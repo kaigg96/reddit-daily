@@ -28,6 +28,9 @@ jobs:
     # Step 4: Run the notebook
     - name: Run the notebook
       env:
+        REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+        REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
         AWS_POLLY_ACCESS_KEY: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
         AWS_POLLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
         YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
