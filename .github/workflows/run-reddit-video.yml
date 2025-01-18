@@ -25,7 +25,14 @@ jobs:
         pip install -r requirements.txt  # Assuming you have a requirements.txt file with necessary dependencies
         pip install nbconvert  # Install nbconvert to run the notebook
 
-    # Step 4: Run the notebook
+    # Step 4: Install Microsoft Core Fonts (including Arial)
+    - name: Install Microsoft core fonts
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ttf-mscorefonts-installer fontconfig
+        sudo fc-cache -fv  # Refresh font cache
+
+    # Step 5: Run the notebook
     - name: Run the notebook
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
