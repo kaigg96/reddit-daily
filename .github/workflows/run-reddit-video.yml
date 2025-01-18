@@ -31,6 +31,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ttf-mscorefonts-installer fontconfig
         sudo fc-cache -fv  # Refresh font cache
+    - name: List available fonts
+      run: fc-list
 
     # Step 5: Run the notebook
     - name: Run the notebook
