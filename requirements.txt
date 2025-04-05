@@ -3,7 +3,7 @@ botocore==1.35.97
 ipykernel==6.29.5
 better-profanity
 moviepy==2.1.2
-numpy==2.2.1
+numpy==1.26.4
 praw==7.8.1
 pillow==10.4.0
 pydub==0.25.1
