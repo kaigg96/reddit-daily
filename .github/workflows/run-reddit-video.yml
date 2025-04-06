@@ -1,5 +1,8 @@
 name: Generate and Upload Reddit Video
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: '0 0,12 * * *'
@@ -49,3 +52,13 @@ jobs:
       run: |   
         set -e
         jupyter nbconvert --to notebook --execute create_video.ipynb  # Executes all cells in the notebook
+
+    - name: Commit and push updated prev_post.txt
+      if: always()
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        git add prev_post.txt
+        git commit -m "Update prev_post.txt with last posted title" || echo "No changes to commit"
+        git push
