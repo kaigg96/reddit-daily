@@ -180,6 +180,23 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R4.2 — Weekly analytics pull — **P2**
 - Second workflow (weekly cron): YouTube Analytics API v2 (`yt-analytics.readonly`) `reports.query` with `dimensions=video` for recent uploads → append `analytics.csv` (committed): views, likes, comments, shares, averageViewDuration, averageViewPercentage. Join key: `video_id` from `upload_log.csv`. Note: impressions / swipe-rate may not be exposed by the API (Studio-only) — implementer should verify current API surface and include them only if available.
 - This closes the loop: every experiment in this PRD becomes evaluable from two committed CSVs.
+- Also append a weekly public-stats snapshot for **all** uploads to `analysis/stats_snapshots.csv` (views/likes/comments per video_id + date), so views@7d / views@28d deltas become computable going forward (see R4.3, which otherwise has only single-snapshot data).
+
+#### R4.3 — Historical content-performance analysis — **P1, sequencing-independent**
+- **Motivation:** ~2 uploads/day since early 2025 means several hundred published Shorts whose descriptions embed the complete content (question + 3 answers). This is an unused dataset for learning which topics and phrasings get distributed vs. suppressed. Suppression is a real mechanism, not just taste: advertiser-unfriendly topics (tragedy, sex-adjacent, drugs, ongoing legal/news stories) can receive limited distribution on Shorts. Note the honest framing: low views for a topic may mean algorithmic suppression *or* weak audience interest — the analysis can't fully separate them, but both point to the same action (avoid the topic), so the ambiguity doesn't block the mechanism.
+- **Data acquisition — no OAuth needed.** All required fields (title, description, tags, publishedAt, duration, viewCount, likeCount, commentCount) are public metadata, fetchable with a free **YouTube Data API key** (new Actions/`.env` secret `YOUTUBE_API_KEY`; see OQ-4): derive the uploads playlist from the channel id (`UC…` → `UU…`), page through `playlistItems.list`, then `videos.list(part=snippet,statistics,contentDetails)` in batches of 50 (1 quota unit per call — the whole channel costs <20 units of the 10k/day budget). Output: `analysis/channel_videos.csv`.
+- **Content recovery:** parse question + answers back out of each description (the format is stable across v1 and v2: `Today's top AskReddit post: …` + numbered comments).
+- **Analysis** (`scripts/analyze_channel.py`, run locally or via a `workflow_dispatch`; outputs committed under `analysis/`):
+  - Control for confounders before comparing anything: video age (views accumulate), upload slot (00:00 vs 12:00 UTC), and format version (everything pre-v2 is old format). Compare age-adjusted residuals (e.g., regress log-views on age) or quantiles within rolling cohorts — never raw view counts across months.
+  - **Topic buckets:** batch-classify each question via Gemini into a fixed taxonomy (~12 buckets, e.g. relationships/dating, money/work, dark-morbid, politics-news, fame-celebrity, nostalgia, humor-absurd, sex-adjacent, health, hypotheticals, life-advice, other). Report per-bucket n and median adjusted performance.
+  - **Distinctive-terms pass:** TF-IDF / distinctive n-grams of top-quartile vs bottom-quartile videos over question+answer text.
+  - **Deliverable:** `analysis/topic_performance.md` — ranked buckets, winner/loser terms, and explicit caveats (correlation ≠ causation, small-n buckets, algorithm drift over the sample period).
+- **Acceptance:** CSVs + report committed and reproducible; zero OAuth scopes used; findings framed as hypotheses with proposed `BLOCKED_TOPICS` candidates for R4.4.
+
+#### R4.4 — Topic avoidance gate at selection — **P2 (depends on R4.3 results)**
+- At selection time, classify the candidate post's title into the R4.3 taxonomy (one Gemini call, **fail-open**: on any error no post is blocked) and skip candidates whose bucket is in a `BLOCKED_TOPICS` config list — selection already iterates the top 10 posts, so it falls through to the next candidate.
+- **Policy:** the analysis *proposes* the blocklist; the owner approves it before it ships — a data artifact must not silently change content policy. Add a `topic` column to `upload_log.csv` so the gate's effect is itself measurable, and bump `FORMAT_VERSION` when the gate first ships (a content-selection change is a format change for attribution purposes).
+- **Acceptance:** dry run with a seeded candidate list shows a blocked-topic post being skipped; `topic` logged per upload; fail-open path verified.
 
 ## 7. Explicitly out of scope
 
@@ -193,6 +210,8 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 4. Evaluate each version only after ≥ 14 days or ≥ 20 uploads; compare medians by `format_version` via the two CSVs.
 
 Do not interleave phases — attribution requires clean version boundaries.
+
+Exception: **R4.3 (historical analysis) is read-only with respect to published content** — it changes nothing viewers see — so it may run at any time, including during v2's measurement window. Only its downstream gate (R4.4) is a content change and rolls out like any phase.
 
 ## 9. Verification playbook (for the implementing agent)
 
@@ -210,6 +229,7 @@ Do not interleave phases — attribution requires clean version boundaries.
 - **OQ-1 — B-roll sourcing:** manual one-time curation by owner (default, better quality control) vs. automated Pexels API fetch (needs a free API key added as a secret). 
 - **OQ-2 — Channel brand name** for watermark/persona: default = fetch channel title via API (R3.4).
 - **OQ-3 — Caption styling specifics** (colors beyond white/black stroke, highlight color for the second voice): implementer's discretion within the readability rules; keep the orange `#ff5d01` as an accent for brand continuity.
+- **OQ-4 — R4.3 credentials:** free YouTube Data API key as a new secret (recommended: public data only, no OAuth, available immediately) vs. waiting for the Phase 3 OAuth re-auth to cover channel reads.
 
 ## Appendix A — API notes & snippets
 
