@@ -13,5 +13,4 @@ google-auth-oauthlib==1.2.1
 google-auth-httplib2==0.2.0
 oauthlib==3.2.2
 requests==2.32.3
-pyttsx3==2.98
 emoji

@@ -7,38 +7,31 @@ on:
   schedule:
     - cron: '0 0,12 * * *'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render only; skip upload and repo mutations (PRD R0.1)'
+        type: boolean
+        default: false
 
 jobs:
   generate_and_upload_video:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    # Step 2: Set up Python
     - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    # Step 3: Install dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt  # Assuming you have a requirements.txt file with necessary dependencies
-        pip install nbconvert  # Install nbconvert to run the notebook
+        pip install -r requirements.txt
 
-    # Step 4: Install Microsoft Core Fonts (including Arial)
-    - name: Install Microsoft core fonts
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ttf-mscorefonts-installer fontconfig
-        sudo fc-cache -fv  # Refresh font cache
-
-    # Step 5: Run the notebook
-    - name: Run the notebook
+    - name: Generate video (and upload unless dry run)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
         REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
@@ -49,16 +42,24 @@ jobs:
         YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
         YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: |   
-        set -e
-        jupyter nbconvert --to notebook --execute create_video.ipynb  # Executes all cells in the notebook
+        DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '' }}
+      run: python -m src.run
 
-    - name: Commit and push updated prev_post.txt
-      if: always()
+    - name: Attach sample video (dry runs only)
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: sample-video
+        path: |
+          assets/gen/final_askreddit_video.mp4
+          assets/gen/thumbnail.png
+
+    - name: Commit and push updated state
+      if: ${{ github.event_name == 'schedule' || !inputs.dry_run }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        git add prev_post.txt
-        git commit -m "Update prev_post.txt with last posted title" || echo "No changes to commit"
+
+        git add prev_post.txt upload_log.csv
+        git commit -m "Update prev_post and upload log" || echo "No changes to commit"
         git push

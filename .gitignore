@@ -10,3 +10,7 @@ audio_adjustment.ipynb
 /assets/final_askreddit_video.mp4
 client_secret.json
 regen_refresh_token.py
+/assets/gen/
+*TEMP_MPY*
+*.icloud
+__pycache__/
