@@ -2,11 +2,53 @@
 
 | | |
 |---|---|
-| **Status** | Approved for implementation |
+| **Status** | Phase 0 + 1 live (`v2`) — measuring; see status section below |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
 | **Repo** | github.com/kaigg96/reddit-daily (local folder: `reddit-digest`) |
+
+---
+
+## 0. Implementation status & next steps *(living section — update when anything ships)*
+
+**Last updated:** 2026-07-18 · **Live format:** `v2` (commit `eb7b716`, first live upload 2026-07-18)
+
+### Requirement status
+
+| Req | What | Status | Notes |
+|---|---|---|---|
+| R0.1 | DRY_RUN mode | ✅ v2 | workflow `dry_run` input attaches sample artifact |
+| R0.2 | upload_log.csv | ✅ v2 | first row logged 2026-07-18 |
+| R0.3 | Notebook → `src/` | ✅ v2 | notebook kept but deprecated |
+| R0.4 | Anton font | ✅ v2 | owner confirmed Anton over 3 alternatives |
+| R0.5 | Hygiene fixes | ✅ v2 | title sanitize, madeForKids, category 24, mimetype |
+| R1.1 | No dead air, hook at 0 | ✅ v2 | silencedetect-verified |
+| R1.2 | Word-timed captions | ✅ v2 | Polly speech marks |
+| R1.3 | Motion background | ✅ v2 | procedural glow live; **b-roll library empty (owner task)** |
+| R1.4 | Caption legibility | ✅ v2 | dark bg + stroke; scrim ready for b-roll |
+| R1.5 | Header + progress badge | ✅ v2 | + question pinned across answers (owner feedback) |
+| R1.6 | Music + SFX | 🟡 partial | SFX ✅ (synthesized); **music still legacy track (owner task)** |
+| R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
+| R2.1–R2.2 | Title hygiene, style rotation | ⬜ v3 | start after v2 measurement window |
+| R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
+| R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
+| R4.1 | Subreddit rotation | ⬜ v5 | |
+| R4.2 | Weekly analytics pull | ⬜ v5 | needs re-auth scopes |
+| R4.3 | Historical content analysis | ⬜ **ready now** | **blocked only on `YOUTUBE_API_KEY` secret (owner, ~5 min)** |
+| R4.4 | Topic avoidance gate | ⬜ | depends on R4.3 findings + owner-approved blocklist |
+| R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see Phase 5 gate) |
+
+Also shipped outside the numbered requirements: audio-mix calibration (music ~10 dB under voice, SFX ~-20 dBFS peaks), `CHANNEL_NAME` = "AskReddit Shorts" branding, no-AI-attribution scrub.
+
+### Next steps, in order
+
+1. **Owner (~5 min, anytime):** create a YouTube Data API key (Google Cloud console, same project as the Gemini key) → add as `YOUTUBE_API_KEY` to Actions secrets and `.env` → unblocks R4.3, which can be built immediately without disturbing v2 measurement.
+2. **Owner (~30–45 min, anytime):** the two asset tasks from the README — b-roll curation (`scripts/prep_broll.py`) and YouTube Audio Library music into `assets/music/`. Safe mid-window: every video logs which background/music it used, so their effect is separable.
+3. **Wait for data:** v2 needs ≥14 days / ≥20 uploads (~Aug 1). Watch in Studio per Short: *viewed vs swiped away* (target ≥70%), *average % viewed* (target ≥70%), median views.
+4. **Then Phase 2 (`v3`):** title hygiene + style rotation. Nothing needed from owner.
+5. **Then Phase 3 (`v4`):** owner runs the one-time OAuth re-auth (expanded scopes in `regen_refresh_token.py`), then CTA/second-voice/auto-comment/watermark/SRT land together.
+6. **Phase 4 (`v5`)** after its evaluation window; **Phase 5** only when its gate is met.
 
 ---
 
