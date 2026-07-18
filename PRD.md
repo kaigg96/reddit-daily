@@ -170,6 +170,11 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R3.4 — Persistent watermark/brand mark — **P2**
 - Small semi-transparent (~60%) channel mark, corner of the safe area, all frames. Fetch the channel title at runtime via `channels().list(mine=True)` (needs re-auth scopes; cache it; fall back to a hardcoded constant) and render as a text mark in the brand font — no logo file required, zero manual steps.
 
+#### R3.5 — Machine-readable content surfaces — **P2**
+- Upload a real subtitle track per video via `captions().insert` (requires this phase's `youtube.force-ssl` scope). The word-level timings from Polly speech marks make generating an accurate `.srt` nearly free — the pipeline already has every timestamp. Real caption tracks improve accessibility, search indexing, and how well every legitimate machine reader (YouTube's own content-understanding systems, search engines, AI assistants that surface and summarize video) can parse the video.
+- Keep descriptions fully self-describing (already true: question + all answers in plain text). The description is the channel's crawlable text surface — never degrade it into teaser copy.
+- **Scope boundary:** this requirement is about maximal legibility to legitimate machine readers, which compounds with human discovery. It is explicitly NOT bot-view optimization — see §7 for why that is excluded.
+
 ### Phase 4 — Content & measurement loop (`v5`)
 
 #### R4.1 — Subreddit rotation (Q&A-mode) — **P2**
@@ -198,15 +203,33 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 - **Policy:** the analysis *proposes* the blocklist; the owner approves it before it ships — a data artifact must not silently change content policy. Add a `topic` column to `upload_log.csv` so the gate's effect is itself measurable, and bump `FORMAT_VERSION` when the gate first ships (a content-selection change is a format change for attribution purposes).
 - **Acceptance:** dry run with a seeded candidate list shows a blocked-topic post being skipped; `topic` logged per upload; fail-open path verified.
 
+### Phase 5 — Localization: one channel per language (`v6+`)
+
+**Gate:** start only after the English format is proven — ≥1 month of post-v2 data with retention around the ≥70% target and a clearly rising view floor. Localization multiplies a format's reach; it cannot fix a format that doesn't retain, and every new channel independently faces its own YPP thresholds (1,000 subs + 10M Shorts views/90d **per channel**). Do not start Phase 5 to rescue a weak format.
+
+**Structure decision:** separate channel per language, mapped 1:1 (the owner's instinct is correct): audience-language coherence is what lets YouTube's recommender build a stable audience per channel, and the multi-audio-track feature does not apply to Shorts. The same Google account can own all channels as brand accounts; OAuth consent is granted per channel, yielding one refresh-token secret per channel (`YOUTUBE_REFRESH_TOKEN_ES`, …).
+
+#### R5.1 — Spanish pilot channel — **P2 (post-gate)**
+- Same daily selected post → Gemini translates question + answers + title + description (prompt for natural colloquial Spanish, not literal; keep proper nouns) → Polly Spanish neural voices (Lupe es-US / Mia es-MX / Sergio es-ES; confirm speech-mark support per voice) → the existing visual system unchanged (Anton covers Spanish diacritics) with localized fixed strings (header, outro, CTA) → upload to the ES channel.
+- Bookkeeping: add a `channel` column to `upload_log.csv`; per-channel dedupe files; render sequentially in the same Action run (~5 extra minutes).
+- Language economics: while the goal is the 10M-view threshold, pick volume-first languages (Spanish, Portuguese-BR, Hindi have the largest Shorts populations). High-CPM/low-volume locales (German, French) only matter post-YPP.
+- **Acceptance:** one DRY_RUN produces both language videos; ES upload path verified against the pilot channel; per-channel log rows separable.
+
+#### R5.2 — Additional languages; RTL support — **P3**
+- Portuguese-BR (Camila/Thiago) and Hindi (Kajal) are near drop-ins on the R5.1 template.
+- **Arabic is not a drop-in.** RTL + script shaping means: Pillow must be built with libraqm (otherwise Arabic renders as disconnected left-to-right letters — visibly broken), an Arabic-script font is required (Cairo or Tajawal, OFL), caption grouping must display in RTL order (the existing byte-offset handling already survives multibyte UTF-8), and Polly Arabic voices (Hala/Zayd, ar-AE) need speech-mark verification. Treat Arabic as its own mini-project with frame-level visual verification before anything uploads.
+- At >3 languages, move from sequential rendering to a workflow matrix to keep job time reasonable.
+
 ## 7. Explicitly out of scope
 
 - Paid services (ElevenLabs, stock subscriptions, editors). Any per-video manual step. Posting-frequency increases. Engagement manipulation of any kind. Long-form video. Shorts poll stickers (not exposed via API). Comment pinning (no API). Reposting/compiling third-party video content. Migrating off the notebook's current infra (Actions + Polly + Gemini stack stays).
+- **Bot-view optimization.** Excluded on both factual and policy grounds. Factual: YPP thresholds count only *valid* public views — YouTube filters traffic it identifies as automated *before* it counts, so views from external bots/scrapers have approximately zero monetization yield regardless of how well content caters to them. Policy: deliberately cultivating artificial traffic falls under YouTube's fake-engagement enforcement (up to channel termination) — an uncapped downside against a ~zero upside, aimed at the exact asset we're trying to monetize. The legitimate core of the idea — content that machines can accurately read, index, and surface — is in scope as R3.5 and costs nothing extra given the speech-mark infrastructure.
 
 ## 8. Sequencing & rollout
 
 1. **Phase 0** entirely (R0.1 first — nothing else proceeds without DRY_RUN).
 2. **Phase 1** as one release: dry-run in CI → owner reviews the sample MP4 (attach as a workflow artifact) → owner approves → bump `FORMAT_VERSION` to `v2` → live.
-3. **Phase 2** (`v3`), **Phase 3** (`v4` — after the one-time re-auth), **Phase 4** (`v5`), each gated the same way: dry-run artifact → owner approval → version bump → live.
+3. **Phase 2** (`v3`), **Phase 3** (`v4` — after the one-time re-auth), **Phase 4** (`v5`), each gated the same way: dry-run artifact → owner approval → version bump → live. **Phase 5** (`v6+`) additionally requires its own gate (see the Phase 5 section) before it may start.
 4. Evaluate each version only after ≥ 14 days or ≥ 20 uploads; compare medians by `format_version` via the two CSVs.
 
 Do not interleave phases — attribution requires clean version boundaries.
@@ -230,6 +253,7 @@ Exception: **R4.3 (historical analysis) is read-only with respect to published c
 - **OQ-2 — Channel brand name** for watermark/persona: default = fetch channel title via API (R3.4).
 - **OQ-3 — Caption styling specifics** (colors beyond white/black stroke, highlight color for the second voice): implementer's discretion within the readability rules; keep the orange `#ff5d01` as an accent for brand continuity.
 - **OQ-4 — R4.3 credentials:** free YouTube Data API key as a new secret (recommended: public data only, no OAuth, available immediately) vs. waiting for the Phase 3 OAuth re-auth to cover channel reads.
+- **OQ-5 — Localization pilot language:** default Spanish (largest Shorts-population overlap with zero new rendering technology); Arabic deliberately deferred to R5.2 because of the RTL/shaping work.
 
 ## Appendix A — API notes & snippets
 
