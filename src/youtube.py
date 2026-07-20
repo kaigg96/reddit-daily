@@ -2,6 +2,8 @@
 
 import os
 
+from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
