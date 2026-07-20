@@ -12,7 +12,9 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-19 · **Live format:** `v2` (commit `eb7b716`, first live upload 2026-07-18)
+**Last updated:** 2026-07-19 · **Live format:** `v3` (Phase 2 shipped 2026-07-19; v2 first went live 2026-07-18)
+
+> **Owner decision 2026-07-19:** proceed to Phase 2 without waiting out the v2 measurement window. Attribution note: Phase 2 is metadata-only (titles/description), so the rendered video format stays v2's — retention metrics remain attributable to the video format while `title_style` in the upload log isolates the title experiments.
 
 ### Requirement status
 
@@ -30,7 +32,8 @@
 | R1.5 | Header + progress badge | ✅ v2 | + question pinned across answers (owner feedback) |
 | R1.6 | Music + SFX | ✅ v2 | SFX synthesized; track confirmed YT Audio Library (2026-07-18); extra tracks optional for variety |
 | R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
-| R2.1–R2.2 | Title hygiene, style rotation | ⬜ v3 | start after v2 measurement window |
+| R2.1 | Title hygiene | ✅ v3 | hashtag suffix removed; description ≤3 hashtags |
+| R2.2 | Title style rotation | ✅ v3 | A/B/C by day-of-year; logged per upload |
 | R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
 | R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
 | R4.1 | Subreddit rotation | ⬜ v5 | |
@@ -45,9 +48,9 @@ Also shipped outside the numbered requirements: audio-mix calibration (music ~10
 
 1. ~~YouTube Data API key + R4.3~~ ✅ done 2026-07-19 — findings in `analysis/topic_performance.md`. Owner: review it and note tentative `BLOCKED_TOPICS`/preferred-topics candidates for R4.4 (no action ships without approval; current evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything — weak buckets are mild, not toxic).
 2. **Owner (~30 min, anytime):** b-roll curation (`scripts/prep_broll.py` + README instructions). Optional: extra Audio Library tracks into `assets/music/` for variety. Also add `YOUTUBE_DATA_API_KEY` to GitHub Actions secrets (already in local `.env`) so R4.2's weekly job can use it later. Safe mid-window: every video logs which background/music it used, so their effect is separable.
-3. **Wait for data:** v2 needs ≥14 days / ≥20 uploads (~Aug 1). Watch in Studio per Short: *viewed vs swiped away* (target ≥70%), *average % viewed* (target ≥70%), median views.
-4. **Then Phase 2 (`v3`):** title hygiene + style rotation. Nothing needed from owner.
-5. **Then Phase 3 (`v4`):** owner runs the one-time OAuth re-auth (expanded scopes in `regen_refresh_token.py`), then CTA/second-voice/auto-comment/watermark/SRT land together.
+3. ~~Phase 2 (`v3`)~~ ✅ shipped 2026-07-19 (owner elected to skip the v2 wait — see note above).
+4. **Next gate — Phase 3 (`v4`), needs owner:** run the one-time OAuth re-auth (update `SCOPES` in `regen_refresh_token.py` per the Phase 3 prerequisite, run locally, update the `YOUTUBE_REFRESH_TOKEN` secret). Then CTA/second-voice/auto-comment/watermark/SRT land together.
+5. **Keep watching Studio** as data accumulates: *viewed vs swiped away* and *average % viewed* (targets ≥70%), median views; title styles become comparable after each style has ≥10 uploads (~2 weeks of rotation).
 6. **Phase 4 (`v5`)** after its evaluation window; **Phase 5** only when its gate is met.
 
 ---

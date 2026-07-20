@@ -5,6 +5,8 @@ import re
 
 import requests
 
+from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
+
 
 def _generate(prompt):
     endpoint = (
@@ -46,8 +48,23 @@ Do not include any context or explanations, return only the 10 keywords numbered
         return []
 
 
-def get_video_title(reddit_title, comments):
-    """Title style A: curiosity rephrase (PRD R2.2 adds B/C variants later)."""
+# PRD R2.2: three title-style experiments, rotated deterministically per day
+# and logged per upload so performance is comparable offline.
+_STYLE_GUIDANCE = {
+    "A": """
+- Be a captivating and concise rephrasing or transformation of the original Reddit question: "{reddit_title}".
+- Spark strong curiosity and make viewers eager to see the answers.""",
+    "B": """
+- Address the viewer directly in the second person ("You...", "Which one are you?", "You'll wish you knew this...").
+- Make it feel like a personal question or challenge aimed at the viewer, derived from the original Reddit question: "{reddit_title}".""",
+    "C": """
+- Lead with the number of answers, list-style (e.g. "3 Answers That...", "3 People Reveal...").
+- Frame the video as a countable list distilled from the original Reddit question: "{reddit_title}".""",
+}
+
+
+def get_video_title(reddit_title, comments, style="A"):
+    guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
     prompt = f"""
 I'm creating a YouTube Short video based on the Reddit question: "{reddit_title}".
 The video will feature these key answers from the comments:
@@ -57,9 +74,7 @@ The video will feature these key answers from the comments:
 
 Your goal is to craft a highly engaging YouTube video title that maximizes click-through rate (CTR) and encourages virality.
 
-The title should:
-- Be a captivating and concise rephrasing or transformation of the original Reddit question: "{reddit_title}".
-- Spark strong curiosity and make viewers eager to see the answers.
+The title should:{guidance}
 - Use impactful and engaging language.
 - Be suitable for a YouTube Short (generally under 70 characters is good, but impact is key).
 - Hint at the nature of the answers/discussion without giving away specifics from the comments.
@@ -74,8 +89,8 @@ Important: Return *only* the generated title. Do not include any surrounding quo
         return None
 
 
-def sanitize_title(title, fallback, max_len=84):
-    """Strip LLM artifacts (R0.5). max_len leaves room for the 16-char hashtag suffix."""
+def sanitize_title(title, fallback, max_len=100):
+    """Strip LLM artifacts (R0.5). 100 is YouTube's title limit."""
     if not title:
         return fallback[:max_len]
     title = re.sub(r"\s+", " ", title).strip().strip('"').strip("'").strip()

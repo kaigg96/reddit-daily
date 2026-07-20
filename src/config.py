@@ -50,8 +50,7 @@ INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
 MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v2"
-TITLE_STYLE = "A"  # curiosity-rephrase; B/C variants arrive in Phase 2
+FORMAT_VERSION = "v3"  # v3 = Phase 2: no title hashtag suffix, title-style rotation
 
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"

@@ -35,9 +35,13 @@ def main():
 
     # --- llm (fail-soft) ---
     keywords = llm.get_keywords(post.title, post.comments)
+    # R2.2: rotate title style by day so both daily uploads share it; logged per upload
+    title_style = "ABC"[datetime.date.today().timetuple().tm_yday % 3]
     video_title = llm.sanitize_title(
-        llm.get_video_title(post.title, post.comments), fallback=post.title
+        llm.get_video_title(post.title, post.comments, style=title_style),
+        fallback=post.title,
     )
+    print(f"Title style {title_style}: {video_title}")
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
@@ -78,14 +82,14 @@ def main():
     video.render(result.video, config.OUT_VIDEO)
     video.make_thumbnail(post.title, result.bg_frame, config.OUT_THUMBNAIL)
 
-    # --- upload metadata ---
-    full_title = f"{video_title} #shorts #foryou"
+    # --- upload metadata (R2.1: no hashtag suffix — Shorts are auto-detected) ---
+    full_title = video_title
     description = (
         f"Today's top AskReddit post: {post.title}\n\n"
         f"Top Comments:\n"
         + "\n".join(f"{i}. {s.text}" for i, s in enumerate(
             (s for s in segments if s.kind == "comment"), 1))
-        + f"\n\n{post.shortlink}\n#AskReddit #RedditDaily #shorts #foryou"
+        + f"\n\n{post.shortlink}\n#AskReddit #Reddit #Shorts"
     )
     tags = ["AskReddit", "Ask Reddit", "Shorts", "Reddit", "Top AskReddit Post",
             "Trending AskReddit"] + keywords
@@ -112,7 +116,7 @@ def main():
         "subreddit": post.subreddit,
         "post_title": post.title,
         "video_title": full_title,
-        "title_style": config.TITLE_STYLE,
+        "title_style": title_style,
         "voice": voice,
         "bg_clip": result.bg_name,
         "music_track": result.music_name,
