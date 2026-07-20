@@ -57,10 +57,11 @@ Still open — the pipeline works without them but improves with them:
    `venv/bin/python scripts/prep_broll.py <downloaded file> <short_name>` and
    record the source URL in `assets/CREDITS.md`. Until then the procedural
    background is used.
-2. **Music (PRD R1.6).** Download 2–3 tracks from YouTube Audio Library
-   (Studio → Audio Library, safest for Content ID) into `assets/music/` and
-   list them in `assets/CREDITS.md`. Until then the legacy
-   `funk_bg_lower.mp3` (unknown license — replace soon) is used.
+2. **Music variety (PRD R1.6, optional).** The current track
+   (`funk_bg_lower.mp3`) is from the YouTube Audio Library and license-clean.
+   For per-video variety, drop 2–3 more Audio Library tracks into
+   `assets/music/` (rotation is automatic) and list them in
+   `assets/CREDITS.md`.
 3. **Phase 3 re-auth (PRD Phase 3 prerequisite).** When engagement features
    land: rerun `regen_refresh_token.py` with the expanded scopes and update
    the `YOUTUBE_REFRESH_TOKEN` secret.

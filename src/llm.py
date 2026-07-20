@@ -41,7 +41,8 @@ Do not include any context or explanations, return only the 10 keywords numbered
     try:
         return re.findall(r"\d+\.\s*(.*)", _generate(prompt))
     except Exception as e:
-        print(f"Gemini keywords failed (continuing without): {e}")
+        # never echo the exception body: HTTPError messages embed the keyed URL
+        print(f"Gemini keywords failed with {type(e).__name__} (continuing without)")
         return []
 
 
@@ -69,7 +70,7 @@ Important: Return *only* the generated title. Do not include any surrounding quo
     try:
         return _generate(prompt)
     except Exception as e:
-        print(f"Gemini title failed (falling back to reddit title): {e}")
+        print(f"Gemini title failed with {type(e).__name__} (falling back to reddit title)")
         return None
 
 

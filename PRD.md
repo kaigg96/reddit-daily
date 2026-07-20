@@ -12,7 +12,7 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-18 · **Live format:** `v2` (commit `eb7b716`, first live upload 2026-07-18)
+**Last updated:** 2026-07-19 · **Live format:** `v2` (commit `eb7b716`, first live upload 2026-07-18)
 
 ### Requirement status
 
@@ -28,14 +28,14 @@
 | R1.3 | Motion background | ✅ v2 | procedural glow live; **b-roll library empty (owner task)** |
 | R1.4 | Caption legibility | ✅ v2 | dark bg + stroke; scrim ready for b-roll |
 | R1.5 | Header + progress badge | ✅ v2 | + question pinned across answers (owner feedback) |
-| R1.6 | Music + SFX | 🟡 partial | SFX ✅ (synthesized); **music still legacy track (owner task)** |
+| R1.6 | Music + SFX | ✅ v2 | SFX synthesized; track confirmed YT Audio Library (2026-07-18); extra tracks optional for variety |
 | R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
 | R2.1–R2.2 | Title hygiene, style rotation | ⬜ v3 | start after v2 measurement window |
 | R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
 | R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
 | R4.1 | Subreddit rotation | ⬜ v5 | |
 | R4.2 | Weekly analytics pull | ⬜ v5 | needs re-auth scopes |
-| R4.3 | Historical content analysis | ⬜ **ready now** | **blocked only on `YOUTUBE_API_KEY` secret (owner, ~5 min)** |
+| R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Add `YOUTUBE_DATA_API_KEY` to Actions secrets before R4.2's weekly job |
 | R4.4 | Topic avoidance gate | ⬜ | depends on R4.3 findings + owner-approved blocklist |
 | R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see Phase 5 gate) |
 
@@ -43,8 +43,8 @@ Also shipped outside the numbered requirements: audio-mix calibration (music ~10
 
 ### Next steps, in order
 
-1. **Owner (~5 min, anytime):** create a YouTube Data API key (Google Cloud console, same project as the Gemini key) → add as `YOUTUBE_API_KEY` to Actions secrets and `.env` → unblocks R4.3, which can be built immediately without disturbing v2 measurement.
-2. **Owner (~30–45 min, anytime):** the two asset tasks from the README — b-roll curation (`scripts/prep_broll.py`) and YouTube Audio Library music into `assets/music/`. Safe mid-window: every video logs which background/music it used, so their effect is separable.
+1. ~~YouTube Data API key + R4.3~~ ✅ done 2026-07-19 — findings in `analysis/topic_performance.md`. Owner: review it and note tentative `BLOCKED_TOPICS`/preferred-topics candidates for R4.4 (no action ships without approval; current evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything — weak buckets are mild, not toxic).
+2. **Owner (~30 min, anytime):** b-roll curation (`scripts/prep_broll.py` + README instructions). Optional: extra Audio Library tracks into `assets/music/` for variety. Also add `YOUTUBE_DATA_API_KEY` to GitHub Actions secrets (already in local `.env`) so R4.2's weekly job can use it later. Safe mid-window: every video logs which background/music it used, so their effect is separable.
 3. **Wait for data:** v2 needs ≥14 days / ≥20 uploads (~Aug 1). Watch in Studio per Short: *viewed vs swiped away* (target ≥70%), *average % viewed* (target ≥70%), median views.
 4. **Then Phase 2 (`v3`):** title hygiene + style rotation. Nothing needed from owner.
 5. **Then Phase 3 (`v4`):** owner runs the one-time OAuth re-auth (expanded scopes in `regen_refresh_token.py`), then CTA/second-voice/auto-comment/watermark/SRT land together.
@@ -174,7 +174,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 - **Acceptance:** frames during each comment show the correct badge.
 
 #### R1.6 — Licensed music + SFX — **P1**
-- Replace `funk_bg_lower.mp3` (unknown license — a Content ID claim risk that can zero monetization later) with 2–3 tracks from the **YouTube Audio Library** (safest) or CC0 sources, committed, randomly rotated, logged (R0.2). Keep the −13 dB duck under speech; optional final `ffmpeg loudnorm` pass to ≈ −14 LUFS.
+- ~~Replace `funk_bg_lower.mp3` (unknown license)~~ *Resolved 2026-07-18: owner confirmed the track is from the YouTube Audio Library — license-clean.* Remaining (optional): add 2–3 more Audio Library tracks to `assets/music/` for per-video variety, randomly rotated, logged (R0.2). Keep music ~9–10 dB under speech; optional final `ffmpeg loudnorm` pass to ≈ −14 LUFS.
 - Add 2–3 CC0 transition SFX for R1.1.
 - **Acceptance:** `assets/CREDITS.md` lists sources/licenses for every audio asset in the repo; old track deleted.
 
@@ -294,7 +294,7 @@ Exception: **R4.3 (historical analysis) is read-only with respect to published c
 - **OQ-1 — B-roll sourcing:** manual one-time curation by owner (default, better quality control) vs. automated Pexels API fetch (needs a free API key added as a secret). 
 - **OQ-2 — Channel brand name** for watermark/persona: default = fetch channel title via API (R3.4).
 - **OQ-3 — Caption styling specifics** (colors beyond white/black stroke, highlight color for the second voice): implementer's discretion within the readability rules; keep the orange `#ff5d01` as an accent for brand continuity.
-- **OQ-4 — R4.3 credentials:** free YouTube Data API key as a new secret (recommended: public data only, no OAuth, available immediately) vs. waiting for the Phase 3 OAuth re-auth to cover channel reads.
+- **OQ-4 — R4.3 credentials:** ~~resolved 2026-07-19~~ — owner created a Data API key as `YOUTUBE_DATA_API_KEY` (note: this name, not `YOUTUBE_API_KEY`); in local `.env`, still to be added to Actions secrets for R4.2.
 - **OQ-5 — Localization pilot language:** default Spanish (largest Shorts-population overlap with zero new rendering technology); Arabic deliberately deferred to R5.2 because of the RTL/shaping work.
 
 ## Appendix A — API notes & snippets
