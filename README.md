@@ -62,9 +62,39 @@ Still open — the pipeline works without them but improves with them:
    For per-video variety, drop 2–3 more Audio Library tracks into
    `assets/music/` (rotation is automatic) and list them in
    `assets/CREDITS.md`.
-3. **Phase 3 re-auth (PRD Phase 3 prerequisite).** When engagement features
-   land: rerun `regen_refresh_token.py` with the expanded scopes and update
-   the `YOUTUBE_REFRESH_TOKEN` secret.
+3. **OAuth re-auth (PRD Phase 3 prerequisite — also permanently fixes the
+   7-day token expiry).** Detailed walkthrough:
+
+   1. **Publish the OAuth consent screen** (this is why tokens have been
+      expiring weekly: "Testing" status caps refresh tokens at 7 days;
+      "In production" tokens don't expire while in regular use).
+      [console.cloud.google.com](https://console.cloud.google.com) → select
+      the project that owns the OAuth client → **APIs & Services → OAuth
+      consent screen** (newer console: *Google Auth Platform → Audience*) →
+      Publishing status shows *Testing* → click **Publish app** → confirm.
+      Do **not** submit for verification — not needed for personal use.
+   2. **Mint the new token** (only after step 1, or the 7-day expiry sticks):
+      `venv/bin/python regen_refresh_token.py` → a browser tab opens → sign
+      in with the **channel's** Google account → on the "Google hasn't
+      verified this app" screen click **Advanced → Go to … (unsafe)** →
+      approve all three permissions (upload, channel management, analytics)
+      → the script prints the refresh token in the terminal.
+   3. **Store it**: GitHub repo → Settings → Secrets and variables →
+      Actions → `YOUTUBE_REFRESH_TOKEN` → Update → paste. Also replace
+      `YOUTUBE_REFRESH_TOKEN` in the local `.env`.
+   4. **Verify** (optional, uploads nothing — a read that the old
+      upload-only token couldn't do):
+
+      ```sh
+      venv/bin/python -c "
+      from src.youtube import _authenticate
+      from googleapiclient.discovery import build
+      yt = build('youtube', 'v3', credentials=_authenticate())
+      print('token OK for:', yt.channels().list(mine=True, part='snippet')
+            .execute()['items'][0]['snippet']['title'])"
+      ```
+
+   After this, the weekly token regeneration is never needed again.
 
 ## Versioning & experiments
 
