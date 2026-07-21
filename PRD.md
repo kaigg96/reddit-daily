@@ -37,7 +37,7 @@
 | R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
 | R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
 | R4.1 | Subreddit rotation | ⬜ v5 | |
-| R4.2 | Weekly analytics pull | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv`; first snapshot captured (890 videos). Single-file design via Analytics API OAuth — no Data API key needed in CI; impressions confirmed not API-exposed |
+| R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Add `YOUTUBE_DATA_API_KEY` to Actions secrets before R4.2's weekly job |
 | R4.4 | Topic avoidance gate | ⬜ | depends on R4.3 findings + owner-approved blocklist |
 | R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see Phase 5 gate) |

@@ -2,6 +2,7 @@ name: Weekly Analytics Snapshot
 
 permissions:
   contents: write
+  issues: write
 
 on:
   schedule:
@@ -30,6 +31,25 @@ jobs:
         YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
       run: python scripts/weekly_analytics.py
+
+    - name: Generate digest
+      env:
+        YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+        YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+      run: python scripts/weekly_digest.py
+
+    - name: Post digest issue
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        TITLE="$(cat assets/gen/digest_title.txt)"
+        COUNT=$(gh issue list --state all --search "in:title \"$TITLE\"" --json number --jq 'length')
+        if [ "$COUNT" != "0" ]; then
+          echo "Digest issue already exists: $TITLE"
+        else
+          gh issue create --title "$TITLE" --body-file assets/gen/digest.md
+        fi
 
     - name: Commit and push snapshot
       run: |

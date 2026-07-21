@@ -102,7 +102,10 @@ def main():
     if OUT.exists():
         with open(OUT) as f:
             if any(row.startswith(today) for row in f):
-                sys.exit(f"snapshot for {today} already present; refusing to double-append")
+                # benign: manual rerun on snapshot day — keep exit 0 so the
+                # digest step still runs afterward
+                print(f"snapshot for {today} already present; skipping append")
+                return
 
     creds = _authenticate()
     yt = build("youtube", "v3", credentials=creds)
