@@ -43,13 +43,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        TITLE="$(cat assets/gen/digest_title.txt)"
-        COUNT=$(gh issue list --state all --search "in:title \"$TITLE\"" --json number --jq 'length')
-        if [ "$COUNT" != "0" ]; then
-          echo "Digest issue already exists: $TITLE"
-        else
-          gh issue create --title "$TITLE" --body-file assets/gen/digest.md
-        fi
+        gh issue create --title "$(cat assets/gen/digest_title.txt)" --body-file assets/gen/digest.md
 
     - name: Commit and push snapshot
       run: |
