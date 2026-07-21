@@ -1,12 +1,13 @@
 """Historical content-performance analysis (PRD R4.3).
 
-Downloads all channel videos' public metadata with a YouTube Data API key
-(no OAuth), recovers question+answers from descriptions, classifies topics
-via Gemini, and reports which content performs above/below the channel's
-age-adjusted baseline.
+Downloads all channel videos' public metadata via OAuth, recovers
+question+answers from descriptions, classifies topics via Gemini, and
+reports which content performs above/below the channel's age-adjusted
+baseline.
 
 Usage: venv/bin/python scripts/analyze_channel.py
-Env:   YOUTUBE_DATA_API_KEY (required), GEMINI_API_KEY (topic classification)
+Env:   YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN,
+       GEMINI_API_KEY (topic classification)
 
 Outputs: analysis/channel_videos.csv, analysis/topic_performance.md
 Re-runnable: fetches fresh stats each time; safe to re-run as data grows.
@@ -26,14 +27,8 @@ import numpy as np
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import config  # noqa: E402  (loads .env)
-from src import llm  # noqa: E402
+from src import analytics, config, llm  # noqa: E402  (config loads .env)
 
-import os  # noqa: E402
-
-API = "https://www.googleapis.com/youtube/v3"
-KEY = os.environ.get("YOUTUBE_DATA_API_KEY")
-CHANNEL_ID = "UCzrMTFGE2G8JYu6V0EAqKUA"  # AskReddit Shorts
 OUT_DIR = config.ROOT / "analysis"
 
 TAXONOMY = [
@@ -53,41 +48,23 @@ who will with you your whats youve dont didnt im its ive youre thats
 # ---------------------------------------------------------------- fetch
 
 
-def _get(endpoint, **params):
-    params["key"] = KEY
-    r = requests.get(f"{API}/{endpoint}", params=params, timeout=30)
-    r.raise_for_status()
-    return r.json()
-
-
-def fetch_all_videos():
-    uploads_playlist = "UU" + CHANNEL_ID[2:]
-    ids = []
-    page = None
-    while True:
-        resp = _get("playlistItems", part="contentDetails", playlistId=uploads_playlist,
-                    maxResults=50, **({"pageToken": page} if page else {}))
-        ids += [it["contentDetails"]["videoId"] for it in resp["items"]]
-        page = resp.get("nextPageToken")
-        if not page:
-            break
+def fetch_all_videos(yt):
+    items = analytics.list_uploaded_videos(yt, part="contentDetails")
+    ids = [it["contentDetails"]["videoId"] for it in items]
 
     videos = []
-    for i in range(0, len(ids), 50):
-        resp = _get("videos", part="snippet,statistics,contentDetails",
-                    id=",".join(ids[i:i + 50]), maxResults=50)
-        for it in resp["items"]:
-            sn, st = it["snippet"], it.get("statistics", {})
-            videos.append({
-                "video_id": it["id"],
-                "published_at": sn["publishedAt"],
-                "title": sn["title"],
-                "description": sn.get("description", ""),
-                "duration": it.get("contentDetails", {}).get("duration", ""),
-                "views": int(st.get("viewCount", 0)),
-                "likes": int(st.get("likeCount", 0)),
-                "comments": int(st.get("commentCount", 0)),
-            })
+    for it in analytics.fetch_video_details(yt, ids, part="snippet,statistics,contentDetails"):
+        sn, st = it["snippet"], it.get("statistics", {})
+        videos.append({
+            "video_id": it["id"],
+            "published_at": sn["publishedAt"],
+            "title": sn["title"],
+            "description": sn.get("description", ""),
+            "duration": it.get("contentDetails", {}).get("duration", ""),
+            "views": int(st.get("viewCount", 0)),
+            "likes": int(st.get("likeCount", 0)),
+            "comments": int(st.get("commentCount", 0)),
+        })
     return videos
 
 
@@ -200,20 +177,14 @@ def distinctive_terms(top_docs, bottom_docs, k=15, min_df=3):
     return ranked[-k:][::-1], ranked[:k]
 
 
-def median(xs):
-    return sorted(xs)[len(xs) // 2] if xs else float("nan")
-
-
 # ---------------------------------------------------------------- main
 
 
 def main():
-    if not KEY:
-        sys.exit("YOUTUBE_DATA_API_KEY not set")
     now = datetime.datetime.now(datetime.timezone.utc)
     OUT_DIR.mkdir(exist_ok=True)
 
-    videos = fetch_all_videos()
+    videos = fetch_all_videos(analytics.youtube_client())
     print(f"fetched {len(videos)} videos")
 
     for v in videos:
@@ -246,12 +217,12 @@ def main():
         by_topic[v["topic"]].append(v)
 
     topic_rows = []
-    for topic, vs in sorted(by_topic.items(), key=lambda kv: -median([v["residual"] for v in kv[1]])):
+    for topic, vs in sorted(by_topic.items(), key=lambda kv: -analytics.median([v["residual"] for v in kv[1]])):
         res = [v["residual"] for v in vs]
         topic_rows.append({
             "topic": topic, "n": len(vs),
-            "median_residual": median(res),
-            "median_views": median([v["views"] for v in vs]),
+            "median_residual": analytics.median(res),
+            "median_views": analytics.median([v["views"] for v in vs]),
             "over_rate": sum(r > 0 for r in res) / len(res),
         })
 
@@ -261,7 +232,7 @@ def main():
     docs = lambda vs: [f"{v['question']} {v['answers']}" for v in vs]
     winners, losers = distinctive_terms(docs(ranked[-q:]), docs(ranked[:q]))
 
-    slot_med = {s: median([v["residual"] for v in sample if v["upload_slot"] == s])
+    slot_med = {s: analytics.median([v["residual"] for v in sample if v["upload_slot"] == s])
                 for s in sorted({v["upload_slot"] for v in sample})}
 
     # ---- report ----

@@ -22,11 +22,8 @@ import datetime
 import sys
 from pathlib import Path
 
-from googleapiclient.discovery import build
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import config  # noqa: E402
-from src.youtube import _authenticate  # noqa: E402
+from src import analytics, config  # noqa: E402
 
 OUT = config.ROOT / "analysis" / "analytics_snapshots.csv"
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
@@ -37,23 +34,12 @@ CHUNK = 200  # Analytics API filter-list limit is 500; stay well under
 
 
 def all_uploads(yt):
-    """[(video_id, published_at)] for every video on the channel, via OAuth."""
-    channel = yt.channels().list(mine=True, part="contentDetails").execute()
-    playlist = channel["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
-    videos, page = [], None
-    while True:
-        kwargs = {"pageToken": page} if page else {}
-        resp = yt.playlistItems().list(
-            part="contentDetails", playlistId=playlist, maxResults=50, **kwargs
-        ).execute()
-        videos += [
-            (it["contentDetails"]["videoId"], it["contentDetails"].get("videoPublishedAt", ""))
-            for it in resp["items"]
-        ]
-        page = resp.get("nextPageToken")
-        if not page:
-            break
-    return videos
+    """[(video_id, published_at)] for every video on the channel."""
+    items = analytics.list_uploaded_videos(yt, part="contentDetails")
+    return [
+        (it["contentDetails"]["videoId"], it["contentDetails"].get("videoPublishedAt", ""))
+        for it in items
+    ]
 
 
 def fetch_stats(ya, video_ids, end_date):
@@ -77,10 +63,6 @@ def fetch_stats(ya, video_ids, end_date):
     return stats
 
 
-def median(xs):
-    return sorted(xs)[len(xs) // 2] if xs else float("nan")
-
-
 def print_experiment_summary(stats):
     """Small log-visible readout: retention by format_version and title_style."""
     if not config.UPLOAD_LOG.exists():
@@ -93,7 +75,7 @@ def print_experiment_summary(stats):
             groups.setdefault(r[key], []).append(
                 float(stats[r["video_id"]].get("averageViewPercentage", 0)))
         for name, vals in sorted(groups.items()):
-            print(f"  {key}={name}: n={len(vals)} median avg_view_pct={median(vals):.1f}")
+            print(f"  {key}={name}: n={len(vals)} median avg_view_pct={analytics.median(vals):.1f}")
 
 
 def main():
@@ -107,9 +89,8 @@ def main():
                 print(f"snapshot for {today} already present; skipping append")
                 return
 
-    creds = _authenticate()
-    yt = build("youtube", "v3", credentials=creds)
-    ya = build("youtubeAnalytics", "v2", credentials=creds)
+    yt = analytics.youtube_client()
+    ya = analytics.youtube_analytics_client()
 
     videos = all_uploads(yt)
     print(f"channel has {len(videos)} videos")

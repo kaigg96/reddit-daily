@@ -3,7 +3,6 @@
 praw.ini
 /venv
 token.json
-audio_adjustment.ipynb
 /assets/comment_*
 /assets/title_audio.mp3
 /assets/funk_bg.mp3

@@ -19,11 +19,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from googleapiclient.discovery import build
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import config  # noqa: E402
-from src.youtube import _authenticate  # noqa: E402
+from src import analytics, config  # noqa: E402
 
 RETENTION_TARGET = 70
 LAG_DAYS = 2      # Analytics API lag: younger uploads aren't "measurable" yet
@@ -31,29 +28,18 @@ ZERO_VIEW_DAYS = 3  # logged uploads older than this with 0 views get flagged
 
 
 def fetch_channel(yt):
-    ch = yt.channels().list(mine=True, part="statistics,contentDetails").execute()["items"][0]
+    ch = yt.channels().list(mine=True, part="statistics").execute()["items"][0]
     subs = int(ch["statistics"]["subscriberCount"])
-    playlist = ch["contentDetails"]["relatedPlaylists"]["uploads"]
-    videos, page = [], None
-    while True:
-        kwargs = {"pageToken": page} if page else {}
-        resp = yt.playlistItems().list(
-            part="snippet,contentDetails", playlistId=playlist, maxResults=50, **kwargs
-        ).execute()
-        for it in resp["items"]:
-            videos.append({
-                "id": it["contentDetails"]["videoId"],
-                "published": it["contentDetails"].get("videoPublishedAt", ""),
-                "title": it["snippet"]["title"],
-            })
-        page = resp.get("nextPageToken")
-        if not page:
-            break
+    items = analytics.list_uploaded_videos(yt, part="snippet,contentDetails")
+    videos = [
+        {
+            "id": it["contentDetails"]["videoId"],
+            "published": it["contentDetails"].get("videoPublishedAt", ""),
+            "title": it["snippet"]["title"],
+        }
+        for it in items
+    ]
     return subs, videos
-
-
-def median(xs):
-    return sorted(xs)[len(xs) // 2] if xs else 0
 
 
 def humanize(n):
@@ -64,8 +50,7 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc)
     iso = lambda days: (now - datetime.timedelta(days=days)).isoformat()
 
-    creds = _authenticate()
-    yt = build("youtube", "v3", credentials=creds)
+    yt = analytics.youtube_client()
     subs, channel_videos = fetch_channel(yt)
     channel_ids = {v["id"] for v in channel_videos}
 
@@ -138,9 +123,9 @@ def main():
     measurable = [v for v in week_videos if v["published"] < iso(LAG_DAYS) and views(v["id"]) > 0]
     d90 = [v for v in channel_videos
            if iso(90) <= v["published"] < iso(LAG_DAYS) and views(v["id"]) > 0]
-    med_week = median([views(v["id"]) for v in measurable])
-    med_pct = median([pct(v["id"]) for v in measurable])
-    med_90 = median([views(v["id"]) for v in d90])
+    med_week = analytics.median([views(v["id"]) for v in measurable])
+    med_pct = analytics.median([pct(v["id"]) for v in measurable])
+    med_90 = analytics.median([views(v["id"]) for v in d90])
     views_90 = sum(views(v["id"]) for v in d90)
 
     cadence = f"{week_count}/14 uploads"

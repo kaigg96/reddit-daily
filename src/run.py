@@ -10,7 +10,7 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, tts, video, youtube
+from . import config, content, llm, log, thumbnail, tts, video, youtube
 
 
 def _probe_duration(path):
@@ -48,20 +48,15 @@ def main():
     polly = tts.make_polly()
     print(f"Narrator voice: {voice}")
 
-    def synth(name, text):
+    def synth(name, text, kind):
         path = config.GEN / f"{name}.mp3"
         marks = tts.synthesize_with_marks(polly, text, voice, path)
-        return video.Segment(kind="", text=text, audio_path=str(path), marks=marks)
+        return video.Segment(kind=kind, text=text, audio_path=str(path), marks=marks)
 
-    segments = [synth("title", post.title)]
-    segments[0].kind = "title"
+    segments = [synth("title", post.title, kind="title")]
     for i, comment in enumerate(post.comments, 1):
-        seg = synth(f"comment_{i}", comment)
-        seg.kind = "comment"
-        segments.append(seg)
-    outro = synth("outro", config.OUTRO_TEXT)
-    outro.kind = "outro"
-    segments.append(outro)
+        segments.append(synth(f"comment_{i}", comment, kind="comment"))
+    segments.append(synth("outro", config.OUTRO_TEXT, kind="outro"))
 
     # --- duration guard (R1.7): drop the last comment rather than run long ---
     def projected(segs):
@@ -80,7 +75,7 @@ def main():
     result = video.assemble(post.title, segments, rng)
     print(f"Assembled: {result.duration:.1f}s, bg={result.bg_name}, music={result.music_name}")
     video.render(result.video, config.OUT_VIDEO)
-    video.make_thumbnail(post.title, result.bg_frame, config.OUT_THUMBNAIL)
+    thumbnail.make_thumbnail(post.title, result.bg_frame, config.OUT_THUMBNAIL)
 
     # --- upload metadata (R2.1: no hashtag suffix — Shorts are auto-detected) ---
     full_title = video_title

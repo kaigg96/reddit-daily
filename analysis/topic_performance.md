@@ -1,6 +1,6 @@
 # Channel content-performance analysis (PRD R4.3)
 
-Generated 2026-07-20 · 869 videos fetched, 857 analyzed (parsed + ≥7 days old) · age model: log-views slope 0.13
+Generated 2026-07-21 · 891 videos fetched, 877 analyzed (parsed + ≥7 days old) · age model: log-views slope 0.10
 
 Performance metric: **age-adjusted residual** — how far a video's log-views sit above/below
 the channel's own age trend. residual > 0 = overperformed for its age. Raw views are NOT
@@ -10,61 +10,61 @@ comparable across months and are shown only for scale.
 
 | Topic | n | median residual | median views | % overperforming |
 |---|---|---|---|---|
-| nostalgia | 24 | +0.57 | 75 | 83% |
-| dark-morbid | 48 | +0.50 | 70 | 73% |
-| humor-absurd | 30 | +0.50 | 68 | 83% |
-| other | 410 | +0.26 | 51 | 69% |
-| hypotheticals | 23 | +0.25 | 55 | 65% |
-| relationships-dating | 69 | +0.22 | 51 | 62% |
-| politics-news | 49 | +0.20 | 54 | 55% |
-| money-work | 54 | +0.18 | 48 | 61% |
-| health-body | 35 | +0.15 | 52 | 60% |
-| fame-celebrity | 22 | +0.13 | 42 | 59% |
-| life-advice | 85 | +0.12 | 47 | 59% |
-| sex-adjacent ⚠️ small n | 8 | -0.07 | 38 | 38% |
+| humor-absurd | 33 | +0.58 | 69 | 88% |
+| dark-morbid | 59 | +0.57 | 69 | 73% |
+| nostalgia | 29 | +0.57 | 70 | 86% |
+| health-body | 43 | +0.40 | 60 | 65% |
+| hypotheticals | 28 | +0.39 | 55 | 68% |
+| politics-news | 56 | +0.32 | 54 | 61% |
+| other | 355 | +0.27 | 48 | 67% |
+| relationships-dating | 80 | +0.25 | 50 | 62% |
+| money-work | 63 | +0.22 | 47 | 63% |
+| life-advice | 95 | +0.22 | 47 | 67% |
+| fame-celebrity | 25 | +0.16 | 42 | 64% |
+| sex-adjacent | 11 | +0.01 | 38 | 64% |
 
 ## Distinctive terms (top quartile vs bottom quartile)
 
 | In overperformers | In underperformers |
 |---|---|
-| yourself | interest |
-| means | deep |
-| sick | reasons |
-| silence | reddit what's |
-| ruin | looks |
-| major | running |
+| more than | self |
+| asking | deep |
+| yourself | thighs |
+| major | mad |
+| sick | about women |
+| means | land |
+| party | model |
 | realizing | automatically |
-| lights | jobs |
-| stuff | celebrity |
-| dating | don't want |
-| pick | being able |
-| played | career |
-| imagine | youtube |
-| written | letting |
-| military | admit wrong |
+| silence | reasons |
+| lights | late |
+| imagine | rate like |
+| played | looks |
+| pick | credit card |
+| walk | beast |
+| ruin | jobs |
 
 ## Upload slot
 
 | UTC hour | median residual |
 |---|---|
-| 00:00 | +0.46 |
-| 01:00 | -0.00 |
-| 02:00 | -0.04 |
-| 03:00 | +0.22 |
-| 04:00 | +0.27 |
-| 05:00 | -0.05 |
-| 06:00 | +0.52 |
-| 12:00 | +0.34 |
-| 13:00 | -0.02 |
-| 14:00 | +0.04 |
-| 15:00 | -0.68 |
-| 16:00 | -0.04 |
-| 17:00 | -0.49 |
-| 18:00 | -1.34 |
-| 19:00 | -0.11 |
-| 20:00 | -1.55 |
-| 22:00 | -0.02 |
-| 23:00 | -2.75 |
+| 00:00 | +0.55 |
+| 01:00 | -0.04 |
+| 02:00 | -0.01 |
+| 03:00 | +0.30 |
+| 04:00 | +0.31 |
+| 05:00 | +0.02 |
+| 06:00 | +0.63 |
+| 12:00 | +0.42 |
+| 13:00 | -0.01 |
+| 14:00 | +0.06 |
+| 15:00 | -0.66 |
+| 16:00 | -0.18 |
+| 17:00 | -0.47 |
+| 18:00 | -2.35 |
+| 19:00 | -3.73 |
+| 20:00 | -2.35 |
+| 22:00 | +0.07 |
+| 23:00 | -3.05 |
 
 ## Caveats (read before acting)
 
