@@ -12,7 +12,7 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-19 · **Live format:** `v3` (Phase 2 shipped 2026-07-19; v2 first went live 2026-07-18)
+**Last updated:** 2026-07-20 · **Live format:** `v3` (Phase 2 shipped 2026-07-19; v2 first went live 2026-07-18)
 
 > **Owner decision 2026-07-19:** proceed to Phase 2 without waiting out the v2 measurement window. Attribution note: Phase 2 is metadata-only (titles/description), so the rendered video format stays v2's — retention metrics remain attributable to the video format while `title_style` in the upload log isolates the title experiments.
 
@@ -37,7 +37,7 @@
 | R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
 | R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
 | R4.1 | Subreddit rotation | ⬜ v5 | |
-| R4.2 | Weekly analytics pull | ⬜ v5 | needs re-auth scopes |
+| R4.2 | Weekly analytics pull | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv`; first snapshot captured (890 videos). Single-file design via Analytics API OAuth — no Data API key needed in CI; impressions confirmed not API-exposed |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Add `YOUTUBE_DATA_API_KEY` to Actions secrets before R4.2's weekly job |
 | R4.4 | Topic avoidance gate | ⬜ | depends on R4.3 findings + owner-approved blocklist |
 | R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see Phase 5 gate) |
@@ -47,7 +47,7 @@ Also shipped outside the numbered requirements: audio-mix calibration (music ~10
 ### Next steps, in order
 
 1. ~~YouTube Data API key + R4.3~~ ✅ done 2026-07-19 — findings in `analysis/topic_performance.md`. Owner: review it and note tentative `BLOCKED_TOPICS`/preferred-topics candidates for R4.4 (no action ships without approval; current evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything — weak buckets are mild, not toxic).
-2. **Owner (~30 min, anytime):** b-roll curation (`scripts/prep_broll.py` + README instructions). Optional: extra Audio Library tracks into `assets/music/` for variety. Also add `YOUTUBE_DATA_API_KEY` to GitHub Actions secrets (already in local `.env`) so R4.2's weekly job can use it later. Safe mid-window: every video logs which background/music it used, so their effect is separable.
+2. **Owner (~30 min, anytime):** b-roll curation (`scripts/prep_broll.py` + README instructions). Optional: extra Audio Library tracks into `assets/music/` for variety. Safe mid-window: every video logs which background/music it used, so their effect is separable. (`YOUTUBE_DATA_API_KEY` in Actions secrets is no longer needed — R4.2 runs entirely on OAuth; the key stays local-only for `analyze_channel.py`.)
 3. ~~Phase 2 (`v3`)~~ ✅ shipped 2026-07-19 (owner elected to skip the v2 wait — see note above).
 4. ~~Phase 3 OAuth prerequisite~~ ✅ complete 2026-07-19: consent screen published to production (ends the 7-day token expiry permanently), re-auth done with expanded scopes (upload + force-ssl + yt-analytics.readonly), secret updated, verified by live run. **Phase 3 build itself is NOT started — awaiting explicit owner go-ahead.**
 5. **Keep watching Studio** as data accumulates: *viewed vs swiped away* and *average % viewed* (targets ≥70%), median views; title styles become comparable after each style has ≥10 uploads (~2 weeks of rotation).
