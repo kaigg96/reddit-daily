@@ -112,7 +112,7 @@ def main():
     if snap_age > 8:
         hard.append(f"analytics snapshot is {snap_age} days old")
     if unlogged:
-        soft.append(f"{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''} to check")
+        soft.append(f"{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''}")
     if zero_views:
         soft.append(f"{len(zero_views)} upload(s) still at 0 views after {ZERO_VIEW_DAYS}+ days")
 
@@ -123,7 +123,7 @@ def main():
     elif soft:
         title = f"Weekly digest — {date_label} — ran clean; {soft[0]}"
         noun = "One item" if len(soft) == 1 else f"{len(soft)} items"
-        status = f"**Status: all scheduled runs completed. {noun} to check below.**"
+        status = f"**Status: all scheduled runs completed. {noun} flagged below.**"
     else:
         title = f"Weekly digest — {date_label} — ran clean"
         status = "**Status: all scheduled runs completed.**"
@@ -147,26 +147,25 @@ def main():
     cadence += " (no missed days)" if not missed_days else f" — **missed: {', '.join(sorted(missed_days))}**"
     if unlogged:
         diff = (f"**{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''}** ("
-                + ", ".join(f"`{v['id']}`, {v['published'][:10]}" for v in unlogged[:3])
-                + " — verify intended)")
+                + ", ".join(v["published"][:10] for v in unlogged[:3]) + ")")
     elif logged_gone:
         diff = f"**missing from channel:** {', '.join(f'`{i}`' for i in logged_gone[:3])}"
     else:
         diff = "clean"
-    freshness = f"fresh (#{len(snap_dates)})" if snap_age <= 8 else f"**stale — {snap_age} days old**"
+    freshness = "current" if snap_age <= 8 else f"**{snap_age} days stale**"
 
     lines = [status, ""]
     lines.append(f"**Pipeline health** — Cadence: {cadence} · Log↔channel diff: {diff} · "
-                 f"Analytics snapshot: {freshness}")
+                 f"Analytics data: {freshness}")
     lines.append("")
+    lines.append("**Performance**")
     if measurable:
-        perf = (f"Median views, this week's measurable uploads: **{med_week}** "
-                f"(90d median: {med_90}) · Avg % viewed: **{med_pct:.0f}%** vs "
-                f"≥{RETENTION_TARGET}% target")
+        lines.append(f"- Median views (this week's measurable uploads): **{med_week}** — 90d median: {med_90}")
+        lines.append(f"- Avg % viewed: **{med_pct:.0f}%** vs ≥{RETENTION_TARGET}% target")
     else:
-        perf = "no measurable uploads yet this week"
-    lines.append(f"**Performance** — {perf} · Subscribers: **{subs}** · "
-                 f"~90d views: ~{humanize(views_90)} (approx)")
+        lines.append("- No measurable uploads yet this week")
+    lines.append(f"- Subscribers: **{subs}**")
+    lines.append(f"- ~90d views: ~{humanize(views_90)} (approx)")
     lines.append("")
     if measurable:
         top = max(measurable, key=lambda v: views(v["id"]))
