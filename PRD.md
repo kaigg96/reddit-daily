@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v3` live; Sprint 1 (bar-raising batch) next — see §0 Delivery plan |
+| **Status** | `v4` live (Sprint 1 shipped 2026-07-22); experiment backlog next — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-22 · **Live format:** `v3` (packaging shipped 2026-07-19; v2 retention overhaul first went live 2026-07-18)
+**Last updated:** 2026-07-22 · **Live format:** `v4` (Sprint 1 bar-raising batch shipped 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. Prior note (still true): v3 was metadata-only, so v1→v2 retention remains a clean comparison.
 
@@ -34,14 +34,14 @@
 | R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
 | R2.1 | Title hygiene | ✅ v3 | hashtag suffix removed; description ≤3 hashtags |
 | R2.2 | Title style rotation | ✅ v3 | A/B/C by day-of-year; logged per upload |
-| R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2; full version a low-priority Sprint 1 keeper |
-| R3.1a | CTA wording (question-specific) + voice fix | ⬜ Sprint 1 | OAuth prerequisite ✅ done |
+| R2.3 | Branded thumbnail | 🟡 partial | basic card live since v2; full Gemini-headline version deferred (low value — not in feed) |
+| R3.1a | CTA wording (question-specific) + voice fix | ✅ v4 | Gemini CTA, markdown-stripped, fail-soft |
 | R3.1b | CTA placement (earlier / mid-video strip) | ⬜ experiment | might-revert; decision rule in Delivery plan |
 | R3.2 | Two-voice reaction beat | ⬜ experiment | retention risk; isolated + baked |
-| R3.3 | Auto-post engagement comment | ⬜ Sprint 1 | OAuth ✅; doesn't touch the video |
-| R3.4 | Persistent watermark | ⬜ Sprint 1 | uses `CHANNEL_NAME`, no API |
-| R3.5 | Subtitle (SRT) track | ⬜ Sprint 1 | OAuth ✅; invisible to the video |
-| R4.5 | Cron de-jitter + publishedAt logging | ⬜ Sprint 1 | plumbing; predictable publish time |
+| R3.3 | Auto-post engagement comment | ✅ v4 | commentThreads.insert, fail-soft; first fires on next live run |
+| R3.4 | Persistent watermark | ✅ v4 | "AskReddit Shorts", 55% opacity, low-center, all frames |
+| R3.5 | Subtitle (SRT) track | ✅ v4 | SRT from caption timings + captions.insert, fail-soft |
+| R4.5 | Cron de-jitter + publishedAt logging | ✅ v4 | cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
 | R4.1 | Subreddit rotation | ⬜ experiment | content bet |
 | R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Migrated to OAuth 2026-07-21 (refactor pass) — no longer needs `YOUTUBE_DATA_API_KEY`; see TECH_DEBT.md |
@@ -59,20 +59,20 @@ Two tracks (rationale in §8). Every unshipped item is tagged Sprint 1 (bar-rais
 
 **One read kept honest (non-blocking):** did v1→v2 actually move retention? Still recoverable (v3 was metadata-only), matures on its own in the weekly digest, consulted before over-investing in the "production quality → retention" thesis — but does **not** gate Sprint 1.
 
-#### Sprint 1 — bar-raising batch (next release, ships as `v4`)
+#### Sprint 1 — bar-raising batch ✅ shipped as `v4` (2026-07-22)
 
-| Item | Req | Decision rule |
+| Item | Req | Status |
 |---|---|---|
-| Subtitle (SRT) track upload | R3.5 | Keep — invisible to the video. Verify SRT parses + uploads. |
-| Question-specific CTA *wording* (+ narrator-voice bug fix) | R3.1a | Keep — strictly better than the generic outro. |
-| Auto-post engagement comment | R3.3 | Keep — doesn't touch the video; fail-soft. |
-| Persistent watermark / brand mark | R3.4 | Keep unless the dry-run sample reads as distracting. |
-| Cron de-jitter + pip caching + log `publishedAt` | R4.5 | Keep — plumbing (predictable publish time, faster CI). |
-| B-roll library *(owner asset task)* | R1.3 | Keep, gated on the R1.4 readability check over the brightest clip. |
-| Extra music tracks *(owner asset task)* | R1.6 | Keep — license-clean variety. |
-| Branded thumbnail card | R2.3 | Safe keeper, low priority (thumbnails don't show in the Shorts feed) — include if cheap, else defer. |
+| Subtitle (SRT) track upload | R3.5 | ✅ SRT from caption timings + `captions.insert` (fail-soft) |
+| Question-specific CTA *wording* (+ narrator-voice fix) | R3.1a | ✅ Gemini CTA, markdown-stripped, fail-soft to generic |
+| Auto-post engagement comment | R3.3 | ✅ `commentThreads.insert` (fail-soft); first fires next live run |
+| Persistent watermark / brand mark | R3.4 | ✅ 55% opacity, low-center, all frames |
+| Cron de-jitter + pip caching + `publishedAt` | R4.5 | ✅ cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
+| B-roll library *(owner asset task)* | R1.3 | ⬜ owner, anytime — drops in with no version bump |
+| Extra music tracks *(owner asset task)* | R1.6 | ⬜ owner, anytime — drops in with no version bump |
+| Branded thumbnail card | R2.3 | ⏸ full Gemini-headline version deferred (low value — not shown in feed) |
 
-All code-side Sprint 1 items are unblocked (`force-ssl` + analytics scopes live). Only owner inputs are the two asset tasks, which the pipeline already handles. Ships as one batch through the review gate (dry-run artifact → owner eyeball → `FORMAT_VERSION` → live); measured only in aggregate.
+Code merged to `main` via `feature/sprint-1` (fast-forward, branch deleted). The two owner asset tasks remain optional and version-bump-free. Untested until the first live run: the real `captions.insert` / `commentThreads.insert` calls (both fail-soft — a scope/API hiccup logs and continues without breaking the upload).
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
