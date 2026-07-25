@@ -42,6 +42,9 @@ def main():
         fallback=post.title,
     )
     print(f"Title style {title_style}: {video_title}")
+    # R3.1a: question-specific outro CTA (fail-soft to the generic line)
+    outro_text = llm.get_cta(post.title) or config.OUTRO_TEXT
+    print(f"CTA: {outro_text}")
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
@@ -56,7 +59,7 @@ def main():
     segments = [synth("title", post.title, kind="title")]
     for i, comment in enumerate(post.comments, 1):
         segments.append(synth(f"comment_{i}", comment, kind="comment"))
-    segments.append(synth("outro", config.OUTRO_TEXT, kind="outro"))
+    segments.append(synth("outro", outro_text, kind="outro"))
 
     # --- duration guard (R1.7): drop the last comment rather than run long ---
     def projected(segs):
@@ -76,6 +79,7 @@ def main():
     print(f"Assembled: {result.duration:.1f}s, bg={result.bg_name}, music={result.music_name}")
     video.render(result.video, config.OUT_VIDEO)
     thumbnail.make_thumbnail(post.title, result.bg_frame, config.OUT_THUMBNAIL)
+    video.write_srt(result.srt_events, config.OUT_SRT)  # R3.5
 
     # --- upload metadata (R2.1: no hashtag suffix — Shorts are auto-detected) ---
     full_title = video_title
@@ -89,12 +93,17 @@ def main():
     tags = ["AskReddit", "Ask Reddit", "Shorts", "Reddit", "Top AskReddit Post",
             "Trending AskReddit"] + keywords
 
+    # R3.3: engagement comment posted from the channel account (the CTA doubles as it)
+    comment_text = outro_text
+
     if config.DRY_RUN:
         print("\n=== DRY RUN — nothing uploaded ===")
         print(f"video:       {config.OUT_VIDEO}")
         print(f"thumbnail:   {config.OUT_THUMBNAIL}")
+        print(f"captions:    {config.OUT_SRT}")
         print(f"title:       {full_title}")
         print(f"tags:        {tags}")
+        print(f"comment:     {comment_text}")
         print(f"description:\n{description}")
         return
 
@@ -102,6 +111,8 @@ def main():
     if not video_id:
         sys.exit("Upload failed; not updating prev_post/upload_log.")
     youtube.upload_thumbnail(video_id, config.OUT_THUMBNAIL)
+    youtube.upload_caption(video_id, config.OUT_SRT)  # R3.5, fail-soft
+    youtube.post_comment(video_id, comment_text)      # R3.3, fail-soft
     print(f"Video live: https://www.youtube.com/watch?v={video_id}")
 
     config.PREV_POST_FILE.write_text(post.title)

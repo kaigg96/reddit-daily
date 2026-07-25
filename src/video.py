@@ -141,15 +141,32 @@ class AssemblyResult:
     bg_name: str
     music_name: str
     bg_frame: np.ndarray = field(repr=False, default=None)
+    srt_events: list = field(default_factory=list)  # (start_s, end_s, text)
 
 
 def _truncate(text, limit=80):
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
+def _srt_ts(t):
+    h, rem = divmod(t, 3600)
+    m, s = divmod(rem, 60)
+    return f"{int(h):02d}:{int(m):02d}:{int(s):02d},{int((t % 1) * 1000):03d}"
+
+
+def write_srt(events, path):
+    """R3.5: subtitle track from the same word-group timings as the on-screen
+    captions (original case, not the uppercased on-screen form)."""
+    blocks = [
+        f"{i}\n{_srt_ts(start)} --> {_srt_ts(end)}\n{text}\n"
+        for i, (start, end, text) in enumerate(events, 1)
+    ]
+    Path(path).write_text("\n".join(blocks))
+
+
 def assemble(question, segments, rng):
     t = 0.0
-    audio_clips, overlays, sfx_times = [], [], []
+    audio_clips, overlays, sfx_times, srt_events = [], [], [], []
     n_answers = sum(1 for s in segments if s.kind == "comment")
     answer_i = 0
     first_comment_start = None
@@ -165,6 +182,7 @@ def assemble(question, segments, rng):
         if seg.kind == "comment":
             display_dur = max(dur, config.MIN_COMMENT_DISPLAY)
         groups = group_words(seg.marks, seg.text, display_dur)
+        srt_events += [(t + g.start, t + g.end, g.text) for g in groups]  # R3.5
 
         if seg.kind == "title":
             overlays.append(overlay_text(config.CHANNEL_NAME, t, display_dur, 46, 120, color=config.BRAND_ORANGE))
@@ -194,6 +212,15 @@ def assemble(question, segments, rng):
                          total - first_comment_start, 44, 120, width=920)
         )
 
+    # R3.4: persistent brand watermark, all frames, low in the safe area.
+    overlays.append(
+        _text_clip(config.CHANNEL_NAME, 34)
+        .with_opacity(0.55)
+        .with_start(0)
+        .with_duration(total)
+        .with_position(("center", 1500))
+    )
+
     bg_clips, bg_name = build_background(total, rng)
     video = CompositeVideoClip(bg_clips + overlays, size=(config.W, config.H)).with_duration(total)
 
@@ -214,6 +241,7 @@ def assemble(question, segments, rng):
         bg_name=bg_name,
         music_name=music_name,
         bg_frame=bg_clips[0].get_frame(min(1.0, total / 2)),
+        srt_events=srt_events,
     )
 
 

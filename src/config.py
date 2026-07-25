@@ -50,7 +50,7 @@ INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
 MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v3"  # v3 = Phase 2: no title hashtag suffix, title-style rotation
+FORMAT_VERSION = "v4"  # v4 = Sprint 1: question CTA, watermark, subtitles, auto-comment
 
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
@@ -64,6 +64,7 @@ SFX_DIR = ASSETS / "sfx"
 FALLBACK_MUSIC = ASSETS / "funk_bg_lower.mp3"  # pre-lowered ~13dB; see CREDITS.md
 OUT_VIDEO = GEN / "final_askreddit_video.mp4"
 OUT_THUMBNAIL = GEN / "thumbnail.png"
+OUT_SRT = GEN / "captions.srt"
 PREV_POST_FILE = ROOT / "prev_post.txt"
 UPLOAD_LOG = ROOT / "upload_log.csv"
 

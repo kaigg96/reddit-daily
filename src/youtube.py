@@ -64,3 +64,33 @@ def upload_thumbnail(video_id, thumbnail_path):
         print("Thumbnail uploaded.")
     except HttpError as e:
         print(f"Failed to upload thumbnail: {e}")
+
+
+def upload_caption(video_id, srt_path, language="en", name="English"):
+    """R3.5: attach a subtitle track. Needs the force-ssl scope. Fail soft."""
+    youtube = build("youtube", "v3", credentials=_authenticate())
+    try:
+        youtube.captions().insert(
+            part="snippet",
+            body={"snippet": {"videoId": video_id, "language": language,
+                              "name": name, "isDraft": False}},
+            media_body=MediaFileUpload(str(srt_path), mimetype="application/octet-stream"),
+        ).execute()
+        print("Caption track uploaded.")
+    except HttpError as e:
+        print(f"Failed to upload caption (continuing): {e}")
+
+
+def post_comment(video_id, text):
+    """R3.3: post one top-level comment from the channel account. force-ssl. Fail soft.
+    (The Data API cannot pin comments — pinning stays manual.)"""
+    youtube = build("youtube", "v3", credentials=_authenticate())
+    try:
+        youtube.commentThreads().insert(
+            part="snippet",
+            body={"snippet": {"videoId": video_id,
+                              "topLevelComment": {"snippet": {"textOriginal": text}}}},
+        ).execute()
+        print("Engagement comment posted.")
+    except HttpError as e:
+        print(f"Failed to post comment (continuing): {e}")

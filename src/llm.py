@@ -89,6 +89,26 @@ Important: Return *only* the generated title. Do not include any surrounding quo
         return None
 
 
+def get_cta(reddit_title):
+    """R3.1a: a ≤12-word question-specific spoken outro. None → caller uses the
+    generic fallback. Fails soft."""
+    prompt = f"""
+My YouTube Short asks: "{reddit_title}" and shows the top three Reddit answers.
+
+Write a spoken outro line of AT MOST 12 words asking viewers to comment their
+own answer to this specific question. Direct, punchy, conversational.
+No hashtags, no emojis, no profanity.
+
+Return only the line itself — no quotes, no explanation.
+"""
+    try:
+        line = re.sub(r"[*_`]", "", _generate(prompt))  # strip markdown emphasis
+        return re.sub(r"\s+", " ", line).strip().strip('"').strip("'").strip() or None
+    except Exception as e:
+        print(f"Gemini CTA failed with {type(e).__name__} (using generic outro)")
+        return None
+
+
 def sanitize_title(title, fallback, max_len=100):
     """Strip LLM artifacts (R0.5). 100 is YouTube's title limit."""
     if not title:
