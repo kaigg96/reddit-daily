@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Phase 0 + 1 live (`v2`) — measuring; see status section below |
+| **Status** | `v3` live; Sprint 1 (bar-raising batch) next — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,9 +12,9 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-20 · **Live format:** `v3` (Phase 2 shipped 2026-07-19; v2 first went live 2026-07-18)
+**Last updated:** 2026-07-22 · **Live format:** `v3` (Phase 2 shipped 2026-07-19; v2 first went live 2026-07-18)
 
-> **Owner decision 2026-07-19:** proceed to Phase 2 without waiting out the v2 measurement window. Attribution note: Phase 2 is metadata-only (titles/description), so the rendered video format stays v2's — retention metrics remain attributable to the video format while `title_style` in the upload log isolates the title experiments.
+> **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. Prior note (still true): v3 was metadata-only, so v1→v2 retention remains a clean comparison.
 
 ### Requirement status
 
@@ -34,24 +34,60 @@
 | R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
 | R2.1 | Title hygiene | ✅ v3 | hashtag suffix removed; description ≤3 hashtags |
 | R2.2 | Title style rotation | ✅ v3 | A/B/C by day-of-year; logged per upload |
-| R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2 |
-| R3.1–R3.5 | CTA, 2nd voice, auto-comment, watermark, SRT | ⬜ v4 | **blocked on one-time OAuth re-auth (owner)** |
-| R4.1 | Subreddit rotation | ⬜ v5 | |
+| R2.3 | Branded thumbnail | 🟡 partial | basic card pulled forward into v2; full version a low-priority Sprint 1 keeper |
+| R3.1a | CTA wording (question-specific) + voice fix | ⬜ Sprint 1 | OAuth prerequisite ✅ done |
+| R3.1b | CTA placement (earlier / mid-video strip) | ⬜ experiment | might-revert; decision rule in Delivery plan |
+| R3.2 | Two-voice reaction beat | ⬜ experiment | retention risk; isolated + baked |
+| R3.3 | Auto-post engagement comment | ⬜ Sprint 1 | OAuth ✅; doesn't touch the video |
+| R3.4 | Persistent watermark | ⬜ Sprint 1 | uses `CHANNEL_NAME`, no API |
+| R3.5 | Subtitle (SRT) track | ⬜ Sprint 1 | OAuth ✅; invisible to the video |
+| R4.5 | Cron de-jitter + publishedAt logging | ⬜ Sprint 1 | plumbing; predictable publish time |
+| R4.1 | Subreddit rotation | ⬜ experiment | content bet |
 | R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Migrated to OAuth 2026-07-21 (refactor pass) — no longer needs `YOUTUBE_DATA_API_KEY`; see TECH_DEBT.md |
-| R4.4 | Topic avoidance gate | ⬜ | depends on R4.3 findings + owner-approved blocklist |
+| R4.4 | Topic avoidance/preference gate | ⬜ experiment | depends on R4.3 findings + owner-approved list |
 | R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see Phase 5 gate) |
 
 Also shipped outside the numbered requirements: audio-mix calibration (music ~10 dB under voice, SFX ~-20 dBFS peaks), `CHANNEL_NAME` = "AskReddit Shorts" branding, no-AI-attribution scrub.
 
-### Next steps, in order
+<a name="delivery-plan"></a>
+### Delivery plan
 
-1. ~~YouTube Data API key + R4.3~~ ✅ done 2026-07-19 — findings in `analysis/topic_performance.md`. Owner: review it and note tentative `BLOCKED_TOPICS`/preferred-topics candidates for R4.4 (no action ships without approval; current evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything — weak buckets are mild, not toxic).
-2. **Owner (~30 min, anytime):** b-roll curation (`scripts/prep_broll.py` + README instructions). Optional: extra Audio Library tracks into `assets/music/` for variety. Safe mid-window: every video logs which background/music it used, so their effect is separable. (`YOUTUBE_DATA_API_KEY` is no longer used anywhere in the codebase as of the 2026-07-21 refactor — every reporting script runs on OAuth now.)
-3. ~~Phase 2 (`v3`)~~ ✅ shipped 2026-07-19 (owner elected to skip the v2 wait — see note above).
-4. ~~Phase 3 OAuth prerequisite~~ ✅ complete 2026-07-19: consent screen published to production (ends the 7-day token expiry permanently), re-auth done with expanded scopes (upload + force-ssl + yt-analytics.readonly), secret updated, verified by live run. **Phase 3 build itself is NOT started — awaiting explicit owner go-ahead.**
-5. **Keep watching Studio** as data accumulates: *viewed vs swiped away* and *average % viewed* (targets ≥70%), median views; title styles become comparable after each style has ≥10 uploads (~2 weeks of rotation).
-6. **Phase 4 (`v5`)** after its evaluation window; **Phase 5** only when its gate is met.
+Two tracks (rationale in §8). Every unshipped item is tagged Sprint 1 (bar-raising keeper) or Experiment (bet), and carries a decision rule.
+
+**Expectation:** Sprint 1 raises/defends the *floor* (production quality) — it is **not** expected to spike views. The ceiling levers (content, hooks, titles) live in the experiment backlog. Flat views during Sprint 1 ≠ failure.
+
+**One read kept honest (non-blocking):** did v1→v2 actually move retention? Still recoverable (v3 was metadata-only), matures on its own in the weekly digest, consulted before over-investing in the "production quality → retention" thesis — but does **not** gate Sprint 1.
+
+#### Sprint 1 — bar-raising batch (next release, ships as `v4`)
+
+| Item | Req | Decision rule |
+|---|---|---|
+| Subtitle (SRT) track upload | R3.5 | Keep — invisible to the video. Verify SRT parses + uploads. |
+| Question-specific CTA *wording* (+ narrator-voice bug fix) | R3.1a | Keep — strictly better than the generic outro. |
+| Auto-post engagement comment | R3.3 | Keep — doesn't touch the video; fail-soft. |
+| Persistent watermark / brand mark | R3.4 | Keep unless the dry-run sample reads as distracting. |
+| Cron de-jitter + pip caching + log `publishedAt` | R4.5 | Keep — plumbing (predictable publish time, faster CI). |
+| B-roll library *(owner asset task)* | R1.3 | Keep, gated on the R1.4 readability check over the brightest clip. |
+| Extra music tracks *(owner asset task)* | R1.6 | Keep — license-clean variety. |
+| Branded thumbnail card | R2.3 | Safe keeper, low priority (thumbnails don't show in the Shorts feed) — include if cheap, else defer. |
+
+All code-side Sprint 1 items are unblocked (`force-ssl` + analytics scopes live). Only owner inputs are the two asset tasks, which the pipeline already handles. Ships as one batch through the review gate (dry-run artifact → owner eyeball → `FORMAT_VERSION` → live); measured only in aggregate.
+
+#### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
+
+| Item | Req | Decision rule (pre-committed) |
+|---|---|---|
+| CTA *placement* (earlier + mid-video strip) | R3.1b | If early/mid-CTA cohort median avg-%-viewed ≥2 pts below outro-only after ≥20 uploads → revert placement, keep wording. |
+| Two-voice reaction beat | R3.2 | If reaction-beat cohort median avg-%-viewed ≥2 pts below non-beat cohort after ≥20 uploads → revert. |
+| Subreddit rotation | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop any that underperform the AskReddit baseline. |
+| Topic preference/avoidance gate | R4.4 | Owner-approved list only; `topic` logged per upload; keep only buckets that hold up in R4.3-style analysis. |
+| Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (Phase 5 gate). |
+| Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until retention is solved + enough volume per slot; magnitude is uncertain for Shorts (long discovery tail). Not a growth lever. |
+
+#### Done / owner-side
+- ~~Phase 3 OAuth prerequisite~~ ✅ 2026-07-19 — production consent screen + expanded scopes; killed the weekly-token chore permanently.
+- ~~R4.3 historical analysis~~ ✅ — owner to review `analysis/topic_performance.md` for tentative R4.4 candidates (evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything).
 
 ---
 
@@ -98,7 +134,7 @@ Ranked by expected impact:
 
 ## 4. Objectives & success metrics
 
-All metrics via YouTube Studio / Analytics API, evaluated over ≥ 14 days or ≥ 20 uploads per format version — individual Shorts are high-variance; never judge a change on 1–2 videos.
+All metrics via YouTube Studio / Analytics API. The **≥ 14 days / ≥ 20 uploads** bake rule applies to **experiment-backlog** changes — the ones we'll act on (keep/revert/iterate); individual Shorts are high-variance, so never judge *a bet* on 1–2 videos. **Bar-raising keepers do not carry per-change bake** — they're kept regardless, so there's no decision to wait for; they're sanity-checked in aggregate. (See §8 for why this split is correct.)
 
 | Area | Metric | Baseline | Target after P1–P3 |
 |---|---|---|---|
@@ -196,33 +232,38 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R2.3 — Branded thumbnail template — **P3 (deliberately deprioritized)**
 - Thumbnails don't render in the Shorts feed; they matter only on channel/search/browse surfaces. Replace the frame-0 screenshot with a Pillow-generated card: dark background, Anton headline (Gemini-shortened ≤ 8-word version of the question), channel mark (R3.4). Keep < 2 MB, correct mimetype.
 
-### Phase 3 — Engagement & persona (`v4`)
+### Phase 3 — Engagement & persona *(now split across Sprint 1 and the experiment backlog — see Delivery plan)*
 
-> **Prerequisite:** one-time OAuth re-consent with expanded scopes. Update [regen_refresh_token.py](regen_refresh_token.py) `SCOPES` to `["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/yt-analytics.readonly"]`; owner runs it locally once and updates the `YOUTUBE_REFRESH_TOKEN` secret. Document in README. All Phase 3/4 API features must degrade gracefully (log + skip) if the token lacks scopes.
+> **Prerequisite ✅ done 2026-07-19:** OAuth re-consent with expanded scopes (`youtube.upload`, `youtube.force-ssl`, `yt-analytics.readonly`); consent screen published to production. All API features still degrade gracefully (log + skip) if a scope is ever missing.
 
-#### R3.1 — Question-specific CTA — **P1**
-- Replace the generic outro. Gemini generates a ≤ 12-word CTA tied to the question (e.g., "Comment the city you thought of — no explaining."; fallback: current generic line). Voiced by the **primary narrator voice** (fixes the Danielle hardcode bug), captioned per R1.2, total segment ≤ 3s. Additionally overlay a small "⬇ comment your answer" strip during the final comment so the ask lands before peak drop-off.
+#### R3.1a — Question-specific CTA wording — **Sprint 1 (keeper)**
+- Replace the generic outro. Gemini generates a ≤ 12-word CTA tied to the question (e.g., "Comment the city you thought of — no explaining."; fallback: current generic line). Voiced by the **primary narrator voice** (fixes the Danielle hardcode bug), captioned per R1.2, total segment ≤ 3s.
 - **Acceptance:** dry-run output shows question-specific CTA text; voice matches narrator across all segments.
 
-#### R3.2 — Two-voice reaction beat — **P2**
-- The *unused* voice of {Danielle, Stephen} delivers one Gemini-written quip (≤ 10 words, reacting to one comment — prompt for "surprised/amused friend" tone, no profanity) placed after comment 2 as a mid-video pattern interrupt. Distinct caption color for the second voice. **Fails soft:** any Gemini/Polly error → omit the beat entirely, video still valid.
-- This is also the start of an actual channel persona (and helps the "meaningfully transformed content" bar for YPP review).
+#### R3.1b — CTA placement — **Experiment (might revert)**
+- Overlay a small "⬇ comment your answer" strip during the final comment (and/or move the ask earlier) so it lands before peak drop-off. This is a retention bet — asking earlier can help *or* feel needy.
+- **Decision rule:** if the early/mid-CTA cohort's median avg-%-viewed is ≥2 pts below the outro-only cohort after ≥20 uploads → revert placement, keep the R3.1a wording. Log a flag distinguishing the cohorts.
 
-#### R3.3 — Auto-post engagement comment — **P2**
+#### R3.2 — Two-voice reaction beat — **Experiment (might revert)**
+- The *unused* voice of {Danielle, Stephen} delivers one Gemini-written quip (≤ 10 words, reacting to one comment — prompt for "surprised/amused friend" tone, no profanity) placed after comment 2 as a mid-video pattern interrupt. Distinct caption color for the second voice. **Fails soft:** any Gemini/Polly error → omit the beat entirely, video still valid.
+- Adds mid-video length + an interruption — genuinely could raise or lower retention. Also the start of an actual channel persona (and helps the "meaningfully transformed content" bar for YPP review).
+- **Decision rule:** if the reaction-beat cohort's median avg-%-viewed is ≥2 pts below the non-beat cohort after ≥20 uploads → revert.
+
+#### R3.3 — Auto-post engagement comment — **Sprint 1 (keeper)**
 - After a live upload, post one top-level comment from the channel account via `commentThreads().insert` (requires `youtube.force-ssl` scope) — content: the CTA question or a "Which answer wins — 1, 2, or 3?" prompt. Respect DRY_RUN. Fail soft.
 - **Known limitation:** the Data API cannot **pin** comments (no such endpoint) — pinning stays manual and optional; do not build for it.
 
-#### R3.4 — Persistent watermark/brand mark — **P2**
-- Small semi-transparent (~60%) channel mark, corner of the safe area, all frames. Fetch the channel title at runtime via `channels().list(mine=True)` (needs re-auth scopes; cache it; fall back to a hardcoded constant) and render as a text mark in the brand font — no logo file required, zero manual steps.
+#### R3.4 — Persistent watermark/brand mark — **Sprint 1 (keeper)**
+- Small semi-transparent (~60%) channel mark, corner of the safe area, all frames. Use the `CHANNEL_NAME` constant (already set to "AskReddit Shorts"; optionally confirm live via `channels().list(mine=True)` and cache) rendered as a text mark in the brand font — no logo file required, zero manual steps.
 
-#### R3.5 — Machine-readable content surfaces — **P2**
+#### R3.5 — Machine-readable content surfaces — **Sprint 1 (keeper)**
 - Upload a real subtitle track per video via `captions().insert` (requires this phase's `youtube.force-ssl` scope). The word-level timings from Polly speech marks make generating an accurate `.srt` nearly free — the pipeline already has every timestamp. Real caption tracks improve accessibility, search indexing, and how well every legitimate machine reader (YouTube's own content-understanding systems, search engines, AI assistants that surface and summarize video) can parse the video.
 - Keep descriptions fully self-describing (already true: question + all answers in plain text). The description is the channel's crawlable text surface — never degrade it into teaser copy.
 - **Scope boundary:** this requirement is about maximal legibility to legitimate machine readers, which compounds with human discovery. It is explicitly NOT bot-view optimization — see §7 for why that is excluded.
 
-### Phase 4 — Content & measurement loop (`v5`)
+### Phase 4 — Content & measurement loop *(R4.2/R4.3 shipped; R4.5 is Sprint 1; R4.1/R4.4 are experiments)*
 
-#### R4.1 — Subreddit rotation (Q&A-mode) — **P2**
+#### R4.1 — Subreddit rotation (Q&A-mode) — **Experiment (content bet)**
 - Config list of question-style subreddits (e.g., AskReddit, NoStupidQuestions, AskMen, AskWomen, AskUK — owner-editable constant). Rotate deterministically per run; existing filters apply; log `subreddit` (R0.2).
 - Replace `prev_post.txt` with `recent_posts.txt`: rolling last 30 posted titles (dedupe window across all subs). Migrate the workflow commit step.
 - **Story-mode subs (r/tifu, r/AmItheAsshole, r/confession) are a stretch (P3):** different format — Gemini condenses the selftext to a ≤ 35s script, CTA becomes a verdict poll ("NTA or YTA? Comment."). Build only after Q&A rotation ships and has data.
@@ -243,10 +284,18 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
   - **Deliverable:** `analysis/topic_performance.md` — ranked buckets, winner/loser terms, and explicit caveats (correlation ≠ causation, small-n buckets, algorithm drift over the sample period).
 - **Acceptance:** CSVs + report committed and reproducible; findings framed as hypotheses with proposed `BLOCKED_TOPICS` candidates for R4.4. (Original acceptance bar was "zero OAuth scopes used" — no longer applicable after the 2026-07-21 OAuth migration; superseded, not failed.)
 
-#### R4.4 — Topic avoidance gate at selection — **P2 (depends on R4.3 results)**
-- At selection time, classify the candidate post's title into the R4.3 taxonomy (one Gemini call, **fail-open**: on any error no post is blocked) and skip candidates whose bucket is in a `BLOCKED_TOPICS` config list — selection already iterates the top 10 posts, so it falls through to the next candidate.
-- **Policy:** the analysis *proposes* the blocklist; the owner approves it before it ships — a data artifact must not silently change content policy. Add a `topic` column to `upload_log.csv` so the gate's effect is itself measurable, and bump `FORMAT_VERSION` when the gate first ships (a content-selection change is a format change for attribution purposes).
-- **Acceptance:** dry run with a seeded candidate list shows a blocked-topic post being skipped; `topic` logged per upload; fail-open path verified.
+#### R4.4 — Topic avoidance gate at selection — **Experiment (depends on R4.3 results)**
+- At selection time, classify the candidate post's title into the R4.3 taxonomy (one Gemini call, **fail-open**: on any error no post is blocked) and skip candidates whose bucket is in a `BLOCKED_TOPICS` config list — selection already iterates the top 10 posts, so it falls through to the next candidate. (Current R4.3 evidence favors a *preference ranker* — prefer nostalgia/dark-morbid/humor-absurd when available — over an outright blocklist; weak buckets are mild, not toxic.)
+- **Policy:** the analysis *proposes* the list; the owner approves it before it ships — a data artifact must not silently change content policy. Add a `topic` column to `upload_log.csv` so the gate's effect is itself measurable, and bump `FORMAT_VERSION` when the gate first ships (a content-selection change is a format change for attribution purposes).
+- **Acceptance:** dry run with a seeded candidate list shows a blocked/deprioritized post being skipped; `topic` logged per upload; fail-open path verified.
+
+#### R4.5 — Upload-time predictability & logging — **Sprint 1 (keeper); time-of-day tuning deferred**
+- **Problem:** scheduled runs currently publish 45–105 min after their cron slot. Most of that is GitHub Actions queue jitter at the top of the hour (`0 0,12`), plus ~7–11 min of uncached `pip install` + render. The publish time is therefore *unpredictable across a ~60-min window*, which makes any time-of-day analysis impossible.
+- **Sprint 1 scope (keeper, plumbing — no growth claim):**
+  - Move the cron off the top of the hour (e.g. `23 0,12 * * *`) to dodge queue congestion; cache pip deps (`actions/setup-python` cache or `actions/cache`) to shave render-start latency. If a specific *publish* clock-time is ever targeted, set the cron ~10 min earlier to absorb the irreducible pipeline runtime.
+  - Join YouTube's actual `publishedAt` (already pulled in R4.2's snapshot) into the experiment data, and add a `publish_hour_utc` to the analytics join so slot becomes analyzable later.
+  - **Acceptance:** post-change scheduled runs land within a tighter, consistent window; `publishedAt` present per video in the joined data.
+- **Deferred (experiment backlog):** actually *optimizing* time-of-day. For Shorts the magnitude is genuinely uncertain (long discovery tail, global test pool — weaker lever than for long-form), and it's second-order to retention. Revisit only once retention is solved and there's enough volume per slot for a comparison to mean anything. **Not** framed as a growth lever.
 
 ### Phase 5 — Localization: one channel per language (`v6+`)
 
@@ -270,16 +319,28 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 - Paid services (ElevenLabs, stock subscriptions, editors). Any per-video manual step. Posting-frequency increases. Engagement manipulation of any kind. Long-form video. Shorts poll stickers (not exposed via API). Comment pinning (no API). Reposting/compiling third-party video content. Migrating off the notebook's current infra (Actions + Polly + Gemini stack stays).
 - **Bot-view optimization.** Excluded on both factual and policy grounds. Factual: YPP thresholds count only *valid* public views — YouTube filters traffic it identifies as automated *before* it counts, so views from external bots/scrapers have approximately zero monetization yield regardless of how well content caters to them. Policy: deliberately cultivating artificial traffic falls under YouTube's fake-engagement enforcement (up to channel termination) — an uncapped downside against a ~zero upside, aimed at the exact asset we're trying to monetize. The legitimate core of the idea — content that machines can accurately read, index, and surface — is in scope as R3.5 and costs nothing extra given the speech-mark infrastructure.
 
-## 8. Sequencing & rollout
+## 8. Delivery model & rollout
 
-1. **Phase 0** entirely (R0.1 first — nothing else proceeds without DRY_RUN).
-2. **Phase 1** as one release: dry-run in CI → owner reviews the sample MP4 (attach as a workflow artifact) → owner approves → bump `FORMAT_VERSION` to `v2` → live.
-3. **Phase 2** (`v3`), **Phase 3** (`v4` — after the one-time re-auth), **Phase 4** (`v5`), each gated the same way: dry-run artifact → owner approval → version bump → live. **Phase 5** (`v6+`) additionally requires its own gate (see the Phase 5 section) before it may start.
-4. Evaluate each version only after ≥ 14 days or ≥ 20 uploads; compare medians by `format_version` via the two CSVs.
+Changes are sorted onto two tracks by one question: **will we act on this change's individual result?** The concrete bucketing is the [Delivery plan](#delivery-plan) in §0; this section is the rationale.
 
-Do not interleave phases — attribution requires clean version boundaries.
+**Why this sorting (and why the old rule was wrong).** There are two distinct reasons to wait between changes, and the original "bake every version ~1 month" rule conflated them:
+1. **Attribution** — ship A then B fast, views move, you can't tell which did it.
+2. **Validation** — you want to know whether a change worked so you can decide to keep / revert / iterate.
+Attribution only has *value* if you'll act on it. For high-confidence changes we'll keep regardless (motion background, captions, branding, subtitles), neither reason applies — so per-change bake time is pure delay. For genuine bets we might revert, both apply — so they get isolated and baked.
 
-Exception: **R4.3 (historical analysis) is read-only with respect to published content** — it changes nothing viewers see — so it may run at any time, including during v2's measurement window. Only its downstream gate (R4.4) is a content change and rolls out like any phase.
+**Track 1 — bar-raising batch.** High-confidence, non-regression keepers. Batch-shipped as a single `FORMAT_VERSION`, minimal bake. We deliberately give up *within-batch* attribution (they're all keepers, so we'd never act on it). Measured only in aggregate as a sanity check.
+
+**Track 2 — experiment backlog.** "Might revert" changes. One variable per version, a real bake window (≥ 20 uploads / ~2 weeks), and a **decision rule pre-committed before shipping** (keep/revert/iterate on a named metric threshold). No bet ships without its rule — a bake window with no pre-committed action is just a delay, which was the gap in the original plan (we never defined what to do after the wait).
+
+**The review gate is preserved on both tracks and is *not* the slow part:** build → dry-run artifact in CI → owner reviews the sample MP4 → approve → bump `FORMAT_VERSION` → live. That gate catches actual regressions (a visual bug, a broken render) — distinct from statistical bake time, which is what we compress for keepers.
+
+**Sort per-change, not per-phase.** Confidence can be miscalibrated, and the old thematic phases mixed safe and risky work (Phase 3's watermark/subtitles are keepers; its reaction beat is a real retention experiment). Every unshipped item carries an explicit bucket tag in the Delivery plan.
+
+**One clean read is protected:** the v1→v2 retention comparison (does production quality move avg-%-viewed at all?) stays recoverable because v3 was metadata-only. It matures in parallel via the weekly digest and is consulted before over-investing in the production-quality thesis — but does **not** block Sprint 1.
+
+**R4.3 exception retained:** read-only analysis (changes nothing viewers see) may run any time, including mid-bake.
+
+**Phase 5 (localization)** keeps its own separate gate (proven English format) on top of all the above.
 
 ## 9. Verification playbook (for the implementing agent)
 
