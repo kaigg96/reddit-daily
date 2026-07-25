@@ -348,7 +348,7 @@ Attribution only has *value* if you'll act on it. For high-confidence changes we
 
 **Track 2 — experiment backlog.** "Might revert" changes. One variable per version, a real bake window (≥ 20 uploads / ~2 weeks), and a **decision rule pre-committed before shipping** (keep/revert/iterate on a named metric threshold). No bet ships without its rule — a bake window with no pre-committed action is just a delay, which was the gap in the original plan (we never defined what to do after the wait).
 
-**The review gate is preserved on both tracks and is *not* the slow part:** build → dry-run artifact in CI → owner reviews the sample MP4 → approve → bump `FORMAT_VERSION` → live. That gate catches actual regressions (a visual bug, a broken render) — distinct from statistical bake time, which is what we compress for keepers.
+**The review gate is preserved on both tracks and is *not* the slow part:** feature branch → build → dry-run artifact in CI → owner reviews the sample MP4 → approve → bump `FORMAT_VERSION` → merge to `main` → live. That gate catches actual regressions (a visual bug, a broken render) — distinct from statistical bake time, which is what we compress for keepers. **Feature work happens on a branch, never directly on `main`** — the live workflow runs from `main` twice daily, so it must stay runnable; this is a standing convention documented in the README's *Development workflow* section.
 
 **Sort per-change, not per-phase.** Confidence can be miscalibrated, and the old thematic phases mixed safe and risky work (Phase 3's watermark/subtitles are keepers; its reaction beat is a real retention experiment). Every unshipped item carries an explicit bucket tag in the Delivery plan.
 

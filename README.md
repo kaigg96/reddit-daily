@@ -43,6 +43,24 @@ skips upload, thumbnail, and all state mutations. In GitHub: *Actions → Run
 workflow → dry_run: true* — the rendered video is attached as a workflow
 artifact for review.
 
+## Development workflow (standing convention)
+
+**`main` is the deployment branch — the video workflow runs from it twice
+daily, so `main` must always be in a runnable state.** Because of that:
+
+- **Do feature work on a branch**, not on `main`. Any change beyond a trivial
+  one-liner (a new requirement, a multi-file change, anything touching the
+  upload path) goes on a `feature/<short-name>` branch. Half-finished code must
+  never sit on `main`, or the next scheduled run executes it.
+- **Merge to `main` only after the rollout gate passes:** dry-run artifact →
+  owner reviews the sample → approve → bump `FORMAT_VERSION` → merge → live.
+  (See PRD §8 "Delivery model & rollout".)
+- The GitHub Actions bot commits `prev_post.txt` / `upload_log.csv` /
+  `analysis/*` back to `main` directly — that's expected and separate from
+  feature work.
+
+This applies to every version release (`v4`, `v5`, …), not just the first one.
+
 ## Local setup
 
 ```sh
