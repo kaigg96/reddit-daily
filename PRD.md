@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v4` live (Sprint 1 shipped 2026-07-22); experiment backlog next — see §0 Delivery plan |
+| **Status** | `v4` live (Sprint 1 shipped 2026-07-22); next: R4.6 suppression-risk screen (`v5`) — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Implementation status & next steps *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-22 · **Live format:** `v4` (Sprint 1 bar-raising batch shipped 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
+**Last updated:** 2026-07-27 · **Live format:** `v4` (Sprint 1 bar-raising batch shipped 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. Prior note (still true): v3 was metadata-only, so v1→v2 retention remains a clean comparison.
 
@@ -42,6 +42,7 @@
 | R3.4 | Persistent watermark | ✅ v4 | "AskReddit Shorts", 55% opacity, low-center, all frames |
 | R3.5 | Subtitle (SRT) track | ✅ v4 | SRT from caption timings + captions.insert, fail-soft |
 | R4.5 | Cron de-jitter + publishedAt logging | ✅ v4 | cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
+| R4.6 | Suppression-risk screen | ⬜ **next keeper (`v5`)** | evidence-anchored: 2 confirmed limited-distribution zeroings (sexual-suggestive, graphic medical harm) |
 | R4.1 | Subreddit rotation | ⬜ experiment | content bet |
 | R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Migrated to OAuth 2026-07-21 (refactor pass) — no longer needs `YOUTUBE_DATA_API_KEY`; see TECH_DEBT.md |
@@ -73,6 +74,12 @@ Two tracks (rationale in §8). Every unshipped item is tagged Sprint 1 (bar-rais
 | Branded thumbnail card | R2.3 | ⏸ full Gemini-headline version deferred (low value — not shown in feed) |
 
 Code merged to `main` via `feature/sprint-1` (fast-forward, branch deleted). The two owner asset tasks remain optional and version-bump-free. Untested until the first live run: the real `captions.insert` / `commentThreads.insert` calls (both fail-soft — a scope/API hiccup logs and continues without breaking the upload).
+
+#### Next keeper release (`v5`)
+
+| Item | Req | Decision rule |
+|---|---|---|
+| Suppression-risk screen at selection | R4.6 | Keep; audit `analysis/screen_log.csv` weekly — if skips look like false positives or exceed ~15% of candidate posts, narrow the prompt rather than revert. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -285,6 +292,19 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 
 #### R2.3 — Branded thumbnail template — **Sprint 1 (keeper, low priority)**
 - A basic frame-0 card already ships (pulled forward into v2); this is the full version. Thumbnails don't render in the Shorts feed — they matter only on channel/search/browse surfaces, hence low priority. Replace the screenshot with a Pillow-generated card: dark background, Anton headline (Gemini-shortened ≤ 8-word version of the question), channel mark (R3.4). Keep < 2 MB, correct mimetype. Include if cheap, else defer.
+
+---
+
+### Next keeper release (`v5`)
+
+#### R4.6 — Suppression-risk screen at selection — **Keeper (content-selection change → own `FORMAT_VERSION` bump, feature branch)**
+- **Problem (evidence, 2026-07-27):** two uploads confirmed zeroed by silent **limited distribution** — public, `processed`, *not* age-restricted via API, yet exactly 0 views while same-period uploads got 28–923: `Your Secret Sign: Amazing In Bed?` (sexual-suggestive framing) and `qvNzVCzWebk` / `When Chiropractic Lands You In The ER` (graphic medical harm: "cervical/vertebral artery dissection", "pneumothorax"). Limited distribution is Studio-only — the API cannot see it, so prevention has to happen at selection. Cost of a zeroed upload: a wasted slot and plausibly worse channel-level classifier priors (the stronger "momentum poisoning" claim is unsubstantiated — not the justification here).
+- **Counter-evidence that keeps the screen narrow:** Epstein/named-celebrity content served fine (42–923 views incl. an Elon Musk question at 70); three videos *mentioning* chiropractic served fine (95–158). The trigger is the **framing** (suggestive / graphic-harm), not the topic. General "controversy" must NOT be filtered — dark-morbid is a top-performing bucket.
+- **Mechanism:** one Gemini call at selection time evaluating the candidate post title + its 3 chosen comments as a package against the categories YouTube's classifiers demonstrably enforce: sexual/suggestive framing · graphic medical harm/injury detail · sexual content in minors' contexts · hard drugs · graphic violence · slurs. Named-individuals-with-criminal-allegations is **log-only** (watched, not filtered — evidence says it isn't suppressed). Use the confirmed-zeroed videos and the fine-serving near-misses above as in-prompt calibration examples.
+- **Verdicts:** `skip_post` (question itself risky → selection falls through to the next of the top 10) · `drop_comment` (one risky answer → replace with next valid comment, keep post) · `pass`. **Fail-open:** any Gemini/API error blocks nothing.
+- **Audit trail (the anti-over-filtering guard):** every non-`pass` verdict appends to a committed `analysis/screen_log.csv` (date, post title, verdict, category, reason) for weekly owner review. Decision rule: false positives in the log or a skip rate above ~15% of candidates → narrow the prompt, don't revert the screen.
+- **Digest addition:** flag logged videos whose `privacyStatus` ≠ public (distinguishes owner-privatized videos from suppression when investigating zero-view flags; the existing 0-views-after-3-days flag remains the suppression detector).
+- **Acceptance:** dry run with seeded risky candidates shows skip/drop/pass each firing correctly; fail-open path verified; screen_log row schema written; existing filters (NSFW/profanity/emoji) untouched.
 
 ---
 
