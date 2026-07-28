@@ -32,18 +32,21 @@
 | R1.5 | Header + progress badge | ✅ v2 | + question pinned across answers (owner feedback) |
 | R1.6 | Music + SFX | ✅ v2 | SFX synthesized; track confirmed YT Audio Library (2026-07-18); extra tracks optional for variety |
 | R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
+| R1.8 | Short format (~14–16s: 2 comments, no spoken outro) | ⬜ experiment — **top of backlog** | strongest prior on the board: fixed ~10–12s watch budget (§4 findings); absorbs R3.1b |
+| R1.9 | Narration rate (+~10% SSML) | ⬜ experiment | same watch-budget thesis; run after R1.8 |
 | R2.1 | Title hygiene | ✅ v3 | hashtag suffix removed; description ≤3 hashtags |
 | R2.2 | Title style rotation | ✅ v3 | A/B/C by day-of-year; logged per upload |
 | R2.3 | Branded thumbnail | 🟡 partial | basic card live since v2; full Gemini-headline version deferred (low value — not in feed) |
 | R3.1a | CTA wording (question-specific) + voice fix | ✅ v4 | Gemini CTA, markdown-stripped, fail-soft |
-| R3.1b | CTA placement (earlier / mid-video strip) | ⬜ experiment | might-revert; decision rule in Delivery plan |
-| R3.2 | Two-voice reaction beat | ⬜ experiment | retention risk; isolated + baked |
+| R3.1b | CTA placement | 🔀 absorbed into R1.8 | the no-spoken-outro arm is the live question; overlay strip ships with R1.8 |
+| R3.2 | Two-voice reaction beat | ⬜ experiment — **demoted to bottom** (2026-07-27) | adds length + interruption, directly against the watch-budget finding |
 | R3.3 | Auto-post engagement comment | ✅ v4 | commentThreads.insert, fail-soft; first fires on next live run |
 | R3.4 | Persistent watermark | ✅ v4 | "AskReddit Shorts", 55% opacity, low-center, all frames |
 | R3.5 | Subtitle (SRT) track | ✅ v4 | SRT from caption timings + captions.insert, fail-soft |
 | R4.5 | Cron de-jitter + publishedAt logging | ✅ v4 | cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
 | R4.6 | Suppression-risk screen | ⬜ **next keeper (`v5`)** | evidence-anchored: 2 confirmed limited-distribution zeroings (sexual-suggestive, graphic medical harm) |
-| R4.1 | Subreddit rotation | ⬜ experiment | content bet |
+| R4.7 | Traffic-source telemetry | ⬜ keeper (no version bump) | add `insightTrafficSourceType` to weekly job — feed-vs-search split |
+| R4.1 | Subreddit rotation | ⬜ experiment — **reframed** (2026-07-27) | inventory prerequisite for a future posting-volume increase, not just a content bet |
 | R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
 | R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Migrated to OAuth 2026-07-21 (refactor pass) — no longer needs `YOUTUBE_DATA_API_KEY`; see TECH_DEBT.md |
 | R4.4 | Topic avoidance/preference gate | ⬜ experiment | depends on R4.3 findings + owner-approved list |
@@ -69,28 +72,33 @@ Two tracks (rationale in §8). Every unshipped item is tagged Sprint 1 (bar-rais
 | Auto-post engagement comment | R3.3 | ✅ `commentThreads.insert` (fail-soft); first fires next live run |
 | Persistent watermark / brand mark | R3.4 | ✅ 55% opacity, low-center, all frames |
 | Cron de-jitter + pip caching + `publishedAt` | R4.5 | ✅ cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
-| B-roll library *(owner asset task)* | R1.3 | ⬜ owner, anytime — drops in with no version bump |
+| B-roll library *(owner asset task)* | R1.3 | ⬜ owner, anytime — no version bump. *Expectation recalibrated 2026-07-27: affects first-impression/swipe margin, not the watch budget (§4)* |
 | Extra music tracks *(owner asset task)* | R1.6 | ⬜ owner, anytime — drops in with no version bump |
 | Branded thumbnail card | R2.3 | ⏸ full Gemini-headline version deferred (low value — not shown in feed) |
 
 Code merged to `main` via `feature/sprint-1` (fast-forward, branch deleted). The two owner asset tasks remain optional and version-bump-free. Untested until the first live run: the real `captions.insert` / `commentThreads.insert` calls (both fail-soft — a scope/API hiccup logs and continues without breaking the upload).
 
-#### Next keeper release (`v5`)
+#### Next keeper release (`v5`) + measurement keepers
 
 | Item | Req | Decision rule |
 |---|---|---|
 | Suppression-risk screen at selection | R4.6 | Keep; audit `analysis/screen_log.csv` weekly — if skips look like false positives or exceed ~15% of candidate posts, narrow the prompt rather than revert. |
+| Traffic-source telemetry in weekly job | R4.7 | Keep — measurement-only, no version bump; ship whenever convenient. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
-| Item | Req | Decision rule (pre-committed) |
-|---|---|---|
-| CTA *placement* (earlier + mid-video strip) | R3.1b | If early/mid-CTA cohort median avg-%-viewed ≥2 pts below outro-only after ≥20 uploads → revert placement, keep wording. |
-| Two-voice reaction beat | R3.2 | If reaction-beat cohort median avg-%-viewed ≥2 pts below non-beat cohort after ≥20 uploads → revert. |
-| Subreddit rotation | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop any that underperform the AskReddit baseline. |
-| Topic preference/avoidance gate | R4.4 | Owner-approved list only; `topic` logged per upload; keep only buckets that hold up in R4.3-style analysis. |
-| Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
-| Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until retention is solved + enough volume per slot; magnitude is uncertain for Shorts (long discovery tail). Not a growth lever. |
+Reordered 2026-07-27 by prior strength after the watch-budget findings (§4).
+
+| # | Item | Req | Decision rule (pre-committed) |
+|---|---|---|---|
+| 1 | **Short format** (~14–16s: 2 comments, no spoken outro; CTA as overlay + pinned comment only) | R1.8 | After ≥20 uploads: keep if median avg-%-viewed ≥65% **and** median views ≥ the prior-format baseline; revert if views drop >30% despite the retention gain. Absorbs R3.1b. |
+| 2 | Narration rate (+~10% via Polly SSML prosody) | R1.9 | After ≥20 uploads: keep if avg-%-viewed and views hold or improve; revert on a clear views drop. Run after R1.8 settles. |
+| 3 | Topic/hook candidate ranker | R4.4 | Owner-approved list only; `topic` logged per upload; keep only buckets/rankings that hold up in R4.3-style analysis. Upgraded rationale: views↔retention decoupling (§4) says hook/topic drives test-pool expansion. |
+| 4 | Subreddit rotation — *inventory prerequisite for volume* | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop underperformers vs the AskReddit baseline. Success unlocks the posting-volume revisit (§7). |
+| 5 | Posting-volume increase (2 → 3–4/day) | — | Only after R4.1 proves inventory quality; hold per-video medians within ~30% of baseline at higher volume, else fall back. |
+| 6 | Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
+| 7 | Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until retention is solved + enough volume per slot. Not a growth lever. |
+| 8 | Two-voice reaction beat — **demoted** | R3.2 | Adds length against a fixed watch budget — weakest prior on the board. If ever run: revert if beat cohort median avg-%-viewed ≥2 pts below non-beat after ≥20 uploads. |
 
 #### Done / owner-side
 - ~~Engagement (R3.x) OAuth prerequisite~~ ✅ 2026-07-19 — production consent screen + expanded scopes; killed the weekly-token chore permanently.
@@ -152,6 +160,16 @@ All metrics via YouTube Studio / Analytics API. The **≥ 14 days / ≥ 20 uploa
 | Engagement | Comments per 100 views | unknown | ≥ 0.3 |
 
 Directional, not contractual — the algorithm is stochastic. The system's job is to make every upload *worthy* of distribution and measurable (R0.2), so format versions can be compared honestly.
+
+### Findings — two-snapshot data review (2026-07-27)
+
+First real read of the format eras (snapshots 07-21 + 07-27; videos ≥3 days old):
+
+1. **Production quality moved distribution, not retention.** v1 recent cohort (n=83): median 26 views, 54.2% avg-viewed. v2/v3 (n=14): median 90 views (3.5×), max 923 vs 115 — but avg-viewed only 57.1%. The founding "quality → retention → distribution" chain is better described as "quality → first-impression/swipe margin → distribution."
+2. **Fixed watch budget ~10–12 s.** Median watch-seconds: v1 = 12.0, v2/v3 = 10.0 — unchanged across a total format overhaul. Avg-%-viewed is therefore ≈ `11s ÷ duration`: every video ≤16s scored 55–74%; every video ≥23s scored 35–37%. **Length, not polish, is the retention lever** — the ≥70% target is expected to be reached via R1.8 (short format), not further production work.
+3. **Views and retention are decoupled at this scale.** 923- and 671-view videos sat at ~55% while a 62-view video hit 73.7% — topic/hook drives test-pool expansion at least as much as retention (rationale upgrade for R4.4).
+
+Strategic implication: 10M views/90d ≈ 110K/day vs the current ~1–2K/week — floor-raising alone can never cover that distance. Sequencing goal: maximize hit probability per slot (length, hook, topic), then multiply slots (volume after R4.1).
 
 ## 5. Constraints & guardrails (binding on the implementer)
 
@@ -306,22 +324,41 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 - **Digest addition:** flag logged videos whose `privacyStatus` ≠ public (distinguishes owner-privatized videos from suppression when investigating zero-view flags; the existing 0-views-after-3-days flag remains the suppression detector).
 - **Acceptance:** dry run with seeded risky candidates shows skip/drop/pass each firing correctly; fail-open path verified; screen_log row schema written; existing filters (NSFW/profanity/emoji) untouched.
 
+#### R4.7 — Traffic-source telemetry — **Keeper (measurement-only, no version bump)**
+- Add `insightTrafficSourceType` (Analytics API dimension) to the weekly snapshot job — per-video or channel-level views by source (Shorts feed / search / browse / external).
+- **Why:** tells us whether the SEO surface (tags, titles-for-search, SRT) earns anything, or whether distribution is ~100% Shorts feed — which decides whether search-oriented work is ever worth revisiting. Currently flying blind on this.
+- **Acceptance:** new column(s)/file appended by the Monday job; a first snapshot committed.
+
 ---
 
 ### Experiment backlog
 
-"Might revert" bets. Ship **one variable per version**, each with a real bake window (≥ 20 uploads / ~2 weeks) and a **pre-committed decision rule** (see §8). Ordering within the backlog is not fixed.
+"Might revert" bets. Ship **one variable per version**, each with a real bake window (≥ 20 uploads / ~2 weeks) and a **pre-committed decision rule** (see §8). Order below follows the 2026-07-27 re-prioritization (Delivery plan).
 
-#### R3.1b — CTA placement — **Experiment (might revert)**
-- Overlay a small "⬇ comment your answer" strip during the final comment (and/or move the ask earlier) so it lands before peak drop-off. This is a retention bet — asking earlier can help *or* feel needy.
-- **Decision rule:** if the early/mid-CTA cohort's median avg-%-viewed is ≥2 pts below the outro-only cohort after ≥20 uploads → revert placement, keep the R3.1a wording. Log a flag distinguishing the cohorts.
+#### R1.8 — Short format — **Experiment, top of backlog (strongest prior)**
+- **Thesis (§4 findings):** viewers grant a fixed ~10–12s watch budget; avg-%-viewed ≈ `11s ÷ duration`. Current videos run 15–26s; the ≥23s ones score 35–37%, the ≤16s ones 55–74%. Shrink the video to fit the budget.
+- **Format change:** title + **2 comments** (drop the 3rd) + **no spoken outro**. CTA survives as (a) the R3.1a question-specific text rendered as a short overlay strip near the end and (b) the auto-posted pinned-style comment (R3.3). Target duration ~14–16s. Duration guard tightens accordingly.
+- Also expected: loop potential (Shorts loops count as re-watches; avg-%-viewed can exceed 100).
+- **Trade-off being tested:** less content per video vs. much higher relative retention. Our data shows no view advantage for longer videos (the 23–26s videos: 41–57 views).
+- **Absorbs R3.1b** — "no spoken outro + overlay CTA" *is* the placement experiment's live arm.
+- **Decision rule:** after ≥20 uploads — keep if median avg-%-viewed ≥65% **and** median views ≥ prior-format baseline; revert if views drop >30% despite the retention gain (distribution didn't follow).
+- **Acceptance:** dry-run sample at ~15s with overlay CTA; `FORMAT_VERSION` bump; duration logged.
 
-#### R3.2 — Two-voice reaction beat — **Experiment (might revert)**
+#### R1.9 — Narration rate — **Experiment (run after R1.8 settles)**
+- Same watch-budget thesis from the other side: fit more content per second. Wrap Polly input in SSML `<prosody rate="~110%">` (verify neural-voice SSML support per voice; speech marks must still align — verify timestamps against the sped audio).
+- **Decision rule:** after ≥20 uploads — keep if avg-%-viewed and views hold or improve; revert on a clear views drop (too-fast narration reads as spammy).
+
+#### R3.1b — CTA placement — **🔀 absorbed into R1.8 (2026-07-27)**
+- The live question ("does removing the spoken outro + overlaying the CTA help?") ships as part of R1.8's format change. No separate experiment.
+
+#### R3.2 — Two-voice reaction beat — **Experiment — demoted to bottom of backlog (2026-07-27)**
 - The *unused* voice of {Danielle, Stephen} delivers one Gemini-written quip (≤ 10 words, reacting to one comment — prompt for "surprised/amused friend" tone, no profanity) placed after comment 2 as a mid-video pattern interrupt. Distinct caption color for the second voice. **Fails soft:** any Gemini/Polly error → omit the beat entirely, video still valid.
 - Adds mid-video length + an interruption — genuinely could raise or lower retention. Also the start of an actual channel persona (and helps the "meaningfully transformed content" bar for YPP review).
+- **Demotion rationale (2026-07-27):** the watch-budget finding (§4) makes anything that *adds* length the weakest prior on the board. Persona value stands, but not at the cost of seconds.
 - **Decision rule:** if the reaction-beat cohort's median avg-%-viewed is ≥2 pts below the non-beat cohort after ≥20 uploads → revert.
 
-#### R4.1 — Subreddit rotation (Q&A-mode) — **Experiment (content bet)**
+#### R4.1 — Subreddit rotation (Q&A-mode) — **Experiment — reframed 2026-07-27: inventory prerequisite for posting volume**
+- **Why it matters more now:** a future posting-volume increase (backlog #5) needs more than one subreddit's worth of daily post inventory — proving rotation works is the gate to that lever, not just a content experiment.
 - Config list of question-style subreddits (e.g., AskReddit, NoStupidQuestions, AskMen, AskWomen, AskUK — owner-editable constant). Rotate deterministically per run; existing filters apply; log `subreddit` (R0.2).
 - Replace `prev_post.txt` with `recent_posts.txt`: rolling last 30 posted titles (dedupe window across all subs). Migrate the workflow commit step.
 - **Decision rule:** compare age-adjusted median views per subreddit after ≥15 uploads each; drop any that underperform the AskReddit baseline.
@@ -352,7 +389,8 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 
 ## 7. Explicitly out of scope
 
-- Paid services (ElevenLabs, stock subscriptions, editors). Any per-video manual step. Posting-frequency increases. Engagement manipulation of any kind. Long-form video. Shorts poll stickers (not exposed via API). Comment pinning (no API). Reposting/compiling third-party video content. Migrating off the notebook's current infra (Actions + Polly + Gemini stack stays).
+- Paid services (ElevenLabs, stock subscriptions, editors). Any per-video manual step. Engagement manipulation of any kind. Long-form video. Shorts poll stickers (not exposed via API). Comment pinning (no API). Reposting/compiling third-party video content. Migrating off the notebook's current infra (Actions + Polly + Gemini stack stays).
+- **Posting-frequency increases — moved from excluded to conditionally deferred (2026-07-27).** The original exclusion ("no volume as a substitute for quality") was right when quality was poor. With a stable format, volume is the most reliable multiplier toward 10M/90d — but only *after* R4.1 proves multi-subreddit inventory can sustain quality at 3–4/day. See experiment backlog #5; never volume *instead of* fixing a broken format.
 - **Bot-view optimization.** Excluded on both factual and policy grounds. Factual: YPP thresholds count only *valid* public views — YouTube filters traffic it identifies as automated *before* it counts, so views from external bots/scrapers have approximately zero monetization yield regardless of how well content caters to them. Policy: deliberately cultivating artificial traffic falls under YouTube's fake-engagement enforcement (up to channel termination) — an uncapped downside against a ~zero upside, aimed at the exact asset we're trying to monetize. The legitimate core of the idea — content that machines can accurately read, index, and surface — is in scope as R3.5 and costs nothing extra given the speech-mark infrastructure.
 
 ## 8. Delivery model & rollout
