@@ -10,73 +10,21 @@
 
 ---
 
-## 0. Implementation status & next steps *(living section — update when anything ships)*
+## 0. Status & delivery plan *(living section — update when anything ships)*
 
 **Last updated:** 2026-07-27 · **Live format:** `v4` (Sprint 1 bar-raising batch shipped 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
 
-> **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. Prior note (still true): v3 was metadata-only, so v1→v2 retention remains a clean comparison.
-
-### Requirement status
-
-| Req | What | Status | Notes |
-|---|---|---|---|
-| R0.1 | DRY_RUN mode | ✅ v2 | workflow `dry_run` input attaches sample artifact |
-| R0.2 | upload_log.csv | ✅ v2 | first row logged 2026-07-18 |
-| R0.3 | Notebook → `src/` | ✅ v2 | notebook kept but deprecated |
-| R0.4 | Anton font | ✅ v2 | owner confirmed Anton over 3 alternatives |
-| R0.5 | Hygiene fixes | ✅ v2 | title sanitize, madeForKids, category 24, mimetype |
-| R1.1 | No dead air, hook at 0 | ✅ v2 | silencedetect-verified |
-| R1.2 | Word-timed captions | ✅ v2 | Polly speech marks |
-| R1.3 | Motion background | ✅ v2 | procedural glow live; **b-roll library empty (owner task)** |
-| R1.4 | Caption legibility | ✅ v2 | dark bg + stroke; scrim ready for b-roll |
-| R1.5 | Header + progress badge | ✅ v2 | + question pinned across answers (owner feedback) |
-| R1.6 | Music + SFX | ✅ v2 | SFX synthesized; track confirmed YT Audio Library (2026-07-18); extra tracks optional for variety |
-| R1.7 | Duration guard | ✅ v2 | + 2.0s min display for short answers (owner feedback) |
-| R1.8 | Short format (~14–16s: 2 comments, no spoken outro) | ⬜ experiment — **top of backlog** | strongest prior on the board: fixed ~10–12s watch budget (§4 findings); absorbs R3.1b |
-| R1.9 | Narration rate (+~10% SSML) | ⬜ experiment | same watch-budget thesis; run after R1.8 |
-| R2.1 | Title hygiene | ✅ v3 | hashtag suffix removed; description ≤3 hashtags |
-| R2.2 | Title style rotation | ✅ v3 | A/B/C by day-of-year; logged per upload |
-| R2.3 | Branded thumbnail | 🟡 partial | basic card live since v2; full Gemini-headline version deferred (low value — not in feed) |
-| R3.1a | CTA wording (question-specific) + voice fix | ✅ v4 | Gemini CTA, markdown-stripped, fail-soft |
-| R3.1b | CTA placement | 🔀 absorbed into R1.8 | the no-spoken-outro arm is the live question; overlay strip ships with R1.8 |
-| R3.2 | Two-voice reaction beat | ⬜ experiment — **demoted to bottom** (2026-07-27) | adds length + interruption, directly against the watch-budget finding |
-| R3.3 | Auto-post engagement comment | ✅ v4 | commentThreads.insert, fail-soft; first fires on next live run |
-| R3.4 | Persistent watermark | ✅ v4 | "AskReddit Shorts", 55% opacity, low-center, all frames |
-| R3.5 | Subtitle (SRT) track | ✅ v4 | SRT from caption timings + captions.insert, fail-soft |
-| R4.5 | Cron de-jitter + publishedAt logging | ✅ v4 | cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
-| R4.6 | Suppression-risk screen | ⬜ **next keeper (`v5`)** | evidence-anchored: 2 confirmed limited-distribution zeroings (sexual-suggestive, graphic medical harm) |
-| R4.7 | Traffic-source telemetry | ⬜ keeper (no version bump) | add `insightTrafficSourceType` to weekly job — feed-vs-search split |
-| R4.1 | Subreddit rotation | ⬜ experiment — **reframed** (2026-07-27) | inventory prerequisite for a future posting-volume increase, not just a content bet |
-| R4.2 | Weekly analytics pull + digest | ✅ 2026-07-20 | `weekly-analytics.yml` Mondays 06:00 UTC → `analysis/analytics_snapshots.csv` + **weekly digest GitHub issue** (owner-approved layout: status/health/performance/top video/TODOs; emails via GitHub notifications). Single-file design via Analytics API OAuth — no Data API key in CI; impressions confirmed not API-exposed. **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in digest |
-| R4.3 | Historical content analysis | ✅ 2026-07-19 | 869 videos analyzed → `analysis/topic_performance.md`; re-run anytime (`scripts/analyze_channel.py`, classifications cached). Migrated to OAuth 2026-07-21 (refactor pass) — no longer needs `YOUTUBE_DATA_API_KEY`; see TECH_DEBT.md |
-| R4.4 | Topic avoidance/preference gate | ⬜ experiment | depends on R4.3 findings + owner-approved list |
-| R5.1–R5.2 | Localization | 🔒 gated | requires proven format (see R5 localization gate) |
-
-Also shipped outside the numbered requirements: audio-mix calibration (music ~10 dB under voice, SFX ~-20 dBFS peaks), `CHANNEL_NAME` = "AskReddit Shorts" branding, no-AI-attribution scrub.
+> **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
 <a name="delivery-plan"></a>
-### Delivery plan
+### Delivery plan *(the single tracker — per-requirement detail lives in §6)*
 
-Two tracks (rationale in §8). Every unshipped item is tagged Sprint 1 (bar-raising keeper) or Experiment (bet), and carries a decision rule.
-
-**Expectation:** Sprint 1 raises/defends the *floor* (production quality) — it is **not** expected to spike views. The ceiling levers (content, hooks, titles) live in the experiment backlog. Flat views during Sprint 1 ≠ failure.
-
-**One read kept honest (non-blocking):** did v1→v2 actually move retention? Still recoverable (v3 was metadata-only), matures on its own in the weekly digest, consulted before over-investing in the "production quality → retention" thesis — but does **not** gate Sprint 1.
-
-#### Sprint 1 — bar-raising batch ✅ shipped as `v4` (2026-07-22)
-
-| Item | Req | Status |
-|---|---|---|
-| Subtitle (SRT) track upload | R3.5 | ✅ SRT from caption timings + `captions.insert` (fail-soft) |
-| Question-specific CTA *wording* (+ narrator-voice fix) | R3.1a | ✅ Gemini CTA, markdown-stripped, fail-soft to generic |
-| Auto-post engagement comment | R3.3 | ✅ `commentThreads.insert` (fail-soft); first fires next live run |
-| Persistent watermark / brand mark | R3.4 | ✅ 55% opacity, low-center, all frames |
-| Cron de-jitter + pip caching + `publishedAt` | R4.5 | ✅ cron `23 0,12` + pip cache; publish_hour derivable from snapshot |
-| B-roll library *(owner asset task)* | R1.3 | ⬜ owner, anytime — no version bump. *Expectation recalibrated 2026-07-27: affects first-impression/swipe margin, not the watch budget (§4)* |
-| Extra music tracks *(owner asset task)* | R1.6 | ⬜ owner, anytime — drops in with no version bump |
-| Branded thumbnail card | R2.3 | ⏸ full Gemini-headline version deferred (low value — not shown in feed) |
-
-Code merged to `main` via `feature/sprint-1` (fast-forward, branch deleted). The two owner asset tasks remain optional and version-bump-free. Untested until the first live run: the real `captions.insert` / `commentThreads.insert` calls (both fail-soft — a scope/API hiccup logs and continues without breaking the upload).
+**Shipped**
+- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration (music ~10 dB under voice, SFX ~−20 dBFS peaks), "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
+- `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
+- `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
+- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore)
+- The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 
 #### Next keeper release (`v5`) + measurement keepers
 
@@ -100,9 +48,10 @@ Reordered 2026-07-27 by prior strength after the watch-budget findings (§4).
 | 7 | Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until retention is solved + enough volume per slot. Not a growth lever. |
 | 8 | Two-voice reaction beat — **demoted** | R3.2 | Adds length against a fixed watch budget — weakest prior on the board. If ever run: revert if beat cohort median avg-%-viewed ≥2 pts below non-beat after ≥20 uploads. |
 
-#### Done / owner-side
-- ~~Engagement (R3.x) OAuth prerequisite~~ ✅ 2026-07-19 — production consent screen + expanded scopes; killed the weekly-token chore permanently.
-- ~~R4.3 historical analysis~~ ✅ — owner to review `analysis/topic_performance.md` for tentative R4.4 candidates (evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking anything).
+#### Owner tasks (anytime, no version bump)
+- **B-roll library** (R1.3, ~30 min): `scripts/prep_broll.py` + README guidance. Expectation recalibrated 2026-07-27: improves the first-impression/swipe margin, not the watch budget (§4).
+- **Music variety** (R1.6): drop 2–3 more YouTube Audio Library tracks into `assets/music/`; rotation is automatic.
+- **Review `analysis/topic_performance.md`** → tentative preference list for R4.4 (evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking).
 
 ---
 
@@ -240,6 +189,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R1.5 — Persistent context header + progress cue — **P1**
 - Small persistent header near the top (inside safe area): the question in compact form on comment segments, or a fixed brand line — plus a **progress badge** ("1/3", "2/3", "3/3") during answers. Signals finite length; carries the "top answers" framing dropped in R1.1.
 - **Acceptance:** frames during each comment show the correct badge.
+- **As-built additions (owner feedback):** the question stays pinned across all answers and the outro (only the badge swaps); short answers hold ≥2.0s on screen (`MIN_COMMENT_DISPLAY`).
 
 #### R1.6 — Licensed music + SFX — **P1**
 - ~~Replace `funk_bg_lower.mp3` (unknown license)~~ *Resolved 2026-07-18: owner confirmed the track is from the YouTube Audio Library — license-clean.* Remaining (optional): add 2–3 more Audio Library tracks to `assets/music/` for per-video variety, randomly rotated, logged (R0.2). Keep music ~9–10 dB under speech; optional final `ffmpeg loudnorm` pass to ≈ −14 LUFS.
@@ -264,6 +214,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 - Second workflow (weekly cron): YouTube Analytics API v2 (`yt-analytics.readonly`) `reports.query` with `dimensions=video` for recent uploads → append `analytics.csv` (committed): views, likes, comments, shares, averageViewDuration, averageViewPercentage. Join key: `video_id` from `upload_log.csv`. Note: impressions / swipe-rate may not be exposed by the API (Studio-only) — implementer should verify current API surface and include them only if available.
 - This closes the loop: every experiment in this PRD becomes evaluable from two committed CSVs.
 - Also append a weekly public-stats snapshot for **all** uploads to `analysis/stats_snapshots.csv` (views/likes/comments per video_id + date), so views@7d / views@28d deltas become computable going forward (see R4.3, which otherwise has only single-snapshot data).
+- **As-built (2026-07-20):** single-file design — `weekly-analytics.yml` Mondays 06:00 UTC appends `analysis/analytics_snapshots.csv` (Analytics API over OAuth; no Data API key in CI; impressions confirmed not API-exposed) **plus a weekly digest GitHub issue** (owner-approved layout: status-in-title / pipeline health / performance / top video / TODOs; emails via GitHub watch notifications; anomaly flags expire after 7 days). **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in the digest.
 
 #### R4.3 — Historical content-performance analysis — **shipped ✅ (P1, sequencing-independent)**
 - **Motivation:** ~2 uploads/day since early 2025 means several hundred published Shorts whose descriptions embed the complete content (question + 3 answers). This is an unused dataset for learning which topics and phrasings get distributed vs. suppressed. Suppression is a real mechanism, not just taste: advertiser-unfriendly topics (tragedy, sex-adjacent, drugs, ongoing legal/news stories) can receive limited distribution on Shorts. Note the honest framing: low views for a topic may mean algorithmic suppression *or* weak audience interest — the analysis can't fully separate them, but both point to the same action (avoid the topic), so the ambiguity doesn't block the mechanism.
@@ -284,23 +235,24 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 
 > **OAuth prerequisite ✅ done 2026-07-19** — scopes `youtube.upload`, `youtube.force-ssl`, `yt-analytics.readonly`; consent screen in production. API features degrade gracefully (log + skip) if a scope is ever missing. Two owner **asset tasks** also land in this batch — b-roll library (completes R1.3) and extra music tracks (R1.6); they're listed in the §0 Delivery plan and not re-specced here.
 
-#### R3.1a — Question-specific CTA wording — **Sprint 1 (keeper)**
+#### R3.1a — Question-specific CTA wording — **✅ v4**
 - Replace the generic outro. Gemini generates a ≤ 12-word CTA tied to the question (e.g., "Comment the city you thought of — no explaining."; fallback: current generic line). Voiced by the **primary narrator voice** (fixes the Danielle hardcode bug), captioned per R1.2, total segment ≤ 3s.
-- **Acceptance:** dry-run output shows question-specific CTA text; voice matches narrator across all segments.
+- **As-built:** markdown emphasis stripped from Gemini output before TTS (asterisks were being spoken); the CTA text doubles as the R3.3 comment.
 
-#### R3.3 — Auto-post engagement comment — **Sprint 1 (keeper)**
+#### R3.3 — Auto-post engagement comment — **✅ v4 (live-verified 2026-07-27)**
 - After a live upload, post one top-level comment from the channel account via `commentThreads().insert` (requires `youtube.force-ssl` scope) — content: the CTA question or a "Which answer wins — 1, 2, or 3?" prompt. Respect DRY_RUN. Fail soft.
 - **Known limitation:** the Data API cannot **pin** comments (no such endpoint) — pinning stays manual and optional; do not build for it.
 
-#### R3.4 — Persistent watermark/brand mark — **Sprint 1 (keeper)**
-- Small semi-transparent (~60%) channel mark, corner of the safe area, all frames. Use the `CHANNEL_NAME` constant (already set to "AskReddit Shorts"; optionally confirm live via `channels().list(mine=True)` and cache) rendered as a text mark in the brand font — no logo file required, zero manual steps.
+#### R3.4 — Persistent watermark/brand mark — **✅ v4**
+- Small semi-transparent channel mark, inside the safe area, all frames. Use the `CHANNEL_NAME` constant rendered as a text mark in the brand font — no logo file required, zero manual steps.
+- **As-built:** "AskReddit Shorts", 34px, 55% opacity, low-center (y=1500) — clear of captions, header, and the Shorts UI.
 
-#### R3.5 — Machine-readable content surfaces — **Sprint 1 (keeper)**
+#### R3.5 — Machine-readable content surfaces — **✅ v4 (caption tracks live-verified 2026-07-27)**
 - Upload a real subtitle track per video via `captions().insert` (requires `youtube.force-ssl` scope). The word-level timings from Polly speech marks make generating an accurate `.srt` nearly free — the pipeline already has every timestamp. Real caption tracks improve accessibility, search indexing, and how well every legitimate machine reader (YouTube's own content-understanding systems, search engines, AI assistants that surface and summarize video) can parse the video.
 - Keep descriptions fully self-describing (already true: question + all answers in plain text). The description is the channel's crawlable text surface — never degrade it into teaser copy.
 - **Scope boundary:** this requirement is about maximal legibility to legitimate machine readers, which compounds with human discovery. It is explicitly NOT bot-view optimization — see §7 for why that is excluded.
 
-#### R4.5 — Upload-time predictability & logging — **Sprint 1 (keeper); time-of-day tuning deferred**
+#### R4.5 — Upload-time predictability & logging — **✅ v4 (time-of-day tuning stays deferred)**
 - **Problem:** scheduled runs currently publish 45–105 min after their cron slot. Most of that is GitHub Actions queue jitter at the top of the hour (`0 0,12`), plus ~7–11 min of uncached `pip install` + render. The publish time is therefore *unpredictable across a ~60-min window*, which makes any time-of-day analysis impossible.
 - **Sprint 1 scope (keeper, plumbing — no growth claim):**
   - Move the cron off the top of the hour (e.g. `23 0,12 * * *`) to dodge queue congestion; cache pip deps (`actions/setup-python` cache or `actions/cache`) to shave render-start latency. If a specific *publish* clock-time is ever targeted, set the cron ~10 min earlier to absorb the irreducible pipeline runtime.
@@ -308,8 +260,8 @@ High-confidence, non-regression keepers. Ship together through the review gate (
   - **Acceptance:** post-change scheduled runs land within a tighter, consistent window; `publishedAt` present per video in the joined data.
 - **Deferred (experiment backlog):** actually *optimizing* time-of-day. For Shorts the magnitude is genuinely uncertain (long discovery tail, global test pool — weaker lever than for long-form), and it's second-order to retention. Revisit only once retention is solved and there's enough volume per slot for a comparison to mean anything. **Not** framed as a growth lever.
 
-#### R2.3 — Branded thumbnail template — **Sprint 1 (keeper, low priority)**
-- A basic frame-0 card already ships (pulled forward into v2); this is the full version. Thumbnails don't render in the Shorts feed — they matter only on channel/search/browse surfaces, hence low priority. Replace the screenshot with a Pillow-generated card: dark background, Anton headline (Gemini-shortened ≤ 8-word version of the question), channel mark (R3.4). Keep < 2 MB, correct mimetype. Include if cheap, else defer.
+#### R2.3 — Branded thumbnail template — **⏸ deferred (2026-07-22, at v4 ship)**
+- A basic branded card already ships (since v2: dark bg frame, channel tag, full question). This spec is the full version — Gemini-shortened ≤ 8-word headline, channel mark. Deferred per "include if cheap, else defer": thumbnails don't render in the Shorts feed, so the marginal value is limited to channel/search/browse surfaces. Revisit only if those surfaces ever matter (see R4.7 traffic-source data).
 
 ---
 
