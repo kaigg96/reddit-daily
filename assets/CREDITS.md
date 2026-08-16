@@ -9,5 +9,11 @@ Every media asset committed to this repo must be listed here with its source and
 | `sfx/whoosh_*.mp3` | Generated in-repo by `scripts/make_sfx.py` (synthesized noise sweeps) | Original work, no third-party material |
 | `bg.png`, `bg.jpg` | Pre-existing brand art (Reddit logo motif) | Legacy asset; used as procedural-background fallback only |
 | `funk_bg_lower.mp3` | YouTube Audio Library (owner-confirmed 2026-07-18); volume-lowered copy | YouTube Audio Library license |
-| `broll/` | *(empty — pending one-time curation, see README)* | Pexels/Pixabay/Mixkit licenses; record each file here |
+| `broll/pexels_7565434.mp4` | https://www.pexels.com/video/7565434/ | Pexels License |
+| `broll/pexels_7565898.mp4` | https://www.pexels.com/video/7565898/ | Pexels License |
+| `broll/pexels_9668945.mp4` | https://www.pexels.com/video/9668945/ | Pexels License |
+| `broll/pexels_12488544.mp4` | https://www.pexels.com/video/12488544/ | Pexels License |
+| `broll/pexels_15022349.mp4` | https://www.pexels.com/video/15022349/ | Pexels License |
+| `broll/pexels_15168364.mp4` | https://www.pexels.com/video/15168364/ | Pexels License |
+| `broll/pexels_16482908.mp4` | https://www.pexels.com/video/16482908/ | Pexels License |
 | `music/` | *(empty — optional: add more Audio Library tracks for variety)* | Record each track here |
