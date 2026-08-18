@@ -23,7 +23,7 @@
 - `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration (music ~10 dB under voice, SFX ~−20 dBFS peaks), "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
-- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore)
+- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push)
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 
 #### Next keeper release (`v5`) + measurement keepers
@@ -49,7 +49,7 @@ Reordered 2026-07-27 by prior strength after the watch-budget findings (§4).
 | 8 | Two-voice reaction beat — **demoted** | R3.2 | Adds length against a fixed watch budget — weakest prior on the board. If ever run: revert if beat cohort median avg-%-viewed ≥2 pts below non-beat after ≥20 uploads. |
 
 #### Owner tasks (anytime, no version bump)
-- **B-roll library** (R1.3, ~30 min): `scripts/prep_broll.py` + README guidance. Expectation recalibrated 2026-07-27: improves the first-impression/swipe margin, not the watch budget (§4).
+- ~~**B-roll library** (R1.3)~~ ✅ 2026-08-15 — 7 dark/moody Pexels clips live (`assets/broll/`, sources in CREDITS.md). Nine curated, two dropped at the R1.4 legibility gate for washing out white captions. Pipeline auto-switched off the procedural background; `bg_clip` logged per upload so per-clip performance is separable later. Expectation (§4): first-impression/swipe margin, not the watch budget.
 - **Music variety** (R1.6): drop 2–3 more YouTube Audio Library tracks into `assets/music/`; rotation is automatic.
 - **Review `analysis/topic_performance.md`** → tentative preference list for R4.4 (evidence favors *preferring* nostalgia/dark-morbid/humor-absurd over blocking).
 
