@@ -49,8 +49,13 @@ MAX_TOTAL_SECONDS = 45  # R1.7: drop last comment if exceeded
 INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
 MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 
+# --- candidate selection / suppression screen (R4.6) ---
+CANDIDATE_LIMIT = 10          # top posts fetched per run
+COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS survive
+MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota
+
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v4"  # v4 = Sprint 1: question CTA, watermark, subtitles, auto-comment
+FORMAT_VERSION = "v5"  # v5 = R4.6 suppression-risk screen at selection
 
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
@@ -67,5 +72,6 @@ OUT_THUMBNAIL = GEN / "thumbnail.png"
 OUT_SRT = GEN / "captions.srt"
 PREV_POST_FILE = ROOT / "prev_post.txt"
 UPLOAD_LOG = ROOT / "upload_log.csv"
+SCREEN_LOG = ROOT / "analysis" / "screen_log.csv"  # R4.6 audit trail
 
 GEN.mkdir(parents=True, exist_ok=True)

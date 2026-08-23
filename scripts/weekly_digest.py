@@ -30,16 +30,29 @@ ZERO_VIEW_DAYS = 3  # logged uploads older than this with 0 views get flagged
 def fetch_channel(yt):
     ch = yt.channels().list(mine=True, part="statistics").execute()["items"][0]
     subs = int(ch["statistics"]["subscriberCount"])
-    items = analytics.list_uploaded_videos(yt, part="snippet,contentDetails")
+    items = analytics.list_uploaded_videos(yt, part="snippet,contentDetails,status")
     videos = [
         {
             "id": it["contentDetails"]["videoId"],
             "published": it["contentDetails"].get("videoPublishedAt", ""),
             "title": it["snippet"]["title"],
+            "privacy": it.get("status", {}).get("privacyStatus", "unknown"),
         }
         for it in items
     ]
     return subs, videos
+
+
+def screen_skips(days=7):
+    """R4.6 audit: skips logged in the window, for the weekly false-positive review."""
+    path = config.SCREEN_LOG
+    if not path.exists():
+        return []
+    cutoff = (datetime.datetime.now(datetime.timezone.utc)
+              - datetime.timedelta(days=days)).isoformat()
+    with open(path) as f:
+        return [r for r in csv.DictReader(f)
+                if r["timestamp_utc"] >= cutoff and r["action"].startswith("skip")]
 
 
 def humanize(n):
@@ -84,9 +97,23 @@ def main():
                     if v["published"] >= max(buffered, iso(7))
                     and v["id"] not in log_ids]
     logged_gone = sorted(log_ids - channel_ids)
+    # Zero-view flags mean suppression only if (a) the snapshot actually covers
+    # the video — one published after the last snapshot has no data, not zero
+    # views — and (b) the video is public; an owner-privatized video looks
+    # identical to a suppressed one in the analytics data.
+    privacy = {v["id"]: v["privacy"] for v in channel_videos}
+    # A video must have been at least ZERO_VIEW_DAYS old *at snapshot time* for
+    # its zero to mean anything (analytics lag ~1-2 days behind the snapshot).
+    zero_cutoff = (datetime.date.fromisoformat(snap_dates[-1])
+                   - datetime.timedelta(days=ZERO_VIEW_DAYS)).isoformat()
     zero_views = [r for r in log_rows
-                  if r["timestamp_utc"] < iso(ZERO_VIEW_DAYS)
-                  and int(latest.get(r["video_id"], {}).get("views", 0)) == 0]
+                  if r["timestamp_utc"][:10] < zero_cutoff
+                  and int(latest.get(r["video_id"], {}).get("views", 0)) == 0
+                  and privacy.get(r["video_id"], "public") == "public"]
+    non_public = [r for r in log_rows
+                  if r["timestamp_utc"] >= iso(7)
+                  and privacy.get(r["video_id"], "public") != "public"]
+    skips = screen_skips()
 
     # --- status ---
     hard, soft = [], []
@@ -100,6 +127,8 @@ def main():
         soft.append(f"{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''}")
     if zero_views:
         soft.append(f"{len(zero_views)} upload(s) still at 0 views after {ZERO_VIEW_DAYS}+ days")
+    if non_public:
+        soft.append(f"{len(non_public)} upload(s) not public")
 
     date_label = f"{now:%b} {now.day}"
     if hard:
@@ -157,6 +186,14 @@ def main():
         lines.append(f"**🏆 Video of the week** — [{top['title']}]"
                      f"(https://youtube.com/shorts/{top['id']}) — "
                      f"{views(top['id'])} views, {pct(top['id']):.0f}% avg viewed")
+        lines.append("")
+
+    # R4.6 audit line — only when the screen actually skipped something, so a
+    # quiet week stays quiet.
+    if skips:
+        cats = ", ".join(sorted({s["category"] for s in skips if s["category"]}))
+        lines.append(f"**Suppression screen** — {len(skips)} post(s) skipped this week ({cats}). "
+                     f"Review `analysis/screen_log.csv` for false positives.")
         lines.append("")
 
     todos = []

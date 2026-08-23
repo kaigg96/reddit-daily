@@ -10,7 +10,7 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, thumbnail, tts, video, youtube
+from . import config, content, llm, log, screen, thumbnail, tts, video, youtube
 
 
 def _probe_duration(path):
@@ -28,7 +28,27 @@ def main():
     prev_title = ""
     if config.PREV_POST_FILE.exists():
         prev_title = config.PREV_POST_FILE.read_text().strip()
-    post = content.select_post(content.make_reddit(), prev_title)
+    # R4.6: log every non-pass verdict for weekly false-positive audit.
+    def record_verdict(post_title, result, action):
+        row = {
+            "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+            "subreddit": "AskReddit",
+            "post_title": post_title,
+            "action": action,
+            "category": result.category,
+            "reason": result.reason,
+            "source": result.source,
+            "dropped_comments": len(result.unsafe),
+        }
+        if config.DRY_RUN:
+            print(f"  [dry run] screen_log row: {row}")
+        else:
+            log.append_screen_log(row)
+
+    post = content.select_post(
+        content.make_reddit(), prev_title,
+        screener=screen.screen, on_verdict=record_verdict,
+    )
     print(f"Selected post: {post.title}")
     for i, c in enumerate(post.comments, 1):
         print(f"  comment {i}: {c}")

@@ -63,6 +63,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        git add prev_post.txt upload_log.csv
+        git add prev_post.txt upload_log.csv analysis/screen_log.csv
         git commit -m "Update prev_post and upload log" || echo "No changes to commit"
+        git pull --rebase origin main
         git push
