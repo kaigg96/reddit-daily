@@ -147,6 +147,3 @@ venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/
 `FORMAT_VERSION` in `src/config.py` stamps every upload-log row. Bump it only
 when a phase goes live, and judge format changes on ≥14 days / ≥20 uploads of
 data (PRD §8), never on individual videos.
-
-`create_video.ipynb` is the deprecated pre-v2 pipeline, kept for reference;
-CI no longer executes it.

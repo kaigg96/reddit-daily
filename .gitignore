@@ -1,6 +1,5 @@
 .env
 .DS*
-praw.ini
 /venv
 token.json
 client_secret.json
