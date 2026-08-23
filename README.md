@@ -10,22 +10,34 @@ and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 `python -m src.run` (entry point, run by
 [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml)):
 
-1. `src/content.py` — pick today's top AskReddit post (filters: NSFW,
-   profanity, emoji, >90-char titles, yesterday's repeat) + 3 clean comments.
-2. `src/llm.py` — Gemini generates SEO keywords and a CTR-oriented title
-   (fails soft; the video ships either way).
-3. `src/tts.py` — AWS Polly narrates every segment (one voice per video) and
+1. `src/content.py` — walk today's top AskReddit posts, applying the basic
+   filters (NSFW, profanity, emoji, >90-char titles, yesterday's repeat), and
+   gather a pool of ~8 eligible comments per candidate.
+2. `src/screen.py` — **suppression-risk screen** (PRD R4.6). One Gemini call
+   per candidate decides: skip the post, drop individual risky answers (the
+   pool backfills), or pass. Three uploads have been silently zeroed by
+   YouTube "limited distribution"; this avoids publishing that shape of
+   content. Fails open — an API error never blocks an upload. The same call
+   also classifies the post's topic, logged for performance tracking.
+3. `src/llm.py` — Gemini generates SEO keywords, a CTR-oriented title (style
+   A/B/C rotates by day), and a question-specific CTA. All fail soft; the
+   video ships either way.
+4. `src/tts.py` — AWS Polly narrates every segment (one voice per video) and
    returns **word-level speech marks** that drive the animated captions.
-4. `src/video.py` assembles one continuous timeline: no silent gaps,
+5. `src/video.py` assembles one continuous timeline: no silent gaps,
    karaoke-style captions, question header + `ANSWER n/3` progress badge,
-   whoosh SFX between answers, background music. Background layers come from
-   `src/background.py` (b-roll if present in `assets/broll/`, otherwise a
-   procedural drifting-glow animation) and the thumbnail card from
-   `src/thumbnail.py`. Renders 1080x1920@30.
-5. `src/youtube.py` — upload video + thumbnail.
-6. On success: `prev_post.txt` (dedupe) and `upload_log.csv` (experiment log,
-   one row per upload — join against YouTube Analytics on `video_id`) are
-   committed back by the workflow.
+   persistent watermark, whoosh SFX between answers, background music.
+   Background layers come from `src/background.py` (b-roll from
+   `assets/broll/`, else a procedural drifting-glow animation), the thumbnail
+   from `src/thumbnail.py`, and a `.srt` subtitle track from the same caption
+   timings. Renders 1080x1920@30.
+6. `src/youtube.py` — upload video, thumbnail, subtitle track, and an
+   engagement comment posted from the channel account.
+7. On success `src/log.py` appends `upload_log.csv` (one row per upload — the
+   experiment log, joined against analytics on `video_id`) and, when the
+   screen acted, `analysis/screen_log.csv` (audit trail for weekly
+   false-positive review). Both plus `prev_post.txt` are committed back by the
+   workflow.
 
 `src/analytics.py` holds the OAuth client helpers and channel-video-listing
 logic shared by the reporting scripts below (`weekly_analytics.py`,
@@ -74,15 +86,12 @@ Secrets go in `.env` (gitignored): `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`,
 
 ## One-time setup tasks (owner)
 
-Still open — the pipeline works without them but improves with them:
-
-1. **B-roll library (PRD R1.3).** Download 10–15 vertical motion clips
-   (satisfying/abstract/scenic; no logos, people close-ups, or embedded music)
-   from Pexels/Pixabay/Mixkit, then for each:
-   `venv/bin/python scripts/prep_broll.py <downloaded file> <short_name>` and
-   record the source URL in `assets/CREDITS.md`. Until then the procedural
-   background is used.
-2. **Music variety (PRD R1.6, optional).** The current track
+1. ~~**B-roll library (PRD R1.3)**~~ — done 2026-08-15: 7 dark/moody Pexels
+   clips in `assets/broll/`, sources in `assets/CREDITS.md`. To add more:
+   `venv/bin/python scripts/prep_broll.py <downloaded file> <short_name>`,
+   then record the source URL. Prefer dark/mid-tone footage — bright clips
+   wash out the white captions even under the scrim.
+2. **Music variety (PRD R1.6, optional — still open).** The current track
    (`funk_bg_lower.mp3`) is from the YouTube Audio Library and license-clean.
    For per-video variety, drop 2–3 more Audio Library tracks into
    `assets/music/` (rotation is automatic) and list them in
@@ -144,6 +153,9 @@ venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/
 
 ## Versioning & experiments
 
-`FORMAT_VERSION` in `src/config.py` stamps every upload-log row. Bump it only
-when a phase goes live, and judge format changes on ≥14 days / ≥20 uploads of
-data (PRD §8), never on individual videos.
+`FORMAT_VERSION` in `src/config.py` stamps every upload-log row; bump it when
+a release goes live. Work splits into **keepers** (high-confidence, batch-shipped,
+no per-change bake) and **experiments** (might-revert bets, shipped one variable
+at a time with a pre-committed decision rule and a ≥20-upload bake) — see PRD §8.
+Judge changes on **watch-seconds**, not avg-%-viewed, and always against an
+age-matched cohort (PRD §4); `scripts/report.py` enforces both.

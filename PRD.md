@@ -65,7 +65,7 @@ A secondary motivation: YPP review rejects "repetitious/duplicative" content. A 
 
 ## 2. Starting system — the v1 baseline this PRD replaced *(historical; superseded at v2)*
 
-At the time this PRD was written, everything lived in one notebook, [create_video.ipynb](create_video.ipynb), executed headlessly by [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml) via `jupyter nbconvert --to notebook --execute` on `ubuntu-latest`, Python 3.10.
+At the time this PRD was written, everything lived in one notebook, `create_video.ipynb` (deleted in the 2026-08-23 cleanup; recoverable from git history), executed headlessly by [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml) via `jupyter nbconvert --to notebook --execute` on `ubuntu-latest`, Python 3.10.
 
 Pipeline (cell by cell):
 
@@ -78,12 +78,13 @@ Pipeline (cell by cell):
 7. **Cell 8 — upload.** YouTube Data API v3, refresh-token auth. Title = Gemini title + `" #shorts #foryou"`. Description = question + 3 comments + link + hashtags. Category 22. Then `thumbnails().set()` (PNG sent with `image/jpeg` mimetype). 
 8. **Cell 9 — dedupe.** Writes posted title to `prev_post.txt`; workflow commits it back.
 
-Known environment facts:
-- Secrets available in Actions: `REDDIT_*`, `AWS_POLLY_*`, `YOUTUBE_CLIENT_ID/SECRET/REFRESH_TOKEN`, `GEMINI_API_KEY`. Local dev uses `.env` / `praw.ini` (both gitignored, **not tracked** — verified).
-- The YouTube refresh token was minted with **only** the `https://www.googleapis.com/auth/youtube.upload` scope ([regen_refresh_token.py](regen_refresh_token.py)). Anything beyond upload/thumbnail (commenting, channel reads, analytics) needs a one-time re-auth with more scopes.
-- The workflow installs `ttf-mscorefonts-installer` (Arial, Impact, etc.).
-- MoviePy is 2.1.2 — the **2.x API** (`with_duration`, `with_start`, `with_position`, `subclipped`, `resized`, Pillow-backed `TextClip` that wants a **font file path**). Do not use 1.x idioms from old tutorials.
-- Stray artifacts exist locally (`final_askreddit_videoTEMP_MPY_wvf_snd.mp3` — crashed-render temp; `assets/.funk_bg.mp3.icloud`). Non-blocking.
+**Environment (kept current — this block describes the system as it is today, not the v1 baseline above):**
+- **Runtime:** Python 3.10 on `ubuntu-latest`, entry point `python -m src.run`. Twice daily at `23 0,12 * * *` (off the hour to dodge Actions queue jitter), plus a `workflow_dispatch` with a `dry_run` input.
+- **Secrets in Actions:** `REDDIT_*`, `AWS_POLLY_*`, `YOUTUBE_CLIENT_ID`/`_SECRET`/`_REFRESH_TOKEN`, `GEMINI_API_KEY`. Local dev reads the same names from `.env` (gitignored). `YOUTUBE_DATA_API_KEY` exists locally but is no longer used by any script.
+- **OAuth:** the refresh token carries `youtube.upload`, `youtube.force-ssl` (comments + captions) and `yt-analytics.readonly`. The consent screen is published **in production**, so tokens no longer expire after 7 days (see README for the re-mint walkthrough).
+- **Fonts:** Anton is committed to `assets/fonts/` and passed to `TextClip` by path — no system font installation, so CI and local renders are identical.
+- **MoviePy 2.1.2** — 2.x API only; see Appendix A for the specific gotchas. (`moviepy.__version__` self-reports `2.1.1` despite the 2.1.2 pin — an upstream metadata quirk, not a wrong install.)
+- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus keywords, title, and CTA. Comfortably inside the free tier at 2 runs/day; heavy *local* testing is what exhausts quota, not production.
 
 ## 3. Diagnosis (why <100 views)
 
@@ -139,7 +140,7 @@ Strategic implication (unchanged): 10M views/90d ≈ 110K/day vs the current ~1�
 2. **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
 3. **Must run headlessly on `ubuntu-latest`** GitHub Actions, twice daily, within reasonable job time (< 30 min).
 4. **DRY_RUN guardrail (build first — R0.1).** All development/verification runs must use DRY_RUN. **Never upload to the live channel, post comments, or mutate `prev_post.txt`/logs during development.** The first live run of any new format version requires explicit owner approval.
-5. **Never commit secrets.** `.env`, `praw.ini`, `client_secret.json`, `token.json` stay gitignored. When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
+5. **Never commit secrets.** `.env`, `client_secret.json`, `token.json` stay gitignored. (`praw.ini` was removed 2026-08-23 — Reddit auth reads `REDDIT_*` from the environment.) When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
 6. **Licensing:** every committed media asset (b-roll, music, SFX, fonts) must be free for commercial use without attribution (CC0/Pixabay License/Mixkit License/YouTube Audio Library/OFL fonts) and its source URL recorded in `assets/CREDITS.md`. No gameplay footage of copyrighted games, no clips with embedded music/watermarks/logos/visible people prominently featured.
 7. **Policy:** no fake engagement, no engagement pods, no view manipulation, no posting-frequency increase as a substitute for quality. Existing content filters (NSFW/profanity/emoji) must remain.
 8. **Repo hygiene:** each committed b-roll/music file < 25 MB; total new committed assets < 300 MB. (If the library needs to grow beyond that later, move to GitHub Release assets + `actions/cache` — out of scope now.)
@@ -226,7 +227,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R4.2 — Weekly analytics pull — **shipped ✅ (P2)**
 - Second workflow (weekly cron): YouTube Analytics API v2 (`yt-analytics.readonly`) `reports.query` with `dimensions=video` for recent uploads → append `analytics.csv` (committed): views, likes, comments, shares, averageViewDuration, averageViewPercentage. Join key: `video_id` from `upload_log.csv`. Note: impressions / swipe-rate may not be exposed by the API (Studio-only) — implementer should verify current API surface and include them only if available.
 - This closes the loop: every experiment in this PRD becomes evaluable from two committed CSVs.
-- Also append a weekly public-stats snapshot for **all** uploads to `analysis/stats_snapshots.csv` (views/likes/comments per video_id + date), so views@7d / views@28d deltas become computable going forward (see R4.3, which otherwise has only single-snapshot data).
+- Also append a weekly snapshot for **all** uploads so views@7d / views@28d deltas become computable going forward (see R4.3, which otherwise had only single-snapshot data). **As-built:** this merged into the single file `analysis/analytics_snapshots.csv` rather than a separate `stats_snapshots.csv` — the Analytics API returns views/likes/comments alongside the retention metrics, so two files would have been redundant.
 - **As-built (2026-07-20):** single-file design — `weekly-analytics.yml` Mondays 06:00 UTC appends `analysis/analytics_snapshots.csv` (Analytics API over OAuth; no Data API key in CI; impressions confirmed not API-exposed) **plus a weekly digest GitHub issue** (owner-approved layout: status-in-title / pipeline health / performance / top video / TODOs; emails via GitHub watch notifications; anomaly flags expire after 7 days). **Deferred until scale warrants** (owner 2026-07-20): engagement-rate scoreboard (when median views/Short ≳500), per-video `subscribersGained` (when subs ≳100), exact rolling-90d windowed views query, experiments section in the digest.
 
 #### R4.3 — Historical content-performance analysis — **shipped ✅ (P1, sequencing-independent)**
@@ -396,20 +397,23 @@ Attribution only has *value* if you'll act on it. For high-confidence changes we
 
 ## 9. Verification playbook (for the implementing agent)
 
-- **Render:** `DRY_RUN=1 python -m src.run` (or notebook equivalent pre-R0.3).
+- **Unit tests:** `venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/` — covers the pure analysis logic (`src/insights.py`). Run before any change touching selection, logging, or analysis.
+- **Render:** `DRY_RUN=1 python -m src.run`.
 - **Structure:** `ffprobe -show_entries format=duration,stream=width,height,avg_frame_rate` → 1080×1920@30, 20–40s.
 - **Dead air:** `ffmpeg -i out.mp4 -af silencedetect=n=-35dB:d=0.3 -f null -` → no detected silence.
 - **Visuals:** extract frames (`ffmpeg -vf fps=1`) at t=0.3, mid-title, each comment, CTA → verify caption word-groups, header/badge, watermark, legibility, motion (pixel-diff two frames 3s apart).
 - **Caption sync:** unit check comparing speech-mark times to caption clip start times (±150 ms).
 - **Safety greps:** every network mutation (`videos().insert`, `thumbnails().set`, `commentThreads().insert`, file/log writes) is behind the DRY_RUN flag; workflow commit step adds only intended files.
 - **CI:** `workflow_dispatch` with `dry_run=true` must pass end-to-end on `ubuntu-latest` before any live rollout.
+- **Performance questions:** use `scripts/report.py` (`--by`, `--compare`, `--metric`) — never ad-hoc analysis. It enforces watch-seconds-primary, age-matched cohorts, and n-gating; see TECH_DEBT.md Pass 2 for why that matters.
+- **Screen behaviour:** after changing `src/screen.py`, re-check it against the three confirmed-suppressed cases and the five fine-serving controls listed in R4.6 before merging.
 - **Never** verify by uploading publicly. If an end-to-end upload test is ever truly needed, ask the owner first (option: `privacyStatus: "private"` test upload, then delete — owner approval required).
 
 ## 10. Open questions (defaults apply if unanswered)
 
-- **OQ-1 — B-roll sourcing:** manual one-time curation by owner (default, better quality control) vs. automated Pexels API fetch (needs a free API key added as a secret). 
-- **OQ-2 — Channel brand name** for watermark/persona: default = fetch channel title via API (R3.4).
-- **OQ-3 — Caption styling specifics** (colors beyond white/black stroke, highlight color for the second voice): implementer's discretion within the readability rules; keep the orange `#ff5d01` as an accent for brand continuity.
+- **OQ-1 — B-roll sourcing:** ~~resolved 2026-08-15~~ — manual curation chosen and done (7 Pexels clips). No API key needed. Selection criterion learned in practice: dark/mid-tone only; two of nine candidates were rejected at the R1.4 legibility gate for washing out white captions.
+- **OQ-2 — Channel brand name:** ~~resolved 2026-07-22~~ — hardcoded `CHANNEL_NAME = "AskReddit Shorts"` in `src/config.py` rather than fetched per run; it never changes, and a constant avoids an API call plus a failure mode on the render path.
+- **OQ-3 — Caption styling:** ~~resolved as-built~~ — white fill, black stroke, Anton, brand orange `#ff5d01` reserved for the `ANSWER n/N` badge and channel tag. The only open sliver is a second-voice highlight colour, which is moot unless R3.2 ships.
 - **OQ-4 — R4.3 credentials:** ~~resolved 2026-07-19~~ — owner created a Data API key as `YOUTUBE_DATA_API_KEY`. ~~Superseded 2026-07-21~~ — R4.3 migrated to OAuth in the refactor pass; the key is unused by any script now and doesn't need to exist as an Actions secret.
 - **OQ-5 — Localization pilot language:** default Spanish (largest Shorts-population overlap with zero new rendering technology); Arabic deliberately deferred to R5.2 because of the RTL/shaping work.
 
