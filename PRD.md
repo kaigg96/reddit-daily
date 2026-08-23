@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v4` live (Sprint 1 shipped 2026-07-22); next: R4.6 suppression-risk screen (`v5`) — see §0 Delivery plan |
+| **Status** | `v5` live (suppression screen shipped 2026-08-23); next: R1.8 short-format experiment — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-07-27 · **Live format:** `v4` (Sprint 1 bar-raising batch shipped 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
+**Last updated:** 2026-08-23 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -24,13 +24,14 @@
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
 - Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push)
+- `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 
-#### Next keeper release (`v5`) + measurement keepers
+#### Next keepers
 
 | Item | Req | Decision rule |
 |---|---|---|
-| Suppression-risk screen at selection | R4.6 | Keep; audit `analysis/screen_log.csv` weekly — if skips look like false positives or exceed ~15% of candidate posts, narrow the prompt rather than revert. |
+| ~~Suppression-risk screen~~ ✅ `v5` | R4.6 | Shipped 2026-08-23. **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
 | Traffic-source telemetry in weekly job | R4.7 | Keep — measurement-only, no version bump; ship whenever convenient. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
