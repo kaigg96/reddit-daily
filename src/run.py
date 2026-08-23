@@ -148,6 +148,8 @@ def main():
         "music_track": result.music_name,
         "format_version": config.FORMAT_VERSION,
         "duration_s": f"{result.duration:.1f}",
+        "candidate_rank": post.candidate_rank,
+        "topic": post.topic,
     })
 
 

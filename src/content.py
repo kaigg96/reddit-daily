@@ -19,6 +19,8 @@ class PostContent:
     title: str
     comments: list  # cleaned comment strings
     shortlink: str
+    candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
+    topic: str = ""           # R4.3 taxonomy, from the screen call (free)
 
 
 def make_reddit():
@@ -75,13 +77,15 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         )
     ]
 
-    for post in candidates[: config.MAX_SCREENED_CANDIDATES]:
+    for rank, post in enumerate(candidates[: config.MAX_SCREENED_CANDIDATES], 1):
         pool = _comment_pool(post, config.COMMENT_POOL)
         if len(pool) < config.NUM_COMMENTS:
             continue
 
+        topic = ""
         if screener:
             result = screener(post.title, pool)
+            topic = result.topic
             if result.verdict == "skip_post":
                 print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                 if on_verdict:
@@ -100,11 +104,15 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
                     on_verdict(post.title, result, "drop_comments")
                 pool = kept
 
+        if rank > 1:
+            print(f"Selected candidate rank {rank} (earlier candidates filtered/screened out)")
         return PostContent(
             subreddit=subreddit_name,
             title=post.title,
             comments=pool[: config.NUM_COMMENTS],
             shortlink=post.shortlink,
+            candidate_rank=rank,
+            topic=topic,
         )
 
     raise ValueError("No suitable Reddit post found (after filters and screen).")

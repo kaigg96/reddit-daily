@@ -73,25 +73,38 @@ Real examples that were FINE and must NOT be flagged:
 - "What YouTuber really fell off?"
 - "What do you think about Ossoff denouncing Trump as a 'Draft Dodger, crook President'?"
 
+Also classify the question's topic into exactly one of:
+{topics}
+
 QUESTION: {question}
 
 COMMENTS:
 {numbered}
 
 Return ONLY compact JSON, no markdown fence:
-{{"post_risk": "none" or one category, "reason": "<12 words", "unsafe_comments": [numbers]}}
+{{"post_risk": "none" or one category, "reason": "<12 words", "unsafe_comments": [numbers], "topic": "one topic"}}
 - post_risk: flag the QUESTION itself only if the question inherently invites flagged content.
 - unsafe_comments: numbers of individual comments that are risky (empty list if none).
+- topic: for performance tracking only — never a reason to flag.
 """
+
+# Same taxonomy as R4.3's historical analysis, so logged topics join cleanly
+# against analysis/topic_performance.md.
+TOPICS = (
+    "relationships-dating", "money-work", "dark-morbid", "politics-news",
+    "fame-celebrity", "nostalgia", "humor-absurd", "sex-adjacent",
+    "health-body", "hypotheticals", "life-advice", "other",
+)
 
 
 class ScreenResult:
-    def __init__(self, verdict, unsafe=(), category="", reason="", source="gemini"):
+    def __init__(self, verdict, unsafe=(), category="", reason="", source="gemini", topic=""):
         self.verdict = verdict          # "pass" | "skip_post"
         self.unsafe = set(unsafe)       # 0-based indices into the comment pool
         self.category = category
         self.reason = reason
         self.source = source            # gemini | backstop | error
+        self.topic = topic              # R4.3 taxonomy, logged for performance tracking
 
     def __repr__(self):
         return (f"ScreenResult({self.verdict}, unsafe={sorted(self.unsafe)}, "
@@ -128,7 +141,8 @@ def screen(question, comments):
     """Screen one candidate. Never raises — worst case returns a permissive result."""
     numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(comments))
     try:
-        raw = _generate_screened(_PROMPT.format(question=question, numbered=numbered))
+        raw = _generate_screened(_PROMPT.format(
+            question=question, numbered=numbered, topics=", ".join(TOPICS)))
         match = re.search(r"\{.*\}", raw, re.S)
         data = json.loads(match.group(0)) if match else {}
     except Exception as e:
@@ -136,12 +150,14 @@ def screen(question, comments):
         return _backstop(question, comments)
 
     risk = str(data.get("post_risk", "none")).strip().lower()
+    topic = str(data.get("topic", "")).strip().lower()
+    topic = topic if topic in TOPICS else ""
     reason = str(data.get("reason", ""))[:120]
     unsafe = {int(n) - 1 for n in data.get("unsafe_comments", [])
               if str(n).isdigit() and 0 < int(n) <= len(comments)}
 
     if risk in CATEGORIES:
-        return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason)
+        return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason, topic=topic)
     return ScreenResult("pass", unsafe=unsafe,
                         category="unsafe_comments" if unsafe else "",
-                        reason=reason if unsafe else "")
+                        reason=reason if unsafe else "", topic=topic)
