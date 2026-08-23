@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v5` live (suppression screen shipped 2026-08-23); next: R1.8 short-format experiment — see §0 Delivery plan |
+| **Status** | `v5` live (suppression screen shipped 2026-08-23); next: R4.4 topic/hook ranker — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -36,18 +36,17 @@
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
-Reordered 2026-07-27 by prior strength after the watch-budget findings (§4).
+Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so the format-geometry experiments are cancelled and content/hook quality moves to the top.
 
 | # | Item | Req | Decision rule (pre-committed) |
 |---|---|---|---|
-| 1 | **Short format** (~14–16s: 2 comments, no spoken outro; CTA as overlay + pinned comment only) | R1.8 | After ≥20 uploads: keep if median avg-%-viewed ≥65% **and** median views ≥ the prior-format baseline; revert if views drop >30% despite the retention gain. Absorbs R3.1b. |
-| 2 | Narration rate (+~10% via Polly SSML prosody) | R1.9 | After ≥20 uploads: keep if avg-%-viewed and views hold or improve; revert on a clear views drop. Run after R1.8 settles. |
-| 3 | Topic/hook candidate ranker | R4.4 | Owner-approved list only; `topic` logged per upload; keep only buckets/rankings that hold up in R4.3-style analysis. Upgraded rationale: views↔retention decoupling (§4) says hook/topic drives test-pool expansion. |
-| 4 | Subreddit rotation — *inventory prerequisite for volume* | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop underperformers vs the AskReddit baseline. Success unlocks the posting-volume revisit (§7). |
-| 5 | Posting-volume increase (2 → 3–4/day) | — | Only after R4.1 proves inventory quality; hold per-video medians within ~30% of baseline at higher volume, else fall back. |
-| 6 | Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
-| 7 | Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until retention is solved + enough volume per slot. Not a growth lever. |
-| 8 | Two-voice reaction beat — **demoted** | R3.2 | Adds length against a fixed watch budget — weakest prior on the board. If ever run: revert if beat cohort median avg-%-viewed ≥2 pts below non-beat after ≥20 uploads. |
+| 1 | **Topic/hook candidate ranker** | R4.4 | Score the top-10 candidates on hook strength + topic prior (seeded from `analysis/topic_performance.md`), pick the best rather than always #1. After ≥20 uploads: keep if median **watch-seconds** and median views both hold or improve vs an age-matched baseline; revert if either drops materially. |
+| 2 | Subreddit rotation — *inventory prerequisite for volume* | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop underperformers vs the AskReddit baseline. Success unlocks the posting-volume revisit (§7). |
+| 3 | Posting-volume increase (2 → 3–4/day) | — | Only after R4.1 proves inventory quality; hold per-video medians within ~30% of baseline at higher volume, else fall back. |
+| 4 | Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
+| 5 | Upload-time-of-day optimization | R4.5 (deferred half) | Deferred until there's enough volume per slot. Not a growth lever. |
+| 6 | Two-voice reaction beat | R3.2 | Persona value, unclear retention effect. Now judged on **watch-seconds**, not avg-% (its old demotion rationale — "adds length" — died with the duration thesis). Revert if watch-seconds drop vs age-matched baseline after ≥20 uploads. |
+| ~~—~~ | ~~Short format (R1.8) / narration rate (R1.9)~~ | — | **Cancelled 2026-08-23.** Both assumed shortening raises real retention. Data says duration doesn't separate winners from losers (`corr(duration, log views) = −0.17`; top-12 median 19.2s vs 19.8s for the rest) and that trimming only inflates the avg-% proxy. See §4 Findings, Review 2. |
 
 #### Owner tasks (anytime, no version bump)
 - ~~**B-roll library** (R1.3)~~ ✅ 2026-08-15 — 7 dark/moody Pexels clips live (`assets/broll/`, sources in CREDITS.md). Nine curated, two dropped at the R1.4 legibility gate for washing out white captions. Pipeline auto-switched off the procedural background; `bg_clip` logged per upload so per-clip performance is separable later. Expectation (§4): first-impression/swipe margin, not the watch budget.
@@ -101,25 +100,38 @@ Ranked by expected impact:
 
 All metrics via YouTube Studio / Analytics API. The **≥ 14 days / ≥ 20 uploads** bake rule applies to **experiment-backlog** changes — the ones we'll act on (keep/revert/iterate); individual Shorts are high-variance, so never judge *a bet* on 1–2 videos. **Bar-raising keepers do not carry per-change bake** — they're kept regardless, so there's no decision to wait for; they're sanity-checked in aggregate. (See §8 for why this split is correct.)
 
-| Area | Metric | Baseline | Target after P1–P3 |
+**Primary metric is `averageViewDuration` (watch-seconds), not `averageViewPercentage`** — revised 2026-08-23. Avg-%-viewed is a ratio whose denominator we control: trimming a video inflates it without adding a single second of real watch time, so targeting it invites optimizing the proxy instead of the outcome (this mistake produced and then killed R1.8/R1.9 — see §4 Findings, Review 2). Watch-seconds cannot be gamed that way, and it is what separates the channel's top videos from the rest.
+
+| Area | Metric | Baseline (2026-08-23) | Target |
 |---|---|---|---|
-| Retention | Average % viewed (avgViewPercentage) | unknown (likely <40%) | **≥ 70%** on ≤ 35s videos |
-| Retention | "Viewed vs swiped" (Shorts feed, Studio only) | unknown | ≥ 70% viewed |
-| Distribution | Median views/Short, trailing 14d | < 100 | ≥ 1,000 (milestone 1) |
-| Engagement | Likes per 100 views | unknown | ≥ 3 |
-| Engagement | Comments per 100 views | unknown | ≥ 0.3 |
+| Attention | **Median watch-seconds** (`averageViewDuration`) | 9.0s (top-12 videos: 11.0s) | **≥ 12s** |
+| Attention | Avg % viewed — *diagnostic only, never a target* | 50% (v4, n=52) | — (interpret only at fixed duration) |
+| Distribution | Median views/Short, trailing 14d | 166 (v4, n=52; recent-era v1 was 28) | ≥ 1,000 (milestone 1) |
+| Engagement | Likes per 100 views | ~1 | ≥ 3 |
+| Engagement | Comments per 100 views | <0.5 | ≥ 0.3 |
 
-Directional, not contractual — the algorithm is stochastic. The system's job is to make every upload *worthy* of distribution and measurable (R0.2), so format versions can be compared honestly.
+**Comparisons must be age-matched.** Avg-%-viewed and views both drift with video age, so any cohort comparison (format versions, experiments, background types) must hold age roughly constant or it will measure age instead of the change.
 
-### Findings — two-snapshot data review (2026-07-27)
+Directional, not contractual — the algorithm is stochastic, and the strongest measured predictor of views explains only part of the variance (`r ≈ +0.34`). The system's job is to make every upload *worthy* of distribution and measurable (R0.2), so format versions can be compared honestly.
 
-First real read of the format eras (snapshots 07-21 + 07-27; videos ≥3 days old):
+### Findings — data reviews
 
-1. **Production quality moved distribution, not retention.** v1 recent cohort (n=83): median 26 views, 54.2% avg-viewed. v2/v3 (n=14): median 90 views (3.5×), max 923 vs 115 — but avg-viewed only 57.1%. The founding "quality → retention → distribution" chain is better described as "quality → first-impression/swipe margin → distribution."
-2. **Fixed watch budget ~10–12 s.** Median watch-seconds: v1 = 12.0, v2/v3 = 10.0 — unchanged across a total format overhaul. Avg-%-viewed is therefore ≈ `11s ÷ duration`: every video ≤16s scored 55–74%; every video ≥23s scored 35–37%. **Length, not polish, is the retention lever** — the ≥70% target is expected to be reached via R1.8 (short format), not further production work.
-3. **Views and retention are decoupled at this scale.** 923- and 671-view videos sat at ~55% while a 62-view video hit 73.7% — topic/hook drives test-pool expansion at least as much as retention (rationale upgrade for R4.4).
+**Review 2 (2026-08-23, n=66 logged uploads, live Analytics, ≥3 days old) — supersedes parts of Review 1.**
 
-Strategic implication: 10M views/90d ≈ 110K/day vs the current ~1–2K/week — floor-raising alone can never cover that distance. Sequencing goal: maximize hit probability per slot (length, hook, topic), then multiply slots (volume after R4.1).
+1. **Duration is NOT a lever — the earlier "shorten the video" conclusion was wrong.** `corr(duration, log views) = −0.17`; the top 12 videos and the rest have effectively the **same** median duration (19.2s vs 19.8s). What separates them is **watch-seconds** (11.0s vs 9.0s) and the avg-% that follows from it.
+2. **Avg-%-viewed is a gameable proxy and must not be a target.** Watch-seconds are roughly flat against duration (`corr = +0.13`), so trimming a video mechanically inflates avg-%-viewed while adding zero real watch time. R1.8/R1.9 were built on exactly this mistake and are **cancelled** — they would have "passed" their decision rule while delivering nothing.
+3. **What predicts views:** `corr(avg-%-viewed, log views) = +0.34` and `corr(watch-seconds, log views) = +0.34` — equal. Since duration doesn't differ between winners and losers, the differentiator is **content/hook quality**, not format geometry (promotes R4.4 to the top of the backlog). Note +0.34 leaves most variance unexplained: much of Shorts success is outside anything we currently measure, so treat R4.4 as improving odds per slot, not as a reliable lever.
+4. **Loops are real upside that shortening cannot buy:** the best performers include a 17s video at **227% avg-viewed** (40s watched) and another at 100%. Watch-seconds above duration only come from content worth re-watching.
+5. **Distribution gain from the overhaul confirmed and larger than first measured:** v4 median **166 views** (n=52) vs recent-era v1 median **28** (n=76) — roughly 6× (Review 1 estimated 3.5× on n=14).
+6. **Methodological rule now binding: cohorts must be age-matched.** Avg-%-viewed *declines as a video ages* (broader, colder audiences). Same-week (3–9d) videos sit at ~65% regardless of background, while the older overall pool sits near 48–50%. Two consequences: (a) **b-roll shows no measurable retention effect** once age-matched (65.5% vs 64.9%) — an apparent advantage was pure age artifact; (b) Review 1's "retention didn't move" claim compared v4 against much older v1 videos and is **not trustworthy as stated** — the distribution half stands, the retention half is unresolved.
+
+**Review 1 (2026-07-27, n=14, two snapshots) — retained for history; items 1 and 2 below are superseded above.**
+
+1. ~~Production quality moved distribution, not retention~~ — distribution finding confirmed (and revised upward to ~6×); the retention half was age-confounded (see Review 2 item 6).
+2. ~~Fixed watch budget ⇒ length is the retention lever~~ — the *observation* (viewers give ~9–12s) holds; the *inference* (therefore shorten) was wrong (Review 2 items 1–2).
+3. **Views and retention are decoupled at this scale** — holds, and strengthened: topic/hook drives expansion more than format geometry.
+
+Strategic implication (unchanged): 10M views/90d ≈ 110K/day vs the current ~1–2K/week — floor-raising alone can never cover that distance. Sequencing goal: maximize hit probability per slot (hook, topic), then multiply slots (volume after R4.1).
 
 ## 5. Constraints & guardrails (binding on the implementer)
 
@@ -298,21 +310,18 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 
 "Might revert" bets. Ship **one variable per version**, each with a real bake window (≥ 20 uploads / ~2 weeks) and a **pre-committed decision rule** (see §8). Order below follows the 2026-07-27 re-prioritization (Delivery plan).
 
-#### R1.8 — Short format — **Experiment, top of backlog (strongest prior)**
-- **Thesis (§4 findings):** viewers grant a fixed ~10–12s watch budget; avg-%-viewed ≈ `11s ÷ duration`. Current videos run 15–26s; the ≥23s ones score 35–37%, the ≤16s ones 55–74%. Shrink the video to fit the budget.
-- **Format change:** title + **2 comments** (drop the 3rd) + **no spoken outro**. CTA survives as (a) the R3.1a question-specific text rendered as a short overlay strip near the end and (b) the auto-posted pinned-style comment (R3.3). Target duration ~14–16s. Duration guard tightens accordingly.
-- Also expected: loop potential (Shorts loops count as re-watches; avg-%-viewed can exceed 100).
-- **Trade-off being tested:** less content per video vs. much higher relative retention. Our data shows no view advantage for longer videos (the 23–26s videos: 41–57 views).
-- **Absorbs R3.1b** — "no spoken outro + overlay CTA" *is* the placement experiment's live arm.
-- **Decision rule:** after ≥20 uploads — keep if median avg-%-viewed ≥65% **and** median views ≥ prior-format baseline; revert if views drop >30% despite the retention gain (distribution didn't follow).
-- **Acceptance:** dry-run sample at ~15s with overlay CTA; `FORMAT_VERSION` bump; duration logged.
+#### R1.8 / R1.9 — Short format & narration rate — **❌ CANCELLED 2026-08-23 (never built)**
 
-#### R1.9 — Narration rate — **Experiment (run after R1.8 settles)**
-- Same watch-budget thesis from the other side: fit more content per second. Wrap Polly input in SSML `<prosody rate="~110%">` (verify neural-voice SSML support per voice; speech marks must still align — verify timestamps against the sped audio).
-- **Decision rule:** after ≥20 uploads — keep if avg-%-viewed and views hold or improve; revert on a clear views drop (too-fast narration reads as spammy).
+Both were premised on a fixed ~10–12s watch budget implying that shortening a video raises real retention. Review 2 (§4 Findings, n=66) refuted the inference:
+- `corr(duration, log views) = −0.17` — longer is not worse, and duration barely matters.
+- Top-12 videos vs the rest: **same** median duration (19.2s vs 19.8s); they differ on **watch-seconds** (11.0s vs 9.0s).
+- Watch-seconds are flat against duration (`corr = +0.13`), so trimming inflates avg-%-viewed *arithmetically* while adding zero watch time. R1.8 would have satisfied its own decision rule while delivering nothing.
+- Loops (one video at 227% avg-viewed = 40s watched on 17s) are real upside that removing content cannot buy.
 
-#### R3.1b — CTA placement — **🔀 absorbed into R1.8 (2026-07-27)**
-- The live question ("does removing the spoken outro + overlaying the CTA help?") ships as part of R1.8's format change. No separate experiment.
+Retained as a cautionary record: the failure mode was targeting a ratio whose denominator we control. §4 now makes **watch-seconds** the primary metric for this reason. Superseded by R4.4 (content/hook quality), which addresses the variable that actually separates winners.
+
+#### R3.1b — CTA placement — **⬜ unscheduled (2026-08-23)**
+- Was folded into R1.8; that experiment is cancelled, so this is standalone again and currently unscheduled. The open question — does moving the ask earlier (overlay strip during the final answer) help or annoy? — is untested. Low priority: it's a small change against an unmeasured effect, and §4 now says judge it on watch-seconds. Revive only with a specific reason.
 
 #### R3.2 — Two-voice reaction beat — **Experiment — demoted to bottom of backlog (2026-07-27)**
 - The *unused* voice of {Danielle, Stephen} delivers one Gemini-written quip (≤ 10 words, reacting to one comment — prompt for "surprised/amused friend" tone, no profanity) placed after comment 2 as a mid-video pattern interrupt. Distinct caption color for the second voice. **Fails soft:** any Gemini/Polly error → omit the beat entirely, video still valid.
@@ -327,10 +336,11 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 - **Decision rule:** compare age-adjusted median views per subreddit after ≥15 uploads each; drop any that underperform the AskReddit baseline.
 - **Story-mode subs (r/tifu, r/AmItheAsshole, r/confession) are a stretch:** different format — Gemini condenses the selftext to a ≤ 35s script, CTA becomes a verdict poll ("NTA or YTA? Comment."). Build only after Q&A rotation ships and has data.
 
-#### R4.4 — Topic avoidance/preference gate at selection — **Experiment (depends on R4.3 results)**
+#### R4.4 — Topic/hook candidate ranker — **Experiment #1 (top of backlog, promoted 2026-08-23)**
 - At selection time, classify the candidate post's title into the R4.3 taxonomy (one Gemini call, **fail-open**: on any error no post is blocked) and skip/deprioritize candidates by bucket — selection already iterates the top 10 posts, so it falls through to the next candidate. (Current R4.3 evidence favors a *preference ranker* — prefer nostalgia/dark-morbid/humor-absurd when available — over an outright blocklist; weak buckets are mild, not toxic.)
 - **Policy:** the analysis *proposes* the list; the owner approves it before it ships — a data artifact must not silently change content policy. Add a `topic` column to `upload_log.csv` so the gate's effect is itself measurable, and bump `FORMAT_VERSION` when the gate first ships (a content-selection change is a format change for attribution purposes).
-- **Decision rule:** keep only the buckets/rankings that hold up in R4.3-style age-adjusted analysis after the gate has run ≥20 uploads.
+- **Decision rule:** after ≥20 uploads, keep if median **watch-seconds** and median views both hold or improve against an age-matched baseline; revert if either drops materially. (Judged on watch-seconds, not avg-%-viewed — see §4.)
+- **Why it's now #1 (2026-08-23):** duration doesn't separate winners from losers, so the differentiator is which post/answers get picked — exactly what this scores. Caveat: the best measured predictor of views explains only part of the variance (`r ≈ +0.34`), so treat this as improving odds per slot, not a reliable lever.
 - **Acceptance:** dry run with a seeded candidate list shows a blocked/deprioritized post being skipped; `topic` logged per upload; fail-open path verified.
 
 #### Localization — one channel per language (R5.x) — **Experiment (separately gated)**
