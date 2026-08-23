@@ -1,0 +1,2 @@
+# Dev/test only — not installed by the video workflow
+pytest==9.1.1

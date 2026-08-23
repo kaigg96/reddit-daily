@@ -8,7 +8,9 @@ from .youtube import _authenticate
 
 
 def median(xs):
-    return sorted(xs)[len(xs) // 2] if xs else float("nan")
+    """Re-exported from insights so there is one implementation of record."""
+    from .insights import median as _median
+    return _median(xs)
 
 
 def youtube_client():

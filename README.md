@@ -121,6 +121,27 @@ the token ever needs re-minting (e.g. new scopes for a future phase):
          .execute()['items'][0]['snippet']['title'])"
    ```
 
+## Answering "did X work?"
+
+```sh
+venv/bin/python scripts/report.py                          # channel overview
+venv/bin/python scripts/report.py --by format_version      # group by any upload_log field
+venv/bin/python scripts/report.py --by topic --metric views
+venv/bin/python scripts/report.py --compare background_type=broll   # age-matched two-way test
+```
+
+Always use this rather than ad-hoc analysis — it enforces the rules that
+ad-hoc scripts kept getting wrong (see TECH_DEBT.md Pass 2): **watch-seconds**
+is the primary metric (avg-%-viewed is a ratio inflated by simply trimming the
+video), cohorts must be **age-matched** or no verdict is given, thin cohorts
+report "insufficient data" instead of a misleading median, and zero-view
+videos are counted separately as suppression candidates rather than averaged
+in. Logic lives in `src/insights.py` and is unit-tested.
+
+```sh
+venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/
+```
+
 ## Versioning & experiments
 
 `FORMAT_VERSION` in `src/config.py` stamps every upload-log row. Bump it only
