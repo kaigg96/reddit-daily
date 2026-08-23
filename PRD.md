@@ -63,9 +63,9 @@ Sub-100 views on Shorts means the algorithm's initial test pool (a few hundred i
 
 A secondary motivation: YPP review rejects "repetitious/duplicative" content. A TTS reading of Reddit comments over a static image is close to that line. The personality/production requirements below (motion, editing, commentary voice) also serve to make the content clearly transformed.
 
-## 2. Current system (as-built)
+## 2. Starting system — the v1 baseline this PRD replaced *(historical; superseded at v2)*
 
-Everything lives in one notebook, [create_video.ipynb](create_video.ipynb), executed headlessly by [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml) via `jupyter nbconvert --to notebook --execute` on `ubuntu-latest`, Python 3.10.
+At the time this PRD was written, everything lived in one notebook, [create_video.ipynb](create_video.ipynb), executed headlessly by [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml) via `jupyter nbconvert --to notebook --execute` on `ubuntu-latest`, Python 3.10.
 
 Pipeline (cell by cell):
 
@@ -191,7 +191,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 #### R1.3 — Motion background — **P0**
 - New `assets/broll/` library: **10–15 vertical loopable clips**, sources: Pexels / Pixabay / Mixkit (free commercial licenses). Curation guidance: satisfying/abstract/scenic motion (kinetic sand, marble runs, drone coastline, timelapse, macro ink-in-water, rain on glass); ≥ 720×1280; 10–30s; re-encode to 1080×1920 (crop-to-fill) H.264 CRF 26–28, strip audio; target 5–15 MB each. Provide `scripts/prep_broll.py` (ffmpeg wrapper) for normalization.
 - Runtime: pick a random clip (log it, R0.2), random start offset, `subclipped` to length, loop via `vfx.Loop` if short, muted, base layer under captions. A subtle slow zoom on top is optional polish.
-- **Fallback:** if `assets/broll/` is empty/missing → Ken Burns pan/zoom on `bg.png` (`ImageClip.resized(lambda t: 1 + 0.015*t)` + position drift). The pipeline must never render a fully static frame again.
+- **Fallback (as-built):** if `assets/broll/` is empty/missing → a procedural drifting-glow animation generated in code (`src/background.py`). The originally-specced Ken Burns pan over `bg.png` was never implemented; the procedural background proved better and `bg.png` was deleted in the 2026-08-23 workspace cleanup. The pipeline must never render a fully static frame again.
 - One-time setup task (owner or implementer-with-browser): download/curate the clips per guidance; record sources in `assets/CREDITS.md`. Alternative if fully-automated sourcing is preferred: free Pexels API key as a new secret + fetch script (decision: **Open Question OQ-1**).
 - **Acceptance:** two frames 3s apart are visibly different (pixel-diff > threshold) in every segment; b-roll audio absent; CI artifact plays smoothly.
 
