@@ -222,7 +222,9 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
         # Derived dimensions — raw bg_clip is per-file ("pexels_123.mp4",
         # "procedural:8471"), which is too granular to group on.
         r = dict(r)
-        r["background_type"] = "procedural" if r.get("bg_clip", "").startswith("procedural") else "broll"
+        bg = (r.get("bg_clip") or "").strip()
+        r["background_type"] = ("(unknown)" if not bg else
+                                "procedural" if bg.startswith("procedural") else "broll")
         v = Video(
             video_id=r["video_id"], published=published,
             views=float(s.get("views", 0)),

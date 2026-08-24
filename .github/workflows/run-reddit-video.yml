@@ -63,7 +63,23 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        git add prev_post.txt upload_log.csv analysis/screen_log.csv
+        # screen_log.csv only exists once the R4.6 screen has acted, so it is
+        # optional. Naming it unconditionally made `git add` fail on a missing
+        # pathspec, and because Actions runs this with `set -e` the step died
+        # BEFORE the commit — losing prev_post.txt and upload_log.csv for an
+        # upload that had already gone live.
+        git add prev_post.txt upload_log.csv
+        if [ -f analysis/screen_log.csv ]; then git add analysis/screen_log.csv; fi
+
         git commit -m "Update prev_post and upload log" || echo "No changes to commit"
-        git pull --rebase origin main
-        git push
+
+        # Retry the push: the weekly-analytics job and manual pushes can land
+        # between our pull and push. Losing state after a live upload breaks
+        # dedupe, so this is worth being stubborn about.
+        for attempt in 1 2 3; do
+          git pull --rebase origin main && git push && exit 0
+          echo "push attempt $attempt failed; retrying"
+          sleep 5
+        done
+        echo "::error::Could not push updated state after 3 attempts"
+        exit 1

@@ -134,3 +134,20 @@ def test_no_baseline_is_reported_rather_than_dividing_by_zero():
     a = cohort(10, 10, "a", watch=10.0)
     b = cohort(10, 10, "b", watch=0.0)
     assert insights.compare(a, b, "a", "b", NOW).verdict == "no baseline"
+
+
+# --- regression: unlogged upload / blank metadata (2026-08-24 incident) ------
+
+def test_blank_bg_clip_is_not_counted_as_broll():
+    """A workflow bug lost an upload's log row; the backfilled row has a blank
+    bg_clip. Blank must not be silently bucketed as 'broll' — that would
+    corrupt the very comparison the b-roll library exists to inform."""
+    from src.insights import Video  # noqa: F401
+    rows = [{"bg_clip": "procedural:12"}, {"bg_clip": "pexels_1.mp4"},
+            {"bg_clip": ""}, {}]
+    got = []
+    for r in rows:
+        bg = (r.get("bg_clip") or "").strip()
+        got.append("(unknown)" if not bg else
+                   "procedural" if bg.startswith("procedural") else "broll")
+    assert got == ["procedural", "broll", "(unknown)", "(unknown)"]
