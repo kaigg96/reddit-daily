@@ -5,6 +5,26 @@ r/AskReddit post + its top 3 comments into a captioned vertical video and
 uploads it. See [PRD.md](PRD.md) for the quality roadmap and requirement IDs,
 and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
+## Picking this up (new session / new contributor)
+
+Read in this order — it's ~5 minutes and avoids re-deriving decisions:
+
+1. **`PRD.md` §0 "Delivery plan"** — the single source of truth for what's
+   shipped, what's next, and the experiment backlog with its pre-committed
+   decision rules. **Update it whenever anything ships.**
+2. **This README's "How it works"** (below) — the actual pipeline.
+3. **`PRD.md` §4 Findings** — only if the task touches metrics or experiments.
+   Several plausible-sounding ideas were killed by data recorded there; skipping
+   it risks reviving one.
+4. **`TECH_DEBT.md`** — only for code-health work.
+
+Standing conventions, non-negotiable:
+- Feature work goes on a branch; `main` runs live twice daily (see below).
+- Don't start building a phase/feature until the owner explicitly says go.
+- Answer performance questions with `scripts/report.py`, never ad-hoc analysis
+  (see "Answering 'did X work?'").
+- Never credit AI tooling in code, commits, or anything published.
+
 ## How it works
 
 `python -m src.run` (entry point, run by
