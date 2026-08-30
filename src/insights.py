@@ -236,3 +236,78 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
         if v.age_days(now) >= min_age_days:
             videos.append(v)
     return videos
+
+
+# ---------------------------------------------------------------- zero-view analysis
+
+ZERO_NEIGHBOURS = 4          # uploads either side used to judge "was the channel alive?"
+COLD_SPELL_MEDIAN = 5        # neighbour median at/below this = channel-wide dead patch
+
+
+def classify_zero_views(channel_videos):
+    """Classify every 0-view video, encoding the two traps that have produced
+    wrong conclusions on this channel:
+
+    1. **Non-public videos are not suppression.** An owner-privatised video is
+       indistinguishable from a suppressed one by view count alone. 10 of this
+       channel's 41 zeroes are private; three were once cited as evidence that
+       the R4.6 screen was missing benign content.
+    2. **A zero inside a channel-wide cold spell is not per-video moderation.**
+       Judge each zero against its publish-order neighbours. The chiropractic
+       video — once recorded as confirmed suppression case #2 — sat in a patch
+       reading `1, 0, 0, 3, 1, [0], 37`; the whole channel was dead.
+
+    `channel_videos` = [{id, published, views, privacy, title}] sorted or not.
+    Returns {"non_public": [...], "cold_spell": [...], "isolated": [...]} —
+    only `isolated` are genuine per-video suppression candidates.
+    """
+    vids = sorted(channel_videos, key=lambda v: v["published"])
+    public = [v for v in vids if v.get("privacy") == "public"]
+    by_id = {v["id"]: i for i, v in enumerate(public)}
+
+    out = {"non_public": [], "cold_spell": [], "isolated": []}
+    for v in vids:
+        if int(v["views"]) != 0:
+            continue
+        if v.get("privacy") != "public":
+            out["non_public"].append(v)
+            continue
+        i = by_id[v["id"]]
+        before = [int(n["views"]) for n in public[max(0, i - ZERO_NEIGHBOURS):i]]
+        after = [int(n["views"]) for n in public[i + 1:i + 1 + ZERO_NEIGHBOURS]]
+        # Judge each side separately. A symmetric median straddles a collapse and
+        # its recovery, which mis-read the chiropractic video (before: 0,0,3,1 —
+        # clearly dead; after: 37,15,43,210 — recovered) as isolated.
+        sides = [median(s) for s in (before, after) if s]
+        v = dict(v, neighbour_median=min(sides) if sides else float("nan"),
+                 before_median=median(before) if before else float("nan"),
+                 after_median=median(after) if after else float("nan"))
+        bucket = ("cold_spell" if sides and min(sides) <= COLD_SPELL_MEDIAN
+                  else "isolated")
+        out[bucket].append(v)
+    return out
+
+
+def load_channel_videos(now=None):
+    """Every channel video with views + privacy (Data API, near-real-time).
+
+    Deliberately separate from load_videos(): that one joins upload_log against
+    the Analytics API, which lags 1-2 days and omits non-logged and private
+    videos — all three of which matter for suppression questions.
+    """
+    from . import analytics
+    yt = analytics.youtube_client()
+    items = analytics.list_uploaded_videos(yt, part="contentDetails")
+    ids = [it["contentDetails"]["videoId"] for it in items]
+    out = []
+    for i in range(0, len(ids), 50):
+        for d in analytics.fetch_video_details(yt, ids[i:i + 50],
+                                               part="snippet,statistics,status"):
+            out.append({
+                "id": d["id"],
+                "published": d["snippet"]["publishedAt"],
+                "title": d["snippet"]["title"],
+                "views": int(d.get("statistics", {}).get("viewCount", 0)),
+                "privacy": d["status"]["privacyStatus"],
+            })
+    return out

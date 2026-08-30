@@ -151,3 +151,47 @@ def test_blank_bg_clip_is_not_counted_as_broll():
         got.append("(unknown)" if not bg else
                    "procedural" if bg.startswith("procedural") else "broll")
     assert got == ["procedural", "broll", "(unknown)", "(unknown)"]
+
+
+# --- zero-view classification (2026-08-30: both traps hit in one investigation) ---
+
+def _cv(vid, day, views, privacy="public"):
+    return {"id": vid, "published": f"2026-07-{day:02d}T01:00:00Z",
+            "views": views, "privacy": privacy, "title": vid}
+
+
+def test_private_zero_is_not_a_suppression_candidate():
+    """10 of the channel's 41 zeroes are owner-privatised. Counting them as
+    suppression once produced 'the screen is missing benign content'."""
+    vids = [_cv(f"ok{i}", i, 100) for i in range(1, 6)] + [_cv("priv", 6, 0, "private")]
+    got = insights.classify_zero_views(vids)
+    assert [v["id"] for v in got["non_public"]] == ["priv"]
+    assert got["isolated"] == [] and got["cold_spell"] == []
+
+
+def test_zero_inside_a_cold_spell_is_not_per_video_moderation():
+    """The chiropractic video sat in a patch reading 1,0,0,3,1,[0],37 — the
+    whole channel was dead. It was recorded as confirmed suppression case #2."""
+    vids = ([_cv(f"dead{i}", i, v) for i, v in enumerate([1, 0, 0, 3, 1], start=1)]
+            + [_cv("target", 6, 0)] + [_cv(f"back{i}", i, 37) for i in range(7, 10)])
+    got = insights.classify_zero_views(vids)
+    assert "target" in [v["id"] for v in got["cold_spell"]]
+    assert "target" not in [v["id"] for v in got["isolated"]]
+
+
+def test_isolated_zero_among_healthy_neighbours_is_flagged():
+    vids = [_cv(f"ok{i}", i, 200) for i in range(1, 6)] + [_cv("sup", 6, 0)] \
+           + [_cv(f"ok{i}", i, 200) for i in range(7, 11)]
+    got = insights.classify_zero_views(vids)
+    assert [v["id"] for v in got["isolated"]] == ["sup"]
+
+
+def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
+    """A symmetric window straddles the collapse and its recovery. The
+    chiropractic video (before: 0,0,3,1 / after: 37,15,43,210) must read as
+    cold-spell, not isolated — it was PRD's confirmed case #2."""
+    vids = ([_cv(f"d{i}", i, v) for i, v in enumerate([0, 0, 3, 1], start=1)]
+            + [_cv("edge", 5, 0)]
+            + [_cv(f"r{i}", i, v) for i, v in zip(range(6, 10), [37, 15, 43, 210])])
+    got = insights.classify_zero_views(vids)
+    assert "edge" in [v["id"] for v in got["cold_spell"]]

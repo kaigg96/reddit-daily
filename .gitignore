@@ -3,7 +3,6 @@
 /venv
 token.json
 client_secret.json
-regen_refresh_token.py
 /assets/gen/
 *TEMP_MPY*
 *.icloud

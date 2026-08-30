@@ -13,9 +13,10 @@ Read in this order — it's ~5 minutes and avoids re-deriving decisions:
    shipped, what's next, and the experiment backlog with its pre-committed
    decision rules. **Update it whenever anything ships.**
 2. **This README's "How it works"** (below) — the actual pipeline.
-3. **`PRD.md` §4 Findings** — only if the task touches metrics or experiments.
-   Several plausible-sounding ideas were killed by data recorded there; skipping
-   it risks reviving one.
+3. **`PRD.md` §4 Findings** — read this for almost any question, not just
+   metrics ones. Review 2 item 6 (age-matching, and that Review 1 is "not
+   trustworthy as stated") is load-bearing, and several plausible-sounding
+   ideas were killed by data recorded there.
 4. **`TECH_DEBT.md`** — only for code-health work.
 
 Standing conventions, non-negotiable:
@@ -166,6 +167,22 @@ video), cohorts must be **age-matched** or no verdict is given, thin cohorts
 report "insufficient data" instead of a misleading median, and zero-view
 videos are counted separately as suppression candidates rather than averaged
 in. Logic lives in `src/insights.py` and is unit-tested.
+
+```sh
+venv/bin/python scripts/report.py --zeros    # 0-view videos, classified
+```
+
+**Which data source to use.** `report.py` reads the **live APIs**, so it is
+current. `analysis/analytics_snapshots.csv` is a *weekly* snapshot and can be up
+to 8 days stale — fine for trends, wrong for "did this specific video get
+suppressed?". For a fresh question about a recent video, always go live;
+`--zeros` does.
+
+Zero-view videos are classified rather than listed flat, because two things
+masquerade as suppression and both have caused wrong conclusions here:
+**non-public** videos (owner-privatised — 10 of the channel's 41 zeroes) and
+**cold-spell** zeroes (the whole channel was dead that week, so it wasn't
+per-video moderation). Only the **isolated** ones are real candidates.
 
 ```sh
 venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/

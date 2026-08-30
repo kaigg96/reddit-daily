@@ -20,7 +20,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import analytics, config  # noqa: E402
+from src import analytics, config, insights  # noqa: E402
 
 RETENTION_TARGET = 70
 LAG_DAYS = 2      # Analytics API lag: younger uploads aren't "measurable" yet
@@ -102,14 +102,19 @@ def main():
     # views — and (b) the video is public; an owner-privatized video looks
     # identical to a suppressed one in the analytics data.
     privacy = {v["id"]: v["privacy"] for v in channel_videos}
-    # A video must have been at least ZERO_VIEW_DAYS old *at snapshot time* for
-    # its zero to mean anything (analytics lag ~1-2 days behind the snapshot).
-    zero_cutoff = (datetime.date.fromisoformat(snap_dates[-1])
-                   - datetime.timedelta(days=ZERO_VIEW_DAYS)).isoformat()
-    zero_views = [r for r in log_rows
-                  if r["timestamp_utc"][:10] < zero_cutoff
-                  and int(latest.get(r["video_id"], {}).get("views", 0)) == 0
-                  and privacy.get(r["video_id"], "public") == "public"]
+    # Zero-view detection uses the Data API (near-real-time) rather than the
+    # weekly snapshot: the snapshot path flagged a suppression event up to nine
+    # days after it happened. classify_zero_views also strips the two things
+    # that masquerade as suppression — private videos and channel-wide cold
+    # spells. See src/insights.py.
+    try:
+        zero_groups = insights.classify_zero_views(insights.load_channel_videos(now))
+        recent_cut = iso(14)[:10]
+        zero_views = [z for z in zero_groups["isolated"] if z["published"][:10] >= recent_cut]
+    except Exception as e:
+        print(f"zero-view check failed ({type(e).__name__}); continuing")
+        zero_views = []
+
     non_public = [r for r in log_rows
                   if r["timestamp_utc"] >= iso(7)
                   and privacy.get(r["video_id"], "public") != "public"]
@@ -126,7 +131,7 @@ def main():
     if unlogged:
         soft.append(f"{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''}")
     if zero_views:
-        soft.append(f"{len(zero_views)} upload(s) still at 0 views after {ZERO_VIEW_DAYS}+ days")
+        soft.append(f"{len(zero_views)} upload(s) at 0 views (isolated — suppression candidates)")
     if non_public:
         soft.append(f"{len(non_public)} upload(s) not public")
 

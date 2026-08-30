@@ -9,6 +9,7 @@ Usage:
   venv/bin/python scripts/report.py --by format_version
   venv/bin/python scripts/report.py --by topic --metric views
   venv/bin/python scripts/report.py --compare candidate_rank=1 --metric watch_seconds
+  venv/bin/python scripts/report.py --zeros            # suppression candidates
 """
 
 import argparse
@@ -56,6 +57,24 @@ def by_dimension(videos, key, metric, now):
               f"  Use --compare for an age-matched two-way test.")
 
 
+def zeros(now):
+    """List 0-view videos, separating the two things that masquerade as
+    suppression: owner-privatised videos, and zeroes inside channel-wide cold
+    spells. Only the isolated ones are real per-video suppression candidates."""
+    groups = insights.classify_zero_views(insights.load_channel_videos(now))
+    print(f"{len(groups['isolated'])} isolated zero(s) — genuine suppression candidates:")
+    for v in sorted(groups["isolated"], key=lambda x: x["published"], reverse=True):
+        print(f"  {v['published'][:10]}  {v['id']}  neighbour median={v['neighbour_median']:.0f}"
+              f"  {v['title'][:44]}")
+    print(f"\n{len(groups['cold_spell'])} zero(s) inside channel-wide cold spells "
+          f"— NOT per-video moderation:")
+    for v in sorted(groups["cold_spell"], key=lambda x: x["published"], reverse=True)[:6]:
+        print(f"  {v['published'][:10]}  {v['id']}  neighbour median={v['neighbour_median']:.0f}")
+    if len(groups["cold_spell"]) > 6:
+        print(f"  ... and {len(groups['cold_spell']) - 6} more")
+    print(f"\n{len(groups['non_public'])} zero(s) are non-public (owner action, not suppression)")
+
+
 def compare(videos, spec, metric, now):
     key, _, value = spec.partition("=")
     a = [v for v in videos if str(v.meta.get(key, "")).strip() == value]
@@ -67,11 +86,19 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
+    p.add_argument("--zeros", action="store_true",
+                   help="list 0-view videos, classified into suppression candidates / "
+                        "cold-spell / non-public")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS])
     args = p.parse_args()
 
     now = datetime.datetime.now(datetime.timezone.utc)
+
+    if args.zeros:          # uses the Data API (near-real-time), not the weekly snapshot
+        zeros(now)
+        return
+
     videos = insights.load_videos(now=now)
     if not videos:
         sys.exit("No analyzable uploads found.")
