@@ -2,3 +2,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-08-25T01:55:48+00:00,AskReddit,What is the cringiest midlife crisis you've witnessed?,drop_comments,unsafe_comments,Question is not inherently risky,gemini,1
 2026-08-26T02:02:25+00:00,AskReddit,"Bartenders of Reddit, what was a ""cut off"" gone wrong?",skip_post,graphic_violence,Invites stories of graphic violence and harm.,gemini,2
 2026-08-31T05:44:51+00:00,AskReddit,what smell inside somebody's house immediately turns you away and why?,drop_comments,unsafe_comments,,gemini,1
+2026-09-01T16:44:18+00:00,AskReddit,What’s something innocent that feels dangerously flirty?,skip_post,sexual_suggestive,Question solicits scenarios with strong sexual innuendo.,gemini,1
