@@ -226,7 +226,11 @@ def main():
         is_new = not OUT.exists()
         OUT.parent.mkdir(exist_ok=True)
         with open(OUT, "a", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=FIELDS)
+            # Pin LF for the same reason as the traffic CSV below: this file is
+            # appended from both CI and local runs and is now ~88% CRLF / 12% LF.
+            # Pinning stops it worsening; normalizing the existing rows is a
+            # separate one-off (see TECH_DEBT.md open items).
+            writer = csv.DictWriter(f, fieldnames=FIELDS, lineterminator="\n")
             if is_new:
                 writer.writeheader()
             for video_id, published_at in videos:

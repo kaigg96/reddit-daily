@@ -56,5 +56,15 @@ jobs:
         # the commit — losing the snapshot too. Same trap as run-reddit-video.yml.
         if [ -f analysis/traffic_sources.csv ]; then git add analysis/traffic_sources.csv; fi
         git commit -m "Weekly analytics snapshot" || echo "No changes to commit"
-        git pull --rebase origin main
-        git push
+
+        # Retry, matching run-reddit-video.yml: the twice-daily video job can
+        # land between our pull and push, and a lost snapshot is a permanent
+        # hole in the weekly series (the next run appends a new date, it does
+        # not backfill).
+        for attempt in 1 2 3; do
+          git pull --rebase origin main && git push && exit 0
+          echo "push attempt $attempt failed; retrying"
+          sleep 5
+        done
+        echo "::error::Could not push analytics snapshot after 3 attempts"
+        exit 1

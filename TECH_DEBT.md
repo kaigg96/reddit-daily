@@ -88,3 +88,23 @@ Lesson for future passes: deleting the *files* is the easy half — the stale **
 ## Ritual
 
 Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, get owner scoping, execute, update this file.
+
+## Open items (logged between passes)
+
+Findings that surface during feature work, recorded here so they survive past
+the commit message they were noticed in. Not a formal pass; fold into the next one.
+
+- **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
+  rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
+  local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
+  but every weekly diff is noisier than it needs to be. Noticed 2026-09-07
+  while shipping R4.7, which pinned LF on the *new* `traffic_sources.csv`.
+  Both writers are now pinned, so it will not worsen. **Normalizing the
+  existing rows is deliberately deferred:** it is a ~7,500-line mechanical diff
+  on a production data file, and worth doing on its own rather than buried in a
+  feature commit. Owner's call.
+- **Digest surfaces `channel_7d` traffic, README says decide on `logged_uploads`.**
+  Both are correct for their purpose (7d is the drift series, logged_uploads is
+  the current-format cohort), but a reader skimming the digest could take the
+  weekly number as the decision number. Revisit if the two ever diverge much.
+
