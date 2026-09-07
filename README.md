@@ -25,6 +25,10 @@ Standing conventions, non-negotiable:
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis
   (see "Answering 'did X work?'").
 - Never credit AI tooling in code, commits, or anything published.
+- **Record any finding you don't fix** in `TECH_DEBT.md` → "Open items (logged
+  between passes)". A diagnosis that lives only in a commit message is
+  invisible to the next session — that is how a known CSV line-ending problem
+  went unrecorded through an otherwise complete feature.
 
 ## How it works
 
