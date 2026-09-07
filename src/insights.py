@@ -311,3 +311,90 @@ def load_channel_videos(now=None):
                 "privacy": d["status"]["privacyStatus"],
             })
     return out
+
+
+# ---------------------------------------------------------------- traffic sources (R4.7)
+
+# The Analytics API does NOT support dimensions="video,insightTrafficSourceType"
+# (400 "query is not supported"), and filtering by a video list AGGREGATES that
+# list rather than breaking it down. So a true per-video mix costs one API call
+# per video — ~1000/week here — for denominators (~100 views) too small to read.
+# Traffic mix is therefore collected at cohort level only; the cohorts are
+# defined by traffic_scopes() in scripts/weekly_analytics.py.
+
+# Analytics returns opaque enum codes; these are the labels YouTube Studio uses.
+# Unmapped codes fall through as-is rather than being dropped or renamed.
+TRAFFIC_LABELS = {
+    "SHORTS": "Shorts feed",
+    "YT_SEARCH": "Search",
+    "YT_CHANNEL": "Channel pages",
+    "YT_OTHER_PAGE": "Other YouTube pages",
+    "RELATED_VIDEO": "Suggested videos",
+    "SUBSCRIBER": "Browse/subscriptions",
+    "EXT_URL": "External",
+    "NOTIFICATION": "Notifications",
+    "PLAYLIST": "Playlists",
+    "HASHTAGS": "Hashtag pages",
+    "SOUND_PAGE": "Sound page",
+    "ADVERTISING": "Advertising",
+    "NO_LINK_OTHER": "Direct/unknown",
+    "NO_LINK_EMBEDDED": "Embedded",
+}
+
+# Sources that represent someone actively looking for content, as opposed to
+# being served it by the feed. This is the number R4.7 exists to produce: it
+# decides whether SEO work (tags, search-oriented titles, SRT) is worth revisiting.
+DISCOVERY_SOURCES = ("YT_SEARCH", "HASHTAGS", "EXT_URL")
+
+
+@dataclass
+class TrafficRow:
+    source: str
+    views: float
+    minutes: float
+    share_pct: float = 0.0
+
+    @property
+    def label(self):
+        return TRAFFIC_LABELS.get(self.source, self.source)
+
+
+def aggregate_traffic(rows):
+    """Sum (source, views, minutes) triples by source and attach view shares.
+
+    Chunked queries (the video filter caps out well before this channel's
+    upload count) each return their own breakdown, so the chunks must be summed
+    before shares mean anything. Sorted by views desc; ties broken by source
+    name so the committed CSV has a stable row order across runs.
+    """
+    totals = {}
+    for source, views, minutes in rows:
+        v, m = totals.get(source, (0.0, 0.0))
+        totals[source] = (v + float(views), m + float(minutes))
+    grand = sum(v for v, _ in totals.values())
+    out = [TrafficRow(source=s, views=v, minutes=m,
+                      share_pct=(100.0 * v / grand) if grand else 0.0)
+           for s, (v, m) in totals.items()]
+    out.sort(key=lambda r: (-r.views, r.source))
+    return out
+
+
+def discovery_share(rows):
+    """Percent of views from search/hashtag/external — the SEO-surface read."""
+    return sum(r.share_pct for r in rows if r.source in DISCOVERY_SOURCES)
+
+
+def format_traffic_mix(rows, top_n=3, min_share=1.0):
+    """One-line readout: 'Shorts feed 94.2% · Search 3.4% · other 2.4%'.
+
+    Everything past top_n, and anything below min_share, collapses into 'other'
+    so a long tail of sub-1% sources can't crowd out the line.
+    """
+    if not rows:
+        return "no data"
+    named = [r for r in rows[:top_n] if r.share_pct >= min_share]
+    parts = [f"{r.label} {r.share_pct:.1f}%" for r in named]
+    rest = 100.0 - sum(r.share_pct for r in named)
+    if rest >= 0.05:
+        parts.append(f"other {rest:.1f}%")
+    return " · ".join(parts)

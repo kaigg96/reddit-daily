@@ -73,5 +73,7 @@ OUT_SRT = GEN / "captions.srt"
 PREV_POST_FILE = ROOT / "prev_post.txt"
 UPLOAD_LOG = ROOT / "upload_log.csv"
 SCREEN_LOG = ROOT / "analysis" / "screen_log.csv"  # R4.6 audit trail
+ANALYTICS_SNAPSHOTS = ROOT / "analysis" / "analytics_snapshots.csv"  # R4.2 weekly series
+TRAFFIC_LOG = ROOT / "analysis" / "traffic_sources.csv"  # R4.7 traffic-source series
 
 GEN.mkdir(parents=True, exist_ok=True)

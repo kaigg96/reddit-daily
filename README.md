@@ -65,6 +65,15 @@ logic shared by the reporting scripts below (`weekly_analytics.py`,
 `weekly_digest.py`, `analyze_channel.py`) — all three read the live channel
 via OAuth, no separate Data API key needed.
 
+The Monday job (`weekly-analytics.yml`) also appends
+`analysis/traffic_sources.csv` — views by traffic source (PRD R4.7), at three
+cohort scopes: `channel_lifetime`, `channel_7d` (a fresh non-overlapping window
+each week, so the series shows drift), and `logged_uploads` (the current-format
+cohort — **read this one for decisions**; lifetime is mostly pre-overhaul v1
+content). Per-video breakdown isn't possible: the Analytics API rejects
+`dimensions="video,insightTrafficSourceType"` and a `video==` filter aggregates
+the list rather than splitting it. The digest surfaces the 7d mix as one line.
+
 ## Dry runs (never touch the channel)
 
 ```sh
@@ -173,7 +182,8 @@ venv/bin/python scripts/report.py --zeros    # 0-view videos, classified
 ```
 
 **Which data source to use.** `report.py` reads the **live APIs**, so it is
-current. `analysis/analytics_snapshots.csv` is a *weekly* snapshot and can be up
+current. `analysis/traffic_sources.csv` is weekly-snapshot data too, and has no
+`report.py` path — it is small enough to read directly. `analysis/analytics_snapshots.csv` is a *weekly* snapshot and can be up
 to 8 days stale — fine for trends, wrong for "did this specific video get
 suppressed?". For a fresh question about a recent video, always go live;
 `--zeros` does.

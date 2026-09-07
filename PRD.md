@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v5` live (suppression screen shipped 2026-08-23); next: R4.4 topic/hook ranker — see §0 Delivery plan |
+| **Status** | `v5` live (suppression screen shipped 2026-08-23); R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-08-23 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
+**Last updated:** 2026-09-07 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -23,7 +23,7 @@
 - `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration (music ~10 dB under voice, SFX ~−20 dBFS peaks), "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
-- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push)
+- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push) · R4.7 traffic-source telemetry (2026-09-07, via `feature/r4.7-traffic-source`) — `analysis/traffic_sources.csv` + a digest line; first snapshot says distribution is **96.7% Shorts feed** on current-format uploads, search **1.3%**
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 
@@ -32,7 +32,7 @@
 | Item | Req | Decision rule |
 |---|---|---|
 | ~~Suppression-risk screen~~ ✅ `v5` | R4.6 | Shipped 2026-08-23. **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
-| Traffic-source telemetry in weekly job | R4.7 | Keep — measurement-only, no version bump; ship whenever convenient. |
+| ~~Traffic-source telemetry~~ ✅ shipped | R4.7 | Shipped 2026-09-07 (no version bump). **Result: the SEO surface earns ~1.3% of views** — search-oriented work stays parked; see §4 Findings. Weekly `channel_7d` rows now accumulate a drift series, so this becomes re-checkable rather than a one-off read. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -125,6 +125,14 @@ Directional, not contractual — the algorithm is stochastic, and the strongest 
 4. **Loops are real upside that shortening cannot buy:** the best performers include a 17s video at **227% avg-viewed** (40s watched) and another at 100%. Watch-seconds above duration only come from content worth re-watching.
 5. **Distribution gain from the overhaul confirmed and larger than first measured:** v4 median **166 views** (n=52) vs recent-era v1 median **28** (n=76) — roughly 6× (Review 1 estimated 3.5× on n=14).
 6. **Methodological rule now binding: cohorts must be age-matched.** Avg-%-viewed *declines as a video ages* (broader, colder audiences). Same-week (3–9d) videos sit at ~65% regardless of background, while the older overall pool sits near 48–50%. Two consequences: (a) **b-roll shows no measurable retention effect** once age-matched (65.5% vs 64.9%) — an apparent advantage was pure age artifact; (b) Review 1's "retention didn't move" claim compared v4 against much older v1 videos and is **not trustworthy as stated** — the distribution half stands, the retention half is unresolved.
+
+**Traffic-source baseline (2026-09-07, R4.7 first snapshot).** Distribution is the Shorts feed and essentially nothing else. On the current-format cohort (`logged_uploads`, n=103): **Shorts feed 96.7%**, other YouTube pages 1.8%, **search 1.3%**, everything else < 0.2%. Channel lifetime is barely different (93.7% / 2.4% / 3.4%) — the older v1 content drew *more* search share than what we ship now, so the SEO surface is not something the overhaul lost, it was never large.
+
+Consequences:
+1. **Search-oriented work is not worth revisiting** at this scale. Tags, search-shaped titles and the SRT track earn ~1.3% of views; even tripling that moves total views by ~3%. Keep them (they cost nothing and the SRT serves accessibility), but do not build for them.
+2. **The thumbnail question is settled the same way** — R2.3's full version was deferred because thumbnails don't render in the Shorts feed, and the surfaces where they do render (channel pages, search, browse) are 2.4% + 1.3% + 0.15% combined. Leave it deferred.
+3. **Retention on the feed is the only lever that matters**, which is the same place §4 Review 2 and R4.4 already point.
+4. Re-check rather than re-derive: `channel_7d` rows accumulate weekly, so a genuine shift in the mix will show up in the series instead of needing another investigation.
 
 **Review 1 (2026-07-27, n=14, two snapshots) — retained for history; items 1 and 2 below are superseded above.**
 
@@ -279,7 +287,7 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 - **Deferred (experiment backlog):** actually optimising time-of-day. Unchanged — not a growth lever.
 
 #### R2.3 — Branded thumbnail template — **⏸ deferred (2026-07-22, at v4 ship)**
-- A basic branded card already ships (since v2: dark bg frame, channel tag, full question). This spec is the full version — Gemini-shortened ≤ 8-word headline, channel mark. Deferred per "include if cheap, else defer": thumbnails don't render in the Shorts feed, so the marginal value is limited to channel/search/browse surfaces. Revisit only if those surfaces ever matter (see R4.7 traffic-source data).
+- A basic branded card already ships (since v2: dark bg frame, channel tag, full question). This spec is the full version — Gemini-shortened ≤ 8-word headline, channel mark. Deferred per "include if cheap, else defer": thumbnails don't render in the Shorts feed, so the marginal value is limited to channel/search/browse surfaces. Revisit only if those surfaces ever matter — **answered 2026-09-07: they don't** (R4.7 measured them at ~3.9% of views combined; see §4 Findings). Stays deferred.
 
 ---
 
@@ -308,10 +316,15 @@ High-confidence, non-regression keepers. Ship together through the review gate (
   - **Do NOT add a category in response to a single new zero.** That is exactly the n=1 fitting that produced this taxonomy and the cancelled R1.8/R1.9.
   - **Recommended posture:** keep the screen (free, fail-open, catches the sexual/named-wrongdoing shapes, and its call carries the `topic` telemetry R4.4 needs), **freeze the taxonomy**, and reclassify 0-views in §0 as accepted background loss rather than an open workstream. Verify with `scripts/report.py --zeros`, which now encodes the private-video and cold-spell traps.
 
-#### R4.7 — Traffic-source telemetry — **Keeper (measurement-only, no version bump)**
+#### R4.7 — Traffic-source telemetry — **shipped ✅ 2026-09-07 (measurement-only, no version bump)**
 - Add `insightTrafficSourceType` (Analytics API dimension) to the weekly snapshot job — per-video or channel-level views by source (Shorts feed / search / browse / external).
 - **Why:** tells us whether the SEO surface (tags, titles-for-search, SRT) earns anything, or whether distribution is ~100% Shorts feed — which decides whether search-oriented work is ever worth revisiting. Currently flying blind on this.
 - **Acceptance:** new column(s)/file appended by the Monday job; a first snapshot committed.
+- **As-built (2026-09-07) — cohort-level, not per-video.** The API forbids the per-video breakdown: `dimensions="video,insightTrafficSourceType"` returns 400 *"The query is not supported"*, and a `video==` filter **aggregates** the id list instead of splitting it. A true per-video mix therefore costs one call per video (~985/week here) for denominators around 100 views — noise. Three cohort scopes are appended instead, one row per (scope, source), to `analysis/traffic_sources.csv`:
+  - `channel_lifetime` — all-time level, dominated by the ~900 pre-overhaul v1 uploads.
+  - `channel_7d` — trailing week, non-overlapping between Monday runs, so repeated runs build a **drift series**. `endDate` is the run date and Analytics lags 1–2 days, so it really covers ~5–6 settled days; the bias is constant, so week-over-week stays comparable.
+  - `logged_uploads` — the `upload_log.csv` cohort, i.e. the format we actually ship today. This is the scope to read for decisions; the lifetime number answers a question about content we no longer make.
+- **As-built additions:** one `Traffic mix (7d)` bullet under the digest's Performance block (the CSV alone would go unread); pure aggregation/share/label logic in `src/insights.py` with unit tests, API calls in `scripts/weekly_analytics.py`. The traffic step is **fail-soft** — a traffic query error must never cost the per-video snapshot — and each CSV now guards its own same-day double-append independently, so a rerun after a partial failure fills in only what is missing.
 
 ---
 

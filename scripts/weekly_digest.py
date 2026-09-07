@@ -8,9 +8,10 @@ upload_log.csv, and live channel reads. Writes:
 Read-only against YouTube; the workflow posts the issue via `gh`.
 
 Content contract (owner-approved 2026-07-20): Status line, Pipeline health,
-Performance, Video of the week, TODOs. Deliberately excluded: experiments
-readout, analytics-lag footnotes, per-video engagement tables, subscriber
-attribution — see PRD R4.2 deferred-metrics note.
+Performance, Video of the week, TODOs — plus one traffic-mix bullet under
+Performance (R4.7, 2026-09-07). Deliberately excluded: experiments readout,
+analytics-lag footnotes, per-video engagement tables, subscriber attribution —
+see PRD R4.2 deferred-metrics note.
 """
 
 import csv
@@ -78,6 +79,24 @@ def screen_skips(days=7):
                 if r["timestamp_utc"] >= cutoff and r["action"].startswith("skip")]
 
 
+def traffic_mix(scope="channel_7d"):
+    """R4.7 readout: latest traffic-source split for one scope, as a display line.
+
+    Reads the CSV the snapshot step just wrote rather than re-querying — same
+    pattern as the analytics snapshot, and it keeps the digest read-only.
+    """
+    if not config.TRAFFIC_LOG.exists():
+        return None
+    with open(config.TRAFFIC_LOG) as f:
+        rows = [r for r in csv.DictReader(f) if r["scope"] == scope]
+    if not rows:
+        return None
+    latest_date = max(r["snapshot_date"] for r in rows)
+    return insights.aggregate_traffic(
+        (r["traffic_source"], r["views"], r["est_minutes_watched"])
+        for r in rows if r["snapshot_date"] == latest_date)
+
+
 def humanize(n):
     return f"{n / 1_000_000:.1f}M" if n >= 1_000_000 else (f"{n / 1000:.1f}K" if n >= 1000 else str(n))
 
@@ -90,7 +109,7 @@ def main():
     subs, channel_videos = fetch_channel(yt)
     channel_ids = {v["id"] for v in channel_videos}
 
-    snap_rows = list(csv.DictReader(open(config.ROOT / "analysis" / "analytics_snapshots.csv")))
+    snap_rows = list(csv.DictReader(open(config.ANALYTICS_SNAPSHOTS)))
     snap_dates = sorted({r["snapshot_date"] for r in snap_rows})
     latest = {r["video_id"]: r for r in snap_rows if r["snapshot_date"] == snap_dates[-1]}
     snap_age = (now.date() - datetime.date.fromisoformat(snap_dates[-1])).days
@@ -210,6 +229,9 @@ def main():
         lines.append(f"- Avg % viewed: **{med_pct:.0f}%** vs ≥{RETENTION_TARGET}% target")
     else:
         lines.append("- No measurable uploads yet this week")
+    mix = traffic_mix()
+    if mix:
+        lines.append(f"- Traffic mix (7d): {insights.format_traffic_mix(mix)}")
     lines.append(f"- Subscribers: **{subs}**")
     lines.append(f"- ~90d views: ~{humanize(views_90)} (approx)")
     lines.append("")

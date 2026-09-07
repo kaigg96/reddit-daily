@@ -207,3 +207,67 @@ def test_publish_drift_is_measured_against_nearest_slot_across_midnight():
     from scripts import weekly_digest as wd
     vids = [{"published": "2026-09-07T23:50:00Z"}, {"published": "2026-09-07T00:23:00Z"}]
     assert wd.median_publish_drift(vids, days=36500) == 16.5   # median of 33 and 0
+
+
+# --- traffic sources (R4.7) -------------------------------------------------
+
+def test_chunked_cohort_queries_are_summed_before_shares_are_computed():
+    """A video filter over >CHUNK ids comes back as several partial breakdowns.
+    Treating one chunk as the whole cohort would report a share of the wrong
+    denominator — the reason aggregate_traffic exists at all."""
+    rows = insights.aggregate_traffic([
+        ("SHORTS", 600, 30), ("YT_SEARCH", 40, 4),      # chunk 1
+        ("SHORTS", 300, 15), ("YT_SEARCH", 60, 6),      # chunk 2
+    ])
+    by_source = {r.source: r for r in rows}
+    assert by_source["SHORTS"].views == 900
+    assert by_source["YT_SEARCH"].views == 100
+    assert by_source["SHORTS"].minutes == 45
+    assert by_source["SHORTS"].share_pct == pytest.approx(90.0)
+    assert by_source["YT_SEARCH"].share_pct == pytest.approx(10.0)
+
+
+def test_traffic_rows_sort_by_views_then_name_for_a_stable_committed_csv():
+    rows = insights.aggregate_traffic([
+        ("YT_SEARCH", 10, 1), ("SHORTS", 90, 9), ("EXT_URL", 10, 1)])
+    assert [r.source for r in rows] == ["SHORTS", "EXT_URL", "YT_SEARCH"]
+
+
+def test_zero_view_scope_does_not_divide_by_zero():
+    """A dead week returns real source rows with 0 views; the job must still
+    write them rather than crash on the share denominator."""
+    rows = insights.aggregate_traffic([("SHORTS", 0, 0), ("YT_SEARCH", 0, 0)])
+    assert [r.share_pct for r in rows] == [0.0, 0.0]
+
+
+def test_discovery_share_counts_only_sources_the_viewer_sought_out():
+    """The R4.7 decision number: search/hashtag/external, not feed placement."""
+    rows = insights.aggregate_traffic([
+        ("SHORTS", 900, 45), ("YT_SEARCH", 60, 6),
+        ("HASHTAGS", 30, 3), ("EXT_URL", 10, 1)])
+    assert insights.discovery_share(rows) == pytest.approx(10.0)
+
+
+def test_traffic_mix_line_collapses_the_long_tail_into_other():
+    rows = insights.aggregate_traffic([
+        ("SHORTS", 940, 47), ("YT_SEARCH", 34, 3), ("YT_CHANNEL", 11, 1),
+        ("EXT_URL", 8, 1), ("SUBSCRIBER", 7, 1)])
+    line = insights.format_traffic_mix(rows)
+    assert line == "Shorts feed 94.0% · Search 3.4% · Channel pages 1.1% · other 1.5%"
+
+
+def test_traffic_mix_drops_sub_one_percent_sources_from_the_named_list():
+    rows = insights.aggregate_traffic([("SHORTS", 995, 50), ("YT_SEARCH", 5, 1)])
+    assert insights.format_traffic_mix(rows) == "Shorts feed 99.5% · other 0.5%"
+
+
+def test_unmapped_traffic_codes_survive_as_their_raw_enum():
+    """YouTube adds source types; an unknown code must show up rather than be
+    silently dropped or mislabelled."""
+    rows = insights.aggregate_traffic([("SOME_NEW_SURFACE", 100, 10)])
+    assert rows[0].label == "SOME_NEW_SURFACE"
+    assert insights.format_traffic_mix(rows) == "SOME_NEW_SURFACE 100.0%"
+
+
+def test_empty_traffic_result_reports_no_data_instead_of_a_blank_line():
+    assert insights.format_traffic_mix([]) == "no data"
