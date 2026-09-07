@@ -131,8 +131,8 @@ def main():
     if not video_id:
         sys.exit("Upload failed; not updating prev_post/upload_log.")
     youtube.upload_thumbnail(video_id, config.OUT_THUMBNAIL)
-    youtube.upload_caption(video_id, config.OUT_SRT)  # R3.5, fail-soft
-    youtube.post_comment(video_id, comment_text)      # R3.3, fail-soft
+    caption_ok = youtube.upload_caption(video_id, config.OUT_SRT)  # R3.5, fail-soft
+    comment_ok = youtube.post_comment(video_id, comment_text)      # R3.3, fail-soft
     print(f"Video live: https://www.youtube.com/watch?v={video_id}")
 
     config.PREV_POST_FILE.write_text(post.title)
@@ -150,6 +150,8 @@ def main():
         "duration_s": f"{result.duration:.1f}",
         "candidate_rank": post.candidate_rank,
         "topic": post.topic,
+        "caption_ok": int(bool(caption_ok)),
+        "comment_ok": int(bool(comment_ok)),
     })
 
 

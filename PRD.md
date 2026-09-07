@@ -266,13 +266,17 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 - Keep descriptions fully self-describing (already true: question + all answers in plain text). The description is the channel's crawlable text surface — never degrade it into teaser copy.
 - **Scope boundary:** this requirement is about maximal legibility to legitimate machine readers, which compounds with human discovery. It is explicitly NOT bot-view optimization — see §7 for why that is excluded.
 
-#### R4.5 — Upload-time predictability & logging — **✅ v4 (time-of-day tuning stays deferred)**
-- **Problem:** scheduled runs currently publish 45–105 min after their cron slot. Most of that is GitHub Actions queue jitter at the top of the hour (`0 0,12`), plus ~7–11 min of uncached `pip install` + render. The publish time is therefore *unpredictable across a ~60-min window*, which makes any time-of-day analysis impossible.
-- **Sprint 1 scope (keeper, plumbing — no growth claim):**
-  - Move the cron off the top of the hour (e.g. `23 0,12 * * *`) to dodge queue congestion; cache pip deps (`actions/setup-python` cache or `actions/cache`) to shave render-start latency. If a specific *publish* clock-time is ever targeted, set the cron ~10 min earlier to absorb the irreducible pipeline runtime.
-  - Join YouTube's actual `publishedAt` (already pulled in R4.2's snapshot) into the experiment data, and add a `publish_hour_utc` to the analytics join so slot becomes analyzable later.
-  - **Acceptance:** post-change scheduled runs land within a tighter, consistent window; `publishedAt` present per video in the joined data.
-- **Deferred (experiment backlog):** actually *optimizing* time-of-day. For Shorts the magnitude is genuinely uncertain (long discovery tail, global test pool — weaker lever than for long-form), and it's second-order to retention. Revisit only once retention is solved and there's enough volume per slot for a comparison to mean anything. **Not** framed as a growth lever.
+#### R4.5 — Upload-time predictability & logging — **✅ v4 shipped; ⚠️ partially regressed (2026-09-07)**
+- **Original problem:** scheduled runs published 45–105 min after their cron slot — top-of-hour GitHub Actions queue congestion plus ~7–11 min of pipeline runtime — making publish time unpredictable across a ~60-min window.
+- **Shipped in v4:** cron moved off the hour to `23 0,12 * * *`, pip caching added. Drift tightened to ~45–100 min.
+- **⚠️ Regression (observed 2026-09-07):** drift stepped up around 08-27→08-29 and has since held at a **stable ~250–325 min (~4.4h) late**, oscillating rather than growing. GitHub delays scheduled workflows under load and that delay is outside our control; moving the cron minute no longer helps.
+- **Impact is low, and deliberately not being chased:**
+  - **Cadence is unaffected** — exactly 2 uploads/day for 19 consecutive days, gaps a steady 11–13h. Nothing is missed or colliding.
+  - Per §4, **time-of-day is not a growth lever** for Shorts (long discovery tail, global test pool). Chasing a specific clock time optimises something we've already concluded doesn't matter.
+  - Compensating by shifting the cron earlier would be fragile: the offset is a queue artifact that can change without notice, and we'd then overshoot early.
+- **What was done instead:** made it *observable*. The weekly digest now reports median publish drift and bolds it past 120 min — previously the cadence check counted uploads per calendar day, so hours of slide stayed invisible for ten days.
+- **If timing ever does matter** (i.e. the deferred time-of-day experiment is revived), the fix is not cron tuning but **self-gating frequent runs**: schedule hourly, exit immediately unless the target window is open and the slot is unfilled. That converts "fire at 00:23 and hope" into "publish as early in the window as the queue allows", at the cost of ~24 short no-op runs/day.
+- **Deferred (experiment backlog):** actually optimising time-of-day. Unchanged — not a growth lever.
 
 #### R2.3 — Branded thumbnail template — **⏸ deferred (2026-07-22, at v4 ship)**
 - A basic branded card already ships (since v2: dark bg frame, channel tag, full question). This spec is the full version — Gemini-shortened ≤ 8-word headline, channel mark. Deferred per "include if cheap, else defer": thumbnails don't render in the Shorts feed, so the marginal value is limited to channel/search/browse surfaces. Revisit only if those surfaces ever matter (see R4.7 traffic-source data).

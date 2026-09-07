@@ -43,6 +43,29 @@ def fetch_channel(yt):
     return subs, videos
 
 
+# Scheduled cron slots (UTC minutes past midnight) — see run-reddit-video.yml.
+CRON_SLOTS = (23, 12 * 60 + 23)
+DRIFT_ALERT_MIN = 120
+
+
+def median_publish_drift(channel_videos, days=7):
+    """Median minutes between the scheduled slot and actual publish.
+
+    The cadence check counts uploads per calendar day, so it stays green while
+    publish time slides hours — GitHub Actions delays scheduled runs under load
+    and the delay has repeatedly grown unnoticed."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cutoff = (now - datetime.timedelta(days=days)).isoformat()
+    drifts = []
+    for v in channel_videos:
+        p = v.get("published", "")
+        if p < cutoff:
+            continue
+        mins = int(p[11:13]) * 60 + int(p[14:16])
+        drifts.append(min(min(abs(mins - s), 1440 - abs(mins - s)) for s in CRON_SLOTS))
+    return analytics.median(drifts) if drifts else float("nan")
+
+
 def screen_skips(days=7):
     """R4.6 audit: skips logged in the window, for the weekly false-positive review."""
     path = config.SCREEN_LOG
@@ -119,6 +142,7 @@ def main():
                   if r["timestamp_utc"] >= iso(7)
                   and privacy.get(r["video_id"], "public") != "public"]
     skips = screen_skips()
+    drift = median_publish_drift(channel_videos)
 
     # --- status ---
     hard, soft = [], []
@@ -164,6 +188,9 @@ def main():
 
     cadence = f"{week_count}/14 uploads"
     cadence += " (no missed days)" if not missed_days else f" — **missed: {', '.join(sorted(missed_days))}**"
+    if drift == drift:  # not NaN
+        cadence += (f" · publish drift: **{drift:.0f} min late**" if drift >= DRIFT_ALERT_MIN
+                    else f" · publish drift: {drift:.0f} min")
     if unlogged:
         diff = (f"**{len(unlogged)} unlogged video{'s' if len(unlogged) > 1 else ''}** ("
                 + ", ".join(v["published"][:10] for v in unlogged[:3]) + ")")

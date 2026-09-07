@@ -195,3 +195,15 @@ def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
             + [_cv(f"r{i}", i, v) for i, v in zip(range(6, 10), [37, 15, 43, 210])])
     got = insights.classify_zero_views(vids)
     assert "edge" in [v["id"] for v in got["cold_spell"]]
+
+
+# --- publish drift (2026-09-07: 4.5h drift ran unnoticed for 10 days) --------
+
+def test_publish_drift_is_measured_against_nearest_slot_across_midnight():
+    """A 23:50 publish is 33 min from the 00:23 slot, not 1407 min — without
+    wrapping, near-midnight uploads would look catastrophically late."""
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    vids = [{"published": "2026-09-07T23:50:00Z"}, {"published": "2026-09-07T00:23:00Z"}]
+    assert wd.median_publish_drift(vids, days=36500) == 16.5   # median of 33 and 0

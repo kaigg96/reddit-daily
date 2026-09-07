@@ -11,6 +11,10 @@ FIELDS = [
     # Added 2026-08-23 to test whether deviating from Reddit's own ranking costs
     # anything, before building any ranker on top of it (PRD R4.4 Step 0).
     "candidate_rank", "topic",
+    # Added 2026-09-07: fail-soft API outcomes previously printed to stdout and
+    # vanished with the Actions log, so a failed caption upload was only
+    # discoverable by querying YouTube directly.
+    "caption_ok", "comment_ok",
 ]
 
 
