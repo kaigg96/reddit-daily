@@ -164,7 +164,11 @@ def snapshot_traffic(ya, today):
     TRAFFIC_OUT.parent.mkdir(exist_ok=True)
     written = 0
     with open(TRAFFIC_OUT, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=TRAFFIC_FIELDS)
+        # Pin LF: csv defaults to CRLF, and this file gets appended to from both
+        # CI (autocrlf off) and local runs (autocrlf=input, which normalizes on
+        # add) — which is how analytics_snapshots.csv ended up with 6601 CRLF
+        # lines and ~900 LF ones. Harmless to parse, ugly in every diff.
+        writer = csv.DictWriter(f, fieldnames=TRAFFIC_FIELDS, lineterminator="\n")
         if is_new:
             writer.writeheader()
         for scope, start_date, video_ids in traffic_scopes(today):

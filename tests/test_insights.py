@@ -271,3 +271,44 @@ def test_unmapped_traffic_codes_survive_as_their_raw_enum():
 
 def test_empty_traffic_result_reports_no_data_instead_of_a_blank_line():
     assert insights.format_traffic_mix([]) == "no data"
+
+
+def test_second_weekly_append_extends_the_file_without_a_repeated_header():
+    """The traffic CSV is appended to weekly and committed. Guards checked:
+    header written once, prior rows untouched, LF endings kept, and the
+    same-day guard refusing a double-append on a rerun."""
+    import sys, pathlib, tempfile
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_analytics as wa
+
+    class StubClient:
+        """Mimics the one report shape R4.7 queries."""
+        def reports(self): return self
+        def query(self, **kw): self.kw = kw; return self
+        def execute(self):
+            return {"columnHeaders": [{"name": "insightTrafficSourceType"},
+                                      {"name": "views"},
+                                      {"name": "estimatedMinutesWatched"}],
+                    "rows": [["SHORTS", 950, 48], ["YT_SEARCH", 50, 5]]}
+
+    with tempfile.TemporaryDirectory() as d:
+        out = pathlib.Path(d) / "traffic_sources.csv"
+        orig_out, orig_scopes = wa.TRAFFIC_OUT, wa.traffic_scopes
+        wa.TRAFFIC_OUT = out
+        wa.traffic_scopes = lambda today: [("channel_7d", "2026-01-01", None)]
+        try:
+            wa.snapshot_traffic(StubClient(), "2026-09-07")
+            assert not wa.already_snapshotted(out, "2026-09-14")
+            wa.snapshot_traffic(StubClient(), "2026-09-14")
+        finally:
+            wa.TRAFFIC_OUT, wa.traffic_scopes = orig_out, orig_scopes
+
+        raw = out.read_bytes()
+        assert b"\r" not in raw
+        lines = raw.decode().splitlines()
+        assert lines[0].startswith("snapshot_date,")
+        assert len(lines) == 5                       # header + 2 sources x 2 weeks
+        assert lines[1] == "2026-09-07,channel_7d,SHORTS,950,48,95.00"
+        assert lines[3] == "2026-09-14,channel_7d,SHORTS,950,48,95.00"
+        assert wa.already_snapshotted(out, "2026-09-07")
+        assert not wa.already_snapshotted(out, "2026-09-21")
