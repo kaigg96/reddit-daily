@@ -94,6 +94,21 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
+  is shared between production and any local analysis.** On 2026-09-10 an R4.3
+  re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the
+  16:45 UTC video run that day very likely executed with no Gemini at all:
+  keyword-backstop screening, and Reddit's own title instead of a generated one.
+  Nothing breaks — every path fails soft — but the upload is materially worse
+  and nothing in the logs said so at the time. PRD §2 says usage is "comfortably
+  inside the free tier at 2 runs/day", which is true for production alone and
+  false as soon as anything else shares the key. Worth deciding on: (a)
+  `screen_source` (v6 branch) will start showing how often production actually
+  loses Gemini; (b) local analysis should run right after a reset **and** be
+  budgeted rather than run opportunistically; (c) retry policy must treat a
+  repeated 429 as a stop signal rather than a reason to try harder —
+  `analyze_channel` now does, and `src/screen.py`'s widened retry is unverified
+  under quota pressure. Noticed 2026-09-10.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
