@@ -196,11 +196,13 @@ to 8 days stale — fine for trends, wrong for "did this specific video get
 suppressed?". For a fresh question about a recent video, always go live;
 `--zeros` does.
 
-Zero-view videos are classified rather than listed flat, because two things
-masquerade as suppression and both have caused wrong conclusions here:
-**non-public** videos (owner-privatised — 10 of the channel's 41 zeroes) and
+Zero-view videos are classified rather than listed flat, because three things
+masquerade as suppression and all have caused wrong conclusions here:
+**non-public** videos (owner-privatised — 10 of the channel's 41 zeroes),
 **cold-spell** zeroes (the whole channel was dead that week, so it wasn't
-per-video moderation). Only the **isolated** ones are real candidates.
+per-video moderation), and videos **too new to judge** (under 3 days old — a
+fresh upload has no views yet and every neighbour is older, so it always looks
+isolated). Only the **isolated** ones are real candidates.
 
 ```sh
 venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/

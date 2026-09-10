@@ -263,9 +263,10 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
 
 ZERO_NEIGHBOURS = 4          # uploads either side used to judge "was the channel alive?"
 COLD_SPELL_MEDIAN = 5        # neighbour median at/below this = channel-wide dead patch
+ZERO_MIN_AGE_DAYS = 3        # below this, 0 views means "new", not "suppressed"
 
 
-def classify_zero_views(channel_videos):
+def classify_zero_views(channel_videos, now=None):
     """Classify every 0-view video, encoding the two traps that have produced
     wrong conclusions on this channel:
 
@@ -278,20 +279,31 @@ def classify_zero_views(channel_videos):
        video — once recorded as confirmed suppression case #2 — sat in a patch
        reading `1, 0, 0, 3, 1, [0], 37`; the whole channel was dead.
 
+    3. **A video too young to have views is not suppressed.** Its neighbours are
+       all older, so a fresh upload always looks isolated — the same
+       false-positive the digest's zero-view alert was fixed for on 2026-08-23,
+       which was never carried across to here. Anything under
+       ZERO_MIN_AGE_DAYS is bucketed as `too_new` instead.
+
     `channel_videos` = [{id, published, views, privacy, title}] sorted or not.
-    Returns {"non_public": [...], "cold_spell": [...], "isolated": [...]} —
-    only `isolated` are genuine per-video suppression candidates.
+    Returns {"non_public": [...], "cold_spell": [...], "isolated": [...],
+    "too_new": [...]} — only `isolated` are genuine suppression candidates.
     """
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    cutoff = (now - datetime.timedelta(days=ZERO_MIN_AGE_DAYS)).isoformat()
     vids = sorted(channel_videos, key=lambda v: v["published"])
     public = [v for v in vids if v.get("privacy") == "public"]
     by_id = {v["id"]: i for i, v in enumerate(public)}
 
-    out = {"non_public": [], "cold_spell": [], "isolated": []}
+    out = {"non_public": [], "cold_spell": [], "isolated": [], "too_new": []}
     for v in vids:
         if int(v["views"]) != 0:
             continue
         if v.get("privacy") != "public":
             out["non_public"].append(v)
+            continue
+        if v["published"] >= cutoff:
+            out["too_new"].append(v)
             continue
         i = by_id[v["id"]]
         before = [int(n["views"]) for n in public[max(0, i - ZERO_NEIGHBOURS):i]]
