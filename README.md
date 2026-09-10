@@ -7,7 +7,10 @@ and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
 ## Picking this up (new session / new contributor)
 
-Read in this order — it's ~5 minutes and avoids re-deriving decisions:
+Run **`/pickup`** (`.claude/skills/pickup/`), which walks this section and the
+delivery plan, then reports where things stand before touching anything. Doing
+it by hand instead — read in this order; it's ~5 minutes and avoids re-deriving
+decisions:
 
 1. **`PRD.md` §0 "Delivery plan"** — the single source of truth for what's
    shipped, what's next, and the experiment backlog with its pre-committed

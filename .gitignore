@@ -7,3 +7,5 @@ client_secret.json
 *TEMP_MPY*
 *.icloud
 __pycache__/
+# machine-local Claude Code settings (skills in .claude/skills/ ARE tracked)
+.claude/settings.local.json
