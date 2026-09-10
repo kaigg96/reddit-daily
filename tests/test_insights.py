@@ -336,3 +336,43 @@ def test_split_cohorts_excludes_unset_from_both_sides():
 def test_split_cohorts_treats_whitespace_as_unset():
     a, b, unset = insights.split_cohorts([v("a", 5, topic="  ")], "topic", "nostalgia")
     assert (a, b, unset) == ([], [], 1)
+
+
+# --- era rank correlation (analyze_channel) ---------------------------------
+
+def _rank_correlation(*args, **kwargs):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "analyze_channel", root / "scripts" / "analyze_channel.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["analyze_channel"] = mod
+    spec.loader.exec_module(mod)
+    return mod.rank_correlation(*args, **kwargs)
+
+
+def row(topic, residual, n=10):
+    return {"topic": topic, "n": n, "median_residual": residual}
+
+
+def test_rank_correlation_detects_a_preserved_ordering():
+    a = [row("x", 0.9), row("y", 0.6), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", 0.5), row("y", 0.4), row("z", 0.2), row("w", -0.1)]
+    rho, shared = _rank_correlation(a, b)
+    assert len(shared) == 4
+    assert rho == pytest.approx(1.0)
+
+
+def test_rank_correlation_detects_a_reversed_ordering():
+    a = [row("x", 0.9), row("y", 0.6), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", -0.4), row("y", -0.2), row("z", 0.3), row("w", 0.8)]
+    rho, _ = _rank_correlation(a, b)
+    assert rho == pytest.approx(-1.0)
+
+
+def test_rank_correlation_drops_thin_buckets_and_refuses_when_too_few_remain():
+    a = [row("x", 0.9), row("y", 0.6, n=1), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", 0.5), row("y", 0.4), row("z", 0.2), row("w", -0.1)]
+    rho, shared = _rank_correlation(a, b)
+    assert "y" not in shared           # thin in era a, so excluded
+    assert rho is None                 # only 3 shared buckets left, under the floor
