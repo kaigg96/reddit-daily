@@ -4,3 +4,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-08-31T05:44:51+00:00,AskReddit,what smell inside somebody's house immediately turns you away and why?,drop_comments,unsafe_comments,,gemini,1
 2026-09-01T16:44:18+00:00,AskReddit,What’s something innocent that feels dangerously flirty?,skip_post,sexual_suggestive,Question solicits scenarios with strong sexual innuendo.,gemini,1
 2026-09-05T15:20:07+00:00,AskReddit,"Doctors/nurses of Reddit, what's a symptom patients brush off that actually terrifies you?",skip_post,graphic_harm,Invites medical harm details.,gemini,3
+2026-09-10T04:51:53+00:00,AskReddit,"Male gynecologists of reddit, why did you chose gynecology?",drop_comments,unsafe_comments,,gemini,2
