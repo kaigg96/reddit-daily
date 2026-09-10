@@ -21,6 +21,7 @@ class PostContent:
     shortlink: str
     candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
     topic: str = ""           # R4.3 taxonomy, from the screen call (free)
+    screen_source: str = ""   # gemini | backstop — which path actually screened this
 
 
 def make_reddit():
@@ -82,10 +83,10 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         if len(pool) < config.NUM_COMMENTS:
             continue
 
-        topic = ""
+        topic = screen_source = ""
         if screener:
             result = screener(post.title, pool)
-            topic = result.topic
+            topic, screen_source = result.topic, result.source
             if result.verdict == "skip_post":
                 print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                 if on_verdict:
@@ -118,6 +119,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             shortlink=post.shortlink,
             candidate_rank=rank,
             topic=topic,
+            screen_source=screen_source,
         )
 
     raise ValueError("No suitable Reddit post found (after filters and screen).")

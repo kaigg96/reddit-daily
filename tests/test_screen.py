@@ -160,3 +160,23 @@ def test_persistent_timeout_still_fails_open(monkeypatch):
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.verdict == "pass"
     assert r.source == "backstop"
+
+
+def test_screen_source_reaches_the_upload_log(monkeypatch):
+    """A run that fell back to the backstop must be distinguishable afterwards."""
+    monkeypatch.setattr(content, "_comment_pool", lambda post, n: ["a", "b", "c", "d"])
+    monkeypatch.setattr(content.profanity, "contains_profanity", lambda t: False)
+
+    class FakeReddit:
+        def subreddit(self, name):
+            class S:
+                def top(self, time_filter, limit):
+                    return [FakePost("An ordinary question?")]
+            return S()
+
+    def degraded(question, comments):
+        return screen.ScreenResult("pass", source="backstop")
+
+    post = content.select_post(FakeReddit(), "", screener=degraded)
+    assert post.screen_source == "backstop"
+    assert post.topic == ""

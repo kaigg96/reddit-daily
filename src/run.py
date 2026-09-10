@@ -151,6 +151,7 @@ def main():
         "duration_s": f"{result.duration:.1f}",
         "candidate_rank": post.candidate_rank,
         "topic": post.topic,
+        "screen_source": post.screen_source,
         "caption_ok": int(bool(caption_ok)),
         "comment_ok": int(bool(comment_ok)),
     })
