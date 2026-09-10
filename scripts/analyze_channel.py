@@ -90,6 +90,10 @@ def age_days(published_at, now):
 # ---------------------------------------------------------------- topic classification
 
 
+class QuotaExhausted(Exception):
+    """Daily Gemini budget is gone; stop rather than spend the rest on 429s."""
+
+
 def _generate_with_retry(prompt, tries=5):
     """Free-tier friendly: back off on 429/503 and on transient network errors,
     honoring Retry-After. Never print exception bodies — requests' HTTPError
@@ -106,6 +110,12 @@ def _generate_with_retry(prompt, tries=5):
             return llm._generate(prompt)
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else "?"
+            # A 429 that survives one backoff is a daily-budget exhaustion, not a
+            # per-minute burst. Grinding out the remaining attempts cannot
+            # succeed and spends requests the twice-daily video run needs — one
+            # aborted classification pass burned ~20 of them that way.
+            if code == 429 and attempt >= 1:
+                raise QuotaExhausted() from None
             if code in (429, 503) and not last:
                 retry_after = e.response.headers.get("Retry-After") if e.response is not None else None
                 wait = int(retry_after) if retry_after and retry_after.isdigit() else delay
@@ -148,6 +158,12 @@ def classify_topics(questions):
                     cache[batch[idx]] = topic
             cache_path.write_text(json.dumps(cache, indent=0))
             print(f"  classified {min(i + BATCH, len(missing))}/{len(missing)}")
+        except QuotaExhausted:
+            remaining = len(missing) - i
+            print(f"gemini daily quota exhausted; stopping with ~{remaining} question(s) "
+                  f"unclassified. Everything classified so far is cached — re-run after "
+                  f"the quota resets and it resumes from there.")
+            break
         except Exception as e:
             print(f"classification batch failed ({e}); leaving batch unclassified")
         time.sleep(7)  # stay under free-tier RPM
