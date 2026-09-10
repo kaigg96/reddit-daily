@@ -180,9 +180,10 @@ Always use this rather than ad-hoc analysis — it enforces the rules that
 ad-hoc scripts kept getting wrong (see TECH_DEBT.md Pass 2): **watch-seconds**
 is the primary metric (avg-%-viewed is a ratio inflated by simply trimming the
 video), cohorts must be **age-matched** or no verdict is given, thin cohorts
-report "insufficient data" instead of a misleading median, and zero-view
+report "insufficient data" instead of a misleading median, zero-view
 videos are counted separately as suppression candidates rather than averaged
-in. Logic lives in `src/insights.py` and is unit-tested.
+in, and `--compare` **excludes videos where the field is unset** rather than
+sweeping the whole pre-field history into the opposing cohort. Logic lives in `src/insights.py` and is unit-tested.
 
 ```sh
 venv/bin/python scripts/report.py --zeros    # 0-view videos, classified

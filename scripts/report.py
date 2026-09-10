@@ -76,9 +76,14 @@ def zeros(now):
 
 
 def compare(videos, spec, metric, now):
+    """Age-matched two-way test on one upload_log field.
+
+    Videos where the field is unset are excluded from both cohorts — see
+    insights.split_cohorts for why that matters."""
     key, _, value = spec.partition("=")
-    a = [v for v in videos if str(v.meta.get(key, "")).strip() == value]
-    b = [v for v in videos if str(v.meta.get(key, "")).strip() != value]
+    a, b, unset = insights.split_cohorts(videos, key, value)
+    if unset:
+        print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
     print(insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric).render())
 
 

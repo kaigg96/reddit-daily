@@ -312,3 +312,27 @@ def test_second_weekly_append_extends_the_file_without_a_repeated_header():
         assert lines[3] == "2026-09-14,channel_7d,SHORTS,950,48,95.00"
         assert wa.already_snapshotted(out, "2026-09-07")
         assert not wa.already_snapshotted(out, "2026-09-21")
+
+
+# --- cohort splitting -------------------------------------------------------
+
+def test_split_cohorts_excludes_unset_from_both_sides():
+    """Fields are added to upload_log mid-history, so `!= value` used to sweep
+    the entire pre-field past into the comparison cohort. `--compare
+    candidate_rank=1` reported 24 vs 75 when the real contrast was 24 vs 3."""
+    videos = [
+        v("a", 5, candidate_rank="1"),
+        v("b", 5, candidate_rank="1"),
+        v("c", 5, candidate_rank="2"),
+        v("old1", 40),           # logged before the field existed
+        v("old2", 40),
+    ]
+    a, b, unset = insights.split_cohorts(videos, "candidate_rank", "1")
+    assert [x.video_id for x in a] == ["a", "b"]
+    assert [x.video_id for x in b] == ["c"]
+    assert unset == 2
+
+
+def test_split_cohorts_treats_whitespace_as_unset():
+    a, b, unset = insights.split_cohorts([v("a", 5, topic="  ")], "topic", "nostalgia")
+    assert (a, b, unset) == ([], [], 1)

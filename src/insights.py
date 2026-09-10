@@ -152,6 +152,27 @@ def compare(videos_a, videos_b, label_a, label_b, now, metric=Metric.WATCH):
     )
 
 
+def split_cohorts(videos, key, value):
+    """Two-way split on an upload_log field, for an age-matched comparison.
+
+    Returns (matching, other, unset_count). Videos where the field is unset are
+    in NEITHER cohort. Every field was added to the log at some point, so a
+    naive `!= value` split silently files the whole pre-field history under
+    "not that value" — for `candidate_rank=1` that meant 24 ranked videos
+    against 75 supposedly-unranked ones, of which only 3 carried a rank at all,
+    and the comparison rendered a confident-looking median either way."""
+    a, b, unset = [], [], 0
+    for v in videos:
+        got = str(v.meta.get(key, "")).strip()
+        if not got:
+            unset += 1
+        elif got == value:
+            a.append(v)
+        else:
+            b.append(v)
+    return a, b, unset
+
+
 def split_by(videos, key):
     """Group videos by an upload_log field (format_version, topic, ...)."""
     out = {}
