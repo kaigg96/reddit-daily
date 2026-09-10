@@ -39,6 +39,10 @@ TAXONOMY = [
 
 MIN_AGE_DAYS = 7  # too-fresh videos have meaningless view counts
 
+# Questions per classification call. 80 makes the model emit ~80 lines, which
+# runs past llm._generate's 30s timeout often enough to lose whole batches.
+BATCH = 40
+
 STOPWORDS = set("""a an and are as at be been but by for from had has have he her his i if in is it its
 just me my not of on one or our out she so that the their them they this to was we were what when which
 who will with you your whats youve dont didnt im its ive youre thats
@@ -87,16 +91,22 @@ def age_days(published_at, now):
 
 
 def _generate_with_retry(prompt, tries=5):
-    """Free-tier friendly: back off on 429/503, honoring Retry-After. Never print
-    exception bodies — requests' HTTPError message embeds the URL including the
-    API key."""
+    """Free-tier friendly: back off on 429/503 and on transient network errors,
+    honoring Retry-After. Never print exception bodies — requests' HTTPError
+    message embeds the URL including the API key.
+
+    Timeouts were not retried until 2026-09-10, when four consecutive batches
+    died on ReadTimeout and fell straight through this handler because a
+    timeout is not an HTTPError. (The screen had the identical gap; see
+    src/screen.py._generate_screened.)"""
     delay = 15
     for attempt in range(tries):
+        last = attempt == tries - 1
         try:
             return llm._generate(prompt)
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else "?"
-            if code in (429, 503) and attempt < tries - 1:
+            if code in (429, 503) and not last:
                 retry_after = e.response.headers.get("Retry-After") if e.response is not None else None
                 wait = int(retry_after) if retry_after and retry_after.isdigit() else delay
                 print(f"  gemini {code}; retrying in {wait}s")
@@ -104,6 +114,12 @@ def _generate_with_retry(prompt, tries=5):
                 delay = min(delay * 2, 120)
             else:
                 raise RuntimeError(f"gemini failed with HTTP {code}") from None
+        except (requests.Timeout, requests.ConnectionError) as e:
+            if last:
+                raise RuntimeError(f"gemini unreachable: {type(e).__name__}") from None
+            print(f"  gemini {type(e).__name__}; retrying in {delay}s")
+            time.sleep(delay)
+            delay = min(delay * 2, 120)
 
 
 def classify_topics(questions):
@@ -115,8 +131,8 @@ def classify_topics(questions):
     missing = [q for q in questions if q not in cache]
     print(f"topics: {len(cache)} cached, {len(missing)} to classify")
 
-    for i in range(0, len(missing), 80):
-        batch = missing[i:i + 80]
+    for i in range(0, len(missing), BATCH):
+        batch = missing[i:i + BATCH]
         numbered = "\n".join(f"{j + 1}. {q}" for j, q in enumerate(batch))
         prompt = (
             "Classify each numbered question into exactly one of these topics: "
@@ -131,7 +147,7 @@ def classify_topics(questions):
                 if 0 <= idx < len(batch) and topic in TAXONOMY:
                     cache[batch[idx]] = topic
             cache_path.write_text(json.dumps(cache, indent=0))
-            print(f"  classified {min(i + 80, len(missing))}/{len(missing)}")
+            print(f"  classified {min(i + BATCH, len(missing))}/{len(missing)}")
         except Exception as e:
             print(f"classification batch failed ({e}); leaving batch unclassified")
         time.sleep(7)  # stay under free-tier RPM
