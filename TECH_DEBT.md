@@ -94,6 +94,32 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **`est_minutes_watched` contradicts `avg_view_duration_s` in
+  `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
+  reported 30s average view duration is ~27 minutes watched, but the row logs
+  `1`. This holds broadly: of 727 videos with ≥10 views in the latest snapshot,
+  686 are off by more than 2× and the column clusters at 0–3 regardless of
+  views. **Not decision-affecting** — `report.py` and `insights.py` judge on
+  views and watch-seconds, and the traffic CSV's minutes come from a separate
+  query — so the column is effectively decorative today. Worth either fixing or
+  dropping before anything starts reading it. Noticed 2026-09-09 during the
+  R4.6 audit.
+- **The SRT track fails to upload roughly half the time.** The `caption_ok`
+  telemetry added 2026-09-07 has 5 rows and 2 are `0`; `comment_ok` is 5/5.
+  The telemetry did its job — this was invisible before. Deliberately not
+  chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
+  accessibility nicety, not a growth lever. Revisit only if the failure rate
+  holds over a larger sample and the fix is cheap. Noticed 2026-09-09.
+- **Scheduled runs now land ~4h25m after their cron slot**, up from ~40–90 min
+  in July (actual publish ~04:48 / ~16:45 UTC against a `23 0,12` cron). This
+  is GitHub Actions queue delay, not a bug in the job — but it is *drifting*,
+  which means publish time is an uncontrolled variable moving underneath every
+  cohort comparison. Already instrumented: `median_publish_drift` in
+  `weekly_digest.py` alerts above 120 min, so the 2026-09-14 digest will fire
+  it. **Two docs are now factually wrong** and want a one-line fix each: the
+  `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
+  min later; acceptable", and README/PRD still describe the slots as 00:00 and
+  12:00 UTC. Noticed 2026-09-09.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,

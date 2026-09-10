@@ -92,6 +92,11 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
                     on_verdict(post.title, result, "skip_post")
                 continue
 
+            # Answer-level category raised against the post: not a skip, but
+            # recorded so the audit can see what the old taxonomy would have cost.
+            if result.demoted and on_verdict:
+                on_verdict(post.title, result, "demoted_post_risk")
+
             if result.unsafe:
                 kept = [c for i, c in enumerate(pool) if i not in result.unsafe]
                 if len(kept) < config.NUM_COMMENTS:
