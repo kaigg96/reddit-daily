@@ -264,8 +264,24 @@ def main():
     age_adjusted_residuals(sample, now)
 
     topics = classify_topics({v["question"] for v in sample})
+    # Snapshot the keys BEFORE the loop below: `topics` is a defaultdict, so
+    # reading a missing question inserts it as "other" and the coverage check
+    # would then see 100% resolved no matter what failed.
+    resolved = set(topics)
     for v in videos:
         v["topic"] = topics[v["question"]] if v.get("question") else ""
+
+    # classify_topics defaults unresolved questions to "other", so a Gemini
+    # outage produces a report that looks entirely normal while most of the
+    # sample sits in one meaningless bucket. Fail loudly instead — and check the
+    # current era separately, since it is the newest content and therefore the
+    # least likely to be already cached.
+    for name, vs in [("overall", sample)] + list(eras.items()):
+        unresolved = sum(1 for v in vs if v["question"] not in resolved) / max(1, len(vs))
+        if unresolved > 0.15:
+            sys.exit(f"ABORT: {unresolved:.0%} of the {name} sample is unclassified "
+                     f"(Gemini failures). Re-run when the API recovers — the cache "
+                     f"keeps what did classify, so a re-run only retries the rest.")
 
     # ---- write full CSV ----
     fields = ["video_id", "published_at", "age_days", "upload_slot", "title", "question",
