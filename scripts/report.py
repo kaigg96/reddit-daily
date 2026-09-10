@@ -61,7 +61,7 @@ def zeros(now):
     """List 0-view videos, separating the two things that masquerade as
     suppression: owner-privatised videos, and zeroes inside channel-wide cold
     spells. Only the isolated ones are real per-video suppression candidates."""
-    groups = insights.classify_zero_views(insights.load_channel_videos(now))
+    groups = insights.classify_zero_views(insights.load_channel_videos(now), now)
     print(f"{len(groups['isolated'])} isolated zero(s) — genuine suppression candidates:")
     for v in sorted(groups["isolated"], key=lambda x: x["published"], reverse=True):
         print(f"  {v['published'][:10]}  {v['id']}  neighbour median={v['neighbour_median']:.0f}"
@@ -73,6 +73,11 @@ def zeros(now):
     if len(groups["cold_spell"]) > 6:
         print(f"  ... and {len(groups['cold_spell']) - 6} more")
     print(f"\n{len(groups['non_public'])} zero(s) are non-public (owner action, not suppression)")
+    if groups["too_new"]:
+        print(f"{len(groups['too_new'])} zero(s) are under {insights.ZERO_MIN_AGE_DAYS}d old "
+              f"— too new to judge, not counted above:")
+        for v in sorted(groups["too_new"], key=lambda x: x["published"], reverse=True):
+            print(f"  {v['published'][:10]}  {v['id']}  {v['title'][:44]}")
 
 
 def compare(videos, spec, metric, now):

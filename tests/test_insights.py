@@ -376,3 +376,25 @@ def test_rank_correlation_drops_thin_buckets_and_refuses_when_too_few_remain():
     rho, shared = _rank_correlation(a, b)
     assert "y" not in shared           # thin in era a, so excluded
     assert rho is None                 # only 3 shared buckets left, under the floor
+# --- zero-view age floor ----------------------------------------------------
+
+def zv(vid, age_days, views=0, privacy="public"):
+    return {"id": vid, "published": (NOW - datetime.timedelta(days=age_days)).isoformat(),
+            "views": views, "privacy": privacy, "title": vid}
+
+
+def test_fresh_zero_is_too_new_not_a_suppression_candidate():
+    """A video hours old has no views yet and every neighbour is older, so it
+    always looks isolated. The digest was fixed for this on 2026-08-23; the
+    same trap sat in report.py --zeros until an upload 1.9h old was flagged."""
+    vids = [zv(f"old{i}", 40 - i, views=50) for i in range(8)] + [zv("fresh", 0.08)]
+    groups = insights.classify_zero_views(vids, NOW)
+    assert [v["id"] for v in groups["too_new"]] == ["fresh"]
+    assert groups["isolated"] == []
+
+
+def test_aged_zero_among_healthy_neighbours_is_still_isolated():
+    vids = [zv(f"old{i}", 40 - i, views=50) for i in range(8)] + [zv("dead", 20)]
+    groups = insights.classify_zero_views(vids, NOW)
+    assert [v["id"] for v in groups["isolated"]] == ["dead"]
+    assert groups["too_new"] == []
