@@ -130,14 +130,15 @@ def test_demoted_verdict_is_recorded_once_with_its_category(monkeypatch):
 
 # --- transient-failure retry ------------------------------------------------
 
-def test_timeout_is_retried_before_giving_up(monkeypatch):
-    """A read timeout used to drop straight to keyword-only screening."""
+def test_timeout_is_retried_once(monkeypatch):
+    """A read timeout used to drop straight to keyword-only screening. It is
+    retried once — not more, because the daily request budget is tight."""
     import requests
     calls = []
 
     def flaky(prompt):
         calls.append(1)
-        if len(calls) < 3:
+        if len(calls) < 2:
             raise requests.Timeout("slow")
         return json.dumps({"post_risk": "none", "reason": "", "unsafe_comments": [],
                            "topic": "other"})
@@ -145,7 +146,7 @@ def test_timeout_is_retried_before_giving_up(monkeypatch):
     monkeypatch.setattr(screen.llm, "_generate", flaky)
     monkeypatch.setattr(screen.time, "sleep", lambda s: None)
     r = screen.screen("q", ["a", "b", "c"])
-    assert len(calls) == 3
+    assert len(calls) == 2
     assert r.source == "gemini"
 
 
@@ -180,3 +181,22 @@ def test_screen_source_reaches_the_upload_log(monkeypatch):
     post = content.select_post(FakeReddit(), "", screener=degraded)
     assert post.screen_source == "backstop"
     assert post.topic == ""
+
+
+def test_429_is_not_retried(monkeypatch):
+    """A 429 here is a daily-budget exhaustion that persists for hours. Retrying
+    cannot succeed and spends requests the title/keyword/CTA calls still need."""
+    import requests
+    calls = []
+
+    def limited(prompt):
+        calls.append(1)
+        resp = requests.Response()
+        resp.status_code = 429
+        raise requests.HTTPError(response=resp)
+
+    monkeypatch.setattr(screen.llm, "_generate", limited)
+    monkeypatch.setattr(screen.time, "sleep", lambda s: None)
+    r = screen.screen("q", ["a", "b", "c"])
+    assert len(calls) == 1          # one attempt, no retry
+    assert r.source == "backstop"   # still fails open

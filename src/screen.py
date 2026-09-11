@@ -150,20 +150,27 @@ def _backstop(question, comments):
                         source="backstop")
 
 
-def _generate_screened(prompt, tries=3):
-    """Retry transient failures — falling back to the keyword backstop is a real
-    downgrade in protection, so it's worth a couple of seconds to avoid.
+def _generate_screened(prompt, tries=2):
+    """Retry a transient failure once — falling back to the keyword backstop is
+    a real downgrade in protection, so it is worth a few seconds to avoid.
 
-    Timeouts and connection drops count as transient: they were not retried
-    until 2026-09-09, when a validation replay hit ReadTimeout on 3 of 8 calls
-    and each one silently degraded that candidate to keyword-only screening."""
+    **A 429 is never retried.** On this project's free tier a 429 is a *daily*
+    budget exhaustion, not a per-minute burst: it persists for hours and clears
+    at midnight PT. Retrying it cannot succeed, and every wasted request comes
+    out of the same budget the title, keyword and CTA calls later in this run
+    still need — so retrying a 429 makes the run's output worse, not better.
+    Measured 2026-09-11: a verification pass retried 429s and burned ~40
+    requests to make 8 useful calls.
+
+    Timeouts and 503s are genuinely transient and are retried once. The budget
+    is tight enough that `tries` is deliberately 2, not 3."""
     for attempt in range(tries):
         last = attempt == tries - 1
         try:
             return llm._generate(prompt)
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else 0
-            if code in (429, 503) and not last:
+            if code == 503 and not last:
                 time.sleep(4 * (attempt + 1))
                 continue
             raise
