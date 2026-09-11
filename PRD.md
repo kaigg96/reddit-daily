@@ -40,7 +40,7 @@ Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so 
 
 | # | Item | Req | Decision rule (pre-committed) |
 |---|---|---|---|
-| 1 | **Topic/hook candidate ranker** — ⚠️ **gate blocked, owner decision needed** | R4.4 | Score the top-10 candidates on hook strength + topic prior (seeded from `analysis/topic_performance.md`), pick the best rather than always #1. After ≥20 uploads: keep if median **watch-seconds** and median views both hold or improve vs an age-matched baseline; revert if either drops materially. **2026-09-09:** Step 0's rank counterfactual is n=3 and cannot reach a verdict before December, and the topic prior it would use is measured on pre-v2 content. Re-run R4.3's topic analysis on the current cohort first — see §4, "R4.4 gate review". |
+| 1 | **Topic/hook candidate ranker** — ✅ **gate cleared 2026-09-11; sequenced behind `v6`** | R4.4 | Score the top-10 candidates on hook strength + topic prior (seeded from `analysis/topic_performance.md`), pick the best rather than always #1. After ≥20 uploads: keep if median **watch-seconds** and median views both hold or improve vs an age-matched baseline; revert if either drops materially. **2026-09-09:** Step 0's rank counterfactual is n=3 and cannot reach a verdict before December, and the topic prior it would use is measured on pre-v2 content. Re-run R4.3's topic analysis on the current cohort first — see §4, "R4.4 gate review". |
 | 2 | Subreddit rotation — *inventory prerequisite for volume* | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop underperformers vs the AskReddit baseline. Success unlocks the posting-volume revisit (§7). |
 | 3 | Posting-volume increase (2 → 3–4/day) | — | Only after R4.1 proves inventory quality; hold per-video medians within ~30% of baseline at higher volume, else fall back. |
 | 4 | Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
@@ -125,6 +125,19 @@ Directional, not contractual — the algorithm is stochastic, and the strongest 
 4. **Loops are real upside that shortening cannot buy:** the best performers include a 17s video at **227% avg-viewed** (40s watched) and another at 100%. Watch-seconds above duration only come from content worth re-watching.
 5. **Distribution gain from the overhaul confirmed and larger than first measured:** v4 median **166 views** (n=52) vs recent-era v1 median **28** (n=76) — roughly 6× (Review 1 estimated 3.5× on n=14).
 6. **Methodological rule now binding: cohorts must be age-matched.** Avg-%-viewed *declines as a video ages* (broader, colder audiences). Same-week (3–9d) videos sit at ~65% regardless of background, while the older overall pool sits near 48–50%. Two consequences: (a) **b-roll shows no measurable retention effect** once age-matched (65.5% vs 64.9%) — an apparent advantage was pure age artifact; (b) Review 1's "retention didn't move" claim compared v4 against much older v1 videos and is **not trustworthy as stated** — the distribution half stands, the retention half is unresolved.
+
+**R4.4 gate CLEARED (2026-09-11) — the topic prior survives the format change.** The gate review below said the ranker's topic prior was measured on pre-overhaul content and was therefore an assumption. Re-running R4.3 with an era split settles it.
+
+**Spearman rho = +0.79** between the pre-overhaul and current-format topic orderings, across the 10 buckets with n≥3 in both eras. The strong tier (nostalgia, humor-absurd, dark-morbid) and the weak tier (life-advice, money-work, fame-celebrity) both hold, and the weak tier reads *weaker* on current content, not softer.
+
+Validated three ways, because the headline rests on only 10 points:
+- **Classifier independence.** All 106 current-era questions were re-labelled by hand against the same taxonomy: **93% agreement** with Gemini (7 disagreements, mostly film/TV questions filed as `fame-celebrity` and a sports question as `politics-news`). Substituting the corrected labels moves rho by **0.00** — the result is not an artifact of how gemini-flash buckets things.
+- **Robust to the bucket floor:** n≥4 → +0.78, n≥5 → +0.76, n≥6 → +0.76.
+- **No single bucket drives it.** Leave-one-bucket-out spans +0.72 (drop nostalgia) to +0.88 (drop `other`). That `other` is the biggest drag is expected — it is a grab-bag, not a topic.
+
+**The one real sensitivity:** fitting the age model on only the *classified* videos rather than all era videos gives **+0.66**. Fitting on everything is the better choice (the age→views trend is topic-independent, so more data is strictly better), but it means the honest range is **+0.66 to +0.79** rather than a point estimate. Every variant is strongly positive, so the *direction* is solid and the magnitude is soft. That is enough to seed a ranker; it is not enough to weight one finely.
+
+**Caveats that travel with the number:** current-era buckets run n=1–23, three are too thin to enter the correlation at all, and 163 pre-overhaul videos are excluded as unclassified by design (the re-run only tops up the era the question turns on).
 
 **R4.4 gate review (2026-09-09) — both of the ranker's evidence bases are currently unusable.**
 
