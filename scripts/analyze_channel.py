@@ -374,12 +374,22 @@ def main():
     # sample sits in one meaningless bucket. Fail loudly instead — and check the
     # current era separately, since it is the newest content and therefore the
     # least likely to be already cached.
-    for name, vs in eras.items():
-        unresolved = sum(1 for v in vs if v["question"] not in resolved) / max(1, len(vs))
-        if unresolved > 0.15:
-            sys.exit(f"ABORT: {unresolved:.0%} of the {name} sample is unclassified "
-                     f"(Gemini failures). Re-run when the API recovers — the cache "
-                     f"keeps what did classify, so a re-run only retries the rest.")
+    # The current era is the half the gate question turns on and the half we
+    # actually request, so a shortfall there means Gemini failed: abort.
+    cur = eras.get("current", [])
+    cur_unresolved = sum(1 for v in cur if v["question"] not in resolved) / max(1, len(cur))
+    if cur_unresolved > 0.15:
+        sys.exit(f"ABORT: {cur_unresolved:.0%} of the current-era sample is unclassified "
+                 f"(Gemini failures). Re-run when the API recovers — the cache keeps what "
+                 f"did classify, so a re-run only retries the rest.")
+
+    # Pre-overhaul is deliberately NOT topped up (see the `want` comment above),
+    # so a percentage there measures that choice, not an outage. Only guard the
+    # absolute count, which is what a 12-bucket ordering actually needs.
+    pre_ok = sum(1 for v in eras.get("pre-overhaul", []) if v["question"] in resolved)
+    if eras.get("pre-overhaul") and pre_ok < 300:
+        sys.exit(f"ABORT: only {pre_ok} pre-overhaul videos are classified; too few to "
+                 f"rank 12 topic buckets against.")
 
     # ---- write full CSV ----
     fields = ["video_id", "published_at", "age_days", "upload_slot", "title", "question",
