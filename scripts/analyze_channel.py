@@ -143,14 +143,49 @@ def _generate_with_retry(prompt, tries=5):
             delay = min(delay * 2, 120)
 
 
+def _cached_questions():
+    """Questions already classified on disk — usable with no API call."""
+    path = OUT_DIR / "topics_cache.json"
+    return set(json.loads(path.read_text())) if path.exists() else set()
+
+
+def seed_cache_from_upload_log(cache):
+    """Fold in topics the R4.6 screen already assigned.
+
+    Every live upload since 2026-08-23 carries a `topic` in upload_log.csv,
+    produced by the screen's existing Gemini call against the *same* taxonomy
+    (src.screen.TOPICS == TAXONOMY). Re-asking Gemini for those is a pure
+    duplicate of work already paid for — and on a free tier where request count
+    is the binding constraint, duplicated requests are the whole problem.
+    """
+    if not config.UPLOAD_LOG.exists():
+        return 0
+    added = 0
+    with open(config.UPLOAD_LOG) as f:
+        for r in csv.DictReader(f):
+            topic, title = r.get("topic", "").strip(), r.get("post_title", "").strip()
+            if topic in TAXONOMY and title and title not in cache:
+                cache[title] = topic
+                added += 1
+    return added
+
+
 def classify_topics(questions):
     """question -> bucket via Gemini, batched. Results are cached on disk so
     re-runs (and quota-interrupted runs) only classify new questions.
-    Unclassified -> 'other'."""
+
+    Anything left unresolved is EXCLUDED from the tables by the caller, not
+    bucketed as 'other' — silently dumping unclassified videos into a real
+    topic would corrupt exactly the bucket the analysis reads."""
     cache_path = OUT_DIR / "topics_cache.json"
     cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+    seeded = seed_cache_from_upload_log(cache)
+    if seeded:
+        cache_path.write_text(json.dumps(cache, indent=0))
+        print(f"topics: seeded {seeded} from upload_log (already classified by the screen)")
     missing = [q for q in questions if q not in cache]
-    print(f"topics: {len(cache)} cached, {len(missing)} to classify")
+    print(f"topics: {len(cache)} cached, {len(missing)} to classify "
+          f"({(len(missing) + BATCH - 1) // BATCH} gemini call(s))")
 
     consecutive_failures = 0
     for i in range(0, len(missing), BATCH):
@@ -315,20 +350,31 @@ def main():
     # restore the whole-channel residuals for every other table below
     age_adjusted_residuals(sample, now)
 
-    topics = classify_topics({v["question"] for v in sample})
+    # Only the CURRENT era needs new Gemini calls. The pre-overhaul table is
+    # already built on 880-odd cached classifications from the 2026-07-21 run,
+    # and a handful more cannot move a 12-bucket ordering — whereas the current
+    # era is the thin half the gate question actually turns on. Asking for the
+    # whole sample meant ~217 classifications where ~44 answer the question,
+    # against a free tier where request count is the binding constraint.
+    want = {v["question"] for v in eras.get("current", [])}
+    want |= {v["question"] for v in sample if v["question"] in _cached_questions()}
+    topics = classify_topics(want)
     # Snapshot the keys BEFORE the loop below: `topics` is a defaultdict, so
     # reading a missing question inserts it as "other" and the coverage check
     # would then see 100% resolved no matter what failed.
     resolved = set(topics)
     for v in videos:
-        v["topic"] = topics[v["question"]] if v.get("question") else ""
+        q = v.get("question")
+        # Unresolved -> "", and excluded from the tables below. Defaulting to
+        # "other" would quietly load a real bucket with unclassified videos.
+        v["topic"] = topics[q] if (q and q in resolved) else ""
 
     # classify_topics defaults unresolved questions to "other", so a Gemini
     # outage produces a report that looks entirely normal while most of the
     # sample sits in one meaningless bucket. Fail loudly instead — and check the
     # current era separately, since it is the newest content and therefore the
     # least likely to be already cached.
-    for name, vs in [("overall", sample)] + list(eras.items()):
+    for name, vs in eras.items():
         unresolved = sum(1 for v in vs if v["question"] not in resolved) / max(1, len(vs))
         if unresolved > 0.15:
             sys.exit(f"ABORT: {unresolved:.0%} of the {name} sample is unclassified "
@@ -345,8 +391,13 @@ def main():
             w.writerow(v)
 
     # ---- per-topic table ----
-    topic_rows = topic_table(sample)
-    era_tables = {name: topic_table(vs, key="era_residual") for name, vs in eras.items()}
+    classified = [v for v in sample if v["topic"]]
+    dropped = len(sample) - len(classified)
+    if dropped:
+        print(f"  {dropped} video(s) left unclassified — excluded from the topic tables")
+    topic_rows = topic_table(classified)
+    era_tables = {name: topic_table([v for v in vs if v["topic"]], key="era_residual")
+                  for name, vs in eras.items()}
     rho, shared = (rank_correlation(era_tables["pre-overhaul"], era_tables["current"])
                    if len(era_tables) == 2 else (None, []))
 
