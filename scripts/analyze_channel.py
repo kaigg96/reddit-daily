@@ -94,6 +94,17 @@ class QuotaExhausted(Exception):
     """Daily Gemini budget is gone; stop rather than spend the rest on 429s."""
 
 
+class ServiceDown(Exception):
+    """Gemini is failing for everyone; stop rather than grind every batch."""
+
+
+# Consecutive whole-batch failures that mean "the API is not usable right now".
+# Right after the midnight-PT quota reset the free tier is reliably overloaded —
+# a 503/timeout storm that burned a full run's budget classifying nothing. Wait
+# an hour or two into the window instead of starting at the boundary.
+MAX_CONSECUTIVE_BATCH_FAILURES = 2
+
+
 def _generate_with_retry(prompt, tries=5):
     """Free-tier friendly: back off on 429/503 and on transient network errors,
     honoring Retry-After. Never print exception bodies — requests' HTTPError
@@ -141,6 +152,7 @@ def classify_topics(questions):
     missing = [q for q in questions if q not in cache]
     print(f"topics: {len(cache)} cached, {len(missing)} to classify")
 
+    consecutive_failures = 0
     for i in range(0, len(missing), BATCH):
         batch = missing[i:i + BATCH]
         numbered = "\n".join(f"{j + 1}. {q}" for j, q in enumerate(batch))
@@ -158,6 +170,7 @@ def classify_topics(questions):
                     cache[batch[idx]] = topic
             cache_path.write_text(json.dumps(cache, indent=0))
             print(f"  classified {min(i + BATCH, len(missing))}/{len(missing)}")
+            consecutive_failures = 0
         except QuotaExhausted:
             remaining = len(missing) - i
             print(f"gemini daily quota exhausted; stopping with ~{remaining} question(s) "
@@ -165,7 +178,14 @@ def classify_topics(questions):
                   f"the quota resets and it resumes from there.")
             break
         except Exception as e:
+            consecutive_failures += 1
             print(f"classification batch failed ({e}); leaving batch unclassified")
+            if consecutive_failures >= MAX_CONSECUTIVE_BATCH_FAILURES:
+                remaining = len(missing) - i
+                print(f"gemini unusable ({consecutive_failures} batches failed in a row); "
+                      f"stopping with ~{remaining} question(s) unclassified rather than "
+                      f"spending the rest of the budget on a failing service.")
+                break
         time.sleep(7)  # stay under free-tier RPM
     return defaultdict(lambda: "other", cache)
 
