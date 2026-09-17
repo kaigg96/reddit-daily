@@ -9,3 +9,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-09-12T04:42:38+00:00,AskReddit,"Doctors of reddit, What disease do you never want to treat again?",skip_post,graphic_harm,Invites descriptions of severe medical harm.,gemini,1
 2026-09-12T04:42:50+00:00,AskReddit,"What’s the greatest ‘well, their career is over’ moment of all time?",drop_comments,unsafe_comments,"Question invites known public events, not unproven allegations",gemini,1
 2026-09-14T18:06:15+00:00,AskReddit,"Unemployed people of reddit, how are you surviving??",drop_comments,unsafe_comments,,gemini,1
+2026-09-17T17:07:24+00:00,AskReddit,"People who dated a professional athlete, how did that relationship go?",drop_comments,unsafe_comments,none,gemini,3
