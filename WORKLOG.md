@@ -11,6 +11,25 @@ Keep it to ~10 entries; delete older ones (git history keeps them).
 
 ## 2026-09-19 — maintenance + project management
 
+**Session efficiency measured, and the premise was wrong.** Orientation costs
+**1.1%** of a session, not the feared 30% — generated output is 17%, and
+**re-reading accumulated context is 73%**. So reading context to decide what to
+do is not worth optimising; *session length* is, because every turn re-reads
+everything before it. Context/turn grew 30k → 450k over 526 turns; splitting
+the same work into five ~105-turn shifts models at **44% of the cost**. New
+rule: one lane, ~100 turns, hand over and end. The `WORKLOG.md` handover is
+what makes a cheap restart possible, so it is leverage rather than overhead.
+Measure with `scripts/context_budget.py --session`.
+
+**`/audit` split out** as its own skill (every ~10th shift), because a deep
+pass read once in ten shifts should not load every shift. It reviews the
+*workflow as a product*: is it producing value or churn, are the gates real or
+theatre, is the authorization boundary right (escalations are the evidence),
+does the handover actually work, are the budgets calibrated, are rules being
+quietly ignored. Plus: `/shift`'s PM lane now treats process friction as a
+finding worth recording every shift, since one shift's friction is invisible
+alone and only shows up as a pattern.
+
 **Standing audit (first one).** Context footprint measured and capped:
 `scripts/context_budget.py` tracks what every session pays for, split into
 always-loaded (`CLAUDE.md`) and read-at-startup. Now **75% of budget** —

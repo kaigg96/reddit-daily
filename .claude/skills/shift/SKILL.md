@@ -81,8 +81,15 @@ clearly wrong; log the rest.
 **Project management** — is the tracker true? Is the next thing we'd build
 actually the highest-leverage thing? Are decision rules still pre-committed and
 honest? Is documentation accurate (stale claims mislead worse than missing
-ones)? **This lane owns this skill too** — if the shift process is wrong,
-fixing it is the work, and §9 is how that stays honest.
+ones)?
+
+**The workflow itself is always in scope here, not only at audit time.** Agentic
+systems improve what they build and never question how they build it. If
+something about this process was awkward *this shift* — a rule that didn't fit,
+a step that added nothing, state you had to re-derive, a gate you worked around
+— that is a finding. Record it in `WORKLOG.md` even when you don't act on it;
+the next `/audit` needs the pattern, and one shift's friction is invisible on
+its own. Changes to the process are proposals (§5), not self-applied edits.
 
 **Research** — how do channels like this actually grow, and what transfers?
 This lane always has capacity, so it is the fallback when nothing else clears
@@ -159,13 +166,11 @@ Limits are in `CLAUDE.md` §1. Shift-specific rules:
 a live system that uploads twice a day. Churn on it is worse than idleness.
 Specifically forbidden:
 
-- **Refactoring without a named benefit.** "Cleaner" is not a benefit. A
-  refactor needs a concrete one: it unblocks a change, removes a duplicated
-  rule that could drift, or makes untestable logic testable. `TECH_DEBT.md`
-  tiers findings for exactly this reason — work the tiers, don't invent work.
-- **Re-planning what was just planned.** Re-deriving priorities every shift
-  destroys direction. `PRD.md` §0's backlog order stands until *data* moves it,
-  not until a shift has a new opinion.
+- **Refactoring without a named benefit.** "Cleaner" is not one. It must
+  unblock a change, remove a rule that could drift, or make untestable logic
+  testable. Work `TECH_DEBT.md`'s tiers; don't invent work.
+- **Re-planning what was just planned.** `PRD.md` §0's backlog order stands
+  until *data* moves it, not until a shift has a new opinion.
 - **Rewriting docs that are already accurate.** Correct stale claims; leave
   correct ones alone.
 - **New trackers, new documents, new analysis files.** Use the four that exist:
@@ -177,49 +182,32 @@ research — it always has capacity, and thinking and planning are real work.
 Only if that is thin too, **stop and say the queue is empty.** A shift that
 ships one real thing and says "nothing else cleared the bar" is a good shift.
 
-## 8. The standing audit — every shift, briefly
-
-Agentic setups bloat until the instructions that matter are lost among those
-that don't — *"bloated CLAUDE.md files cause Claude to ignore your actual
-instructions."* This project added four documents in its first autonomous
-session, so the pressure is real.
-
-**Every shift, before closing:**
+## 8. Leave the context no bigger than you found it
 
 ```sh
 venv/bin/python scripts/context_budget.py --check
 ```
 
-If you added context, you are expected to have removed some. The test for any
-line, from Anthropic's own guidance: **"would removing this cause a mistake?"**
-If not, cut it. When something is over budget, the fix is almost never a bigger
-budget — delete it, move detail to where it is read on demand (a skill, or PRD
-§6), or convert an advisory rule into a hook or a test, which is enforcement
-rather than words.
+Agentic setups bloat until the instructions that matter are lost among those
+that don't. If you added context, you are expected to have removed some. The
+test for any line: **would removing this cause a mistake?** If not, cut it.
+When something is over budget the fix is almost never a bigger budget — delete
+it, move detail to where it is read on demand, or convert an advisory rule into
+a hook or a test.
 
-**Every ~10th shift, or whenever `WORKLOG.md` shows no audit in the last ten,
-do the deep pass** and record it in `TECH_DEBT.md`:
+**Every ~10th shift** (or when `WORKLOG.md` shows none in the last ten), run
+**`/audit`** for the deep pass over the process itself.
 
-1. **Prune.** Re-read `CLAUDE.md` line by line against the question above.
-   `/doctor` proposes cuts for anything derivable from the codebase.
-2. **Check the external guidance.** Re-read
-   [Claude Code best practices](https://code.claude.com/docs/en/best-practices)
-   and the [skills](https://code.claude.com/docs/en/skills) docs. They change.
-   Adopt what applies; **record what you deliberately rejected and why**, so
-   the next shift doesn't re-litigate it.
-3. **Audit what the process actually produced.** Read the last ten `WORKLOG.md`
-   entries. Which shifts shipped something that mattered? Which produced churn?
-   Is any lane always skipped — and is that correct, or is the triage order
-   wrong? Are escalations landing on real decisions, or noise?
-4. **Look for layering.** Rules restated in two places will drift — that has
-   already happened once here, between memory and `PRD.md`. One rule, one home,
-   pointers everywhere else.
+## 9. End the shift rather than extend it
 
-Changes to this skill are a **proposal**, not a self-applied edit: escalate
-them (§5). A workflow that rewrites its own rules unobserved is the failure
-mode this whole section exists to prevent.
+Every turn re-reads everything before it, so cost climbs with session length
+while **orientation is only ~1% of it** — don't optimise the reading, optimise
+the length. **One lane, ~100 turns, then hand over and end.** A good
+`WORKLOG.md` entry isn't overhead; it's what makes a cheap restart possible
+instead of an expensive continuation. Evidence and the measurement:
+`scripts/context_budget.py --session`.
 
-## 9. Close the loop
+## 10. Close the loop
 
 Before the shift ends — and early enough that it still happens if usage runs
 out mid-task:
