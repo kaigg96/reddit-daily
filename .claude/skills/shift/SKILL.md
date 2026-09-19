@@ -28,7 +28,37 @@ Run the **`/pickup`** steps first. Do not re-derive state from `git log`.
 Then read `WORKLOG.md` (repo root) — the last few shifts and what each one
 queued for the next.
 
-## 2. Triage before choosing a lane
+## 2. Check the budget — how big a shift is this?
+
+```sh
+cat ~/.claude/usage-snapshot.json
+```
+
+Written by `scripts/statusline.py` on every assistant message. It carries the
+**real server-side limits** (`five_hour` / `seven_day`, each with
+`used_percentage` and a `resets_at` epoch) — the only supported source for
+these; they are not in `~/.claude.json` and `/usage` is interactive-only.
+
+Check `captured_at`. If it is from a previous session the percentages are
+stale, but `resets_at` still tells you whether the window has since rolled over
+— if it has, you are starting fresh.
+
+Scope the shift to what fits:
+
+| 5h window used | Take on |
+|---|---|
+| < 40% | Anything, including a feature with a dry run and a merge |
+| 40–75% | One bounded task; finish and ship it rather than starting something big |
+| > 75% | Close the loop only: commit, update `WORKLOG.md`, hand over |
+| unknown | Assume the middle band |
+
+Watch `seven_day` too — a low 5h figure against a nearly-spent weekly budget
+still means a small shift.
+
+**Never start something that cannot be finished or cleanly parked.** An
+abandoned half-refactor costs the next shift more than it saved this one.
+
+## 3. Triage before choosing a lane
 
 In order. The first one that fires wins the shift.
 
@@ -45,7 +75,7 @@ In order. The first one that fires wins the shift.
 4. Otherwise, **rotate** through the lanes below, skipping any with nothing
    above the value bar. Prefer the lane least recently worked (see `WORKLOG.md`).
 
-## 3. The lanes
+## 4. The lanes
 
 **Maintenance** — the system and the channel. Is the pipeline healthy, are the
 logs sane, is anything silently failing? The recurring lesson here is that
@@ -67,15 +97,27 @@ fixing it is the work.
 
 **Research** — how do channels like this actually grow, and what transfers?
 This lane always has capacity, so it is the fallback when nothing else clears
-the bar. **Filter everything through this channel's own findings.** Generic
-Shorts advice is precisely the genre that produced R1.8/R1.9 and the b-roll
-retention claim, both of which the data later killed. Output hypotheses with a
-proposed test, never "best practices" to adopt.
+the bar. Three rules keep it useful:
+
+- **Filter through this channel's own findings.** Generic Shorts advice is
+  precisely the genre that produced R1.8/R1.9 and the b-roll retention claim,
+  both of which the data later killed. Output a **hypothesis with a proposed
+  test**, never a practice to adopt.
+- **Do not pivot on new information.** A finding goes to the bottom of the
+  experiment backlog in `PRD.md` §0 and waits its turn, unless it contradicts
+  something we currently *believe* — in which case the finding is that our
+  evidence is weak, not that we should change direction today. Direction changes
+  need data from our own channel.
+- **Discard aggressively.** Research that does not change a decision should be
+  a sentence in the `WORKLOG.md` entry, not a new document. **Do not create
+  new files in `analysis/` or new top-level docs for research output.** A
+  scatter of unread reports is a maintenance cost with no upside; if it is
+  worth keeping, it belongs in §0's backlog or §4's Findings.
 
 **Feature work** — the experiment backlog in `PRD.md` §0, in its stated order,
 under its pre-committed decision rules.
 
-## 4. Authorization (owner, 2026-09-19)
+## 5. Authorization (owner, 2026-09-19)
 
 **You may merge to `main` yourself, including changes to the live upload path,
 prompts and content selection.** The former rollout gate (owner reviews a
@@ -104,7 +146,7 @@ median watch-seconds or views against an age-matched baseline (`scripts/report.p
 --compare`) reverts it and records why. Shipping without review only works if
 something is watching the result.
 
-## 5. External budgets (these are not Claude usage)
+## 6. External budgets (these are not Claude usage)
 
 - **Gemini: 20 requests/day, shared with production.** Production spends 4–10.
   Budget **at most 8** for verification, only after the 07:00 UTC reset, and
@@ -115,15 +157,31 @@ something is watching the result.
 - **Don't run `scripts/weekly_analytics.py`** to check something — it appends
   real rows. If you do, revert the file before committing.
 
-## 6. Stopping is allowed
+## 7. The value bar — what NOT to do
 
-If a lane has nothing above the value bar, say so and move on. If *no* lane
-does, do research — and if that is thin too, **stop and say the queue is
-empty.** Idle beats manufactured work on a system that uploads twice a day.
-A shift that ships one real thing and says "nothing else was worth doing" is a
-good shift.
+"Always be working" creates pressure to manufacture tasks, and this project is
+a live system that uploads twice a day. Churn on it is worse than idleness.
+Specifically forbidden:
 
-## 7. Close the loop
+- **Refactoring without a named benefit.** "Cleaner" is not a benefit. A
+  refactor needs a concrete one: it unblocks a change, removes a duplicated
+  rule that could drift, or makes untestable logic testable. `TECH_DEBT.md`
+  tiers findings for exactly this reason — work the tiers, don't invent work.
+- **Re-planning what was just planned.** Re-deriving priorities every shift
+  destroys direction. `PRD.md` §0's backlog order stands until *data* moves it,
+  not until a shift has a new opinion.
+- **Rewriting docs that are already accurate.** Correct stale claims; leave
+  correct ones alone.
+- **New trackers, new documents, new analysis files.** Use the four that exist:
+  `PRD.md`, `TECH_DEBT.md`, `WORKLOG.md`, `CLAUDE.md`.
+- **Widening scope mid-shift.** Finish the thing, then pick the next thing.
+
+If a lane has nothing above that bar, say so and move on. If *no* lane does, do
+research — it always has capacity, and thinking and planning are real work.
+Only if that is thin too, **stop and say the queue is empty.** A shift that
+ships one real thing and says "nothing else cleared the bar" is a good shift.
+
+## 8. Close the loop
 
 Before the shift ends — and early enough that it still happens if usage runs
 out mid-task:
