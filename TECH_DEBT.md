@@ -94,6 +94,23 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload.**
+  Recorded here because the *class* of bug matters more than the fix: the
+  Analytics API returns no row at all for a video with exactly 0 views, and
+  `load_videos` did `if not s: continue`. So the uploads that vanished from
+  every median, every `--by` grouping and the zero-view count were precisely
+  the worst performers — and among them **both surviving confirmed-suppression
+  cases** (`VDH3pSafyE0`, `_0MNAf8AzNg`), i.e. the entire evidence base for
+  R4.6's skip categories was invisible to the tool the PRD tells you to verify
+  it with. Measured effect on the live channel: zero-view uploads **1 → 4**,
+  cohort **118 → 121**; headline medians unchanged. A missing row is now read
+  as a genuine zero, except for non-public videos, which are excluded and
+  counted in a printed note. Non-public vs cold-spell vs isolated was already
+  encoded in `classify_zero_views` — it just had never been carried into the
+  join. Worth remembering that `--zeros` was right all along while the overview
+  was wrong: two paths over the same question disagreed for weeks and nothing
+  flagged it.
+
 - **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
   is shared between production and any local analysis.** On 2026-09-10 an R4.3
   re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the

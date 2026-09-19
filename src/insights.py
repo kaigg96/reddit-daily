@@ -234,11 +234,36 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
             d = dict(zip(cols, row))
             stats[d["video"]] = d
 
+    # A video with exactly 0 views has NO row in the Analytics response, so
+    # `stats` is missing precisely the uploads that matter most: on 2026-09-19
+    # the three dropped uploads old enough to have data were the 2026-09-14
+    # zero and BOTH surviving confirmed-suppression cases (VDH3pSafyE0,
+    # _0MNAf8AzNg) — the entire evidence base for R4.6's skip categories,
+    # invisible to the tool that answers "did X work?". Dropping them also bias
+    # every median upward, since they are the worst performers by definition.
+    #
+    # So a missing row is treated as a genuine zero, except where the video is
+    # non-public (owner-privatised), which is a different thing entirely and is
+    # excluded — the same distinction `classify_zero_views` already encodes.
+    missing_ids = [r["video_id"] for r in rows if r["video_id"] not in stats]
+    privacy = {}
+    if missing_ids:
+        yt = analytics.youtube_client()
+        for d in analytics.fetch_video_details(yt, missing_ids, part="status"):
+            privacy[d["id"]] = d.get("status", {}).get("privacyStatus", "unknown")
+
     videos = []
+    excluded_non_public = []
     for r in rows:
         s = stats.get(r["video_id"])
         if not s:
-            continue
+            vid = r["video_id"]
+            if privacy.get(vid, "unknown") != "public":
+                # Privatised or deleted: not a performance data point either way.
+                excluded_non_public.append(vid)
+                continue
+            s = {"views": 0, "averageViewDuration": 0, "averageViewPercentage": 0,
+                 "likes": 0, "comments": 0}
         published = _parse_ts(r["timestamp_utc"])
         # Derived dimensions — raw bg_clip is per-file ("pexels_123.mp4",
         # "procedural:8471"), which is too granular to group on.
@@ -256,6 +281,9 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
         )
         if v.age_days(now) >= min_age_days:
             videos.append(v)
+    if excluded_non_public:
+        print(f"note: {len(excluded_non_public)} logged upload(s) excluded as "
+              f"non-public (owner-privatised), not counted as zero-view")
     return videos
 
 
