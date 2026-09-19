@@ -15,7 +15,7 @@ on:
     paths:
       - 'CLAUDE.md'
       - '.claude/skills/**'
-      - '.github/workflows/protect-process.yml'
+      - '.github/workflows/**'
 
 permissions:
   contents: write
@@ -43,8 +43,11 @@ jobs:
             const { execSync } = require('child_process');
             const changed = execSync('git diff --name-only HEAD~1 HEAD')
               .toString().split('\n').filter(Boolean)
+              // Workflows are protected because CI *is* the gate that replaced
+              // owner review -- a shift able to edit it could disable its own
+              // supervision, which matters more now shifts can run inside CI.
               .filter(f => f === 'CLAUDE.md' || f.startsWith('.claude/skills/')
-                        || f === '.github/workflows/protect-process.yml');
+                        || f.startsWith('.github/workflows/'));
             if (changed.length === 0) { core.setOutput('ok', 'true'); return; }
 
             const msg = execSync('git log -1 --pretty=%B').toString();

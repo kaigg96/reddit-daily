@@ -1,0 +1,56 @@
+name: Run a shift
+
+# Runs /shift on a schedule using the owner's Claude subscription (an OAuth
+# token, not API billing — so no new paid service, per PRD §5).
+#
+# Deliberately NOT given the upload secrets. A shift gets GEMINI_API_KEY for
+# the release gates and nothing else: it cannot upload to YouTube, post a
+# comment, or spend a cent on Polly from here. If a render is needed, it
+# dispatches run-reddit-video.yml with dry_run, which has its own secrets.
+
+on:
+  schedule:
+    - cron: '17 9 * * *'   # after the 07:00 Gemini reset and the 08:17 validation
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'What to run (default: /shift)'
+        required: false
+        default: '/shift'
+
+permissions:
+  contents: write
+  issues: write
+  actions: write      # to dispatch the dry-run workflow
+  id-token: write
+
+concurrency:
+  group: shift
+  cancel-in-progress: false
+
+jobs:
+  shift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45      # a runaway shift costs Actions minutes and quota
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # shifts read git history
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m venv venv
+          venv/bin/pip install -q -r requirements.txt -r requirements-dev.txt
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: ${{ inputs.prompt || '/shift' }}
+          claude_args: --max-turns 120
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
