@@ -38,7 +38,7 @@ Then **get on with it.** ~~Stop unless told to build~~ — that rule was retired
 2026-09-19; the owner would rather work proceed than wait on a go-ahead. For a
 session with no specific task, use **`/shift`**, which picks the lane and
 carries the authorization rules and external budgets. What still needs the
-owner is listed in `CLAUDE.md` §3.
+owner is listed in `CLAUDE.md` §4, and the usage reserve in §2.
 
 ## 3. Conventions
 
