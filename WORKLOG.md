@@ -20,33 +20,38 @@ are being finished or filled:
 
 ## 2026-09-19 — first session (pre-dates the allocation model)
 
-    Allocation (planned→actual %): rounds 0→0 · maintenance 0→35 · pm 0→45 · research 0→5 · feature 0→5 · close 0→10
+    Allocation (planned→actual %): rounds 0→0 · maintenance 0→30 · pm 0→50 · research 0→5 · feature 0→5 · close 0→10
 
 Unplanned — this session built the workflow rather than running it. The zeros
 in `planned` mark it as the outlier, not a starvation signal.
 
-**Shipped to `main`:** escalation path (verified end-to-end — owner confirmed
-the email), usage statusline, CI release gates.
+**⛔ `integration/preview` is BLOCKED on owner approval.** It changes
+`CLAUDE.md` and `.claude/skills/**`, which `protect-process.yml` guards. Issue
+*"Approve the process rules built on 2026-09-19?"* is filed. When it carries
+the `approved` label, land the branch with `Approved-In: #N` in the merge
+commit — without it CI reverts the protected files.
 
-**On `integration/preview`, 83 tests green, awaiting CI:** v6 screen retiering,
-the Gemini thinking fix, the zero-view analytics fix, metadata consolidation,
-and the shift/audit workflow.
+**On `main`:** escalation path (verified end-to-end), usage statusline, CI
+release gates, the approval request.
+
+**On `integration/preview`, 83 tests green:** v6 screen retiering, the Gemini
+thinking fix, the zero-view analytics fix, metadata consolidation, and the
+whole shift/audit workflow.
 
 **Two live bugs found, both silent** (detail in PRD §4 Findings): Gemini's
 default thinking blew the 30s timeout, so **~25% of uploads for two weeks
 shipped the raw Reddit question as their title**; and `load_videos` dropped
 every 0-view upload, hiding **both confirmed-suppression cases** from
-`report.py`. Also measured: the Gemini free tier is **20 requests/day**, not
-the few hundred assumed.
+`report.py`. Also measured: the Gemini free tier is **20 requests/day**.
 
 **Queued next:**
-1. CI validates `preview` at 08:17 UTC → read `.github/last-release-validation.md`
-   on `main`. PASS means merge; FAIL means an issue is already open.
+1. Get approval → merge `preview`. CI validates it at 08:17 UTC daily; read the
+   verdict in `.github/last-release-validation.md` on `main`.
 2. Pass 3 Tier 1 (`TECH_DEBT.md`): extract and test the R1.7 duration guard;
    reconcile the two `age_adjusted_residuals` implementations (14% apart).
-3. No automated video check yet — CI gates prompts and tests, not that a
-   playable MP4 came out. `run-reddit-video.yml` takes a `dry_run` input.
+3. No automated video check — CI gates prompts and tests, not that a playable
+   MP4 came out. `run-reddit-video.yml` already takes a `dry_run` input.
 
-**Process friction noted:** the shift skill needed four rounds of word-shaving
-before the real fix (splitting `/audit` out) became obvious; and `DECISIONS.md`
-D1 records a decision whose assumption expired in two hours unnoticed.
+**Every threshold in the workflow is an unvalidated guess** — caps, waste and
+starvation windows, turn counts. No shift has run. First real shifts should
+treat them as hypotheses and report friction (`DECISIONS.md` D4, D5).
