@@ -144,14 +144,16 @@ Strategic implication (unchanged): 10M views/90d ≈ 110K/day vs the current ~1�
 
 ## 5. Constraints & guardrails (binding on the implementer)
 
-1. **$0 budget.** No new paid services. Existing Polly/Gemini/YouTube usage stays. (Note: Polly neural is ~$16/1M chars once past free tier; speech-mark calls double character usage → still ≈ $1–2/mo at 60 videos. Accepted. Gemini 2.5 Flash free tier covers the added calls.)
-2. **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
-3. **Must run headlessly on `ubuntu-latest`** GitHub Actions, twice daily, within reasonable job time (< 30 min).
-4. **DRY_RUN guardrail (build first — R0.1).** All development/verification runs must use DRY_RUN. **Never upload to the live channel, post comments, or mutate `prev_post.txt`/logs during development.** The first live run of any new format version requires explicit owner approval.
-5. **Never commit secrets.** `.env`, `client_secret.json`, `token.json` stay gitignored. (`praw.ini` was removed 2026-08-23 — Reddit auth reads `REDDIT_*` from the environment.) When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
-6. **Licensing:** every committed media asset (b-roll, music, SFX, fonts) must be free for commercial use without attribution (CC0/Pixabay License/Mixkit License/YouTube Audio Library/OFL fonts) and its source URL recorded in `assets/CREDITS.md`. No gameplay footage of copyrighted games, no clips with embedded music/watermarks/logos/visible people prominently featured.
-7. **Policy:** no fake engagement, no engagement pods, no view manipulation, no posting-frequency increase as a substitute for quality. Existing content filters (NSFW/profanity/emoji) must remain.
-8. **Repo hygiene:** each committed b-roll/music file < 25 MB; total new committed assets < 300 MB. (If the library needs to grow beyond that later, move to GitHub Release assets + `actions/cache` — out of scope now.)
+1. **$0 budget.** No new paid services. Existing Polly/Gemini/YouTube usage stays.
+2. **AWS Polly is the one line item that costs the owner real money — treat call volume as the constraint.** Neural is $16/1M characters and every segment is synthesized **twice** (mp3 + speech marks), so characters bill double. Production is ~910 billed chars/video ≈ **$0.90/month** at 2/day, and must stay in that range. The exposure is not per-video cost but **bulk synthesis**: 10,000 test renders is ~$144, and 10,000 calls at Polly's 3K-char cap is ~$960. **No bulk synthesis, no un-capped retries, reuse `assets/gen/` audio when iterating on visuals, and ask the owner before any deliberate batch job.** Enforced in code by the per-process budget in `src/tts.py` (`POLLY_CHAR_BUDGET`) — prose is not an enforcement mechanism. Full rules in [CLAUDE.md](CLAUDE.md) §1.
+3. **Gemini's free tier is a shared daily request budget**, not per-process: local analysis and the live 2x/day pipeline draw on the same key, and exhausting it silently degrades real uploads to keyword-backstop screening and un-generated titles (observed 2026-09-10 — see TECH_DEBT.md). Budget local Gemini work rather than running it opportunistically.
+4. **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
+5. **Must run headlessly on `ubuntu-latest`** GitHub Actions, twice daily, within reasonable job time (< 30 min).
+6. **DRY_RUN guardrail (build first — R0.1).** All development/verification runs must use DRY_RUN. **Never upload to the live channel, post comments, or mutate `prev_post.txt`/logs during development.** The first live run of any new format version requires explicit owner approval.
+7. **Never commit secrets.** `.env`, `client_secret.json`, `token.json` stay gitignored. (`praw.ini` was removed 2026-08-23 — Reddit auth reads `REDDIT_*` from the environment.) When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
+8. **Licensing:** every committed media asset (b-roll, music, SFX, fonts) must be free for commercial use without attribution (CC0/Pixabay License/Mixkit License/YouTube Audio Library/OFL fonts) and its source URL recorded in `assets/CREDITS.md`. No gameplay footage of copyrighted games, no clips with embedded music/watermarks/logos/visible people prominently featured.
+9. **Policy:** no fake engagement, no engagement pods, no view manipulation, no posting-frequency increase as a substitute for quality. Existing content filters (NSFW/profanity/emoji) must remain.
+10. **Repo hygiene:** each committed b-roll/music file < 25 MB; total new committed assets < 300 MB. (If the library needs to grow beyond that later, move to GitHub Release assets + `actions/cache` — out of scope now.)
 
 ## 6. Requirements
 

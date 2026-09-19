@@ -22,7 +22,14 @@ decisions:
    ideas were killed by data recorded there.
 4. **`TECH_DEBT.md`** — only for code-health work.
 
-Standing conventions, non-negotiable:
+Standing conventions, non-negotiable (the full set, with the reasoning, is in
+[CLAUDE.md](CLAUDE.md) — loaded automatically in every session):
+- **AWS Polly costs real money — never synthesize in bulk.** It is the only
+  billed service here ($16/1M chars, billed twice per segment because of the
+  speech-mark call). Production is ~$0.90/month; a batch job is where a
+  surprise bill comes from. Reuse the mp3s in `assets/gen/` when iterating on
+  visuals, and ask the owner before any deliberate bulk synthesis.
+  `POLLY_CHAR_BUDGET` in `src/tts.py` enforces a per-process cap.
 - Feature work goes on a branch; `main` runs live twice daily (see below).
 - Don't start building a phase/feature until the owner explicitly says go.
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis

@@ -57,6 +57,15 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v5"  # v5 = R4.6 suppression-risk screen at selection
 
+# --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
+# Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
+# marks), so characters bill double. A real run spends ~910 billed chars; the
+# config caps above put the ceiling at ~1,260. The budget is per-process and
+# sized at ~4x a worst-case run: generous for one video, nowhere near enough
+# for a batch job. Raise it only for a deliberate, owner-approved bulk run
+# (POLLY_CHAR_BUDGET=... in the environment), never to make an error go away.
+POLLY_CHAR_BUDGET = int(os.environ.get("POLLY_CHAR_BUDGET", 5000))
+
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
 
