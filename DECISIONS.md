@@ -31,6 +31,30 @@ revisit trigger.
 
 ---
 
+## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
+
+`CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
+the owner labelled `approved`, referenced as `Approved-In: #N`. Unapproved
+changes are reverted automatically and escalated.
+
+**Alternatives:** keep it as prose (it already was, in three places, and
+nothing enforced it); require PR review (we deliberately removed that gate —
+it was the bottleneck); protect via branch rules (cannot express "approved
+issue exists").
+
+**Why:** shifts are autonomous and audit their own process. Prose telling an
+agent not to rewrite its own rules is advisory, and this project has learned
+three times that advisory loses — the R4.6 tier guarantee moved into
+`screen.py`, the Polly limit into `tts.py`, the context limit into a budget.
+
+**Assumptions:**
+1. Branch work stays unrestricted, so proposing costs nothing.
+2. Reverting is safe — the change is never lost, only unlanded.
+3. The owner is reachable to approve. *(Escalation email verified 2026-09-19.)*
+
+**Revisit when:** approval becomes a bottleneck the way review did (1 or 3
+failing); or a revert loses work rather than unlanding it (2 false).
+
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
 `WORKLOG.md` 10 entries, `DECISIONS.md` 15, `TECH_DEBT.md` 25 open items,

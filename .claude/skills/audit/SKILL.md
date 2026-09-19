@@ -10,10 +10,20 @@ the channel has metrics; the process has neither unless a shift deliberately
 looks. That gap is where agentic systems rot — they optimise what they build
 and never ask whether the way they build it still makes sense.
 
-Run every ~10th shift. Findings go in `TECH_DEBT.md`. Changes to `/shift`,
-`/pickup` or `CLAUDE.md` are **proposals** — escalate them with
-`scripts/escalate.py` rather than self-applying. A workflow that rewrites its
-own rules unobserved is the failure this exists to prevent.
+Run every ~10th shift. Findings go in `TECH_DEBT.md`.
+
+**Changes to `CLAUDE.md` or any skill are proposals, and this is enforced, not
+advised.** `.github/workflows/protect-process.yml` reverts a protected file
+changed on `main` without approval and tells the owner. The path:
+
+1. Make the change **on a branch** — branches are unrestricted.
+2. `scripts/escalate.py` to raise it, with the reasoning and your recommendation.
+3. The owner labels that issue `approved`.
+4. Land it with `Approved-In: #N` in the commit message. CI checks the issue
+   really exists and really carries the label — the trailer alone proves nothing.
+
+A workflow that rewrites its own rules unobserved is the failure this prevents,
+and prose was never going to stop it.
 
 Hold it to the same standard as the channel: **evidence over hunches, record
 what you rejected, and don't change direction because a shift has a new

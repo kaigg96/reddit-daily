@@ -56,6 +56,10 @@ blocking:
 - Deleting or rewriting production data, including historical backfills.
 - Publishing anything outside the channel's normal upload.
 
+**Changing `CLAUDE.md` or a skill** — propose on a branch, escalate, and land
+only with `Approved-In: #N` naming an issue the owner labelled `approved`.
+Enforced by `protect-process.yml`, which reverts unapproved changes.
+
 **And when the process itself is failing** — not a permission question, but a
 signal the owner needs. `scripts/context_budget.py --health` detects these and
 queues the issue automatically: capacity consistently unused, a lane starved
