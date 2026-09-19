@@ -1,0 +1,112 @@
+name: File escalations as issues
+
+# Shifts run without the owner. When one hits a decision it may not make, it
+# queues a file in .escalations/ (see scripts/escalate.py); this turns each one
+# into a GitHub issue, which emails the owner because they watch the repo.
+#
+# Uses the built-in GITHUB_TOKEN — deliberately no SMTP credentials, which
+# would add an attack surface for no gain over an issue.
+
+on:
+  push:
+    branches: [main]
+    paths: ['.escalations/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # to delete the queued file once filed
+  issues: write
+
+# Never run two of these at once: both would file the same escalation.
+concurrency:
+  group: escalations
+  cancel-in-progress: false
+
+jobs:
+  file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create or update issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const dir = '.escalations';
+            if (!fs.existsSync(dir)) { core.info('no queue directory'); return; }
+
+            const files = fs.readdirSync(dir)
+              .filter(f => f.endsWith('.md') && f !== 'README.md');
+            if (files.length === 0) { core.info('nothing queued'); return; }
+
+            // Frontmatter is deliberately flat `key: value` lines so this can
+            // be parsed without pulling in a YAML dependency.
+            const parse = (raw) => {
+              const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+              if (!m) return { meta: {}, body: raw };
+              const meta = {};
+              for (const line of m[1].split('\n')) {
+                const i = line.indexOf(':');
+                if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+              }
+              return { meta, body: m[2] };
+            };
+
+            // List rather than search: the search index lags behind a push by
+            // enough to file a duplicate.
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', per_page: 100,
+            });
+
+            for (const file of files) {
+              const { meta, body } = parse(fs.readFileSync(`${dir}/${file}`, 'utf8'));
+              const key = meta.key || file.replace(/\.md$/, '');
+              const marker = `<!-- escalation-key: ${key} -->`;
+              const title = meta.title || key;
+              const labels = (meta.labels || 'needs-owner')
+                .split(',').map(s => s.trim()).filter(Boolean);
+
+              const existing = open.find(i => (i.body || '').includes(marker));
+              if (existing) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: existing.number,
+                  body: `**Raised again** by a later shift (\`${file}\`):\n\n${body}`,
+                });
+                core.info(`commented on #${existing.number} (${key})`);
+              } else {
+                const issue = await github.rest.issues.create({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  title, labels, body: `${marker}\n\n${body}`,
+                });
+                core.info(`opened #${issue.data.number} (${key})`);
+              }
+              fs.unlinkSync(`${dir}/${file}`);
+            }
+
+      - name: Clear the queue
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Nothing filed -> nothing to clear. Not an error.
+          if git diff --quiet -- .escalations; then
+            echo "queue already empty"; exit 0
+          fi
+
+          git add -A .escalations
+          git commit -m "Clear filed escalations"
+
+          # The video and analytics jobs commit to main too, so contend for it
+          # the same way they do rather than failing the run.
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "push attempt $attempt failed; retrying"
+            sleep 5
+          done
+          echo "::error::Filed the issues but could not clear the queue —
+            delete .escalations/*.md by hand or the next push refiles them
+            (they will comment on the existing issue, not duplicate it)."
+          exit 1
