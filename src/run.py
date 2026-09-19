@@ -59,25 +59,26 @@ def main():
     # exactly why the outcome has to be logged. Title fallbacks ran at ~25% for
     # two weeks in Sept 2026 and were only discoverable by comparing the shipped
     # title back to the Reddit question (PRD §2, TECH_DEBT 2026-09-19).
-    keywords = llm.get_keywords(post.title, post.comments)
-    keywords_ok = keywords is not None
-    keywords = keywords or []
-
     # R2.2: rotate title style by day so both daily uploads share it; logged per upload
     title_style = "ABC"[datetime.date.today().timetuple().tm_yday % 3]
-    resolved = llm.resolve_title(
-        llm.get_video_title(post.title, post.comments, style=title_style),
-        style=title_style, fallback=post.title)
-    video_title, title_style, title_ok = resolved
+
+    # One request for all three fields. Each fails soft independently, so a
+    # missing CTA doesn't cost us the title -- see llm.get_metadata.
+    meta = llm.get_metadata(post.title, post.comments, style=title_style)
+
+    keywords_ok = meta.keywords is not None
+    keywords = meta.keywords or []
+
+    video_title, title_style, title_ok = llm.resolve_title(
+        meta.title, style=title_style, fallback=post.title)
     if not title_ok:
         print("Title generation failed — shipping the Reddit question and "
               "logging no style (it was never applied)")
     print(f"Title style {title_style or '-'}: {video_title}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
-    cta = llm.get_cta(post.title)
-    cta_ok = cta is not None
-    outro_text = cta or config.OUTRO_TEXT
+    cta_ok = meta.cta is not None
+    outro_text = meta.cta or config.OUTRO_TEXT
     print(f"CTA: {outro_text}")
 
     # --- tts ---

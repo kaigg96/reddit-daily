@@ -41,7 +41,9 @@ by keeping both sides.
 | 3 | `feature/r4.6-taxonomy-narrow` | `v6` screen retiering (the original pending item) | Medium — content selection |
 | 4 | `fix/analytics-drops-zero-views` | **Analysis correctness fix.** 0-view uploads were dropped from every median and every cohort | Low — read-only tooling |
 
-**⚠️ One check outstanding before any of this reaches `main`:** `scripts/replay_screen.py`
+**⚠️ Two checks outstanding before any of this reaches `main`**, both needing Gemini quota (run after 07:00 UTC): (a) one `llm.get_metadata` call, to confirm the merged prompt returns a sane title/keywords/CTA — merging three focused prompts into one multi-task prompt can degrade each task, and that is **not yet validated**; (b) the screen replay below.
+
+**Check (b):** `scripts/replay_screen.py`
 must pass. It validates two things at once — `named_wrongdoing` (the item `v6`
 has been waiting on since 2026-09-09) and whether the R4.6 screen's JSON
 verdicts still hold with thinking disabled, which branch 2 changes. It could
@@ -112,7 +114,7 @@ Pipeline (cell by cell):
 - **OAuth:** the refresh token carries `youtube.upload`, `youtube.force-ssl` (comments + captions) and `yt-analytics.readonly`. The consent screen is published **in production**, so tokens no longer expire after 7 days (see README for the re-mint walkthrough).
 - **Fonts:** Anton is committed to `assets/fonts/` and passed to `TextClip` by path — no system font installation, so CI and local renders are identical.
 - **MoviePy 2.1.2** — 2.x API only; see Appendix A for the specific gotchas. (`moviepy.__version__` self-reports `2.1.1` despite the 2.1.2 pin — an upstream metadata quirk, not a wrong install.)
-- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus keywords, title, and CTA = **4–7 requests per run, 8–14 per day**. ⚠️ **Corrected 2026-09-19: this is NOT comfortably inside the free tier.** The cap is **20 requests/day** for `gemini-2.5-flash` on this project (measured from the 429 body: `GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`), so production alone is **40–70% of it**. Any local testing competes directly with live uploads, and a single screen replay is a third of the day's budget. The quota counts **requests, not tokens**, so the structural fix is fewer calls (keywords/title/CTA could be one call, not three) — see TECH_DEBT.md. Reset is midnight Pacific ≈ 07:00 UTC, which falls *between* the two scheduled runs, so the ~04:50 UTC run is the one exposed to a budget already spent.
+- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus **one** metadata call covering title + keywords + CTA = **2–5 requests per run, 4–10 per day** (was 4–7 / 8–14 until the three metadata prompts were merged on 2026-09-19). ⚠️ **Corrected 2026-09-19: this is NOT comfortably inside the free tier.** The cap is **20 requests/day** for `gemini-2.5-flash` on this project (measured from the 429 body: `GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`), so production alone is **40–70% of it**. Any local testing competes directly with live uploads, and a single screen replay is a third of the day's budget. The quota counts **requests, not tokens**, so the structural fix is fewer calls (keywords/title/CTA could be one call, not three) — see TECH_DEBT.md. Reset is midnight Pacific ≈ 07:00 UTC, which falls *between* the two scheduled runs, so the ~04:50 UTC run is the one exposed to a budget already spent.
 
 ## 3. Diagnosis (why <100 views)
 

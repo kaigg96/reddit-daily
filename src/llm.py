@@ -1,6 +1,7 @@
 """Gemini calls. Every function fails soft: the video must ship without them."""
 
 import collections
+import json
 import os
 import re
 
@@ -48,31 +49,6 @@ def _generate(prompt, thinking_budget=0):
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
-def get_keywords(reddit_title, comments):
-    prompt = f"""
-I'm publishing a YouTube video answering the following question: {reddit_title}.
-
-Here are the responses I'll be highlighting: {comments[0]}, {comments[1]}, {comments[2]}.
-
-Please extract the 10 best topics or keywords I can add to the video to maximize search optimization and virality.
-Include a mix of short-tail and long-tail keywords that people searching for answers to this question or related discussions might use. Also, consider terms related to the themes in the provided comments.
-
-Do not include any context or explanations, return only the 10 keywords numbered in the following format:
-```
-    1. keyword1
-    2. keyword2
-    ...
-    10.keyword10
-```
-"""
-    try:
-        return re.findall(r"\d+\.\s*(.*)", _generate(prompt))
-    except Exception as e:
-        # never echo the exception body: HTTPError messages embed the keyed URL
-        print(f"Gemini keywords failed with {type(e).__name__} (continuing without)")
-        return None  # None = the call failed; [] = it answered with nothing
-
-
 # PRD R2.2: three title-style experiments, rotated deterministically per day
 # and logged per upload so performance is comparable offline.
 _STYLE_GUIDANCE = {
@@ -88,50 +64,93 @@ _STYLE_GUIDANCE = {
 }
 
 
-def get_video_title(reddit_title, comments, style="A"):
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta")
+
+
+def get_metadata(reddit_title, comments, style="A"):
+    """Title + SEO keywords + CTA in ONE Gemini request.
+
+    These were three separate calls until 2026-09-19. The free-tier cap is 20
+    requests/day and production already spends 8-14 of them (PRD §2), so three
+    requests about the same post was the most obviously removable third of the
+    budget. The quota counts requests, not tokens, so merging the prompts is a
+    straight saving: 4-7 requests per run becomes 2-5.
+
+    Fail-soft stays PER FIELD, which is the part worth being careful about. A
+    response missing a CTA must not cost us the title, so each field comes back
+    None independently and the caller falls back on just that one. Returning a
+    single all-or-nothing result would have made one bad field as expensive as
+    a dead API.
+    """
     guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
+    numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
-I'm creating a YouTube Short video based on the Reddit question: "{reddit_title}".
-The video will feature these key answers from the comments:
-1. "{comments[0]}"
-2. "{comments[1]}"
-3. "{comments[2]}"
+I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
+It features these answers:
+{numbered}
 
-Your goal is to craft a highly engaging YouTube video title that maximizes click-through rate (CTR) and encourages virality.
+Produce three things.
 
-The title should:{guidance}
-- Use impactful and engaging language.
-- Be suitable for a YouTube Short (generally under 70 characters is good, but impact is key).
-- Hint at the nature of the answers/discussion without giving away specifics from the comments.
-- NOT be overly clickbaity or sensational.
+1. TITLE — a YouTube title that maximizes click-through rate.
+   The title should:{guidance}
+   - Use impactful, engaging language; under 70 characters is ideal.
+   - Hint at the nature of the answers without giving away specifics.
+   - NOT be overly clickbaity or sensational. No emoji.
 
-Important: Return *only* the generated title. Do not include any surrounding quotes, introductory phrases like "Here's a title:", or any other explanatory text. Just the title itself.
+2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
+   long-tail terms someone looking for this discussion would actually type.
+
+3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
+   their own answer to this specific question. Direct, punchy, conversational.
+   No hashtags, no emoji, no profanity.
+
+Return ONLY a JSON object, no markdown fence, in exactly this shape:
+{{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
 """
     try:
-        return _generate(prompt)
+        raw = _generate(prompt)
     except Exception as e:
-        print(f"Gemini title failed with {type(e).__name__} (falling back to reddit title)")
-        return None
+        # never echo the exception body: HTTPError messages embed the keyed URL
+        print(f"Gemini metadata failed with {type(e).__name__} "
+              f"(title, keywords and CTA all fall back)")
+        return MetadataResult(None, None, None)
 
-
-def get_cta(reddit_title):
-    """R3.1a: a ≤12-word question-specific spoken outro. None → caller uses the
-    generic fallback. Fails soft."""
-    prompt = f"""
-My YouTube Short asks: "{reddit_title}" and shows the top three Reddit answers.
-
-Write a spoken outro line of AT MOST 12 words asking viewers to comment their
-own answer to this specific question. Direct, punchy, conversational.
-No hashtags, no emojis, no profanity.
-
-Return only the line itself — no quotes, no explanation.
-"""
+    match = re.search(r"\{.*\}", raw, re.S)
+    if not match:
+        print("Gemini metadata returned no JSON object (all fields fall back)")
+        return MetadataResult(None, None, None)
     try:
-        line = re.sub(r"[*_`]", "", _generate(prompt))  # strip markdown emphasis
-        return re.sub(r"\s+", " ", line).strip().strip('"').strip("'").strip() or None
-    except Exception as e:
-        print(f"Gemini CTA failed with {type(e).__name__} (using generic outro)")
+        data = json.loads(match.group(0))
+    except ValueError:
+        print("Gemini metadata returned unparseable JSON (all fields fall back)")
+        return MetadataResult(None, None, None)
+
+    return MetadataResult(
+        title=_clean_str(data.get("title")),
+        keywords=_clean_keywords(data.get("keywords")),
+        cta=_clean_str(data.get("cta")),
+    )
+
+
+def _clean_str(value):
+    """A usable non-empty string, or None. Strips the quoting LLMs add."""
+    if not isinstance(value, str):
         return None
+    value = re.sub(r"[*_`]", "", value)                    # markdown emphasis
+    value = re.sub(r"\s+", " ", value).strip().strip('"').strip("'").strip()
+    return value or None
+
+
+def _clean_keywords(value):
+    """A list of non-empty keyword strings, or None if the field was absent.
+
+    [] and None mean different things here, same as the old get_keywords: None
+    is "the model didn't give us this field", [] is "it gave us nothing usable".
+    Only the first tells us the call is unhealthy.
+    """
+    if not isinstance(value, list):
+        return None
+    return [k for k in (_clean_str(v) for v in value) if k]
 
 
 TitleResult = collections.namedtuple("TitleResult", "title style ok")

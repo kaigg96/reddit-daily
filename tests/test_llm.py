@@ -12,6 +12,8 @@ The request shape is therefore load-bearing, not incidental, and it lives in
 one place that every caller shares.
 """
 
+import json
+
 import pytest
 
 from src import llm
@@ -28,6 +30,10 @@ class FakeResponse:
 
     def json(self):
         return {"candidates": [{"content": {"parts": [{"text": self._text}]}}]}
+
+
+GOOD_JSON = ('{"title": "A Great Title", '
+             '"keywords": ["one", "two"], "cta": "Comment your answer below!"}')
 
 
 @pytest.fixture
@@ -51,16 +57,14 @@ def test_thinking_is_disabled_by_default(captured):
     assert cfg["thinkingBudget"] == 0
 
 
-def test_every_caller_gets_thinking_disabled(captured):
-    """Keywords, title and CTA all share _generate — none may opt back in
-    silently, since each one failing soft is invisible in the logs."""
-    llm.get_keywords("q", ["a", "b", "c"])
-    llm.get_video_title("q", ["a", "b", "c"], style="B")
-    llm.get_cta("q")
+def test_metadata_is_one_request_not_three(captured):
+    """The whole point: the free-tier cap is 20 requests/day and production was
+    spending three of them on one post. Title, keywords and CTA now share a
+    request, taking a run from 4-7 down to 2-5."""
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
 
-    assert len(captured) == 3
-    for call in captured:
-        assert call["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
+    assert len(captured) == 1
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
 
 
 def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
@@ -101,26 +105,68 @@ def test_failures_stay_soft_and_do_not_echo_the_keyed_url(monkeypatch, capsys):
     monkeypatch.setattr(llm.requests, "post", boom)
     monkeypatch.setenv("GEMINI_API_KEY", "super-secret")
 
-    assert llm.get_keywords("q", ["a", "b", "c"]) is None
-    assert llm.get_video_title("q", ["a", "b", "c"]) is None
-    assert llm.get_cta("q") is None
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta == (None, None, None)
     assert "super-secret" not in capsys.readouterr().out
 
 
-def test_keywords_distinguishes_failure_from_an_empty_answer(captured, monkeypatch):
-    """None means the call failed; [] means it answered with nothing.
+def test_metadata_parses_a_good_response(monkeypatch):
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: GOOD_JSON)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "A Great Title"
+    assert meta.keywords == ["one", "two"]
+    assert meta.cta == "Comment your answer below!"
 
-    Without the distinction `keywords_ok` would be unloggable — the old code
-    returned [] for both, so a dead Gemini looked identical to a quiet one.
+
+def test_metadata_survives_a_markdown_fence(monkeypatch):
+    """Models wrap JSON in ```json fences unprompted; the screen already
+    tolerates this and so must this."""
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: f"```json\n{GOOD_JSON}\n```")
+    assert llm.get_metadata("q", ["a", "b", "c"]).title == "A Great Title"
+
+
+def test_one_missing_field_does_not_cost_the_others(monkeypatch):
+    """The risk merging three calls introduces: an all-or-nothing result would
+    make a single bad field as expensive as a dead API. Fail-soft is per field.
     """
-    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no numbered list here")
-    assert llm.get_keywords("q", ["a", "b", "c"]) == []
+    monkeypatch.setattr(llm, "_generate",
+                        lambda *a, **k: '{"title": "Kept", "keywords": ["k"]}')
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "Kept"
+    assert meta.keywords == ["k"]
+    assert meta.cta is None        # caller falls back to the generic outro only
 
-    def boom(*a, **k):
-        raise llm.requests.ConnectionError("down")
 
-    monkeypatch.setattr(llm, "_generate", boom)
-    assert llm.get_keywords("q", ["a", "b", "c"]) is None
+def test_unparseable_json_falls_back_on_everything(monkeypatch, capsys):
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "{not json at all")
+    assert llm.get_metadata("q", ["a", "b", "c"]) == (None, None, None)
+    assert "fall back" in capsys.readouterr().out
+
+
+def test_keywords_distinguishes_a_missing_field_from_an_empty_one(monkeypatch):
+    """None means the model never gave us the field; [] means it gave us
+    nothing usable. Only the first says the call is unhealthy, and keywords_ok
+    in the upload log depends on the difference."""
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: '{"title": "t", "keywords": []}')
+    assert llm.get_metadata("q", ["a", "b", "c"]).keywords == []
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: '{"title": "t"}')
+    assert llm.get_metadata("q", ["a", "b", "c"]).keywords is None
+
+
+def test_metadata_strips_the_junk_llms_add(monkeypatch):
+    """Quotes, markdown emphasis, blanks and non-strings all show up in practice."""
+    payload = json.dumps({
+        "title": '  "Quoted"  ',
+        "keywords": ["  a  ", "", None],
+        "cta": "**Bold** line",
+    })
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: payload)
+
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "Quoted"
+    assert meta.keywords == ["a"]      # blanks and non-strings dropped
+    assert meta.cta == "Bold line"
 
 
 def test_resolve_title_blanks_the_style_when_generation_failed():
