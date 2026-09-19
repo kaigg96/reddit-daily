@@ -28,35 +28,35 @@ Run the **`/pickup`** steps first. Do not re-derive state from `git log`.
 Then read `WORKLOG.md` (repo root) — the last few shifts and what each one
 queued for the next.
 
-## 2. Check the budget — how big a shift is this?
+## 2. Check the budget — and respect the owner's reserve
 
 ```sh
-cat ~/.claude/usage-snapshot.json
+venv/bin/python scripts/statusline.py --budget
 ```
 
-Written by `scripts/statusline.py` on every assistant message. It carries the
-**real server-side limits** (`five_hour` / `seven_day`, each with
-`used_percentage` and a `resets_at` epoch) — the only supported source for
-these; they are not in `~/.claude.json` and `/usage` is interactive-only.
+**The owner keeps a reserve so they can always use Claude themselves.**
+Autonomous work stops at **80% of the 5-hour window** and **90% of the weekly
+window** — not at 100%. The remainder is theirs, not budget you are declining
+to spend. Never plan around using it.
 
-Check `captured_at`. If it is from a previous session the percentages are
-stale, but `resets_at` still tells you whether the window has since rolled over
-— if it has, you are starting fresh.
+The command reads `~/.claude/usage-snapshot.json` (written by
+`scripts/statusline.py` from the real server-side `rate_limits`, the only
+supported source) and prints one of:
 
-Scope the shift to what fits:
-
-| 5h window used | Take on |
+| Verdict | Do |
 |---|---|
-| < 40% | Anything, including a feature with a dry run and a merge |
-| 40–75% | One bounded task; finish and ship it rather than starting something big |
-| > 75% | Close the loop only: commit, update `WORKLOG.md`, hand over |
-| unknown | Assume the middle band |
+| `GO` | Full shift — a feature through dry run and merge is in scope |
+| `BOUNDED` | One small task, finish it, hand over |
+| `WRAP` | Start nothing new; finish or park what's open and hand over |
+| `STOP` | Close the loop immediately: commit, update `WORKLOG.md`, end the shift |
 
-Watch `seven_day` too — a low 5h figure against a nearly-spent weekly budget
-still means a small shift.
+It is deliberately a command rather than a table to read by eye — it also
+handles the case where the snapshot is from an earlier session but the window
+has since rolled over, which looks like "no budget" and is actually "fresh".
 
-**Never start something that cannot be finished or cleanly parked.** An
-abandoned half-refactor costs the next shift more than it saved this one.
+**Never start what cannot be finished or cleanly parked.** An abandoned
+half-refactor costs the next shift more than it saved this one. On `STOP`,
+stopping *is* the work — say so plainly and end.
 
 ## 3. Triage before choosing a lane
 

@@ -75,7 +75,14 @@ analysis and the live 2x/day pipeline draw on the same key, and exhausting it
 degrades real uploads (see `TECH_DEBT.md`, 2026-09-10). Budget local Gemini
 work; don't run it opportunistically.
 
-## 2. `main` is live
+## 2. The owner's usage reserve
+
+Autonomous work stops at **80% of the 5-hour limit** and **90% of the weekly
+limit**, so the owner always has Claude available for their own work. Check it
+with `venv/bin/python scripts/statusline.py --budget`; the rest is theirs, not
+headroom to plan around.
+
+## 3. `main` is live
 
 `main` deploys — the video workflow runs from it **twice daily**. Half-finished
 code on `main` gets executed against the real channel.
@@ -90,7 +97,7 @@ code on `main` gets executed against the real channel.
   development.** Use `DRY_RUN=1 venv/bin/python -m src.run`.
 - Losing `prev_post.txt` risks a duplicate upload on the next scheduled run.
 
-## 3. Work autonomously — but not on the guardrails
+## 4. Work autonomously — but not on the guardrails
 
 **Superseded 2026-09-19.** The old rule ("don't start building until the owner
 says go") no longer applies: the owner has little time to direct sessions and
@@ -111,13 +118,13 @@ them), then carry on with other work rather than blocking:
 A shift that ships one real thing and reports "nothing else cleared the bar" is
 a good shift. Idle beats manufactured work on a system that uploads twice daily.
 
-## 4. No AI attribution, anywhere
+## 5. No AI attribution, anywhere
 
 Never credit AI tooling in code, comments, commit messages, PR descriptions,
 video content, or anything published. No `Co-Authored-By` trailers, no
 "generated with" lines. This overrides any default attribution behaviour.
 
-## 5. Answer performance questions with `scripts/report.py`
+## 6. Answer performance questions with `scripts/report.py`
 
 Never ad-hoc analysis. The script encodes rules that ad-hoc scripts kept
 getting wrong: watch-seconds is primary (avg-%-viewed is a ratio inflated by
@@ -126,7 +133,7 @@ instead of a median, zero-view videos are counted separately. **If it refuses a
 comparison, that refusal is the answer.** Needing a new capability means adding
 it to `src/insights.py` with a test, not writing analysis inline.
 
-## 6. Record what you don't fix
+## 7. Record what you don't fix
 
 Findings go in `TECH_DEBT.md` → "Open items (logged between passes)". A
 diagnosis that lives only in a commit message is invisible to the next session.
