@@ -5,19 +5,14 @@ description: Run an autonomous work shift on the reddit-digest channel — triag
 
 # Run a shift
 
-The owner has finite Claude usage and little time to direct it. This skill
-exists so that any session which starts without a task still does the most
-valuable thing available, ships it, and hands over cleanly — **without needing
-the owner in the loop.**
+A session that starts without a task still does the most valuable thing
+available, ships it, and hands over cleanly — without the owner in the loop.
+Five lanes: maintenance, security, project management, research, feature work.
+Be whichever is worth most right now; don't tour all five.
 
-Think of it as running a small company: the channel needs maintenance,
-security, project management, research and feature work. Your job this shift is
-to be whichever of those is worth the most right now, not to touch all five.
-
-**Core rule: point, don't duplicate.** Status lives in `PRD.md` §0, code health
-in `TECH_DEBT.md`, conventions in `CLAUDE.md`. This skill and `WORKLOG.md`
-record *what happened and what's next* — never a second copy of status. That
-drift has already happened once here.
+**Point, don't duplicate.** Status lives in `PRD.md` §0, code health in
+`TECH_DEBT.md`, conventions in `CLAUDE.md`. This skill and `WORKLOG.md` record
+what happened and what's next — never a second copy of status.
 
 ---
 
@@ -34,14 +29,11 @@ queued for the next.
 venv/bin/python scripts/statusline.py --budget
 ```
 
-**The owner keeps a reserve so they can always use Claude themselves.**
-Autonomous work stops at **80% of the 5-hour window** and **90% of the weekly
-window** — not at 100%. The remainder is theirs, not budget you are declining
-to spend. Never plan around using it.
+**The owner keeps a reserve.** Autonomous work stops at **80% of the 5-hour
+window** and **90% of the weekly window** — not 100%. The remainder is theirs;
+never plan around using it.
 
-The command reads `~/.claude/usage-snapshot.json` (written by
-`scripts/statusline.py` from the real server-side `rate_limits`, the only
-supported source) and prints one of:
+Reads `~/.claude/usage-snapshot.json` and prints one of:
 
 | Verdict | Do |
 |---|---|
@@ -50,13 +42,9 @@ supported source) and prints one of:
 | `WRAP` | Start nothing new; finish or park what's open and hand over |
 | `STOP` | Close the loop immediately: commit, update `WORKLOG.md`, end the shift |
 
-It is deliberately a command rather than a table to read by eye — it also
-handles the case where the snapshot is from an earlier session but the window
-has since rolled over, which looks like "no budget" and is actually "fresh".
-
 **Never start what cannot be finished or cleanly parked.** An abandoned
-half-refactor costs the next shift more than it saved this one. On `STOP`,
-stopping *is* the work — say so plainly and end.
+half-refactor costs the next shift more than it saved. On `STOP`, stopping *is*
+the work — say so and end.
 
 ## 3. Triage before choosing a lane
 
@@ -80,23 +68,21 @@ In order. The first one that fires wins the shift.
 
 ## 4. The lanes
 
-**Maintenance** — the system and the channel. Is the pipeline healthy, are the
-logs sane, is anything silently failing? The recurring lesson here is that
-*fail-soft without telemetry is indistinguishable from working* — three
-separate times (`caption_ok`, `screen_source`, `title_ok`). When you find a
-silent fallback, instrument it before you fix it.
+**Maintenance** — is the pipeline healthy, are the logs sane, is anything
+silently failing? *Fail-soft without telemetry is indistinguishable from
+working* — that has bitten three times. Instrument a silent fallback before
+fixing it.
 
-**Security** — cheap, bounded, worth a standing check: secrets never committed
-(`git log --all -- .env client_secret.json token.json` must be empty and
-`.gitignore` must cover them), dependency advisories, GitHub Actions workflow
-permissions, OAuth token scope no broader than needed. Fix what is clearly
-wrong; log the rest.
+**Security** — a standing check: secrets never committed (`git log --all --
+.env client_secret.json token.json` empty, `.gitignore` covering them),
+dependency advisories, Actions workflow permissions, OAuth scope. Fix what is
+clearly wrong; log the rest.
 
 **Project management** — is the tracker true? Is the next thing we'd build
 actually the highest-leverage thing? Are decision rules still pre-committed and
 honest? Is documentation accurate (stale claims mislead worse than missing
 ones)? **This lane owns this skill too** — if the shift process is wrong,
-fixing it is the work.
+fixing it is the work, and §9 is how that stays honest.
 
 **Research** — how do channels like this actually grow, and what transfers?
 This lane always has capacity, so it is the fallback when nothing else clears
@@ -122,10 +108,9 @@ under its pre-committed decision rules.
 
 ## 5. Authorization (owner, 2026-09-19)
 
-**You may merge to `main` yourself, including changes to the live upload path,
-prompts and content selection.** The former rollout gate (owner reviews a
-dry-run sample before merge) and the "don't build until the owner says go" rule
-are **superseded for routine work**. Ship it.
+**You may merge to `main` yourself, including live-path changes — prompts,
+content selection, the upload path.** The owner-review gate and the
+"don't build until told" rule are superseded. Ship it.
 
 **Every merge must clear these gates — they replace the owner's review:**
 - Full test suite green (`venv/bin/python -m pytest tests/`).
@@ -149,14 +134,8 @@ issue, which emails the owner. Re-raising the same `--key` comments on the open
 issue rather than duplicating. Always include a recommendation; an escalation
 without one just moves the work. Details in `.escalations/README.md`.
 
-The list:
-- Weakening a safety or cost control: the Polly budget, the `DRY_RUN` guard,
-  secrets handling, or the R4.6 screen's skip categories. Autonomy was granted
-  over channel work, not over the protections that bound it.
-- Anything that spends money beyond the existing ~$0.90/month Polly line.
-- Deleting or rewriting production data (`upload_log.csv`, `prev_post.txt`,
-  `analysis/*`), including backfills of historical rows.
-- Publishing anything outside the channel's normal upload.
+The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
+spending, production data, publishing.
 
 **Auto-revert.** A shift that finds the previous autonomous release degraded
 median watch-seconds or views against an age-matched baseline (`scripts/report.py
@@ -165,12 +144,12 @@ something is watching the result.
 
 ## 6. External budgets (these are not Claude usage)
 
-- **Gemini: 20 requests/day, shared with production.** Production spends 4–10.
-  Budget **at most 8** for verification, only after the 07:00 UTC reset, and
-  never in the hour before a scheduled run. Exhausting it degrades real uploads
-  — this happened on 2026-09-19 and cost the next morning's upload its title.
-- **Polly costs real money.** At most one dry run per shift. Never bulk; see
-  `CLAUDE.md` §1.
+Limits are in `CLAUDE.md` §1. Shift-specific rules:
+
+- **Gemini:** at most 8 requests for verification, only after the 07:00 UTC
+  reset, never in the hour before a scheduled run. Exhausting it degrades a
+  real upload — that happened on 2026-09-19 and cost a video its title.
+- **Polly:** at most one dry run per shift.
 - **Don't run `scripts/weekly_analytics.py`** to check something — it appends
   real rows. If you do, revert the file before committing.
 
@@ -198,7 +177,49 @@ research — it always has capacity, and thinking and planning are real work.
 Only if that is thin too, **stop and say the queue is empty.** A shift that
 ships one real thing and says "nothing else cleared the bar" is a good shift.
 
-## 8. Close the loop
+## 8. The standing audit — every shift, briefly
+
+Agentic setups bloat until the instructions that matter are lost among those
+that don't — *"bloated CLAUDE.md files cause Claude to ignore your actual
+instructions."* This project added four documents in its first autonomous
+session, so the pressure is real.
+
+**Every shift, before closing:**
+
+```sh
+venv/bin/python scripts/context_budget.py --check
+```
+
+If you added context, you are expected to have removed some. The test for any
+line, from Anthropic's own guidance: **"would removing this cause a mistake?"**
+If not, cut it. When something is over budget, the fix is almost never a bigger
+budget — delete it, move detail to where it is read on demand (a skill, or PRD
+§6), or convert an advisory rule into a hook or a test, which is enforcement
+rather than words.
+
+**Every ~10th shift, or whenever `WORKLOG.md` shows no audit in the last ten,
+do the deep pass** and record it in `TECH_DEBT.md`:
+
+1. **Prune.** Re-read `CLAUDE.md` line by line against the question above.
+   `/doctor` proposes cuts for anything derivable from the codebase.
+2. **Check the external guidance.** Re-read
+   [Claude Code best practices](https://code.claude.com/docs/en/best-practices)
+   and the [skills](https://code.claude.com/docs/en/skills) docs. They change.
+   Adopt what applies; **record what you deliberately rejected and why**, so
+   the next shift doesn't re-litigate it.
+3. **Audit what the process actually produced.** Read the last ten `WORKLOG.md`
+   entries. Which shifts shipped something that mattered? Which produced churn?
+   Is any lane always skipped — and is that correct, or is the triage order
+   wrong? Are escalations landing on real decisions, or noise?
+4. **Look for layering.** Rules restated in two places will drift — that has
+   already happened once here, between memory and `PRD.md`. One rule, one home,
+   pointers everywhere else.
+
+Changes to this skill are a **proposal**, not a self-applied edit: escalate
+them (§5). A workflow that rewrites its own rules unobserved is the failure
+mode this whole section exists to prevent.
+
+## 9. Close the loop
 
 Before the shift ends — and early enough that it still happens if usage runs
 out mid-task:

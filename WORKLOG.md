@@ -11,6 +11,19 @@ Keep it to ~10 entries; delete older ones (git history keeps them).
 
 ## 2026-09-19 — maintenance + project management
 
+**Standing audit (first one).** Context footprint measured and capped:
+`scripts/context_budget.py` tracks what every session pays for, split into
+always-loaded (`CLAUDE.md`) and read-at-startup. Now **75% of budget** —
+`CLAUDE.md` pruned 1,173 → 540 words (54%) with all 19 binding rules intact;
+what went was evidence and explanation, which lives in PRD §5 and is read on
+demand. The check then caught the shift skill going over as the audit section
+was added, which forced removing a duplicated "needs the owner" list — one
+rule, one home. Adopted from Anthropic's best-practices doc: the
+*"would removing this cause a mistake?"* test, CLAUDE.md as broadly-applicable
+rules only with specifics in skills, and hooks/tests over advisory prose.
+Deliberately not adopted yet: `/doctor` for automated cuts (untried here),
+subagents for research isolation (worth trying next audit).
+
 **Shipped:** nothing to `main` yet (authorization to self-merge arrived at the
 end of this session). Seven branches assembled and green on
 `integration/preview`, 83 tests.
