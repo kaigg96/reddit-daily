@@ -85,6 +85,66 @@ Lesson for future passes: deleting the *files* is the easy half — the stale **
 - No tests over the rendering path — still correctly covered by the dry-run + frame-extraction ritual, which checks things assertions can't (legibility, timing feel).
 - `create_video.ipynb` remains in the repo as deprecated reference; harmless, owner's call.
 
+## Pass 3 — 2026-09-19 (proposed; at the pending `v6` bump) — **awaiting owner scoping**
+
+Read fresh, per the ritual. `src/` is ~2,000 lines and the Pass-1 module split is
+still holding; nothing has rotted structurally. Two findings are worth acting on,
+and they are the same shape as the two real bugs found today — **logic that no
+test can reach, and two implementations of one question that quietly disagree.**
+
+### Tier 1 — recommend doing
+
+1. **`run.py:main()` is 152 lines and effectively untestable, and the R1.7
+   duration guard inside it has zero tests.** That guard decides whether to drop
+   an answer from the video, i.e. it changes what ships. It is the last
+   substantial piece of pure logic with no coverage. Today's `title_style` bug
+   lived in the same function and could only be tested after extracting
+   `llm.resolve_title` — the same move works here. `main()` is 2x the next
+   longest function in `src/` (`video.assemble`, 79).
+   *Proposed:* extract the guard to a pure `plan_segments(segments, budget)`
+   returning the kept segments plus what was dropped, and test it — including
+   the case below.
+
+2. **Two implementations of `age_adjusted_residuals` that disagree.**
+   `src/insights.py:184` and `scripts/analyze_channel.py:231` answer the same
+   question differently: insights **excludes** zero-view videos and clamps age,
+   analyze_channel **includes** them, and their `MIN_AGE_DAYS` are 3 vs 7.
+   Measured on the live channel: slope **−0.185 vs −0.212, a 14% difference**,
+   driven by 41 zero-view videos. Neither is obviously wrong, but the project
+   has a *stated* rule that zeros are counted separately rather than averaged in
+   — insights follows it, analyze_channel does not, and nothing documents the
+   divergence. It matters because **the R4.4 gate was cleared using
+   analyze_channel's implementation** while `report.py` uses the other, so that
+   evidence is not reproducible through the sanctioned tool. (R4.4's own
+   sensitivity note already brackets the age model at +0.66 to +0.79, so this
+   does not overturn the gate — it means the number depends on which
+   implementation you ask.)
+   *Proposed:* analyze_channel calls `insights.age_adjusted_residuals`, with the
+   zero-view decision made once, explicitly, and written down.
+
+### Tier 2 — worth doing, lower urgency
+
+3. **A bare `assert` sits in the upload path** (`run.py`, `assert projected(...) <= 60`).
+   If it ever fires, the run dies and the slot is lost — the opposite of the
+   fail-soft posture everywhere else in the pipeline. It is also stripped under
+   `python -O`. Should drop another answer or truncate, not raise.
+4. **`_probe_duration` spawns ~10 ffprobe subprocesses per run** — `projected()`
+   is called twice and re-probes every segment each time, though the durations
+   are already known when the audio is synthesized. Pure waste, easily cached.
+5. **`analyze_channel.py` has grown 292 → 517 lines** during the R4.4 work. Pass 2
+   deferred refactoring it as "292 working lines, not causing problems"; at 517
+   lines carrying the duplicated statistics in finding 2, that reasoning is
+   weaker than it was.
+
+### Tier 3 — deliberately deferred (unchanged)
+
+- `scripts/` naming convention (one-time tools vs CI-invoked) — 7 scripts, still
+  not painful.
+- Normalizing `analytics_snapshots.csv` line endings — still a ~7,500-line
+  mechanical diff on a production data file; owner's call, and it cannot worsen
+  now that both writers pin LF.
+- Type hints / mypy / ruff — unchanged reasoning from Pass 1.
+
 ## Ritual
 
 Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, get owner scoping, execute, update this file.
