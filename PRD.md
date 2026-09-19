@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-09-09 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18) · **Pending owner review:** `v6` on `feature/r4.6-taxonomy-narrow`
+**Last updated:** 2026-09-19 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18) · **Pending owner review:** `v6` — four branches, integrated and green on `integration/preview` (78 tests). See *Pending review* below.
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -26,6 +26,33 @@
 - Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push) · R4.7 traffic-source telemetry (2026-09-07, via `feature/r4.7-traffic-source`) — `analysis/traffic_sources.csv` + a digest line; first snapshot says distribution is **96.7% Shorts feed** on current-format uploads, search **1.3%**
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
+
+#### Pending owner review *(nothing merged; `main` is untouched)*
+
+All four branches merge cleanly in this order and pass 78 tests together —
+`integration/preview` is the assembled artifact to review. Two conflicts, both
+append-only list regions (`TECH_DEBT.md` open items, `log.py` FIELDS), resolved
+by keeping both sides.
+
+| # | Branch | What it is | Risk |
+|---|---|---|---|
+| 1 | `chore/cost-guardrails` | Polly cost rules recorded where every agent sees them (`CLAUDE.md`, new) + a per-process character budget enforcing them + the neural engine pinned as a deliberate paid choice | Low — no-op at production volumes |
+| 2 | `fix/gemini-thinking-timeouts` | **Live regression fix.** Disables gemini-2.5-flash thinking; adds `title_ok`/`keywords_ok`/`cta_ok`; stops logging a `title_style` that was never applied | Medium — changes what ships |
+| 3 | `feature/r4.6-taxonomy-narrow` | `v6` screen retiering (the original pending item) | Medium — content selection |
+| 4 | `fix/analytics-drops-zero-views` | **Analysis correctness fix.** 0-view uploads were dropped from every median and every cohort | Low — read-only tooling |
+
+**⚠️ One check outstanding before any of this reaches `main`:** `scripts/replay_screen.py`
+must pass. It validates two things at once — `named_wrongdoing` (the item `v6`
+has been waiting on since 2026-09-09) and whether the R4.6 screen's JSON
+verdicts still hold with thinking disabled, which branch 2 changes. It could
+not run on 2026-09-19: the daily Gemini budget was exhausted. **Run it after
+07:00 UTC**, when the quota resets.
+
+**A dry run on the integrated state did pass** (2026-09-19, Gemini exhausted):
+18.8s video, b-roll, captions, thumbnail and SRT all produced, `format=v6`, the
+Polly guard did not interfere, and the new `title_style`-blanking fired
+correctly. That was an unintentionally good test of the degraded path, since it
+is exactly what a quota-exhausted run looks like.
 
 #### Next keepers
 
@@ -151,6 +178,13 @@ R4.4 Step 0 shipped 2026-08-23 to accumulate the rank counterfactual *before* bu
 **Recommendation: re-run R4.3's topic analysis on the current-format cohort before building anything.** It is pure analysis — ~107 Gemini title classifications, since `analysis/topics_cache.json` covers the v1 era and holds only 1 of the 108 logged uploads — and it tests the single assumption R4.4 rests on. If the topic spread survives on v2+ content, the topic exception can ship on that evidence and the rank gate is droppable as a nice-to-have that was never load-bearing. If it does not survive, R4.4's premise needs rework and the build is avoided. Either way the answer arrives in an afternoon instead of in December. **Owner decision required** — this changes what "supported by data" meant when Step 0 was written.
 
 **Incidental (not actionable on its own):** `topic_performance.md`'s upload-slot table is era-confounded and its caveats explicitly forbid rescheduling from it. Noting it only because it intersects the publish-drift item in TECH_DEBT: the second daily slot has drifted from ~12:xx UTC (+0.42 median residual in that table) to ~16:45 (−0.18 to −0.47). Not evidence of harm — but publish time is an uncontrolled variable that has been moving underneath every cohort comparison for two months.
+
+**Gemini silently degraded ~25% of uploads for two weeks (found 2026-09-19).** `gemini-2.5-flash` thinks by default; a title call was measured spending **546 reasoning tokens to emit an 8-token title, taking 33.1s** against a 30s timeout. The call fails soft, so nothing broke loudly — the run just shipped the raw Reddit question as its YouTube title. Rate by week: **0% in W29–W32, then 29% (W37) and 25% (W38)**. `src/llm.py` had not changed since v4 in July, so this was environmental. A live screen replay the same evening lost **4 of 5 calls** to `ReadTimeout`. Disabling thinking puts the same call at **0.6s**.
+
+Three consequences worth carrying forward:
+1. **The R2.2 title-style comparison is contaminated and the contamination is uneven** — 10 of 127 rows record a style that was never applied (A 7% / B 12% / C 5%, and 23% of the last 30). That biases the cohorts rather than just adding noise. Fixed going forward; historical rows are **not** backfilled, since rewriting production history on an inference is an owner call.
+2. **Fail-soft without telemetry is indistinguishable from working.** Three of the four Gemini call sites left no trace when they failed; this was only findable by comparing `video_title` back to `post_title`. Now logged as `title_ok`/`keywords_ok`/`cta_ok`, the same pattern as `caption_ok`. This is the third time the same lesson has landed (`caption_ok` 2026-09-07, `screen_source` 2026-09-09).
+3. **The free-tier cap is 20 requests/day, not the few hundred assumed** — measured from the 429 body. Production spends 8–14/day, so it runs at 40–70% of budget and any local work competes with live uploads. The lever is fewer *requests* (the quota counts requests, not tokens): keywords + title + CTA are three calls about the same post and could be one. See §2 and TECH_DEBT.
 
 **Traffic-source baseline (2026-09-07, R4.7 first snapshot).** Distribution is the Shorts feed and essentially nothing else. On the current-format cohort (`logged_uploads`, n=103): **Shorts feed 96.7%**, other YouTube pages 1.8%, **search 1.3%**, everything else < 0.2%. Channel lifetime is barely different (93.7% / 2.4% / 3.4%) — the older v1 content drew *more* search share than what we ship now, so the SEO surface is not something the overhaul lost, it was never large.
 
