@@ -93,10 +93,25 @@ between unrelated tasks within a shift.
 
 ## Prune
 
-Run `venv/bin/python scripts/context_budget.py`. Re-read `CLAUDE.md` line by
-line against the pruning test. Look for **layering**: the same rule stated in
-two places will drift — that has already happened here between memory and
-`PRD.md`. One rule, one home, pointers everywhere else.
+Run `venv/bin/python scripts/context_budget.py`. It reports three things:
+words in the always-loaded and startup docs, and **open-item counts in the
+append-only ones** — `WORKLOG.md`, `DECISIONS.md`, `TECH_DEBT.md`. The second
+is the one that creeps, because those files cost nothing per session and so
+nobody notices them growing.
+
+Enforce closure. An open item resolves — fixed, promoted to `PRD.md` §0's
+backlog, or deleted with reasoning. A superseded decision compresses to a line;
+one confirmed stable across three audits graduates into the rules and leaves a
+stub. **"Still open" is not a resolution**, and a list nobody can read is the
+same as no list.
+
+**`PRD.md` is the largest document and only §0 is budgeted**, so check it by
+hand: cancelled and superseded requirements in §6, and retracted findings in
+§4, should compress to a line plus a pointer to git history. Full text of a
+decision we no longer act on is cost without benefit.
+
+Look for **layering**: the same rule stated in two places will drift — that has
+already happened here between memory and `PRD.md`. One rule, one home.
 
 ## Finish
 

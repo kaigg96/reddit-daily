@@ -18,7 +18,38 @@ Product and experiment decisions live in `PRD.md` §4 Findings, not here.
 Keep entries short. One decision, the alternatives, the assumptions, the
 revisit trigger.
 
+**Retention — this file must not grow forever** (cap: 15 entries, checked by
+`scripts/context_budget.py`):
+
+- **Superseded decisions compress to one line** — title, date, "superseded by
+  Dn" — unless kept deliberately as a worked example, as D1 is.
+- **A decision confirmed stable across three audits graduates.** Fold it into
+  the rules it implies (`CLAUDE.md`, a skill) and leave a one-line stub here.
+  A decision record is for things still live enough to be worth revisiting; a
+  settled one belongs in the rules, where it is actually read.
+- Past the cap, **resolve before adding**.
+
 ---
+
+## D4 · 2026-09-19 · Retention caps on the append-only docs
+
+`WORKLOG.md` 10 entries, `DECISIONS.md` 15, `TECH_DEBT.md` 25 open items,
+counted by `scripts/context_budget.py`. Past a cap, close before adding.
+
+**Alternatives:** rely on judgment during audits (the status quo, and it was
+already failing — tech debt hit 24 of 25 in one session with nothing watching);
+or word budgets like the loaded docs (wrong unit — the problem is too many open
+*things*, not too many words).
+
+**Assumptions:**
+1. These numbers are roughly right. They are **guesses**, not measurements.
+2. Things genuinely can close — items are fixable, decisions do settle.
+3. Counting items is a good proxy for whether a doc is still readable.
+
+**Revisit when:** a cap blocks work that should have happened (1 too low); a
+doc becomes unmaintainable while still under cap (1 too high, or 3 false); or
+items get closed by deletion-without-reasoning to stay under (2 false — the
+cap is then producing dishonesty rather than hygiene).
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift
 

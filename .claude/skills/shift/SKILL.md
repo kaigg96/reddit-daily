@@ -124,13 +124,10 @@ under its pre-committed decision rules.
 content selection, the upload path.** The owner-review gate and the
 "don't build until told" rule are superseded. Ship it.
 
-**Every merge must clear these gates — they replace the owner's review:**
-- Full test suite green (`venv/bin/python -m pytest tests/`).
-- For anything touching the rendered video or its metadata: a `DRY_RUN=1` run
-  that produces a playable MP4, with the printed metadata sane.
-- `FORMAT_VERSION` bumped if the video or its metadata changes, so the cohort
-  stays separable. **One variable per release.**
-- `WORKLOG.md` updated, and `PRD.md` §0 updated if anything shipped.
+**Gates that replace the owner's review** (also `CLAUDE.md` §3): tests green;
+a `DRY_RUN=1` run producing a playable MP4 for anything touching the video or
+its metadata; `FORMAT_VERSION` bumped when the video changes; one variable per
+release. Then update `WORKLOG.md`, and `PRD.md` §0 if anything shipped.
 
 **Still requires the owner — escalate, don't decide.** Queue an issue and move
 on to other work; do not block the shift waiting for an answer:
@@ -193,9 +190,13 @@ ships one real thing and says "nothing else cleared the bar" is a good shift.
 venv/bin/python scripts/context_budget.py --check
 ```
 
-Agentic setups bloat until the instructions that matter are lost among those
-that don't. If you added context, you are expected to have removed some. The
-test for any line: **would removing this cause a mistake?** If not, cut it.
+Add `--health` once a day: it detects process dysfunction — capacity
+consistently unused, a lane starved — and **queues the escalation itself**.
+
+Checks both words in the loaded docs and **open items in the append-only ones**
+(`WORKLOG.md`, `DECISIONS.md`, `TECH_DEBT.md`) — those cost nothing per session,
+so nobody notices them growing. If you added, you are expected to have closed
+something. The test for any line: **would removing this cause a mistake?**
 When something is over budget the fix is almost never a bigger budget — delete
 it, move detail to where it is read on demand, or convert an advisory rule into
 a hook or a test.

@@ -26,6 +26,7 @@ right fix when a budget is breached.
 """
 import argparse
 import glob
+import subprocess
 import json
 import os
 import re
@@ -161,6 +162,44 @@ def session_cost():
               f"\n     point where splitting stops paying (5 x 105 ≈ 44% of 1 x 526).")
 
 
+# Files that are read on demand cost nothing per session, but they still rot:
+# stale, superseded and contradictory content accumulates where nobody looks.
+# The failure mode is too many OPEN THINGS, not too many words, so these are
+# counted as items. Past a cap, the rule is closure -- you cannot add without
+# resolving, which is the same forcing function the word budgets apply.
+CORPUS = {
+    "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them"),
+    "DECISIONS.md": (r"^## D\d+ ", 15, "decisions",
+                     "compress superseded ones to a line; graduate stable ones into the rules"),
+    "TECH_DEBT.md": (r"^- \*\*", 25, "open items",
+                     "fix, promote to PRD §0's backlog, or delete with reasoning"),
+}
+
+
+def corpus_health():
+    """Count open items in the append-only docs. Growth here is invisible to
+    the word budgets because these files are read on demand, not every session.
+    """
+    print("\nCORPUS (read on demand — counted as open items, not words)")
+    over = []
+    for path, (pattern, cap, noun, fix) in CORPUS.items():
+        try:
+            raw = open(os.path.join(ROOT, path), encoding="utf-8").read()
+        except OSError:
+            continue
+        n = len(re.findall(pattern, raw, re.M))
+        flag = "OVER" if n > cap else "ok"
+        bar = "#" * min(int(n / cap * 20), 30)
+        print(f"  {n:>6}/{cap:<5} {flag:4} {bar:<22} {path}  ({noun})")
+        if n > cap:
+            over.append((path, n, cap, fix))
+    for path, n, cap, fix in over:
+        print(f"\n  {path}: {n} {'items'} exceeds {cap} — {fix}")
+    if not over:
+        print("  (things are closing, not just accumulating)")
+    return over
+
+
 LANES = ["rounds", "maintenance", "pm", "research", "feature", "close"]
 STARVED_AFTER = 5   # consecutive shifts at ~0% before a lane takes priority
 
@@ -219,6 +258,99 @@ def allocation_history():
               "we are not finding valuable work. Process finding, not a good shift.")
 
 
+# Process-health thresholds. Guesses, like the caps — see DECISIONS.md D4.
+WASTE_SHIFTS = 3      # consecutive shifts using far less than planned
+WASTE_RATIO = 0.6     # ...where actual total is below this share of planned
+STARVED_SHIFTS = 5    # consecutive shifts a lane sat at 0%
+
+
+def _allocation_rows():
+    try:
+        raw = open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read()
+    except OSError:
+        return []
+    rows = []
+    for block in raw.split("\n## ")[1:]:
+        m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
+        if not m:
+            continue
+        row = {}
+        for part in m.group(1).split("·"):
+            hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
+            if hit:
+                row[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
+        if any(p for p, _ in row.values()):     # skip unplanned/outlier shifts
+            rows.append(row)
+    return rows
+
+
+def health(raise_issues=False):
+    """Detect process dysfunction and escalate it.
+
+    The escalation path was built for "I need permission", not for "something
+    is systematically wrong" — so the workflow could measure its own failure
+    and have no route to report it. These checks close that: a threshold trip
+    queues a GitHub issue, which emails the owner.
+    """
+    rows = _allocation_rows()
+    problems = []
+
+    recent = rows[:WASTE_SHIFTS]
+    if len(recent) == WASTE_SHIFTS:
+        planned = sum(p for r in recent for p, _ in r.values())
+        actual = sum(a for r in recent for _, a in r.values())
+        if planned and actual / planned < WASTE_RATIO:
+            problems.append((
+                "process-capacity-underused",
+                "Shifts are consistently using far less than they plan",
+                f"The last {WASTE_SHIFTS} shifts used {actual / planned:.0%} of "
+                f"planned capacity (threshold {WASTE_RATIO:.0%}).\n\n"
+                "Slices are ceilings, so landing under plan is fine — but this "
+                "much, this consistently, means we are not finding valuable "
+                "work rather than working efficiently.\n\n"
+                "Worth deciding: is the backlog thin (a project-management "
+                "problem), are the allocations wrong, or should unused budget "
+                "roll into another lane instead of ending the shift?",
+                "Look at what the lanes actually had available. If the backlog "
+                "is genuinely thin, that is the finding — not the allocation."))
+
+    for lane in LANES:
+        zeros = 0
+        for r in rows:
+            if r.get(lane, (0, 0))[1] > 0:
+                break
+            zeros += 1
+        if zeros >= STARVED_SHIFTS:
+            problems.append((
+                f"process-lane-starved-{lane}",
+                f"The {lane} lane has had no time for {zeros} shifts",
+                f"`{lane}` has been allocated ~0% for {zeros} consecutive "
+                f"shifts.\n\nThe starvation floor should have promoted it. "
+                "Either it is not firing, or the lane genuinely has no work — "
+                "and if it has none for this long, it may not be a lane.",
+                "Check whether the lane has queued work. If it never does, "
+                "propose removing it rather than leaving a slice that is "
+                "always zero."))
+
+    if not problems:
+        print("\nPROCESS HEALTH: ok"
+              + ("" if rows else "  (no planned shifts recorded yet)"))
+        return []
+
+    print("\nPROCESS HEALTH: %d problem(s)" % len(problems))
+    for key, title, body, rec in problems:
+        print(f"  - {title}")
+        if raise_issues:
+            r = subprocess.run(
+                [sys.executable, os.path.join(ROOT, "scripts", "escalate.py"),
+                 "--title", title, "--key", key, "--recommend", rec],
+                input=body, text=True, capture_output=True)
+            print("    " + (r.stdout.strip() or r.stderr.strip()))
+        else:
+            print(f"    (run with --health to queue an issue; key={key})")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
@@ -227,12 +359,15 @@ def main():
                     help="also report what the latest session actually spent")
     ap.add_argument("--allocation", action="store_true",
                     help="planned vs actual per lane, from WORKLOG.md")
+    ap.add_argument("--health", action="store_true",
+                    help="detect process dysfunction and queue escalations for it")
     args = ap.parse_args()
 
     always = measure(ALWAYS)
     orient = measure(ORIENT)
     over = report(always, "ALWAYS LOADED (every session, whatever the task)")
     over += report(orient, "READ AT STARTUP (every shift)")
+    corpus_over = corpus_health()
 
     total = sum(n for _, n, _ in always + orient if n)
     cap = sum(b for _, _, b in always + orient)
@@ -243,6 +378,10 @@ def main():
         session_cost()
     if args.allocation:
         allocation_history()
+    if args.health:
+        health(raise_issues=True)
+
+    over += [(p, n, c) for p, n, c, _ in corpus_over]
 
     if over:
         print("\nOver budget:")

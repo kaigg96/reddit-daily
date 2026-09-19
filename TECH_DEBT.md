@@ -154,6 +154,13 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+**Retention — open items must close, not accumulate** (cap: 25, checked by
+`scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
+(delete it, or leave one line in the pass that fixed it), **promoted** to
+`PRD.md` §0's backlog if it is really product work, or **deleted with
+reasoning** if it stopped mattering. Past the cap, close before adding —
+a list nobody can read is the same as no list.
+
 - **The Gemini free-tier daily cap is 20 requests, not the few hundred everyone
   assumed — and production needs 8–14 of them.** Measured directly 2026-09-19
   from the 429 body:

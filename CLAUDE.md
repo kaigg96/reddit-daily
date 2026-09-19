@@ -56,6 +56,12 @@ blocking:
 - Deleting or rewriting production data, including historical backfills.
 - Publishing anything outside the channel's normal upload.
 
+**And when the process itself is failing** — not a permission question, but a
+signal the owner needs. `scripts/context_budget.py --health` detects these and
+queues the issue automatically: capacity consistently unused, a lane starved
+for many shifts, a cap producing dishonesty rather than hygiene. If you notice
+one the tool doesn't measure, escalate it yourself.
+
 ## 5. No AI attribution, anywhere
 
 Never credit AI tooling in code, commits, PR descriptions, video content, or
