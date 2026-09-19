@@ -101,10 +101,53 @@ def test_failures_stay_soft_and_do_not_echo_the_keyed_url(monkeypatch, capsys):
     monkeypatch.setattr(llm.requests, "post", boom)
     monkeypatch.setenv("GEMINI_API_KEY", "super-secret")
 
-    assert llm.get_keywords("q", ["a", "b", "c"]) == []
+    assert llm.get_keywords("q", ["a", "b", "c"]) is None
     assert llm.get_video_title("q", ["a", "b", "c"]) is None
     assert llm.get_cta("q") is None
     assert "super-secret" not in capsys.readouterr().out
+
+
+def test_keywords_distinguishes_failure_from_an_empty_answer(captured, monkeypatch):
+    """None means the call failed; [] means it answered with nothing.
+
+    Without the distinction `keywords_ok` would be unloggable — the old code
+    returned [] for both, so a dead Gemini looked identical to a quiet one.
+    """
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no numbered list here")
+    assert llm.get_keywords("q", ["a", "b", "c"]) == []
+
+    def boom(*a, **k):
+        raise llm.requests.ConnectionError("down")
+
+    monkeypatch.setattr(llm, "_generate", boom)
+    assert llm.get_keywords("q", ["a", "b", "c"]) is None
+
+
+def test_resolve_title_blanks_the_style_when_generation_failed():
+    """The R2.2 contamination fix.
+
+    An upload carrying the raw Reddit question is not evidence about style A, B
+    or C. Logging one as style B is what biased the cohorts unevenly.
+    """
+    r = llm.resolve_title(None, style="B", fallback="Raw question?")
+    assert r.title == "Raw question?"
+    assert r.style == ""
+    assert r.ok is False
+
+
+def test_resolve_title_keeps_the_style_when_generation_worked():
+    r = llm.resolve_title('  "Great Title"  ', style="C", fallback="Raw?")
+    assert r.title == "Great Title"
+    assert r.style == "C"
+    assert r.ok is True
+
+
+def test_resolve_title_treats_whitespace_only_as_a_failure():
+    """sanitize_title would fall back anyway, so the style must not be claimed."""
+    r = llm.resolve_title("   \n  ", style="A", fallback="Raw?")
+    assert r.title == "Raw?"
+    assert r.style == ""
+    assert r.ok is False
 
 
 def test_sanitize_title_falls_back_when_generation_failed():
