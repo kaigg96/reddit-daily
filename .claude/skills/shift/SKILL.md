@@ -23,48 +23,53 @@ Run the **`/pickup`** steps first. Do not re-derive state from `git log`.
 Then read `WORKLOG.md` (repo root) — the last few shifts and what each one
 queued for the next.
 
-## 2. Check the budget — and respect the owner's reserve
+## 2. Plan the shift
 
 ```sh
-venv/bin/python scripts/statusline.py --budget
+venv/bin/python scripts/statusline.py --budget   # GO / BOUNDED / WRAP / STOP
 ```
 
-**The owner keeps a reserve.** Autonomous work stops at **80% of the 5-hour
-window** and **90% of the weekly window** — not 100%. The remainder is theirs;
-never plan around using it.
+**The owner keeps a reserve.** Work stops at 80% of the 5-hour window and 90%
+of the weekly one — the rest is theirs; never plan around using it. `WRAP`
+means finish or park what's open; `STOP` means close the loop and end.
 
-Reads `~/.claude/usage-snapshot.json` and prints one of:
+Then **allocate across every lane**, writing the plan into the `WORKLOG.md`
+entry before starting. Two slices are fixed: **rounds ~10%** and **closing the
+loop ~10%**. The remaining ~80% is split by how much genuinely valuable work
+each lane actually has — not by a fixed percentage.
 
-| Verdict | Do |
-|---|---|
-| `GO` | Full shift — a feature through dry run and merge is in scope |
-| `BOUNDED` | One small task, finish it, hand over |
-| `WRAP` | Start nothing new; finish or park what's open and hand over |
-| `STOP` | Close the loop immediately: commit, update `WORKLOG.md`, end the shift |
+**Slices are ceilings, not quotas.** A lane finishes its valuable work and
+stops; it does not fill its allocation. Unused budget is **not** redistributed
+— if every lane finishes early, the shift ends early. That is the whole
+defence against padding, and padding ships.
 
-**Never start what cannot be finished or cleanly parked.** An abandoned
-half-refactor costs the next shift more than it saved. On `STOP`, stopping *is*
-the work — say so and end.
+Allocating honestly:
 
-## 3. Triage before choosing a lane
+- **A lane with no actionable work gets 0%, and that is a finding**, not a
+  failure. Say so in `WORKLOG.md`.
+- **An empty feature lane is a project-management problem.** Give that time to
+  PM to populate the backlog rather than inventing features to build.
+- **Research absorbs genuine slack** — it always has capacity — but cap it at
+  ~25%, or it becomes the place effort goes to look busy.
+- **Starvation floor:** any lane at ~0% for **5 consecutive shifts** takes
+  priority in this one if it has any queued work. Check the `Lane:` lines in
+  `WORKLOG.md`. A lane that keeps losing is the failure mode of every
+  priority scheme, including the one this replaced (see `DECISIONS.md` D1).
 
-In order. The first one that fires wins the shift.
+## 3. Preemption — when one thing takes the whole shift
 
-1. **Incident.** Is production broken? Check: did both scheduled uploads land
-   (`upload_log.csv` tail), did the last workflow run succeed, is
-   `prev_post.txt` intact? A missed or duplicated upload preempts everything.
-2. **Time-windowed work.** Anything blocked on an external budget that is
-   *now* available — most often Gemini quota after its 07:00 UTC reset. These
-   windows close; take them when they are open.
-3. **Ship what's already built.** Read `.github/last-release-validation.md` on
-   `main` — CI runs the Gemini gates at 08:17 UTC daily and commits the verdict
-   there, so you never need quota to find out. PASS means merge.
-   If branches are queued and their gates pass,
-   **merging beats building more.** Unshipped work is inventory, not progress:
-   on 2026-09-19 a branch had sat 8 days while six more were stacked behind it.
-   Clearing the queue is a real lane, not overhead.
-4. Otherwise, **rotate** through the lanes below, skipping any with nothing
-   above the value bar. Prefer the lane least recently worked (see `WORKLOG.md`).
+These are not lanes competing for a slice; they are the shift's purpose that
+day. Check in order, before allocating:
+
+1. **Incident.** Did both scheduled uploads land (`upload_log.csv` tail)? Did
+   the last workflow run succeed? Is `prev_post.txt` intact? A missed or
+   duplicated upload preempts everything.
+2. **Ship what's built.** Read `.github/last-release-validation.md` on `main` —
+   CI runs the Gemini gates at 08:17 UTC and commits the verdict, so you never
+   need quota to find out. PASS means merge. Unshipped work is inventory, not
+   progress: a branch once sat 8 days while six stacked behind it.
+3. **A closing window.** Work blocked on an external budget that is available
+   *now* — these windows close.
 
 ## 4. The lanes
 

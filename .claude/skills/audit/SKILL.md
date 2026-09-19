@@ -21,12 +21,31 @@ opinion.** Process churn is as costly as code churn.
 
 ## The evidence to read first
 
+- **`DECISIONS.md`** — every process decision and the assumptions under it.
 - **`WORKLOG.md`, last ten entries** — what shifts actually did.
 - **Closed and open escalation issues** — which decisions really needed a human.
 - **`git log`** — what got reverted, re-done, or abandoned on a branch.
-- **`scripts/context_budget.py --session`** — what a session spends and on what.
+- `scripts/context_budget.py --session --allocation` — what a session spent,
+  and planned vs actual per lane.
+
+## Re-test the decisions
+
+Walk `DECISIONS.md` and, for each assumption, ask **is this still true?** A
+false assumption means the decision is due for re-litigation — not necessarily
+reversal. Record the re-review inline with a date, *including* "still holds":
+an unreviewed decision and a reviewed-and-confirmed one look identical
+otherwise.
+
+This is the file's reason to exist. D1 is there as the worked example — a
+decision whose primary assumption became false within two hours and stood
+unexamined until the owner happened to ask.
 
 ## What to ask
+
+**Are slices being finished or filled?** `--allocation` shows planned vs
+actual. Landing under plan is fine — slices are ceilings. *Every* lane under
+plan on *every* shift means we are not finding valuable work, which is a
+process finding. Consistently over means the allocation is wrong.
 
 **Is it producing value?** Which of the last ten shifts shipped something that
 mattered, and which produced churn? If a shift's output was a refactor nobody

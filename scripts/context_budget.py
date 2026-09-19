@@ -161,12 +161,72 @@ def session_cost():
               f"\n     point where splitting stops paying (5 x 105 ≈ 44% of 1 x 526).")
 
 
+LANES = ["rounds", "maintenance", "pm", "research", "feature", "close"]
+STARVED_AFTER = 5   # consecutive shifts at ~0% before a lane takes priority
+
+
+def allocation_history():
+    """Planned vs actual per lane, from WORKLOG.md's allocation lines.
+
+    Two questions this answers that prose cannot: is a lane being starved, and
+    are slices being *finished* or merely *filled*? Consistently landing under
+    plan is not a problem — slices are ceilings — but landing under plan on
+    every lane, every shift, means we are not finding valuable work, which is a
+    process finding rather than a good shift.
+    """
+    try:
+        raw = open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read()
+    except OSError:
+        print("no WORKLOG.md")
+        return
+    entries = []
+    for block in raw.split("\n## ")[1:]:
+        m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
+        if not m:
+            continue
+        row = {}
+        for part in m.group(1).split("·"):
+            hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
+            if hit:
+                row[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
+        entries.append((block.split("\n")[0].strip()[:28], row))
+    if not entries:
+        print("\nno allocation lines in WORKLOG.md yet")
+        return
+
+    print(f"\nALLOCATION, last {len(entries)} shift(s)   (planned→actual %)")
+    header = "  " + "shift".ljust(30) + "".join(l[:7].ljust(9) for l in LANES)
+    print(header)
+    for label, row in entries:
+        cells = "".join((f"{row[l][0]}→{row[l][1]}" if l in row else "-").ljust(9)
+                        for l in LANES)
+        print(f"  {label.ljust(30)}{cells}")
+
+    print()
+    for lane in LANES:
+        zeros = 0
+        for _, row in entries:                       # newest first
+            if row.get(lane, (0, 0))[1] > 0:
+                break
+            zeros += 1
+        if zeros >= STARVED_AFTER:
+            print(f"  ⚠️ {lane}: {zeros} consecutive shifts at 0% — "
+                  f"takes priority next shift if it has queued work")
+    under = [l for l in LANES
+             if all(row.get(l, (0, 0))[1] < row.get(l, (1, 0))[0] for _, row in entries)]
+    if len(entries) >= 3 and len(under) >= len(LANES) - 1:
+        print("  ⚠️ every lane landed under plan on every recorded shift — "
+              "we are not finding valuable work. Process finding, not a good shift.")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
                     help="exit 1 if anything is over budget")
     ap.add_argument("--session", action="store_true",
                     help="also report what the latest session actually spent")
+    ap.add_argument("--allocation", action="store_true",
+                    help="planned vs actual per lane, from WORKLOG.md")
     args = ap.parse_args()
 
     always = measure(ALWAYS)
@@ -181,6 +241,8 @@ def main():
 
     if args.session:
         session_cost()
+    if args.allocation:
+        allocation_history()
 
     if over:
         print("\nOver budget:")
