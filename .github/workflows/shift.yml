@@ -33,21 +33,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45      # a runaway shift costs Actions minutes and quota
     steps:
+      - name: Is the subscription token set up yet?
+        id: auth
+        run: |
+          if [ -z "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is not set — run 'claude setup-token'"
+            echo "locally and add it as a repository secret. Skipping rather"
+            echo "than failing, so this does not show a red X every morning."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.auth.outputs.ready == 'true'
         with:
           fetch-depth: 0     # shifts read git history
 
       - uses: actions/setup-python@v5
+        if: steps.auth.outputs.ready == 'true'
         with:
           python-version: '3.10'
           cache: pip
 
       - name: Install
+        if: steps.auth.outputs.ready == 'true'
         run: |
           python -m venv venv
           venv/bin/pip install -q -r requirements.txt -r requirements-dev.txt
 
       - uses: anthropics/claude-code-action@v1
+        if: steps.auth.outputs.ready == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ inputs.prompt || '/shift' }}
