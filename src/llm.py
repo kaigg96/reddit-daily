@@ -8,16 +8,40 @@ import requests
 from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 
 
-def _generate(prompt):
-    endpoint = (
-        "https://generativelanguage.googleapis.com/v1/models/"
-        f"gemini-2.5-flash:generateContent?key={os.environ['GEMINI_API_KEY']}"
-    )
+# gemini-2.5-flash "thinks" by default, and on these prompts that is pure
+# latency: measured 2026-09-19, one title call spent 546 reasoning tokens to
+# emit an 8-token title and took 33.1s — past the 30s timeout this module used
+# to use, so the call raised ReadTimeout and the run shipped the raw Reddit
+# question instead of a generated title. Disabling thinking put the same call
+# at 0.6s. Every task here (keyword extraction, title rephrasing, a one-line
+# CTA, the R4.6 screen's JSON verdict) is a short transformation, not a
+# reasoning problem.
+#
+# thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
+# for api version v1." That is the only reason this module is on v1beta.
+_ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
+             "gemini-2.5-flash:generateContent")
+
+# Generous because it is now only a backstop against a pathological response,
+# not a routine limit — with thinking off, calls land in about a second.
+# requests' timeout is per-read, not a total deadline, so this does not bound
+# total call duration; it only stops a stalled socket hanging the run.
+_TIMEOUT = 60
+
+
+def _generate(prompt, thinking_budget=0):
+    """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
+    default, and what every caller here wants); pass a token budget only for a
+    task where reasoning demonstrably helps."""
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
+    }
     resp = requests.post(
-        endpoint,
+        f"{_ENDPOINT}?key={os.environ['GEMINI_API_KEY']}",
         headers={"Content-Type": "application/json"},
-        json={"contents": [{"parts": [{"text": prompt}]}]},
-        timeout=30,
+        json=body,
+        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
