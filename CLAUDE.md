@@ -34,6 +34,16 @@ three to four orders of magnitude above a normal run:
 | 10,000 test renders | 9M | **$144** |
 | 10,000 calls at Polly's 3K-char cap | 60M | **$960** |
 
+**The neural engine is a deliberate paid choice — do not "optimize" it away.**
+The owner is past the 12-month free tier and pays from the first character,
+having chosen neural because the audio quality is genuinely better. Standard
+voices are 4x cheaper and would save roughly **$0.65/month** while degrading
+the channel's single most important quality signal. That trade is never worth
+making, and it is not an agent's call. `Engine="neural"` is pinned by a test.
+The same applies in reverse: do not move to the generative or long-form engines
+(materially more expensive) without asking. **Cost work here means reducing
+wasted calls, never reducing audio quality.**
+
 **Binding rules:**
 
 1. **Never synthesize in bulk.** No loops over a corpus, no "generate N

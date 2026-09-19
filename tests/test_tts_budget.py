@@ -149,6 +149,27 @@ def test_spend_stays_bounded_even_if_the_caller_catches_everything(tmp_path):
     assert len(polly.calls) < 40
 
 
+def test_both_calls_use_the_neural_engine(tmp_path):
+    """The engine is a paid quality decision, not a cost knob.
+
+    Standard voices are 4x cheaper and would save ~$0.65/month while degrading
+    the channel's core audio. The cost rules in CLAUDE.md create a standing
+    temptation to "optimize" exactly this line, so it is pinned here: cost work
+    means removing wasted calls, never reducing quality. Changing it in either
+    direction (standard down, generative up) is the owner's call.
+    """
+    polly = FakePolly()
+    synth(polly, "hello there", tmp_path)
+
+    assert len(polly.calls) == 2
+    assert all(c["Engine"] == "neural" for c in polly.calls)
+    # The marks call must match the audio call, or the timings won't line up.
+    audio, marks = polly.calls
+    assert audio["Text"] == marks["Text"]
+    assert audio["VoiceId"] == marks["VoiceId"]
+    assert audio["Engine"] == marks["Engine"]
+
+
 def test_budget_is_raisable_for_an_approved_bulk_run(tmp_path, monkeypatch):
     """The escape hatch exists, but it has to be taken deliberately."""
     polly = FakePolly()
