@@ -27,7 +27,7 @@ opening a second one. Name it after the *decision*, not the day.
 
 ## What belongs here
 
-Only what a shift genuinely may not decide (`CLAUDE.md` §3):
+Only what a shift genuinely may not decide (`CLAUDE.md` §4):
 
 - Weakening a safety or cost control — the Polly budget, the `DRY_RUN` guard,
   secrets handling, the R4.6 screen's skip categories.

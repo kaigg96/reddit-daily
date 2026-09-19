@@ -39,6 +39,10 @@ TAXONOMY = [
 
 MIN_AGE_DAYS = 7  # too-fresh videos have meaningless view counts
 
+# Questions per classification call. 80 makes the model emit ~80 lines, which
+# runs past llm._generate's 30s timeout often enough to lose whole batches.
+BATCH = 40
+
 STOPWORDS = set("""a an and are as at be been but by for from had has have he her his i if in is it its
 just me my not of on one or our out she so that the their them they this to was we were what when which
 who will with you your whats youve dont didnt im its ive youre thats
@@ -86,17 +90,44 @@ def age_days(published_at, now):
 # ---------------------------------------------------------------- topic classification
 
 
+class QuotaExhausted(Exception):
+    """Daily Gemini budget is gone; stop rather than spend the rest on 429s."""
+
+
+class ServiceDown(Exception):
+    """Gemini is failing for everyone; stop rather than grind every batch."""
+
+
+# Consecutive whole-batch failures that mean "the API is not usable right now".
+# Right after the midnight-PT quota reset the free tier is reliably overloaded —
+# a 503/timeout storm that burned a full run's budget classifying nothing. Wait
+# an hour or two into the window instead of starting at the boundary.
+MAX_CONSECUTIVE_BATCH_FAILURES = 2
+
+
 def _generate_with_retry(prompt, tries=5):
-    """Free-tier friendly: back off on 429/503, honoring Retry-After. Never print
-    exception bodies — requests' HTTPError message embeds the URL including the
-    API key."""
+    """Free-tier friendly: back off on 429/503 and on transient network errors,
+    honoring Retry-After. Never print exception bodies — requests' HTTPError
+    message embeds the URL including the API key.
+
+    Timeouts were not retried until 2026-09-10, when four consecutive batches
+    died on ReadTimeout and fell straight through this handler because a
+    timeout is not an HTTPError. (The screen had the identical gap; see
+    src/screen.py._generate_screened.)"""
     delay = 15
     for attempt in range(tries):
+        last = attempt == tries - 1
         try:
             return llm._generate(prompt)
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else "?"
-            if code in (429, 503) and attempt < tries - 1:
+            # A 429 that survives one backoff is a daily-budget exhaustion, not a
+            # per-minute burst. Grinding out the remaining attempts cannot
+            # succeed and spends requests the twice-daily video run needs — one
+            # aborted classification pass burned ~20 of them that way.
+            if code == 429 and attempt >= 1:
+                raise QuotaExhausted() from None
+            if code in (429, 503) and not last:
                 retry_after = e.response.headers.get("Retry-After") if e.response is not None else None
                 wait = int(retry_after) if retry_after and retry_after.isdigit() else delay
                 print(f"  gemini {code}; retrying in {wait}s")
@@ -104,19 +135,61 @@ def _generate_with_retry(prompt, tries=5):
                 delay = min(delay * 2, 120)
             else:
                 raise RuntimeError(f"gemini failed with HTTP {code}") from None
+        except (requests.Timeout, requests.ConnectionError) as e:
+            if last:
+                raise RuntimeError(f"gemini unreachable: {type(e).__name__}") from None
+            print(f"  gemini {type(e).__name__}; retrying in {delay}s")
+            time.sleep(delay)
+            delay = min(delay * 2, 120)
+
+
+def _cached_questions():
+    """Questions already classified on disk — usable with no API call."""
+    path = OUT_DIR / "topics_cache.json"
+    return set(json.loads(path.read_text())) if path.exists() else set()
+
+
+def seed_cache_from_upload_log(cache):
+    """Fold in topics the R4.6 screen already assigned.
+
+    Every live upload since 2026-08-23 carries a `topic` in upload_log.csv,
+    produced by the screen's existing Gemini call against the *same* taxonomy
+    (src.screen.TOPICS == TAXONOMY). Re-asking Gemini for those is a pure
+    duplicate of work already paid for — and on a free tier where request count
+    is the binding constraint, duplicated requests are the whole problem.
+    """
+    if not config.UPLOAD_LOG.exists():
+        return 0
+    added = 0
+    with open(config.UPLOAD_LOG) as f:
+        for r in csv.DictReader(f):
+            topic, title = r.get("topic", "").strip(), r.get("post_title", "").strip()
+            if topic in TAXONOMY and title and title not in cache:
+                cache[title] = topic
+                added += 1
+    return added
 
 
 def classify_topics(questions):
     """question -> bucket via Gemini, batched. Results are cached on disk so
     re-runs (and quota-interrupted runs) only classify new questions.
-    Unclassified -> 'other'."""
+
+    Anything left unresolved is EXCLUDED from the tables by the caller, not
+    bucketed as 'other' — silently dumping unclassified videos into a real
+    topic would corrupt exactly the bucket the analysis reads."""
     cache_path = OUT_DIR / "topics_cache.json"
     cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+    seeded = seed_cache_from_upload_log(cache)
+    if seeded:
+        cache_path.write_text(json.dumps(cache, indent=0))
+        print(f"topics: seeded {seeded} from upload_log (already classified by the screen)")
     missing = [q for q in questions if q not in cache]
-    print(f"topics: {len(cache)} cached, {len(missing)} to classify")
+    print(f"topics: {len(cache)} cached, {len(missing)} to classify "
+          f"({(len(missing) + BATCH - 1) // BATCH} gemini call(s))")
 
-    for i in range(0, len(missing), 80):
-        batch = missing[i:i + 80]
+    consecutive_failures = 0
+    for i in range(0, len(missing), BATCH):
+        batch = missing[i:i + BATCH]
         numbered = "\n".join(f"{j + 1}. {q}" for j, q in enumerate(batch))
         prompt = (
             "Classify each numbered question into exactly one of these topics: "
@@ -131,9 +204,23 @@ def classify_topics(questions):
                 if 0 <= idx < len(batch) and topic in TAXONOMY:
                     cache[batch[idx]] = topic
             cache_path.write_text(json.dumps(cache, indent=0))
-            print(f"  classified {min(i + 80, len(missing))}/{len(missing)}")
+            print(f"  classified {min(i + BATCH, len(missing))}/{len(missing)}")
+            consecutive_failures = 0
+        except QuotaExhausted:
+            remaining = len(missing) - i
+            print(f"gemini daily quota exhausted; stopping with ~{remaining} question(s) "
+                  f"unclassified. Everything classified so far is cached — re-run after "
+                  f"the quota resets and it resumes from there.")
+            break
         except Exception as e:
+            consecutive_failures += 1
             print(f"classification batch failed ({e}); leaving batch unclassified")
+            if consecutive_failures >= MAX_CONSECUTIVE_BATCH_FAILURES:
+                remaining = len(missing) - i
+                print(f"gemini unusable ({consecutive_failures} batches failed in a row); "
+                      f"stopping with ~{remaining} question(s) unclassified rather than "
+                      f"spending the rest of the budget on a failing service.")
+                break
         time.sleep(7)  # stay under free-tier RPM
     return defaultdict(lambda: "other", cache)
 
@@ -149,6 +236,45 @@ def age_adjusted_residuals(videos, now):
     for v, x, y in zip(videos, xs, ys):
         v["residual"] = float(y - (slope * x + intercept))
     return slope, intercept
+
+
+def topic_table(videos, key="residual"):
+    """Per-topic median residual, ordered best to worst."""
+    by_topic = defaultdict(list)
+    for v in videos:
+        by_topic[v["topic"]].append(v)
+    rows = []
+    for topic, vs in by_topic.items():
+        res = [v[key] for v in vs]
+        rows.append({
+            "topic": topic, "n": len(vs),
+            "median_residual": analytics.median(res),
+            "median_views": analytics.median([v["views"] for v in vs]),
+            "over_rate": sum(r > 0 for r in res) / len(res),
+        })
+    return sorted(rows, key=lambda r: -r["median_residual"])
+
+
+def rank_correlation(rows_a, rows_b, min_n=3):
+    """Spearman rho between two eras' topic orderings.
+
+    This is the question R4.4 actually needs answered: not "what is each topic
+    worth" (per-bucket medians on the current cohort are far too thin for that)
+    but "does the pre-overhaul ordering still hold for the format we ship now?"
+    A rank correlation over ~12 buckets survives thin buckets far better than
+    any individual median does."""
+    a = {r["topic"]: r["median_residual"] for r in rows_a if r["n"] >= min_n}
+    b = {r["topic"]: r["median_residual"] for r in rows_b if r["n"] >= min_n}
+    shared = sorted(set(a) & set(b))
+    if len(shared) < 4:
+        return None, shared
+    def ranks(d):
+        order = sorted(shared, key=lambda t: d[t])
+        return {t: i for i, t in enumerate(order)}
+    ra, rb = ranks(a), ranks(b)
+    xs = np.array([ra[t] for t in shared], dtype=float)
+    ys = np.array([rb[t] for t in shared], dtype=float)
+    return float(np.corrcoef(xs, ys)[0, 1]), shared
 
 
 def tokenize(text):
@@ -196,11 +322,74 @@ def main():
     sample = [v for v in videos if v["question"] and v["age_days"] >= MIN_AGE_DAYS]
     print(f"analyzable (parsed question, age>={MIN_AGE_DAYS}d): {len(sample)}")
 
+    # Era split. `upload_log.csv` is exactly the current-format cohort (v2+);
+    # everything older is pre-overhaul v1. Same cohort definition R4.7 uses for
+    # `logged_uploads`, which the README already names as the one to decide on.
+    logged = set()
+    if config.UPLOAD_LOG.exists():
+        with open(config.UPLOAD_LOG) as f:
+            logged = {r["video_id"] for r in csv.DictReader(f)}
+    for v in videos:
+        v["era"] = "current" if v["video_id"] in logged else "pre-overhaul"
+
     slope, _ = age_adjusted_residuals(sample, now)
 
-    topics = classify_topics({v["question"] for v in sample})
+    # Residuals again WITHIN each era. The global fit absorbs the format's own
+    # ~6x distribution gain into the age slope, since current-format videos are
+    # both younger and better-performing; a within-era fit removes the era's
+    # level so the two topic orderings are comparable.
+    eras = {}
+    for name in ("pre-overhaul", "current"):
+        vs = [v for v in sample if v["era"] == name]
+        if len(vs) >= 10:
+            age_adjusted_residuals(vs, now)
+            for v in vs:
+                v["era_residual"] = v["residual"]
+            eras[name] = vs
+        print(f"  era {name}: {len(vs)} analyzable")
+    # restore the whole-channel residuals for every other table below
+    age_adjusted_residuals(sample, now)
+
+    # Only the CURRENT era needs new Gemini calls. The pre-overhaul table is
+    # already built on 880-odd cached classifications from the 2026-07-21 run,
+    # and a handful more cannot move a 12-bucket ordering — whereas the current
+    # era is the thin half the gate question actually turns on. Asking for the
+    # whole sample meant ~217 classifications where ~44 answer the question,
+    # against a free tier where request count is the binding constraint.
+    want = {v["question"] for v in eras.get("current", [])}
+    want |= {v["question"] for v in sample if v["question"] in _cached_questions()}
+    topics = classify_topics(want)
+    # Snapshot the keys BEFORE the loop below: `topics` is a defaultdict, so
+    # reading a missing question inserts it as "other" and the coverage check
+    # would then see 100% resolved no matter what failed.
+    resolved = set(topics)
     for v in videos:
-        v["topic"] = topics[v["question"]] if v.get("question") else ""
+        q = v.get("question")
+        # Unresolved -> "", and excluded from the tables below. Defaulting to
+        # "other" would quietly load a real bucket with unclassified videos.
+        v["topic"] = topics[q] if (q and q in resolved) else ""
+
+    # classify_topics defaults unresolved questions to "other", so a Gemini
+    # outage produces a report that looks entirely normal while most of the
+    # sample sits in one meaningless bucket. Fail loudly instead — and check the
+    # current era separately, since it is the newest content and therefore the
+    # least likely to be already cached.
+    # The current era is the half the gate question turns on and the half we
+    # actually request, so a shortfall there means Gemini failed: abort.
+    cur = eras.get("current", [])
+    cur_unresolved = sum(1 for v in cur if v["question"] not in resolved) / max(1, len(cur))
+    if cur_unresolved > 0.15:
+        sys.exit(f"ABORT: {cur_unresolved:.0%} of the current-era sample is unclassified "
+                 f"(Gemini failures). Re-run when the API recovers — the cache keeps what "
+                 f"did classify, so a re-run only retries the rest.")
+
+    # Pre-overhaul is deliberately NOT topped up (see the `want` comment above),
+    # so a percentage there measures that choice, not an outage. Only guard the
+    # absolute count, which is what a 12-bucket ordering actually needs.
+    pre_ok = sum(1 for v in eras.get("pre-overhaul", []) if v["question"] in resolved)
+    if eras.get("pre-overhaul") and pre_ok < 300:
+        sys.exit(f"ABORT: only {pre_ok} pre-overhaul videos are classified; too few to "
+                 f"rank 12 topic buckets against.")
 
     # ---- write full CSV ----
     fields = ["video_id", "published_at", "age_days", "upload_slot", "title", "question",
@@ -212,19 +401,15 @@ def main():
             w.writerow(v)
 
     # ---- per-topic table ----
-    by_topic = defaultdict(list)
-    for v in sample:
-        by_topic[v["topic"]].append(v)
-
-    topic_rows = []
-    for topic, vs in sorted(by_topic.items(), key=lambda kv: -analytics.median([v["residual"] for v in kv[1]])):
-        res = [v["residual"] for v in vs]
-        topic_rows.append({
-            "topic": topic, "n": len(vs),
-            "median_residual": analytics.median(res),
-            "median_views": analytics.median([v["views"] for v in vs]),
-            "over_rate": sum(r > 0 for r in res) / len(res),
-        })
+    classified = [v for v in sample if v["topic"]]
+    dropped = len(sample) - len(classified)
+    if dropped:
+        print(f"  {dropped} video(s) left unclassified — excluded from the topic tables")
+    topic_rows = topic_table(classified)
+    era_tables = {name: topic_table([v for v in vs if v["topic"]], key="era_residual")
+                  for name, vs in eras.items()}
+    rho, shared = (rank_correlation(era_tables["pre-overhaul"], era_tables["current"])
+                   if len(era_tables) == 2 else (None, []))
 
     # ---- distinctive terms, top vs bottom quartile ----
     ranked = sorted(sample, key=lambda v: v["residual"])
@@ -255,6 +440,45 @@ def main():
         flag = " ⚠️ small n" if r["n"] < 10 else ""
         lines.append(f"| {r['topic']}{flag} | {r['n']} | {r['median_residual']:+.2f} "
                      f"| {r['median_views']} | {r['over_rate']:.0%} |")
+    # ---- era comparison: does the pre-overhaul topic prior still hold? ----
+    lines += ["", "## Does the topic prior survive the format change? (R4.4 gate)", ""]
+    if len(era_tables) < 2:
+        lines += ["Not enough videos in one of the two eras to compare.", ""]
+    else:
+        lines += [
+            "The table above pools eras. R4.4 would seed a ranker from these priors, but they",
+            "were measured almost entirely on pre-overhaul v1 content, and v1->v4 moved median",
+            "views ~6x (PRD §4 Review 2). Below, residuals are refit **within** each era, so the",
+            "era's own level is removed and only the topic ordering is compared.",
+            "",
+            "| Topic | v1 n | v1 residual | current n | current residual |",
+            "|---|---|---|---|---|",
+        ]
+        cur = {r["topic"]: r for r in era_tables["current"]}
+        for r in era_tables["pre-overhaul"]:
+            c = cur.get(r["topic"])
+            cn = str(c["n"]) if c else "—"
+            cr = f"{c['median_residual']:+.2f}" if c else "—"
+            thin = " ⚠️" if c and c["n"] < 5 else ""
+            lines.append(f"| {r['topic']}{thin} | {r['n']} | {r['median_residual']:+.2f} | {cn} | {cr} |")
+        lines += [""]
+        if rho is None:
+            lines += [f"**Too few shared topic buckets ({len(shared)}) to correlate the orderings.**", ""]
+        else:
+            verdict = ("the prior TRANSFERS — the ranker may seed from the v1 table"
+                       if rho >= 0.5 else
+                       "the prior does NOT transfer — do not seed a ranker from the v1 table"
+                       if rho <= 0.2 else
+                       "INCONCLUSIVE — weak agreement, not enough to seed a ranker on")
+            lines += [
+                f"**Spearman rho = {rho:+.2f}** across {len(shared)} shared buckets "
+                f"(buckets with n<3 in either era excluded): {verdict}.",
+                "",
+                "Read the rho, not the individual current-era medians — per-bucket n is small,",
+                "but the ordering across ~10 buckets is far more robust than any one median.",
+                "",
+            ]
+
     lines += [
         "",
         "## Distinctive terms (top quartile vs bottom quartile)",
@@ -281,7 +505,8 @@ def main():
         "  action for weak topics.",
         "- **Upload-slot medians are era-confounded**: posting times changed over the channel's life,",
         "  so slot differences partly encode channel age/maturity. Don't reschedule from this table.",
-        "- Nearly all analyzed videos are pre-v2 format; re-run after v2 accumulates data.",
+        "- The pooled topic table is still dominated by pre-v2 videos; for anything that",
+        "  drives selection, read the era-comparison section rather than the pooled table.",
         "- Proposed `BLOCKED_TOPICS` candidates require owner approval before any gate ships (R4.4).",
     ]
     (OUT_DIR / "topic_performance.md").write_text("\n".join(lines))

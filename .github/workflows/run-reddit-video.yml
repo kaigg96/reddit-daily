@@ -6,7 +6,11 @@ permissions:
 on:
   schedule:
     # R4.5: off the top of the hour to dodge GitHub Actions queue congestion.
-    # Actual publish lands ~10 min later (pip install + render); acceptable.
+    # Actual publish lands ~4-5h later, not ~10 min: GitHub queues scheduled
+    # workflows under load and that delay is outside our control. Stable and
+    # deliberately not chased (PRD R4.5) -- cadence is unaffected at exactly
+    # 2/day, and time-of-day is not a growth lever for Shorts. The weekly
+    # digest reports median drift so it stays visible.
     - cron: '23 0,12 * * *'
   workflow_dispatch:
     inputs:

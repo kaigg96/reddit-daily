@@ -312,3 +312,181 @@ def test_second_weekly_append_extends_the_file_without_a_repeated_header():
         assert lines[3] == "2026-09-14,channel_7d,SHORTS,950,48,95.00"
         assert wa.already_snapshotted(out, "2026-09-07")
         assert not wa.already_snapshotted(out, "2026-09-21")
+
+
+# --- cohort splitting -------------------------------------------------------
+
+def test_split_cohorts_excludes_unset_from_both_sides():
+    """Fields are added to upload_log mid-history, so `!= value` used to sweep
+    the entire pre-field past into the comparison cohort. `--compare
+    candidate_rank=1` reported 24 vs 75 when the real contrast was 24 vs 3."""
+    videos = [
+        v("a", 5, candidate_rank="1"),
+        v("b", 5, candidate_rank="1"),
+        v("c", 5, candidate_rank="2"),
+        v("old1", 40),           # logged before the field existed
+        v("old2", 40),
+    ]
+    a, b, unset = insights.split_cohorts(videos, "candidate_rank", "1")
+    assert [x.video_id for x in a] == ["a", "b"]
+    assert [x.video_id for x in b] == ["c"]
+    assert unset == 2
+
+
+def test_split_cohorts_treats_whitespace_as_unset():
+    a, b, unset = insights.split_cohorts([v("a", 5, topic="  ")], "topic", "nostalgia")
+    assert (a, b, unset) == ([], [], 1)
+
+
+# --- era rank correlation (analyze_channel) ---------------------------------
+
+def _rank_correlation(*args, **kwargs):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "analyze_channel", root / "scripts" / "analyze_channel.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["analyze_channel"] = mod
+    spec.loader.exec_module(mod)
+    return mod.rank_correlation(*args, **kwargs)
+
+
+def row(topic, residual, n=10):
+    return {"topic": topic, "n": n, "median_residual": residual}
+
+
+def test_rank_correlation_detects_a_preserved_ordering():
+    a = [row("x", 0.9), row("y", 0.6), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", 0.5), row("y", 0.4), row("z", 0.2), row("w", -0.1)]
+    rho, shared = _rank_correlation(a, b)
+    assert len(shared) == 4
+    assert rho == pytest.approx(1.0)
+
+
+def test_rank_correlation_detects_a_reversed_ordering():
+    a = [row("x", 0.9), row("y", 0.6), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", -0.4), row("y", -0.2), row("z", 0.3), row("w", 0.8)]
+    rho, _ = _rank_correlation(a, b)
+    assert rho == pytest.approx(-1.0)
+
+
+def test_rank_correlation_drops_thin_buckets_and_refuses_when_too_few_remain():
+    a = [row("x", 0.9), row("y", 0.6, n=1), row("z", 0.3), row("w", 0.1)]
+    b = [row("x", 0.5), row("y", 0.4), row("z", 0.2), row("w", -0.1)]
+    rho, shared = _rank_correlation(a, b)
+    assert "y" not in shared           # thin in era a, so excluded
+    assert rho is None                 # only 3 shared buckets left, under the floor
+# --- zero-view age floor ----------------------------------------------------
+
+def zv(vid, age_days, views=0, privacy="public"):
+    return {"id": vid, "published": (NOW - datetime.timedelta(days=age_days)).isoformat(),
+            "views": views, "privacy": privacy, "title": vid}
+
+
+def test_fresh_zero_is_too_new_not_a_suppression_candidate():
+    """A video hours old has no views yet and every neighbour is older, so it
+    always looks isolated. The digest was fixed for this on 2026-08-23; the
+    same trap sat in report.py --zeros until an upload 1.9h old was flagged."""
+    vids = [zv(f"old{i}", 40 - i, views=50) for i in range(8)] + [zv("fresh", 0.08)]
+    groups = insights.classify_zero_views(vids, NOW)
+    assert [v["id"] for v in groups["too_new"]] == ["fresh"]
+    assert groups["isolated"] == []
+
+
+def test_aged_zero_among_healthy_neighbours_is_still_isolated():
+    vids = [zv(f"old{i}", 40 - i, views=50) for i in range(8)] + [zv("dead", 20)]
+    groups = insights.classify_zero_views(vids, NOW)
+    assert [v["id"] for v in groups["isolated"]] == ["dead"]
+    assert groups["too_new"] == []
+
+
+# ---------------------------------------------------------- load_videos joins
+
+class _FakeQuery:
+    """Stands in for the Analytics reports().query() chain."""
+
+    def __init__(self, rows):
+        self._rows = rows
+
+    def reports(self):
+        return self
+
+    def query(self, **kw):
+        return self
+
+    def execute(self):
+        return {
+            "columnHeaders": [{"name": n} for n in (
+                "video", "views", "averageViewDuration",
+                "averageViewPercentage", "likes", "comments")],
+            "rows": self._rows,
+        }
+
+
+def _fake_analytics(monkeypatch, rows, privacy):
+    from src import analytics
+    monkeypatch.setattr(analytics, "youtube_analytics_client", lambda: _FakeQuery(rows))
+    monkeypatch.setattr(analytics, "youtube_client", lambda: object())
+    monkeypatch.setattr(analytics, "fetch_video_details",
+                        lambda yt, ids, part=None: [
+                            {"id": i, "status": {"privacyStatus": privacy.get(i, "public")}}
+                            for i in ids])
+
+
+def _write_log(tmp_path, monkeypatch, video_ids):
+    from src import config
+    path = tmp_path / "upload_log.csv"
+    old = NOW - datetime.timedelta(days=30)
+    with open(path, "w", newline="") as f:
+        f.write("timestamp_utc,video_id,post_title,video_title,bg_clip\n")
+        for vid in video_ids:
+            f.write(f"{old.isoformat()},{vid},q,t,pexels_1.mp4\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", path)
+    return path
+
+
+def test_a_zero_view_upload_is_kept_not_silently_dropped(tmp_path, monkeypatch):
+    """The Analytics API returns NO row for a 0-view video.
+
+    The old code did `if not s: continue`, so those uploads vanished from every
+    median and every zero count. On 2026-09-19 that hid both surviving
+    confirmed-suppression cases (VDH3pSafyE0, _0MNAf8AzNg) — the entire evidence
+    base for R4.6's skip categories — from the tool that answers "did X work?".
+    """
+    _write_log(tmp_path, monkeypatch, ["seen", "zeroed"])
+    _fake_analytics(monkeypatch, rows=[["seen", 100, 12.0, 50.0, 1, 0]], privacy={})
+
+    vids = insights.load_videos(now=NOW)
+
+    assert {v.video_id for v in vids} == {"seen", "zeroed"}
+    zero = next(v for v in vids if v.video_id == "zeroed")
+    assert zero.views == 0
+    assert zero.watch_seconds == 0
+
+
+def test_a_privatised_upload_is_excluded_rather_than_counted_as_zero(tmp_path, monkeypatch):
+    """Owner-privatised is not suppression — the distinction classify_zero_views
+    already makes, now made here too. Counting them as zeros would invent
+    suppression events."""
+    _write_log(tmp_path, monkeypatch, ["seen", "hidden"])
+    _fake_analytics(monkeypatch, rows=[["seen", 100, 12.0, 50.0, 1, 0]],
+                    privacy={"hidden": "private"})
+
+    vids = insights.load_videos(now=NOW)
+
+    assert {v.video_id for v in vids} == {"seen"}
+
+
+def test_dropping_zero_view_uploads_biases_medians_upward(tmp_path, monkeypatch):
+    """Why this mattered beyond the zero count: the dropped rows are the worst
+    performers by definition, so excluding them flatters every median."""
+    _write_log(tmp_path, monkeypatch, ["a", "b", "c"])
+    _fake_analytics(monkeypatch,
+                    rows=[["a", 100, 10.0, 50.0, 1, 0], ["b", 100, 20.0, 50.0, 1, 0]],
+                    privacy={})
+
+    vids = insights.load_videos(now=NOW)
+    watch = sorted(v.watch_seconds for v in vids)
+
+    assert watch == [0.0, 10.0, 20.0]      # the zero is present
+    assert insights.median(watch) == 10.0  # not 15.0, which is what dropping it gave

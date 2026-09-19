@@ -29,14 +29,16 @@ Do not reconstruct state from `git log`, the code, or an old conversation. If
 §0 and the code disagree, say so — that's a finding, not something to silently
 work around.
 
-## 2. Report before building
+## 2. Report, then work
 
 Open with a few lines: what's shipped, what §0 says is next, and your
 recommendation — including disagreeing with §0 if the data supports it.
 
-Then **stop**, unless the invocation both named a task and told you to build.
-Starting a phase or feature without an explicit go-ahead is a standing rule the
-owner set after it happened.
+Then **get on with it.** ~~Stop unless told to build~~ — that rule was retired
+2026-09-19; the owner would rather work proceed than wait on a go-ahead. For a
+session with no specific task, use **`/shift`**, which picks the lane and
+carries the authorization rules and external budgets. What still needs the
+owner is listed in `CLAUDE.md` §4, and the usage reserve in §2.
 
 ## 3. Conventions
 

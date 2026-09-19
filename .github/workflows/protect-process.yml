@@ -1,0 +1,135 @@
+name: Protect the process rules
+
+# Shifts run autonomously and are told, in prose, that changes to their own
+# rules are proposals rather than self-applied edits. Prose is advisory — the
+# same reason the R4.6 tier guarantee moved into screen.py and the Polly budget
+# into tts.py. This is that rule in code.
+#
+# If a protected file changes on main without an approving issue, the change is
+# reverted and the owner is told. Branches are untouched: propose freely, get
+# approval, then merge.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'CLAUDE.md'
+      - '.claude/skills/**'
+      - '.github/workflows/protect-process.yml'
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: protect-process
+  cancel-in-progress: false
+
+jobs:
+  check:
+    # Don't fight our own revert commit.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Was this approved?
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const changed = execSync('git diff --name-only HEAD~1 HEAD')
+              .toString().split('\n').filter(Boolean)
+              .filter(f => f === 'CLAUDE.md' || f.startsWith('.claude/skills/')
+                        || f === '.github/workflows/protect-process.yml');
+            if (changed.length === 0) { core.setOutput('ok', 'true'); return; }
+
+            const msg = execSync('git log -1 --pretty=%B').toString();
+            const m = msg.match(/Approved-In:\s*#(\d+)/i);
+            if (!m) {
+              core.setOutput('ok', 'false');
+              core.setOutput('files', changed.join(', '));
+              core.setOutput('why', 'no `Approved-In: #N` trailer on the commit');
+              return;
+            }
+            // A trailer alone proves nothing — check the issue is real and the
+            // owner actually marked it approved.
+            try {
+              const issue = await github.rest.issues.get({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: Number(m[1]),
+              });
+              // Case- and whitespace-insensitive: a label typed `Approved`
+              // should not silently fail a check whose whole job is to be
+              // unambiguous about whether the owner said yes.
+              const approved = issue.data.labels
+                .some(l => String(l.name || l).trim().toLowerCase() === 'approved');
+              if (!approved) {
+                core.setOutput('ok', 'false');
+                core.setOutput('files', changed.join(', '));
+                core.setOutput('why', `issue #${m[1]} is not labelled \`approved\``);
+                return;
+              }
+              core.setOutput('ok', 'true');
+            } catch (e) {
+              core.setOutput('ok', 'false');
+              core.setOutput('files', changed.join(', '));
+              core.setOutput('why', `issue #${m[1]} could not be read`);
+            }
+
+      - name: Revert the unapproved change
+        if: steps.verify.outputs.ok == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          for f in ${{ steps.verify.outputs.files }}; do
+            git checkout HEAD~1 -- "${f%,}" 2>/dev/null || true
+          done
+          git commit -m "Revert unapproved process change
+
+          Protected files changed on main without owner approval. The change is
+          not lost -- it is in the previous commit and can be re-proposed on a
+          branch with an approving issue." || echo "nothing to revert"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            sleep 5
+          done
+          echo "::error::could not revert"; exit 1
+
+      - name: Tell the owner
+        if: steps.verify.outputs.ok == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const key = 'process-change-without-approval';
+            const marker = `<!-- escalation-key: ${key} -->`;
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `${marker}\n\n` +
+              `A protected file changed on \`main\` without approval and **has been reverted**.\n\n` +
+              `- **Files:** ${{ toJSON(steps.verify.outputs.files) }}\n` +
+              `- **Reason:** ${{ toJSON(steps.verify.outputs.why) }}\n` +
+              `- **Commit:** ${context.sha.slice(0, 7)} · [run](${run})\n\n` +
+              `These files define how shifts behave, so changing them is a proposal, ` +
+              `not a shift's call. The work is not lost — it is in that commit.\n\n` +
+              `## Recommendation\n\nIf you want it: label an issue \`approved\` and ` +
+              `re-land with \`Approved-In: #N\` in the commit message. If you don't, ` +
+              `nothing further is needed — it is already reverted.`;
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100,
+            });
+            const existing = open.find(i => (i.body || '').includes(marker));
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number, body: `**Again.**\n\n${body}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: 'Process rules changed without approval (reverted)',
+                labels: ['needs-owner'], body,
+              });
+            }

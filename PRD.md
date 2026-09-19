@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v5` live (suppression screen shipped 2026-08-23); R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker — see §0 Delivery plan |
+| **Status** | `v6` pending review (R4.6 screen retiered after the first standing audit); `v5` live since 2026-08-23; R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker, whose Step-0 gate needs a decision — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-09-07 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
+**Last updated:** 2026-09-19 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18) · **Pending owner review:** `v6` — four branches, integrated and green on `integration/preview` (78 tests). See *Pending review* below.
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -27,11 +27,40 @@
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 
+#### Pending owner review *(nothing merged; `main` is untouched)*
+
+All four branches merge cleanly in this order and pass 78 tests together —
+`integration/preview` is the assembled artifact to review. Two conflicts, both
+append-only list regions (`TECH_DEBT.md` open items, `log.py` FIELDS), resolved
+by keeping both sides.
+
+| # | Branch | What it is | Risk |
+|---|---|---|---|
+| 1 | `chore/cost-guardrails` | Polly cost rules recorded where every agent sees them (`CLAUDE.md`, new) + a per-process character budget enforcing them + the neural engine pinned as a deliberate paid choice | Low — no-op at production volumes |
+| 2 | `fix/gemini-thinking-timeouts` | **Live regression fix.** Disables gemini-2.5-flash thinking; adds `title_ok`/`keywords_ok`/`cta_ok`; stops logging a `title_style` that was never applied | Medium — changes what ships |
+| 3 | `feature/r4.6-taxonomy-narrow` | `v6` screen retiering (the original pending item) | Medium — content selection |
+| 4 | `fix/analytics-drops-zero-views` | **Analysis correctness fix.** 0-view uploads were dropped from every median and every cohort | Low — read-only tooling |
+
+**⚠️ Two checks outstanding before any of this reaches `main`**, both needing Gemini quota (run after 07:00 UTC): (a) one `llm.get_metadata` call, to confirm the merged prompt returns a sane title/keywords/CTA — merging three focused prompts into one multi-task prompt can degrade each task, and that is **not yet validated**; (b) the screen replay below.
+
+**Check (b):** `scripts/replay_screen.py`
+must pass. It validates two things at once — `named_wrongdoing` (the item `v6`
+has been waiting on since 2026-09-09) and whether the R4.6 screen's JSON
+verdicts still hold with thinking disabled, which branch 2 changes. It could
+not run on 2026-09-19: the daily Gemini budget was exhausted. **Run it after
+07:00 UTC**, when the quota resets.
+
+**A dry run on the integrated state did pass** (2026-09-19, Gemini exhausted):
+18.8s video, b-roll, captions, thumbnail and SRT all produced, `format=v6`, the
+Polly guard did not interfere, and the new `title_style`-blanking fired
+correctly. That was an unintentionally good test of the degraded path, since it
+is exactly what a quota-exhausted run looks like.
+
 #### Next keepers
 
 | Item | Req | Decision rule |
 |---|---|---|
-| ~~Suppression-risk screen~~ ✅ `v5` | R4.6 | Shipped 2026-08-23. **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
+| ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | R4.6 | Shipped 2026-08-23; **first standing audit run 2026-09-09 → taxonomy retiered** (see §6). **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
 | ~~Traffic-source telemetry~~ ✅ shipped | R4.7 | Shipped 2026-09-07 (no version bump). **Result: the SEO surface earns ~1.3% of views** — search-oriented work stays parked; see §4 Findings. Weekly `channel_7d` rows now accumulate a drift series, so this becomes re-checkable rather than a one-off read. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
@@ -40,7 +69,7 @@ Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so 
 
 | # | Item | Req | Decision rule (pre-committed) |
 |---|---|---|---|
-| 1 | **Topic/hook candidate ranker** | R4.4 | Score the top-10 candidates on hook strength + topic prior (seeded from `analysis/topic_performance.md`), pick the best rather than always #1. After ≥20 uploads: keep if median **watch-seconds** and median views both hold or improve vs an age-matched baseline; revert if either drops materially. |
+| 1 | **Topic/hook candidate ranker** — ✅ **gate cleared 2026-09-11; sequenced behind `v6`** | R4.4 | Score the top-10 candidates on hook strength + topic prior (seeded from `analysis/topic_performance.md`), pick the best rather than always #1. After ≥20 uploads: keep if median **watch-seconds** and median views both hold or improve vs an age-matched baseline; revert if either drops materially. **2026-09-09:** Step 0's rank counterfactual is n=3 and cannot reach a verdict before December, and the topic prior it would use is measured on pre-v2 content. Re-run R4.3's topic analysis on the current cohort first — see §4, "R4.4 gate review". |
 | 2 | Subreddit rotation — *inventory prerequisite for volume* | R4.1 | Compare age-adjusted median views per subreddit after ≥15 uploads each; drop underperformers vs the AskReddit baseline. Success unlocks the posting-volume revisit (§7). |
 | 3 | Posting-volume increase (2 → 3–4/day) | — | Only after R4.1 proves inventory quality; hold per-video medians within ~30% of baseline at higher volume, else fall back. |
 | 4 | Localization (per-language channels) | R5.1–R5.2 | Gated — requires a proven English format first (R5 localization gate). |
@@ -57,7 +86,7 @@ Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so 
 
 ## 1. Background & goal
 
-This repo generates and uploads a YouTube Short twice daily (00:00 and 12:00 UTC) from the top r/AskReddit post of the day. Videos currently average **under 100 views each**. The owner's goal is YouTube Partner Program monetization, whose Shorts route requires **1,000 subscribers + 10M valid public Shorts views in a trailing 90-day window** (the long-form route is 4,000 watch-hours/12mo). At 2 posts/day, 10M/90d implies ~55K average views per video — the strategy is to (a) raise the floor via production quality and (b) raise the ceiling (hit probability) via better hooks and content variety.
+This repo generates and uploads a YouTube Short twice daily from the top r/AskReddit post of the day (cron `23 0,12 * * *`; actual publish has drifted to ~04:50 and ~16:45 UTC — GitHub queue delay, see R4.5). Videos currently average **under 100 views each**. The owner's goal is YouTube Partner Program monetization, whose Shorts route requires **1,000 subscribers + 10M valid public Shorts views in a trailing 90-day window** (the long-form route is 4,000 watch-hours/12mo). At 2 posts/day, 10M/90d implies ~55K average views per video — the strategy is to (a) raise the floor via production quality and (b) raise the ceiling (hit probability) via better hooks and content variety.
 
 Sub-100 views on Shorts means the algorithm's initial test pool (a few hundred impressions served automatically to every new Short) is not converting. The dominant signal for further distribution is **retention** (viewed vs. swiped away, average % watched), followed by engagement (likes/comments/shares per view). "Click rate" in the classic thumbnail sense barely applies inside the Shorts feed — the real analog is **surviving the first 1–2 seconds**. Titles/thumbnails matter mainly on search, channel page, and browse surfaces.
 
@@ -79,12 +108,13 @@ Pipeline (cell by cell):
 8. **Cell 9 — dedupe.** Writes posted title to `prev_post.txt`; workflow commits it back.
 
 **Environment (kept current — this block describes the system as it is today, not the v1 baseline above):**
+- **Gemini model/endpoint:** `gemini-2.5-flash` on **`v1beta`** with `thinkingConfig.thinkingBudget = 0`. Thinking is disabled deliberately (2026-09-19): it added 30s+ of latency on prompts needing ~8 output tokens and was timing out, silently degrading ~25% of uploads. `v1` cannot express this — it rejects `thinkingConfig` with HTTP 400.
 - **Runtime:** Python 3.10 on `ubuntu-latest`, entry point `python -m src.run`. Twice daily at `23 0,12 * * *` (off the hour to dodge Actions queue jitter), plus a `workflow_dispatch` with a `dry_run` input.
 - **Secrets in Actions:** `REDDIT_*`, `AWS_POLLY_*`, `YOUTUBE_CLIENT_ID`/`_SECRET`/`_REFRESH_TOKEN`, `GEMINI_API_KEY`. Local dev reads the same names from `.env` (gitignored). `YOUTUBE_DATA_API_KEY` exists locally but is no longer used by any script.
 - **OAuth:** the refresh token carries `youtube.upload`, `youtube.force-ssl` (comments + captions) and `yt-analytics.readonly`. The consent screen is published **in production**, so tokens no longer expire after 7 days (see README for the re-mint walkthrough).
 - **Fonts:** Anton is committed to `assets/fonts/` and passed to `TextClip` by path — no system font installation, so CI and local renders are identical.
 - **MoviePy 2.1.2** — 2.x API only; see Appendix A for the specific gotchas. (`moviepy.__version__` self-reports `2.1.1` despite the 2.1.2 pin — an upstream metadata quirk, not a wrong install.)
-- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus keywords, title, and CTA. Comfortably inside the free tier at 2 runs/day; heavy *local* testing is what exhausts quota, not production.
+- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus **one** metadata call covering title + keywords + CTA = **2–5 requests per run, 4–10 per day** (was 4–7 / 8–14 until the three metadata prompts were merged on 2026-09-19). ⚠️ **Corrected 2026-09-19: this is NOT comfortably inside the free tier.** The cap is **20 requests/day** for `gemini-2.5-flash` on this project (measured from the 429 body: `GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`), so production alone is **40–70% of it**. Any local testing competes directly with live uploads, and a single screen replay is a third of the day's budget. The quota counts **requests, not tokens**, so the structural fix is fewer calls (keywords/title/CTA could be one call, not three) — see TECH_DEBT.md. Reset is midnight Pacific ≈ 07:00 UTC, which falls *between* the two scheduled runs, so the ~04:50 UTC run is the one exposed to a budget already spent.
 
 ## 3. Diagnosis (why <100 views)
 
@@ -126,6 +156,38 @@ Directional, not contractual — the algorithm is stochastic, and the strongest 
 5. **Distribution gain from the overhaul confirmed and larger than first measured:** v4 median **166 views** (n=52) vs recent-era v1 median **28** (n=76) — roughly 6× (Review 1 estimated 3.5× on n=14).
 6. **Methodological rule now binding: cohorts must be age-matched.** Avg-%-viewed *declines as a video ages* (broader, colder audiences). Same-week (3–9d) videos sit at ~65% regardless of background, while the older overall pool sits near 48–50%. Two consequences: (a) **b-roll shows no measurable retention effect** once age-matched (65.5% vs 64.9%) — an apparent advantage was pure age artifact; (b) Review 1's "retention didn't move" claim compared v4 against much older v1 videos and is **not trustworthy as stated** — the distribution half stands, the retention half is unresolved.
 
+**R4.4 gate CLEARED (2026-09-11) — the topic prior survives the format change.** The gate review below said the ranker's topic prior was measured on pre-overhaul content and was therefore an assumption. Re-running R4.3 with an era split settles it.
+
+**Spearman rho = +0.79** between the pre-overhaul and current-format topic orderings, across the 10 buckets with n≥3 in both eras. The strong tier (nostalgia, humor-absurd, dark-morbid) and the weak tier (life-advice, money-work, fame-celebrity) both hold, and the weak tier reads *weaker* on current content, not softer.
+
+Validated three ways, because the headline rests on only 10 points:
+- **Classifier independence.** All 106 current-era questions were re-labelled by hand against the same taxonomy: **93% agreement** with Gemini (7 disagreements, mostly film/TV questions filed as `fame-celebrity` and a sports question as `politics-news`). Substituting the corrected labels moves rho by **0.00** — the result is not an artifact of how gemini-flash buckets things.
+- **Robust to the bucket floor:** n≥4 → +0.78, n≥5 → +0.76, n≥6 → +0.76.
+- **No single bucket drives it.** Leave-one-bucket-out spans +0.72 (drop nostalgia) to +0.88 (drop `other`). That `other` is the biggest drag is expected — it is a grab-bag, not a topic.
+
+**The one real sensitivity:** fitting the age model on only the *classified* videos rather than all era videos gives **+0.66**. Fitting on everything is the better choice (the age→views trend is topic-independent, so more data is strictly better), but it means the honest range is **+0.66 to +0.79** rather than a point estimate. Every variant is strongly positive, so the *direction* is solid and the magnitude is soft. That is enough to seed a ranker; it is not enough to weight one finely.
+
+**Caveats that travel with the number:** current-era buckets run n=1–23, three are too thin to enter the correlation at all, and 163 pre-overhaul videos are excluded as unclassified by design (the re-run only tops up the era the question turns on).
+
+**R4.4 gate review (2026-09-09) — both of the ranker's evidence bases are currently unusable.**
+
+R4.4 Step 0 shipped 2026-08-23 to accumulate the rank counterfactual *before* building the ranker. Checking what it has produced:
+
+1. **The rank counterfactual will not arrive on a useful timeline.** 35 uploads carry `candidate_rank`: **32 rank 1, 3 rank 2, nothing lower** — and all three off-rank cases were caused by R4.6 screen skips, not by the basic filters. `report.py --compare candidate_rank=1` correctly refuses a verdict at n=3. At ~9% of uploads the cohort reaches n=15 around **early December**, and it **cannot be backfilled**: Reddit's top-of-day for a past date isn't retrievable, so no historical reconstruction exists. (Until `--compare` was fixed the same query read 24 vs 75 and looked conclusive — the 75 were videos logged before the column existed.)
+2. **The topic prior is measured on content we no longer make.** The ~1.6× spread R4.4 cites comes from `analysis/topic_performance.md` (n=607), whose own caveats say: *"Nearly all analyzed videos are pre-v2 format; re-run after v2 accumulates data."* Given that v1→v4 moved median views ~6× (Review 2 item 5), whether topic preference survives that format change is an **assumption, not evidence**. On the current format `report.py --by topic` has n=24 classified across 10 buckets — every bucket flagged thin.
+3. **The firing rate is unknowable from the current log.** The mechanism is a narrow exception (top candidate in a weak tier **and** another top-few candidate in a strong tier), but the log records only the *selected* post's topic, never the slate we passed over. So R4.4's own ≥20-upload bake cannot even be scheduled — it might need months to accumulate 20 firings.
+
+**Recommendation: re-run R4.3's topic analysis on the current-format cohort before building anything.** It is pure analysis — ~107 Gemini title classifications, since `analysis/topics_cache.json` covers the v1 era and holds only 1 of the 108 logged uploads — and it tests the single assumption R4.4 rests on. If the topic spread survives on v2+ content, the topic exception can ship on that evidence and the rank gate is droppable as a nice-to-have that was never load-bearing. If it does not survive, R4.4's premise needs rework and the build is avoided. Either way the answer arrives in an afternoon instead of in December. **Owner decision required** — this changes what "supported by data" meant when Step 0 was written.
+
+**Incidental (not actionable on its own):** `topic_performance.md`'s upload-slot table is era-confounded and its caveats explicitly forbid rescheduling from it. Noting it only because it intersects the publish-drift item in TECH_DEBT: the second daily slot has drifted from ~12:xx UTC (+0.42 median residual in that table) to ~16:45 (−0.18 to −0.47). Not evidence of harm — but publish time is an uncontrolled variable that has been moving underneath every cohort comparison for two months.
+
+**Gemini silently degraded ~25% of uploads for two weeks (found 2026-09-19).** `gemini-2.5-flash` thinks by default; a title call was measured spending **546 reasoning tokens to emit an 8-token title, taking 33.1s** against a 30s timeout. The call fails soft, so nothing broke loudly — the run just shipped the raw Reddit question as its YouTube title. Rate by week: **0% in W29–W32, then 29% (W37) and 25% (W38)**. `src/llm.py` had not changed since v4 in July, so this was environmental. A live screen replay the same evening lost **4 of 5 calls** to `ReadTimeout`. Disabling thinking puts the same call at **0.6s**.
+
+Three consequences worth carrying forward:
+1. **The R2.2 title-style comparison is contaminated and the contamination is uneven** — 10 of 127 rows record a style that was never applied (A 7% / B 12% / C 5%, and 23% of the last 30). That biases the cohorts rather than just adding noise. Fixed going forward; historical rows are **not** backfilled, since rewriting production history on an inference is an owner call.
+2. **Fail-soft without telemetry is indistinguishable from working.** Three of the four Gemini call sites left no trace when they failed; this was only findable by comparing `video_title` back to `post_title`. Now logged as `title_ok`/`keywords_ok`/`cta_ok`, the same pattern as `caption_ok`. This is the third time the same lesson has landed (`caption_ok` 2026-09-07, `screen_source` 2026-09-09).
+3. **The free-tier cap is 20 requests/day, not the few hundred assumed** — measured from the 429 body. Production spends 8–14/day, so it runs at 40–70% of budget and any local work competes with live uploads. The lever is fewer *requests* (the quota counts requests, not tokens): keywords + title + CTA are three calls about the same post and could be one. See §2 and TECH_DEBT.
+
 **Traffic-source baseline (2026-09-07, R4.7 first snapshot).** Distribution is the Shorts feed and essentially nothing else. On the current-format cohort (`logged_uploads`, n=103): **Shorts feed 96.7%**, other YouTube pages 1.8%, **search 1.3%**, everything else < 0.2%. Channel lifetime is barely different (93.7% / 2.4% / 3.4%) — the older v1 content drew *more* search share than what we ship now, so the SEO surface is not something the overhaul lost, it was never large.
 
 Consequences:
@@ -144,14 +206,16 @@ Strategic implication (unchanged): 10M views/90d ≈ 110K/day vs the current ~1�
 
 ## 5. Constraints & guardrails (binding on the implementer)
 
-1. **$0 budget.** No new paid services. Existing Polly/Gemini/YouTube usage stays. (Note: Polly neural is ~$16/1M chars once past free tier; speech-mark calls double character usage → still ≈ $1–2/mo at 60 videos. Accepted. Gemini 2.5 Flash free tier covers the added calls.)
-2. **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
-3. **Must run headlessly on `ubuntu-latest`** GitHub Actions, twice daily, within reasonable job time (< 30 min).
-4. **DRY_RUN guardrail (build first — R0.1).** All development/verification runs must use DRY_RUN. **Never upload to the live channel, post comments, or mutate `prev_post.txt`/logs during development.** The first live run of any new format version requires explicit owner approval.
-5. **Never commit secrets.** `.env`, `client_secret.json`, `token.json` stay gitignored. (`praw.ini` was removed 2026-08-23 — Reddit auth reads `REDDIT_*` from the environment.) When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
-6. **Licensing:** every committed media asset (b-roll, music, SFX, fonts) must be free for commercial use without attribution (CC0/Pixabay License/Mixkit License/YouTube Audio Library/OFL fonts) and its source URL recorded in `assets/CREDITS.md`. No gameplay footage of copyrighted games, no clips with embedded music/watermarks/logos/visible people prominently featured.
-7. **Policy:** no fake engagement, no engagement pods, no view manipulation, no posting-frequency increase as a substitute for quality. Existing content filters (NSFW/profanity/emoji) must remain.
-8. **Repo hygiene:** each committed b-roll/music file < 25 MB; total new committed assets < 300 MB. (If the library needs to grow beyond that later, move to GitHub Release assets + `actions/cache` — out of scope now.)
+1. **$0 budget.** No new paid services. Existing Polly/Gemini/YouTube usage stays.
+2. **AWS Polly is the one line item that costs the owner real money — treat call volume as the constraint.** Neural is $16/1M characters and every segment is synthesized **twice** (mp3 + speech marks), so characters bill double. Production is ~910 billed chars/video ≈ **$0.90/month** at 2/day, and must stay in that range. The exposure is not per-video cost but **bulk synthesis**: 10,000 test renders is ~$144, and 10,000 calls at Polly's 3K-char cap is ~$960. **No bulk synthesis, no un-capped retries, reuse `assets/gen/` audio when iterating on visuals, and ask the owner before any deliberate batch job.** Enforced in code by the per-process budget in `src/tts.py` (`POLLY_CHAR_BUDGET`) — prose is not an enforcement mechanism. **The neural engine is a deliberate paid quality choice** (the owner is past the 12-month free tier and pays from the first character): standard voices are 4x cheaper and would save ~$0.65/month while degrading the channel's core audio — never make that trade, and don't move to the pricier generative/long-form engines without asking either. Cost work here means removing wasted calls, never reducing audio quality. Full rules in [CLAUDE.md](CLAUDE.md) §1.
+3. **Gemini's free tier is a shared daily request budget**, not per-process: local analysis and the live 2x/day pipeline draw on the same key, and exhausting it silently degrades real uploads to keyword-backstop screening and un-generated titles (observed 2026-09-10 — see TECH_DEBT.md). Budget local Gemini work rather than running it opportunistically.
+4. **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
+5. **Must run headlessly on `ubuntu-latest`** GitHub Actions, twice daily, within reasonable job time (< 30 min).
+6. **DRY_RUN guardrail (build first — R0.1).** All development/verification runs must use DRY_RUN. **Never upload to the live channel, post comments, or mutate `prev_post.txt`/logs during development.** ~~The first live run of any new format version requires explicit owner approval.~~ **Revised 2026-09-19:** a new format version goes live once the automated gates pass (tests green, dry run produces a playable MP4, `FORMAT_VERSION` bumped, one variable per release) — see §8. The DRY_RUN guardrail itself is unchanged and still absolute.
+7. **Never commit secrets.** `.env`, `client_secret.json`, `token.json` stay gitignored. (`praw.ini` was removed 2026-08-23 — Reddit auth reads `REDDIT_*` from the environment.) When extending the workflow's commit step, `git add` only the specific intended files (never `-A`).
+8. **Licensing:** every committed media asset (b-roll, music, SFX, fonts) must be free for commercial use without attribution (CC0/Pixabay License/Mixkit License/YouTube Audio Library/OFL fonts) and its source URL recorded in `assets/CREDITS.md`. No gameplay footage of copyrighted games, no clips with embedded music/watermarks/logos/visible people prominently featured.
+9. **Policy:** no fake engagement, no engagement pods, no view manipulation, no posting-frequency increase as a substitute for quality. Existing content filters (NSFW/profanity/emoji) must remain.
+10. **Repo hygiene:** each committed b-roll/music file < 25 MB; total new committed assets < 300 MB. (If the library needs to grow beyond that later, move to GitHub Release assets + `actions/cache` — out of scope now.)
 
 ## 6. Requirements
 
@@ -243,7 +307,7 @@ Nearly every requirement below touches Cell 7's monolith; refactor first: `src/`
 - **Data acquisition — originally no OAuth needed.** All required fields (title, description, tags, publishedAt, duration, viewCount, likeCount, commentCount) are public metadata, so this shipped against a free **YouTube Data API key** (avoiding a dependency on the not-yet-unblocked Phase 3 re-auth; see OQ-4): derive the uploads playlist from the channel id (`UC…` → `UU…`), page through `playlistItems.list`, then `videos.list(part=snippet,statistics,contentDetails)` in batches of 50 (1 quota unit per call — the whole channel costs <20 units of the 10k/day budget). Output: `analysis/channel_videos.csv`. **Superseded 2026-07-21:** now that OAuth is live, this script was migrated onto the same authenticated client the other reporting scripts use (`src/analytics.py`), eliminating a second auth mechanism and a hardcoded channel-ID constant — see TECH_DEBT.md.
 - **Content recovery:** parse question + answers back out of each description (the format is stable across v1 and v2: `Today's top AskReddit post: …` + numbered comments).
 - **Analysis** (`scripts/analyze_channel.py`, run locally or via a `workflow_dispatch`; outputs committed under `analysis/`):
-  - Control for confounders before comparing anything: video age (views accumulate), upload slot (00:00 vs 12:00 UTC), and format version (everything pre-v2 is old format). Compare age-adjusted residuals (e.g., regress log-views on age) or quantiles within rolling cohorts — never raw view counts across months.
+  - Control for confounders before comparing anything: video age (views accumulate), upload slot (the early vs late daily run), and format version (everything pre-v2 is old format). Compare age-adjusted residuals (e.g., regress log-views on age) or quantiles within rolling cohorts — never raw view counts across months.
   - **Topic buckets:** batch-classify each question via Gemini into a fixed taxonomy (~12 buckets, e.g. relationships/dating, money/work, dark-morbid, politics-news, fame-celebrity, nostalgia, humor-absurd, sex-adjacent, health, hypotheticals, life-advice, other). Report per-bucket n and median adjusted performance.
   - **Distinctive-terms pass:** TF-IDF / distinctive n-grams of top-quartile vs bottom-quartile videos over question+answer text.
   - **Deliverable:** `analysis/topic_performance.md` — ranked buckets, winner/loser terms, and explicit caveats (correlation ≠ causation, small-n buckets, algorithm drift over the sample period).
@@ -316,6 +380,28 @@ High-confidence, non-regression keepers. Ship together through the review gate (
   - **Do NOT add a category in response to a single new zero.** That is exactly the n=1 fitting that produced this taxonomy and the cancelled R1.8/R1.9.
   - **Recommended posture:** keep the screen (free, fail-open, catches the sexual/named-wrongdoing shapes, and its call carries the `topic` telemetry R4.4 needs), **freeze the taxonomy**, and reclassify 0-views in §0 as accepted background loss rather than an open workstream. Verify with `scripts/report.py --zeros`, which now encodes the private-video and cold-spell traps.
 
+- **FIRST STANDING AUDIT (2026-09-09) → two-tier taxonomy, ships as `v6`.** `analysis/screen_log.csv` over 2026-08-25 … 2026-09-10: 6 verdicts across 33 uploads — 3 `skip_post`, 3 `drop_comments`. The **rate** is fine (well under the ~15% narrow-the-prompt threshold); the **composition** is not. Two of the three skips came from the two categories with the weakest evidence:
+  - `2026-09-05` *"Doctors/nurses of Reddit, what's a symptom patients brush off that actually terrifies you?"* → **`graphic_harm`**, the category whose only confirmed case (`qvNzVCzWebk`) the 2026-08-30 correction above retracted as a cold-spell artifact.
+  - `2026-08-26` *"Bartenders of Reddit, what was a 'cut off' gone wrong?"* → **`graphic_violence`**, which never had a confirmed case at all — it was reasoned into the taxonomy, not observed.
+  Both are ordinary high-engagement AskReddit shapes, and dark-morbid is a top-performing bucket (§4). The screen was spending its most expensive action on its least-supported categories.
+- **Change — split the taxonomy by cost, not by severity.** Skipping a post discards the top-ranked candidate of the day; dropping an answer costs one answer and the pool backfills. A category now earns post-skip authority only if a confirmed zeroed upload supports it, or its severity means it never fires here anyway:
+  - **`SKIP_CATEGORIES`** (may discard the post): `sexual_suggestive` and `named_wrongdoing` (the two surviving confirmed cases), plus `minors_sexual` / `hard_drugs` / `slurs` — zero-cost tail guards that have never fired on this channel, so removing them would buy nothing.
+  - **`DROP_ONLY_CATEGORIES`** (answer-level only, never a skip): `graphic_harm`, `graphic_violence`.
+  Enforced **in code**, not just in the prompt — the model may still raise one of these against a question, and `screen.py` demotes it to a pass. A prompt instruction is not an enforcement mechanism.
+- **The counterfactual stays visible.** A demoted verdict writes a `demoted_post_risk` row to `screen_log.csv` carrying the category we declined to skip on. If zeroes rise, the audit can see exactly what was let through — this is the record that would justify a re-promotion, and the only thing that should.
+- **Also corrected:** the retracted chiropractic case was still sitting in the prompt as a *"WAS suppressed"* calibration example, teaching the model the pattern the evidence no longer supports. Removed. The three audited false positives are now in-prompt as questions that must pass. The confirmed-case count drops to **two** here and in the README.
+- **This is a narrowing, not an addition** — consistent with "freeze the taxonomy" above, which forbids *adding* categories off single zeroes. The standing decision rule already prescribes exactly this action ("false positives in the log → narrow the prompt, don't revert").
+- **Validation (2026-09-09):** 18 unit tests in `tests/test_screen.py` lock the tier guarantee per category (a `DROP_ONLY` category can never return `skip_post`), the audit's three false positives, the fail-open backstop's matching two-tier split, the `demoted_post_risk` audit row, and the retry fix below. Live-Gemini replay via the new `scripts/replay_screen.py`, **4 of 8 cases confirmed before the free-tier quota ran out**:
+  - ✅ *"Doctors/nurses … symptom that terrifies you?"* → **pass** (was a live `graphic_harm` skip)
+  - ✅ *"Bartenders … a 'cut off' gone wrong?"* → **pass, one answer dropped** (was a live `graphic_violence` skip) — the tier working as intended: keep the slot, drop the one risky answer
+  - ✅ *"ER workers … chiropractic patients?"* → **pass, two graphic answers dropped** — via the backstop, which now also declines to skip on those terms
+  - ✅ *"…hints someone's excellent in bed?"* → **still skips `sexual_suggestive`** (confirmed-zeroed case)
+  - ⚠️ **Not yet re-verified live: `named_wrongdoing`.** The prompt lost a calibration example in this change (the retracted chiropractic case), so the surviving confirmed shapes deserve a live re-check. Re-run `scripts/replay_screen.py` once quota resets — this is the one open item before merge.
+- **Reliability fix found by that replay, then corrected 2026-09-11:** `_generate_screened` retried HTTP 429/503 but **not** `Timeout`/`ConnectionError`, so a transient read timeout dropped straight to keyword-only screening — 3 of the first 8 replay calls hit exactly that. Timeouts are now retried.
+  - **But retrying 429 was wrong and is now removed.** On this free tier a 429 is a *daily* budget exhaustion, not a per-minute burst — it persists for hours and clears at midnight PT. Retrying it cannot succeed, and each wasted request comes out of the same budget the keyword, title and CTA calls later in the same run still need, so it makes the run's output worse rather than better. Measured: a verification pass on 2026-09-11 retried 429s and spent ~40 requests to make 8 useful calls. `tries` is also reduced 3 → 2, so a screen call costs at most 2 requests instead of 3. Fail-open behaviour is unchanged.
+- **Screen coverage is lower than assumed — `screen_source` added (2026-09-09).** 5 of the 35 uploads since the screen shipped (**14%**) carry no `topic`, which means the Gemini call failed and the run shipped on the keyword backstop. Nothing recorded that, so the standing audit has been auditing a screen it could not confirm ran, and R4.4's topic telemetry has a 14% hole. `upload_log.csv` now records `screen_source` (`gemini` | `backstop`) per upload, the same pattern as the 2026-09-07 `caption_ok`/`comment_ok` columns. This also makes the retry fix above measurable: if those failures were transient, the backstop share should fall.
+- **Version:** content-selection change → `FORMAT_VERSION` bump to `v6` for attribution, per the rule in R4.4.
+
 #### R4.7 — Traffic-source telemetry — **shipped ✅ 2026-09-07 (measurement-only, no version bump)**
 - Add `insightTrafficSourceType` (Analytics API dimension) to the weekly snapshot job — per-video or channel-level views by source (Shorts feed / search / browse / external).
 - **Why:** tells us whether the SEO surface (tags, titles-for-search, SRT) earns anything, or whether distribution is ~100% Shorts feed — which decides whether search-oriented work is ever worth revisiting. Currently flying blind on this.
@@ -367,6 +453,7 @@ Retained as a cautionary record: the failure mode was targeting a ratio whose de
   - **Precedent:** we already deviate (≤150-char comment filter, profanity/emoji/NSFW filters, R4.6 screen), so this is a question of degree and basis, not principle.
 - **Revised mechanism — Reddit rank is the default, our data is a narrow exception.** Take the top-ranked eligible post *unless* its topic sits in the measured-weak tier **and** another candidate within the top few sits in the measured-strong tier. This layers our audience's revealed preference on top of Reddit's rather than replacing it. **Comments are not reordered** — within a single thread, vote ranking is the strongest signal available and the audience mismatch is smallest; only R4.6 may drop a comment.
 - **Step 0 — ✅ shipped 2026-08-23 (telemetry only, no behavior change).** `candidate_rank` and `topic` are now logged per upload (`upload_log.csv`; topic piggybacks on the existing R4.6 screen call, so zero extra Gemini quota). Existing filters already push selection off rank 1 sometimes, so this accumulates the counterfactual we've never had: **does taking a lower-ranked post actually cost views?** Build the ranker only once that data supports it — if rank turns out not to matter, the topic exception is cheap; if lower ranks measurably underperform, the exception bar should rise.
+  - **⚠️ Step 0 reviewed 2026-09-09 — the gate as written will not open.** 35 uploads in: 32 rank 1, 3 rank 2, and all three of those were caused by R4.6 skips rather than the basic filters. The estimate that "existing filters already push selection off rank 1 sometimes" turned out to mean ~9% of uploads, which puts a usable cohort in December, and the history cannot be backfilled. Two further gaps: the topic prior this ranker would use is measured almost entirely on pre-v2 content (`topic_performance.md`'s own caveat says to re-run it), and the log keeps only the *selected* post's topic, so the ranker's firing rate — and therefore the length of its own bake window — is unknowable from the current data. Full analysis and the recommended unblock are in §4, "R4.4 gate review". **Do not start the build until that decision is made.**
 - **Decision rule:** after ≥20 uploads, keep if median **watch-seconds** and median views both hold or improve against an age-matched baseline; revert if either drops materially. (Judged on watch-seconds, not avg-%-viewed — see §4.)
 - **Acceptance:** dry run with a seeded candidate list shows a blocked/deprioritized post being skipped; `topic` logged per upload; fail-open path verified.
 
@@ -406,7 +493,7 @@ Attribution only has *value* if you'll act on it. For high-confidence changes we
 
 **Track 2 — experiment backlog.** "Might revert" changes. One variable per version, a real bake window (≥ 20 uploads / ~2 weeks), and a **decision rule pre-committed before shipping** (keep/revert/iterate on a named metric threshold). No bet ships without its rule — a bake window with no pre-committed action is just a delay, which was the gap in the original plan (we never defined what to do after the wait).
 
-**The review gate is preserved on both tracks and is *not* the slow part:** feature branch → build → dry-run artifact in CI → owner reviews the sample MP4 → approve → bump `FORMAT_VERSION` → merge to `main` → live. That gate catches actual regressions (a visual bug, a broken render) — distinct from statistical bake time, which is what we compress for keepers. **Feature work happens on a branch, never directly on `main`** — the live workflow runs from `main` twice daily, so it must stay runnable; this is a standing convention documented in the README's *Development workflow* section.
+**The release gate is preserved on both tracks and is *not* the slow part** — but as of 2026-09-19 it is **automated rather than owner-reviewed**: feature branch → build → tests green → `DRY_RUN=1` produces a playable MP4 with sane metadata → bump `FORMAT_VERSION` → merge to `main` → live. The owner-review step was removed because it had become the binding constraint (a branch sat 8 days while six more stacked behind it), and unshipped work is inventory, not progress. What replaces the owner's eyes is **auto-revert**: a later shift that finds a release degraded median watch-seconds or views against an age-matched baseline reverts it. Shipping without review only works if something watches the result. That gate catches actual regressions (a visual bug, a broken render) — distinct from statistical bake time, which is what we compress for keepers. **Feature work happens on a branch, never directly on `main`** — the live workflow runs from `main` twice daily, so it must stay runnable; this is a standing convention documented in the README's *Development workflow* section.
 
 **Sort per-change, not per-phase.** Confidence can be miscalibrated, and the old thematic phases mixed safe and risky work (Phase 3's watermark/subtitles are keepers; its reaction beat is a real retention experiment). Every unshipped item carries an explicit bucket tag in the Delivery plan.
 

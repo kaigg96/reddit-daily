@@ -85,6 +85,66 @@ Lesson for future passes: deleting the *files* is the easy half — the stale **
 - No tests over the rendering path — still correctly covered by the dry-run + frame-extraction ritual, which checks things assertions can't (legibility, timing feel).
 - `create_video.ipynb` remains in the repo as deprecated reference; harmless, owner's call.
 
+## Pass 3 — 2026-09-19 (proposed; at the pending `v6` bump) — **awaiting owner scoping**
+
+Read fresh, per the ritual. `src/` is ~2,000 lines and the Pass-1 module split is
+still holding; nothing has rotted structurally. Two findings are worth acting on,
+and they are the same shape as the two real bugs found today — **logic that no
+test can reach, and two implementations of one question that quietly disagree.**
+
+### Tier 1 — recommend doing
+
+1. **`run.py:main()` is 152 lines and effectively untestable, and the R1.7
+   duration guard inside it has zero tests.** That guard decides whether to drop
+   an answer from the video, i.e. it changes what ships. It is the last
+   substantial piece of pure logic with no coverage. Today's `title_style` bug
+   lived in the same function and could only be tested after extracting
+   `llm.resolve_title` — the same move works here. `main()` is 2x the next
+   longest function in `src/` (`video.assemble`, 79).
+   *Proposed:* extract the guard to a pure `plan_segments(segments, budget)`
+   returning the kept segments plus what was dropped, and test it — including
+   the case below.
+
+2. **Two implementations of `age_adjusted_residuals` that disagree.**
+   `src/insights.py:184` and `scripts/analyze_channel.py:231` answer the same
+   question differently: insights **excludes** zero-view videos and clamps age,
+   analyze_channel **includes** them, and their `MIN_AGE_DAYS` are 3 vs 7.
+   Measured on the live channel: slope **−0.185 vs −0.212, a 14% difference**,
+   driven by 41 zero-view videos. Neither is obviously wrong, but the project
+   has a *stated* rule that zeros are counted separately rather than averaged in
+   — insights follows it, analyze_channel does not, and nothing documents the
+   divergence. It matters because **the R4.4 gate was cleared using
+   analyze_channel's implementation** while `report.py` uses the other, so that
+   evidence is not reproducible through the sanctioned tool. (R4.4's own
+   sensitivity note already brackets the age model at +0.66 to +0.79, so this
+   does not overturn the gate — it means the number depends on which
+   implementation you ask.)
+   *Proposed:* analyze_channel calls `insights.age_adjusted_residuals`, with the
+   zero-view decision made once, explicitly, and written down.
+
+### Tier 2 — worth doing, lower urgency
+
+3. **A bare `assert` sits in the upload path** (`run.py`, `assert projected(...) <= 60`).
+   If it ever fires, the run dies and the slot is lost — the opposite of the
+   fail-soft posture everywhere else in the pipeline. It is also stripped under
+   `python -O`. Should drop another answer or truncate, not raise.
+4. **`_probe_duration` spawns ~10 ffprobe subprocesses per run** — `projected()`
+   is called twice and re-probes every segment each time, though the durations
+   are already known when the audio is synthesized. Pure waste, easily cached.
+5. **`analyze_channel.py` has grown 292 → 517 lines** during the R4.4 work. Pass 2
+   deferred refactoring it as "292 working lines, not causing problems"; at 517
+   lines carrying the duplicated statistics in finding 2, that reasoning is
+   weaker than it was.
+
+### Tier 3 — deliberately deferred (unchanged)
+
+- `scripts/` naming convention (one-time tools vs CI-invoked) — 7 scripts, still
+  not painful.
+- Normalizing `analytics_snapshots.csv` line endings — still a ~7,500-line
+  mechanical diff on a production data file; owner's call, and it cannot worsen
+  now that both writers pin LF.
+- Type hints / mypy / ruff — unchanged reasoning from Pass 1.
+
 ## Ritual
 
 Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, get owner scoping, execute, update this file.
@@ -94,6 +154,121 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+**Retention — open items must close, not accumulate** (cap: 25, checked by
+`scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
+(delete it, or leave one line in the pass that fixed it), **promoted** to
+`PRD.md` §0's backlog if it is really product work, or **deleted with
+reasoning** if it stopped mattering. Past the cap, close before adding —
+a list nobody can read is the same as no list.
+
+- **The Gemini free-tier daily cap is 20 requests, not the few hundred everyone
+  assumed — and production needs 8–14 of them.** Measured directly 2026-09-19
+  from the 429 body:
+  `quotaId=GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`.
+  Per run the pipeline spends 1–4 on the R4.6 screen (`MAX_SCREENED_CANDIDATES`),
+  plus one each for keywords, title and CTA = **4–7 per run, 8–14 per day**, so
+  **production alone is 40–70% of the cap** with no headroom on a bad day.
+  **PRD §2's "comfortably inside the free tier at 2 runs/day" is false** and has
+  been corrected. Consequences worth deciding on:
+  - **Any local Gemini work competes directly with live uploads.** The
+    2026-09-10 note below guessed at this; it is now measured, and it is worse
+    than that note assumed. A single replay run (5–8 calls) is a third of the
+    day's budget.
+  - **The cheapest structural fix is fewer requests, not fewer tokens** — the
+    quota counts *requests*. `get_keywords` + `get_video_title` + `get_cta` are
+    three calls against the same post and could be one, taking a run from 4–7
+    to 2–5. Not done here: it changes prompt behaviour on the live path and
+    wants its own review.
+  - This also retroactively supports the v6 branch's "never retry a 429"
+    decision — at 20/day a retry is a meaningful fraction of the budget.
+  - Reset is midnight Pacific ≈ 07:00 UTC, which falls **between** the two
+    scheduled runs (~04:50 and ~16:45 UTC). So the early run is the one exposed
+    to a budget already spent the previous day.
+- **Gemini failures are invisible in `upload_log.csv` for three of the four
+  call sites.** `screen_source` (v6 branch) covers the screen, but a failed
+  keyword, title or CTA call is only inferable — and only for the title, by
+  comparing `video_title` to `post_title`. That inference is how the regression
+  above was found at all, and it is fragile. Worth `title_ok` / `cta_ok` /
+  `keywords_ok` columns on the established `caption_ok`/`comment_ok` pattern.
+  Noticed 2026-09-19.
+- **`title_style` is logged on uploads whose title was never generated**,
+  contaminating the R2.2 A/B/C experiment: 10 of 127 rows (8% lifetime, but
+  **23% of the last 30**) claim a style that was never applied, because the run
+  fell back to the raw Reddit question. Per-cohort the mislabel rate is A 7% /
+  B 12% / C 5%, i.e. unevenly spread, so it biases the comparison rather than
+  just adding noise. The style should be logged blank when generation failed,
+  which also makes `report.py --compare` correct automatically (it already
+  excludes rows where the field is unset). Noticed 2026-09-19.
+- **Generated titles can contain emoji, while Reddit posts containing emoji are
+  filtered out at selection.** `sanitize_title` strips quotes and whitespace but
+  not emoji, so the pipeline rejects emoji in source content and then adds its
+  own: 1 of 127 shipped titles (`Your Pets' Secret Drama? Tell Us! 🤫`), and the
+  model volunteered one in 2 of 4 test generations on 2026-09-19. Low impact and
+  arguably fine on YouTube, but it is an inconsistency someone should decide on
+  rather than discover. Noticed 2026-09-19.
+
+- **`est_minutes_watched` contradicts `avg_view_duration_s` in
+  `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
+  reported 30s average view duration is ~27 minutes watched, but the row logs
+  `1`. This holds broadly: of 727 videos with ≥10 views in the latest snapshot,
+  686 are off by more than 2× and the column clusters at 0–3 regardless of
+  views. **Not decision-affecting** — `report.py` and `insights.py` judge on
+  views and watch-seconds, and the traffic CSV's minutes come from a separate
+  query — so the column is effectively decorative today. Worth either fixing or
+  dropping before anything starts reading it. Noticed 2026-09-09 during the
+  R4.6 audit.
+- **The SRT track fails to upload roughly half the time.** The `caption_ok`
+  telemetry added 2026-09-07 has 5 rows and 2 are `0`; `comment_ok` is 5/5.
+  The telemetry did its job — this was invisible before. Deliberately not
+  chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
+  accessibility nicety, not a growth lever. Revisit only if the failure rate
+  holds over a larger sample and the fix is cheap. Noticed 2026-09-09.
+- ~~**Scheduled runs now land ~4h25m after their cron slot**~~ — the two stale
+  doc claims were corrected 2026-09-19 (workflow cron comment, and PRD §1/§4's
+  "00:00 and 12:00 UTC"). The drift itself remains deliberately unchased; the
+  original note is kept below for the reasoning. **Scheduled runs land ~4h25m
+  after their cron slot**, up from ~40–90 min
+  in July (actual publish ~04:48 / ~16:45 UTC against a `23 0,12` cron). This
+  is GitHub Actions queue delay, not a bug in the job — but it is *drifting*,
+  which means publish time is an uncontrolled variable moving underneath every
+  cohort comparison. Already instrumented: `median_publish_drift` in
+  `weekly_digest.py` alerts above 120 min, so the 2026-09-14 digest will fire
+  it. **Two docs are now factually wrong** and want a one-line fix each: the
+  `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
+  min later; acceptable", and README/PRD still describe the slots as 00:00 and
+  12:00 UTC. Noticed 2026-09-09.
+- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload.**
+  Recorded here because the *class* of bug matters more than the fix: the
+  Analytics API returns no row at all for a video with exactly 0 views, and
+  `load_videos` did `if not s: continue`. So the uploads that vanished from
+  every median, every `--by` grouping and the zero-view count were precisely
+  the worst performers — and among them **both surviving confirmed-suppression
+  cases** (`VDH3pSafyE0`, `_0MNAf8AzNg`), i.e. the entire evidence base for
+  R4.6's skip categories was invisible to the tool the PRD tells you to verify
+  it with. Measured effect on the live channel: zero-view uploads **1 → 4**,
+  cohort **118 → 121**; headline medians unchanged. A missing row is now read
+  as a genuine zero, except for non-public videos, which are excluded and
+  counted in a printed note. Non-public vs cold-spell vs isolated was already
+  encoded in `classify_zero_views` — it just had never been carried into the
+  join. Worth remembering that `--zeros` was right all along while the overview
+  was wrong: two paths over the same question disagreed for weeks and nothing
+  flagged it.
+
+- **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
+  is shared between production and any local analysis.** On 2026-09-10 an R4.3
+  re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the
+  16:45 UTC video run that day very likely executed with no Gemini at all:
+  keyword-backstop screening, and Reddit's own title instead of a generated one.
+  Nothing breaks — every path fails soft — but the upload is materially worse
+  and nothing in the logs said so at the time. PRD §2 says usage is "comfortably
+  inside the free tier at 2 runs/day", which is true for production alone and
+  false as soon as anything else shares the key. Worth deciding on: (a)
+  `screen_source` (v6 branch) will start showing how often production actually
+  loses Gemini; (b) local analysis should run right after a reset **and** be
+  budgeted rather than run opportunistically; (c) retry policy must treat a
+  repeated 429 as a stop signal rather than a reason to try harder —
+  `analyze_channel` now does, and `src/screen.py`'s widened retry is unverified
+  under quota pressure. Noticed 2026-09-10.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,

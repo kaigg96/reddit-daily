@@ -15,6 +15,17 @@ FIELDS = [
     # vanished with the Actions log, so a failed caption upload was only
     # discoverable by querying YouTube directly.
     "caption_ok", "comment_ok",
+    # Added 2026-09-19: the other three fail-soft Gemini calls. Only the screen
+    # was observable (via screen_source/topic); a failed keyword, title or CTA
+    # call left no trace, and the title regression that prompted these columns
+    # was found by comparing video_title back to post_title -- an inference
+    # that breaks the moment a generated title happens to match the question.
+    "title_ok", "keywords_ok", "cta_ok",
+    # Added 2026-09-09: 14% of uploads since the screen shipped carry no topic,
+    # meaning the Gemini call failed and the run shipped on the keyword backstop
+    # — invisible in the logs, and it makes the R4.6 audit an audit of a screen
+    # nobody can confirm ran.
+    "screen_source",
 ]
 
 

@@ -1,0 +1,203 @@
+"""Tests for the Gemini request shape.
+
+These pin a live production regression found 2026-09-19: gemini-2.5-flash
+thinks by default, a title call spent 546 reasoning tokens to emit an 8-token
+title and took 33.1s, and the module's 30s timeout turned that into a
+ReadTimeout. The call fails soft, so nothing broke loudly — roughly a quarter
+of uploads in the two weeks before the fix simply shipped the raw Reddit
+question as their YouTube title, and the R4.6 screen fell to its keyword
+backstop. Nothing in the logs said so.
+
+The request shape is therefore load-bearing, not incidental, and it lives in
+one place that every caller shares.
+"""
+
+import json
+
+import pytest
+
+from src import llm
+
+
+class FakeResponse:
+    def __init__(self, text="a title", status=200):
+        self._text = text
+        self.status_code = status
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise AssertionError("unexpected error status in this test")
+
+    def json(self):
+        return {"candidates": [{"content": {"parts": [{"text": self._text}]}}]}
+
+
+GOOD_JSON = ('{"title": "A Great Title", '
+             '"keywords": ["one", "two"], "cta": "Comment your answer below!"}')
+
+
+@pytest.fixture
+def captured(monkeypatch):
+    """Capture the outgoing request instead of calling Gemini."""
+    calls = []
+
+    def fake_post(url, **kw):
+        calls.append({"url": url, **kw})
+        return FakeResponse()
+
+    monkeypatch.setattr(llm.requests, "post", fake_post)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    return calls
+
+
+def test_thinking_is_disabled_by_default(captured):
+    """The fix itself. Default thinking is what blew the timeout."""
+    llm._generate("hello")
+    cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
+    assert cfg["thinkingBudget"] == 0
+
+
+def test_metadata_is_one_request_not_three(captured):
+    """The whole point: the free-tier cap is 20 requests/day and production was
+    spending three of them on one post. Title, keywords and CTA now share a
+    request, taking a run from 4-7 down to 2-5."""
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+
+    assert len(captured) == 1
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
+
+
+def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
+    """v1 answers thinkingConfig with HTTP 400 'Thinking is not enabled for
+    api version v1'. Dropping back to v1 would silently restore the bug."""
+    llm._generate("hello")
+    assert "/v1beta/" in captured[0]["url"]
+
+
+def test_a_caller_can_still_opt_into_reasoning(captured):
+    """The budget is a parameter, not a hardcode — a genuinely reasoning-heavy
+    prompt can ask for it, deliberately and visibly."""
+    llm._generate("hello", thinking_budget=512)
+    cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
+    assert cfg["thinkingBudget"] == 512
+
+
+def test_timeout_is_generous_enough_to_be_a_backstop(captured):
+    """30s was a routine limit that real calls crossed. It should now only
+    catch a stalled socket."""
+    llm._generate("hello")
+    assert captured[0]["timeout"] >= 60
+
+
+def test_the_api_key_is_never_in_the_request_body(captured):
+    """It goes in the query string; keeping it out of the body means an error
+    log that echoes the body can't leak it."""
+    llm._generate("hello")
+    assert "test-key" not in str(captured[0]["json"])
+
+
+def test_failures_stay_soft_and_do_not_echo_the_keyed_url(monkeypatch, capsys):
+    """HTTPError messages embed the keyed URL, so callers print the exception
+    type only. A leak here would publish the key in the Actions log."""
+    def boom(url, **kw):
+        raise llm.requests.HTTPError(f"403 Client Error for url: {url}")
+
+    monkeypatch.setattr(llm.requests, "post", boom)
+    monkeypatch.setenv("GEMINI_API_KEY", "super-secret")
+
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta == (None, None, None)
+    assert "super-secret" not in capsys.readouterr().out
+
+
+def test_metadata_parses_a_good_response(monkeypatch):
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: GOOD_JSON)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "A Great Title"
+    assert meta.keywords == ["one", "two"]
+    assert meta.cta == "Comment your answer below!"
+
+
+def test_metadata_survives_a_markdown_fence(monkeypatch):
+    """Models wrap JSON in ```json fences unprompted; the screen already
+    tolerates this and so must this."""
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: f"```json\n{GOOD_JSON}\n```")
+    assert llm.get_metadata("q", ["a", "b", "c"]).title == "A Great Title"
+
+
+def test_one_missing_field_does_not_cost_the_others(monkeypatch):
+    """The risk merging three calls introduces: an all-or-nothing result would
+    make a single bad field as expensive as a dead API. Fail-soft is per field.
+    """
+    monkeypatch.setattr(llm, "_generate",
+                        lambda *a, **k: '{"title": "Kept", "keywords": ["k"]}')
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "Kept"
+    assert meta.keywords == ["k"]
+    assert meta.cta is None        # caller falls back to the generic outro only
+
+
+def test_unparseable_json_falls_back_on_everything(monkeypatch, capsys):
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "{not json at all")
+    assert llm.get_metadata("q", ["a", "b", "c"]) == (None, None, None)
+    assert "fall back" in capsys.readouterr().out
+
+
+def test_keywords_distinguishes_a_missing_field_from_an_empty_one(monkeypatch):
+    """None means the model never gave us the field; [] means it gave us
+    nothing usable. Only the first says the call is unhealthy, and keywords_ok
+    in the upload log depends on the difference."""
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: '{"title": "t", "keywords": []}')
+    assert llm.get_metadata("q", ["a", "b", "c"]).keywords == []
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: '{"title": "t"}')
+    assert llm.get_metadata("q", ["a", "b", "c"]).keywords is None
+
+
+def test_metadata_strips_the_junk_llms_add(monkeypatch):
+    """Quotes, markdown emphasis, blanks and non-strings all show up in practice."""
+    payload = json.dumps({
+        "title": '  "Quoted"  ',
+        "keywords": ["  a  ", "", None],
+        "cta": "**Bold** line",
+    })
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: payload)
+
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert meta.title == "Quoted"
+    assert meta.keywords == ["a"]      # blanks and non-strings dropped
+    assert meta.cta == "Bold line"
+
+
+def test_resolve_title_blanks_the_style_when_generation_failed():
+    """The R2.2 contamination fix.
+
+    An upload carrying the raw Reddit question is not evidence about style A, B
+    or C. Logging one as style B is what biased the cohorts unevenly.
+    """
+    r = llm.resolve_title(None, style="B", fallback="Raw question?")
+    assert r.title == "Raw question?"
+    assert r.style == ""
+    assert r.ok is False
+
+
+def test_resolve_title_keeps_the_style_when_generation_worked():
+    r = llm.resolve_title('  "Great Title"  ', style="C", fallback="Raw?")
+    assert r.title == "Great Title"
+    assert r.style == "C"
+    assert r.ok is True
+
+
+def test_resolve_title_treats_whitespace_only_as_a_failure():
+    """sanitize_title would fall back anyway, so the style must not be claimed."""
+    r = llm.resolve_title("   \n  ", style="A", fallback="Raw?")
+    assert r.title == "Raw?"
+    assert r.style == ""
+    assert r.ok is False
+
+
+def test_sanitize_title_falls_back_when_generation_failed():
+    """The fallback path is what shipped raw Reddit questions as titles."""
+    assert llm.sanitize_title(None, fallback="Raw question?") == "Raw question?"
+    assert llm.sanitize_title('  "Quoted"  ', fallback="x") == "Quoted"
+    assert len(llm.sanitize_title("z" * 200, fallback="x")) == 100
