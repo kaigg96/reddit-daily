@@ -49,8 +49,12 @@ jobs:
           # Nothing pending means nothing to gate, and a run would spend Gemini
           # quota that production needs.
           if [ "$ahead" -eq 0 ]; then
-            echo "nothing pending"
-            echo "proceed=false" >> "$GITHUB_OUTPUT"; exit 0
+            # Nothing pending means the branch has merged. The gates must keep
+            # running against what is LIVE -- otherwise merging silently
+            # retires the only check on the prompts and the R4.6 screen.
+            echo "$TARGET is merged; validating main instead"
+            TARGET=main
+            echo "TARGET=main" >> "$GITHUB_ENV"
           fi
 
           # Don't re-validate a commit that already passed. A branch waiting to
