@@ -132,7 +132,21 @@ are **superseded for routine work**. Ship it.
   stays separable. **One variable per release.**
 - `WORKLOG.md` updated, and `PRD.md` §0 updated if anything shipped.
 
-**Still requires the owner — do not do these autonomously:**
+**Still requires the owner — escalate, don't decide.** Queue an issue and move
+on to other work; do not block the shift waiting for an answer:
+
+```sh
+venv/bin/python scripts/escalate.py --title "..." --key ... --recommend "..." <<'EOF'
+...why this is the owner's call...
+EOF
+```
+
+Commit and push it — `.github/workflows/escalations.yml` files it as a GitHub
+issue, which emails the owner. Re-raising the same `--key` comments on the open
+issue rather than duplicating. Always include a recommendation; an escalation
+without one just moves the work. Details in `.escalations/README.md`.
+
+The list:
 - Weakening a safety or cost control: the Polly budget, the `DRY_RUN` guard,
   secrets handling, or the R4.6 screen's skip categories. Autonomy was granted
   over channel work, not over the protections that bound it.

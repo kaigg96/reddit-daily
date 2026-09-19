@@ -97,7 +97,9 @@ says go") no longer applies: the owner has little time to direct sessions and
 would rather work proceed than wait. Pick the highest-value task and ship it —
 `/shift` is the routine for deciding which.
 
-**These still need the owner, and autonomy does not extend to them:**
+**These still need the owner** — raise them with
+`venv/bin/python scripts/escalate.py` (queues a GitHub issue, which emails
+them), then carry on with other work rather than blocking:
 - Weakening a safety or cost control — the Polly budget (§1), the `DRY_RUN`
   guard, secrets handling, or the R4.6 screen's skip categories. Autonomy was
   granted over channel work, not over the protections that bound it.
