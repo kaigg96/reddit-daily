@@ -31,7 +31,9 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
   visuals, and ask the owner before any deliberate bulk synthesis.
   `POLLY_CHAR_BUDGET` in `src/tts.py` enforces a per-process cap.
 - Feature work goes on a branch; `main` runs live twice daily (see below).
-- Don't start building a phase/feature until the owner explicitly says go.
+- Work autonomously and merge your own work (owner, 2026-09-19) — under the
+  gates in `.claude/skills/shift/SKILL.md` §4. Safety and cost controls,
+  production data and spending still need the owner.
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis
   (see "Answering 'did X work?'").
 - Never credit AI tooling in code, commits, or anything published.
@@ -112,8 +114,10 @@ daily, so `main` must always be in a runnable state.** Because of that:
   one-liner (a new requirement, a multi-file change, anything touching the
   upload path) goes on a `feature/<short-name>` branch. Half-finished code must
   never sit on `main`, or the next scheduled run executes it.
-- **Merge to `main` only after the rollout gate passes:** dry-run artifact →
-  owner reviews the sample → approve → bump `FORMAT_VERSION` → merge → live.
+- **Merge to `main` once the automated gates pass** (revised 2026-09-19 — the
+  owner-review step is retired): tests green → `DRY_RUN=1` produces a playable
+  MP4 and sane metadata → bump `FORMAT_VERSION` if the video changed → merge →
+  live. One variable per release, so the cohort stays separable.
   (See PRD §8 "Delivery model & rollout".)
 - The GitHub Actions bot commits `prev_post.txt` / `upload_log.csv` /
   `analysis/*` back to `main` directly — that's expected and separate from

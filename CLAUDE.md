@@ -81,17 +81,33 @@ work; don't run it opportunistically.
 code on `main` gets executed against the real channel.
 
 - Feature work goes on a branch. Always.
-- Merge only through the rollout gate: dry-run artifact → owner reviews the
-  sample → approve → bump `FORMAT_VERSION` → merge. (`PRD.md` §8)
+- **You may merge to `main` yourself** (owner, 2026-09-19), including live-path
+  changes. The gates below replace the owner's review — they are not optional:
+  full test suite green, a `DRY_RUN=1` run producing a playable MP4 for
+  anything touching the video or its metadata, `FORMAT_VERSION` bumped if the
+  video changes, one variable per release. See `.claude/skills/shift/SKILL.md` §4.
 - **Never upload, comment, or mutate `prev_post.txt` / `upload_log.csv` during
   development.** Use `DRY_RUN=1 venv/bin/python -m src.run`.
 - Losing `prev_post.txt` risks a duplicate upload on the next scheduled run.
 
-## 3. Don't start building until the owner says go
+## 3. Work autonomously — but not on the guardrails
 
-Analysis, diagnosis and reporting are always in scope. Starting a phase or
-feature build is not, until the owner explicitly approves it. This is a
-standing rule the owner set after it happened.
+**Superseded 2026-09-19.** The old rule ("don't start building until the owner
+says go") no longer applies: the owner has little time to direct sessions and
+would rather work proceed than wait. Pick the highest-value task and ship it —
+`/shift` is the routine for deciding which.
+
+**These still need the owner, and autonomy does not extend to them:**
+- Weakening a safety or cost control — the Polly budget (§1), the `DRY_RUN`
+  guard, secrets handling, or the R4.6 screen's skip categories. Autonomy was
+  granted over channel work, not over the protections that bound it.
+- Spending money beyond the existing ~$0.90/month Polly line.
+- Deleting or rewriting production data (`upload_log.csv`, `prev_post.txt`,
+  `analysis/*`), including backfilling historical rows.
+- Publishing anything outside the channel's normal upload.
+
+A shift that ships one real thing and reports "nothing else cleared the bar" is
+a good shift. Idle beats manufactured work on a system that uploads twice daily.
 
 ## 4. No AI attribution, anywhere
 
