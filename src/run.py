@@ -54,16 +54,29 @@ def main():
         print(f"  comment {i}: {c}")
 
     # --- llm (fail-soft) ---
+    # Each of these fails soft, so the run continues either way -- which is
+    # exactly why the outcome has to be logged. Title fallbacks ran at ~25% for
+    # two weeks in Sept 2026 and were only discoverable by comparing the shipped
+    # title back to the Reddit question (PRD §2, TECH_DEBT 2026-09-19).
     keywords = llm.get_keywords(post.title, post.comments)
+    keywords_ok = keywords is not None
+    keywords = keywords or []
+
     # R2.2: rotate title style by day so both daily uploads share it; logged per upload
     title_style = "ABC"[datetime.date.today().timetuple().tm_yday % 3]
-    video_title = llm.sanitize_title(
+    resolved = llm.resolve_title(
         llm.get_video_title(post.title, post.comments, style=title_style),
-        fallback=post.title,
-    )
-    print(f"Title style {title_style}: {video_title}")
+        style=title_style, fallback=post.title)
+    video_title, title_style, title_ok = resolved
+    if not title_ok:
+        print("Title generation failed — shipping the Reddit question and "
+              "logging no style (it was never applied)")
+    print(f"Title style {title_style or '-'}: {video_title}")
+
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
-    outro_text = llm.get_cta(post.title) or config.OUTRO_TEXT
+    cta = llm.get_cta(post.title)
+    cta_ok = cta is not None
+    outro_text = cta or config.OUTRO_TEXT
     print(f"CTA: {outro_text}")
 
     # --- tts ---
@@ -152,6 +165,9 @@ def main():
         "topic": post.topic,
         "caption_ok": int(bool(caption_ok)),
         "comment_ok": int(bool(comment_ok)),
+        "title_ok": int(title_ok),
+        "keywords_ok": int(keywords_ok),
+        "cta_ok": int(cta_ok),
     })
 
 

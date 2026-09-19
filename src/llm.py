@@ -1,5 +1,6 @@
 """Gemini calls. Every function fails soft: the video must ship without them."""
 
+import collections
 import os
 import re
 
@@ -8,16 +9,40 @@ import requests
 from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 
 
-def _generate(prompt):
-    endpoint = (
-        "https://generativelanguage.googleapis.com/v1/models/"
-        f"gemini-2.5-flash:generateContent?key={os.environ['GEMINI_API_KEY']}"
-    )
+# gemini-2.5-flash "thinks" by default, and on these prompts that is pure
+# latency: measured 2026-09-19, one title call spent 546 reasoning tokens to
+# emit an 8-token title and took 33.1s — past the 30s timeout this module used
+# to use, so the call raised ReadTimeout and the run shipped the raw Reddit
+# question instead of a generated title. Disabling thinking put the same call
+# at 0.6s. Every task here (keyword extraction, title rephrasing, a one-line
+# CTA, the R4.6 screen's JSON verdict) is a short transformation, not a
+# reasoning problem.
+#
+# thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
+# for api version v1." That is the only reason this module is on v1beta.
+_ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
+             "gemini-2.5-flash:generateContent")
+
+# Generous because it is now only a backstop against a pathological response,
+# not a routine limit — with thinking off, calls land in about a second.
+# requests' timeout is per-read, not a total deadline, so this does not bound
+# total call duration; it only stops a stalled socket hanging the run.
+_TIMEOUT = 60
+
+
+def _generate(prompt, thinking_budget=0):
+    """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
+    default, and what every caller here wants); pass a token budget only for a
+    task where reasoning demonstrably helps."""
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
+    }
     resp = requests.post(
-        endpoint,
+        f"{_ENDPOINT}?key={os.environ['GEMINI_API_KEY']}",
         headers={"Content-Type": "application/json"},
-        json={"contents": [{"parts": [{"text": prompt}]}]},
-        timeout=30,
+        json=body,
+        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
@@ -45,7 +70,7 @@ Do not include any context or explanations, return only the 10 keywords numbered
     except Exception as e:
         # never echo the exception body: HTTPError messages embed the keyed URL
         print(f"Gemini keywords failed with {type(e).__name__} (continuing without)")
-        return []
+        return None  # None = the call failed; [] = it answered with nothing
 
 
 # PRD R2.2: three title-style experiments, rotated deterministically per day
@@ -107,6 +132,26 @@ Return only the line itself — no quotes, no explanation.
     except Exception as e:
         print(f"Gemini CTA failed with {type(e).__name__} (using generic outro)")
         return None
+
+
+TitleResult = collections.namedtuple("TitleResult", "title style ok")
+
+
+def resolve_title(generated, style, fallback, max_len=100):
+    """Decide the shipped title, the style to log, and whether generation worked.
+
+    The style is blanked whenever generation failed, because an upload carrying
+    the raw Reddit question is not evidence about style A, B or C. Logging it as
+    such contaminated the R2.2 cohorts unevenly (A 7%, B 12%, C 5% mislabelled,
+    and 23% of the last 30 uploads) — a bias, not just noise. Keeping the rule
+    here rather than in run.py means the log and the experiment can't disagree.
+    """
+    ok = bool(generated and generated.strip())
+    return TitleResult(
+        title=sanitize_title(generated, fallback, max_len),
+        style=style if ok else "",
+        ok=ok,
+    )
 
 
 def sanitize_title(title, fallback, max_len=100):

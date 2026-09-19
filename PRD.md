@@ -79,12 +79,13 @@ Pipeline (cell by cell):
 8. **Cell 9 — dedupe.** Writes posted title to `prev_post.txt`; workflow commits it back.
 
 **Environment (kept current — this block describes the system as it is today, not the v1 baseline above):**
+- **Gemini model/endpoint:** `gemini-2.5-flash` on **`v1beta`** with `thinkingConfig.thinkingBudget = 0`. Thinking is disabled deliberately (2026-09-19): it added 30s+ of latency on prompts needing ~8 output tokens and was timing out, silently degrading ~25% of uploads. `v1` cannot express this — it rejects `thinkingConfig` with HTTP 400.
 - **Runtime:** Python 3.10 on `ubuntu-latest`, entry point `python -m src.run`. Twice daily at `23 0,12 * * *` (off the hour to dodge Actions queue jitter), plus a `workflow_dispatch` with a `dry_run` input.
 - **Secrets in Actions:** `REDDIT_*`, `AWS_POLLY_*`, `YOUTUBE_CLIENT_ID`/`_SECRET`/`_REFRESH_TOKEN`, `GEMINI_API_KEY`. Local dev reads the same names from `.env` (gitignored). `YOUTUBE_DATA_API_KEY` exists locally but is no longer used by any script.
 - **OAuth:** the refresh token carries `youtube.upload`, `youtube.force-ssl` (comments + captions) and `yt-analytics.readonly`. The consent screen is published **in production**, so tokens no longer expire after 7 days (see README for the re-mint walkthrough).
 - **Fonts:** Anton is committed to `assets/fonts/` and passed to `TextClip` by path — no system font installation, so CI and local renders are identical.
 - **MoviePy 2.1.2** — 2.x API only; see Appendix A for the specific gotchas. (`moviepy.__version__` self-reports `2.1.1` despite the 2.1.2 pin — an upstream metadata quirk, not a wrong install.)
-- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus keywords, title, and CTA. Comfortably inside the free tier at 2 runs/day; heavy *local* testing is what exhausts quota, not production.
+- **Gemini usage per run:** 1–4 screen calls (R4.6, capped by `MAX_SCREENED_CANDIDATES`) plus keywords, title, and CTA = **4–7 requests per run, 8–14 per day**. ⚠️ **Corrected 2026-09-19: this is NOT comfortably inside the free tier.** The cap is **20 requests/day** for `gemini-2.5-flash` on this project (measured from the 429 body: `GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`), so production alone is **40–70% of it**. Any local testing competes directly with live uploads, and a single screen replay is a third of the day's budget. The quota counts **requests, not tokens**, so the structural fix is fewer calls (keywords/title/CTA could be one call, not three) — see TECH_DEBT.md. Reset is midnight Pacific ≈ 07:00 UTC, which falls *between* the two scheduled runs, so the ~04:50 UTC run is the one exposed to a budget already spent.
 
 ## 3. Diagnosis (why <100 views)
 
