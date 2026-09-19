@@ -156,7 +156,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
   accessibility nicety, not a growth lever. Revisit only if the failure rate
   holds over a larger sample and the fix is cheap. Noticed 2026-09-09.
-- **Scheduled runs now land ~4h25m after their cron slot**, up from ~40–90 min
+- ~~**Scheduled runs now land ~4h25m after their cron slot**~~ — the two stale
+  doc claims were corrected 2026-09-19 (workflow cron comment, and PRD §1/§4's
+  "00:00 and 12:00 UTC"). The drift itself remains deliberately unchased; the
+  original note is kept below for the reasoning. **Scheduled runs land ~4h25m
+  after their cron slot**, up from ~40–90 min
   in July (actual publish ~04:48 / ~16:45 UTC against a `23 0,12` cron). This
   is GitHub Actions queue delay, not a bug in the job — but it is *drifting*,
   which means publish time is an uncontrolled variable moving underneath every
