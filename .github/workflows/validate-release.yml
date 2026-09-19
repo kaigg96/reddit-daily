@@ -49,10 +49,25 @@ jobs:
           # Nothing pending means nothing to gate, and a run would spend Gemini
           # quota that production needs.
           if [ "$ahead" -eq 0 ]; then
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            echo "nothing pending"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
+
+          # Don't re-validate a commit that already passed. A branch waiting to
+          # be merged would otherwise burn 6 of the day's 20 Gemini requests
+          # every morning to re-learn the same answer. A previous FAIL does get
+          # retried, because the commonest cause is an exhausted quota rather
+          # than bad output.
+          VERDICT=.github/last-release-validation.md
+          target_sha=$(git rev-parse --short "origin/$TARGET")
+          if [ -f "$VERDICT" ]; then
+            prev_sha=$(grep '^- \*\*Commit:\*\*' "$VERDICT" | grep -o '`[^`]*`' | tr -d '`' | head -1)
+            if [ "$prev_sha" = "$target_sha" ] && grep -q 'PASS' "$VERDICT"; then
+              echo "$target_sha already validated and passed — skipping to save quota"
+              echo "proceed=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
 
       - name: Check out the branch under test
         if: steps.check.outputs.proceed == 'true'
