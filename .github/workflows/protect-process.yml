@@ -62,8 +62,11 @@ jobs:
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: Number(m[1]),
               });
+              // Case- and whitespace-insensitive: a label typed `Approved`
+              // should not silently fail a check whose whole job is to be
+              // unambiguous about whether the owner said yes.
               const approved = issue.data.labels
-                .some(l => (l.name || l) === 'approved');
+                .some(l => String(l.name || l).trim().toLowerCase() === 'approved');
               if (!approved) {
                 core.setOutput('ok', 'false');
                 core.setOutput('files', changed.join(', '));
