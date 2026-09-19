@@ -68,7 +68,10 @@ In order. The first one that fires wins the shift.
 2. **Time-windowed work.** Anything blocked on an external budget that is
    *now* available — most often Gemini quota after its 07:00 UTC reset. These
    windows close; take them when they are open.
-3. **Ship what's already built.** If branches are queued and their gates pass,
+3. **Ship what's already built.** Read `.github/last-release-validation.md` on
+   `main` — CI runs the Gemini gates at 08:17 UTC daily and commits the verdict
+   there, so you never need quota to find out. PASS means merge.
+   If branches are queued and their gates pass,
    **merging beats building more.** Unshipped work is inventory, not progress:
    on 2026-09-19 a branch had sat 8 days while six more were stacked behind it.
    Clearing the queue is a real lane, not overhead.

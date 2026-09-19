@@ -32,20 +32,33 @@ Pass 3 code-health findings proposed; two stale docs corrected.
 **Measured, and it reframes things:** the Gemini free-tier cap is **20
 requests/day**, not the few hundred assumed. Production spends 4–10.
 
-**Blocked — needs Gemini quota, run after 07:00 UTC:**
-1. `scripts/replay_screen.py` — validates `named_wrongdoing` (open since
-   2026-09-09) *and* whether the screen's verdicts survive thinking being
-   disabled. **Gates the whole preview branch.**
-2. One `llm.get_metadata` call — the merged prompt is unvalidated; merging
-   three focused prompts into one multi-task prompt can degrade each task.
+**Was blocked on Gemini quota — now handled by CI.** Both gates run in
+`validate-release.yml` at **08:17 UTC daily** (after the 07:00 reset, before the
+~16:45 production run), against `integration/preview`, skipping itself when that
+branch isn't ahead of `main`. Nobody needs to be awake for it.
+
+1. `scripts/replay_screen.py` — `named_wrongdoing` (open since 2026-09-09) *and*
+   whether the screen's verdicts survive thinking being disabled.
+2. One `llm.get_metadata` call — the merged prompt is unvalidated.
+
+**How the next shift picks this up:** read
+`.github/last-release-validation.md` on `main` — CI commits the verdict there
+precisely because a cold session has no GitHub token and can't read Actions
+results. ✅ PASS → merge `integration/preview` to `main`. ❌ FAIL → an issue was
+already opened; read it before touching the branch.
+
+**Shipped to `main` this session:** the escalation path (`scripts/escalate.py` +
+`escalations.yml`, verified end-to-end — the owner confirmed the email arrived),
+the usage statusline, and the CI release gates.
 
 **Queued next:**
-- Run both validations, then ship `integration/preview`.
+- Merge `integration/preview` once CI says PASS (36 commits: v6 screen, Gemini
+  fixes, analytics fix, metadata consolidation, shift workflow).
 - Pass 3 Tier 1: extract and test the R1.7 duration guard; reconcile the two
   `age_adjusted_residuals` implementations (they disagree by 14% on slope).
-- Decide the shift trigger: scheduled cloud routines need a permission grant
-  *and* a way to reach the secrets — GitHub Actions `dry_run` is the likely
-  verification substrate.
+- The release still has **no automated video check** — CI validates prompts and
+  tests, not that a playable MP4 came out. `run-reddit-video.yml` already has a
+  `dry_run` input; chaining it into the gate is the missing piece.
 
 **Self-inflicted:** this session exhausted the day's Gemini quota, so the
 ~04:50 UTC upload on 2026-09-20 will ship with a raw title and backstop
