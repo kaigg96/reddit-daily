@@ -35,7 +35,8 @@ def main():
             "subreddit": "AskReddit",
             "post_title": post_title,
             "action": action,
-            "category": result.category,
+            # A demoted row's payload is the category we chose not to skip on.
+            "category": result.demoted if action == "demoted_post_risk" else result.category,
             "reason": result.reason,
             "source": result.source,
             "dropped_comments": len(result.unsafe),
@@ -163,6 +164,7 @@ def main():
         "duration_s": f"{result.duration:.1f}",
         "candidate_rank": post.candidate_rank,
         "topic": post.topic,
+        "screen_source": post.screen_source,
         "caption_ok": int(bool(caption_ok)),
         "comment_ok": int(bool(comment_ok)),
         "title_ok": int(title_ok),

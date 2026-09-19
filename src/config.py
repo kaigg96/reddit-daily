@@ -55,7 +55,7 @@ COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS su
 MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v5"  # v5 = R4.6 suppression-risk screen at selection
+FORMAT_VERSION = "v6"  # v6 = R4.6 screen retiered (skip vs answer-level categories)
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech

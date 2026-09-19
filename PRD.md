@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v5` live (suppression screen shipped 2026-08-23); R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker — see §0 Delivery plan |
+| **Status** | `v6` pending review (R4.6 screen retiered after the first standing audit); `v5` live since 2026-08-23; R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker, whose Step-0 gate needs a decision — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-09-07 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18)
+**Last updated:** 2026-09-09 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18) · **Pending owner review:** `v6` on `feature/r4.6-taxonomy-narrow`
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -31,7 +31,7 @@
 
 | Item | Req | Decision rule |
 |---|---|---|
-| ~~Suppression-risk screen~~ ✅ `v5` | R4.6 | Shipped 2026-08-23. **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
+| ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | R4.6 | Shipped 2026-08-23; **first standing audit run 2026-09-09 → taxonomy retiered** (see §6). **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
 | ~~Traffic-source telemetry~~ ✅ shipped | R4.7 | Shipped 2026-09-07 (no version bump). **Result: the SEO surface earns ~1.3% of views** — search-oriented work stays parked; see §4 Findings. Weekly `channel_7d` rows now accumulate a drift series, so this becomes re-checkable rather than a one-off read. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
@@ -318,6 +318,28 @@ High-confidence, non-regression keepers. Ship together through the review gate (
   - **Cost/benefit is plausibly negative:** the screen spends ~6.7% of slots (one `skip_post` in ~15 live runs, discarding the top-ranked candidate) against a phenomenon costing ~2.6% of era views, and explains at best half of it.
   - **Do NOT add a category in response to a single new zero.** That is exactly the n=1 fitting that produced this taxonomy and the cancelled R1.8/R1.9.
   - **Recommended posture:** keep the screen (free, fail-open, catches the sexual/named-wrongdoing shapes, and its call carries the `topic` telemetry R4.4 needs), **freeze the taxonomy**, and reclassify 0-views in §0 as accepted background loss rather than an open workstream. Verify with `scripts/report.py --zeros`, which now encodes the private-video and cold-spell traps.
+
+- **FIRST STANDING AUDIT (2026-09-09) → two-tier taxonomy, ships as `v6`.** `analysis/screen_log.csv` over 2026-08-25 … 2026-09-10: 6 verdicts across 33 uploads — 3 `skip_post`, 3 `drop_comments`. The **rate** is fine (well under the ~15% narrow-the-prompt threshold); the **composition** is not. Two of the three skips came from the two categories with the weakest evidence:
+  - `2026-09-05` *"Doctors/nurses of Reddit, what's a symptom patients brush off that actually terrifies you?"* → **`graphic_harm`**, the category whose only confirmed case (`qvNzVCzWebk`) the 2026-08-30 correction above retracted as a cold-spell artifact.
+  - `2026-08-26` *"Bartenders of Reddit, what was a 'cut off' gone wrong?"* → **`graphic_violence`**, which never had a confirmed case at all — it was reasoned into the taxonomy, not observed.
+  Both are ordinary high-engagement AskReddit shapes, and dark-morbid is a top-performing bucket (§4). The screen was spending its most expensive action on its least-supported categories.
+- **Change — split the taxonomy by cost, not by severity.** Skipping a post discards the top-ranked candidate of the day; dropping an answer costs one answer and the pool backfills. A category now earns post-skip authority only if a confirmed zeroed upload supports it, or its severity means it never fires here anyway:
+  - **`SKIP_CATEGORIES`** (may discard the post): `sexual_suggestive` and `named_wrongdoing` (the two surviving confirmed cases), plus `minors_sexual` / `hard_drugs` / `slurs` — zero-cost tail guards that have never fired on this channel, so removing them would buy nothing.
+  - **`DROP_ONLY_CATEGORIES`** (answer-level only, never a skip): `graphic_harm`, `graphic_violence`.
+  Enforced **in code**, not just in the prompt — the model may still raise one of these against a question, and `screen.py` demotes it to a pass. A prompt instruction is not an enforcement mechanism.
+- **The counterfactual stays visible.** A demoted verdict writes a `demoted_post_risk` row to `screen_log.csv` carrying the category we declined to skip on. If zeroes rise, the audit can see exactly what was let through — this is the record that would justify a re-promotion, and the only thing that should.
+- **Also corrected:** the retracted chiropractic case was still sitting in the prompt as a *"WAS suppressed"* calibration example, teaching the model the pattern the evidence no longer supports. Removed. The three audited false positives are now in-prompt as questions that must pass. The confirmed-case count drops to **two** here and in the README.
+- **This is a narrowing, not an addition** — consistent with "freeze the taxonomy" above, which forbids *adding* categories off single zeroes. The standing decision rule already prescribes exactly this action ("false positives in the log → narrow the prompt, don't revert").
+- **Validation (2026-09-09):** 18 unit tests in `tests/test_screen.py` lock the tier guarantee per category (a `DROP_ONLY` category can never return `skip_post`), the audit's three false positives, the fail-open backstop's matching two-tier split, the `demoted_post_risk` audit row, and the retry fix below. Live-Gemini replay via the new `scripts/replay_screen.py`, **4 of 8 cases confirmed before the free-tier quota ran out**:
+  - ✅ *"Doctors/nurses … symptom that terrifies you?"* → **pass** (was a live `graphic_harm` skip)
+  - ✅ *"Bartenders … a 'cut off' gone wrong?"* → **pass, one answer dropped** (was a live `graphic_violence` skip) — the tier working as intended: keep the slot, drop the one risky answer
+  - ✅ *"ER workers … chiropractic patients?"* → **pass, two graphic answers dropped** — via the backstop, which now also declines to skip on those terms
+  - ✅ *"…hints someone's excellent in bed?"* → **still skips `sexual_suggestive`** (confirmed-zeroed case)
+  - ⚠️ **Not yet re-verified live: `named_wrongdoing`.** The prompt lost a calibration example in this change (the retracted chiropractic case), so the surviving confirmed shapes deserve a live re-check. Re-run `scripts/replay_screen.py` once quota resets — this is the one open item before merge.
+- **Reliability fix found by that replay, then corrected 2026-09-11:** `_generate_screened` retried HTTP 429/503 but **not** `Timeout`/`ConnectionError`, so a transient read timeout dropped straight to keyword-only screening — 3 of the first 8 replay calls hit exactly that. Timeouts are now retried.
+  - **But retrying 429 was wrong and is now removed.** On this free tier a 429 is a *daily* budget exhaustion, not a per-minute burst — it persists for hours and clears at midnight PT. Retrying it cannot succeed, and each wasted request comes out of the same budget the keyword, title and CTA calls later in the same run still need, so it makes the run's output worse rather than better. Measured: a verification pass on 2026-09-11 retried 429s and spent ~40 requests to make 8 useful calls. `tries` is also reduced 3 → 2, so a screen call costs at most 2 requests instead of 3. Fail-open behaviour is unchanged.
+- **Screen coverage is lower than assumed — `screen_source` added (2026-09-09).** 5 of the 35 uploads since the screen shipped (**14%**) carry no `topic`, which means the Gemini call failed and the run shipped on the keyword backstop. Nothing recorded that, so the standing audit has been auditing a screen it could not confirm ran, and R4.4's topic telemetry has a 14% hole. `upload_log.csv` now records `screen_source` (`gemini` | `backstop`) per upload, the same pattern as the 2026-09-07 `caption_ok`/`comment_ok` columns. This also makes the retry fix above measurable: if those failures were transient, the backstop share should fall.
+- **Version:** content-selection change → `FORMAT_VERSION` bump to `v6` for attribution, per the rule in R4.4.
 
 #### R4.7 — Traffic-source telemetry — **shipped ✅ 2026-09-07 (measurement-only, no version bump)**
 - Add `insightTrafficSourceType` (Analytics API dimension) to the weekly snapshot job — per-video or channel-level views by source (Shorts feed / search / browse / external).

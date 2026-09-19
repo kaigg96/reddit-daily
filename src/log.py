@@ -21,6 +21,11 @@ FIELDS = [
     # was found by comparing video_title back to post_title -- an inference
     # that breaks the moment a generated title happens to match the question.
     "title_ok", "keywords_ok", "cta_ok",
+    # Added 2026-09-09: 14% of uploads since the screen shipped carry no topic,
+    # meaning the Gemini call failed and the run shipped on the keyword backstop
+    # — invisible in the logs, and it makes the R4.6 audit an audit of a screen
+    # nobody can confirm ran.
+    "screen_source",
 ]
 
 

@@ -50,10 +50,14 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
    gather a pool of ~8 eligible comments per candidate.
 2. `src/screen.py` — **suppression-risk screen** (PRD R4.6). One Gemini call
    per candidate decides: skip the post, drop individual risky answers (the
-   pool backfills), or pass. Three uploads have been silently zeroed by
+   pool backfills), or pass. Two uploads have been silently zeroed by
    YouTube "limited distribution"; this avoids publishing that shape of
-   content. Fails open — an API error never blocks an upload. The same call
-   also classifies the post's topic, logged for performance tracking.
+   content. Categories sit in **two tiers** — only those with a confirmed
+   zeroed upload behind them (or a severity that never fires here) may discard
+   a whole post; the rest can only drop an answer, because a skip costs the
+   top-ranked candidate of the day and a drop costs nothing. Fails open — an
+   API error never blocks an upload. The same call also classifies the post's
+   topic, logged for performance tracking.
 3. `src/llm.py` — Gemini generates SEO keywords, a CTR-oriented title (style
    A/B/C rotates by day), and a question-specific CTA. All fail soft; the
    video ships either way.
@@ -211,6 +215,19 @@ per-video moderation). Only the **isolated** ones are real candidates.
 ```sh
 venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/
 ```
+
+**After changing the R4.6 screen** (prompt wording or taxonomy), also run the
+live-Gemini regression — unit tests can't reach the half of the behaviour that
+lives in the prompt:
+
+```sh
+venv/bin/python scripts/replay_screen.py
+```
+
+It costs one Gemini call per case against the same free-tier quota production
+uses, so run it once rather than in a loop. The screen fails open, so an
+exhausted quota degrades live runs to the keyword backstop until it resets
+rather than breaking them.
 
 ## Versioning & experiments
 
