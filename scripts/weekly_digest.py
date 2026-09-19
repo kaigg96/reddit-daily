@@ -148,9 +148,10 @@ def main():
     # weekly snapshot: the snapshot path flagged a suppression event up to nine
     # days after it happened. classify_zero_views also strips the two things
     # that masquerade as suppression — private videos and channel-wide cold
-    # spells. See src/insights.py.
+    # spells — and holds back anything too young to have views yet. See
+    # src/insights.py.
     try:
-        zero_groups = insights.classify_zero_views(insights.load_channel_videos(now))
+        zero_groups = insights.classify_zero_views(insights.load_channel_videos(now), now)
         recent_cut = iso(14)[:10]
         zero_views = [z for z in zero_groups["isolated"] if z["published"][:10] >= recent_cut]
     except Exception as e:

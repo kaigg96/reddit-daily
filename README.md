@@ -191,9 +191,10 @@ Always use this rather than ad-hoc analysis — it enforces the rules that
 ad-hoc scripts kept getting wrong (see TECH_DEBT.md Pass 2): **watch-seconds**
 is the primary metric (avg-%-viewed is a ratio inflated by simply trimming the
 video), cohorts must be **age-matched** or no verdict is given, thin cohorts
-report "insufficient data" instead of a misleading median, and zero-view
+report "insufficient data" instead of a misleading median, zero-view
 videos are counted separately as suppression candidates rather than averaged
-in. Logic lives in `src/insights.py` and is unit-tested.
+in, and `--compare` **excludes videos where the field is unset** rather than
+sweeping the whole pre-field history into the opposing cohort. Logic lives in `src/insights.py` and is unit-tested.
 
 ```sh
 venv/bin/python scripts/report.py --zeros    # 0-view videos, classified
@@ -206,11 +207,13 @@ to 8 days stale — fine for trends, wrong for "did this specific video get
 suppressed?". For a fresh question about a recent video, always go live;
 `--zeros` does.
 
-Zero-view videos are classified rather than listed flat, because two things
-masquerade as suppression and both have caused wrong conclusions here:
-**non-public** videos (owner-privatised — 10 of the channel's 41 zeroes) and
+Zero-view videos are classified rather than listed flat, because three things
+masquerade as suppression and all have caused wrong conclusions here:
+**non-public** videos (owner-privatised — 10 of the channel's 41 zeroes),
 **cold-spell** zeroes (the whole channel was dead that week, so it wasn't
-per-video moderation). Only the **isolated** ones are real candidates.
+per-video moderation), and videos **too new to judge** (under 3 days old — a
+fresh upload has no views yet and every neighbour is older, so it always looks
+isolated). Only the **isolated** ones are real candidates.
 
 ```sh
 venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/

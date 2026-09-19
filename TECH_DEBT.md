@@ -166,6 +166,38 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
   min later; acceptable", and README/PRD still describe the slots as 00:00 and
   12:00 UTC. Noticed 2026-09-09.
+- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload.**
+  Recorded here because the *class* of bug matters more than the fix: the
+  Analytics API returns no row at all for a video with exactly 0 views, and
+  `load_videos` did `if not s: continue`. So the uploads that vanished from
+  every median, every `--by` grouping and the zero-view count were precisely
+  the worst performers — and among them **both surviving confirmed-suppression
+  cases** (`VDH3pSafyE0`, `_0MNAf8AzNg`), i.e. the entire evidence base for
+  R4.6's skip categories was invisible to the tool the PRD tells you to verify
+  it with. Measured effect on the live channel: zero-view uploads **1 → 4**,
+  cohort **118 → 121**; headline medians unchanged. A missing row is now read
+  as a genuine zero, except for non-public videos, which are excluded and
+  counted in a printed note. Non-public vs cold-spell vs isolated was already
+  encoded in `classify_zero_views` — it just had never been carried into the
+  join. Worth remembering that `--zeros` was right all along while the overview
+  was wrong: two paths over the same question disagreed for weeks and nothing
+  flagged it.
+
+- **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
+  is shared between production and any local analysis.** On 2026-09-10 an R4.3
+  re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the
+  16:45 UTC video run that day very likely executed with no Gemini at all:
+  keyword-backstop screening, and Reddit's own title instead of a generated one.
+  Nothing breaks — every path fails soft — but the upload is materially worse
+  and nothing in the logs said so at the time. PRD §2 says usage is "comfortably
+  inside the free tier at 2 runs/day", which is true for production alone and
+  false as soon as anything else shares the key. Worth deciding on: (a)
+  `screen_source` (v6 branch) will start showing how often production actually
+  loses Gemini; (b) local analysis should run right after a reset **and** be
+  budgeted rather than run opportunistically; (c) retry policy must treat a
+  repeated 429 as a stop signal rather than a reason to try harder —
+  `analyze_channel` now does, and `src/screen.py`'s widened retry is unverified
+  under quota pressure. Noticed 2026-09-10.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
