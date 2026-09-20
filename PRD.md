@@ -339,7 +339,7 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 - **Scope boundary:** this requirement is about maximal legibility to legitimate machine readers, which compounds with human discovery. It is explicitly NOT bot-view optimization — see §7 for why that is excluded.
 
 #### R4.5 — Upload-time predictability & logging — **✅ v4 shipped; ⚠️ partially regressed (2026-09-07)**
-- **Original problem:** scheduled runs published 45–105 min after their cron slot — top-of-hour GitHub Actions queue congestion plus ~7–11 min of pipeline runtime — making publish time unpredictable across a ~60-min window.
+- **Original problem:** scheduled runs published 45–105 min after their cron slot — top-of-hour GitHub Actions queue congestion plus pipeline runtime (~7–11 min when measured in July; **actually ~3.4 min as of 2026-09-19**, measured over 60 runs) — making publish time unpredictable across a ~60-min window.
 - **Shipped in v4:** cron moved off the hour to `23 0,12 * * *`, pip caching added. Drift tightened to ~45–100 min.
 - **⚠️ Regression (observed 2026-09-07):** drift stepped up around 08-27→08-29 and has since held at a **stable ~250–325 min (~4.4h) late**, oscillating rather than growing. GitHub delays scheduled workflows under load and that delay is outside our control; moving the cron minute no longer helps.
 - **Impact is low, and deliberately not being chased:**

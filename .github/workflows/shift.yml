@@ -31,7 +31,11 @@ concurrency:
 jobs:
   shift:
     runs-on: ubuntu-latest
-    timeout-minutes: 45      # a runaway shift costs Actions minutes and quota
+    # Actions minutes are finite (2,000/mo on this private repo) and the video
+    # pipeline needs ~210 of them. Exhausting the allowance STOPS publishing,
+    # which is far worse than a shift being cut short, so the shift is capped
+    # well under the headroom: 30 min/day is ~900/mo, leaving ~45% spare.
+    timeout-minutes: 30
     steps:
       - name: Is the subscription token set up yet?
         id: auth
@@ -67,6 +71,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ inputs.prompt || '/shift' }}
-          claude_args: --max-turns 120
+          claude_args: --max-turns 80
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
