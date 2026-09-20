@@ -1,0 +1,85 @@
+name: Guardrail integrity
+
+# CLAUDE.md §4 says weakening a safety or cost control needs the owner. That
+# was advisory -- none of the files carrying those controls were protected, so
+# a shift could have raised the Polly budget or dropped a screen category and
+# pushed it. The same gap that let "no AI attribution" be ignored.
+#
+# Path-protecting the files would block legitimate work: src/screen.py changes
+# for real reasons. So this asserts the INVARIANTS instead. The assertions live
+# in a workflow, and .github/workflows/** is protected, so weakening a guardrail
+# now requires an approved issue.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cost controls intact
+        run: |
+          budget=$(grep -oE 'POLLY_CHAR_BUDGET *= *int\(os\.environ\.get\("POLLY_CHAR_BUDGET", *[0-9]+' src/config.py | grep -oE '[0-9]+$')
+          echo "POLLY_CHAR_BUDGET default = ${budget:-MISSING}"
+          [ -n "$budget" ] || { echo "::error::POLLY_CHAR_BUDGET is gone"; exit 1; }
+          [ "$budget" -le 5000 ] || { echo "::error::Polly budget raised to $budget (max 5000 without approval)"; exit 1; }
+          grep -q "_charge(text, calls=2)" src/tts.py \
+            || { echo "::error::tts.py no longer charges the budget before calling Polly"; exit 1; }
+          grep -q 'Engine="neural"' src/tts.py \
+            || { echo "::error::the neural engine was changed (CLAUDE.md §1: owner's call)"; exit 1; }
+
+      - name: Safety screen intact
+        run: |
+          for c in sexual_suggestive named_wrongdoing minors_sexual hard_drugs slurs; do
+            grep -q "\"$c\"" src/screen.py \
+              || { echo "::error::SKIP_CATEGORIES lost '$c'"; exit 1; }
+          done
+          for c in graphic_harm graphic_violence; do
+            grep -q "\"$c\"" src/screen.py \
+              || { echo "::error::DROP_ONLY_CATEGORIES lost '$c'"; exit 1; }
+          done
+          b=$(grep -oE 'SCREEN_THINKING_BUDGET *= *[0-9]+' src/screen.py | grep -oE '[0-9]+$')
+          [ -n "$b" ] && [ "$b" -gt 0 ] \
+            || { echo "::error::the screen is running without reasoning again"; exit 1; }
+          echo "7 categories present; screen reasoning budget = $b"
+
+      - name: DRY_RUN guard intact
+        run: |
+          upload=$(grep -n "youtube.upload_video" src/run.py | head -1 | cut -d: -f1)
+          [ -n "$upload" ] || { echo "::error::cannot find the upload call"; exit 1; }
+
+          # There are several DRY_RUN checks; only one matters -- the block that
+          # RETURNS before the upload. Taking the first match would have passed
+          # on an unrelated guard 100 lines earlier and proved nothing.
+          guard=""
+          while read -r n; do
+            [ "$n" -lt "$upload" ] || continue
+            # a bare `return` between this check and the upload call
+            if sed -n "${n},${upload}p" src/run.py | grep -qE '^\s+return\s*$'; then
+              guard="$n"
+            fi
+          done < <(grep -n "if config.DRY_RUN:" src/run.py | cut -d: -f1)
+
+          [ -n "$guard" ] || {
+            echo "::error::no DRY_RUN block returns before youtube.upload_video."
+            echo "::error::Development runs could upload to the live channel."
+            exit 1; }
+          echo "DRY_RUN returns at line $guard, before the upload at $upload"
+
+      - name: Secrets still ignored
+        run: |
+          for f in .env client_secret.json token.json; do
+            git check-ignore -q "$f" || { echo "::error::$f is no longer gitignored"; exit 1; }
+          done
+          if git log --all --oneline -- .env client_secret.json token.json | grep -q .; then
+            echo "::error::a secret file appears in git history"; exit 1
+          fi
+          echo "secrets ignored and never committed"

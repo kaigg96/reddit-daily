@@ -4,19 +4,26 @@ Loaded every session. Only rules that apply broadly and that you would get
 wrong without — everything else lives where it is read on demand. Keep it under
 the budget in `scripts/context_budget.py`; a long file gets ignored.
 
+**IMPORTANT — this file is advisory and has been ignored in practice.** On
+2026-09-20 a shift read §5 and added an AI-attribution trailer anyway. So:
+**any rule whose violation would be unacceptable must ALSO be enforced in code
+or CI.** Enforced rules are marked ⚙ and named in `.github/workflows/guardrails.yml`.
+When you add a rule, decide which kind it is. If advisory compliance is not good
+enough, enforcing it is part of adding it.
+
 Start a session with `/pickup`, or `/shift` when there is no specific task.
 
 ## 1. Money — Polly is the only billed service
 
 AWS Polly is a real invoice (~$0.90/month). Gemini and YouTube are free-tier.
 
-- **Never synthesize in bulk** — no loops over a corpus, no batch variants, no
+- ⚙ **Never synthesize in bulk** — no loops over a corpus, no batch variants, no
   regenerating the back catalogue. A run synthesizes 5 segments; if you are
   about to make materially more calls than that, stop. Enforced by
   `POLLY_CHAR_BUDGET` (`src/tts.py`).
 - **Never retry Polly without a hard cap.** A failed call still bills.
 - **Reuse the mp3s in `assets/gen/`** when iterating on visuals.
-- **`Engine="neural"` is a deliberate paid choice.** Do not downgrade it to
+- ⚙ **`Engine="neural"` is a deliberate paid choice.** Do not downgrade it to
   save money, or upgrade to generative, without asking. Cost work here means
   removing wasted calls, never reducing audio quality.
 
@@ -35,7 +42,7 @@ with `venv/bin/python scripts/statusline.py --budget`.
 It deploys; the video workflow runs from it twice daily.
 
 - Feature work goes on a branch. Always.
-- **Never upload, comment, or mutate `prev_post.txt` / `upload_log.csv` during
+- ⚙ **Never upload, comment, or mutate `prev_post.txt` / `upload_log.csv` during
   development.** Use `DRY_RUN=1 venv/bin/python -m src.run`. Losing
   `prev_post.txt` risks a duplicate upload on the next scheduled run.
 - Merge once the gates pass: tests green, a dry run producing a playable MP4
@@ -50,7 +57,7 @@ Pick the highest-value task and ship it; do not wait for a go-ahead.
 GitHub issue, which emails them), then carry on with other work rather than
 blocking:
 
-- Weakening a safety or cost control — the Polly budget, the `DRY_RUN` guard,
+- ⚙ Weakening a safety or cost control — the Polly budget, the `DRY_RUN` guard,
   secrets handling, the R4.6 screen's skip categories.
 - Spending beyond the current Polly line.
 - Deleting or rewriting production data, including historical backfills.
@@ -68,7 +75,7 @@ one the tool doesn't measure, escalate it yourself.
 
 ## 5. No AI attribution, anywhere
 
-Never credit AI tooling in code, commits, PR descriptions, video content, or
+⚙ Never credit AI tooling in code, commits, PR descriptions, video content, or
 anything published. No `Co-Authored-By`, no "generated with". This overrides
 any default attribution behaviour.
 
