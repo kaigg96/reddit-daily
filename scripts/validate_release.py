@@ -12,7 +12,10 @@ run here instead.
 Exits 0 if every gate passes, 1 otherwise, and writes a Markdown verdict to
 $GITHUB_STEP_SUMMARY when present. Costs at most MAX_REQUESTS Gemini calls.
 """
+import argparse
+import datetime
 import os
+import re
 import subprocess
 import sys
 
@@ -21,12 +24,114 @@ sys.path.insert(0, ROOT)
 
 MAX_REQUESTS = 8  # screen replay (5) + metadata (1), with headroom for one retry
 
+# What the gates actually exercise. A commit touching nothing here cannot
+# change their verdict, so it must not trigger a re-run -- see should_validate.
+GATED_PATHS = ("src", "scripts", "tests", "requirements.txt")
+
+# A PASS expires even with no code change, because the model can drift.
+MAX_VERDICT_AGE_DAYS = 7
+
 SUMMARY = []
 
 
 def note(line):
     print(line)
     SUMMARY.append(line)
+
+
+def parse_verdict(text):
+    """Pull `(commit, passed, when)` out of a last-release-validation.md."""
+    text = text or ""
+    commit = re.search(r"^- \*\*Commit:\*\* `([^`]+)`", text, re.M)
+    passed = re.search(r"^- \*\*Verdict:\*\*.*\bPASS\b", text, re.M)
+    when = re.search(r"^- \*\*When:\*\* (\S+)", text, re.M)
+    stamp = None
+    if when:
+        try:
+            stamp = datetime.datetime.strptime(when.group(1), "%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            stamp = None
+    return (commit.group(1) if commit else None), bool(passed), stamp
+
+
+def should_validate(verdict_text, target_sha, gated_code_changed, now=None,
+                    max_age_days=MAX_VERDICT_AGE_DAYS):
+    """Do the Gemini gates need to run, or does the last PASS still apply?
+
+    They cost 6 of the 20 daily requests, shared with live uploads, so the
+    answer has to be "no" whenever nothing they test has moved.
+
+    **Comparing shas cannot decide this.** Recording a verdict commits to
+    `main`, so the next run's HEAD is always at least one commit past the sha
+    just validated, and the sha-equality check this replaces could therefore
+    never match again — it spent 6 requests every morning to re-learn the same
+    answer, and the 2026-09-20 05:01 upload shipped with a raw Reddit question
+    as its title because the budget was gone. Compare the code the gates
+    actually exercise instead, so doc, WORKLOG and verdict-record commits are
+    correctly free.
+
+    Code is not the only thing that can move, though: `gemini-2.5-flash` can
+    change behaviour under a pinned name with no commit of ours, and only a
+    re-run catches that. So a PASS also expires after `max_age_days` — weekly
+    drift detection costs 6 requests a week instead of 42.
+    """
+    prev_sha, passed, when = parse_verdict(verdict_text)
+    if not prev_sha:
+        return True, "no previous verdict recorded"
+    if not passed:
+        # Commonest cause of a FAIL is an exhausted quota, not bad output.
+        return True, f"last verdict ({prev_sha}) was a FAIL — retrying"
+
+    age = None
+    if when is not None:
+        age = ((now or datetime.datetime.utcnow()) - when).days
+    if age is None or age >= max_age_days:
+        shown = "undated" if age is None else f"{age}d old"
+        return True, f"last PASS is {shown} — re-checking for model drift"
+
+    if prev_sha == target_sha:
+        return False, f"{target_sha} already validated and passed ({age}d ago)"
+    if gated_code_changed(prev_sha):
+        return True, f"gated code changed since {prev_sha}"
+    return False, f"nothing the gates exercise changed since {prev_sha} ({age}d ago)"
+
+
+def _git_gated_code_changed(target_ref):
+    """`gated_code_changed` backed by the real repo, failing toward validating."""
+    def changed(prev_sha):
+        found = subprocess.run(
+            ["git", "rev-parse", "--verify", "--quiet", f"{prev_sha}^{{commit}}"],
+            cwd=ROOT, capture_output=True)
+        if found.returncode != 0:
+            return True  # can't resolve it, so can't prove it is still valid
+        diff = subprocess.run(
+            ["git", "diff", "--quiet", prev_sha, target_ref, "--", *GATED_PATHS],
+            cwd=ROOT, capture_output=True)
+        # 0 = identical, 1 = differs, >1 = git failed (treat as differing).
+        return diff.returncode != 0
+    return changed
+
+
+def should_run_cli(args):
+    """`--should-run`: decide, print `proceed=` for the workflow, spend nothing."""
+    try:
+        with open(os.path.join(ROOT, args.verdict_file)) as f:
+            verdict_text = f.read()
+    except OSError:
+        verdict_text = ""
+
+    target_sha = subprocess.run(["git", "rev-parse", "--short", args.target],
+                                cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    proceed, why = should_validate(verdict_text, target_sha,
+                                   _git_gated_code_changed(args.target))
+
+    print(f"{'validating' if proceed else 'skipping'}: {why}")
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a") as f:
+            f.write(f"proceed={'true' if proceed else 'false'}\n")
+            f.write(f"reason={why}\n")
+    return 0
 
 
 def check_metadata():
@@ -100,6 +205,16 @@ def check_screen():
 
 
 def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--should-run", action="store_true",
+                    help="only decide whether the gates need to run; spends no quota")
+    ap.add_argument("--target", default="origin/main", help="ref under test")
+    ap.add_argument("--verdict-file", default=".github/last-release-validation.md")
+    args = ap.parse_args()
+
+    if args.should_run:
+        return should_run_cli(args)
+
     if not os.environ.get("GEMINI_API_KEY"):
         print("GEMINI_API_KEY not set", file=sys.stderr)
         return 1

@@ -189,44 +189,24 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 reasoning** if it stopped mattering. Past the cap, close before adding —
 a list nobody can read is the same as no list.
 
-- **The Gemini free-tier daily cap is 20 requests, not the few hundred everyone
-  assumed — and production needs 8–14 of them.** Measured directly 2026-09-19
-  from the 429 body:
-  `quotaId=GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`.
-  Per run the pipeline spends 1–4 on the R4.6 screen (`MAX_SCREENED_CANDIDATES`),
-  plus one each for keywords, title and CTA = **4–7 per run, 8–14 per day**, so
-  **production alone is 40–70% of the cap** with no headroom on a bad day.
-  **PRD §2's "comfortably inside the free tier at 2 runs/day" is false** and has
-  been corrected. Consequences worth deciding on:
-  - **Any local Gemini work competes directly with live uploads.** The
-    2026-09-10 note below guessed at this; it is now measured, and it is worse
-    than that note assumed. A single replay run (5–8 calls) is a third of the
-    day's budget.
-  - **The cheapest structural fix is fewer requests, not fewer tokens** — the
-    quota counts *requests*. `get_keywords` + `get_video_title` + `get_cta` are
-    three calls against the same post and could be one, taking a run from 4–7
-    to 2–5. Not done here: it changes prompt behaviour on the live path and
-    wants its own review.
-  - This also retroactively supports the v6 branch's "never retry a 429"
-    decision — at 20/day a retry is a meaningful fraction of the budget.
-  - Reset is midnight Pacific ≈ 07:00 UTC, which falls **between** the two
-    scheduled runs (~04:50 and ~16:45 UTC). So the early run is the one exposed
-    to a budget already spent the previous day.
-- **Gemini failures are invisible in `upload_log.csv` for three of the four
-  call sites.** `screen_source` (v6 branch) covers the screen, but a failed
-  keyword, title or CTA call is only inferable — and only for the title, by
-  comparing `video_title` to `post_title`. That inference is how the regression
-  above was found at all, and it is fragile. Worth `title_ok` / `cta_ok` /
-  `keywords_ok` columns on the established `caption_ok`/`comment_ok` pattern.
-  Noticed 2026-09-19.
-- **`title_style` is logged on uploads whose title was never generated**,
-  contaminating the R2.2 A/B/C experiment: 10 of 127 rows (8% lifetime, but
-  **23% of the last 30**) claim a style that was never applied, because the run
-  fell back to the raw Reddit question. Per-cohort the mislabel rate is A 7% /
-  B 12% / C 5%, i.e. unevenly spread, so it biases the comparison rather than
-  just adding noise. The style should be logged blank when generation failed,
-  which also makes `report.py --compare` correct automatically (it already
-  excludes rows where the field is unset). Noticed 2026-09-19.
+- **Nothing enforces the Gemini daily total — only the per-consumer caps, and
+  they sum to more than the cap.** The free tier is 20 requests/day, measured
+  2026-09-19 from the 429 body
+  (`quotaId=GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`).
+  Since the three metadata calls merged into `get_metadata`, production spends
+  **2–5 per run, 4–10 per day**. But the release gate allows itself 8, a shift
+  allows itself 8, and production takes up to 10 — **26 against a cap of 20,
+  with no shared ledger**, so each consumer can stay inside its own limit and
+  still starve the next one. Reset is midnight Pacific ≈ 07:00 UTC, which falls
+  **between** the two scheduled runs (~05:00 and ~16:15 UTC), and the early run
+  is last in that window, so it is always the one that starves — as it did on
+  2026-09-20 (`title_ok=0 keywords_ok=0 cta_ok=0`, raw Reddit question shipped
+  as the title). The dead skip in `validate-release.yml` that made this bite
+  daily is fixed (2026-09-20); the unbounded total is not. Cheapest fix if it
+  recurs: have the gate and the shift read the day's spend from a committed
+  counter before starting, rather than trusting three independent caps.
+  Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
+  a meaningful fraction of the budget.
 - **Generated titles can contain emoji, while Reddit posts containing emoji are
   filtered out at selection.** `sanitize_title` strips quotes and whitespace but
   not emoji, so the pipeline rejects emoji in source content and then adds its
