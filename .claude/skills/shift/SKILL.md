@@ -96,24 +96,17 @@ a step that added nothing, state you had to re-derive, a gate you worked around
 the next `/audit` needs the pattern, and one shift's friction is invisible on
 its own. Changes to the process are proposals (§5), not self-applied edits.
 
-**Research** — how do channels like this actually grow, and what transfers?
-This lane always has capacity, so it is the fallback when nothing else clears
-the bar. Three rules keep it useful:
+**Research** — how do channels like this grow, and what transfers? Always has
+capacity, so it is the fallback when nothing else clears the bar. Three rules:
 
-- **Filter through this channel's own findings.** Generic Shorts advice is
-  precisely the genre that produced R1.8/R1.9 and the b-roll retention claim,
-  both of which the data later killed. Output a **hypothesis with a proposed
-  test**, never a practice to adopt.
-- **Do not pivot on new information.** A finding goes to the bottom of the
-  experiment backlog in `PRD.md` §0 and waits its turn, unless it contradicts
-  something we currently *believe* — in which case the finding is that our
-  evidence is weak, not that we should change direction today. Direction changes
-  need data from our own channel.
-- **Discard aggressively.** Research that does not change a decision should be
-  a sentence in the `WORKLOG.md` entry, not a new document. **Do not create
-  new files in `analysis/` or new top-level docs for research output.** A
-  scatter of unread reports is a maintenance cost with no upside; if it is
-  worth keeping, it belongs in §0's backlog or §4's Findings.
+- **Filter through our own findings.** Generic Shorts advice is the genre that
+  produced R1.8/R1.9 and the b-roll claim, both killed by our data later.
+  Output a **hypothesis with a proposed test**, never a practice to adopt.
+- **Do not pivot on new information.** A finding joins the bottom of `PRD.md`
+  §0's backlog and waits. Direction changes need data from our own channel.
+- **Discard aggressively.** Research that changes no decision is a sentence in
+  `WORKLOG.md`, not a document. **Never create new files in `analysis/` or new
+  top-level docs for it** — unread reports are pure maintenance cost.
 
 **Feature work** — the experiment backlog in `PRD.md` §0, in its stated order,
 under its pre-committed decision rules.
