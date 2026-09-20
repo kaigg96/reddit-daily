@@ -136,7 +136,7 @@ def test_timeout_is_retried_once(monkeypatch):
     import requests
     calls = []
 
-    def flaky(prompt):
+    def flaky(prompt, thinking_budget=0):
         calls.append(1)
         if len(calls) < 2:
             raise requests.Timeout("slow")
@@ -153,7 +153,7 @@ def test_timeout_is_retried_once(monkeypatch):
 def test_persistent_timeout_still_fails_open(monkeypatch):
     import requests
 
-    def always_slow(prompt):
+    def always_slow(prompt, thinking_budget=0):
         raise requests.Timeout("slow")
 
     monkeypatch.setattr(screen.llm, "_generate", always_slow)
@@ -189,7 +189,7 @@ def test_429_is_not_retried(monkeypatch):
     import requests
     calls = []
 
-    def limited(prompt):
+    def limited(prompt, thinking_budget=0):
         calls.append(1)
         resp = requests.Response()
         resp.status_code = 429
@@ -200,3 +200,28 @@ def test_429_is_not_retried(monkeypatch):
     r = screen.screen("q", ["a", "b", "c"])
     assert len(calls) == 1          # one attempt, no retry
     assert r.source == "backstop"   # still fails open
+
+
+def test_the_screen_asks_for_reasoning(monkeypatch):
+    """The screen must NOT run with thinking disabled.
+
+    Pins a live regression. Disabling thinking for every Gemini call on
+    2026-09-19 fixed a real latency problem for titles, and quietly broke the
+    screen: it began passing a sexual_suggestive question backed by one of the
+    two confirmed zeroed uploads. Caught by the CI gate on 2026-09-20, after
+    it had already reached main.
+
+    Titles, keywords and CTAs are transformations and are fine at zero. The
+    screen is a judgment call and is not.
+    """
+    seen = {}
+
+    def fake(prompt, thinking_budget=0):
+        seen["budget"] = thinking_budget
+        return json.dumps({"post_risk": "none", "reason": "",
+                           "unsafe_comments": [], "topic": "other"})
+
+    monkeypatch.setattr(screen.llm, "_generate", fake)
+    screen.screen("A harmless question?", ["a", "b", "c", "d"])
+
+    assert seen["budget"] > 0, "the screen must request reasoning tokens"

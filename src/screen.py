@@ -150,6 +150,18 @@ def _backstop(question, comments):
                         source="backstop")
 
 
+# The screen is the one genuine judgment task in the pipeline, and disabling
+# reasoning broke it: with thinking off it passed "What's something innocent
+# that feels dangerously flirty?", a `sexual_suggestive` shape backed by a
+# confirmed zeroed upload (VDH3pSafyE0). Caught by the 2026-09-20 CI gate.
+#
+# Keywords, titles and CTAs are transformations and stay at zero — this budget
+# buys reasoning only where it demonstrably changes the verdict. It is small
+# because latency is what broke this module before: default thinking spent 546
+# tokens and 33s on a title, past the old 30s timeout.
+SCREEN_THINKING_BUDGET = 512
+
+
 def _generate_screened(prompt, tries=2):
     """Retry a transient failure once — falling back to the keyword backstop is
     a real downgrade in protection, so it is worth a few seconds to avoid.
@@ -167,7 +179,7 @@ def _generate_screened(prompt, tries=2):
     for attempt in range(tries):
         last = attempt == tries - 1
         try:
-            return llm._generate(prompt)
+            return llm._generate(prompt, thinking_budget=SCREEN_THINKING_BUDGET)
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else 0
             if code == 503 and not last:
