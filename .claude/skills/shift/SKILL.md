@@ -153,13 +153,12 @@ something is watching the result.
 
 ## 6. External budgets (these are not Claude usage)
 
-Limits are in `CLAUDE.md` §1. Shift-specific rules:
+Limits are in `CLAUDE.md` §1. Shift-specific:
 
-- **Gemini:** at most 8 requests for verification, only after the 07:00 UTC
-  reset, never in the hour before a scheduled run. Exhausting it degrades a
-  real upload — that happened on 2026-09-19 and cost a video its title.
+- **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
+  an hour of a scheduled run — exhausting it cost a real upload its title.
 - **Polly:** at most one dry run per shift.
-- **Don't run `scripts/weekly_analytics.py`** to check something — it appends
+- **Never run `scripts/weekly_analytics.py`** to check something: it appends
   real rows. If you do, revert the file before committing.
 
 ## 7. The value bar — what NOT to do
@@ -206,11 +205,10 @@ a hook or a test.
 
 ## 9. End the shift rather than extend it
 
-Every turn re-reads everything before it, so cost climbs with session length
-while **orientation is only ~1% of it** — don't optimise the reading, optimise
-the length. **One lane, ~100 turns, then hand over and end.** A good
-`WORKLOG.md` entry isn't overhead; it's what makes a cheap restart possible
-instead of an expensive continuation. Evidence and the measurement:
+Every turn re-reads everything before it, so cost climbs with length while
+**orientation is only ~1% of it** — optimise the length, not the reading.
+**Hand over and end rather than continuing.** A good `WORKLOG.md` entry isn't
+overhead; it's what makes a cheap restart possible. Measurement:
 `scripts/context_budget.py --session`.
 
 ## 10. Close the loop
