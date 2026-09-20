@@ -107,7 +107,7 @@ def build(worklog, ledger, since_sha, run_url=""):
     if cost:
         out.append(f"*{cost.get('model','?')} at {cost.get('effort','?')} · "
                    f"{cost.get('turns','?')} turns · {cost.get('duration_min','?')} min · "
-                   f"${cost.get('cost_usd','?')}*")
+                   f"{cost.get('quota_units','?')} quota units*")
     if run_url:
         out.append(f"*[Full run]({run_url})*")
     return "\n".join(out)

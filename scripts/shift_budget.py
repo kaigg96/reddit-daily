@@ -34,7 +34,7 @@ def _recent(ledger, days=7):
             try:
                 when = datetime.datetime.fromisoformat(row["timestamp_utc"])
                 if when >= cut:
-                    total += float(row["cost_usd"] or 0)
+                    total += float(row["quota_units"] or 0)
             except (ValueError, KeyError, TypeError):
                 continue  # a malformed row must not unblock the budget
     return total
@@ -45,7 +45,8 @@ UNDERSPEND_SHARE = 0.35   # below this share of the ceiling, capacity is idle
 
 def check(ledger, ceiling):
     spent = _recent(ledger)
-    print(f"shifts have cost ${spent:.2f} in the last 7 days (ceiling ${ceiling:.2f})")
+    print(f"shifts used {spent:.2f} quota units in the last 7 days "
+          f"(weekly allowance {ceiling:.2f}). Units are an API-list-price\n    equivalent, not money -- this account cannot be billed per token.")
     if spent >= ceiling:
         print("OVER — skipping this shift to protect the owner's own quota.")
         return 1
@@ -56,11 +57,11 @@ def check(ledger, ceiling):
     # tuning signal rather than a fault -- so it warns and proceeds.
     runs = _count(ledger)
     if runs >= 5 and spent < ceiling * UNDERSPEND_SHARE:
-        print(f"::warning::Only ${spent:.2f} of ${ceiling:.2f} used across {runs} "
+        print(f"::warning::Only {spent:.2f} of {ceiling:.2f} quota units used across {runs} "
               f"shifts this week. Capacity is going unused — consider raising the "
               f"cadence, the turn cap, or the effort level.")
 
-    print(f"${ceiling - spent:.2f} of allowance left")
+    print(f"{ceiling - spent:.2f} quota units of allowance left")
     return 0
 
 
@@ -99,7 +100,7 @@ def record(output, ledger, run_id, model, effort):
         w = csv.writer(f, lineterminator="\n")
         if new:
             w.writerow(["timestamp_utc", "run_id", "model", "effort",
-                        "turns", "duration_min", "cost_usd", "is_error"])
+                        "turns", "duration_min", "quota_units", "is_error"])
         row = [datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
                run_id, model, effort, data.get("num_turns", ""),
                f'{data.get("duration_ms", 0) / 60000:.1f}',

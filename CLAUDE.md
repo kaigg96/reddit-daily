@@ -33,6 +33,12 @@ opportunistically. Reasoning and numbers: PRD §5.
 
 ## 2. The owner's usage reserve
 
+**Nothing here bills per token.** The Claude subscription has overage disabled,
+so quota runs out rather than costing money. The "quota units" in
+`.github/shift-usage.csv` are an API-list-price *equivalent*, used only as a
+consistent yardstick — never read them as spending. The one thing that does
+cost money is Polly (§1).
+
 Autonomous work stops at **80% of the 5-hour limit and 90% of the weekly
 limit** — the rest is the owner's to use, not headroom to plan around. Check
 with `venv/bin/python scripts/statusline.py --budget`.

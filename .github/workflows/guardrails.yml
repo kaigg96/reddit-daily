@@ -80,7 +80,7 @@ jobs:
             || { echo "::error::the shift budget script is gone"; exit 1; }
           grep -q "spent >= ceiling" scripts/shift_budget.py \
             || { echo "::error::shift_budget no longer refuses when over the ceiling"; exit 1; }
-          grep -q "SHIFT_WEEKLY_COST_CEILING" .github/workflows/shift.yml \
+          grep -q "SHIFT_WEEKLY_QUOTA_BUDGET" .github/workflows/shift.yml \
             || { echo "::error::the shift workflow no longer checks the budget"; exit 1; }
           echo "weekly cost ceiling is still enforced"
 

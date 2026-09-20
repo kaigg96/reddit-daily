@@ -69,15 +69,17 @@ jobs:
       # The owner's 80/90% reserve cannot be enforced here -- remaining quota is
       # not observable on a runner (statusLine does not fire headlessly,
       # transcripts record only the moment a limit is hit, no plan-usage API).
-      # So it is enforced by construction: a rolling 7-day ceiling on what
-      # shifts have actually cost. The ceiling lives in a repository variable,
-      # not in the repo, so a shift cannot raise its own allowance.
+      # So it is enforced by construction: a rolling 7-day allowance of QUOTA
+      # UNITS, which are an API-list-price equivalent of tokens consumed and
+      # NOT money -- this account is a subscription with overage disabled and
+      # cannot be billed per token. The allowance lives in a repository
+      # variable, not the repo, so a shift cannot raise its own.
       - name: Within the weekly shift budget?
         id: budget
         if: steps.auth.outputs.ready == 'true'
         run: |
-          if python3 scripts/shift_budget.py check .github/shift-cost.csv \
-               "${{ vars.SHIFT_WEEKLY_COST_CEILING || '25' }}"; then
+          if python3 scripts/shift_budget.py check .github/shift-usage.csv \
+               "${{ vars.SHIFT_WEEKLY_QUOTA_BUDGET || '25' }}"; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Weekly shift allowance spent — skipping."
@@ -130,17 +132,17 @@ jobs:
       # shift owes a WORKLOG entry, including "nothing cleared the bar".
       # Recorded whatever the outcome: a run that failed still spent quota,
       # and a ceiling that ignores failed runs is not a ceiling.
-      - name: Record what this shift cost
+      - name: Record what this shift used
         if: always() && steps.budget.outputs.proceed == 'true'
         run: |
           python3 scripts/shift_budget.py record \
             /home/runner/work/_temp/claude-execution-output.json \
-            .github/shift-cost.csv "${{ github.run_id }}" \
+            .github/shift-usage.csv "${{ github.run_id }}" \
             "${{ inputs.model || 'claude-opus-5' }}" \
             "${{ inputs.effort || 'ultracode' }}"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/shift-cost.csv 2>/dev/null || exit 0
+          git add .github/shift-usage.csv 2>/dev/null || exit 0
           git commit -m "Record shift cost" || exit 0
           for a in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
@@ -161,7 +163,7 @@ jobs:
             let body;
             try {
               body = execSync(
-                `python3 scripts/shift_report.py WORKLOG.md .github/shift-cost.csv ` +
+                `python3 scripts/shift_report.py WORKLOG.md .github/shift-usage.csv ` +
                 `${process.env.START_SHA} ${url}`, { encoding: 'utf8' });
             } catch (e) {
               body = `Could not build the shift report: ${e.message}`;
