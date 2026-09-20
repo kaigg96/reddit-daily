@@ -163,6 +163,11 @@ jobs:
             "${{ inputs.effort || 'ultracode' }}"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # claude-code-action re-authenticates the remote as the Claude App,
+          # leaving this step unable to push ("Invalid username or token",
+          # observed 2026-09-20). Restore a credential that works.
+          git remote set-url origin \
+            "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git add .github/shift-usage.csv 2>/dev/null || exit 0
           git commit -m "Record shift cost" || exit 0
           for a in 1 2 3; do
@@ -219,7 +224,8 @@ jobs:
       - name: No AI attribution in commits
         if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
-          git fetch origin main --quiet
+          # No fetch: the shift's commits are already in this checkout, and
+          # reaching the remote fails once the action has swapped credentials.
           bad=$(git log "$START_SHA"..HEAD --format='%H %s%n%b' 2>/dev/null \
                 | grep -iE 'co-authored-by:.*(claude|anthropic)|generated with' || true)
           if [ -n "$bad" ]; then
@@ -236,11 +242,10 @@ jobs:
         # never started, because the budget was spent, does not.
         if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
-          git fetch origin main --quiet
-          # Compare against where the shift STARTED, not origin/main — a shift
-          # that correctly committed and pushed would otherwise look identical
-          # to one that did nothing, since origin/main already has its work.
-          if [ -z "$(git log "$START_SHA"..origin/main --oneline -- WORKLOG.md)" ] \
+          # Local history only. origin/main would be wrong twice over: the
+          # shift has already pushed there, and fetching fails after the action
+          # swaps git credentials.
+          if [ -z "$(git log "$START_SHA"..HEAD --oneline -- WORKLOG.md)" ] \
              && git diff --quiet HEAD -- WORKLOG.md; then
             echo "::error::The shift left no WORKLOG entry. Either it did nothing,"
             echo "::error::or it did work and failed to hand over. Both are faults:"

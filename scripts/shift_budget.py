@@ -84,13 +84,23 @@ def record(output, ledger, run_id, model, effort):
     """Append what the run actually cost. Best-effort: never fail the job."""
     try:
         text = open(output).read()
-        # The action writes either one object or a stream of them; the last
-        # object carries the result.
+        # The action writes a JSON array, a single object, or a stream of
+        # objects depending on version. Observed in CI 2026-09-20: an array,
+        # which the earlier code parsed happily and then called .get() on.
         try:
             data = json.loads(text)
         except ValueError:
             data = [json.loads(l) for l in text.splitlines()
-                    if l.strip().startswith("{")][-1]
+                    if l.strip().startswith("{")]
+        if isinstance(data, list):
+            results = [d for d in data if isinstance(d, dict)
+                       and ("total_cost_usd" in d or d.get("type") == "result")]
+            data = results[-1] if results else {}
+        if not isinstance(data, dict) or "total_cost_usd" not in data:
+            # Recording a zero row would silently understate the budget, which
+            # is worse than recording nothing at all.
+            print("execution output carried no usage figures — nothing recorded")
+            return 0
     except Exception as e:
         print(f"no usable execution output ({type(e).__name__}) — nothing recorded")
         return 0
