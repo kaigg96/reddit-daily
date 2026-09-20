@@ -153,6 +153,25 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **A scheduled shift cannot answer any performance question, so the analysis
+  half of the PM and feature lanes is unreachable from CI.** `report.py` →
+  `insights.load_videos` calls live YouTube Analytics and dies on
+  `KeyError: 'YOUTUBE_REFRESH_TOKEN'`; `shift.yml` withholds the YouTube
+  secrets deliberately and correctly (a shift must not be able to upload).
+  Hit 2026-09-20 trying to re-run the topic analysis that gates R4.4, the
+  **top item in the PRD §0 backlog** — so the highest-priority feature work
+  is blocked on credentials a shift is not supposed to have. The data is
+  already in the repo: `analysis/analytics_snapshots.csv` has weekly
+  `views` / `avg_view_duration_s` / `avg_view_pct` per video. The fix is an
+  offline loader in `src/insights.py` reading the newest snapshot per
+  `video_id`, with the **read-only** path being the only thing a shift gets.
+  Deliberately not rushed at the end of a shift: `load_videos` encodes two
+  non-obvious rules a naive snapshot reader would silently break — a missing
+  Analytics row means a genuine zero (not absent data), and non-public videos
+  are excluded — and `insights.py` exists precisely because throwaway analysis
+  kept reaching wrong conclusions. A half-right offline path is worse than
+  none.
+
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
   screen after they were caught passing a `sexual_suggestive` question with
