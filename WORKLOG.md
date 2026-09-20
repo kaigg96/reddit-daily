@@ -18,6 +18,53 @@ are being finished or filled:
 
 ---
 
+## 2026-09-20 — maintenance (incident-led)
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→65 · pm 15→20 · research 15→0 · feature 35→0 · close 10→5
+
+Preempted by two faults, so feature and research got nothing — correct under
+the triage rules, not starvation.
+
+**FAULT 1 — the screen lost its judgment, and it was live.** The 08:17 CI gate
+failed against `main`: with thinking disabled the R4.6 screen **passed** a
+`sexual_suggestive` question backed by one of only two confirmed zeroed
+uploads. Disabling thinking everywhere (2026-09-19) fixed title latency and
+silently broke the one genuine judgment task. Fixed: the screen gets 512
+reasoning tokens, everything else stays at zero. Verified live —
+`skip_post/sexual_suggestive` in 5.4s. A test pins it. **The gate is the only
+reason this surfaced before it cost an upload.**
+
+**FAULT 2 — the first scheduled shift did nothing, and reported success.**
+`claude-code-action` grants a prompt no shell or file access without
+`--allowedTools`, and `/shift` has no `allowed-tools` frontmatter. Fixed in the
+workflow. The generalisable half: **a shift that leaves no trace is
+indistinguishable from one that never ran**, and every health signal built so
+far reads `WORKLOG.md`, which a silent shift never writes — so they would have
+reported "ok" forever. The workflow now fails when a shift produces no
+handover. Logged in `TECH_DEBT.md`.
+
+**The new telemetry proved itself immediately.** `2026-09-20T05:01` shows
+`title_ok=0 keywords_ok=0 cta_ok=0` with `screen_source=gemini` — that run
+fired before the 07:00 reset on the budget the previous session exhausted, so
+the screen call landed and the metadata call hit the wall. Previously invisible.
+`16:15` came back all-`1` with a good merged-prompt title. The R2.2 fix also
+holds in production: the failed run logged a blank `title_style`, the good one
+logged `C`.
+
+**Queued next:**
+1. **Verify the shift workflow actually works** — needs a manual *Actions → Run
+   a shift → Run workflow*, or tomorrow's 09:17. It has never completed a real
+   shift. Until it does, treat scheduled autonomy as unproven.
+2. The 08:17 gate should now pass; confirm in `.github/last-release-validation.md`.
+3. Pass 3 Tier 1 (`TECH_DEBT.md`): extract and test the R1.7 duration guard;
+   reconcile the two `age_adjusted_residuals` implementations (14% apart).
+4. No automated video check — CI gates prompts and tests, not that a playable
+   MP4 came out.
+
+**Both faults were mine, both were caught by the checks rather than by looking,
+and both were invisible in their own success output.** That is the pattern to
+watch for: green is not evidence.
+
 ## 2026-09-19 — first session (pre-dates the allocation model)
 
     Allocation (planned→actual %): rounds 0→0 · maintenance 0→30 · pm 0→50 · research 0→5 · feature 0→5 · close 0→10
