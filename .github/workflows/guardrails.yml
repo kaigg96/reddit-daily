@@ -74,6 +74,16 @@ jobs:
             exit 1; }
           echo "DRY_RUN returns at line $guard, before the upload at $upload"
 
+      - name: CI usage reserve intact
+        run: |
+          [ -f scripts/shift_budget.py ] \
+            || { echo "::error::the shift budget script is gone"; exit 1; }
+          grep -q "spent >= ceiling" scripts/shift_budget.py \
+            || { echo "::error::shift_budget no longer refuses when over the ceiling"; exit 1; }
+          grep -q "SHIFT_WEEKLY_COST_CEILING" .github/workflows/shift.yml \
+            || { echo "::error::the shift workflow no longer checks the budget"; exit 1; }
+          echo "weekly cost ceiling is still enforced"
+
       - name: Secrets still ignored
         run: |
           for f in .env client_secret.json token.json; do

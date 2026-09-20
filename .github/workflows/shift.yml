@@ -66,24 +66,42 @@ jobs:
         with:
           fetch-depth: 0     # shifts read git history
 
-      - name: Remember where this shift started
+      # The owner's 80/90% reserve cannot be enforced here -- remaining quota is
+      # not observable on a runner (statusLine does not fire headlessly,
+      # transcripts record only the moment a limit is hit, no plan-usage API).
+      # So it is enforced by construction: a rolling 7-day ceiling on what
+      # shifts have actually cost. The ceiling lives in a repository variable,
+      # not in the repo, so a shift cannot raise its own allowance.
+      - name: Within the weekly shift budget?
+        id: budget
         if: steps.auth.outputs.ready == 'true'
+        run: |
+          if python3 scripts/shift_budget.py check .github/shift-cost.csv \
+               "${{ vars.SHIFT_WEEKLY_COST_CEILING || '25' }}"; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Weekly shift allowance spent — skipping."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Remember where this shift started
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
         run: echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
-        if: steps.auth.outputs.ready == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
         with:
           python-version: '3.10'
           cache: pip
 
       - name: Install
-        if: steps.auth.outputs.ready == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
         run: |
           python -m venv venv
           venv/bin/pip install -q -r requirements.txt -r requirements-dev.txt
 
       - uses: anthropics/claude-code-action@v1
-        if: steps.auth.outputs.ready == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ inputs.prompt || '/shift' }}
@@ -110,12 +128,31 @@ jobs:
       # A shift that runs and leaves no trace looks identical to one that never
       # ran -- which is how the first scheduled shift passed silently. Every
       # shift owes a WORKLOG entry, including "nothing cleared the bar".
+      # Recorded whatever the outcome: a run that failed still spent quota,
+      # and a ceiling that ignores failed runs is not a ceiling.
+      - name: Record what this shift cost
+        if: always() && steps.budget.outputs.proceed == 'true'
+        run: |
+          python3 scripts/shift_budget.py record \
+            /home/runner/work/_temp/claude-execution-output.json \
+            .github/shift-cost.csv "${{ github.run_id }}" \
+            "${{ inputs.model || 'claude-opus-5' }}" \
+            "${{ inputs.effort || 'ultracode' }}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/shift-cost.csv 2>/dev/null || exit 0
+          git commit -m "Record shift cost" || exit 0
+          for a in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            sleep 5
+          done
+
       # CLAUDE.md §5 forbids AI attribution and says it overrides default
       # behaviour. The first real shift read that file and added
       # "Co-Authored-By: Claude Sonnet 5" to both its commits anyway. Prose
       # lost to the action's default, so this is the rule in code.
       - name: No AI attribution in commits
-        if: always() && steps.auth.outputs.ready == 'true'
+        if: always() && steps.budget.outputs.proceed == 'true'
         run: |
           git fetch origin main --quiet
           bad=$(git log "$START_SHA"..HEAD --format='%H %s%n%b' 2>/dev/null \
@@ -130,8 +167,9 @@ jobs:
       - name: Did the shift actually hand over?
         # always(), because the first real shift failed on a turn-count
         # technicality AFTER doing its work, which skipped this check
-        # entirely. A shift that fails still owes a handover.
-        if: always() && steps.auth.outputs.ready == 'true'
+        # entirely. A shift that fails still owes a handover -- but one that
+        # never started, because the budget was spent, does not.
+        if: always() && steps.budget.outputs.proceed == 'true'
         run: |
           git fetch origin main --quiet
           # Compare against where the shift STARTED, not origin/main — a shift
