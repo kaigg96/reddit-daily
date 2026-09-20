@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Deep audit of the reddit-digest agentic workflow itself — is the process producing value, are the rules still right, what external guidance should we adopt, and where is it bloating. Run roughly every tenth shift, or when WORKLOG.md shows none recently.
+description: Deep audit of the reddit-digest agentic workflow itself — is the process producing value, are the rules still right, what external guidance should we adopt, and where is it bloating. A project-management task that comes due once about ten shifts of evidence have accumulated; check WORKLOG.md for when one last ran.
 ---
 
 # Audit the workflow
@@ -10,7 +10,10 @@ the channel has metrics; the process has neither unless a shift deliberately
 looks. That gap is where agentic systems rot — they optimise what they build
 and never ask whether the way they build it still makes sense.
 
-Run every ~10th shift. Findings go in `TECH_DEBT.md`.
+This is the biggest task in the project-management lane, not a separate
+rotation. It comes due once roughly ten shifts of evidence exist, because every
+question below reads a *series* — one shift cannot tell you whether the process
+is working. Findings go in `TECH_DEBT.md`.
 
 **Changes to `CLAUDE.md` or any skill are proposals, and this is enforced, not
 advised.** `.github/workflows/protect-process.yml` reverts a protected file

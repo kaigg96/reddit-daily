@@ -40,7 +40,11 @@ ALWAYS = {"CLAUDE.md": 1200}
 ORIENT = {
     "README.md#Picking this up": 400,
     "PRD.md#0.": 1800,
-    "WORKLOG.md": 900,
+    # Raised from 900 on 2026-09-20: it contradicted the 10-entry retention
+    # cap in CORPUS below. Entries run ~200 words, so ten of them plus the
+    # template header can never fit in 900 — one of the two controls had to
+    # move, and the audit needs ten entries of evidence to read.
+    "WORKLOG.md": 2400,
     ".claude/skills/shift/SKILL.md": 1800,
     ".claude/skills/pickup/SKILL.md": 700,
 }

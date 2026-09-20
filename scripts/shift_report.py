@@ -27,10 +27,27 @@ LANE_NAMES = {
 }
 
 
+def _strip_fences(raw):
+    """Drop fenced code blocks.
+
+    The file's header shows the entry template inside a fence, and that example
+    contains a '## <date>' line. Without this, the report happily renders the
+    template as if it were the latest shift.
+    """
+    out, fenced = [], False
+    for line in raw.splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        if not fenced:
+            out.append(line)
+    return "\n".join(out)
+
+
 def latest_entry(worklog):
     """The newest '## <date>' block — what this shift wrote."""
     try:
-        raw = open(worklog, encoding="utf-8").read()
+        raw = _strip_fences(open(worklog, encoding="utf-8").read())
     except OSError:
         return None, None
     blocks = raw.split("\n## ")
@@ -73,43 +90,73 @@ def last_cost(ledger):
         return None
 
 
+def sections(text):
+    """The `### Workstream` blocks a shift wrote, in the order it wrote them."""
+    out, current, buf = [], None, []
+    for line in (text or "").splitlines():
+        if line.startswith("### "):
+            if current:
+                out.append((current, "\n".join(buf).strip()))
+            current, buf = line[4:].strip(), []
+        elif current is not None:
+            buf.append(line)
+    if current:
+        out.append((current, "\n".join(buf).strip()))
+    return out
+
+
+def summary_line(text):
+    m = re.search(r"\*\*Summary:\*\*\s*(.+?)(?=\n\n|\n###|$)", text or "", re.S)
+    return " ".join(m.group(1).split()) if m else ""
+
+
 def build(worklog, ledger, since_sha, run_url=""):
     date, body = latest_entry(worklog)
     if not date:
-        return "No WORKLOG entry — nothing to report."
+        return "No handover was written, so there is nothing to report."
 
+    out = [f"## {date}", ""]
+
+    # 1. The overview, first and short — this is what gets read on a phone.
+    summary = summary_line(body)
+    if summary:
+        out += [summary, ""]
+
+    # 2. Where the time went.
     alloc = allocation(body)
-    commits, stat = changes(since_sha)
-    cost = last_cost(ledger)
-
-    out = [f"## Shift — {date}", ""]
-
     if alloc:
-        out += ["**Where the time went**", "",
-                "| Workstream | Planned | Actual |", "|---|---|---|"]
+        out += ["| Workstream | Planned | Actual |", "|---|---|---|"]
         for lane in LANES:
             if lane in alloc:
-                p, a = alloc[lane]
-                note = " — nothing worth doing" if a == 0 else ""
-                out.append(f"| {LANE_NAMES[lane]} | {p}% | {a}%{note} |")
+                planned, actual = alloc[lane]
+                out.append(f"| {LANE_NAMES[lane]} | {planned}% | {actual}% |")
         out.append("")
 
-    # Strip the allocation line; it is already rendered as the table above.
-    narrative = re.sub(r"\s*Allocation \(planned→actual %\):.+", "", body).strip()
-    if narrative:
-        out += ["**What happened**", "", narrative, ""]
-
-    if commits:
-        out += ["**Shipped**", "", commits, "", f"`{stat}`", ""]
+    # 3. One heading per workstream, bullets underneath. Same shape every time,
+    #    so it can be skimmed without reading.
+    blocks = sections(body)
+    if blocks:
+        for heading, content in blocks:
+            out += [f"### {heading}", ""]
+            lines = [l for l in content.splitlines() if l.strip()]
+            if not any(l.lstrip().startswith(("-", "*")) for l in lines):
+                lines = [f"- {' '.join(' '.join(lines).split())}"] if lines else []
+            out += lines + [""]
     else:
-        out += ["**Shipped** — nothing landed this shift.", ""]
+        # A shift that ignored the template still gets reported, rather than
+        # the owner silently receiving less than they asked for.
+        narrative = re.sub(r"\s*Allocation \(planned→actual %\):.+", "", body)
+        narrative = re.sub(r"\*\*Summary:\*\*.+?(?=\n\n|$)", "", narrative, flags=re.S)
+        out += ["### Details", "", narrative.strip(),
+                "", "*(This shift did not follow the report template.)*", ""]
 
+    cost = last_cost(ledger)
     if cost:
-        out.append(f"*{cost.get('model','?')} at {cost.get('effort','?')} · "
-                   f"{cost.get('turns','?')} turns · {cost.get('duration_min','?')} min · "
+        out.append(f"*{cost.get('turns','?')} steps · "
+                   f"{cost.get('duration_min','?')} min · "
                    f"{cost.get('quota_units','?')} quota units*")
     if run_url:
-        out.append(f"*[Full run]({run_url})*")
+        out.append(f"*[Full log]({run_url})*")
     return "\n".join(out)
 
 

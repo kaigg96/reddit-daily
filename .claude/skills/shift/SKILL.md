@@ -83,10 +83,22 @@ fixing it.
 dependency advisories, Actions workflow permissions, OAuth scope. Fix what is
 clearly wrong; log the rest.
 
-**Project management** — is the tracker true? Is the next thing we'd build
-actually the highest-leverage thing? Are decision rules still pre-committed and
-honest? Is documentation accurate (stale claims mislead worse than missing
-ones)?
+**Project management** — the lane that notices things. Standing jobs:
+
+- **Has a decision rule come due?** `PRD.md` §0's experiments each carry one
+  ("after ≥20 uploads, keep if… revert if…"). Count uploads since the version
+  shipped and *act on it*. Nothing else watches this, and an unevaluated
+  experiment is worse than an unrun one — it looks like evidence.
+- **Is the tracker true, and the documentation accurate?** Stale claims mislead
+  worse than missing ones.
+- **Is the next thing we'd build the highest-leverage thing?** If the feature
+  lane is empty, filling the backlog is this lane's job (§2).
+- **Record decisions as they're made** in `DECISIONS.md`, with the assumptions
+  under them — that is what makes them revisitable.
+- **Chase closure.** Open escalations awaiting the owner, `TECH_DEBT.md` at its
+  cap, branches unmerged. Things must close, not accumulate.
+- **`/audit`** is this lane's periodic deep task (§8).
+
 
 **The workflow itself is always in scope here, not only at audit time.** Agentic
 systems improve what they build and never question how they build it. If
@@ -113,17 +125,11 @@ under its pre-committed decision rules.
 
 ## 5. Authorization (owner, 2026-09-19)
 
-**You may merge to `main` yourself, including live-path changes — prompts,
-content selection, the upload path.** The owner-review gate and the
-"don't build until told" rule are superseded. Ship it.
+**You may merge to `main` yourself, including live-path changes.** The gates
+that replace owner review are in `CLAUDE.md` §3; clear them, then update
+`WORKLOG.md` and `PRD.md` §0.
 
-**Gates that replace the owner's review** (also `CLAUDE.md` §3): tests green;
-a `DRY_RUN=1` run producing a playable MP4 for anything touching the video or
-its metadata; `FORMAT_VERSION` bumped when the video changes; one variable per
-release. Then update `WORKLOG.md`, and `PRD.md` §0 if anything shipped.
-
-**Still requires the owner — escalate, don't decide.** Queue an issue and move
-on to other work; do not block the shift waiting for an answer:
+**Some things need the owner — escalate, don't decide, and don't block:**
 
 ```sh
 venv/bin/python scripts/escalate.py --title "..." --key ... --recommend "..." <<'EOF'
@@ -131,18 +137,17 @@ venv/bin/python scripts/escalate.py --title "..." --key ... --recommend "..." <<
 EOF
 ```
 
-Commit and push it — `.github/workflows/escalations.yml` files it as a GitHub
-issue, which emails the owner. Re-raising the same `--key` comments on the open
-issue rather than duplicating. Always include a recommendation; an escalation
-without one just moves the work. Details in `.escalations/README.md`.
+Commit and push it; it becomes an issue that emails the owner. Re-raising the
+same `--key` comments rather than duplicating. **Always include a
+recommendation** — an escalation without one just moves the work.
 
 The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
 spending, production data, publishing.
 
-**Auto-revert.** A shift that finds the previous autonomous release degraded
-median watch-seconds or views against an age-matched baseline (`scripts/report.py
---compare`) reverts it and records why. Shipping without review only works if
-something is watching the result.
+**Auto-revert.** A release that degraded median watch-seconds or views against
+an age-matched baseline (`scripts/report.py --compare`) gets reverted, with the
+reason recorded. Shipping without review only works if something watches the
+result — that watching is the PM lane's first job above.
 
 ## 6. External budgets (these are not Claude usage)
 
@@ -156,20 +161,17 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 
 ## 7. The value bar — what NOT to do
 
-"Always be working" creates pressure to manufacture tasks, and this project is
-a live system that uploads twice a day. Churn on it is worse than idleness.
-Specifically forbidden:
+"Always be working" manufactures tasks, and churn on a live system is worse
+than idleness. Forbidden:
 
 - **Refactoring without a named benefit.** "Cleaner" is not one. It must
   unblock a change, remove a rule that could drift, or make untestable logic
   testable. Work `TECH_DEBT.md`'s tiers; don't invent work.
 - **Re-planning what was just planned.** `PRD.md` §0's backlog order stands
   until *data* moves it, not until a shift has a new opinion.
-- **Rewriting docs that are already accurate.** Correct stale claims; leave
-  correct ones alone.
-- **New trackers, new documents, new analysis files.** Use the four that exist:
-  `PRD.md`, `TECH_DEBT.md`, `WORKLOG.md`, `CLAUDE.md`.
-- **Widening scope mid-shift.** Finish the thing, then pick the next thing.
+- **Rewriting accurate docs.** Correct stale claims; leave the rest.
+- **New trackers or documents.** Use the ones that exist.
+- **Widening scope mid-shift.** Finish, then pick the next thing.
 
 If a lane has nothing above that bar, say so and move on. If *no* lane does, do
 research — it always has capacity, and thinking and planning are real work.
@@ -193,8 +195,10 @@ When something is over budget the fix is almost never a bigger budget — delete
 it, move detail to where it is read on demand, or convert an advisory rule into
 a hook or a test.
 
-**Every ~10th shift** (or when `WORKLOG.md` shows none in the last ten), run
-**`/audit`** for the deep pass over the process itself.
+**`/audit` is a PM task that comes due, not a separate cadence.** It reads a
+*series* — the last ten entries, escalations, what got reverted — so it needs
+about ten shifts of evidence. Run it when `WORKLOG.md` shows none in the last
+ten; PM's slice grows that shift to fit, which is §2 working, not an exception.
 
 ## 9. End the shift rather than extend it
 
@@ -212,9 +216,9 @@ out mid-task:
 1. Commit work in progress on a branch; never leave `main` half-finished.
 2. Update `PRD.md` §0 if anything shipped; `TECH_DEBT.md` for findings you did
    not fix.
-3. Prepend a `WORKLOG.md` entry: the allocation line, then **one line per lane
-   saying what it produced** — including "nothing, because …", which is a real
-   answer. Then what's queued next, and anything blocked *and on what*. This
-   entry is emailed to the owner as the shift report, so it is the only thing
-   they see; write it for someone who has not looked at the repo.
+3. Prepend a `WORKLOG.md` entry **following the template in that file's
+   header**. It is emailed to the owner verbatim as the shift report and is the
+   only thing they see, so write it for a manager, not an engineer: plain
+   language, no filenames, no jargon. Technical detail belongs in the commit
+   message and `TECH_DEBT.md`, where the next shift will look for it.
 4. State plainly what you did and what you would do next.

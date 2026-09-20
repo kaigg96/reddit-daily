@@ -7,13 +7,36 @@ what*, so a cold session can resume without re-deriving anything.
 
 Keep it to ~10 entries; delete older ones (git history keeps them).
 
-**Every entry starts with an allocation line**, in exactly this shape, so the
-next shift can compute starvation floors and `/audit` can see whether slices
-are being finished or filled:
+**Entries are emailed to the owner verbatim as the shift report.** Write for a
+manager, not an engineer: plain language, no filenames, no jargon. Technical
+detail belongs in the commit message and `TECH_DEBT.md`, which is where the
+next shift looks. Follow this template exactly — the report is generated from
+its structure:
 
-    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · pm 15→12 · research 10→0 · feature 40→35 · close 10→10
+```
+## 2026-09-21 — one line on what actually mattered
 
-`0` actual is fine and often correct — say why in the entry. Read it with
+    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · security 10→0 · pm 15→12 · research 10→0 · feature 30→45 · close 10→10
+
+**Summary:** Two sentences. What the shift achieved, and why it matters to the
+channel. No detail — this is the part read on a phone.
+
+### Maintenance
+- One bullet per thing done, in plain words.
+
+### Project management
+- Nothing this shift — no decisions came due.
+
+### Blocked
+- What is stuck, and what it is waiting on.
+
+### Next
+- What the following shift should pick up.
+```
+
+A workstream with nothing to report still gets its heading and a one-line
+"nothing this shift, because …" — silence and inactivity must not look alike.
+Read the allocation series with
 `venv/bin/python scripts/context_budget.py --allocation`.
 
 ---
