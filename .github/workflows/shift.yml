@@ -147,6 +147,48 @@ jobs:
             sleep 5
           done
 
+      # The owner does not watch the repo work. One long-lived issue gets a
+      # comment per shift, so they get one email each time, in one thread,
+      # without cluttering the issue tracker -- which is reserved for things
+      # that actually need a decision from them.
+      - name: Email the owner what this shift did
+        if: always() && steps.budget.outputs.proceed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            let body;
+            try {
+              body = execSync(
+                `python3 scripts/shift_report.py WORKLOG.md .github/shift-cost.csv ` +
+                `${process.env.START_SHA} ${url}`, { encoding: 'utf8' });
+            } catch (e) {
+              body = `Could not build the shift report: ${e.message}`;
+            }
+            const marker = '<!-- shift-reports -->';
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', per_page: 100,
+            });
+            let thread = open.find(i => (i.body || '').includes(marker));
+            if (!thread) {
+              const made = await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: 'Shift reports',
+                labels: ['shift-report'],
+                body: `${marker}\n\nOne comment per shift: what moved, broken down by ` +
+                      `workstream. Keep this issue OPEN — closing it stops the emails ` +
+                      `and the next shift will open a replacement.`,
+              });
+              thread = made.data;
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: thread.number, body,
+            });
+            core.info(`reported to issue #${thread.number}`);
+
       # CLAUDE.md §5 forbids AI attribution and says it overrides default
       # behaviour. The first real shift read that file and added
       # "Co-Authored-By: Claude Sonnet 5" to both its commits anyway. Prose

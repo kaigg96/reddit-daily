@@ -40,14 +40,43 @@ def _recent(ledger, days=7):
     return total
 
 
+UNDERSPEND_SHARE = 0.35   # below this share of the ceiling, capacity is idle
+
+
 def check(ledger, ceiling):
     spent = _recent(ledger)
     print(f"shifts have cost ${spent:.2f} in the last 7 days (ceiling ${ceiling:.2f})")
     if spent >= ceiling:
         print("OVER — skipping this shift to protect the owner's own quota.")
         return 1
+
+    # The mirror risk, and the one the owner actually expects to hit: the whole
+    # point of this workflow is that unused capacity is wasted. A ceiling that
+    # is never approached means shifts are too small or too rare, which is a
+    # tuning signal rather than a fault -- so it warns and proceeds.
+    runs = _count(ledger)
+    if runs >= 5 and spent < ceiling * UNDERSPEND_SHARE:
+        print(f"::warning::Only ${spent:.2f} of ${ceiling:.2f} used across {runs} "
+              f"shifts this week. Capacity is going unused — consider raising the "
+              f"cadence, the turn cap, or the effort level.")
+
     print(f"${ceiling - spent:.2f} of allowance left")
     return 0
+
+
+def _count(ledger, days=7):
+    if not os.path.exists(ledger):
+        return 0
+    cut = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    n = 0
+    with open(ledger) as f:
+        for row in csv.DictReader(f):
+            try:
+                if datetime.datetime.fromisoformat(row["timestamp_utc"]) >= cut:
+                    n += 1
+            except (ValueError, KeyError, TypeError):
+                continue
+    return n
 
 
 def record(output, ledger, run_id, model, effort):

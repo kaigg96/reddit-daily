@@ -221,6 +221,9 @@ out mid-task:
 1. Commit work in progress on a branch; never leave `main` half-finished.
 2. Update `PRD.md` §0 if anything shipped; `TECH_DEBT.md` for findings you did
    not fix.
-3. Prepend a `WORKLOG.md` entry: date, lane, what happened, what's queued next,
-   and anything blocked *and on what*.
+3. Prepend a `WORKLOG.md` entry: the allocation line, then **one line per lane
+   saying what it produced** — including "nothing, because …", which is a real
+   answer. Then what's queued next, and anything blocked *and on what*. This
+   entry is emailed to the owner as the shift report, so it is the only thing
+   they see; write it for someone who has not looked at the repo.
 4. State plainly what you did and what you would do next.
