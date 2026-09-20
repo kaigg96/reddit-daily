@@ -71,6 +71,28 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ inputs.prompt || '/shift' }}
-          claude_args: --max-turns 80
+          # Without --allowedTools the action runs with NO shell or file
+          # access, so the first scheduled shift "succeeded" having done
+          # literally nothing. Blast radius is bounded elsewhere: this job has
+          # no upload secrets, and protect-process.yml guards CI and the rules.
+          claude_args: >-
+            --max-turns 80
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      # A shift that runs and leaves no trace looks identical to one that never
+      # ran -- which is how the first scheduled shift passed silently. Every
+      # shift owes a WORKLOG entry, including "nothing cleared the bar".
+      - name: Did the shift actually hand over?
+        if: steps.auth.outputs.ready == 'true'
+        run: |
+          git fetch origin main --quiet
+          if git diff --quiet origin/main -- WORKLOG.md && \
+             [ -z "$(git log origin/main..HEAD --oneline -- WORKLOG.md)" ]; then
+            echo "::error::The shift left no WORKLOG entry. Either it did nothing,"
+            echo "::error::or it did work and failed to hand over. Both are faults:"
+            echo "::error::a silent shift cannot be told apart from one that never ran."
+            exit 1
+          fi
+          echo "handover present"

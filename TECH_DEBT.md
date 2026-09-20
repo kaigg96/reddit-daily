@@ -154,6 +154,18 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **A CI shift with no granted tools "succeeds" having done nothing.** The
+  first scheduled shift (2026-09-20 13:35) ran green and produced no commit, no
+  `WORKLOG.md` entry and no escalation, because `claude-code-action` gives a
+  prompt no shell or file access unless `--allowedTools` is passed or the
+  skill carries `allowed-tools` frontmatter — and `/shift` has neither. Fixed
+  by granting tools in the workflow. The **generalisable** part is worse than
+  the bug: *a shift that runs and leaves no trace is indistinguishable from one
+  that never ran*, and every health check written so far reads `WORKLOG.md`,
+  which a silent shift never writes. The workflow now fails when a shift
+  produces no handover. Anything else that reasons from `WORKLOG.md` inherits
+  the same blind spot and should be checked against it.
+
 **Retention — open items must close, not accumulate** (cap: 25, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
