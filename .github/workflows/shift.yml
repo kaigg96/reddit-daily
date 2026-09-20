@@ -54,6 +54,10 @@ jobs:
         with:
           fetch-depth: 0     # shifts read git history
 
+      - name: Remember where this shift started
+        if: steps.auth.outputs.ready == 'true'
+        run: echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
       - uses: actions/setup-python@v5
         if: steps.auth.outputs.ready == 'true'
         with:
@@ -76,7 +80,7 @@ jobs:
           # literally nothing. Blast radius is bounded elsewhere: this job has
           # no upload secrets, and protect-process.yml guards CI and the rules.
           claude_args: >-
-            --max-turns 80
+            --max-turns 200
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -84,12 +88,35 @@ jobs:
       # A shift that runs and leaves no trace looks identical to one that never
       # ran -- which is how the first scheduled shift passed silently. Every
       # shift owes a WORKLOG entry, including "nothing cleared the bar".
-      - name: Did the shift actually hand over?
-        if: steps.auth.outputs.ready == 'true'
+      # CLAUDE.md §5 forbids AI attribution and says it overrides default
+      # behaviour. The first real shift read that file and added
+      # "Co-Authored-By: Claude Sonnet 5" to both its commits anyway. Prose
+      # lost to the action's default, so this is the rule in code.
+      - name: No AI attribution in commits
+        if: always() && steps.auth.outputs.ready == 'true'
         run: |
           git fetch origin main --quiet
-          if git diff --quiet origin/main -- WORKLOG.md && \
-             [ -z "$(git log origin/main..HEAD --oneline -- WORKLOG.md)" ]; then
+          bad=$(git log "$START_SHA"..HEAD --format='%H %s%n%b' 2>/dev/null \
+                | grep -iE 'co-authored-by:.*(claude|anthropic)|generated with' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::A commit credits AI tooling, which CLAUDE.md §5 forbids."
+            echo "$bad"
+            exit 1
+          fi
+          echo "no AI attribution found"
+
+      - name: Did the shift actually hand over?
+        # always(), because the first real shift failed on a turn-count
+        # technicality AFTER doing its work, which skipped this check
+        # entirely. A shift that fails still owes a handover.
+        if: always() && steps.auth.outputs.ready == 'true'
+        run: |
+          git fetch origin main --quiet
+          # Compare against where the shift STARTED, not origin/main — a shift
+          # that correctly committed and pushed would otherwise look identical
+          # to one that did nothing, since origin/main already has its work.
+          if [ -z "$(git log "$START_SHA"..origin/main --oneline -- WORKLOG.md)" ] \
+             && git diff --quiet HEAD -- WORKLOG.md; then
             echo "::error::The shift left no WORKLOG entry. Either it did nothing,"
             echo "::error::or it did work and failed to hand over. Both are faults:"
             echo "::error::a silent shift cannot be told apart from one that never ran."
