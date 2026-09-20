@@ -127,6 +127,11 @@ jobs:
           # access, so the first scheduled shift "succeeded" having done
           # literally nothing. Blast radius is bounded elsewhere: this job has
           # no upload secrets, and protect-process.yml guards CI and the rules.
+          #
+          # Task/Agent are listed because ultracode orchestrates dynamic
+          # workflows; without them it would quietly degrade to plain xhigh and
+          # the run would not test what the owner actually asked for. Harmless
+          # if unused.
           # Scheduled runs get the defaults below; a dispatch can override both.
           # The first shift silently ran Sonnet because nothing set this.
           #
@@ -139,7 +144,7 @@ jobs:
             --model ${{ inputs.model || 'claude-opus-5' }}
             --effort ${{ inputs.effort || 'ultracode' }}
             --max-turns 200
-            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite"
+            --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite,Task,Agent"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
