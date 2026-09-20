@@ -16,7 +16,7 @@ its structure:
 ```
 ## 2026-09-21 — one line on what actually mattered
 
-    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · security 10→0 · pm 15→12 · research 10→0 · feature 30→45 · close 10→10
+    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · security 10→5 · pm 15→12 · research 10→0 · feature 30→40 · close 10→10
 
 **Summary:** Two sentences. What the shift achieved, and why it matters to the
 channel. No detail — this is the part read on a phone.
@@ -24,8 +24,14 @@ channel. No detail — this is the part read on a phone.
 ### Maintenance
 - One bullet per thing done, in plain words.
 
+### Security
+- Nothing this shift — the standing checks were clean.
+
 ### Project management
 - Nothing this shift — no decisions came due.
+
+### Research
+- Nothing this shift, because maintenance took the time.
 
 ### Blocked
 - What is stuck, and what it is waiting on.
@@ -34,8 +40,11 @@ channel. No detail — this is the part read on a phone.
 - What the following shift should pick up.
 ```
 
-A workstream with nothing to report still gets its heading and a one-line
-"nothing this shift, because …" — silence and inactivity must not look alike.
+**Every workstream gets a heading, including ones that did nothing** — with a
+one-line "nothing this shift, because …". Silence and inactivity must not look
+alike, and the report flags a missing reason rather than hiding it. Routine
+checks and wrap-up are overhead and need no section. **The planned and actual
+columns must each total 100%**; the report shows the sum and flags it if not.
 Read the allocation series with
 `venv/bin/python scripts/context_budget.py --allocation`.
 
