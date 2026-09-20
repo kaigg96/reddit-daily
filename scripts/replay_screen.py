@@ -53,6 +53,12 @@ DUMB = ["Died trying to prove a window was unbreakable.",
         "Ate a poisonous fish on a dare.",
         "Tried to outrun a train for a bet."]
 
+# The FLIRT case ("...dangerously flirty?") is now also a calibration example
+# in `_PROMPT` (src/screen.py, added 2026-09-20 after this exact case missed
+# live with reasoning already restored). That makes it a memorization check, not a
+# generalization check, from here on — swap in a fresh unseen paraphrase of the
+# same sexual_suggestive shape next time quota allows a live re-verify, rather
+# than trusting a pass on this one as proof the category generalizes.
 CASES = [
     ("PASS", "ER workers, what stories do you have involving chiropractic patients?", ER),
     ("SKIP", "What's a horrible thing that a famous person did that everyone forgot about but you?", FAM),

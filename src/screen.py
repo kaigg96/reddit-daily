@@ -86,6 +86,10 @@ Real examples from this channel that WERE suppressed:
 - "What's a horrible thing that a famous person did that everyone forgot about but you?"
   (answers alleged specific misconduct by named celebrities) -> named_wrongdoing
 
+Same premise, different wording — still sexual_suggestive, because the trigger is
+sexual/romantic performance framed as intrigue, not the literal words above:
+- "What's something innocent that feels dangerously flirty?" -> sexual_suggestive
+
 Real examples that were FINE and must NOT be flagged:
 - "What was one name mentioned in The Epstein Files which shocked you?"
 - "Which famous person died in the dumbest way possible?"
@@ -152,13 +156,20 @@ def _backstop(question, comments):
 
 # The screen is the one genuine judgment task in the pipeline, and disabling
 # reasoning broke it: with thinking off it passed "What's something innocent
-# that feels dangerously flirty?", a `sexual_suggestive` shape backed by a
-# confirmed zeroed upload (VDH3pSafyE0). Caught by the 2026-09-20 CI gate.
+# that feels dangerously flirty?", replay_screen.py's paraphrase of the same
+# `sexual_suggestive` shape as the confirmed zeroed upload VDH3pSafyE0 ("...hints
+# someone's excellent in bed?"). Caught by the 2026-09-20 CI gate.
 #
 # Keywords, titles and CTAs are transformations and stay at zero — this budget
 # buys reasoning only where it demonstrably changes the verdict. It is small
 # because latency is what broke this module before: default thinking spent 546
 # tokens and 33s on a title, past the old 30s timeout.
+#
+# 512 tokens is not sufficient on its own: a same-day replay (still on this
+# budget) missed the flirty paraphrase again while correctly catching the
+# literal example already in the prompt — one example doesn't generalize. The
+# paraphrase is now a second in-prompt example above; reasoning budget alone
+# was the wrong lever.
 SCREEN_THINKING_BUDGET = 512
 
 

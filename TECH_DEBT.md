@@ -62,8 +62,7 @@ Root cause: decisions were driven by throwaway scripts, so nothing was reproduci
 - **New `tests/test_insights.py` (12 tests)** — clears the testing item deferred in Pass 1. Each test pins a mistake that actually happened: the b-roll age confound, the thin-cohort median, the avg-% illusion, zero-view contamination. Run: `venv/bin/python -m pytest tests/`.
 - **New `scripts/report.py`** — CLI over the module (`--by`, `--compare`, `--metric`). Verified against live data: it reproduces the real numbers *and* refuses to call the b-roll comparison, flagging 6d vs 22d median ages — the exact error that previously slipped through.
 - **Derived `background_type`** dimension (broll/procedural), since raw `bg_clip` is per-file and too granular to group on.
-- **`median` consolidated** to one implementation; `analytics.median` now delegates to `insights.median`.
-- **`requirements-dev.txt`** added so pytest stays out of the CI runtime install.
+- **`median` consolidated** to one implementation (`analytics.median` delegates to `insights.median`), and `requirements-dev.txt` added so pytest stays out of the CI runtime install.
 
 ### Workspace cleanup (same pass, 2026-08-23)
 
@@ -153,6 +152,23 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
+
+- **One in-prompt example does not generalize the R4.6 screen's judgment
+  categories.** The 2026-09-20 morning fix restored reasoning tokens for the
+  screen after they were caught passing a `sexual_suggestive` question with
+  thinking off. A same-day replay, with reasoning already restored, still
+  missed a live paraphrase of the identical shape ("...dangerously flirty?")
+  while correctly catching the literal in-prompt example ("...excellent in
+  bed?"). Fixed by adding the paraphrase as a second calibration example
+  (`src/screen.py`), pinned by a deterministic test. The generalisable part:
+  reasoning tokens buy consistency on cases the model has already seen the
+  shape of; they don't buy category generalization. Any future screen category
+  should ship with **two** differently-worded examples, not one, and the
+  standing audit (`analysis/screen_log.csv`) is the only thing that would
+  catch a shape the taxonomy has zero examples of. `scripts/replay_screen.py`'s
+  FLIRT case is now a memorization check, not a generalization check, since its
+  question is also in the prompt — swap in a fresh paraphrase before trusting
+  a pass on it as proof the category holds.
 
 - **A CI shift with no granted tools "succeeds" having done nothing.** The
   first scheduled shift (2026-09-20 13:35) ran green and produced no commit, no
@@ -249,22 +265,10 @@ a list nobody can read is the same as no list.
   `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
   min later; acceptable", and README/PRD still describe the slots as 00:00 and
   12:00 UTC. Noticed 2026-09-09.
-- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload.**
-  Recorded here because the *class* of bug matters more than the fix: the
-  Analytics API returns no row at all for a video with exactly 0 views, and
-  `load_videos` did `if not s: continue`. So the uploads that vanished from
-  every median, every `--by` grouping and the zero-view count were precisely
-  the worst performers — and among them **both surviving confirmed-suppression
-  cases** (`VDH3pSafyE0`, `_0MNAf8AzNg`), i.e. the entire evidence base for
-  R4.6's skip categories was invisible to the tool the PRD tells you to verify
-  it with. Measured effect on the live channel: zero-view uploads **1 → 4**,
-  cohort **118 → 121**; headline medians unchanged. A missing row is now read
-  as a genuine zero, except for non-public videos, which are excluded and
-  counted in a printed note. Non-public vs cold-spell vs isolated was already
-  encoded in `classify_zero_views` — it just had never been carried into the
-  join. Worth remembering that `--zeros` was right all along while the overview
-  was wrong: two paths over the same question disagreed for weeks and nothing
-  flagged it.
+- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload**
+  (including both confirmed-suppression cases), because the Analytics API
+  returns no row for an exact 0 and the join treated a missing row as
+  "exclude" rather than "zero". A missing row now reads as a genuine zero.
 
 - **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
   is shared between production and any local analysis.** On 2026-09-10 an R4.3

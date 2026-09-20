@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v6` pending review (R4.6 screen retiered after the first standing audit); `v5` live since 2026-08-23; R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker, whose Step-0 gate needs a decision — see §0 Delivery plan |
+| **Status** | `v6` live since 2026-09-19 (R4.6 screen retiered after the first standing audit, Gemini thinking-timeout fix, analytics zero-view fix); R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker, whose Step-0 gate needs a decision — see §0 Delivery plan |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-09-19 · **Live format:** `v5` (suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18) · **Pending owner review:** `v6` — four branches, integrated and green on `integration/preview` (78 tests). See *Pending review* below.
+**Last updated:** 2026-09-20 · **Live format:** `v6` (R4.6 screen retiered + Gemini thinking-timeout fix + analytics zero-view fix, merged 2026-09-19; suppression screen 2026-08-23; v4 Sprint 1 2026-07-22; v3 packaging 2026-07-19; v2 retention overhaul 2026-07-18). `integration/preview` is stale (14 commits behind `main`) — the four branches below merged directly to `main`, not through it.
 
 > **Cadence model (revised 2026-07-22):** work is sorted onto two tracks by *whether we'll act on a change's individual result*, not by theme — a **bar-raising batch** (high-confidence keepers, shipped fast) and an **experiment backlog** (bets, isolated + baked with a pre-committed decision rule). The old "bake every version ~1 month" rule conflated attribution with validation; see §8 for the full rationale and the [Delivery plan](#delivery-plan) below for the concrete bucketing. The v1→v2 retention read that v3's metadata-only design kept clean was cashed in on 2026-07-27 — see §4 Findings.
 
@@ -26,35 +26,9 @@
 - Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent + expanded scopes (2026-07-19 — ended the weekly token chore) · R1.3 b-roll library completed (2026-08-15, 7 clips — first live use on the next scheduled run after push) · R4.7 traffic-source telemetry (2026-09-07, via `feature/r4.7-traffic-source`) — `analysis/traffic_sources.csv` + a digest line; first snapshot says distribution is **96.7% Shorts feed** on current-format uploads, search **1.3%**
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
-
-#### Pending owner review *(nothing merged; `main` is untouched)*
-
-All four branches merge cleanly in this order and pass 78 tests together —
-`integration/preview` is the assembled artifact to review. Two conflicts, both
-append-only list regions (`TECH_DEBT.md` open items, `log.py` FIELDS), resolved
-by keeping both sides.
-
-| # | Branch | What it is | Risk |
-|---|---|---|---|
-| 1 | `chore/cost-guardrails` | Polly cost rules recorded where every agent sees them (`CLAUDE.md`, new) + a per-process character budget enforcing them + the neural engine pinned as a deliberate paid choice | Low — no-op at production volumes |
-| 2 | `fix/gemini-thinking-timeouts` | **Live regression fix.** Disables gemini-2.5-flash thinking; adds `title_ok`/`keywords_ok`/`cta_ok`; stops logging a `title_style` that was never applied | Medium — changes what ships |
-| 3 | `feature/r4.6-taxonomy-narrow` | `v6` screen retiering (the original pending item) | Medium — content selection |
-| 4 | `fix/analytics-drops-zero-views` | **Analysis correctness fix.** 0-view uploads were dropped from every median and every cohort | Low — read-only tooling |
-
-**⚠️ Two checks outstanding before any of this reaches `main`**, both needing Gemini quota (run after 07:00 UTC): (a) one `llm.get_metadata` call, to confirm the merged prompt returns a sane title/keywords/CTA — merging three focused prompts into one multi-task prompt can degrade each task, and that is **not yet validated**; (b) the screen replay below.
-
-**Check (b):** `scripts/replay_screen.py`
-must pass. It validates two things at once — `named_wrongdoing` (the item `v6`
-has been waiting on since 2026-09-09) and whether the R4.6 screen's JSON
-verdicts still hold with thinking disabled, which branch 2 changes. It could
-not run on 2026-09-19: the daily Gemini budget was exhausted. **Run it after
-07:00 UTC**, when the quota resets.
-
-**A dry run on the integrated state did pass** (2026-09-19, Gemini exhausted):
-18.8s video, b-roll, captions, thumbnail and SRT all produced, `format=v6`, the
-Polly guard did not interfere, and the new `title_style`-blanking fired
-correctly. That was an unintentionally good test of the degraded path, since it
-is exactly what a quota-exhausted run looks like.
+- **`v6` — merged to `main` 2026-09-19** (four branches: cost guardrails, Gemini thinking-timeout fix, R4.6 screen retiering, analytics zero-view fix). The pre-merge checks below passed. `integration/preview` was the assembled review artifact and is now stale — treat it as retired, not as a second copy of `main`.
+  - Both Gemini-quota checks passed live: the merged `llm.get_metadata` prompt, and `scripts/replay_screen.py`.
+  - **2026-09-20 follow-up:** the 08:17 UTC CI gate (`validate-release.yml`, added with this merge) caught a live regression the merge introduced — disabling Gemini thinking everywhere also silently disabled it for the R4.6 screen, which needs it to reason. Fixed same-day (`src/screen.py`); see `WORKLOG.md` 2026-09-20 for the full incident and a second generalization gap the fix exposed.
 
 #### Next keepers
 

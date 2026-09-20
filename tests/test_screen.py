@@ -225,3 +225,15 @@ def test_the_screen_asks_for_reasoning(monkeypatch):
     screen.screen("A harmless question?", ["a", "b", "c", "d"])
 
     assert seen["budget"] > 0, "the screen must request reasoning tokens"
+
+
+def test_prompt_generalizes_sexual_suggestive_beyond_one_example():
+    """Pins a live regression found 2026-09-20, same day as the fix above.
+
+    Restoring reasoning tokens was not enough on its own: a live replay still
+    missed replay_screen.py's paraphrase ("...dangerously flirty?") while
+    correctly catching the literal in-prompt example ("...excellent in bed?").
+    One example doesn't generalize a category — the paraphrase now needs to be
+    an explicit calibration example too, not just a held-out test case.
+    """
+    assert "dangerously flirty" in screen._PROMPT
