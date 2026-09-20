@@ -81,8 +81,12 @@ jobs:
           grep -q "spent >= ceiling" scripts/shift_budget.py \
             || { echo "::error::shift_budget no longer refuses when over the ceiling"; exit 1; }
           grep -q "SHIFT_WEEKLY_QUOTA_BUDGET" .github/workflows/shift.yml \
-            || { echo "::error::the shift workflow no longer checks the budget"; exit 1; }
-          echo "weekly cost ceiling is still enforced"
+            || { echo "::error::the shift workflow no longer checks its quota budget"; exit 1; }
+          grep -q "used >= ceiling" scripts/shift_budget.py \
+            || { echo "::error::the Actions-minutes guard no longer refuses"; exit 1; }
+          grep -q "shift_budget.py actions" .github/workflows/shift.yml \
+            || { echo "::error::the shift workflow no longer checks Actions minutes"; exit 1; }
+          echo "quota allowance and Actions-minutes guard both still enforced"
 
       - name: Secrets still ignored
         run: |

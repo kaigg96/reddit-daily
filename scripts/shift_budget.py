@@ -111,10 +111,67 @@ def record(output, ledger, run_id, model, effort):
     return 0
 
 
+def actions_minutes(repo, token, days=30):
+    """Minutes of GitHub Actions this repo has used recently.
+
+    The free allowance on a private repo is 2000/month. Exhausting it does not
+    produce a bill -- it STOPS Actions, which means the video pipeline stops
+    publishing. That is a far worse outcome than a shift being skipped, so
+    shifts yield to the pipeline rather than competing with it.
+    """
+    import urllib.request
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cut = now - datetime.timedelta(days=days)
+    total, page = 0.0, 1
+    while page <= 5:
+        req = urllib.request.Request(
+            f"https://api.github.com/repos/{repo}/actions/runs?per_page=100&page={page}",
+            headers={"Authorization": f"Bearer {token}",
+                     "Accept": "application/vnd.github+json"})
+        try:
+            data = json.load(urllib.request.urlopen(req))
+        except Exception as e:
+            print(f"could not read Actions usage ({type(e).__name__}) — not blocking")
+            return None
+        runs = data.get("workflow_runs") or []
+        if not runs:
+            break
+        for r in runs:
+            try:
+                st = datetime.datetime.fromisoformat(r["run_started_at"].replace("Z", "+00:00"))
+                if st < cut:
+                    continue
+                en = datetime.datetime.fromisoformat(r["updated_at"].replace("Z", "+00:00"))
+                mins = (en - st).total_seconds() / 60
+                if 0 <= mins <= 180:      # ignore absurd values from stuck runs
+                    total += mins
+            except Exception:
+                continue
+        page += 1
+    return total
+
+
+def check_actions(repo, token, allowance, reserve_share):
+    used = actions_minutes(repo, token)
+    if used is None:
+        return 0                      # unreadable must not block the shift
+    ceiling = allowance * reserve_share
+    print(f"Actions used ~{used:.0f} of {allowance:.0f} min this month "
+          f"(shifts stop at {ceiling:.0f}, leaving the rest for the video pipeline)")
+    if used >= ceiling:
+        print("OVER — skipping this shift so the channel keeps publishing.")
+        return 1
+    return 0
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "check":
         sys.exit(check(sys.argv[2], float(sys.argv[3])))
     if cmd == "record":
         sys.exit(record(*sys.argv[2:7]))
+    if cmd == "actions":
+        # repo, token, allowance, reserve_share
+        sys.exit(check_actions(sys.argv[2], sys.argv[3],
+                               float(sys.argv[4]), float(sys.argv[5])))
     sys.exit(__doc__)

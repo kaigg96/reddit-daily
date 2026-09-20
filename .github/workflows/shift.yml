@@ -86,24 +86,40 @@ jobs:
             echo "proceed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Remember where this shift started
+      # Actions minutes are a separate finite resource from Claude quota, and
+      # running out does not bill -- it STOPS Actions, which stops the channel
+      # publishing. Shifts yield to the pipeline rather than compete with it.
+      - name: Enough Actions minutes left?
+        id: minutes
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
+        run: |
+          if python3 scripts/shift_budget.py actions "${{ github.repository }}" \
+               "${{ github.token }}" "${{ vars.ACTIONS_MONTHLY_ALLOWANCE || '2000' }}" \
+               "${{ vars.SHIFT_ACTIONS_SHARE || '0.70' }}"; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Actions minutes are running low — skipping this shift so the video pipeline keeps running."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Remember where this shift started
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
-        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         with:
           python-version: '3.10'
           cache: pip
 
       - name: Install
-        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
           python -m venv venv
           venv/bin/pip install -q -r requirements.txt -r requirements-dev.txt
 
       - uses: anthropics/claude-code-action@v1
-        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true'
+        if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: ${{ inputs.prompt || '/shift' }}
@@ -133,7 +149,7 @@ jobs:
       # Recorded whatever the outcome: a run that failed still spent quota,
       # and a ceiling that ignores failed runs is not a ceiling.
       - name: Record what this shift used
-        if: always() && steps.budget.outputs.proceed == 'true'
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
           python3 scripts/shift_budget.py record \
             /home/runner/work/_temp/claude-execution-output.json \
@@ -154,7 +170,7 @@ jobs:
       # without cluttering the issue tracker -- which is reserved for things
       # that actually need a decision from them.
       - name: Email the owner what this shift did
-        if: always() && steps.budget.outputs.proceed == 'true'
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -196,7 +212,7 @@ jobs:
       # "Co-Authored-By: Claude Sonnet 5" to both its commits anyway. Prose
       # lost to the action's default, so this is the rule in code.
       - name: No AI attribution in commits
-        if: always() && steps.budget.outputs.proceed == 'true'
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
           git fetch origin main --quiet
           bad=$(git log "$START_SHA"..HEAD --format='%H %s%n%b' 2>/dev/null \
@@ -213,7 +229,7 @@ jobs:
         # technicality AFTER doing its work, which skipped this check
         # entirely. A shift that fails still owes a handover -- but one that
         # never started, because the budget was spent, does not.
-        if: always() && steps.budget.outputs.proceed == 'true'
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
           git fetch origin main --quiet
           # Compare against where the shift STARTED, not origin/main — a shift
