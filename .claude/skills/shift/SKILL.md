@@ -77,8 +77,7 @@ day. Check in order, before allocating:
 
 **Maintenance** — is the pipeline healthy, are the logs sane, is anything
 silently failing? *Fail-soft without telemetry is indistinguishable from
-working* — that has bitten three times. Instrument a silent fallback before
-fixing it.
+working.* Instrument a silent fallback before fixing it.
 
 **Security** — a standing check: secrets never committed (`git log --all --
 .env client_secret.json token.json` empty, `.gitignore` covering them),
@@ -119,8 +118,7 @@ capacity, so it is the fallback when nothing else clears the bar. Three rules:
 - **Do not pivot on new information.** A finding joins the bottom of `PRD.md`
   §0's backlog and waits. Direction changes need data from our own channel.
 - **Discard aggressively.** Research that changes no decision is a sentence in
-  `WORKLOG.md`, not a document. **Never create new files in `analysis/` or new
-  top-level docs for it** — unread reports are pure maintenance cost.
+  `WORKLOG.md`, not a document. **Never create new files for it.**
 
 **Feature work** — the experiment backlog in `PRD.md` §0, in its stated order,
 under its pre-committed decision rules.

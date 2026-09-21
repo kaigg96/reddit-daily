@@ -88,6 +88,14 @@ jobs:
             || { echo "::error::the shift workflow no longer checks Actions minutes"; exit 1; }
           echo "quota allowance and Actions-minutes guard both still enforced"
 
+      # Left to human discipline, this check gets looked at and not acted on.
+      # It was pushed past four times in one day -- each time the exit code was
+      # captured into an echo, which always succeeds, so nothing ever gated on
+      # it. A rule that reports a fault and changes nothing teaches everyone to
+      # ignore it, so it is a build failure now.
+      - name: Context budget
+        run: python3 scripts/context_budget.py --check
+
       - name: Secrets still ignored
         run: |
           for f in .env client_secret.json token.json; do
