@@ -66,31 +66,30 @@ actually be measured.
   one from September read at a week old — which is what the rule always
   required and never had. It covers both of the measures the rule names, not
   just one, and needs no account access, so an unattended session can run it.
-- **Its first run would have thrown away the last two things we shipped.** It
-  said to roll back both the current video format and the background-video
-  library, on view drops of 50% and 39%. Checking that: the channel's view
-  counts move 27–52% between consecutive batches of uploads *with nothing
-  changed at all*. Both "drops" are the same few weeks of ordinary weather. The
-  tool now measures that background movement and will not call something a
-  regression unless it is bigger, and it prints the size of that limit beside
-  every answer, so nobody reads a clean result as proof a change worked.
+- **Its first run would have thrown away the last two things we shipped** —
+  roll back both the current video format and the background-video library, on
+  view drops of 50% and 39%. But the channel's view counts move 27–52% between
+  consecutive batches of uploads *with nothing changed at all*, and both
+  "drops" are the same few weeks of ordinary weather. The tool now measures
+  that background movement, will not call something a regression unless it is
+  bigger, and prints that limit beside every answer — so nobody reads a clean
+  result as proof a change worked.
 - Verdicts as of today: current format **keep**; background library **roll
   back, but see below**; newest release **no answer yet**, and it becomes
   answerable around 5 October.
 
 ### Project management
 - **A decision that is yours.** The rule rolls back a release if watch time
-  *or* views got worse. For the background library those two disagree: time
-  watched is up 22%, comfortably beyond the noise, while views are down 39%
-  against a noise limit of 38% — a one-point margin. So the rule says roll back
-  a change that improved the measure the plan calls primary, and doing that
-  would also mean discarding clips you chose. **Raised with you**; I have not
-  acted on it, and the tool shows the disagreement rather than hiding it.
-- **The same problem is waiting in the next experiment.** The planned
-  question-ranking experiment is pre-committed to "keep only if watch time and
-  views both hold or improve". Views cannot hold to that standard on this
-  channel at two uploads a day. Flagged in the plan rather than rewritten,
-  because it is the same decision as above.
+  *or* views got worse, and for the background library those two disagree:
+  time watched is up 22%, comfortably beyond the noise, while views are down
+  39% against a noise limit of 38%. So the rule says roll back a change that
+  improved the measure the plan calls primary — and doing that would discard
+  clips you chose. **Raised with you**; not acted on, and the tool shows the
+  disagreement rather than hiding it.
+- **The same problem waits in the next experiment**, which is pre-committed to
+  "keep only if watch time and views both hold or improve". Views cannot meet
+  that standard here at two uploads a day. Flagged in the plan rather than
+  rewritten, because it is the same decision as above.
 
 ### Maintenance
 - The daily check on the live code has now failed two mornings running, and I
