@@ -153,24 +153,33 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **A scheduled shift cannot answer any performance question, so the analysis
-  half of the PM and feature lanes is unreachable from CI.** `report.py` →
-  `insights.load_videos` calls live YouTube Analytics and dies on
-  `KeyError: 'YOUTUBE_REFRESH_TOKEN'`; `shift.yml` withholds the YouTube
-  secrets deliberately and correctly (a shift must not be able to upload).
-  Hit 2026-09-20 trying to re-run the topic analysis that gates R4.4, the
-  **top item in the PRD §0 backlog** — so the highest-priority feature work
-  is blocked on credentials a shift is not supposed to have. The data is
-  already in the repo: `analysis/analytics_snapshots.csv` has weekly
-  `views` / `avg_view_duration_s` / `avg_view_pct` per video. The fix is an
-  offline loader in `src/insights.py` reading the newest snapshot per
-  `video_id`, with the **read-only** path being the only thing a shift gets.
-  Deliberately not rushed at the end of a shift: `load_videos` encodes two
-  non-obvious rules a naive snapshot reader would silently break — a missing
-  Analytics row means a genuine zero (not absent data), and non-public videos
-  are excluded — and `insights.py` exists precisely because throwaway analysis
-  kept reaching wrong conclusions. A half-right offline path is worse than
-  none.
+- **`age_adjusted_residuals` has no `report.py` surface, so no flag-day change
+  has ever been evaluated.** Found 2026-09-21 while using the new offline path.
+  A release or a library switch applies to everything after it and nothing
+  before, so its cohorts differ in age by construction and `--compare` refuses
+  them — correctly. Checked: v4, v5 and the b-roll switch (R1.3) all refuse on
+  age-matching; v6 is simply too young. `insights.age_adjusted_residuals` is
+  written and tested for exactly this case ("use when cohorts *can't* be
+  age-matched") and is reachable from nothing. Consequence is bigger than the
+  gap: `/shift` §5's auto-revert rule names `--compare` as the check that
+  substitutes for owner review of every merge, so that guardrail has never been
+  able to fire. Escalated (`auto-revert-unfireable`) because the rule is the
+  owner's; the build is not, and is the next shift's first item —
+  `report.py --release <version>`, median residual of the cohort vs the rest,
+  same n-gate and zero-view handling as everything else. Known limit to state
+  when it ships: residuals model views only, so the first version covers half
+  of what the rule claims.
+
+- ~~**A scheduled shift cannot answer any performance question.**~~ **Fixed
+  2026-09-21** — `insights.load_videos_offline` + `report.py --offline` read
+  the committed weekly snapshot. The three rules it had to encode, and the one
+  it cannot, are in the commit message and pinned by tests. **Residual:** the
+  snapshot records no privacy status, so an owner-privatised upload reads as
+  zero-view offline where the live path excludes it. Bounded (zeros are already
+  excluded from medians, so only the zero count moves) and printed on every
+  offline run. If that ever needs closing, the fix is a `privacy_status` column
+  in `weekly_analytics.py`, which costs one extra Data API call per snapshot —
+  not worth doing until a question turns on it.
 
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
