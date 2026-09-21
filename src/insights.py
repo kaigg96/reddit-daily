@@ -30,6 +30,8 @@ from . import config
 
 # A comparison needs at least this many videos per side to report a number.
 MIN_COHORT = 8
+# Below this relative change, two cohorts are "the same".
+MATERIAL = 0.05
 # Analytics lags ~1-2 days; younger videos have meaningless stats.
 MIN_AGE_DAYS = 3
 
@@ -52,6 +54,9 @@ class Video:
     likes: float = 0.0
     comments: float = 0.0
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
+    # Set only by load_videos_at_age, where `published` is deliberately
+    # synthetic so that every age rule applies unchanged. See that docstring.
+    true_published: datetime.datetime = None
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
@@ -88,10 +93,18 @@ class Comparison:
             return "not age-matched — unreliable"
         if self.b.median == 0:
             return "no baseline"
-        delta = (self.a.median - self.b.median) / self.b.median
-        if abs(delta) < 0.05:
+        if abs(self.delta) < MATERIAL:
             return "no material difference"
-        return f"{'better' if delta > 0 else 'worse'} by {abs(delta):.0%}"
+        return f"{'better' if self.delta > 0 else 'worse'} by {abs(self.delta):.0%}"
+
+    @property
+    def delta(self):
+        """Relative change of a against b — None when nothing can be concluded."""
+        if not (self.a.sufficient and self.b.sufficient) or not self.age_matched:
+            return None
+        if not self.b.median:
+            return None
+        return (self.a.median - self.b.median) / self.b.median
 
     def render(self):
         lines = [f"{self.metric}: {self.a.label} vs {self.b.label} -> {self.verdict}"]
@@ -179,6 +192,118 @@ def split_by(videos, key):
     for v in videos:
         out.setdefault(str(v.meta.get(key, "")).strip() or "(unset)", []).append(v)
     return out
+
+
+def release_cohorts(videos, key, value):
+    """Split for a revert decision: the release against **what preceded it**.
+
+    `split_cohorts` answers "this value vs every other value", which is right
+    for a dimension like topic and wrong for a release. Once a later version
+    ships, "every other value" mixes the predecessor era with the successor
+    era, and the question being answered stops being the revert question —
+    *was this worse than the thing it replaced?* Uploads published after the
+    release began are dropped rather than folded into its baseline.
+
+    Returns (release, preceding, unset, later_count).
+    """
+    a, b, unset = split_cohorts(videos, key, value)
+    if not a:
+        return a, b, unset, 0
+    started = min((v.true_published or v.published) for v in a)
+    preceding = [v for v in b if (v.true_published or v.published) < started]
+    return a, preceding, unset, len(b) - len(preceding)
+
+
+def drift_floor(videos, metric, block=MIN_COHORT):
+    """How much `metric` moves between consecutive groups of uploads anyway.
+
+    Age-matching removes the age confound; it does not remove the *calendar*
+    one. Measured on the real channel, median views at seven days old run 82 →
+    228 → 114 → 62 by half-month while the format was unchanged for most of it
+    — a 2.8x swing inside a single version. Any release-vs-predecessor test on
+    views will attribute that swing to the release: the first two run against
+    live data said "revert" for both `v5` and the b-roll library on drops of
+    50% and 39%, which is ordinary weather on this channel.
+
+    So the release check carries its own detection limit. Blocks are
+    `MIN_COHORT` uploads in publish order — the smallest group this module will
+    report a median for at all — and the floor is the median absolute change
+    between adjacent blocks. Returns None when there is not enough history.
+
+    Known limit, worth stating rather than hiding: the era used as the
+    reference contains the releases that preceded this one, so it measures
+    "how much this moves between consecutive batches in normal operation",
+    not pure noise. That makes the floor generous and the check conservative —
+    it will miss a small real regression before it invents one.
+    """
+    live = sorted([v for v in videos if v.views > 0],
+                  key=lambda v: v.true_published or v.published)
+    blocks = [live[i:i + block] for i in range(0, len(live) - block + 1, block)]
+    deltas = []
+    for x, y in zip(blocks, blocks[1:]):
+        mx, my = median([v.get(metric) for v in x]), median([v.get(metric) for v in y])
+        if mx:
+            deltas.append(abs(my - mx) / mx)
+    return median(deltas) if deltas else None
+
+
+def release_verdict(comparisons, floors=None):
+    """Fold `/shift` §5: a release that degraded watch-seconds **or** views is
+    reverted — unless the drop is no bigger than the channel's own drift.
+
+    Everything short of a clean, separable answer is an explicit "no verdict",
+    never silence. The guardrail spent four releases returning nothing at all
+    and reading, to anyone glancing at it, like approval.
+    """
+    if not comparisons:
+        return "NO VERDICT — nothing to compare"
+    for c in comparisons:
+        if not (c.a.sufficient and c.b.sufficient):
+            return (f"NO VERDICT — under {MIN_COHORT} measurable uploads on one side; "
+                    f"bake longer")
+        if not c.age_matched:
+            return "NO VERDICT — cohorts are not age-matched"
+    floors = floors or {}
+    worse = []
+    for c in comparisons:
+        floor = floors.get(c.metric)
+        if (c.delta is not None and c.delta < 0 and abs(c.delta) >= MATERIAL
+                and (floor is None or abs(c.delta) > floor)):
+            worse.append(c.metric)
+    if worse:
+        return f"REVERT — {' and '.join(worse)} degraded beyond the channel's own drift"
+    return "KEEP — nothing degraded beyond the channel's own drift"
+
+
+def render_release(comparisons, floors):
+    """The release answer in full: both metrics, each with the size of change
+    that would have to be exceeded to mean anything, then the verdict."""
+    out = []
+    for c in comparisons:
+        out.append(c.render())
+        floor = floors.get(c.metric)
+        if floor is None:
+            out.append(f"    detection limit: not measurable — under {2 * MIN_COHORT} "
+                       f"measured uploads before this change")
+        else:
+            out.append(f"    detection limit: {floor:.0%} — median move in {c.metric} "
+                       f"between consecutive groups of {MIN_COHORT} uploads in the era "
+                       f"before it. Smaller than that is ordinary channel drift.")
+    # `/shift` §5 reverts on watch-seconds OR views, so a release can be
+    # reverted while the channel's *primary* metric says it worked. That is the
+    # rule as the owner wrote it and not a shift's to reinterpret — but it must
+    # not be read off a one-line verdict as if the two agreed.
+    moved = {c.metric: c.delta for c in comparisons
+             if c.delta is not None and floors.get(c.metric) is not None
+             and abs(c.delta) > floors[c.metric]}
+    if any(d > 0 for d in moved.values()) and any(d < 0 for d in moved.values()):
+        better = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d > 0)
+        worse = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d < 0)
+        out.append(f"    CONFLICT: {better} but {worse}. §5 reverts on either, so this "
+                   f"is the owner's call, not an automatic one.")
+    out.append("")
+    out.append(f"{release_verdict(comparisons, floors)}   (/shift §5 auto-revert rule)")
+    return "\n".join(out)
 
 
 def age_adjusted_residuals(videos, now):
@@ -388,6 +513,118 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
         if v.age_days(asof) >= min_age_days:
             videos.append(v)
     return OfflineLoad(videos, asof, too_new, absent)
+
+
+# --------------------------------------------- age-matched reads (snapshot series)
+
+# The first weekly snapshot after publication. Shorts distribution is largely
+# decided in the first days, and this is the age with the most coverage.
+AGE_MATCH_TARGET_DAYS = 7
+# Half the weekly cadence, so no video has two candidate snapshots and none is
+# counted twice.
+AGE_MATCH_TOLERANCE_DAYS = 3.5
+
+
+@dataclass
+class AgeMatchedLoad:
+    """Uploads as they looked at a common age, with what that could not cover."""
+    videos: list
+    anchor: datetime.datetime = None
+    target_age: float = AGE_MATCH_TARGET_DAYS
+    not_yet: list = field(default_factory=list)      # too young to have reached it
+    no_coverage: list = field(default_factory=list)  # old, but no snapshot at that age
+
+    def caveats(self):
+        if not self.videos:
+            return ["no weekly snapshot covers any upload at that age — nothing to report"]
+        out = [f"every median below is measured at ~{self.target_age:.0f} days old, not "
+               f"today; that is what makes releases from different months comparable"]
+        if self.not_yet:
+            out.append(f"{len(self.not_yet)} upload(s) have not reached "
+                       f"{self.target_age:.0f} days yet — excluded as unmeasured, NOT "
+                       f"counted as zero-view")
+        if self.no_coverage:
+            out.append(f"{len(self.no_coverage)} older upload(s) have no snapshot at that "
+                       f"age (they predate the weekly series) — excluded")
+        out.append("privacy is not recorded in the snapshots, so an owner-privatised "
+                   "upload reads as zero-view; medians are unaffected (zeros are excluded "
+                   "from them) but the zero count may overstate suppression")
+        return out
+
+
+def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
+                       tolerance_days=AGE_MATCH_TOLERANCE_DAYS):
+    """Every logged upload as it looked at ~`target_age_days` old.
+
+    Rule 2 says cohorts must be age-matched, and a release can never satisfy it
+    against a snapshot of today: it applies to every upload after it and none
+    before, so its two cohorts differ in age *by construction* and `compare`
+    correctly refuses them. That is why `/shift` §5's auto-revert guardrail has
+    never once produced a verdict — see issue #16.
+
+    The weekly snapshot series is the way out. Each one records every channel
+    video's metrics on that date, so a July upload has a row from when it was a
+    week old and so does a September one. Reading both at the same age makes
+    the eras genuinely comparable, on **watch-seconds as well as views** —
+    which is the whole of what the rule claims, not the half an age-trend
+    regression on views could have covered.
+
+    `published` on the returned videos is **synthetic**: set so each video's age
+    at `anchor` equals the age it was measured at, which is what lets every
+    existing rule (`ages_comparable`, `summarize`, `compare`) apply unchanged.
+    The real publish time is on `true_published`; nothing should read
+    `published` as a date.
+
+    Uploads with no snapshot inside the window are excluded and counted, never
+    scored zero — the same rule `load_videos_offline` had to learn.
+    """
+    if not (config.ANALYTICS_SNAPSHOTS.exists() and config.UPLOAD_LOG.exists()):
+        return AgeMatchedLoad([])
+    by_video = {}
+    with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
+        for r in csv.DictReader(f):
+            if r.get("snapshot_date") and r.get("video_id"):
+                by_video.setdefault(r["video_id"], []).append(r)
+    if not by_video:
+        return AgeMatchedLoad([])
+
+    latest = max(r["snapshot_date"] for rows in by_video.values() for r in rows)
+    anchor = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+
+    with open(config.UPLOAD_LOG) as f:
+        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+
+    videos, not_yet, no_coverage = [], [], []
+    for row in rows:
+        published = _parse_ts(row["timestamp_utc"])
+        best = None
+        for s in by_video.get(row["video_id"], []):
+            when = datetime.datetime.fromisoformat(s["snapshot_date"]).replace(
+                tzinfo=datetime.timezone.utc)
+            age = (when - published).total_seconds() / 86400
+            if abs(age - target_age_days) > tolerance_days:
+                continue
+            if best is None or abs(age - target_age_days) < abs(best[0] - target_age_days):
+                best = (age, s)
+        if best is None:
+            reached = (anchor - published).total_seconds() / 86400
+            (not_yet if reached < target_age_days - tolerance_days
+             else no_coverage).append(row["video_id"])
+            continue
+        age, s = best
+        meta = _with_derived_dimensions(row)
+        videos.append(Video(
+            video_id=row["video_id"],
+            published=anchor - datetime.timedelta(days=age),
+            true_published=published,
+            views=float(s.get("views") or 0),
+            watch_seconds=float(s.get("avg_view_duration_s") or 0),
+            avg_view_pct=float(s.get("avg_view_pct") or 0),
+            likes=float(s.get("likes") or 0),
+            comments=float(s.get("comments") or 0),
+            meta=meta,
+        ))
+    return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage)
 
 
 # ---------------------------------------------------------------- zero-view analysis

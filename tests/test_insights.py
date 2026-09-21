@@ -629,3 +629,288 @@ def test_offline_with_no_snapshot_file_reports_rather_than_crashes(tmp_path, mon
     assert load.videos == [] and load.asof is None
     assert load.caveats() == ["no analytics snapshot on disk — nothing to report"]
 
+
+
+# ------------------------------- the auto-revert check (issue #16, /shift §5)
+#
+# The guardrail that substitutes for owner review of every merge says a release
+# that degraded watch-seconds or views gets reverted. It never once produced a
+# verdict: a release applies to every upload after it and none before, so its
+# cohorts differ in age *by construction* and `compare` correctly refuses them.
+# Reading each upload at the same age, from the weekly snapshot series, is what
+# makes the comparison possible at all. These pin that.
+
+def _write_series(tmp_path, monkeypatch, uploads, snapshots):
+    """uploads: [(video_id, published, format_version)]
+    snapshots: [(date, video_id, views, watch)]"""
+    from src import config
+    log = tmp_path / "upload_log.csv"
+    with open(log, "w", newline="") as f:
+        f.write("timestamp_utc,video_id,post_title,video_title,bg_clip,format_version\n")
+        for vid, published, fv in uploads:
+            f.write(f"{published.isoformat()},{vid},q,t,pexels_1.mp4,{fv}\n")
+    snap = tmp_path / "analytics_snapshots.csv"
+    with open(snap, "w", newline="") as f:
+        f.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
+        for date, vid, views, watch in snapshots:
+            f.write(f"{date},{vid},,{views},0,0,0,0,{watch},50\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+
+def _era(prefix, start_day, n, fv, views, watch, snapshot_gap=7):
+    """n uploads from 2026-07-`start_day`, each with a snapshot `snapshot_gap`
+    days later — i.e. every one of them measured at the same age."""
+    uploads, snaps = [], []
+    for i in range(n):
+        published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
+            + datetime.timedelta(days=start_day + i)
+        uploads.append((f"{prefix}{i}", published, fv))
+        snaps.append(((published + datetime.timedelta(days=snapshot_gap)).date().isoformat(),
+                      f"{prefix}{i}", views, watch))
+    return uploads, snaps
+
+
+def _two_eras(tmp_path, monkeypatch, new_views=200, new_watch=10.0,
+              old_views=200, old_watch=10.0, n=10):
+    old_u, old_s = _era("old", 0, n, "v4", old_views, old_watch)
+    new_u, new_s = _era("new", 60, n, "v5", new_views, new_watch)
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+
+def _verdict(version="v5", key="format_version"):
+    load = insights.load_videos_at_age()
+    a, b, unset, later = insights.release_cohorts(load.videos, key, version)
+    comparisons = [insights.compare(a, b, "release", "before", load.anchor, m)
+                   for m in (Metric.WATCH, Metric.VIEWS)]
+    return insights.release_verdict(comparisons), comparisons
+
+
+def test_a_release_becomes_age_matched_when_read_at_a_common_age(tmp_path, monkeypatch):
+    """The whole point. Two eras two months apart are un-comparable today, and
+    perfectly comparable at seven days old."""
+    _two_eras(tmp_path, monkeypatch)
+    verdict, comparisons = _verdict()
+    assert all(c.age_matched for c in comparisons)
+    assert verdict == "KEEP — nothing degraded beyond the channel's own drift"
+
+
+def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch):
+    _two_eras(tmp_path, monkeypatch, new_watch=6.0, old_watch=10.0)
+    verdict, _ = _verdict()
+    assert verdict == "REVERT — watch_seconds degraded beyond the channel's own drift"
+
+
+def test_either_metric_degrading_is_enough_to_revert(tmp_path, monkeypatch):
+    """The rule says watch-seconds *or* views, so a release that held retention
+    while halving distribution must not read as a pass."""
+    _two_eras(tmp_path, monkeypatch, new_views=100, old_views=200)
+    verdict, _ = _verdict()
+    assert verdict == "REVERT — views degraded beyond the channel's own drift"
+
+
+def test_a_release_too_young_to_judge_says_so_instead_of_nothing(tmp_path, monkeypatch):
+    """Four releases shipped under a guardrail that returned nothing at all,
+    which read like approval. A refusal has to be loud."""
+    _two_eras(tmp_path, monkeypatch, n=4)
+    verdict, _ = _verdict()
+    assert verdict.startswith("NO VERDICT")
+    assert "bake longer" in verdict
+
+
+def test_uploads_not_yet_old_enough_are_unmeasured_never_zero(tmp_path, monkeypatch):
+    """Same trap as the offline loader: the ~14 uploads too young to have
+    reached the age must not be scored zero, which would invent suppression."""
+    old_u, old_s = _era("old", 0, 10, "v4", 200, 10.0)
+    new_u, new_s = _era("new", 60, 10, "v5", 200, 10.0)
+    baby = (datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+            + datetime.timedelta(days=80))
+    _write_series(tmp_path, monkeypatch, old_u + new_u + [("baby", baby, "v5")],
+                  old_s + new_s)
+
+    load = insights.load_videos_at_age()
+
+    assert load.not_yet == ["baby"]
+    assert "baby" not in {v.video_id for v in load.videos}
+    assert any("NOT counted as zero-view" in c for c in load.caveats())
+
+
+def test_uploads_predating_the_snapshot_series_are_excluded_not_zero(tmp_path, monkeypatch):
+    old_u, old_s = _era("old", 0, 10, "v4", 200, 10.0)
+    new_u, new_s = _era("new", 60, 10, "v5", 200, 10.0)
+    ancient = datetime.datetime(2025, 1, 1, tzinfo=datetime.timezone.utc)
+    _write_series(tmp_path, monkeypatch, old_u + new_u + [("ancient", ancient, "v1")],
+                  old_s + new_s)
+
+    load = insights.load_videos_at_age()
+
+    assert load.no_coverage == ["ancient"]
+    assert any("predate the weekly series" in c for c in load.caveats())
+
+
+def test_the_baseline_is_what_the_release_replaced_not_its_successors(tmp_path, monkeypatch):
+    """`split_cohorts` would fold a later version into the baseline, quietly
+    changing the question from "was this worse than what it replaced?" to
+    something no rule asks."""
+    old_u, old_s = _era("old", 0, 10, "v4", 200, 10.0)
+    mid_u, mid_s = _era("mid", 60, 10, "v5", 200, 10.0)
+    new_u, new_s = _era("new", 120, 10, "v6", 20, 1.0)   # a disaster, after v5
+    _write_series(tmp_path, monkeypatch, old_u + mid_u + new_u, old_s + mid_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, later = insights.release_cohorts(load.videos, "format_version", "v5")
+
+    assert later == 10
+    assert {x.meta["format_version"] for x in b} == {"v4"}
+    assert insights.release_verdict(
+        [insights.compare(a, b, "r", "p", load.anchor, m)
+         for m in (Metric.WATCH, Metric.VIEWS)]).startswith("KEEP")
+
+
+def test_only_one_snapshot_per_upload_is_used(tmp_path, monkeypatch):
+    """A video has ten weekly rows and must contribute exactly one, or it skews
+    its own cohort's median. The window is half the weekly cadence, so only one
+    row can ever fall inside it — and if the cadence ever changed, the row
+    nearest the target age wins rather than the first one seen."""
+    published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+    _write_series(
+        tmp_path, monkeypatch, [("a", published, "v5")],
+        snapshots=[("2026-07-05", "a", 100, 9.0),    # age 4 — inside
+                   ("2026-07-08", "a", 400, 11.0),   # age 7 — inside and nearer
+                   ("2026-07-12", "a", 900, 12.0),   # age 11 — outside
+                   ("2026-07-19", "a", 1600, 13.0)])
+
+    load = insights.load_videos_at_age()
+
+    assert [x.video_id for x in load.videos] == ["a"]
+    assert load.videos[0].views == 400
+
+
+def test_synthetic_publish_dates_never_leak_as_real_ones(tmp_path, monkeypatch):
+    """`published` is rewritten so the existing age rules work unchanged. Any
+    code that needs the real date must reach for `true_published`."""
+    _two_eras(tmp_path, monkeypatch)
+    load = insights.load_videos_at_age()
+    assert all(x.true_published is not None for x in load.videos)
+    assert all(abs(x.age_days(load.anchor) - insights.AGE_MATCH_TARGET_DAYS) <= 3.5
+               for x in load.videos)
+
+
+def test_no_snapshot_series_reports_rather_than_crashes(tmp_path, monkeypatch):
+    from src import config
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", tmp_path / "missing.csv")
+    monkeypatch.setattr(config, "UPLOAD_LOG", tmp_path / "missing_log.csv")
+
+    load = insights.load_videos_at_age()
+
+    assert load.videos == [] and load.anchor is None
+    assert insights.release_verdict([]) == "NO VERDICT — nothing to compare"
+
+
+# --- the detection limit: age-matching does not remove the calendar confound -
+
+def _noisy_era(prefix, start_day, n, fv, view_cycle, watch=10.0):
+    """An era whose views swing between blocks with nothing changing."""
+    uploads, snaps = [], []
+    for i in range(n):
+        published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
+            + datetime.timedelta(days=start_day + i)
+        uploads.append((f"{prefix}{i}", published, fv))
+        snaps.append(((published + datetime.timedelta(days=7)).date().isoformat(),
+                      f"{prefix}{i}", view_cycle[(i // 8) % len(view_cycle)], watch))
+    return uploads, snaps
+
+
+def test_a_drop_inside_the_channels_own_drift_is_not_a_revert(tmp_path, monkeypatch):
+    """Run against live data, the first version of this check ordered reverting
+    both `v5` and the b-roll library on views drops of 50% and 39% — while
+    median day-7 views moved 82 -> 228 -> 114 -> 62 by half-month with the
+    format unchanged for most of it. A guardrail that fires on the weather
+    reverts good work."""
+    old_u, old_s = _noisy_era("old", 0, 32, "v4", [400, 100, 400, 100])
+    new_u, new_s = _era("new", 60, 16, "v5", 200, 10.0)   # mid-range, no real change
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+    comparisons = [insights.compare(a, b, "r", "p", load.anchor, m)
+                   for m in (Metric.WATCH, Metric.VIEWS)]
+    floors = {m: insights.drift_floor(b, m) for m in (Metric.WATCH, Metric.VIEWS)}
+
+    assert floors[Metric.VIEWS] > 0.5          # the era swings 4x on its own
+    assert insights.release_verdict(comparisons, floors).startswith("KEEP")
+
+
+def test_a_drop_larger_than_the_drift_still_reverts(tmp_path, monkeypatch):
+    """The floor must not defang the rule: a degradation bigger than the
+    channel's own movement is exactly what it exists to catch."""
+    old_u, old_s = _noisy_era("old", 0, 32, "v4", [220, 200, 220, 200])
+    new_u, new_s = _era("new", 60, 16, "v5", 40, 10.0)
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+    comparisons = [insights.compare(a, b, "r", "p", load.anchor, m)
+                   for m in (Metric.WATCH, Metric.VIEWS)]
+    floors = {m: insights.drift_floor(b, m) for m in (Metric.WATCH, Metric.VIEWS)}
+
+    assert floors[Metric.VIEWS] < 0.2
+    assert insights.release_verdict(comparisons, floors) == (
+        "REVERT — views degraded beyond the channel's own drift")
+
+
+def test_the_drift_floor_is_measured_before_the_change_not_on_it(tmp_path, monkeypatch):
+    """Measuring it on the release's own uploads would let a volatile release
+    excuse its own regression."""
+    old_u, old_s = _era("old", 0, 24, "v4", 200, 10.0)                 # steady
+    new_u, new_s = _noisy_era("new", 60, 24, "v5", [20, 900, 20, 900])  # wild
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+
+    assert insights.drift_floor(b, Metric.VIEWS) == 0      # the steady era
+    assert insights.drift_floor(a, Metric.VIEWS) > 1       # would have hidden anything
+
+
+def test_drift_floor_is_unmeasurable_rather_than_zero_on_thin_history():
+    """None means "cannot tell"; 0 would mean "this channel never moves" and
+    would wave every drop through as significant."""
+    assert insights.drift_floor([], Metric.VIEWS) is None
+    assert insights.drift_floor(
+        [v(f"a{i}", 10, views=100) for i in range(9)], Metric.VIEWS) is None
+
+
+def test_the_detection_limit_is_printed_with_every_release_answer(tmp_path, monkeypatch):
+    """A verdict without its detection limit invites reading "KEEP" as "proven
+    safe" — on views, this channel cannot prove anything under ~50%."""
+    _two_eras(tmp_path, monkeypatch)
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+    comparisons = [insights.compare(a, b, "r", "p", load.anchor, m)
+                   for m in (Metric.WATCH, Metric.VIEWS)]
+    out = insights.render_release(comparisons, {m: insights.drift_floor(b, m)
+                                                for m in (Metric.WATCH, Metric.VIEWS)})
+    assert out.count("detection limit") == 2
+    assert "/shift §5" in out
+
+
+def test_metrics_pointing_opposite_ways_are_called_out_not_flattened(tmp_path, monkeypatch):
+    """The b-roll library, live: watch-seconds +22% (limit 11%) and views -39%
+    (limit 38%). §5 reverts on either, so the verdict reads REVERT while the
+    channel's primary metric says the change worked. Both facts have to be on
+    screen or the one-line verdict misleads."""
+    old_u, old_s = _era("old", 0, 24, "v4", 200, 6.0)
+    new_u, new_s = _era("new", 60, 24, "v5", 100, 12.0)   # views halved, watch doubled
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+    metrics = (Metric.WATCH, Metric.VIEWS)
+    comparisons = [insights.compare(a, b, "r", "p", load.anchor, m) for m in metrics]
+    out = insights.render_release(comparisons, {m: insights.drift_floor(b, m)
+                                                for m in metrics})
+
+    assert "CONFLICT" in out and "the owner's call" in out
+    assert "REVERT" in out
