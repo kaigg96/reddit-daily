@@ -97,8 +97,10 @@ actually be measured.
   could not find out why: the failure detail only exists in a log an unattended
   session is not allowed to read, and re-running the check would have taken
   more of the shared daily AI allowance than was left after today's uploads.
-  Nothing suggests a live problem — today's upload generated everything
+  Nothing suggests a live problem — this morning's upload generated everything
   correctly — but it is unresolved and you already have an open issue about it.
+- The morning upload landed. **The evening one was still due when this shift
+  ended and is unconfirmed** — the next shift should check it first.
 - **The fix is a line in a file I am not permitted to change**, so I added it
   to the approval you already have waiting rather than raising a third request.
   Once approved, every future failure explains itself for free.
@@ -108,13 +110,12 @@ actually be measured.
   ignored, and every automated workflow's permissions are scoped.
 
 ### Research
-- Outside sources say a sub-1,000-subscriber channel normally gets 50–500
-  views in the first two days, with rare breakouts — our range sits inside
-  that, which independently supports the finding above: the swing is the
-  platform's per-video lottery, not something wrong with us. They also claim
-  the ranking now follows watch time; **our own numbers point the other way**
-  (time watched rose steadily while views fell), so it is recorded as a
-  question, not a fact. Nothing adopted.
+- Outside sources put 50–500 views in the first two days as normal for a
+  channel our size. We sit inside that, which independently supports the
+  finding above: the swing is the platform's per-video lottery, not something
+  wrong with us. They also claim ranking now follows watch time; **our own
+  numbers point the other way**, so it is filed as a question, not a fact.
+  Nothing adopted.
 
 ### Blocked
 - The roll-back rule's disagreement between the two measures needs your call.
