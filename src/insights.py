@@ -208,6 +208,20 @@ def _parse_ts(value):
     return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
+def _with_derived_dimensions(row):
+    """Group-able dimensions computed from an upload_log row.
+
+    Shared by both loaders on purpose: raw bg_clip is per-file
+    ("pexels_123.mp4", "procedural:8471"), too granular to group on, and two
+    loaders deriving it separately is a rule that drifts.
+    """
+    r = dict(row)
+    bg = (r.get("bg_clip") or "").strip()
+    r["background_type"] = ("(unknown)" if not bg else
+                            "procedural" if bg.startswith("procedural") else "broll")
+    return r
+
+
 def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
     """Join upload_log.csv against live Analytics. Only logged uploads appear,
     since analysis needs the experiment metadata to be meaningful."""
@@ -265,12 +279,7 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
             s = {"views": 0, "averageViewDuration": 0, "averageViewPercentage": 0,
                  "likes": 0, "comments": 0}
         published = _parse_ts(r["timestamp_utc"])
-        # Derived dimensions — raw bg_clip is per-file ("pexels_123.mp4",
-        # "procedural:8471"), which is too granular to group on.
-        r = dict(r)
-        bg = (r.get("bg_clip") or "").strip()
-        r["background_type"] = ("(unknown)" if not bg else
-                                "procedural" if bg.startswith("procedural") else "broll")
+        r = _with_derived_dimensions(r)
         v = Video(
             video_id=r["video_id"], published=published,
             views=float(s.get("views", 0)),
@@ -285,6 +294,100 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
         print(f"note: {len(excluded_non_public)} logged upload(s) excluded as "
               f"non-public (owner-privatised), not counted as zero-view")
     return videos
+
+
+# ------------------------------------------------- offline I/O (weekly snapshot)
+
+
+@dataclass
+class OfflineLoad:
+    """What the snapshot could and could not measure — returned together so a
+    caller cannot report the numbers without the caveats."""
+    videos: list
+    asof: datetime.datetime = None
+    too_new: list = field(default_factory=list)   # published after the snapshot
+    absent: list = field(default_factory=list)    # older, yet missing from it
+
+    def caveats(self):
+        if self.asof is None:
+            return ["no analytics snapshot on disk — nothing to report"]
+        out = [f"weekly snapshot as of {self.asof.date()}; every age and median "
+               f"below is measured at that date, not today"]
+        if self.too_new:
+            out.append(f"{len(self.too_new)} logged upload(s) postdate the snapshot "
+                       f"and are excluded as unmeasured — NOT counted as zero-view")
+        if self.absent:
+            out.append(f"WARNING: {len(self.absent)} upload(s) older than the snapshot "
+                       f"are missing from it (deleted from the channel?): "
+                       f"{', '.join(self.absent[:5])}")
+        out.append("privacy is not recorded in the snapshot, so an owner-privatised "
+                   "upload reads here as zero-view; medians are unaffected (zeros are "
+                   "excluded from them) but the zero count may overstate suppression")
+        return out
+
+
+def load_videos_offline(min_age_days=MIN_AGE_DAYS):
+    """Join upload_log.csv against the newest weekly analytics snapshot — the
+    read-only path, for callers with no YouTube credentials (every scheduled
+    shift: `shift.yml` withholds them deliberately, and correctly, so a shift
+    cannot upload). Live `load_videos` remains the authority.
+
+    Three rules the live path gets from the API and this one has to encode:
+
+    1. **Measure ages at the snapshot, not at wall-clock time.** The metrics
+       were frozen when the snapshot ran, so a video published the day before
+       it had one day to earn them however old it is now. Hence no `now`
+       parameter: `asof` is returned instead, and callers must pass it on to
+       every age-matched comparison.
+    2. **A logged upload absent from the snapshot is unmeasured, never a
+       zero.** These are the ~2/day published since it ran. Scoring them zero
+       invents suppression events wholesale — the exact false positive the
+       digest's zero-view alert was fixed for on 2026-08-23 (12 alerts → 1).
+    3. **A row that IS present with 0 views is a genuine zero.** The snapshot
+       writes one row per channel video and defaults a missing Analytics row to
+       0, so `load_videos`' hard-won "missing row means zero" is already baked
+       into the file.
+
+    The one thing it cannot do: the snapshot records no privacy status, so
+    owner-privatised uploads — which `load_videos` excludes — read as
+    zero-view. Bounded, not silent: see `OfflineLoad.caveats()`.
+    """
+    if not (config.ANALYTICS_SNAPSHOTS.exists() and config.UPLOAD_LOG.exists()):
+        return OfflineLoad([])
+    with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
+        snapshot_rows = [r for r in csv.DictReader(f) if r.get("snapshot_date")]
+    if not snapshot_rows:
+        return OfflineLoad([])
+
+    latest = max(r["snapshot_date"] for r in snapshot_rows)
+    # Midnight of the snapshot date: the run happens during that day, so this
+    # understates ages by under a day — conservative in the direction that
+    # drops a borderline-young video rather than admitting one.
+    asof = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+    stats = {r["video_id"]: r for r in snapshot_rows if r["snapshot_date"] == latest}
+
+    with open(config.UPLOAD_LOG) as f:
+        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+
+    videos, too_new, absent = [], [], []
+    for r in rows:
+        published = _parse_ts(r["timestamp_utc"])
+        s = stats.get(r["video_id"])
+        if s is None:
+            (too_new if published > asof else absent).append(r["video_id"])
+            continue
+        r = _with_derived_dimensions(r)
+        v = Video(
+            video_id=r["video_id"], published=published,
+            views=float(s.get("views") or 0),
+            watch_seconds=float(s.get("avg_view_duration_s") or 0),
+            avg_view_pct=float(s.get("avg_view_pct") or 0),
+            likes=float(s.get("likes") or 0), comments=float(s.get("comments") or 0),
+            meta=r,
+        )
+        if v.age_days(asof) >= min_age_days:
+            videos.append(v)
+    return OfflineLoad(videos, asof, too_new, absent)
 
 
 # ---------------------------------------------------------------- zero-view analysis

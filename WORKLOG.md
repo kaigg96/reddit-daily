@@ -50,6 +50,74 @@ Read the allocation series with
 
 ---
 
+## 2026-09-21 — the channel can now be measured without the keys to it
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 15→25 · research 5→0 · feature 45→45 · close 10→10
+
+**Summary:** Automated work sessions could not answer a single question about
+how the channel is performing, because the performance tool needed YouTube
+credentials that those sessions are deliberately denied. They can now, using
+the weekly performance data we already keep. The first thing it found is that
+the rule meant to catch a bad release has never been able to run.
+
+### Feature work
+- Performance reporting now has an offline mode that reads the weekly
+  performance data already stored in the project, so an unattended session can
+  check how the channel is doing without any account access. Three
+  easy-to-get-wrong rules are built in and locked down by tests — most
+  importantly that the fortnight of videos published since the last weekly data
+  pull are reported as *not yet measured* rather than as zero views, which
+  would have invented two weeks of fake disasters.
+- It states what it cannot see on every run rather than quietly guessing, and
+  refuses outright to answer the one question the stored data genuinely cannot
+  settle.
+
+### Project management
+- **The safety net behind unattended releases has never worked.** The rule says
+  a release that hurts performance is automatically rolled back, judged against
+  videos of a similar age. But a release applies to everything published after
+  it and nothing before, so there is never a similar-aged group to compare
+  against, and the check correctly refuses to answer — every time, for every
+  release we have shipped, and for the background-video library too. Nothing
+  was ever rolled back because nothing could ever produce a verdict. The right
+  measurement already exists in the project and simply has no way to be run.
+  **Raised with you as an issue**, since the rule is yours; the tool it needs is
+  ordinary work and is queued next.
+- **A blocker that had already been cleared cost the last session its feature
+  time.** The next planned experiment was recorded as waiting on an analysis
+  that had in fact been completed ten days earlier — the plan said so in one
+  place and the detailed spec still said "do not start" in another. Corrected.
+- **That experiment has a cost nobody had priced.** Picking a better question
+  than Reddit's top-ranked one means asking our AI service about several
+  candidates instead of one, and the free daily allowance is already tight
+  enough that it starved a live upload last week. Scanning ten candidates would
+  consume the entire day's allowance by itself. Recorded a cheaper design —
+  one combined request per run — that both fits the allowance and produces the
+  missing measurement the experiment needs before it can be judged.
+
+### Maintenance
+- Both scheduled uploads landed, and today's ran with every element generated
+  correctly — the title problem from last week has not recurred.
+
+### Security
+- Standing checks clean: no credentials have ever been committed, they remain
+  ignored, and every automated workflow's permissions are scoped.
+
+### Research
+- Nothing this shift. Project management turned up more than expected and the
+  time went there; this is the third consecutive shift at zero, and the process
+  flags a lane at five.
+
+### Blocked
+- The release-rollback rule needs your decision before the check can be pointed
+  at something that works.
+- Still waiting on the earlier request about the daily allowance the release
+  gate consumes.
+
+### Next
+- Build the release check the rule needs, so a release can finally be judged.
+- Then the slate measurement for the next experiment, under the cheaper design.
+
 ## 2026-09-20 (evening) — maintenance + PM (a guardrail that cost quota daily)
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 45→45 · security 10→5 · pm 15→20 · research 10→0 · feature 10→10 · close 10→10

@@ -490,3 +490,142 @@ def test_dropping_zero_view_uploads_biases_medians_upward(tmp_path, monkeypatch)
 
     assert watch == [0.0, 10.0, 20.0]      # the zero is present
     assert insights.median(watch) == 10.0  # not 15.0, which is what dropping it gave
+
+
+# ------------------------------------------- load_videos_offline (weekly snapshot)
+
+def _write_offline(tmp_path, monkeypatch, uploads, snapshots):
+    """uploads: [(video_id, published)] · snapshots: [(date, video_id, views, watch)]"""
+    from src import config
+    log = tmp_path / "upload_log.csv"
+    with open(log, "w", newline="") as f:
+        f.write("timestamp_utc,video_id,post_title,video_title,bg_clip\n")
+        for vid, published in uploads:
+            f.write(f"{published.isoformat()},{vid},q,t,pexels_1.mp4\n")
+    snap = tmp_path / "analytics_snapshots.csv"
+    with open(snap, "w", newline="") as f:
+        f.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
+        for date, vid, views, watch in snapshots:
+            f.write(f"{date},{vid},,{views},0,0,0,0,{watch},50\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+
+def test_offline_uploads_newer_than_the_snapshot_are_unmeasured_not_zero(
+        tmp_path, monkeypatch):
+    """The snapshot runs weekly and the channel uploads twice a day, so ~14
+    logged uploads always postdate it. Scoring them 0 would manufacture a
+    fortnight of suppression events — the 2026-08-23 digest false positive,
+    exactly."""
+    old = NOW - datetime.timedelta(days=30)
+    fresh = NOW - datetime.timedelta(days=1)          # after the snapshot below
+    _write_offline(
+        tmp_path, monkeypatch,
+        uploads=[("measured", old), ("fresh", fresh)],
+        snapshots=[("2026-08-20", "measured", 100, 12.0)],
+    )
+
+    load = insights.load_videos_offline()
+
+    assert [v.video_id for v in load.videos] == ["measured"]
+    assert load.too_new == ["fresh"]
+    assert load.absent == []
+    assert any("NOT counted as zero-view" in c for c in load.caveats())
+
+
+def test_offline_zero_view_rows_are_kept_as_genuine_zeros(tmp_path, monkeypatch):
+    """A row that IS in the snapshot with 0 views is real: weekly_analytics writes
+    one row per channel video and defaults a missing Analytics row to 0. Dropping
+    these would re-lose the suppression evidence load_videos was fixed to keep."""
+    old = NOW - datetime.timedelta(days=30)
+    _write_offline(
+        tmp_path, monkeypatch,
+        uploads=[("seen", old), ("zeroed", old)],
+        snapshots=[("2026-08-20", "seen", 100, 12.0), ("2026-08-20", "zeroed", 0, 0.0)],
+    )
+
+    load = insights.load_videos_offline()
+
+    assert {v.video_id for v in load.videos} == {"seen", "zeroed"}
+    assert load.too_new == []
+
+
+def test_offline_ages_are_measured_at_the_snapshot_not_today(tmp_path, monkeypatch):
+    """The metrics froze when the snapshot ran. A video published the day before
+    it had one day to earn them, however old it is now — so MIN_AGE_DAYS has to
+    bite against the snapshot date, and callers must age-match against `asof`."""
+    old = NOW - datetime.timedelta(days=30)
+    young_at_snapshot = datetime.datetime(2026, 8, 19, tzinfo=datetime.timezone.utc)
+    _write_offline(
+        tmp_path, monkeypatch,
+        uploads=[("measured", old), ("young", young_at_snapshot)],
+        snapshots=[("2026-08-20", "measured", 100, 12.0),
+                   ("2026-08-20", "young", 0, 0.0)],
+    )
+
+    load = insights.load_videos_offline()
+
+    # "young" is 4 days old today but was 1 day old when measured -> excluded.
+    assert [v.video_id for v in load.videos] == ["measured"]
+    assert load.asof == datetime.datetime(2026, 8, 20, tzinfo=datetime.timezone.utc)
+
+
+def test_offline_reads_the_newest_snapshot_per_video(tmp_path, monkeypatch):
+    """The file is an append-only weekly series; stale rows must not win."""
+    old = NOW - datetime.timedelta(days=30)
+    _write_offline(
+        tmp_path, monkeypatch,
+        uploads=[("measured", old)],
+        snapshots=[("2026-08-13", "measured", 50, 6.0),
+                   ("2026-08-20", "measured", 100, 12.0)],
+    )
+
+    load = insights.load_videos_offline()
+
+    assert load.videos[0].views == 100
+    assert load.videos[0].watch_seconds == 12.0
+
+
+def test_offline_flags_an_older_upload_missing_from_the_snapshot(tmp_path, monkeypatch):
+    """Absent-but-old means it left the channel (deleted, or never in the uploads
+    playlist) — a different thing from too-new, and worth saying out loud rather
+    than folding into the benign bucket."""
+    old = NOW - datetime.timedelta(days=30)
+    _write_offline(
+        tmp_path, monkeypatch,
+        uploads=[("measured", old), ("vanished", old)],
+        snapshots=[("2026-08-20", "measured", 100, 12.0)],
+    )
+
+    load = insights.load_videos_offline()
+
+    assert load.absent == ["vanished"]
+    assert load.too_new == []
+    assert any(c.startswith("WARNING") for c in load.caveats())
+
+
+def test_offline_always_states_the_privacy_blind_spot(tmp_path, monkeypatch):
+    """The snapshot records no privacy status, so a privatised upload reads as
+    zero-view here while load_videos excludes it. Bounded and stated, never
+    silent — a half-right offline path is worse than none."""
+    old = NOW - datetime.timedelta(days=30)
+    _write_offline(tmp_path, monkeypatch, uploads=[("measured", old)],
+                   snapshots=[("2026-08-20", "measured", 100, 12.0)])
+
+    caveats = insights.load_videos_offline().caveats()
+
+    assert any("privacy" in c for c in caveats)
+    assert any("as of 2026-08-20" in c for c in caveats)
+
+
+def test_offline_with_no_snapshot_file_reports_rather_than_crashes(tmp_path, monkeypatch):
+    from src import config
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", tmp_path / "missing.csv")
+    monkeypatch.setattr(config, "UPLOAD_LOG", tmp_path / "missing_log.csv")
+
+    load = insights.load_videos_offline()
+
+    assert load.videos == [] and load.asof is None
+    assert load.caveats() == ["no analytics snapshot on disk — nothing to report"]
+
