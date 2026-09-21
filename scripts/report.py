@@ -9,6 +9,8 @@ Usage:
   venv/bin/python scripts/report.py --by format_version
   venv/bin/python scripts/report.py --by topic --metric views
   venv/bin/python scripts/report.py --compare candidate_rank=1 --metric watch_seconds
+  venv/bin/python scripts/report.py --release v6       # the auto-revert check
+  venv/bin/python scripts/report.py --release broll --release-key background_type
   venv/bin/python scripts/report.py --zeros            # suppression candidates
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
 
@@ -98,10 +100,48 @@ def compare(videos, spec, metric, now):
     print(insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric).render())
 
 
+def release(version, key, target_age):
+    """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
+
+    Has its own loader rather than using the shared one: it reads every upload
+    at a *common age* from the weekly snapshot series, which is the only way a
+    release ever becomes age-matched against the era it replaced. Needs no
+    YouTube credentials, so a scheduled shift can run it."""
+    load = insights.load_videos_at_age(target_age)
+    for line in load.caveats():
+        print(f"AGE-MATCHED: {line}")
+    print()
+    if not load.videos:
+        sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
+
+    a, b, unset, later = insights.release_cohorts(load.videos, key, version)
+    if unset:
+        print(f"({unset} upload(s) have no {key} recorded — in neither cohort)")
+    if later:
+        print(f"({later} upload(s) postdate {version} — excluded, so this compares it "
+              f"with what it replaced rather than with its own successors)")
+    metrics = (Metric.WATCH, Metric.VIEWS)
+    comparisons = [insights.compare(a, b, f"{key}={version}", f"before {version}",
+                                    load.anchor, metric) for metric in metrics]
+    # The floor comes from the era BEFORE the change. Measuring it on the
+    # release's own uploads would let a volatile release excuse itself.
+    floors = {m: insights.drift_floor(b, m) for m in metrics}
+    print(insights.render_release(comparisons, floors))
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
+    p.add_argument("--release", metavar="VERSION",
+                   help="auto-revert check on a flag-day change, e.g. v6: its uploads "
+                        "vs the era it replaced, both read at the same age")
+    p.add_argument("--release-key", default="format_version",
+                   help="upload_log field --release splits on (default format_version; "
+                        "use background_type for the b-roll switch)")
+    p.add_argument("--at-age", type=float, default=insights.AGE_MATCH_TARGET_DAYS,
+                   metavar="DAYS", help="age at which --release reads every upload "
+                                        f"(default {insights.AGE_MATCH_TARGET_DAYS:.0f})")
     p.add_argument("--zeros", action="store_true",
                    help="list 0-view videos, classified into suppression candidates / "
                         "cold-spell / non-public")
@@ -122,6 +162,10 @@ def main():
             sys.exit("--zeros needs live privacy status, which the snapshot does not "
                      "record; it cannot be answered offline.")
         zeros(now)
+        return
+
+    if args.release:    # reads the snapshot series at a fixed age, not one point in time
+        release(args.release, args.release_key, args.at_age)
         return
 
     if args.offline:
