@@ -10,6 +10,12 @@ Usage:
   venv/bin/python scripts/report.py --by topic --metric views
   venv/bin/python scripts/report.py --compare candidate_rank=1 --metric watch_seconds
   venv/bin/python scripts/report.py --zeros            # suppression candidates
+  venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
+
+--offline reads the committed weekly snapshot instead of the live API, so a
+scheduled shift — which is deliberately given no YouTube secrets — can still
+answer a performance question. It is a week stale by construction and is never
+chosen silently: ask for it, and every answer carries its as-of date.
 """
 
 import argparse
@@ -101,15 +107,39 @@ def main():
                         "cold-spell / non-public")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS])
+    p.add_argument("--offline", action="store_true",
+                   help="read the committed weekly snapshot instead of the live "
+                        "YouTube API (no credentials needed; a week stale)")
     args = p.parse_args()
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
     if args.zeros:          # uses the Data API (near-real-time), not the weekly snapshot
+        if args.offline:
+            # Refusing is the honest answer: the classification turns on privacy
+            # status, and calling privatised videos suppression is the specific
+            # wrong conclusion classify_zero_views exists to prevent.
+            sys.exit("--zeros needs live privacy status, which the snapshot does not "
+                     "record; it cannot be answered offline.")
         zeros(now)
         return
 
-    videos = insights.load_videos(now=now)
+    if args.offline:
+        load = insights.load_videos_offline()
+        videos, now = load.videos, load.asof
+        for line in load.caveats():
+            print(f"OFFLINE: {line}")
+        print()
+    else:
+        try:
+            videos = insights.load_videos(now=now)
+        except KeyError as e:
+            # The scheduled-shift case: no YouTube secrets by design. Say so and
+            # name the way through, rather than dying on a bare KeyError.
+            sys.exit(f"No YouTube credentials ({e} is unset), so the live API is "
+                     f"unavailable.\nRe-run with --offline to use the committed "
+                     f"weekly snapshot instead.")
+
     if not videos:
         sys.exit("No analyzable uploads found.")
 
