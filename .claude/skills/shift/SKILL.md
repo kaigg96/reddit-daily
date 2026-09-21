@@ -5,14 +5,12 @@ description: Run an autonomous work shift on the reddit-digest channel — triag
 
 # Run a shift
 
-A session that starts without a task still does the most valuable thing
-available, ships it, and hands over cleanly — without the owner in the loop.
-Five lanes: maintenance, security, project management, research, feature work.
-Be whichever is worth most right now; don't tour all five.
+A session with no task allocates its time across every workstream —
+maintenance, security, project management, research, feature work — does the
+work, ships it, and hands over, without the owner in the loop.
 
-**Point, don't duplicate.** Status lives in `PRD.md` §0, code health in
-`TECH_DEBT.md`, conventions in `CLAUDE.md`. This skill and `WORKLOG.md` record
-what happened and what's next — never a second copy of status.
+**Point, don't duplicate.** Status is `PRD.md` §0, code health `TECH_DEBT.md`,
+conventions `CLAUDE.md`. Never keep a second copy of status here.
 
 ---
 
@@ -30,8 +28,12 @@ venv/bin/python scripts/statusline.py --budget   # GO / BOUNDED / WRAP / STOP
 ```
 
 **The owner keeps a reserve.** Work stops at 80% of the 5-hour window and 90%
-of the weekly one — the rest is theirs; never plan around using it. `WRAP`
-means finish or park what's open; `STOP` means close the loop and end.
+of the weekly one — the rest is theirs; never plan around using it.
+
+**`GO`** — take on real work: a feature through dry run and merge, or a deep
+task like `/audit`. Fill the shift with what is genuinely worth doing; do not
+default to something small. **`BOUNDED`** — one bounded task, finished.
+**`WRAP`** — finish or park what's open. **`STOP`** — close the loop and end.
 
 Then **allocate across every lane**, writing the plan into the `WORKLOG.md`
 entry before starting. Two slices are fixed: **rounds ~10%** and **closing the
@@ -112,8 +114,8 @@ its own. Changes to the process are proposals (§5), not self-applied edits.
 capacity, so it is the fallback when nothing else clears the bar. Three rules:
 
 - **Filter through our own findings.** Generic Shorts advice is the genre that
-  produced R1.8/R1.9 and the b-roll claim, both killed by our data later.
-  Output a **hypothesis with a proposed test**, never a practice to adopt.
+  produced two conclusions our own data later killed. Output a **hypothesis
+  with a proposed test**, never a practice to adopt.
 - **Do not pivot on new information.** A finding joins the bottom of `PRD.md`
   §0's backlog and waits. Direction changes need data from our own channel.
 - **Discard aggressively.** Research that changes no decision is a sentence in
@@ -202,11 +204,11 @@ ten; PM's slice grows that shift to fit, which is §2 working, not an exception.
 
 ## 9. End the shift rather than extend it
 
-Every turn re-reads everything before it, so cost climbs with length while
-**orientation is only ~1% of it** — optimise the length, not the reading.
-**Hand over and end rather than continuing.** A good `WORKLOG.md` entry isn't
-overhead; it's what makes a cheap restart possible. Measurement:
-`scripts/context_budget.py --session`.
+Cost climbs with session length, not with how much you read at the start
+(orientation is ~1%). So when the work is done, **hand over and end rather
+than continuing** — a good `WORKLOG.md` entry is what makes the next shift
+cheap. Ending early because the work is done is right; ending early with
+valuable work outstanding is not.
 
 ## 10. Close the loop
 

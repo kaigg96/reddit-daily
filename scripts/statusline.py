@@ -159,7 +159,16 @@ def budget_verdict(snap, now=None):
     seven = _live_pct((snap or {}).get("seven_day"), now)
 
     if five is None and seven is None:
-        # No reading at all: assume the middle rather than either extreme.
+        # No reading at all. On a runner that is expected -- statusLine does not
+        # fire headlessly -- and the reserve has ALREADY been enforced before
+        # the shift started, by the weekly quota allowance and the Actions
+        # minutes guard in shift.yml. Returning BOUNDED here caps the shift a
+        # second time: the first CI shift was told to do "one small task" and
+        # duly stopped after 9.5 minutes having used 4.9 of 25 allowed units.
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            return "GO", ("running in CI — the weekly allowance and Actions "
+                          "guard already gated this shift")
+        # Locally, a missing snapshot really is unknown: assume the middle.
         return "BOUNDED", "no usage snapshot — assuming mid-budget"
     five = 0.0 if five is None else five
     seven = 0.0 if seven is None else seven
