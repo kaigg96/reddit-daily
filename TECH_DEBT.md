@@ -153,22 +153,33 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **`age_adjusted_residuals` has no `report.py` surface, so no flag-day change
-  has ever been evaluated.** Found 2026-09-21 while using the new offline path.
-  A release or a library switch applies to everything after it and nothing
-  before, so its cohorts differ in age by construction and `--compare` refuses
-  them — correctly. Checked: v4, v5 and the b-roll switch (R1.3) all refuse on
-  age-matching; v6 is simply too young. `insights.age_adjusted_residuals` is
-  written and tested for exactly this case ("use when cohorts *can't* be
-  age-matched") and is reachable from nothing. Consequence is bigger than the
-  gap: `/shift` §5's auto-revert rule names `--compare` as the check that
-  substitutes for owner review of every merge, so that guardrail has never been
-  able to fire. Escalated (`auto-revert-unfireable`) because the rule is the
-  owner's; the build is not, and is the next shift's first item —
-  `report.py --release <version>`, median residual of the cohort vs the rest,
-  same n-gate and zero-view handling as everything else. Known limit to state
-  when it ships: residuals model views only, so the first version covers half
-  of what the rule claims.
+- ~~**No flag-day change has ever been evaluated; §5's auto-revert rule cannot
+  fire.**~~ **Fixed 2026-09-21** — `report.py --release <version>`. Not with
+  `age_adjusted_residuals`, which this item and issue #16 both proposed: a
+  release's date and its videos' ages are perfectly collinear, so one age trend
+  fitted across both cohorts absorbs the effect into its slope — on a synthetic
+  60% degradation it recovered 11%. The weekly snapshot series holds ten rows
+  per video, so every upload can be read at the *same age* and `--compare`'s
+  age-matching passes legitimately, covering watch-seconds as well as views.
+  `age_adjusted_residuals` is still reachable from nothing; leave it — it is
+  tested, and it remains the right tool for a non-flag-day cut like topic.
+  **Residual:** `--release` is not wired into any automation, so it fires only
+  when a shift runs it. The §5 ritual says to, but that is prose.
+
+- **A failed release gate cannot be read without Actions log access, so
+  diagnosing it costs 6–8 Gemini requests a shift already spent.** The gate
+  exists so a cold session learns the verdict without quota — but only the PASS
+  path delivers that. `.github/last-release-validation.md` records PASS/FAIL
+  plus a link to a run log a shift's token cannot read (403), and
+  `validate_release.py` already builds exactly the detail needed in `SUMMARY`
+  and writes it only to `$GITHUB_STEP_SUMMARY`, which is discarded. Hit twice
+  now: 2026-09-20's shift re-ran the gates locally to find out (8 requests),
+  and 2026-09-21's could not afford to at all — the 15:06 run had taken 6 and
+  the two scheduled uploads had the rest. **The fix is one line of workflow**
+  (`> $VERDICT` also receiving the summary, or moving the verdict write into
+  `validate_release.py --record`), and `.github/workflows/**` is protected and
+  unpushable from a shift — so it is stacked behind #14 rather than doable.
+  Worth bundling into that approval rather than raising a third workflow ask.
 
 - ~~**A scheduled shift cannot answer any performance question.**~~ **Fixed
   2026-09-21** — `insights.load_videos_offline` + `report.py --offline` read

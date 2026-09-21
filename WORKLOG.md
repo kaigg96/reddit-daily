@@ -50,6 +50,83 @@ Read the allocation series with
 
 ---
 
+## 2026-09-21 (evening) — the safety net behind unattended releases now works, and it says views can't be trusted
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 15→15 · research 20→10 · feature 30→40 · close 10→10
+
+**Summary:** The rule that is supposed to catch a bad release and roll it back
+has never once been able to give an answer; it can now, using performance data
+we already keep. Building it turned up something bigger: the channel's view
+counts swing so much on their own that most of what we measure them for cannot
+actually be measured.
+
+### Feature work
+- **The release safety net works.** Every upload can now be compared with
+  older ones *at the same age* — a video from July read at a week old against
+  one from September read at a week old — which is what the rule always
+  required and never had. It covers both of the measures the rule names, not
+  just one, and needs no account access, so an unattended session can run it.
+- **Its first run would have thrown away the last two things we shipped.** It
+  said to roll back both the current video format and the background-video
+  library, on view drops of 50% and 39%. Checking that: the channel's view
+  counts move 27–52% between consecutive batches of uploads *with nothing
+  changed at all*. Both "drops" are the same few weeks of ordinary weather. The
+  tool now measures that background movement and will not call something a
+  regression unless it is bigger, and it prints the size of that limit beside
+  every answer, so nobody reads a clean result as proof a change worked.
+- Verdicts as of today: current format **keep**; background library **roll
+  back, but see below**; newest release **no answer yet**, and it becomes
+  answerable around 5 October.
+
+### Project management
+- **A decision that is yours.** The rule rolls back a release if watch time
+  *or* views got worse. For the background library those two disagree: time
+  watched is up 22%, comfortably beyond the noise, while views are down 39%
+  against a noise limit of 38% — a one-point margin. So the rule says roll back
+  a change that improved the measure the plan calls primary, and doing that
+  would also mean discarding clips you chose. **Raised with you**; I have not
+  acted on it, and the tool shows the disagreement rather than hiding it.
+- **The same problem is waiting in the next experiment.** The planned
+  question-ranking experiment is pre-committed to "keep only if watch time and
+  views both hold or improve". Views cannot hold to that standard on this
+  channel at two uploads a day. Flagged in the plan rather than rewritten,
+  because it is the same decision as above.
+
+### Maintenance
+- The daily check on the live code has now failed two mornings running, and I
+  could not find out why: the failure detail only exists in a log an unattended
+  session is not allowed to read, and re-running the check would have taken
+  more of the shared daily AI allowance than was left after today's uploads.
+  Nothing suggests a live problem — today's upload generated everything
+  correctly — but it is unresolved and you already have an open issue about it.
+- **The fix is a line in a file I am not permitted to change**, so I added it
+  to the approval you already have waiting rather than raising a third request.
+  Once approved, every future failure explains itself for free.
+
+### Security
+- Standing checks clean: no credentials have ever been committed, they remain
+  ignored, and every automated workflow's permissions are scoped.
+
+### Research
+- Outside sources say a sub-1,000-subscriber channel normally gets 50–500
+  views in the first two days, with rare breakouts — our range sits inside
+  that, which independently supports the finding above: the swing is the
+  platform's per-video lottery, not something wrong with us. They also claim
+  the ranking now follows watch time; **our own numbers point the other way**
+  (time watched rose steadily while views fell), so it is recorded as a
+  question, not a fact. Nothing adopted.
+
+### Blocked
+- The roll-back rule's disagreement between the two measures needs your call.
+- The release-check failures stay undiagnosed until either the approval lands
+  or a shift has spare daily allowance.
+
+### Next
+- If the owner settles the measures question, apply it in one place for both
+  the roll-back rule and the ranking experiment.
+- Otherwise: the slate measurement the ranking experiment needs, under the
+  cheaper design already priced.
+
 ## 2026-09-21 — the channel can now be measured without the keys to it
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 15→25 · research 5→0 · feature 45→45 · close 10→10
@@ -202,12 +279,3 @@ and every health signal reads `WORKLOG.md`.
 
 **Both faults were caught by the checks, not by looking. Green is not
 evidence.**
-
-## 2026-09-19 — first session (pre-dates the allocation model)
-
-    Allocation (planned→actual %): rounds 0→0 · maintenance 0→30 · pm 0→50 · research 0→5 · feature 0→5 · close 0→10
-
-Built the workflow rather than running it. Merged `v6`; shipped `/shift` +
-`/audit`. **Still open:** `escalations.yml` discards the issue number it
-creates; no automated *video* check. **Every threshold was an unvalidated
-guess** — under test (`DECISIONS.md` D4, D5).

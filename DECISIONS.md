@@ -31,6 +31,31 @@ revisit trigger.
 
 ---
 
+## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
+
+`report.py --release` reads every upload at the same age from the weekly
+snapshot series, and refuses to call a change a regression unless the drop
+exceeds how much that metric moves between consecutive batches of uploads
+anyway (measured on the era before the change: ~52% for day-7 views, ~11% for
+watch-seconds).
+
+**Alternatives:** compare medians directly — which, run live, ordered
+reverting both `v5` and the b-roll library on one shared calendar swing; or
+age-adjusted residuals, which attenuate a real 60% degradation to 11% because
+a release's date and its videos' ages are perfectly collinear.
+
+**Assumptions:** (a) the pre-change era is a fair reference for how much the
+metric moves without us — it contains earlier releases, so the floor is
+generous and the check errs toward missing a small regression rather than
+inventing one; (b) upload cadence stays ~2/day, so batches of 8 span ~4 days
+and the floor keeps meaning "a week's weather"; (c) the weekly snapshot keeps
+running — without it there is no age-matched read at all.
+
+**Revisit when:** cadence changes materially (assumption b), or any release
+lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
+watch-seconds *or* views, and views is 5× noisier — escalated as
+`release-rule-metric-conflict`, owner's call.
+
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
 `CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
