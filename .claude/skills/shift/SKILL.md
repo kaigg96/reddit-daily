@@ -60,18 +60,16 @@ Allocating honestly:
 
 ## 3. Preemption — when one thing takes the whole shift
 
-These are not lanes competing for a slice; they are the shift's purpose that
-day. Check in order, before allocating:
+Not lanes competing for a slice — the shift's purpose that day. Check before
+allocating:
 
-1. **Incident.** Did both scheduled uploads land (`upload_log.csv` tail)? Did
-   the last workflow run succeed? Is `prev_post.txt` intact? A missed or
-   duplicated upload preempts everything.
-2. **Ship what's built.** Read `.github/last-release-validation.md` on `main` —
-   CI runs the Gemini gates at 08:17 UTC and commits the verdict, so you never
-   need quota to find out. PASS means merge. Unshipped work is inventory, not
-   progress: a branch once sat 8 days while six stacked behind it.
-3. **A closing window.** Work blocked on an external budget that is available
-   *now* — these windows close.
+1. **Incident.** Did both uploads land (`upload_log.csv` tail)? Did the last
+   workflow run succeed? Is `prev_post.txt` intact? A missed or duplicated
+   upload preempts everything.
+2. **Ship what's built.** Read `.github/last-release-validation.md` on `main`;
+   CI writes the verdict there, so you never need quota to find out. PASS means
+   merge. Unshipped work is inventory, not progress.
+3. **A closing window.** Work blocked on an external budget available *now*.
 
 ## 4. The lanes
 
@@ -79,10 +77,9 @@ day. Check in order, before allocating:
 silently failing? *Fail-soft without telemetry is indistinguishable from
 working.* Instrument a silent fallback before fixing it.
 
-**Security** — a standing check: secrets never committed (`git log --all --
-.env client_secret.json token.json` empty, `.gitignore` covering them),
-dependency advisories, Actions workflow permissions, OAuth scope. Fix what is
-clearly wrong; log the rest.
+**Security** — a standing check: secrets never committed and still ignored,
+dependency advisories, workflow permissions, OAuth scope. Fix what is clearly
+wrong; log the rest.
 
 **Project management** — the lane that notices things. Standing jobs:
 
@@ -144,10 +141,13 @@ recommendation** — an escalation without one just moves the work.
 The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
 spending, production data, publishing.
 
-**Auto-revert.** A release that degraded median watch-seconds or views against
-an age-matched baseline (`scripts/report.py --compare`) gets reverted, with the
-reason recorded. Shipping without review only works if something watches the
-result — that watching is the PM lane's first job above.
+**Auto-revert** (revised by the owner, issue #18). Check a release with
+`scripts/report.py --release <version>`, which reads every upload at the same
+age from the weekly snapshot — a flag-day change can never be age-matched with
+`--compare`. **Revert on watch-seconds only.** Views are reported but never
+trigger: measured on this channel they swing 27–50% at fixed age with nothing
+changed, so a views trigger fires on noise. Shipping without review only works
+if something watches the result; that watching is the PM lane's first job.
 
 ## 6. External budgets (these are not Claude usage)
 
@@ -203,10 +203,9 @@ ten; PM's slice grows that shift to fit, which is §2 working, not an exception.
 ## 9. End the shift rather than extend it
 
 Cost climbs with session length, not with how much you read at the start
-(orientation is ~1%). So when the work is done, **hand over and end rather
-than continuing** — a good `WORKLOG.md` entry is what makes the next shift
-cheap. Ending early because the work is done is right; ending early with
-valuable work outstanding is not.
+(orientation is ~1%). When the work is done, **hand over and end** — the
+`WORKLOG.md` entry is what makes the next shift cheap. Ending early because
+the work is done is right; ending early with work outstanding is not.
 
 ## 10. Close the loop
 
