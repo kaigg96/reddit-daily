@@ -153,44 +153,37 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- ~~**No flag-day change has ever been evaluated; §5's auto-revert rule cannot
-  fire.**~~ **Fixed 2026-09-21** — `report.py --release <version>`. Not with
-  `age_adjusted_residuals`, which this item and issue #16 both proposed: a
-  release's date and its videos' ages are perfectly collinear, so one age trend
-  fitted across both cohorts absorbs the effect into its slope — on a synthetic
-  60% degradation it recovered 11%. The weekly snapshot series holds ten rows
-  per video, so every upload can be read at the *same age* and `--compare`'s
-  age-matching passes legitimately, covering watch-seconds as well as views.
-  `age_adjusted_residuals` is still reachable from nothing; leave it — it is
-  tested, and it remains the right tool for a non-flag-day cut like topic.
-  **Residual:** `--release` is not wired into any automation, so it fires only
-  when a shift runs it. The §5 ritual says to, but that is prose.
+- **Two residuals from the 2026-09-21 reporting work.** (a) `report.py --release`
+  answers the §5 auto-revert question but is **wired into no automation** — it
+  fires only when a shift remembers, and "the ritual says to" is prose. `v6` is
+  the first release that needs it, from ~2026-10-05. (It replaced
+  `age_adjusted_residuals`, which this item and #16 both proposed: a release's
+  date and its videos' ages are collinear, so that fit absorbed the effect into
+  its slope.) (b) `--offline` reads the weekly snapshot, which records no
+  `privacy_status`, so an owner-privatised upload reads as zero-view there.
+  Bounded — medians exclude zeros, so only the zero count moves — and printed on
+  every offline run. Fix is a column in `weekly_analytics.py`; not worth one
+  extra Data API call per snapshot until a question turns on it.
 
-- **A failed release gate cannot be read without Actions log access, so
-  diagnosing it costs 6–8 Gemini requests a shift already spent.** The gate
-  exists so a cold session learns the verdict without quota — but only the PASS
-  path delivers that. `.github/last-release-validation.md` records PASS/FAIL
-  plus a link to a run log a shift's token cannot read (403), and
-  `validate_release.py` already builds exactly the detail needed in `SUMMARY`
-  and writes it only to `$GITHUB_STEP_SUMMARY`, which is discarded. Hit twice
-  now: 2026-09-20's shift re-ran the gates locally to find out (8 requests),
-  and 2026-09-21's could not afford to at all — the 15:06 run had taken 6 and
-  the two scheduled uploads had the rest. **The fix is one line of workflow**
-  (`> $VERDICT` also receiving the summary, or moving the verdict write into
-  `validate_release.py --record`), and `.github/workflows/**` is protected and
-  unpushable from a shift — so it is stacked behind #14 rather than doable.
-  Worth bundling into that approval rather than raising a third workflow ask.
-
-- ~~**A scheduled shift cannot answer any performance question.**~~ **Fixed
-  2026-09-21** — `insights.load_videos_offline` + `report.py --offline` read
-  the committed weekly snapshot. The three rules it had to encode, and the one
-  it cannot, are in the commit message and pinned by tests. **Residual:** the
-  snapshot records no privacy status, so an owner-privatised upload reads as
-  zero-view offline where the live path excludes it. Bounded (zeros are already
-  excluded from medians, so only the zero count moves) and printed on every
-  offline run. If that ever needs closing, the fix is a `privacy_status` column
-  in `weekly_analytics.py`, which costs one extra Data API call per snapshot —
-  not worth doing until a question turns on it.
+- **A failed release gate cannot be read without Actions log access.** The gate
+  exists so a cold session learns the verdict without spending quota — but only
+  the PASS path delivers that. A FAIL records "do not merge" plus a link to a
+  run log a shift's token gets 403 on. Hit **three** times now: 2026-09-20
+  re-ran the gates locally to find out (8 requests), 2026-09-21 could not afford
+  to, and 2026-09-22 found both gates passing on `main` while CI had said FAIL
+  three runs running, with no way to see what CI saw. **Half-fixed 2026-09-22:**
+  `validate_release.py` now writes `.github/last-release-detail.md`; the one
+  workflow line that appends it to the verdict is escalated
+  (`release-gate-readable`) and does nothing until approved.
+  - **Two things this exposed.** A shift cannot push a workflow change *at all*
+    — not blocked by `protect-process.yml` but by the token: *"refusing to allow
+    a GitHub App to create or update workflow ... without `workflows`
+    permission"*. So "propose it on a branch", which is what `CLAUDE.md` §4 and
+    the shift skill both say to do, is not an available instruction; the patch
+    has to be inlined into the escalation. And this fix had already been queued
+    once, as "bundle it into #14's approval" — **#14 was approved, its other
+    half was done, and this half died with the issue.** Stacking a request
+    behind someone else's approval does not survive that approval closing.
 
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
@@ -208,18 +201,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   FLIRT case is now a memorization check, not a generalization check, since its
   question is also in the prompt — swap in a fresh paraphrase before trusting
   a pass on it as proof the category holds.
-
-- **A CI shift with no granted tools "succeeds" having done nothing.** The
-  first scheduled shift (2026-09-20 13:35) ran green and produced no commit, no
-  `WORKLOG.md` entry and no escalation, because `claude-code-action` gives a
-  prompt no shell or file access unless `--allowedTools` is passed or the
-  skill carries `allowed-tools` frontmatter — and `/shift` has neither. Fixed
-  by granting tools in the workflow. The **generalisable** part is worse than
-  the bug: *a shift that runs and leaves no trace is indistinguishable from one
-  that never ran*, and every health check written so far reads `WORKLOG.md`,
-  which a silent shift never writes. The workflow now fails when a shift
-  produces no handover. Anything else that reasons from `WORKLOG.md` inherits
-  the same blind spot and should be checked against it.
 
 **Retention — open items must close, not accumulate** (cap: 25, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**

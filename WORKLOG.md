@@ -62,6 +62,94 @@ Read the allocation series with
 
 ---
 
+## 2026-09-22 — the check that guards every release has never once passed, and nobody could see why
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 40→35 · security 5→5 · pm 25→40 · research 10→0 · feature 0→0 · close 10→10
+
+**Summary:** The automatic check that decides whether new work is safe to put
+live has failed every day since it was built, and today I could show that the
+thing it was failing is healthy. One cause is fixed and live; seeing the rest
+needs a one-line change you have to approve.
+
+### Maintenance
+- **The release check has never passed.** Three runs, three refusals to ship.
+  I ran both halves of it by hand today against the live code: both pass. The
+  code was fine, the check was wrong about it, and meanwhile nothing could be
+  shipped.
+- **Fixed one cause.** We get a fixed number of free AI requests a day, shared
+  with the two live uploads. When they ran out, the check could not tell "I
+  could not check this" apart from "this is broken" — so it declared the
+  release unsafe and emailed you. It now tells those apart, and once it knows
+  the service is not answering it stops rather than spending five more requests
+  proving it again.
+- **That failure was quietly expensive.** A failed check is retried every
+  morning by design, so a permanently stuck one spent nearly a third of the
+  day's shared AI allowance daily to re-learn the same non-answer. The
+  early-morning upload is last in that queue and lost its title to exactly this
+  two days ago.
+- **What I still cannot see** is whether that was the whole story: the reason
+  exists only in a log this kind of session is not permitted to read. Third
+  shift running to hit that wall. One line fixes it; it is with you.
+
+### Security
+- Standing checks clean: no credentials have ever been committed, they remain
+  ignored, nothing secret-shaped is in the tracked files, and every automated
+  job's permissions are still scoped to what it does.
+
+### Project management
+- **The channel is flat** — viewing time has sat inside its own noise for six
+  periods. The rule for that is explicit: process work does not count as a
+  response, we have to change what we publish. Candidates generated and ranked;
+  the winner is now first in the plan.
+- **Titles matter less than we assumed.** Our three competing title styles
+  separate nothing across 119 videos — the first properly powered "no effect"
+  this channel has produced. And only about 1 view in 70 arrives through search:
+  96.6% come from the feed, where the opening second decides whether someone
+  stays. **So the new top experiment changes that opening second**, which today
+  is spent on our channel name and a label reading "today's top question"
+  rather than on the question itself. No AI requests, no new narration, and a
+  rollback rule agreed in advance.
+- **The AI allowance is now choosing our work, not just costing effort** — it
+  is what blocks the experiment previously ranked first. Raised with you, with
+  three costed ways out, one of them free.
+- **Applied your decision** on how a release is judged to that experiment,
+  which was still written against a measure that cannot be measured here. That
+  closes the previous shift's open item.
+- Two process notes, because they cost time: the rules tell me to propose a
+  change like this on a branch for you to review, and I cannot — my access
+  refuses to create or change automated jobs at all, so the patch has to be
+  pasted into the issue. And this same fix was queued once before as "add it to
+  the approval already waiting" — it died silently when you closed that one.
+
+### Research
+- Nothing this shift. The release-check failure and the flat-channel response
+  took the time, and neither left a question outside reading would settle.
+
+### Feature work
+- Nothing built. The check that guards shipping was itself broken, so fixing it
+  was what stood between us and shipping anything at all.
+
+### Blocked
+- The one-line approval, without which a failed release check stays unreadable.
+- Your call on the AI allowance; until then the previously-top experiment can
+  be prepared but not run.
+
+### Next
+- Build the opening-second change and dry-run it — that needs a render this
+  kind of session cannot do directly and must ask the video job to produce.
+- Check tomorrow's release check. If it passes, the three-day failure was the
+  allowance running out, and it closes.
+
+### Better?
+- **Than last shift:** yes. Last shift knew the check was failing and could not
+  find out why; this one proved the code healthy, removed one cause, and
+  stopped the daily waste the failure was causing.
+- **Than ~10 shifts ago:** yes, narrowly. Ten shifts ago a release could not be
+  measured at all; now it can, and that same tooling is what shows the channel
+  is flat — worse news, honestly arrived at. The uncomfortable pattern is how
+  many of those shifts went on the machinery rather than on what we publish.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-21 (evening) — the safety net behind unattended releases now works, and it says views can't be trusted
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 15→15 · research 20→10 · feature 30→40 · close 10→10
@@ -139,130 +227,6 @@ actually be measured.
 - Otherwise: the slate measurement the ranking experiment needs, under the
   cheaper design already priced.
 
-## 2026-09-21 — the channel can now be measured without the keys to it
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 15→25 · research 5→0 · feature 45→45 · close 10→10
-
-**Summary:** Automated work sessions could not answer a single question about
-how the channel is performing, because the performance tool needed YouTube
-credentials that those sessions are deliberately denied. They can now, using
-the weekly performance data we already keep. The first thing it found is that
-the rule meant to catch a bad release has never been able to run.
-
-### Feature work
-- Performance reporting now has an offline mode that reads the weekly
-  performance data already stored in the project, so an unattended session can
-  check how the channel is doing without any account access. Three
-  easy-to-get-wrong rules are built in and locked down by tests — most
-  importantly that the fortnight of videos published since the last weekly data
-  pull are reported as *not yet measured* rather than as zero views, which
-  would have invented two weeks of fake disasters.
-- It states what it cannot see on every run rather than quietly guessing, and
-  refuses outright to answer the one question the stored data genuinely cannot
-  settle.
-
-### Project management
-- **The safety net behind unattended releases has never worked.** The rule says
-  a release that hurts performance is automatically rolled back, judged against
-  videos of a similar age. But a release applies to everything published after
-  it and nothing before, so there is never a similar-aged group to compare
-  against, and the check correctly refuses to answer — every time, for every
-  release we have shipped, and for the background-video library too. Nothing
-  was ever rolled back because nothing could ever produce a verdict. The right
-  measurement already exists in the project and simply has no way to be run.
-  **Raised with you as an issue**, since the rule is yours; the tool it needs is
-  ordinary work and is queued next.
-- **A blocker that had already been cleared cost the last session its feature
-  time.** The next planned experiment was recorded as waiting on an analysis
-  that had in fact been completed ten days earlier — the plan said so in one
-  place and the detailed spec still said "do not start" in another. Corrected.
-- **That experiment has a cost nobody had priced.** Picking a better question
-  than Reddit's top-ranked one means asking our AI service about several
-  candidates instead of one, and the free daily allowance is already tight
-  enough that it starved a live upload last week. Scanning ten candidates would
-  consume the entire day's allowance by itself. Recorded a cheaper design —
-  one combined request per run — that both fits the allowance and produces the
-  missing measurement the experiment needs before it can be judged.
-
-### Maintenance
-- Both scheduled uploads landed, and today's ran with every element generated
-  correctly — the title problem from last week has not recurred.
-
-### Security
-- Standing checks clean: no credentials have ever been committed, they remain
-  ignored, and every automated workflow's permissions are scoped.
-
-### Research
-- Nothing this shift. Project management turned up more than expected and the
-  time went there; this is the third consecutive shift at zero, and the process
-  flags a lane at five.
-
-### Blocked
-- The release-rollback rule needs your decision before the check can be pointed
-  at something that works.
-- Still waiting on the earlier request about the daily allowance the release
-  gate consumes.
-
-### Next
-- Build the release check the rule needs, so a release can finally be judged.
-- Then the slate measurement for the next experiment, under the cheaper design.
-
-## 2026-09-20 (evening) — maintenance + PM (a guardrail that cost quota daily)
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 45→45 · security 10→5 · pm 15→20 · research 10→0 · feature 10→10 · close 10→10
-
-No preemption: both uploads landed, `prev_post.txt` intact, nothing waiting to
-ship, recorded FAIL stale by 16 commits.
-
-**The release gate could never skip itself, and the early upload paid.**
-`validate-release.yml`'s "don't re-validate a commit that already passed"
-branch cannot fire: recording a verdict *commits to `main`*, so next morning
-HEAD is always past the sha just recorded. `a4fb38c` names `c6ee5f7` and sits
-directly on top of it. Cost: **6 of the day's 20 Gemini requests, every day,
-forever** — shared with live uploads, and the ~05:00 publish is *last* in the
-07:00→07:00 window, so it starves first. That is why the 05:01 upload shipped
-the raw Reddit question as its title (`title_ok=0`).
-
-Fix compares the code the gates exercise, expires a PASS after 7 days (the
-model drifts with no commit of ours), and runs the unit tests unconditionally
-— free, and **the only pytest anywhere in CI**. Logic moved from bash into a
-tested function; the version it replaces failed silently and nothing could
-have noticed.
-
-**Half of it is not mine to ship.** `should_validate` + 12 tests landed
-(`4cfc1c4`), inert. The wiring is **issue #14**: `.github/workflows/**` is
-protected precisely because a shift editing it "could disable its own
-supervision", and this reduces how often that supervision runs.
-
-**Two process findings.** (1) A shift cannot propose a workflow change on a
-branch either — the push is rejected for lack of `workflows` permission, so
-`.escalations/README.md`'s "propose freely on a branch" is not the real route
-for these; diff inlined in #14. (2) `report.py` dies on
-`KeyError: 'YOUTUBE_REFRESH_TOKEN'` — shifts are rightly denied YouTube
-secrets, so **a scheduled shift can answer no performance question at all.**
-
-**PM.** Three TECH_DEBT items described already-shipped work (merged
-`get_metadata`, the `*_ok` columns, `title_style` blanking). PRD §4 still said
-8–14 requests/day, contradicting §2's corrected 4–10. Fixed; items 25 → 24.
-
-**Feature (10%) ended in a blocker, not code.** R4.4 is gated on re-running
-the topic analysis, which needs `report.py` — see finding (2). The fix is an
-offline read-only loader in `insights.py`; not rushed at shift end, because
-`load_videos` encodes two rules a naive snapshot reader breaks silently.
-Details in `TECH_DEBT.md`.
-
-**Research 0%** — nothing above the bar once the gate bug surfaced; 2
-consecutive shifts at 0, floor is 5. **Security clean** — secrets never
-committed and still ignored, permissions scoped.
-
-**Queued next:** (1) the offline analytics loader, unblocking R4.4 and every
-future PM lane; (2) #14 needs the owner before the quota fix does anything;
-(3) tomorrow's 08:17 gate is the authoritative verdict on the screen fix — it
-*will* run, since `src/screen.py` and `scripts/` changed; (4)
-`replay_screen.py`'s FLIRT case is still a memorization check.
-
-**Spent no Gemini, no Polly** — today's window was already drawn down.
-
 ## 2026-09-20 (afternoon) — maintenance (stale-then-real gate failure)
 
     Allocation (planned→actual %): rounds 10→5 · maintenance 15→70 · pm 15→15 · research 10→0 · feature 40→0 · close 10→10
@@ -274,20 +238,3 @@ example. **One example doesn't generalize a category.** Fixed in `89bc245`,
 pinned by a test; full finding in `TECH_DEBT.md`.
 
 **A fix verified once, live, is a sample of one.**
-
-## 2026-09-20 — maintenance (incident-led)
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→65 · pm 15→20 · research 15→0 · feature 35→0 · close 10→5
-
-**FAULT 1 — the screen lost its judgment, live.** Disabling Gemini thinking
-everywhere (2026-09-19) fixed title latency and silently broke the one genuine
-judgment task. 512 reasoning tokens restored, pinned by a test. **The CI gate
-is the only reason this surfaced before it cost an upload.**
-
-**FAULT 2 — the first scheduled shift did nothing and reported success.**
-`claude-code-action` grants no shell access without `--allowedTools`. Fixed.
-**A shift that leaves no trace is indistinguishable from one that never ran**,
-and every health signal reads `WORKLOG.md`.
-
-**Both faults were caught by the checks, not by looking. Green is not
-evidence.**
