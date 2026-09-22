@@ -38,7 +38,19 @@ channel. No detail — this is the part read on a phone.
 
 ### Next
 - What the following shift should pick up.
+
+### Better?
+- **Than last shift:** yes/no/unclear, and the specific thing that is better.
+- **Than ~10 shifts ago:** same, naming evidence rather than impression.
+- **Than ~100 shifts ago:** same, or "too early to say".
 ```
+
+**On the "Better?" section.** Numbers lag and no single one judges this channel
+(`report.py --scorecard`), so a subjective read is part of the record — but a
+shift grading its own work is exactly the bias the research warns about. Two
+rules make it worth having: answer **comparatively** against a named horizon
+rather than rating out of ten, and **name the evidence**, not the feeling.
+"Unclear" is a real answer and more useful than a confident guess.
 
 **Every workstream gets a heading, including ones that did nothing** — with a
 one-line "nothing this shift, because …". Silence and inactivity must not look

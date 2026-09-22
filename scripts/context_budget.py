@@ -44,7 +44,11 @@ ORIENT = {
     # cap in CORPUS below. Entries run ~200 words, so ten of them plus the
     # template header can never fit in 900 — one of the two controls had to
     # move, and the audit needs ten entries of evidence to read.
-    "WORKLOG.md": 2400,
+    # 2400 -> 2600 on 2026-09-21: the entry template gained a "Better?"
+    # section at three horizons, which every entry now carries. The retention
+    # cap is ten entries and the audit needs all ten, so the budget moved
+    # rather than the retention -- the same trade as the 900 -> 2400 raise.
+    "WORKLOG.md": 2600,
     # Raised 1800 -> 1900 on 2026-09-21, using the escape hatch below for the
     # first time and deliberately. 1800 was a first guess made when the skill
     # covered four lanes and one budget. It now covers six workstreams, four

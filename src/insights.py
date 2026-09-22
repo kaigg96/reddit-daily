@@ -370,6 +370,104 @@ def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):
     return ("rising" if change > 0 else "falling"), f"{span} over {half * 2} periods"
 
 
+# ------------------------------------------------------------ scorecard
+#
+# One metric cannot judge this channel, and the project has the scar to prove
+# it: avg-%-viewed was dropped as a target because trimming a video inflates it
+# without adding a second of watch time (PRD §4, Review 2). Watch-seconds has
+# the mirror flaw -- lengthen a video and it rises while the share watched
+# falls. Either number alone will call that success.
+#
+# So metrics are typed, which is the standard treatment: one SUCCESS metric
+# that must improve, GUARDRAILS that must not degrade beyond a stated margin,
+# and DIAGNOSTICS that explain a disagreement without voting. The decision is
+# deliberately conservative -- a guardrail breach is not outweighed by the
+# success metric rising, because that combination is usually an artefact.
+#
+# Adding guardrails is not free: each one costs statistical power, and with
+# cohorts of 5-14 uploads a week there is little to spend. Hence a short fixed
+# list that decides, and a wider panel that only informs.
+
+SUCCESS_METRIC = "watch_seconds"
+# A fixed margin is only honest for a metric whose ordinary swing we know.
+# Views is not one: measured on this channel it runs 82 -> 228 -> 114 -> 62 by
+# half-month with the format unchanged, a 2.8x swing. A hardcoded margin on it
+# fires on weather -- the first real scorecard run breached on a 2x drop that
+# is well inside that. So views carries no fixed margin and is reported as a
+# diagnostic unless a measured floor is supplied by the caller.
+GUARDRAILS = {
+    # metric: how much worse it may get before it blocks, in its own units
+    "avg_view_pct": 5.0,      # catches "we just made videos longer"
+    "zero_rate": 3.0,         # suppression creeping up, in percentage points
+}
+DIAGNOSTICS = ("views", "duration_s", "likes_per_100", "comments_per_100")
+
+
+def scorecard(then, now, guardrails=None):
+    """Compare two periods across typed metrics and return one honest verdict.
+
+    `then` and `now` are {metric: value}. Returns (verdict, rows, notes) where
+    verdict is one of BETTER / MIXED / WORSE / FLAT and rows carry every metric
+    with its own read, so a disagreement is visible rather than averaged away.
+    """
+    # A caller with a measured drift floor for a metric can promote it to a
+    # guardrail; without one it stays diagnostic rather than blocking on noise.
+    margins = dict(GUARDRAILS) if guardrails is None else dict(guardrails)
+    diagnostics = [m for m in DIAGNOSTICS if m not in margins]
+    rows, notes = [], []
+    breached, improved = [], False
+
+    for metric in [SUCCESS_METRIC] + list(margins) + diagnostics:
+        a, b = then.get(metric), now.get(metric)
+        if a is None or b is None:
+            continue
+        change = b - a
+        kind = ("success" if metric == SUCCESS_METRIC
+                else "guardrail" if metric in margins else "diagnostic")
+        read = ""
+        if kind == "success":
+            improved = change > 0
+            read = "up" if change > 0 else ("down" if change < 0 else "level")
+        elif kind == "guardrail":
+            if -change > margins[metric]:
+                read = "BREACHED"
+                breached.append(metric)
+            else:
+                read = "ok"
+        rows.append({"metric": metric, "kind": kind, "then": a, "now": b,
+                     "change": change, "read": read})
+
+    if breached and improved:
+        verdict = "MIXED"
+        notes.append("the success metric rose while " + ", ".join(breached)
+                     + " degraded — usually an artefact, not an improvement")
+    elif breached:
+        verdict = "WORSE"
+        notes.append("guardrail breach: " + ", ".join(breached))
+    elif improved:
+        verdict = "BETTER"
+    else:
+        verdict = "FLAT"
+
+    # A diagnostic does not vote, but a large move must not be silent either:
+    # the first real run read BETTER while views and engagement had both
+    # roughly halved. Not blocking on that is right; hiding it is not.
+    moved = []
+    for r in rows:
+        if r["kind"] != "diagnostic" or not r["then"]:
+            continue
+        if abs(r["change"]) / abs(r["then"]) >= 0.30:
+            moved.append(f"{r['metric']} {r['then']:.1f}→{r['now']:.1f}")
+    if moved:
+        notes.append("large diagnostic moves (not blocking, but watch if they "
+                     "repeat): " + "; ".join(moved))
+
+    # The honest caveat, every time: this is a small channel.
+    notes.append("each guardrail costs power; on cohorts this size read a "
+                 "single period's move as weather unless it repeats")
+    return verdict, rows, notes
+
+
 def age_adjusted_residuals(videos, now):
     """Residual of log-views against the channel's own log-age trend.
 

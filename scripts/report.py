@@ -156,6 +156,114 @@ def _snapshot_metric_rows(metric_col="avg_view_duration_s"):
     return out
 
 
+def _period_metrics(at_age=7, tolerance=4, half=3):
+    """Metrics for the recent `half` publish-weeks vs the `half` before them.
+
+    Every upload read at the same age, so the two periods are comparable.
+    Duration comes from upload_log; the rest from the weekly snapshot.
+    """
+    import csv as _csv
+    import datetime as _dt
+    import os as _os
+    root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+
+    durations = {}
+    try:
+        with open(_os.path.join(root, "upload_log.csv"), encoding="utf-8",
+                  errors="ignore") as f:
+            for r in _csv.DictReader(f):
+                try:
+                    durations[r["video_id"]] = float(r.get("duration_s") or 0)
+                except (ValueError, TypeError):
+                    pass
+    except OSError:
+        pass
+
+    best = {}
+    try:
+        with open(_os.path.join(root, "analysis", "analytics_snapshots.csv"),
+                  encoding="utf-8", errors="ignore") as f:
+            for r in _csv.DictReader(f):
+                try:
+                    pub = _dt.datetime.fromisoformat(
+                        (r.get("published_at") or "").replace("Z", "+00:00"))
+                    snap = _dt.datetime.fromisoformat(
+                        (r.get("snapshot_date") or "") + "T00:00:00+00:00")
+                except (ValueError, TypeError):
+                    continue
+                age = (snap - pub).days
+                if abs(age - at_age) > tolerance:
+                    continue
+                vid = r.get("video_id")
+                prev = best.get(vid)
+                if prev is None or abs(age - at_age) < abs(prev[0] - at_age):
+                    best[vid] = (age, r, pub)
+    except OSError:
+        return None, None, 0, 0
+
+    buckets = {}
+    for vid, (_, r, pub) in best.items():
+        buckets.setdefault(pub.strftime("%Y-W%V"), []).append((vid, r))
+    weeks = sorted(w for w, v in buckets.items() if len(v) >= 5)
+    if len(weeks) < half * 2:
+        return None, None, 0, 0
+
+    def agg(window):
+        rows = [pair for w in window for pair in buckets[w]]
+        def nums(col):
+            out = []
+            for _, r in rows:
+                try:
+                    v = float(r.get(col) or 0)
+                except (ValueError, TypeError):
+                    continue
+                if v > 0:
+                    out.append(v)
+            return out
+        views = nums("views")
+        zeros = sum(1 for _, r in rows if float(r.get("views") or 0) == 0)
+        m = {
+            "watch_seconds": insights.median(nums("avg_view_duration_s")),
+            "avg_view_pct": insights.median(nums("avg_view_pct")),
+            "views": insights.median(views),
+            "zero_rate": 100.0 * zeros / max(len(rows), 1),
+        }
+        d = [durations[v] for v, _ in rows if durations.get(v)]
+        if d:
+            m["duration_s"] = insights.median(d)
+        if views:
+            tv = sum(views) or 1
+            m["likes_per_100"] = 100.0 * sum(nums("likes")) / tv
+            m["comments_per_100"] = 100.0 * sum(nums("comments")) / tv
+        return m
+
+    prior, recent = weeks[-half * 2:-half], weeks[-half:]
+    n_prior = sum(len(buckets[w]) for w in prior)
+    n_recent = sum(len(buckets[w]) for w in recent)
+    return agg(prior), agg(recent), n_prior, n_recent
+
+
+def show_scorecard(args):
+    """`--scorecard`: many metrics, one honest verdict, tensions visible."""
+    then, now, n_then, n_now = _period_metrics(at_age=args.at_age or 7)
+    if not then:
+        print("not enough comparable history yet")
+        return
+    verdict, rows, notes = insights.scorecard(then, now)
+    print(f"CHANNEL SCORECARD — every upload read at ~{args.at_age or 7} days old")
+    print(f"  prior 3 weeks (n={n_then})  vs  recent 3 weeks (n={n_now})\n")
+    kind = None
+    for r in rows:
+        if r["kind"] != kind:
+            kind = r["kind"]
+            print(f"  {kind}")
+        print(f"    {r['metric']:18} {r['then']:>8.1f} -> {r['now']:>8.1f}  "
+              f"{r['change']:+8.1f}   {r['read']}")
+    print(f"\n  VERDICT: {verdict}")
+    for n in notes:
+        print(f"    - {n}")
+
+
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     rows = _snapshot_metric_rows()
@@ -192,6 +300,9 @@ def main():
     p.add_argument("--at-age", type=float, default=insights.AGE_MATCH_TARGET_DAYS,
                    metavar="DAYS", help="age at which --release reads every upload "
                                         f"(default {insights.AGE_MATCH_TARGET_DAYS:.0f})")
+    p.add_argument("--scorecard", action="store_true",
+                   help="many metrics at once: success, guardrails and "
+                        "diagnostics, with one verdict that shows disagreement")
     p.add_argument("--trajectory", action="store_true",
                    help="is the channel improving? every upload read at the "
                         "same age, grouped by publish week")
@@ -206,6 +317,10 @@ def main():
     args = p.parse_args()
 
     now = datetime.datetime.now(datetime.timezone.utc)
+
+    if args.scorecard:      # many metrics; no single one can judge this channel
+        show_scorecard(args)
+        return
 
     if args.trajectory:     # the only surface that answers "are we improving?"
         show_trajectory(args)

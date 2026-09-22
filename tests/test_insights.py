@@ -976,3 +976,98 @@ def test_too_little_history_says_unknown_rather_than_guessing():
     series = [(f"w{i}", 10, 10.0) for i in range(3)]
     verdict, _ = insights.trajectory_verdict(series, floor=1.0)
     assert verdict == "unknown"
+
+
+# ------------------------------------------------------------- scorecard
+
+def test_longer_videos_are_not_called_success():
+    """The owner's exact objection, and the project's own scar.
+
+    Watch-seconds up while the share watched falls and duration rises is
+    "we made videos longer", not "we made them better". A single-metric
+    verdict calls it success; this must not.
+    """
+    then = {"watch_seconds": 10.0, "avg_view_pct": 55.0, "views": 120.0,
+            "zero_rate": 3.0, "duration_s": 19.0}
+    now = {"watch_seconds": 12.0, "avg_view_pct": 45.0, "views": 118.0,
+           "zero_rate": 3.0, "duration_s": 26.0}
+    verdict, rows, notes = insights.scorecard(then, now)
+    assert verdict == "MIXED", verdict
+    assert any("artefact" in n for n in notes)
+    pct = next(r for r in rows if r["metric"] == "avg_view_pct")
+    assert pct["read"] == "BREACHED"
+
+
+def test_a_genuine_improvement_still_reads_as_better():
+    """The guard must not make every result mixed."""
+    then = {"watch_seconds": 10.0, "avg_view_pct": 50.0, "views": 120.0, "zero_rate": 3.0}
+    now = {"watch_seconds": 12.0, "avg_view_pct": 52.0, "views": 130.0, "zero_rate": 2.0}
+    verdict, _, _ = insights.scorecard(then, now)
+    assert verdict == "BETTER"
+
+
+def test_a_guardrail_breach_alone_is_worse_not_flat():
+    then = {"watch_seconds": 10.0, "avg_view_pct": 55.0, "views": 120.0, "zero_rate": 1.0}
+    now = {"watch_seconds": 10.0, "avg_view_pct": 40.0, "views": 118.0, "zero_rate": 1.0}
+    verdict, _, _ = insights.scorecard(then, now)
+    assert verdict == "WORSE"
+
+
+def test_movement_inside_the_margin_does_not_breach():
+    """Guardrails have margins so ordinary weather doesn't block everything."""
+    then = {"watch_seconds": 10.0, "avg_view_pct": 50.0, "views": 120.0, "zero_rate": 2.0}
+    now = {"watch_seconds": 11.0, "avg_view_pct": 47.0, "views": 100.0, "zero_rate": 3.0}
+    verdict, _, _ = insights.scorecard(then, now)
+    assert verdict == "BETTER"
+
+
+def test_diagnostics_explain_but_never_vote():
+    """A diagnostic moving wildly must not change the verdict by itself."""
+    base = {"watch_seconds": 10.0, "avg_view_pct": 50.0, "views": 120.0, "zero_rate": 2.0}
+    calm = insights.scorecard(base, dict(base, watch_seconds=11.0))[0]
+    noisy = insights.scorecard(dict(base, duration_s=15.0),
+                               dict(base, watch_seconds=11.0, duration_s=40.0))[0]
+    assert calm == noisy == "BETTER"
+
+
+def test_the_power_caveat_is_always_stated():
+    """A small-cohort channel must never be handed a confident verdict."""
+    _, _, notes = insights.scorecard({"watch_seconds": 10.0}, {"watch_seconds": 11.0})
+    assert any("weather" in n for n in notes)
+
+
+def test_views_does_not_block_on_ordinary_weather():
+    """Views swings 2.8x on this channel with the format unchanged.
+
+    The first real scorecard run breached on a 2x drop that is well inside
+    that, which is a false positive of exactly the kind `drift_floor` exists
+    to prevent. Views is diagnostic unless a caller supplies a measured floor.
+    """
+    then = {"watch_seconds": 11.0, "avg_view_pct": 59.0, "views": 136.0, "zero_rate": 2.4}
+    now = {"watch_seconds": 12.0, "avg_view_pct": 59.0, "views": 67.5, "zero_rate": 2.4}
+    verdict, rows, _ = insights.scorecard(then, now)
+    assert verdict == "BETTER", verdict
+    views_row = next(r for r in rows if r["metric"] == "views")
+    assert views_row["kind"] == "diagnostic"
+
+
+def test_a_measured_floor_promotes_views_to_a_guardrail():
+    """Once we can measure its ordinary swing, it can block again."""
+    then = {"watch_seconds": 11.0, "views": 136.0}
+    now = {"watch_seconds": 12.0, "views": 67.5}
+    verdict, rows, _ = insights.scorecard(then, now, guardrails={"views": 20.0})
+    assert verdict == "MIXED"
+    assert next(r for r in rows if r["metric"] == "views")["read"] == "BREACHED"
+
+
+def test_a_big_diagnostic_move_is_never_silent():
+    """It must not vote, and it must not be hidden.
+
+    The first real run reported BETTER while views and engagement had both
+    roughly halved. Not blocking on that is correct; saying nothing is not.
+    """
+    then = {"watch_seconds": 11.0, "views": 136.0, "likes_per_100": 1.1}
+    now = {"watch_seconds": 12.0, "views": 67.5, "likes_per_100": 0.5}
+    verdict, _, notes = insights.scorecard(then, now)
+    assert verdict == "BETTER"
+    assert any("views" in n and "watch if they repeat" in n for n in notes)

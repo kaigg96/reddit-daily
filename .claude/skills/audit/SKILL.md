@@ -60,6 +60,15 @@ actual. Landing under plan is fine — slices are ceilings. *Every* lane under
 plan on *every* shift means we are not finding valuable work, which is a
 process finding. Consistently over means the allocation is wrong.
 
+**Is the channel better than it was?** Read `scripts/report.py --scorecard`
+for the numbers and the last ten `WORKLOG` "Better?" sections for the
+subjective series. The two disagreeing is information, not a problem: numbers
+lag, and a run of "unclear" answers alongside a flat scorecard is the strongest
+signal available that the work is not landing. **Then ask whether the measures
+themselves are right** — the success metric, the guardrails and their margins
+are a decision (`DECISIONS.md`), not a law, and a guardrail that has never
+fired or fires every time is miscalibrated.
+
 **Is it producing value?** Which of the last ten shifts shipped something that
 mattered, and which produced churn? If a shift's output was a refactor nobody
 needed or a doc nobody reads, that is a process failure, not a one-off — the

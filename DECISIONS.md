@@ -56,7 +56,64 @@ lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
 watch-seconds *or* views, and views is 5× noisier — escalated as
 `release-rule-metric-conflict`, owner's call.
 
-## D6 · 2026-09-21 · Slack goes to PM and research, not back to the clock
+## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
+
+One success metric (watch-seconds) that must improve, guardrails that must not
+degrade past a stated margin, diagnostics that explain without voting, plus a
+subjective comparative read at three horizons. A guardrail breach is **not**
+outweighed by the success metric rising.
+
+**Alternatives:** the single trajectory measure shipped hours earlier, which
+read "flat, slightly up" while views and engagement had both halved; a
+composite score, rejected because averaging hides the disagreement that *is*
+the information.
+
+**Why:** no single metric survives this channel. Avg-%-viewed was dropped as a
+target because trimming inflates it; watch-seconds has the mirror flaw, rising
+when videos merely get longer.
+
+**Assumptions:**
+1. The margins are right. `avg_view_pct` 5pts and `zero_rate` 3pts are guesses.
+   Views deliberately has **no** margin — its ordinary swing here is 2.8x, and
+   a fixed margin on it fired on weather in the first real run.
+2. Watch-seconds is the right success metric — still one number carrying a lot.
+3. A subjective comparative read adds signal that the numbers lag on.
+
+**Revisit when:** a guardrail never fires, or fires every period (1 false); the
+scorecard and the subjective series disagree persistently (2 or 3 false); or a
+new guardrail blocks work on noise — each costs power, and ten at 80% leaves
+about 11% combined.
+
+## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
+
+Generating candidate work, ranking it, evaluating a due experiment, verifying
+the tracker and challenging a constraint each had one sentence. They set the
+channel's direction and each is a job where a model's default behaviour is
+measurably wrong, so each now has a method in `/backlog`.
+
+*(Recorded late: this decision was written when the methods shipped and lost to
+a silent assert failure in the script that was meant to append it. Rewritten
+from the commit message.)*
+
+**Why each:** generation fixates on early outputs and favours typical text, so
+it draws from named evidence sources and asks for candidates *with
+probabilities* (~1.6–2.1x wider range, no quality cost). Ranking suffers
+self-preference, position and verbosity bias — two structural — so the fixes
+are procedural: separate pass, forward and reversed, one-line statements,
+dimension-wise scoring. Evaluation's remaining failure is reinterpreting a rule
+once the answer is inconvenient, so the rule is quoted verbatim first and "not
+yet" is a real outcome. Constraint challenge uses the five focusing steps,
+which name what went wrong with Gemini: exploit and subordinate, never elevate.
+
+**Assumptions:**
+1. The techniques transfer from benchmarks to this project's few, high-stakes
+   judgement calls.
+2. A shift will follow a procedure slower than its intuition.
+
+**Revisit when:** `/backlog` produces candidates that all look alike (1 false),
+or `WORKLOG` shows the method skipped (2 false).
+
+## D7 · 2026-09-21 · Slack goes to PM and research, not back to the clock
 
 A shift whose maintenance and feature lanes are thin becomes a
 PM-and-research shift, not a short one. Research has no percentage ceiling;

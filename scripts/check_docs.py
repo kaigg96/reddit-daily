@@ -111,7 +111,27 @@ def check_open_escalations():
     return True, f"{len(refs)} referenced issue(s), none misdescribed"
 
 
+def check_decision_ids():
+    """Two authors appending to DECISIONS.md will pick the same number.
+
+    It happened on 2026-09-21: a shift added a D6 and this session added
+    another, independently. A duplicate id makes every later reference
+    ambiguous, and one decision was lost entirely in the same episode.
+    """
+    ids = re.findall(r"^## (D\d+)\b", _read("DECISIONS.md"), re.M)
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        return False, f"duplicate decision id(s): {', '.join(dupes)}"
+    nums = sorted(int(i[1:]) for i in ids)
+    gaps = [n for n in range(1, max(nums, default=0)) if n not in nums]
+    if gaps:
+        return False, (f"missing decision id(s) {gaps} — a record was lost or "
+                       f"mis-numbered")
+    return True, f"{len(ids)} decisions, ids unique and contiguous"
+
+
 CHECKS = [
+    ("decision ids", check_decision_ids),
     ("live format", check_live_format),
     ("merged branches", check_merged_branches),
     ("cohort sizes", check_upload_counts),
