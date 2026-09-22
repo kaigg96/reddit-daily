@@ -41,9 +41,14 @@ loop ~10%**. The remaining ~80% is split by how much genuinely valuable work
 each lane actually has — not by a fixed percentage.
 
 **Slices are ceilings, not quotas.** A lane finishes its valuable work and
-stops; it does not fill its allocation. Unused budget is **not** redistributed
-— if every lane finishes early, the shift ends early. That is the whole
-defence against padding, and padding ships.
+stops rather than padding out its allocation — padding ships.
+
+**But slack goes to project management and research, it does not end the
+shift.** Those two always have work: a backlog to populate, decision rules to
+check, documentation to verify, and questions about how channels like this
+grow. If maintenance and feature work are thin, the shift is a PM-and-research
+shift — not a short one. Ending early is for when even those two have nothing
+above the value bar (§7), which should be rare.
 
 Allocating honestly:
 
@@ -51,8 +56,9 @@ Allocating honestly:
   failure. Say so in `WORKLOG.md`.
 - **An empty feature lane is a project-management problem.** Give that time to
   PM to populate the backlog rather than inventing features to build.
-- **Research absorbs genuine slack** — it always has capacity — but cap it at
-  ~25%, or it becomes the place effort goes to look busy.
+- **Research has no ceiling**, but its output is governed by the value bar: a
+  hypothesis with a proposed test, recorded in `WORKLOG.md`, no new documents.
+  That bar is what stops it becoming busywork — not a percentage.
 - **Starvation floor:** any lane at ~0% for **5 consecutive shifts** takes
   priority in this one if it has any queued work. Check the `Lane:` lines in
   `WORKLOG.md`. A lane that keeps losing is the failure mode of every
@@ -172,10 +178,11 @@ than idleness. Forbidden:
 - **New trackers or documents.** Use the ones that exist.
 - **Widening scope mid-shift.** Finish, then pick the next thing.
 
-If a lane has nothing above that bar, say so and move on. If *no* lane does, do
-research — it always has capacity, and thinking and planning are real work.
-Only if that is thin too, **stop and say the queue is empty.** A shift that
-ships one real thing and says "nothing else cleared the bar" is a good shift.
+If a lane has nothing above that bar, say so and move on — the time goes to PM
+and research (§2), not back to the clock. Stopping early is the last resort,
+not the default: it means even planning, prioritising and research had nothing
+worth doing, which should be rare. When it happens, say the queue is empty and
+why.
 
 ## 8. Leave the context no bigger than you found it
 

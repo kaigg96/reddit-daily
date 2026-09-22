@@ -56,6 +56,33 @@ lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
 watch-seconds *or* views, and views is 5× noisier — escalated as
 `release-rule-metric-conflict`, owner's call.
 
+## D6 · 2026-09-21 · Slack goes to PM and research, not back to the clock
+
+A shift whose maintenance and feature lanes are thin becomes a
+PM-and-research shift, not a short one. Research has no percentage ceiling;
+its output is governed by the value bar instead.
+
+**Alternatives:** the previous rule — research capped at ~25% and unused budget
+not redistributed — which contradicted itself. Capping research while also
+refusing to redistribute meant a shift with an empty feature lane simply ended
+with half its time unspent, which is the wasted capacity this whole workflow
+exists to prevent.
+
+**Why:** the owner's point is that there is always work — a backlog to
+populate, decision rules to check, documentation to verify, questions about how
+channels like this grow. A percentage cap was the wrong instrument for the real
+worry, which is busywork. The value bar is the right one: a hypothesis with a
+proposed test and no new documents.
+
+**Assumptions:**
+1. PM and research genuinely always have work above the value bar.
+2. The value bar is strong enough to stop research becoming padding without a
+   numeric cap.
+
+**Revisit when:** `WORKLOG` shows research producing findings nobody acts on,
+or shifts spending heavily on research while the backlog stays empty (2 false);
+or shifts still ending early with time unspent (1 false).
+
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
 `CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
