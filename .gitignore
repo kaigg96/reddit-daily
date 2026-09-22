@@ -9,3 +9,6 @@ client_secret.json
 __pycache__/
 # machine-local Claude Code settings (skills in .claude/skills/ ARE tracked)
 .claude/settings.local.json
+# scratch: validate_release.py writes it, the workflow appends it to the
+# verdict it commits. Never committed on its own.
+.github/last-release-detail.md

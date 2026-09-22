@@ -140,6 +140,13 @@ def check_metadata():
     Merging three focused prompts into one multi-task prompt can degrade each
     task, and unit tests can only cover the parsing half — the prompt half only
     shows up live.
+
+    Returns True/False, or None for inconclusive — the same three states as
+    `check_screen`. The asymmetry that is gone: `get_metadata` fails soft, so a
+    spent quota and a degraded prompt both arrive as three empty fields, and
+    this gate used to call both "❌ FAIL — do not merge". That pages the owner
+    about a healthy release and blocks merging on the shared 20/day cap running
+    out, which is exactly the mistake `check_screen` already refuses to make.
     """
     from src import llm
 
@@ -149,6 +156,15 @@ def check_metadata():
                 "Warhammer. The plastic crack is genuinely brutal now.",
                 "Skiing. A lift ticket is close to two hundred dollars."]
     meta = llm.get_metadata(q, comments, style="A")
+
+    if meta.source == "error":
+        # Deliberately not retried, for the same reason check_screen doesn't:
+        # the commonest cause is the day's quota, and a retry spends another
+        # request to fail identically while the ~05:00 upload goes without.
+        note("- ⚠️ INCONCLUSIVE — Gemini did not answer (quota spent, or "
+             "unreachable). The prompt was never exercised, so this is not a "
+             "verdict either way; the next scheduled run re-checks it.\n")
+        return None
 
     ok = True
     for field, value in (("title", meta.title), ("keywords", meta.keywords),
@@ -215,6 +231,35 @@ def check_screen():
     return True
 
 
+DETAIL_FILE = ".github/last-release-detail.md"
+
+# The verdict file is read at the start of every shift, so the detail has to
+# earn its words. Enough for "which gate, and what did it say"; not the whole
+# replay transcript.
+MAX_DETAIL_CHARS = 1500
+
+
+def write_detail(summary=None, path=None):
+    """Leave *why* the gates ruled as they did somewhere a shift can read it.
+
+    A PASS needs no explanation, but a FAIL is unreadable without Actions log
+    access, which a shift's token does not have (403). So the one case the
+    verdict file exists to serve — a cold session learning the outcome without
+    spending quota — is the one it does not serve: 2026-09-20's shift re-ran
+    the gates locally to find out (8 requests), 2026-09-21's could not afford
+    to, and 2026-09-22's found both gates passing with no way to see what CI
+    had seen. The workflow appends this file to the verdict it commits.
+    """
+    text = "\n".join(SUMMARY if summary is None else summary).strip()
+    if len(text) > MAX_DETAIL_CHARS:
+        text = "…(truncated)…\n" + text[-MAX_DETAIL_CHARS:]
+    try:
+        with open(os.path.join(ROOT, path or DETAIL_FILE), "w") as f:
+            f.write("\n## What the gates said\n\n" + text + "\n")
+    except OSError as e:
+        print(f"could not write the detail file: {type(e).__name__}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--should-run", action="store_true",
@@ -233,7 +278,20 @@ def main():
     note(f"## Release validation\n\nBudget: at most {MAX_REQUESTS} Gemini "
          f"requests of the 20/day cap shared with production.\n")
 
-    results = {"metadata": check_metadata(), "screen": check_screen()}
+    # Gate 1 costs one request, gate 2 costs five. If the cheap one proves
+    # Gemini is not answering, the expensive one can only fail the same way, so
+    # spending it takes five requests off the ~05:00 upload -- the run last in
+    # the daily window, and the one that shipped a raw Reddit title on
+    # 2026-09-20 when the budget was gone. Order matters here: cheapest first.
+    metadata = check_metadata()
+    if metadata is None:
+        note("### Gate 2 — R4.6 screen replay\n\n- ⏭️ skipped: Gemini is not "
+             "answering, so its five requests would buy nothing.\n")
+        screen = None
+    else:
+        screen = check_screen()
+
+    results = {"metadata": metadata, "screen": screen}
     inconclusive = any(v is None for v in results.values())
     passed = all(v is True for v in results.values())
 
@@ -252,6 +310,8 @@ def main():
                 f.write("\n".join(SUMMARY) + "\n")
         except OSError:
             pass
+
+    write_detail()
     # Exit 2 for inconclusive: the workflow records it but must not escalate,
     # because nothing is wrong with the release.
     if passed:

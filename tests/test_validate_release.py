@@ -108,3 +108,84 @@ def test_a_pass_still_holds_the_day_before_it_expires():
 
 def test_an_undated_verdict_is_not_trusted():
     assert decide(verdict("c6ee5f7", PASS, when="whenever"), "c6ee5f7")[0] is True
+
+
+# --- The three states of gate 1 -------------------------------------------
+# `get_metadata` fails soft, so a spent quota and a degraded prompt both arrive
+# as three empty fields. Calling both FAIL blocks merging a healthy release and
+# pages the owner -- the mistake check_screen already refuses to make.
+
+import scripts.validate_release as vr
+from src.llm import MetadataResult
+
+
+def _metadata(monkeypatch, meta):
+    monkeypatch.setattr("src.llm.get_metadata", lambda *a, **k: meta)
+    return vr.check_metadata()
+
+
+def test_a_dead_api_is_inconclusive_not_a_failed_release(monkeypatch):
+    assert _metadata(monkeypatch, MetadataResult(None, None, None, "error")) is None
+
+
+def test_gemini_answering_with_junk_is_a_real_failure(monkeypatch):
+    """Empty fields when the call itself succeeded means the prompt degraded."""
+    assert _metadata(monkeypatch, MetadataResult(None, None, None, "gemini")) is False
+
+
+def test_a_good_answer_passes(monkeypatch):
+    assert _metadata(monkeypatch, MetadataResult(
+        "A Rewritten Title", ["a", "b", "c"], "Comment below!", "gemini")) is True
+
+
+def test_a_title_that_echoes_the_question_fails(monkeypatch):
+    """"Worked" is not the same as "produced something usable"."""
+    echoed = "What hobby has become too expensive for the average person?"
+    assert _metadata(monkeypatch, MetadataResult(
+        echoed, ["a", "b", "c"], "Comment below!", "gemini")) is False
+
+
+def test_an_overlong_title_fails(monkeypatch):
+    assert _metadata(monkeypatch, MetadataResult(
+        "x" * 101, ["a", "b", "c"], "Comment below!", "gemini")) is False
+
+
+def test_a_dead_api_does_not_spend_the_screen_replays_five_requests(monkeypatch):
+    """The saving is the point: gate 2 costs five of the 20 daily requests, and
+    if Gemini is not answering they can only fail the same way as gate 1's one.
+    Those five come off the ~05:00 upload, which is last in the daily window."""
+    monkeypatch.setenv("GEMINI_API_KEY", "set")
+    monkeypatch.setattr(sys, "argv", ["validate_release.py"])
+    monkeypatch.setattr(vr, "check_metadata", lambda: None)
+
+    def never(*a, **k):
+        raise AssertionError("spent the replay's five requests on a dead API")
+
+    monkeypatch.setattr(vr, "check_screen", never)
+    assert vr.main() == 2          # inconclusive, not a failed release
+
+
+def test_a_reachable_gemini_still_runs_both_gates(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "set")
+    monkeypatch.setattr(sys, "argv", ["validate_release.py"])
+    monkeypatch.setattr(vr, "check_metadata", lambda: True)
+    monkeypatch.setattr(vr, "check_screen", lambda: True)
+    assert vr.main() == 0
+
+
+def test_the_detail_keeps_the_end_of_a_long_transcript(tmp_path):
+    """Truncation must keep the verdict, which the gates print last -- keeping
+    the head would preserve the preamble and lose the answer."""
+    out = tmp_path / "detail.md"
+    vr.write_detail(["x" * 4000, "FAIL — do not merge"], path=str(out))
+    written = out.read_text()
+
+    assert "FAIL — do not merge" in written
+    assert "truncated" in written
+    assert len(written) < vr.MAX_DETAIL_CHARS + 200
+
+
+def test_the_detail_survives_an_unwritable_path(capsys):
+    """It is diagnostics, never a reason to fail a release."""
+    vr.write_detail(["anything"], path="no/such/dir/detail.md")
+    assert "could not write" in capsys.readouterr().err

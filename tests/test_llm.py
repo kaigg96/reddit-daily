@@ -106,7 +106,7 @@ def test_failures_stay_soft_and_do_not_echo_the_keyed_url(monkeypatch, capsys):
     monkeypatch.setenv("GEMINI_API_KEY", "super-secret")
 
     meta = llm.get_metadata("q", ["a", "b", "c"])
-    assert meta == (None, None, None)
+    assert (meta.title, meta.keywords, meta.cta) == (None, None, None)
     assert "super-secret" not in capsys.readouterr().out
 
 
@@ -139,8 +139,28 @@ def test_one_missing_field_does_not_cost_the_others(monkeypatch):
 
 def test_unparseable_json_falls_back_on_everything(monkeypatch, capsys):
     monkeypatch.setattr(llm, "_generate", lambda *a, **k: "{not json at all")
-    assert llm.get_metadata("q", ["a", "b", "c"]) == (None, None, None)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.keywords, meta.cta) == (None, None, None)
     assert "fall back" in capsys.readouterr().out
+
+
+def test_source_separates_a_dead_api_from_a_bad_answer(monkeypatch):
+    """Both come back with three empty fields, and the release gate has to
+    tell them apart: one means "could not check", the other "do not merge".
+    Without this the shared 20/day quota running out reads as a release
+    regression, which paged the owner three mornings running."""
+    def boom(*a, **k):
+        raise llm.requests.HTTPError("429 Too Many Requests")
+
+    monkeypatch.setattr(llm, "_generate", boom)
+    assert llm.get_metadata("q", ["a", "b", "c"]).source == "error"
+
+    # Gemini answered -- badly. That IS evidence about the prompt.
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no json here")
+    assert llm.get_metadata("q", ["a", "b", "c"]).source == "gemini"
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: GOOD_JSON)
+    assert llm.get_metadata("q", ["a", "b", "c"]).source == "gemini"
 
 
 def test_keywords_distinguishes_a_missing_field_from_an_empty_one(monkeypatch):
