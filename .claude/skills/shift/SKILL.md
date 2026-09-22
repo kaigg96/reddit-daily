@@ -91,10 +91,15 @@ wrong; log the rest.
   worse than missing ones.
 - **Is the next thing we'd build the highest-leverage thing?** If the feature
   lane is empty, filling the backlog is this lane's job (§2).
-- **Record decisions as they're made** in `DECISIONS.md`, with the assumptions
-  under them — that is what makes them revisitable.
-- **Chase closure.** Open escalations awaiting the owner, `TECH_DEBT.md` at its
-  cap, branches unmerged. Things must close, not accumulate.
+- **Record decisions** in `DECISIONS.md` with the assumptions under them —
+  that is what makes them revisitable.
+- **Do what the owner has already decided.** `scripts/escalations.py approved`
+  lists escalations they have labelled — those are **work items, not
+  questions**. Do them, then `escalations.py close <n> "what was done"`. Once
+  they have decided, they are out of it; leaving one open keeps notifying them
+  about a settled question, which is how four piled up at once.
+- **Chase closure** elsewhere too: `TECH_DEBT.md` at its cap, branches
+  unmerged. Things must close, not accumulate.
 - **`/audit`** is this lane's periodic deep task (§8).
 
 
@@ -126,17 +131,11 @@ under its pre-committed decision rules.
 that replace owner review are in `CLAUDE.md` §3; clear them, then update
 `WORKLOG.md` and `PRD.md` §0.
 
-**Some things need the owner — escalate, don't decide, and don't block:**
-
-```sh
-venv/bin/python scripts/escalate.py --title "..." --key ... --recommend "..." <<'EOF'
-...why this is the owner's call...
-EOF
-```
-
-Commit and push it; it becomes an issue that emails the owner. Re-raising the
-same `--key` comments rather than duplicating. **Always include a
-recommendation** — an escalation without one just moves the work.
+**Some things need the owner — escalate, don't decide, don't block.** Raise it
+with `scripts/escalate.py --title … --key … --recommend …`, commit, and push;
+it becomes an issue that emails them. The same `--key` comments rather than
+duplicating. **Always include a recommendation** — one without it just moves
+the work.
 
 The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
 spending, production data, publishing.

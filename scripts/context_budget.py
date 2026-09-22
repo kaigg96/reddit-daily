@@ -45,7 +45,14 @@ ORIENT = {
     # template header can never fit in 900 — one of the two controls had to
     # move, and the audit needs ten entries of evidence to read.
     "WORKLOG.md": 2400,
-    ".claude/skills/shift/SKILL.md": 1800,
+    # Raised 1800 -> 1900 on 2026-09-21, using the escape hatch below for the
+    # first time and deliberately. 1800 was a first guess made when the skill
+    # covered four lanes and one budget. It now covers six workstreams, four
+    # separate resource budgets, escalation, owner reporting and close-out --
+    # scope the project actually gained, not prose that crept in. Six trims in
+    # one day had reached the point where each one removed real guidance, and
+    # grinding further was itself the waste the budget exists to prevent.
+    ".claude/skills/shift/SKILL.md": 1900,
     ".claude/skills/pickup/SKILL.md": 700,
 }
 

@@ -147,6 +147,10 @@ jobs:
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite,Task,Agent"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # So the shift can pick up decisions the owner has already made and
+          # close them out. Scoped to this repo, and no wider than what the
+          # action can already do.
+          GITHUB_TOKEN: ${{ github.token }}
 
       # A shift that runs and leaves no trace looks identical to one that never
       # ran -- which is how the first scheduled shift passed silently. Every

@@ -93,6 +93,14 @@ jobs:
       # captured into an echo, which always succeeds, so nothing ever gated on
       # it. A rule that reports a fault and changes nothing teaches everyone to
       # ignore it, so it is a build failure now.
+      - name: Owner decisions get picked up
+        run: |
+          [ -f scripts/escalations.py ] \
+            || { echo "::error::the approved-escalation tool is gone"; exit 1; }
+          grep -q "escalations.py approved" .claude/skills/shift/SKILL.md \
+            || { echo "::error::shifts no longer check for decisions the owner has made"; exit 1; }
+          echo "approved escalations are still picked up"
+
       - name: Context budget
         run: python3 scripts/context_budget.py --check
 
