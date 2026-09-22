@@ -914,3 +914,65 @@ def test_metrics_pointing_opposite_ways_are_called_out_not_flattened(tmp_path, m
 
     assert "CONFLICT" in out and "the owner's call" in out
     assert "REVERT" in out
+
+
+# ------------------------------------------------------------ trajectory
+
+def _snap(vid, published_day, snapshot_day, value):
+    base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+    return {"video_id": vid,
+            "published": base + datetime.timedelta(days=published_day),
+            "snapshot": base + datetime.timedelta(days=snapshot_day),
+            "value": value}
+
+
+def test_trajectory_reads_every_upload_at_the_same_age():
+    """The point of the measure: months become comparable.
+
+    A July upload read at 7 days must sit alongside a September one read at 7
+    days, not at 60. Without that, every trend is really an age trend.
+    """
+    # All six inside one ISO week — 2026-07-01 is a Wednesday, so spreading
+    # them over six days would straddle the boundary and split the bucket.
+    rows = []
+    for i in range(6):
+        rows.append(_snap(f"a{i}", 0, 7, 10.0 + i * 0))     # read at 7d
+        rows.append(_snap(f"a{i}", 0, 60, 40.0))            # and much later
+    series = insights.trajectory(rows)
+    assert len(series) == 1
+    _, n, med = series[0]
+    assert n == 6
+    assert med == 10.0          # the 7-day reading, not the 60-day one
+
+
+def test_trajectory_skips_periods_too_thin_to_report():
+    """Two uploads is not a week's worth; reporting it invites noise-chasing."""
+    rows = [_snap("a", 0, 7, 10.0), _snap("b", 1, 8, 30.0)]
+    assert insights.trajectory(rows) == []
+
+
+def test_flat_is_detected_against_the_channels_own_drift():
+    """The actionable verdict. A 1s wobble inside normal weather is NOT
+    progress, and calling it progress is how a flatlining channel looks fine.
+    """
+    series = [(f"w{i}", 10, v) for i, v in enumerate([10.0, 11.0, 10.0, 11.0, 10.0, 11.0])]
+    verdict, why = insights.trajectory_verdict(series, floor=2.0)
+    assert verdict == "flat", why
+
+
+def test_real_movement_is_not_dismissed_as_drift():
+    series = [(f"w{i}", 10, v) for i, v in enumerate([8.0, 8.0, 8.0, 14.0, 14.0, 14.0])]
+    verdict, _ = insights.trajectory_verdict(series, floor=2.0)
+    assert verdict == "rising"
+
+
+def test_a_decline_is_reported_as_falling():
+    series = [(f"w{i}", 10, v) for i, v in enumerate([14.0, 14.0, 14.0, 8.0, 8.0, 8.0])]
+    verdict, _ = insights.trajectory_verdict(series, floor=2.0)
+    assert verdict == "falling"
+
+
+def test_too_little_history_says_unknown_rather_than_guessing():
+    series = [(f"w{i}", 10, 10.0) for i in range(3)]
+    verdict, _ = insights.trajectory_verdict(series, floor=1.0)
+    assert verdict == "unknown"

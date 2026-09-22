@@ -27,6 +27,9 @@ proposes the same safe list every time.
 **Draw from evidence, not from imagination.** Before generating, read at least
 three of these, and say which you used:
 
+- **The trajectory** — `scripts/report.py --trajectory`, first. If it says
+  FLAT, the last few things we shipped did not work, and repeating that shape
+  of idea is the mistake. Read *what we tried* in `PRD.md` §0 before proposing.
 - **Failures** — `scripts/report.py --zeros`. What do the suppressed and
   zero-view uploads have in common?
 - **The spread** — `--by topic`, `--by title_style`, `--by background_type`.

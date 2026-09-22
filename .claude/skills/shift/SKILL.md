@@ -10,7 +10,7 @@ maintenance, security, project management, research, feature work — does the
 work, ships it, and hands over, without the owner in the loop.
 
 **Point, don't duplicate.** Status is `PRD.md` §0, code health `TECH_DEBT.md`,
-conventions `CLAUDE.md`. Never keep a second copy of status here.
+conventions `CLAUDE.md`. Never copy status here.
 
 ---
 
@@ -49,15 +49,21 @@ rules to check, and how channels like this grow. A thin maintenance or feature
 day makes a PM-and-research shift, not a short one. Ending early is for when
 even those have nothing above the value bar (§7), which should be rare.
 
+**If the channel is flat, PM's slice is already spoken for.**
+`scripts/report.py --trajectory` reads every upload at the same age, so months
+compare. **FLAT** means the work being done is not moving the outcome, and
+process work does not count as a response: PM must propose a change to *what
+we ship* (`/backlog`). Flat with no experiment concluded is the clearest
+evidence available that we are toiling.
+
 Allocating honestly:
 
-- **A lane with no actionable work gets 0%, and that is a finding**, not a
-  failure. Say so in `WORKLOG.md`.
+- **A lane with no actionable work gets 0%** — a finding, not a failure. Say so.
 - **An empty feature lane is a project-management problem.** Give that time to
   PM to populate the backlog rather than inventing features to build.
 - **Research has no ceiling**, but its output is governed by the value bar: a
-  hypothesis with a proposed test, recorded in `WORKLOG.md`, no new documents.
-  That bar is what stops it becoming busywork — not a percentage.
+  hypothesis with a proposed test, no new documents. That bar stops it becoming
+  busywork, not a percentage.
 - **Starvation floor:** a lane at ~0% for **5 consecutive shifts** takes
   priority if it has queued work (check `WORKLOG.md`). A lane that keeps losing
   is the failure mode of every priority scheme.
@@ -106,8 +112,7 @@ wrong; log the rest.
 - **Do what the owner has already decided.** `scripts/escalations.py approved`
   lists what they have labelled — **work items, not questions**. Do them, then
   `escalations.py close <n> "…"`. Leaving one open keeps notifying them.
-- **Chase closure:** `TECH_DEBT.md` at its cap, branches unmerged. Things must
-  close, not accumulate.
+- **Chase closure:** `TECH_DEBT.md` at its cap, branches unmerged.
 - **`/audit`** is this lane's periodic deep task (§8).
 
 
@@ -174,17 +179,14 @@ than idleness. Forbidden:
 - **Refactoring without a named benefit.** "Cleaner" is not one. It must
   unblock a change, remove a rule that could drift, or make untestable logic
   testable. Work `TECH_DEBT.md`'s tiers; don't invent work.
-- **Re-planning what was just planned.** `PRD.md` §0's backlog order stands
-  until *data* moves it, not until a shift has a new opinion.
-- **Rewriting accurate docs.** Correct stale claims; leave the rest.
-- **New trackers or documents.** Use the ones that exist.
-- **Widening scope mid-shift.** Finish, then pick the next thing.
+- **Re-planning what was just planned.** `PRD.md` §0's order stands until
+  *data* moves it, not a new opinion.
+- **Rewriting accurate docs**, **new trackers or documents**, **widening scope
+  mid-shift.**
 
-If a lane has nothing above that bar, say so and move on — the time goes to PM
-and research (§2), not back to the clock. Stopping early is the last resort,
-not the default: it means even planning, prioritising and research had nothing
-worth doing, which should be rare. When it happens, say the queue is empty and
-why.
+If a lane has nothing above that bar, the time goes to PM and research (§2),
+not back to the clock. Stopping early is the last resort: it means even
+planning and research had nothing worth doing. Say the queue is empty and why.
 
 ## 8. Leave the context no bigger than you found it
 
@@ -192,8 +194,8 @@ why.
 venv/bin/python scripts/context_budget.py --check
 ```
 
-Add `--health` once a day: it detects process dysfunction — capacity
-consistently unused, a lane starved — and **queues the escalation itself**.
+Add `--health` once a day: it detects capacity going unused or a lane
+starved, and **queues the escalation itself**.
 
 Checks both words in the loaded docs and **open items in the append-only ones**
 (`WORKLOG.md`, `DECISIONS.md`, `TECH_DEBT.md`) — those cost nothing per session,
@@ -204,9 +206,9 @@ it, move detail to where it is read on demand, or convert an advisory rule into
 a hook or a test.
 
 **`/audit` is a PM task that comes due, not a separate cadence.** It reads a
-*series* — the last ten entries, escalations, what got reverted — so it needs
-about ten shifts of evidence. Run it when `WORKLOG.md` shows none in the last
-ten; PM's slice grows that shift to fit, which is §2 working, not an exception.
+*series* — the last ten entries, escalations, reverts — so it needs ~ten
+shifts of evidence. Run it when `WORKLOG.md` shows none recently; PM's slice
+grows to fit, which is §2 working, not an exception.
 
 ## 9. End the shift rather than extend it
 

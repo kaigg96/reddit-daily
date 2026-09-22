@@ -129,6 +129,56 @@ def release(version, key, target_age):
     print(insights.render_release(comparisons, floors))
 
 
+
+def _snapshot_metric_rows(metric_col="avg_view_duration_s"):
+    """Weekly-snapshot rows shaped for insights.trajectory."""
+    import csv as _csv
+    import datetime as _dt
+    import os as _os
+    root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    path = _os.path.join(root, "analysis", "analytics_snapshots.csv")
+    out = []
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            for r in _csv.DictReader(f):
+                try:
+                    pub = _dt.datetime.fromisoformat(
+                        (r.get("published_at") or "").replace("Z", "+00:00"))
+                    snap = _dt.datetime.fromisoformat(
+                        (r.get("snapshot_date") or "") + "T00:00:00+00:00")
+                    val = float(r.get(metric_col) or 0)
+                except (ValueError, TypeError):
+                    continue
+                out.append({"video_id": r.get("video_id"), "published": pub,
+                            "snapshot": snap, "value": val})
+    except OSError:
+        pass
+    return out
+
+
+def show_trajectory(args):
+    """`--trajectory`: is the channel actually getting better?"""
+    rows = _snapshot_metric_rows()
+    series = insights.trajectory(rows, at_age=args.at_age or 7)
+    if not series:
+        print("not enough comparable history yet")
+        return
+    print(f"Median watch-seconds, every upload read at ~{args.at_age or 7} days old\n")
+    print(f"  {'week':10} {'n':>4} {'median':>8}")
+    for period, n, med in series:
+        print(f"  {period:10} {n:>4} {med:>7.1f}s")
+
+    floor = insights.median([abs(b[2] - a[2])
+                            for a, b in zip(series, series[1:])]) or None
+    verdict, why = insights.trajectory_verdict(series, floor=floor)
+    print(f"\n  {verdict.upper()} — {why}")
+    if floor:
+        print(f"  (week-to-week drift on this channel is ~{floor:.1f}s)")
+    if verdict == "flat":
+        print("\n  Flat is the actionable verdict: the work being done is not"
+              "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
@@ -142,6 +192,9 @@ def main():
     p.add_argument("--at-age", type=float, default=insights.AGE_MATCH_TARGET_DAYS,
                    metavar="DAYS", help="age at which --release reads every upload "
                                         f"(default {insights.AGE_MATCH_TARGET_DAYS:.0f})")
+    p.add_argument("--trajectory", action="store_true",
+                   help="is the channel improving? every upload read at the "
+                        "same age, grouped by publish week")
     p.add_argument("--zeros", action="store_true",
                    help="list 0-view videos, classified into suppression candidates / "
                         "cold-spell / non-public")
@@ -153,6 +206,10 @@ def main():
     args = p.parse_args()
 
     now = datetime.datetime.now(datetime.timezone.utc)
+
+    if args.trajectory:     # the only surface that answers "are we improving?"
+        show_trajectory(args)
+        return
 
     if args.zeros:          # uses the Data API (near-real-time), not the weekly snapshot
         if args.offline:

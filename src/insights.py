@@ -306,6 +306,70 @@ def render_release(comparisons, floors):
     return "\n".join(out)
 
 
+# ---------------------------------------------------------------- trajectory
+
+TRAJECTORY_AT_AGE = 7      # days old at which every upload is read
+TRAJECTORY_MIN_N = 5       # periods thinner than this are not reported
+TRAJECTORY_HALF = 3        # periods per half when comparing then-vs-now
+
+
+def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+    """Median metric per publish-week, every upload read at the same age.
+
+    Answers the one question no other surface here answers: **is the channel
+    getting better?** `--by` groups, `--compare` tests two cohorts and
+    `--release` judges one release — all of them point-in-time. A system can
+    pass every one of those while the channel flatlines for months, which is
+    the failure this exists to catch.
+
+    Reading at a fixed age is what makes months comparable: the weekly snapshot
+    holds ~10 readings per video, so a July upload can be read at seven days
+    old alongside a September one. Returns [(period, n, median)] oldest first.
+    """
+    best = {}
+    for row in snapshot_rows:
+        pub, snap = row.get("published"), row.get("snapshot")
+        value = row.get("value")
+        if not pub or not snap or not value or value <= 0:
+            continue
+        age = (snap - pub).days
+        if abs(age - at_age) > tolerance:
+            continue
+        key = row.get("video_id")
+        prev = best.get(key)
+        if prev is None or abs(age - at_age) < abs(prev[0] - at_age):
+            best[key] = (age, value, pub)
+
+    buckets = {}
+    for _, value, pub in best.values():
+        buckets.setdefault(pub.strftime("%Y-W%V"), []).append(value)
+    return [(period, len(v), median(v))
+            for period, v in sorted(buckets.items())
+            if len(v) >= TRAJECTORY_MIN_N]
+
+
+def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):
+    """Rising, flat or falling — against the channel's own noise, not zero.
+
+    A flat verdict is the actionable one and the whole point: it means the work
+    being done is not moving the outcome, which no amount of process metrics
+    would reveal. `floor` is the ordinary between-batch swing (see
+    `drift_floor`); without it a 1s wobble reads as progress.
+    """
+    if len(series) < half * 2:
+        return "unknown", f"only {len(series)} comparable periods"
+    recent = median([m for _, _, m in series[-half:]])
+    prior = median([m for _, _, m in series[-half * 2:-half]])
+    change = recent - prior
+    span = f"{prior:.1f} → {recent:.1f}"
+    if floor is not None and abs(change) <= floor:
+        return "flat", (f"{span} over {half * 2} periods — inside the "
+                        f"channel's own {floor:.1f} drift")
+    if abs(change) < 0.5:
+        return "flat", f"{span} over {half * 2} periods"
+    return ("rising" if change > 0 else "falling"), f"{span} over {half * 2} periods"
+
+
 def age_adjusted_residuals(videos, now):
     """Residual of log-views against the channel's own log-age trend.
 
