@@ -66,20 +66,21 @@ jobs:
         with:
           fetch-depth: 0     # shifts read git history
 
-      # The owner's 80/90% reserve cannot be enforced here -- remaining quota is
-      # not observable on a runner (statusLine does not fire headlessly,
-      # transcripts record only the moment a limit is hit, no plan-usage API).
-      # So it is enforced by construction: a rolling 7-day allowance of QUOTA
-      # UNITS, which are an API-list-price equivalent of tokens consumed and
-      # NOT money -- this account is a subscription with overage disabled and
-      # cannot be billed per token. The allowance lives in a repository
-      # variable, not the repo, so a shift cannot raise its own.
+      # A runaway breaker, not a budget. Remaining quota is not observable on a
+      # runner, and the owner's real weekly figure (their Claude console)
+      # includes their own interactive sessions, which dwarf shift usage --
+      # two shifts came to 15 units while the console read 38%. So this only
+      # needs to catch a shift looping. 120 allows a daily shift at the
+      # observed ~10.5 units with generous headroom. The window aligns with the
+      # real Friday 18:00 UTC reset rather than rolling. Units are an
+      # API-list-price equivalent, never money: overage is disabled on this
+      # account. Lives in a repository variable so a shift cannot raise its own.
       - name: Within the weekly shift budget?
         id: budget
         if: steps.auth.outputs.ready == 'true'
         run: |
           if python3 scripts/shift_budget.py check .github/shift-usage.csv \
-               "${{ vars.SHIFT_WEEKLY_QUOTA_BUDGET || '25' }}"; then
+               "${{ vars.SHIFT_WEEKLY_QUOTA_BUDGET || '120' }}"; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Weekly shift allowance spent — skipping."

@@ -11,6 +11,13 @@ What IS observable is consumption: the action writes `total_cost_usd`,
 construction rather than measurement — shifts get a fixed weekly allowance,
 and stop when they have spent it.
 
+**This is a runaway breaker, not a budget.** The owner's real weekly quota is
+the percentage in their Claude console, which includes their own interactive
+sessions and which CI cannot see. Measured 2026-09-21: two shifts totalled
+15.45 units while the console read 38% used -- almost all of that 38% was
+interactive work, so shifts are a small slice. The allowance therefore only
+needs to be low enough to catch a shift looping, not to manage their week.
+
     shift_budget.py check <ledger> <ceiling>   -> prints spend; exit 1 if over
     shift_budget.py record <output> <ledger> <run_id> <model> <effort>
 
@@ -24,10 +31,29 @@ import os
 import sys
 
 
-def _recent(ledger, days=7):
+# The owner's Claude quota resets on a fixed weekly boundary -- Friday 11:00
+# Pacific, which is 18:00 UTC -- not on a rolling window. A rolling 7-day sum
+# let spending from BEFORE the reset block shifts after it. Overridable for
+# when the plan or timezone changes.
+RESET_WEEKDAY = int(os.environ.get("QUOTA_RESET_WEEKDAY", 4))   # Mon=0 … Fri=4
+RESET_HOUR_UTC = int(os.environ.get("QUOTA_RESET_HOUR_UTC", 18))
+
+
+def window_start(now=None):
+    """The most recent quota reset at or before `now`."""
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    candidate = now.replace(hour=RESET_HOUR_UTC, minute=0, second=0, microsecond=0)
+    # Walk back to the reset weekday, then back another week if that lands ahead.
+    candidate -= datetime.timedelta(days=(candidate.weekday() - RESET_WEEKDAY) % 7)
+    if candidate > now:
+        candidate -= datetime.timedelta(days=7)
+    return candidate
+
+
+def _recent(ledger, now=None):
     if not os.path.exists(ledger):
         return 0.0
-    cut = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    cut = window_start(now)
     total = 0.0
     with open(ledger) as f:
         for row in csv.DictReader(f):
@@ -45,8 +71,9 @@ UNDERSPEND_SHARE = 0.35   # below this share of the ceiling, capacity is idle
 
 def check(ledger, ceiling):
     spent = _recent(ledger)
-    print(f"shifts used {spent:.2f} quota units in the last 7 days "
-          f"(weekly allowance {ceiling:.2f}). Units are an API-list-price\n    equivalent, not money -- this account cannot be billed per token.")
+    print(f"shifts used {spent:.2f} quota units since the "
+          f"{window_start():%a %d %b %H:%M} UTC reset (allowance "
+          f"{ceiling:.2f}). Units are an API-list-price equivalent, not money.")
     if spent >= ceiling:
         print("OVER — skipping this shift to protect the owner's own quota.")
         return 1
@@ -65,10 +92,10 @@ def check(ledger, ceiling):
     return 0
 
 
-def _count(ledger, days=7):
+def _count(ledger, now=None):
     if not os.path.exists(ledger):
         return 0
-    cut = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+    cut = window_start(now)
     n = 0
     with open(ledger) as f:
         for row in csv.DictReader(f):
