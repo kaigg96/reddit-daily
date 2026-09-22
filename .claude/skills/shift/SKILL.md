@@ -78,8 +78,8 @@ allocating:
 ## 4. The lanes
 
 **Maintenance** — is the pipeline healthy, are the logs sane, is anything
-silently failing? *Fail-soft without telemetry is indistinguishable from
-working.* Instrument a silent fallback before fixing it.
+silently failing? *Fail-soft without telemetry looks identical to working.*
+Instrument a silent fallback before fixing it.
 
 **Security** — a standing check: secrets never committed and still ignored,
 dependency advisories, workflow permissions, OAuth scope. Fix what is clearly
@@ -88,36 +88,36 @@ wrong; log the rest.
 **Project management** — the lane that notices things. Standing jobs:
 
 - **Has a decision rule come due?** Each experiment in `PRD.md` §0 carries one.
-  Count uploads since the release and *act*. Nothing else watches this, and an
-  unevaluated experiment is worse than an unrun one — it looks like evidence.
-- **Is the tracker true, and the documentation accurate?** Stale claims mislead
-  worse than missing ones.
+  Count uploads since the release and *act* — method in `/backlog` §4, which
+  exists because this is the job the project has got wrong most often. An
+  unevaluated experiment is worse than an unrun one: it looks like evidence.
+- **Is the tracker true?** `scripts/check_docs.py` checks the checkable claims;
+  judgement covers the rest (`/backlog` §5). Stale claims mislead worse than
+  missing ones.
 - **Is the next thing we'd build the highest-leverage thing?** If the feature
-  lane is empty, filling the backlog is this lane's job (§2). Use **`/backlog`**
-  — generating and ranking work has documented failure modes that intuition
-  walks straight into.
-- **Is a constraint costing more than it buys?** `PRD.md` §5 marks each 🔒
-  inviolable or 🔄 open to challenge. Three workarounds for one 🔄 constraint, or
-  one blocking planned work, means it is due to be challenged — `/backlog` §3.
-  **Absorbing a recurring cost gracefully is how it becomes permanent.**
+  lane is empty, filling the backlog is this lane's job (§2) — `/backlog` §1–2,
+  because generating and ranking work has failure modes intuition walks into.
+- **Is a constraint costing more than it buys?** `PRD.md` §5 marks each 🔒 or
+  🔄. Three workarounds for one 🔄, or one blocking planned work, means it is due
+  — `/backlog` §3. **Absorbing a recurring cost gracefully is how it becomes
+  permanent.**
 - **Record decisions** in `DECISIONS.md` with their assumptions — that is what
   makes them revisitable.
 - **Do what the owner has already decided.** `scripts/escalations.py approved`
   lists what they have labelled — **work items, not questions**. Do them, then
-  `escalations.py close <n> "what was done"`. Leaving one open keeps notifying
-  them about a settled question.
-- **Chase closure** elsewhere too: `TECH_DEBT.md` at its cap, branches
-  unmerged. Things must close, not accumulate.
+  `escalations.py close <n> "…"`. Leaving one open keeps notifying them.
+- **Chase closure:** `TECH_DEBT.md` at its cap, branches unmerged. Things must
+  close, not accumulate.
 - **`/audit`** is this lane's periodic deep task (§8).
 
 
 **The workflow itself is always in scope here, not only at audit time.** Agentic
 systems improve what they build and never question how they build it. If
-something about this process was awkward *this shift* — a rule that didn't fit,
-a step that added nothing, state you had to re-derive, a gate you worked around
-— that is a finding. Record it in `WORKLOG.md` even when you don't act on it;
-the next `/audit` needs the pattern, and one shift's friction is invisible on
-its own. Changes to the process are proposals (§5), not self-applied edits.
+something was awkward *this shift* — a rule that didn't fit, a step that added
+nothing, state you had to re-derive, a gate you worked around — that is a
+finding. Record it in `WORKLOG.md` even without acting: one shift's friction is
+invisible alone, and `/audit` needs the pattern. Process changes are proposals
+(§5), never self-applied.
 
 **Research** — how do channels like this grow, and what transfers? Always has
 capacity, so it is the fallback when nothing else clears the bar. Three rules:

@@ -1,6 +1,6 @@
 ---
 name: backlog
-description: How the project-management lane decides what the channel should do next — generating candidate work, prioritising it, and challenging a constraint that costs more than it buys. Load when the feature lane is empty, when a decision rule comes due, or when a constraint keeps forcing workarounds.
+description: How the project-management lane runs the channel's decision cycle — generating candidate work, prioritising it, evaluating an experiment whose decision rule has come due, and challenging a constraint that costs more than it buys. Load when the feature lane is empty, when a rule comes due, or when a constraint keeps forcing workarounds.
 ---
 
 # Decide what to work on next
@@ -117,3 +117,55 @@ it becomes permanent.**
 
 Then escalate with evidence, a concrete alternative, and its cost. **Elevating
 is the owner's call; noticing that it is due is not.**
+
+## 4. Evaluating an experiment whose rule has come due
+
+This is the job this project has got wrong most often. Four conclusions reached
+a decision in two weeks and all four were wrong (`TECH_DEBT.md` Pass 2): a
+length thesis that nearly shipped two features, a b-roll effect that was pure
+age artifact, a retention claim later retracted, and an alert with twelve false
+positives. The tooling was then built to make those specific errors impossible
+— age-matching, watch-seconds as primary, cohort floors, zero-view separation.
+**`scripts/report.py` is not advice; it is the accumulated corrections.**
+
+What the tooling cannot stop is the remaining failure: **reinterpreting the
+rule once the answer is inconvenient.** A pre-committed rule only controls
+error if it is applied as written, so:
+
+1. **Quote the rule first, before looking at any number.** Copy it from
+   `PRD.md` §0 into the `WORKLOG` entry verbatim. A rule you have to
+   paraphrase after seeing the data is no longer a pre-commitment.
+2. **Check the cohort qualifies before reading the verdict.** `report.py`
+   refuses thin or age-mismatched comparisons; that refusal is the answer, not
+   an obstacle to route around with a different cut of the data.
+3. **Apply it exactly, and accept the result.** Keep or revert as written.
+4. **"Not yet" is a third outcome** and the commonest one. A cohort too small
+   to decide is not evidence of no effect, and it is not licence to substitute
+   an easier test.
+
+**Anything else you notice in the data is exploratory.** It may be true and it
+is not a verdict — it went looking after the fact, which is how the length
+thesis happened. Exploratory findings become **candidates in §1**, each needing
+its own pre-committed rule before it can ever be acted on. Never act on one in
+the shift that found it.
+
+Record the verdict against the rule in `PRD.md` §0 so the next shift cannot
+re-litigate it, and say plainly which outcome it was: kept, reverted, or not
+yet.
+
+## 5. Checking the tracker is true
+
+```sh
+venv/bin/python scripts/check_docs.py
+```
+
+Stale claims mislead worse than missing ones, because they are read with
+confidence — a shift once lost its feature time to a blocker that had been
+cleared ten days earlier, because two places disagreed. The checkable claims
+are checked mechanically: live format against the code, branches described as
+pending that have merged, cohort sizes quoted as current, and issues described
+as open that are closed.
+
+**Spend judgement on what it cannot check**: whether §0's priorities are still
+right, whether a finding in §4 still holds, and whether a decision in
+`DECISIONS.md` rests on an assumption that has quietly become false.
