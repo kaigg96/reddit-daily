@@ -12,7 +12,14 @@ gives it a ceiling — the same reason the Polly budget lives in code rather tha
 in a paragraph.
 
     venv/bin/python scripts/context_budget.py          # report
-    venv/bin/python scripts/context_budget.py --check  # exit 1 if over budget
+    venv/bin/python scripts/context_budget.py --check  # exit 1 if CLAUDE.md is over
+
+Only the ALWAYS tier fails a build. Everything else is reported and left to
+judgement, because a project that grows legitimately needs more words, and a
+cap that blocks is a cap agents route around. That mattered most for the
+corpus counts: when exceeding TECH_DEBT's cap broke CI, the cheapest way to
+stay green was to not record the finding -- a control producing dishonesty
+rather than hygiene, which is the failure CLAUDE.md section 4 warns about.
 
 Two tiers, because they cost differently:
 
@@ -34,7 +41,9 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Budgets are deliberately tight. Raising one is a decision to spend more of
+# Budgets are deliberately tight, and this one is the only hard limit: bloat
+# here has a specific documented effect -- Claude starts ignoring the file, which
+# has already happened on this project. Raising it is a decision to spend more of
 # every future session on the same words, so it needs a reason beyond "it grew".
 ALWAYS = {"CLAUDE.md": 1200}
 ORIENT = {
@@ -180,8 +189,9 @@ def session_cost():
 # Files that are read on demand cost nothing per session, but they still rot:
 # stale, superseded and contradictory content accumulates where nobody looks.
 # The failure mode is too many OPEN THINGS, not too many words, so these are
-# counted as items. Past a cap, the rule is closure -- you cannot add without
-# resolving, which is the same forcing function the word budgets apply.
+# counted as items. Past a cap the signal is "this list needs closing, not
+# extending" -- but it is advisory. Blocking on it would make silence cheaper
+# than recording a finding, which is worse than a long list.
 CORPUS = {
     "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them"),
     "DECISIONS.md": (r"^## D\d+ ", 15, "decisions",
@@ -380,8 +390,8 @@ def main():
 
     always = measure(ALWAYS)
     orient = measure(ORIENT)
-    over = report(always, "ALWAYS LOADED (every session, whatever the task)")
-    over += report(orient, "READ AT STARTUP (every shift)")
+    blocking = report(always, "ALWAYS LOADED (every session, whatever the task)")
+    advisory = report(orient, "READ AT STARTUP (every shift)")
     corpus_over = corpus_health()
 
     total = sum(n for _, n, _ in always + orient if n)
@@ -396,21 +406,27 @@ def main():
     if args.health:
         health(raise_issues=True)
 
-    over += [(p, n, c) for p, n, c, _ in corpus_over]
+    advisory += [(p, n, c) for p, n, c, _ in corpus_over]
 
-    if over:
-        print("\nOver budget:")
-        for name, n, budget in over:
-            print(f"  - {name}: {n} words, {n - budget} over")
-        print("\nThe fix is almost never a bigger budget. In order of preference:")
+    if blocking or advisory:
+        if blocking:
+            print("\nOver budget — BLOCKING (always-loaded context):")
+            for name, n, budget in blocking:
+                print(f"  - {name}: {n} words, {n - budget} over")
+        if advisory:
+            print("\nOver budget — advisory, does not fail the build:")
+            for name, n, budget in advisory:
+                print(f"  - {name}: {n}, {n - budget} over")
+        print("\nOptions, in rough order of preference:")
         print("  1. Delete it. 'Would removing this cause a mistake?' If no, cut it.")
         print("  2. Move detail to where it is read on demand — a skill, or PRD §6.")
         print("  3. Convert an advisory rule into a hook or a test, which is")
         print("     enforcement rather than words (CLAUDE.md is advisory).")
-        print("  4. Only then, raise the budget — and say why in the commit.")
+        print("  4. Raise the budget — legitimate when the project actually grew,")
+        print("     which it has twice. Say why in the commit, as those did.")
     else:
         print("\nAll within budget.")
-    return 1 if (over and args.check) else 0
+    return 1 if (blocking and args.check) else 0
 
 
 if __name__ == "__main__":
