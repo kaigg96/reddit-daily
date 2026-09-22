@@ -1,0 +1,119 @@
+---
+name: backlog
+description: How the project-management lane decides what the channel should do next — generating candidate work, prioritising it, and challenging a constraint that costs more than it buys. Load when the feature lane is empty, when a decision rule comes due, or when a constraint keeps forcing workarounds.
+---
+
+# Decide what to work on next
+
+Three jobs shape the channel's direction, and each fails differently. They are
+here rather than in `/shift` because they are methods, used when the work comes
+up, not rules to carry every shift.
+
+**One rule spans all three.** This channel has twice killed a plausible,
+confident, wrong idea with its own data — R1.8/R1.9 and the b-roll retention
+claim (`PRD.md` §4). Anything produced here is a **candidate**, not a finding.
+It earns its place by surviving contact with `scripts/report.py`, not by
+sounding right.
+
+---
+
+## 1. Generating candidates
+
+The failure mode is measured, not hypothetical: language models **fixate** —
+early outputs constrain later ones — and **favour typical text**, so asking
+for ideas yields a handful of obvious, homogeneous ones. Left alone this lane
+proposes the same safe list every time.
+
+**Draw from evidence, not from imagination.** Before generating, read at least
+three of these, and say which you used:
+
+- **Failures** — `scripts/report.py --zeros`. What do the suppressed and
+  zero-view uploads have in common?
+- **The spread** — `--by topic`, `--by title_style`, `--by background_type`.
+  Where is the variance, and what would exploit it?
+- **The audience** — comments on our own uploads. The only direct signal we get.
+- **Distribution** — `analysis/traffic_sources.csv`. Where views actually come
+  from, which killed the SEO work once already.
+- **Constraints** — anything in §3 below that is forcing workarounds.
+- **The gap** — decision rules in `PRD.md` §0 that cannot be answered yet, and
+  what would make them answerable.
+
+**Then generate divergently, and only then converge.** Keep the two apart; a
+constraint applied during ideation is what collapses it to the obvious:
+
+> Generate 8 candidate work items, each with an estimated probability that it
+> is the highest-leverage thing we could do next. Include low-probability ones.
+
+Asking for **explicit probabilities across a set** ("verbalized sampling")
+measurably widens the range versus asking for a list — roughly 1.6–2.1× on
+published benchmarks, without costing quality, and the gain is larger on
+stronger models. Aim for spread: if all eight are the same shape, the sources
+above were not actually consulted.
+
+**Only now apply the filters.** Discard anything that contradicts a finding in
+§4, costs more than its constraint allows, or cannot be measured by an existing
+decision rule. Surviving candidates go to §2.
+
+## 2. Prioritising
+
+The failure mode here is that **the shift both generates and ranks**, and
+models systematically favour their own output. Three biases are documented and
+two are structural, so prompting alone will not fix them:
+
+- **Self-preference** — a property of the judge, not the prompt. Mitigate by
+  ranking in a **separate pass** with the candidates stripped of any note of
+  who proposed them or in what order they arose.
+- **Position bias** — order sensitivity that a rubric cannot reach. Mitigate by
+  **scoring the list, then scoring it reversed**, and keeping only the items
+  that rank well both ways.
+- **Verbosity bias** — longer reads as better. Mitigate by scoring a **one-line
+  statement** of each candidate, not its argument.
+
+**Score each dimension separately before any overall judgement** — decomposing
+a holistic call into dimension-wise ones roughly halves error against human
+judgement. Dimensions, in this project's terms:
+
+| | |
+|---|---|
+| **Effect on watch-seconds** | The primary metric (`PRD.md` §4). Views are noisy — 27–50% at fixed age. |
+| **Evidence** | Measured on *our* channel / measured elsewhere / reasoned. |
+| **Cost** | Gemini requests, Polly characters, Actions minutes, shift time. |
+| **Reversibility** | One `FORMAT_VERSION` bump, or something that cannot be undone. |
+| **Blocked?** | Gated on uploads accumulating is not a reason to rank it high now. |
+
+Rank on the dimensions, not on enthusiasm. Then write the top item into
+`PRD.md` §0's backlog **with its decision rule already stated** — an item
+without one cannot be evaluated later, which is how an experiment becomes
+permanent by default.
+
+## 3. Challenging a constraint
+
+`PRD.md` §5 marks each constraint 🔒 inviolable or 🔄 open to challenge. For a
+🔄 one, use the five focusing steps — the standard treatment for a system
+bottleneck:
+
+1. **Identify** — which constraint is actually limiting throughput? Not the
+   loudest one; the one whose removal would change what we can do.
+2. **Exploit** — get more from it without changing it. *Merging three Gemini
+   prompts into one was this.*
+3. **Subordinate** — make everything else serve it. *Per-consumer request caps
+   and timing shifts around the reset were this.*
+4. **Elevate** — change the constraint itself. A paid tier, a different model,
+   a different host.
+5. **Repeat** — the constraint moves; find the next one.
+
+**We stopped at step 3 and called it solved.** Every Gemini workaround was
+exploit-or-subordinate, each correct on its own, and together they removed the
+pressure that would have prompted step 4. That is the failure this section
+exists to prevent: **steps 2 and 3 make a constraint survivable, which is how
+it becomes permanent.**
+
+**The trigger is measurable, not a feeling.** Elevate is due when *either*:
+
+- one 🔄 constraint has forced **three or more** workarounds across shifts
+  (`WORKLOG.md`, `TECH_DEBT.md`), or
+- it has begun blocking planned work — a backlog item priced out by it is the
+  clearest possible signal.
+
+Then escalate with evidence, a concrete alternative, and its cost. **Elevating
+is the owner's call; noticing that it is due is not.**

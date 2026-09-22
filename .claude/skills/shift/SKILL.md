@@ -87,20 +87,21 @@ wrong; log the rest.
 
 **Project management** — the lane that notices things. Standing jobs:
 
-- **Has a decision rule come due?** `PRD.md` §0's experiments each carry one
-  ("after ≥20 uploads, keep if… revert if…"). Count uploads since the release
-  and *act*. Nothing else watches this, and an unevaluated experiment is worse
-  than an unrun one — it looks like evidence.
+- **Has a decision rule come due?** Each experiment in `PRD.md` §0 carries one.
+  Count uploads since the release and *act*. Nothing else watches this, and an
+  unevaluated experiment is worse than an unrun one — it looks like evidence.
 - **Is the tracker true, and the documentation accurate?** Stale claims mislead
   worse than missing ones.
 - **Is the next thing we'd build the highest-leverage thing?** If the feature
-  lane is empty, filling the backlog is this lane's job (§2).
+  lane is empty, filling the backlog is this lane's job (§2). Use **`/backlog`**
+  — generating and ranking work has documented failure modes that intuition
+  walks straight into.
 - **Is a constraint costing more than it buys?** `PRD.md` §5 marks each 🔒
-  inviolable or 🔄 open to challenge. A 🔄 one that keeps forcing workarounds is
-  a finding: evidence, an alternative, its cost, then escalate. **Absorbing a
-  recurring cost gracefully is how it becomes permanent.**
-- **Record decisions** in `DECISIONS.md` with the assumptions under them —
-  that is what makes them revisitable.
+  inviolable or 🔄 open to challenge. Three workarounds for one 🔄 constraint, or
+  one blocking planned work, means it is due to be challenged — `/backlog` §3.
+  **Absorbing a recurring cost gracefully is how it becomes permanent.**
+- **Record decisions** in `DECISIONS.md` with their assumptions — that is what
+  makes them revisitable.
 - **Do what the owner has already decided.** `scripts/escalations.py approved`
   lists what they have labelled — **work items, not questions**. Do them, then
   `escalations.py close <n> "what was done"`. Leaving one open keeps notifying

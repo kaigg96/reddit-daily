@@ -101,6 +101,18 @@ jobs:
             || { echo "::error::shifts no longer check for decisions the owner has made"; exit 1; }
           echo "approved escalations are still picked up"
 
+      - name: PM keeps its methods
+        run: |
+          [ -f .claude/skills/backlog/SKILL.md ] \
+            || { echo "::error::the backlog methods are gone"; exit 1; }
+          for m in "verbalized\|probabilit" "reversed" "focusing steps"; do
+            grep -qi "$m" .claude/skills/backlog/SKILL.md \
+              || { echo "::error::backlog lost a documented bias mitigation ($m)"; exit 1; }
+          done
+          grep -q "/backlog" .claude/skills/shift/SKILL.md \
+            || { echo "::error::the PM lane no longer points at its methods"; exit 1; }
+          echo "generation, ranking and constraint methods intact"
+
       - name: Context budget
         run: python3 scripts/context_budget.py --check
 
