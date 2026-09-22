@@ -194,9 +194,20 @@ def check_screen():
     # as a pass is exactly how the 2026-09-19 run looked green while proving
     # almost nothing.
     if "inconclusive" in out:
-        note("\n- ❌ some cases fell through to the backstop — not a verdict. "
-             "Usually means Gemini was unreachable or the quota was spent.")
-        return False
+        # Three states, not two. A case that fell to the keyword backstop
+        # proved nothing, so it must never count as a pass -- but it is not
+        # evidence the release is bad either, and treating it as FAIL paged the
+        # owner on 2026-09-21 about a release that was fine.
+        #
+        # Deliberately NOT retried: the commonest cause is an exhausted daily
+        # quota, so a retry would spend 5 more of 20 requests, fail the same
+        # way, and starve the next upload. That is the mistake the R4.6 screen
+        # already corrected by never retrying a 429.
+        note("\n- ⚠️ INCONCLUSIVE — a case fell through to the keyword "
+             "backstop, so the screen was not actually exercised. Gemini was "
+             "unreachable or the day's quota was spent. Not a verdict either "
+             "way; the next scheduled run re-checks it.")
+        return None
     if proc.returncode != 0:
         note("\n- ❌ replay reported a wrong verdict")
         return False
@@ -223,12 +234,16 @@ def main():
          f"requests of the 20/day cap shared with production.\n")
 
     results = {"metadata": check_metadata(), "screen": check_screen()}
-    passed = all(results.values())
+    inconclusive = any(v is None for v in results.values())
+    passed = all(v is True for v in results.values())
 
     note("\n### Verdict\n")
-    note(f"**{'PASS — release gates clear' if passed else 'FAIL — do not merge'}**\n")
+    if inconclusive and not any(v is False for v in results.values()):
+        note("**INCONCLUSIVE — could not be checked, not a failure**\n")
+    else:
+        note(f"**{'PASS — release gates clear' if passed else 'FAIL — do not merge'}**\n")
     for name, ok in results.items():
-        note(f"- {name}: {'pass' if ok else 'FAIL'}")
+        note(f"- {name}: {'pass' if ok is True else ('inconclusive' if ok is None else 'FAIL')}")
 
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
@@ -237,7 +252,11 @@ def main():
                 f.write("\n".join(SUMMARY) + "\n")
         except OSError:
             pass
-    return 0 if passed else 1
+    # Exit 2 for inconclusive: the workflow records it but must not escalate,
+    # because nothing is wrong with the release.
+    if passed:
+        return 0
+    return 2 if inconclusive and not any(v is False for v in results.values()) else 1
 
 
 if __name__ == "__main__":
