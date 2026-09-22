@@ -43,12 +43,11 @@ each lane actually has — not by a fixed percentage.
 **Slices are ceilings, not quotas.** A lane finishes its valuable work and
 stops rather than padding out its allocation — padding ships.
 
-**But slack goes to project management and research, it does not end the
-shift.** Those two always have work: a backlog to populate, decision rules to
-check, documentation to verify, and questions about how channels like this
-grow. If maintenance and feature work are thin, the shift is a PM-and-research
-shift — not a short one. Ending early is for when even those two have nothing
-above the value bar (§7), which should be rare.
+**But slack goes to PM and research, it does not end the shift.** Those two
+always have work — a backlog to populate, constraints to question, decision
+rules to check, and how channels like this grow. A thin maintenance or feature
+day makes a PM-and-research shift, not a short one. Ending early is for when
+even those have nothing above the value bar (§7), which should be rare.
 
 Allocating honestly:
 
@@ -59,10 +58,9 @@ Allocating honestly:
 - **Research has no ceiling**, but its output is governed by the value bar: a
   hypothesis with a proposed test, recorded in `WORKLOG.md`, no new documents.
   That bar is what stops it becoming busywork — not a percentage.
-- **Starvation floor:** any lane at ~0% for **5 consecutive shifts** takes
-  priority in this one if it has any queued work. Check the `Lane:` lines in
-  `WORKLOG.md`. A lane that keeps losing is the failure mode of every
-  priority scheme, including the one this replaced (see `DECISIONS.md` D1).
+- **Starvation floor:** a lane at ~0% for **5 consecutive shifts** takes
+  priority if it has queued work (check `WORKLOG.md`). A lane that keeps losing
+  is the failure mode of every priority scheme.
 
 ## 3. Preemption — when one thing takes the whole shift
 
@@ -90,20 +88,23 @@ wrong; log the rest.
 **Project management** — the lane that notices things. Standing jobs:
 
 - **Has a decision rule come due?** `PRD.md` §0's experiments each carry one
-  ("after ≥20 uploads, keep if… revert if…"). Count uploads since the version
-  shipped and *act on it*. Nothing else watches this, and an unevaluated
-  experiment is worse than an unrun one — it looks like evidence.
+  ("after ≥20 uploads, keep if… revert if…"). Count uploads since the release
+  and *act*. Nothing else watches this, and an unevaluated experiment is worse
+  than an unrun one — it looks like evidence.
 - **Is the tracker true, and the documentation accurate?** Stale claims mislead
   worse than missing ones.
 - **Is the next thing we'd build the highest-leverage thing?** If the feature
   lane is empty, filling the backlog is this lane's job (§2).
+- **Is a constraint costing more than it buys?** `PRD.md` §5 marks each 🔒
+  inviolable or 🔄 open to challenge. A 🔄 one that keeps forcing workarounds is
+  a finding: evidence, an alternative, its cost, then escalate. **Absorbing a
+  recurring cost gracefully is how it becomes permanent.**
 - **Record decisions** in `DECISIONS.md` with the assumptions under them —
   that is what makes them revisitable.
 - **Do what the owner has already decided.** `scripts/escalations.py approved`
-  lists escalations they have labelled — those are **work items, not
-  questions**. Do them, then `escalations.py close <n> "what was done"`. Once
-  they have decided, they are out of it; leaving one open keeps notifying them
-  about a settled question, which is how four piled up at once.
+  lists what they have labelled — **work items, not questions**. Do them, then
+  `escalations.py close <n> "what was done"`. Leaving one open keeps notifying
+  them about a settled question.
 - **Chase closure** elsewhere too: `TECH_DEBT.md` at its cap, branches
   unmerged. Things must close, not accumulate.
 - **`/audit`** is this lane's periodic deep task (§8).
