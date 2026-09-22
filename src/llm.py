@@ -64,7 +64,13 @@ _STYLE_GUIDANCE = {
 }
 
 
-MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta")
+# `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
+# which all-None fields cannot. Both a spent quota and a prompt that produces
+# junk return None for every field, and the release gate has to tell them apart
+# -- one is "could not check", the other is "do not merge". Defaulted so the
+# upload path, which only ever reads the three content fields, is untouched.
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source")
+MetadataResult.__new__.__defaults__ = ("gemini",)
 
 
 def get_metadata(reddit_title, comments, style="A"):
@@ -113,7 +119,9 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         # never echo the exception body: HTTPError messages embed the keyed URL
         print(f"Gemini metadata failed with {type(e).__name__} "
               f"(title, keywords and CTA all fall back)")
-        return MetadataResult(None, None, None)
+        # The request never landed -- a 429 on the shared daily cap, a timeout,
+        # a transport error. Nothing was learned about the prompt's quality.
+        return MetadataResult(None, None, None, "error")
 
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
