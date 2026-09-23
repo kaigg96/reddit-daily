@@ -125,7 +125,10 @@ def report(rows, label):
 
 # Anthropic price ratios vs input tokens — cache reads are cheap per token but
 # dominate a long session because every turn re-reads everything before it.
-WEIGHTS = {"input": 1.0, "cw1h": 2.0, "cw5m": 1.25, "cread": 0.1, "output": 5.0}
+# Calibrated for Claude Opus 5.5 ($4/$20 per MTok), which shifts run: its cache
+# reads are 5% of base input, where every earlier model charged 10%. The
+# output/cache-write ratios are unchanged from Opus 5.
+WEIGHTS = {"input": 1.0, "cw1h": 2.0, "cw5m": 1.25, "cread": 0.05, "output": 5.0}
 
 
 def _turns(path):
