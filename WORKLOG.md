@@ -62,6 +62,92 @@ Read the allocation series with
 
 ---
 
+## 2026-09-23 — the next experiment is built; one permission that exists only on paper stops it shipping
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→10 · pm 25→25 · research 10→10 · feature 30→30 · close 10→10
+
+**Summary:** The top experiment is built, tested and waiting: each video opening
+on the question itself instead of on our channel name and a label. It cannot
+go live yet because the final check needs a sample video, and a shift turns out
+never to have had the access to request one. The fix is ready for you to apply.
+
+### Feature work
+- **Built the new opening.** From the first frame, the top of the screen now
+  shows the whole question where it used to show "AskReddit Shorts / Today's
+  top question". The channel name stays in its small mark near the bottom of
+  every frame. I compared old and new frames side by side before committing.
+- **Caught a flaw in my own first version.** Long questions were being cut
+  short at the top of the screen, and one sample opened on "...slowly started
+  becoming unwa…". That was harmless when the question only appeared after
+  the viewer had heard it. As the opening it hides the point, and it would
+  have affected about one video in seven. Fixed; the longest question we
+  accept fits on two lines.
+- **Added the first automatic check on how a video is put together.** Until
+  now a mistake there would first show up as a failed live upload.
+
+### Project management
+- **Why it can't ship yet.** The rules require a real sample video before
+  anything visual goes live. The shift's settings do grant permission to
+  request one, but that permission is swapped out before the session starts,
+  so it has never worked. Raised with you, with the two small edits that fix
+  it, including a safeguard that stops a shift ever publishing by accident.
+- **Timing, whatever you decide:** the new opening should not go live before
+  about 25 September. The current format needs a few more uploads before its
+  own check can give a verdict.
+- **Your decisions:** closed the two about running shifts on the newer model.
+  Both are live, and this shift ran on it. The third (making a failed release
+  check explain itself) is approved, but a shift is refused permission to make
+  that edit, so it needs applying by hand; I've said so on the issue.
+- **Process note:** the rules say "propose on a branch" and "dry-run before
+  merging", and a shift can do neither for anything touching automated jobs or
+  the video. Three of the last four shifts hit this same access wall.
+
+### Maintenance
+- Every upload since the last shift landed. The daily release check
+  **passed** for the first time, on live code. That matches yesterday's manual
+  re-run: the earlier failures were the check, not the release. I recommended
+  you close that alert.
+- Subtitle uploads fail about one time in four (7 of 31), fewer than the half
+  first feared. Still not worth chasing.
+
+### Security
+- No credentials committed, nothing secret-shaped in the files, job
+  permissions unchanged.
+- **New finding:** the image library and the web-request library we use have
+  published security fixes we don't have, and our Python version stops getting
+  support on 4 October. Real risk is low, because neither library ever handles
+  anything from outside. Upgrading can change how videos look, though, so it
+  needs its own tested release. Logged.
+
+### Research
+- **A better way to measure the new opening.** YouTube now counts a Short as
+  viewed the moment it starts, and separately reports how many plays got past
+  the first few seconds. That second figure measures the opening directly, and
+  we don't collect it. Added to the plan as a test to run beside the agreed
+  rule, never as a replacement for it.
+- YouTube's August change to how views are counted affected long videos only;
+  Shorts have counted this way since 2025. So it doesn't explain our view
+  counts swinging.
+
+### Blocked
+- The new opening: waiting on your approval of the sample-video fix.
+- Making a failed release check explain itself: approved, needs applying by you.
+
+### Next
+- If the fix lands: request the sample video, confirm it plays and that the
+  safeguard is working, then put the new opening live (not before ~25 Sept).
+- If it hasn't: collecting the engaged-plays figure is the best use of the
+  wait, so the old format has a baseline before the new one ships.
+
+### Better?
+- **Than last shift:** yes. The top experiment went from a line in the plan to
+  built and tested, and "ask for a sample video" turned out to be impossible
+  as written. Now we know exactly why, and the fix is ready.
+- **Than ~10 shifts ago:** unclear. This is the first change to what viewers
+  see since mid-September. But nothing new has reached viewers in that time,
+  and several recent shifts ended blocked on access rather than on the work.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-22 — the check that guards every release has never once passed, and nobody could see why
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 40→35 · security 5→5 · pm 25→40 · research 10→0 · feature 0→0 · close 10→10
@@ -150,91 +236,3 @@ needs a one-line change you have to approve.
   many of those shifts went on the machinery rather than on what we publish.
 - **Than ~100 shifts ago:** too early to say.
 
-## 2026-09-21 (evening) — the safety net behind unattended releases now works, and it says views can't be trusted
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 15→15 · research 20→10 · feature 30→40 · close 10→10
-
-**Summary:** The rule that is supposed to catch a bad release and roll it back
-has never once been able to give an answer; it can now, using performance data
-we already keep. Building it turned up something bigger: the channel's view
-counts swing so much on their own that most of what we measure them for cannot
-actually be measured.
-
-### Feature work
-- **The release safety net works.** Every upload can now be compared with
-  older ones *at the same age* — a video from July read at a week old against
-  one from September read at a week old — which is what the rule always
-  required and never had. It covers both of the measures the rule names, not
-  just one, and needs no account access, so an unattended session can run it.
-- **Its first run would have thrown away the last two things we shipped** —
-  roll back both the current video format and the background-video library, on
-  view drops of 50% and 39%. But the channel's view counts move 27–52% between
-  consecutive batches of uploads *with nothing changed at all*, and both
-  "drops" are the same few weeks of ordinary weather. The tool now measures
-  that background movement, will not call something a regression unless it is
-  bigger, and prints that limit beside every answer — so nobody reads a clean
-  result as proof a change worked.
-- Verdicts as of today: current format **keep**; background library **roll
-  back, but see below**; newest release **no answer yet**, and it becomes
-  answerable around 5 October.
-
-### Project management
-- **A decision that is yours.** The rule rolls back a release if watch time
-  *or* views got worse, and for the background library those two disagree:
-  time watched is up 22%, comfortably beyond the noise, while views are down
-  39% against a noise limit of 38%. So the rule says roll back a change that
-  improved the measure the plan calls primary — and doing that would discard
-  clips you chose. **Raised with you**; not acted on, and the tool shows the
-  disagreement rather than hiding it.
-- **The same problem waits in the next experiment**, which is pre-committed to
-  "keep only if watch time and views both hold or improve". Views cannot meet
-  that standard here at two uploads a day. Flagged in the plan rather than
-  rewritten, because it is the same decision as above.
-
-### Maintenance
-- The daily check on the live code has now failed two mornings running, and I
-  could not find out why: the failure detail only exists in a log an unattended
-  session is not allowed to read, and re-running the check would have taken
-  more of the shared daily AI allowance than was left after today's uploads.
-  Nothing suggests a live problem — this morning's upload generated everything
-  correctly — but it is unresolved and you already have an open issue about it.
-- The morning upload landed. **The evening one was still due when this shift
-  ended and is unconfirmed** — the next shift should check it first.
-- **The fix is a line in a file I am not permitted to change**, so I added it
-  to the approval you already have waiting rather than raising a third request.
-  Once approved, every future failure explains itself for free.
-
-### Security
-- Standing checks clean: no credentials have ever been committed, they remain
-  ignored, and every automated workflow's permissions are scoped.
-
-### Research
-- Outside sources put 50–500 views in the first two days as normal for a
-  channel our size. We sit inside that, which independently supports the
-  finding above: the swing is the platform's per-video lottery, not something
-  wrong with us. They also claim ranking now follows watch time; **our own
-  numbers point the other way**, so it is filed as a question, not a fact.
-  Nothing adopted.
-
-### Blocked
-- The roll-back rule's disagreement between the two measures needs your call.
-- The release-check failures stay undiagnosed until either the approval lands
-  or a shift has spare daily allowance.
-
-### Next
-- If the owner settles the measures question, apply it in one place for both
-  the roll-back rule and the ranking experiment.
-- Otherwise: the slate measurement the ranking experiment needs, under the
-  cheaper design already priced.
-
-## 2026-09-20 (afternoon) — maintenance (stale-then-real gate failure)
-
-    Allocation (planned→actual %): rounds 10→5 · maintenance 15→70 · pm 15→15 · research 10→0 · feature 40→0 · close 10→10
-
-The recorded FAIL was stale, but re-checking found a real, different fault:
-with reasoning restored, the R4.6 screen still missed a paraphrase of the
-identical `sexual_suggestive` shape while catching the literal in-prompt
-example. **One example doesn't generalize a category.** Fixed in `89bc245`,
-pinned by a test; full finding in `TECH_DEBT.md`.
-
-**A fix verified once, live, is a sample of one.**

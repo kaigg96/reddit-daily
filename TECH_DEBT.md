@@ -173,8 +173,21 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   to, and 2026-09-22 found both gates passing on `main` while CI had said FAIL
   three runs running, with no way to see what CI saw. **Half-fixed 2026-09-22:**
   `validate_release.py` now writes `.github/last-release-detail.md`; the one
-  workflow line that appends it to the verdict is escalated
-  (`release-gate-readable`) and does nothing until approved.
+  workflow line that appends it to the verdict was **approved in #21 but cannot
+  be pushed by a shift** (re-confirmed 2026-09-23) — the owner has to apply it.
+  - **The same token also has no Actions permission (2026-09-23).**
+    `claude-code-action` replaces the `GITHUB_TOKEN: ${{ github.token }}` that
+    `shift.yml` passes with its own app token (`GH_TOKEN` and `GITHUB_TOKEN`
+    hash identically in-session), so the `actions: write` that file grants "to
+    dispatch the dry-run workflow" never reaches the session: every Actions API
+    call is 403. Consequence: **no video change can clear the dry-run merge
+    gate from a shift** — `v7` is parked on `feature/v7-open-on-hook` for this.
+    Escalated (`shift-dry-run-dispatch`) with a `DISPATCH_TOKEN` env var plus a
+    guard refusing a non-dry manual upload not started by the owner.
+  - **Do not delete `integration/preview`** though §0 calls it retired:
+    `validate-release.yml` defaults its target to it, and a missing target
+    exits "nothing to validate" *before* the fall-through to `main` — so
+    deleting the branch silently retires the daily gate on live code.
   - **Two things this exposed.** A shift cannot push a workflow change *at all*
     — not blocked by `protect-process.yml` but by the token: *"refusing to allow
     a GitHub App to create or update workflow ... without `workflows`
@@ -245,12 +258,12 @@ a list nobody can read is the same as no list.
   query — so the column is effectively decorative today. Worth either fixing or
   dropping before anything starts reading it. Noticed 2026-09-09 during the
   R4.6 audit.
-- **The SRT track fails to upload roughly half the time.** The `caption_ok`
-  telemetry added 2026-09-07 has 5 rows and 2 are `0`; `comment_ok` is 5/5.
-  The telemetry did its job — this was invisible before. Deliberately not
+- **The SRT track fails to upload about one time in four.** First read
+  2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
+  `comment_ok` was 31/31, so it is real but not the half it first looked. The
+  telemetry did its job — this was invisible before. Deliberately not
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
-  accessibility nicety, not a growth lever. Revisit only if the failure rate
-  holds over a larger sample and the fix is cheap. Noticed 2026-09-09.
+  accessibility nicety, not a growth lever. Revisit only if the fix is cheap.
 - ~~**Scheduled runs now land ~4h25m after their cron slot**~~ — the two stale
   doc claims were corrected 2026-09-19 (workflow cron comment, and PRD §1/§4's
   "00:00 and 12:00 UTC"). The drift itself remains deliberately unchased; the
@@ -265,10 +278,17 @@ a list nobody can read is the same as no list.
   `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
   min later; acceptable", and README/PRD still describe the slots as 00:00 and
   12:00 UTC. Noticed 2026-09-09.
-- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload**
-  (including both confirmed-suppression cases), because the Analytics API
-  returns no row for an exact 0 and the join treated a missing row as
-  "exclude" rather than "zero". A missing row now reads as a genuine zero.
+- **The runtime and two dependencies are ageing out.** Every workflow pins
+  Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
+  already warns it will stop shipping updates for it. And an OSV check of
+  `requirements.txt` (2026-09-23) finds published advisories against
+  **Pillow 10.4.0** (30+) and **requests 2.32.3** (4). Exposure is low: Pillow
+  only ever decodes our own fonts, b-roll and generated frames, never an
+  untrusted image, and requests only posts to fixed Google endpoints. Nothing
+  breaks on the EOL date, so this is not urgent — but bumping either
+  dependency, or Python, can change how frames render, so it is a video change:
+  it needs the dry-run gate (blocked, see above) and its own release, not a
+  ride-along in an experiment.
 
 - **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
   is shared between production and any local analysis.** On 2026-09-10 an R4.3
