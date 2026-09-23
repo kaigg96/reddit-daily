@@ -335,3 +335,34 @@ a list nobody can read is the same as no list.
   to scan every commit in the push (`git log HEAD~1..HEAD`, or the push event's
   `commits` array) rather than only the tip — but that widens what counts as an
   approval, so it wants deliberate design, not a one-line patch.
+
+- **Shifts cannot render a dry run, and #27's proposed fix would bypass the
+  process guard.** The release gate needs a playable MP4 from a dry run, but a
+  shift holds no Polly credentials and its `actions: write` never reaches the
+  session — the Claude action swaps in its own app token. Found by the
+  2026-09-23 shift, which built `v7` and parked it on `feature/v7-open-on-hook`
+  for this reason. #27 proposes exposing the workflow's own token to the session
+  as `DISPATCH_TOKEN`. That token also has `contents: write` and full
+  `actions: write`: pushes made with it trigger no `on: push` workflow, so a
+  direct push of `CLAUDE.md` or a skill would never meet `protect-process.yml`
+  (nothing else blocks it — branch rules need GitHub Pro on a private repo), and
+  `actions: write` can disable workflows outright, guards included. Every push a
+  session can make today is guarded; this would add the first that is not.
+  **Safer shape, same pattern as `.escalations/`:** the shift commits a request
+  file with its normal token; a workflow triggered by it renders `DRY_RUN=1` on
+  the named branch in a job holding no YouTube secrets — so nothing it runs can
+  publish, whatever the branch's own workflow file says — and writes the verdict
+  back for the next shift to read, as `validate-release.yml` already does.
+  Residual risk in any design that renders branch code in CI: that code runs
+  with Polly credentials, so the job wants a short timeout, and an AWS-side
+  budget is the real backstop.
+
+- **The weekly shift breaker is ~2x looser on Opus 5.5, not the ~20% first
+  estimated.** First Opus 5.5 shift (2026-09-23): 0.044 quota units per turn,
+  against 0.059–0.098 on the three Opus 5 shifts. List prices fell 20%, but
+  cache reads — most of a long session's cost — fell 60% ($0.50 → $0.20/MTok).
+  So `SHIFT_WEEKLY_QUOTA_BUDGET=120` now permits roughly twice the real work it
+  did when set. Whether that matters depends on how the subscription meters
+  Opus 5.5, which units cannot show: compare the console's weekly % after a
+  shift with a pre-5.5 one. If a shift still costs a similar share, lower the
+  ceiling to ~60. One data point so far — confirm over a few shifts.
