@@ -132,6 +132,14 @@ def record(output, ledger, run_id, model, effort):
         print(f"no usable execution output ({type(e).__name__}) — nothing recorded")
         return 0
 
+    # The action hides its output, so on 2026-09-23 a shift that the API refused
+    # in under a second left nothing in the log to diagnose it by -- the reason
+    # sat unread in this file. Surface it, but only an API error: on any other
+    # run `result` is the agent's own final message, which is what is hidden.
+    result = str(data.get("result") or "")
+    if data.get("is_error") and result.startswith("API Error"):
+        print(f"::error::{result[:500]}")
+
     new = not os.path.exists(ledger)
     with open(ledger, "a", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
