@@ -299,3 +299,19 @@ a list nobody can read is the same as no list.
   the current-format cohort), but a reader skimming the digest could take the
   weekly number as the decision number. Revisit if the two ever diverge much.
 
+
+- **`protect-process.yml` reverts approved changes merged via a merge commit.**
+  The guard reads `git log -1 --pretty=%B`, so it only ever sees the *head*
+  commit's message. That is correct for a direct push or a fast-forward, where
+  the head is the approved commit carrying `Approved-In: #N`. It is wrong for a
+  GitHub "Create a merge commit" merge, whose head message is
+  `Merge pull request #N from ...` — no trailer, so a legitimately approved
+  change is reverted and a `needs-owner` issue is filed against the owner's own
+  approval. Verified locally 2026-09-23 by simulating both strategies against
+  the guard's exact two commands. Not caught earlier because PR #19, the only
+  prior PR, touched no protected path, so the guard short-circuited on
+  `changed.length === 0`. **Workaround until fixed: merge protected-path changes
+  with "Rebase and merge" or a fast-forward, never a merge commit.** The fix is
+  to scan every commit in the push (`git log HEAD~1..HEAD`, or the push event's
+  `commits` array) rather than only the tip — but that widens what counts as an
+  approval, so it wants deliberate design, not a one-line patch.
