@@ -375,3 +375,12 @@ a list nobody can read is the same as no list.
   Opus 5.5, which units cannot show: compare the console's weekly % after a
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
+
+- **No CI job runs the test suite on a push or PR.** `CLAUDE.md` §3 makes
+  "tests green" a merge gate, but `guardrails.yml` runs grep-style invariant
+  checks only; the suite runs daily inside `validate-release.yml` (against its
+  target branch) and whenever a session remembers to. So a shift's
+  self-merge is gated on tests by prose alone. Found 2026-09-24 while adding
+  `tests/test_protect_process.py`, which therefore guards the guard only
+  daily, not per push. The fix is a `pytest` step in `guardrails.yml` (a
+  protected path; node is already on the runner for the guard tests).
