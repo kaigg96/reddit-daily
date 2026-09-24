@@ -165,39 +165,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   every offline run. Fix is a column in `weekly_analytics.py`; not worth one
   extra Data API call per snapshot until a question turns on it.
 
-- **A failed release gate cannot be read without Actions log access.** The gate
-  exists so a cold session learns the verdict without spending quota — but only
-  the PASS path delivers that. A FAIL records "do not merge" plus a link to a
-  run log a shift's token gets 403 on. Hit **three** times now: 2026-09-20
-  re-ran the gates locally to find out (8 requests), 2026-09-21 could not afford
-  to, and 2026-09-22 found both gates passing on `main` while CI had said FAIL
-  three runs running, with no way to see what CI saw. **Half-fixed 2026-09-22:**
-  `validate_release.py` now writes `.github/last-release-detail.md`; the one
-  workflow line that appends it to the verdict was **approved in #21 but cannot
-  be pushed by a shift** (re-confirmed 2026-09-23) — the owner has to apply it.
-  - **The same token also has no Actions permission (2026-09-23).**
-    `claude-code-action` replaces the `GITHUB_TOKEN: ${{ github.token }}` that
-    `shift.yml` passes with its own app token (`GH_TOKEN` and `GITHUB_TOKEN`
-    hash identically in-session), so the `actions: write` that file grants "to
-    dispatch the dry-run workflow" never reaches the session: every Actions API
-    call is 403. Consequence: **no video change can clear the dry-run merge
-    gate from a shift** — `v7` is parked on `feature/v7-open-on-hook` for this.
-    Escalated (`shift-dry-run-dispatch`) with a `DISPATCH_TOKEN` env var plus a
-    guard refusing a non-dry manual upload not started by the owner.
-  - **Do not delete `integration/preview`** though §0 calls it retired:
-    `validate-release.yml` defaults its target to it, and a missing target
-    exits "nothing to validate" *before* the fall-through to `main` — so
-    deleting the branch silently retires the daily gate on live code.
-  - **Two things this exposed.** A shift cannot push a workflow change *at all*
-    — not blocked by `protect-process.yml` but by the token: *"refusing to allow
-    a GitHub App to create or update workflow ... without `workflows`
-    permission"*. So "propose it on a branch", which is what `CLAUDE.md` §4 and
-    the shift skill both say to do, is not an available instruction; the patch
-    has to be inlined into the escalation. And this fix had already been queued
-    once, as "bundle it into #14's approval" — **#14 was approved, its other
-    half was done, and this half died with the issue.** Stacking a request
-    behind someone else's approval does not survive that approval closing.
-
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
   screen after they were caught passing a `sexual_suggestive` question with
@@ -264,20 +231,6 @@ a list nobody can read is the same as no list.
   telemetry did its job — this was invisible before. Deliberately not
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
   accessibility nicety, not a growth lever. Revisit only if the fix is cheap.
-- ~~**Scheduled runs now land ~4h25m after their cron slot**~~ — the two stale
-  doc claims were corrected 2026-09-19 (workflow cron comment, and PRD §1/§4's
-  "00:00 and 12:00 UTC"). The drift itself remains deliberately unchased; the
-  original note is kept below for the reasoning. **Scheduled runs land ~4h25m
-  after their cron slot**, up from ~40–90 min
-  in July (actual publish ~04:48 / ~16:45 UTC against a `23 0,12` cron). This
-  is GitHub Actions queue delay, not a bug in the job — but it is *drifting*,
-  which means publish time is an uncontrolled variable moving underneath every
-  cohort comparison. Already instrumented: `median_publish_drift` in
-  `weekly_digest.py` alerts above 120 min, so the 2026-09-14 digest will fire
-  it. **Two docs are now factually wrong** and want a one-line fix each: the
-  `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
-  min later; acceptable", and README/PRD still describe the slots as 00:00 and
-  12:00 UTC. Noticed 2026-09-09.
 - **The runtime and two dependencies are ageing out.** Every workflow pins
   Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
   already warns it will stop shipping updates for it. And an OSV check of
@@ -290,21 +243,6 @@ a list nobody can read is the same as no list.
   it needs the dry-run gate (blocked, see above) and its own release, not a
   ride-along in an experiment.
 
-- **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
-  is shared between production and any local analysis.** On 2026-09-10 an R4.3
-  re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the
-  16:45 UTC video run that day very likely executed with no Gemini at all:
-  keyword-backstop screening, and Reddit's own title instead of a generated one.
-  Nothing breaks — every path fails soft — but the upload is materially worse
-  and nothing in the logs said so at the time. PRD §2 says usage is "comfortably
-  inside the free tier at 2 runs/day", which is true for production alone and
-  false as soon as anything else shares the key. Worth deciding on: (a)
-  `screen_source` (v6 branch) will start showing how often production actually
-  loses Gemini; (b) local analysis should run right after a reset **and** be
-  budgeted rather than run opportunistically; (c) retry policy must treat a
-  repeated 429 as a stop signal rather than a reason to try harder —
-  `analyze_channel` now does, and `src/screen.py`'s widened retry is unverified
-  under quota pressure. Noticed 2026-09-10.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
@@ -314,11 +252,6 @@ a list nobody can read is the same as no list.
   existing rows is deliberately deferred:** it is a ~7,500-line mechanical diff
   on a production data file, and worth doing on its own rather than buried in a
   feature commit. Owner's call.
-- **Digest surfaces `channel_7d` traffic, README says decide on `logged_uploads`.**
-  Both are correct for their purpose (7d is the drift series, logged_uploads is
-  the current-format cohort), but a reader skimming the digest could take the
-  weekly number as the decision number. Revisit if the two ever diverge much.
-
 
 - **The weekly shift breaker is ~2x looser on Opus 5.5, not the ~20% first
   estimated.** First Opus 5.5 shift (2026-09-23): 0.044 quota units per turn,
@@ -338,6 +271,12 @@ a list nobody can read is the same as no list.
   `tests/test_protect_process.py`, which therefore guards the guard only
   daily, not per push. The fix is a `pytest` step in `guardrails.yml` (a
   protected path; node is already on the runner for the guard tests).
+  **Bit on 2026-09-24:** four new modules imported an uninstalled `yaml`, so
+  the suite stopped at collection and ran nothing. Fixed in
+  `requirements-dev.txt`; the job itself is escalated as an auto-apply patch
+  (`tests-on-push`). Related gap: in `validate-release.yml` a failing
+  unit-test step ends the job before the verdict is written, so the file keeps
+  showing the *previous* PASS. Read its commit, not just its verdict.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
