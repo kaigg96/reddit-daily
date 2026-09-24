@@ -273,20 +273,13 @@ a list nobody can read is the same as no list.
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
 
-- **No CI job runs the test suite on a push or PR.** `CLAUDE.md` §3 makes
-  "tests green" a merge gate, but `guardrails.yml` runs grep-style invariant
-  checks only; the suite runs daily inside `validate-release.yml` (against its
-  target branch) and whenever a session remembers to. So a shift's
-  self-merge is gated on tests by prose alone. Found 2026-09-24 while adding
-  `tests/test_protect_process.py`, which therefore guards the guard only
-  daily, not per push. The fix is a `pytest` step in `guardrails.yml` (a
-  protected path; node is already on the runner for the guard tests).
-  **Bit on 2026-09-24:** four new modules imported an uninstalled `yaml`, so
-  the suite stopped at collection and ran nothing. Fixed in
-  `requirements-dev.txt`; the job itself is escalated as an auto-apply patch
-  (`tests-on-push`). Related gap: in `validate-release.yml` a failing
-  unit-test step ends the job before the verdict is written, so the file keeps
-  showing the *previous* PASS. Read its commit, not just its verdict.
+- **A release check whose unit tests fail leaves the previous PASS in place.**
+  In `validate-release.yml` a failing unit-test step ends the job before the
+  verdict is written, so `.github/last-release-validation.md` keeps showing
+  the last run's PASS: read its commit, not just its verdict. Less likely now
+  that the suite runs on every push (#33, applied 2026-09-24, after four new
+  modules importing an uninstalled `yaml` stopped it at collection). Fix: move
+  the tests after the verdict step, or record FAIL when they fail.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
