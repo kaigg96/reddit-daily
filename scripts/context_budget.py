@@ -65,7 +65,11 @@ ORIENT = {
     # scope the project actually gained, not prose that crept in. Six trims in
     # one day had reached the point where each one removed real guidance, and
     # grinding further was itself the waste the budget exists to prevent.
-    ".claude/skills/shift/SKILL.md": 1900,
+    # 1900 -> 1950 on 2026-09-24: shifts gained a way to get a render at all
+    # (dry runs by request, #27). The old line said "at most one dry run" and
+    # never how -- shifts inferred a route from a comment in shift.yml that had
+    # never worked. Four lines of mechanism, not prose creep.
+    ".claude/skills/shift/SKILL.md": 1950,
     ".claude/skills/pickup/SKILL.md": 700,
 }
 

@@ -518,8 +518,9 @@ Attribution only has *value* if you'll act on it. For high-confidence changes we
 
 - **Unit tests:** `venv/bin/pip install -r requirements-dev.txt && venv/bin/python -m pytest tests/` — covers the pure analysis logic (`src/insights.py`). Run before any change touching selection, logging, or analysis.
 - **Render:** `DRY_RUN=1 python -m src.run`.
-- **Structure:** `ffprobe -show_entries format=duration,stream=width,height,avg_frame_rate` → 1080×1920@30, 20–40s.
-- **Dead air:** `ffmpeg -i out.mp4 -af silencedetect=n=-35dB:d=0.3 -f null -` → no detected silence.
+- **Structure:** `ffprobe -show_entries format=duration,stream=width,height,avg_frame_rate` → 1080×1920@30, 10–59s. *(Was 20–40s until 2026-09-24: 25 of the last 60 real uploads ran under 20s, the shortest 12.8s, so the old floor failed healthy renders. The gate is for broken renders, not format.)*
+- **Dead air:** `ffmpeg -i out.mp4 -af silencedetect=n=-35dB:d=1.0 -f null -` → no silence of 1s or more. *(Was d=0.3: a render that shipped has a natural 0.34s pause after the title.)*
+- **Automated:** `scripts/dry_run.py check <mp4>` applies both of the above plus audio presence and a full decode — the check `dry-run.yml` runs on every requested render.
 - **Visuals:** extract frames (`ffmpeg -vf fps=1`) at t=0.3, mid-title, each comment, CTA → verify caption word-groups, header/badge, watermark, legibility, motion (pixel-diff two frames 3s apart).
 - **Caption sync:** unit check comparing speech-mark times to caption clip start times (±150 ms).
 - **Safety greps:** every network mutation (`videos().insert`, `thumbnails().set`, `commentThreads().insert`, file/log writes) is behind the DRY_RUN flag; workflow commit step adds only intended files.

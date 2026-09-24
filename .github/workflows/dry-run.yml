@@ -1,0 +1,184 @@
+name: Dry-run a branch
+
+# A shift cannot render a video. It holds no Polly or Reddit credentials,
+# deliberately, and it cannot start a workflow: the Claude action swaps the
+# workflow token for its own, which has no Actions permission (#27). So it
+# queues a request with scripts/dry_run.py, and this job renders it.
+#
+# The job holds no YouTube credentials, so nothing it runs can publish,
+# whatever the branch under test contains. The branch's code does run with the
+# Polly, Reddit and Gemini keys, so the job is time-boxed, automated requests
+# get one render per 12 hours, and the AWS-side budget is the real backstop.
+# Everything that judges a render -- the checker, the limit, the redaction --
+# runs from main, never from the branch being judged.
+
+on:
+  push:
+    branches: [main]
+    paths: ['.dry-run-requests/*.md']
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to render (a manual run skips the 12-hour limit)'
+        required: true
+
+permissions:
+  contents: write   # record the verdict, clear the queue
+  actions: read     # render history, which the 12-hour limit reads
+
+concurrency:
+  group: dry-run
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: What to render
+        id: req
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          INPUT_BRANCH: ${{ inputs.branch }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then BRANCH="$INPUT_BRANCH"
+          else BRANCH=$(python3 scripts/dry_run.py pending); fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          refuse() { echo "go=false" >> "$GITHUB_OUTPUT"; echo "why=$1" >> "$GITHUB_OUTPUT"; echo "::warning::$1"; exit 0; }
+
+          [ -n "$BRANCH" ] || refuse "no valid request in the queue"
+          python3 -c "import sys; sys.path.insert(0,'scripts'); import dry_run; sys.exit(0 if dry_run.valid_branch(sys.argv[1]) else 1)" "$BRANCH" \
+            || refuse "not a plain branch name"
+          git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null || refuse "$BRANCH is not on origin"
+
+          # One automated render per 12 hours, read from this workflow's own
+          # render artifacts: every attempt uploads one, and a shift can neither
+          # create nor delete them, so the limit cannot be edited around.
+          if [ "$EVENT" = "push" ]; then
+            LAST=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts?name=dry-run-render&per_page=50" \
+              | python3 -c "import json,sys; a=json.load(sys.stdin)['artifacts']; print(max((x['created_at'] for x in a), default=''))") \
+              || refuse "could not read the render history, so the 12-hour limit cannot be checked"
+            if [ -n "$LAST" ] && [ $(( $(date -u +%s) - $(date -u -d "$LAST" +%s) )) -lt 43200 ]; then
+              refuse "one automated render per 12 hours; the last was $LAST"
+            fi
+          fi
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the branch under test
+        if: steps.req.outputs.go == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.req.outputs.branch }}
+          path: under-test
+
+      - uses: actions/setup-python@v5
+        if: steps.req.outputs.go == 'true'
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install the branch's dependencies
+        if: steps.req.outputs.go == 'true'
+        working-directory: under-test
+        run: pip install -r requirements.txt
+
+      - name: Render (DRY_RUN; no YouTube credentials exist in this job)
+        id: render
+        if: steps.req.outputs.go == 'true'
+        working-directory: under-test
+        env:
+          DRY_RUN: '1'
+          POLLY_CHAR_BUDGET: '5000'
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+          AWS_POLLY_ACCESS_KEY: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
+          AWS_POLLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set +e
+          timeout 900 python -m src.run > "$RUNNER_TEMP/render.log" 2>&1
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      # The log is written back to main for the shift to read, and GitHub masks
+      # secrets only in its own log view -- never in a file. So strip them here,
+      # from main's side, before anything is uploaded or committed.
+      - name: Strip secrets from the log
+        if: always() && steps.req.outputs.go == 'true'
+        env:
+          S1: ${{ secrets.REDDIT_CLIENT_ID }}
+          S2: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          S3: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
+          S4: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
+          S5: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python3 - "$RUNNER_TEMP/render.log" <<'PY'
+          import os, sys
+          p = sys.argv[1]
+          text = open(p, errors="replace").read() if os.path.exists(p) else ""
+          for k in ("S1", "S2", "S3", "S4", "S5"):
+              v = os.environ.get(k, "")
+              if len(v) >= 6:
+                  text = text.replace(v, "***")
+          open(p, "w").write(text)
+          PY
+          tail -n 60 "$RUNNER_TEMP/render.log"
+
+      - name: Is it a playable video?
+        if: always() && steps.req.outputs.go == 'true'
+        run: |
+          python scripts/dry_run.py check under-test/assets/gen/final_askreddit_video.mp4 \
+            > "$RUNNER_TEMP/check.txt" 2>&1 || true
+          cat "$RUNNER_TEMP/check.txt"
+          # mkdir first: a pipeline that died early may never have made the
+          # folder, and an attempt with no artifact would escape the limit.
+          mkdir -p under-test/assets/gen
+          cp "$RUNNER_TEMP/render.log" under-test/assets/gen/render.log 2>/dev/null || true
+
+      # Always uploaded, even when the render failed: the 12-hour limit counts
+      # these, and a failing branch should not get unlimited retries.
+      - name: Keep the sample and the log
+        if: always() && steps.req.outputs.go == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-render
+          path: |
+            under-test/assets/gen/final_askreddit_video.mp4
+            under-test/assets/gen/thumbnail.png
+            under-test/assets/gen/render.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Record the verdict where a shift can read it
+        if: always()
+        env:
+          BRANCH: ${{ steps.req.outputs.branch }}
+          GO: ${{ steps.req.outputs.go }}
+          WHY: ${{ steps.req.outputs.why }}
+          CODE: ${{ steps.render.outputs.code }}
+          COMMIT: ${{ steps.render.outputs.commit }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$GO" = "true" ]; then
+            python3 scripts/dry_run.py record --branch "$BRANCH" --commit "$COMMIT" \
+              --render-code "${CODE:-1}" --check-file "$RUNNER_TEMP/check.txt" \
+              --log "$RUNNER_TEMP/render.log" --run-url "$RUN_URL"
+          else
+            python3 scripts/dry_run.py record --branch "$BRANCH" --refused "${WHY:-the job failed before rendering}"
+          fi
+          # A request is answered either way, so the queue is cleared either way.
+          find .dry-run-requests -name '*.md' ! -name README.md -delete 2>/dev/null || true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A .github/last-dry-run.md .dry-run-requests
+          git commit -m "Record dry-run verdict" || echo "unchanged"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "push attempt $attempt failed; retrying"; sleep 5
+          done
+          echo "::error::could not record the verdict"; exit 1
