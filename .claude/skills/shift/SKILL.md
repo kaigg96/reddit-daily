@@ -75,7 +75,8 @@ allocating:
 
 1. **Incident.** Did both uploads land (`upload_log.csv` tail)? Did the last
    workflow run succeed? Is `prev_post.txt` intact? A missed or duplicated
-   upload preempts everything.
+   upload preempts everything. You cannot read Actions logs, so to see *why* a
+   run failed, request a dry run of `main` (§6): the verdict carries the error.
 2. **Ship what's built.** Read `.github/last-release-validation.md` on `main`;
    CI writes the verdict there, so you never need quota to find out. PASS means
    merge. Unshipped work is inventory, not progress.
@@ -149,6 +150,12 @@ with `scripts/escalate.py --title … --key … --recommend …`, commit, and pu
 it becomes an issue that emails them. The same `--key` comments rather than
 duplicating. **Always include a recommendation** — one without it just moves
 the work.
+
+**A workflow change you cannot push:** make the edit, `git diff --
+.github/workflows/ > change.patch`, drop the edit, and add `--patch
+change.patch`. The owner's label then applies it — except to
+`protect-process.yml` and `apply-approved.yml`, which only the owner lands. If
+it is refused, the issue says why; raise it again.
 
 The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
 spending, production data, publishing.
