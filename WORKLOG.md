@@ -62,6 +62,41 @@ Read the allocation series with
 
 ---
 
+## 2026-09-24 (afternoon) — the new opening's sample video passed; this morning's upload went out without its generated title
+
+    Allocation (planned→actual %): rounds 10→15 · maintenance 20→20 · security 5→5 · pm 15→10 · research 0→0 · feature 40→35 · close 10→15
+
+**Summary:** The new opening passed its sample video and goes live after tonight's upload, as agreed. This morning's upload shipped with the plain Reddit question as its title, the second time in this format. The likely cause is the shared daily AI allowance running out, and the fix for that is now due.
+
+### Feature work
+- **Asked for the new opening's sample video.** First I updated it with everything that has gone live since it was built, so the sample tests exactly what would ship. All tests pass.
+- **The sample video passed** (right size, sound throughout, no silent gaps). The agreed rule is to wait for the 10th upload in the current format, which lands around 17:00 tonight. This shift has a 30-minute limit and can't wait that long, so tomorrow morning's shift puts it live.
+
+### Maintenance
+- **This morning's upload lost its generated title, search keywords and closing question.** It shipped with the Reddit question as the title instead. That is 2 of the 9 uploads in the current format, and both were morning runs. The morning run is the last one before the daily AI allowance resets, so it is the one that goes short when other jobs have spent it. The record can't yet say for certain that the allowance was the cause: it logs *that* the title failed, not *why*. Logged, with the fix, for the next shift.
+- Every scheduled upload landed, and the saved record of the last post is intact.
+
+### Security
+- Standing check clean: no credentials committed, and the secret files are still excluded.
+
+### Project management
+- **Your approval for sample videos is done and closed.** It worked end to end on the first try: requested at 14:17, rendered and judged by 14:20.
+
+### Research
+- Nothing this shift. The shift has a 30-minute limit, and shipping the new opening came first.
+
+### Blocked
+- Nothing is blocked on you.
+
+### Next
+- Put the new opening live, as long as tonight's upload landed and the branch hasn't changed since the sample. Then update the plan. Its result can be read after 20 uploads, no earlier than about 5 October.
+- Record *why* the title step fails on each upload, then make the release check and sample videos check what the day has already spent before they start. Both are in the tech-debt list.
+
+### Better?
+- **Than last shift:** yes, a little. The new opening moved from "waiting to ask for a sample" to passed and ready to go live. The morning title failure is now counted, not just noticed.
+- **Than ~10 shifts ago:** unclear. The release process is much sturdier, but nothing new has reached viewers yet and the channel is still flat.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-24 — the new opening is queued for its sample video, a wrong "revert" verdict is fixed, and the next experiment no longer waits on the AI allowance
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 25→25 · research 10→10 · feature 25→30 · close 10→10
