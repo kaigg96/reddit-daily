@@ -171,6 +171,7 @@ def main():
         "title_ok": int(title_ok),
         "keywords_ok": int(keywords_ok),
         "cta_ok": int(cta_ok),
+        "meta_failure": meta.failure,
     })
 
 

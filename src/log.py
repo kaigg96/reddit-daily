@@ -26,6 +26,10 @@ FIELDS = [
     # — invisible in the logs, and it makes the R4.6 audit an audit of a screen
     # nobody can confirm ran.
     "screen_source",
+    # Added 2026-09-24: why the metadata call failed, blank when it answered.
+    # The ok-flags above say THAT it failed; a 429 on the shared daily cap and
+    # a timeout need different fixes, and the flags cannot tell them apart.
+    "meta_failure",
 ]
 
 
