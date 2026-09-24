@@ -384,3 +384,15 @@ a list nobody can read is the same as no list.
   `tests/test_protect_process.py`, which therefore guards the guard only
   daily, not per push. The fix is a `pytest` step in `guardrails.yml` (a
   protected path; node is already on the runner for the guard tests).
+
+- **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
+  checks that the cited issue is approved by the owner, not that the commit is
+  the change that issue described — so any commit can cite any approved issue,
+  including one approved for something else. A squash merge carrying several
+  trailers is judged on the first alone. Auto-apply does not share this: it
+  lands only the exact diff fingerprinted in the issue. Nothing suggests reuse
+  has happened, and self-approval is closed (#31: only the owner's label
+  counts). Options, cheapest first: refuse a cited issue that is closed, so an
+  approval cannot outlive the work it approved; require every cited issue to be
+  approved; move protected-file changes to the fingerprinted route. Found
+  2026-09-24.
