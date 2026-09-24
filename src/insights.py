@@ -247,9 +247,18 @@ def drift_floor(videos, metric, block=MIN_COHORT):
     return median(deltas) if deltas else None
 
 
+# What may fire a revert. The owner settled it on #18 (2026-09-22): "the rule
+# now triggers on watch-seconds only, with views reported but never firing it".
+# Views at a fixed age move 27-52% between batches with nothing changed, five
+# times watch-seconds' 6-15%, so a views trigger fires on noise. Views are
+# still compared and printed, with their own detection limit.
+REVERT_TRIGGER = (Metric.WATCH,)
+
+
 def release_verdict(comparisons, floors=None):
-    """Fold `/shift` §5: a release that degraded watch-seconds **or** views is
-    reverted — unless the drop is no bigger than the channel's own drift.
+    """Fold `/shift` §5: a release that degraded **watch-seconds** is reverted,
+    unless the drop is no bigger than the channel's own drift. Other metrics
+    are reported beside it and never fire (REVERT_TRIGGER).
 
     Everything short of a clean, separable answer is an explicit "no verdict",
     never silence. The guardrail spent four releases returning nothing at all
@@ -257,6 +266,8 @@ def release_verdict(comparisons, floors=None):
     """
     if not comparisons:
         return "NO VERDICT — nothing to compare"
+    if not any(c.metric in REVERT_TRIGGER for c in comparisons):
+        return f"NO VERDICT — {' / '.join(REVERT_TRIGGER)} was not compared"
     for c in comparisons:
         if not (c.a.sufficient and c.b.sufficient):
             return (f"NO VERDICT — under {MIN_COHORT} measurable uploads on one side; "
@@ -267,12 +278,14 @@ def release_verdict(comparisons, floors=None):
     worse = []
     for c in comparisons:
         floor = floors.get(c.metric)
-        if (c.delta is not None and c.delta < 0 and abs(c.delta) >= MATERIAL
+        if (c.metric in REVERT_TRIGGER
+                and c.delta is not None and c.delta < 0 and abs(c.delta) >= MATERIAL
                 and (floor is None or abs(c.delta) > floor)):
             worse.append(c.metric)
     if worse:
         return f"REVERT — {' and '.join(worse)} degraded beyond the channel's own drift"
-    return "KEEP — nothing degraded beyond the channel's own drift"
+    return (f"KEEP — {' / '.join(REVERT_TRIGGER)} did not degrade beyond the "
+            f"channel's own drift")
 
 
 def render_release(comparisons, floors):
@@ -289,18 +302,22 @@ def render_release(comparisons, floors):
             out.append(f"    detection limit: {floor:.0%} — median move in {c.metric} "
                        f"between consecutive groups of {MIN_COHORT} uploads in the era "
                        f"before it. Smaller than that is ordinary channel drift.")
-    # `/shift` §5 reverts on watch-seconds OR views, so a release can be
-    # reverted while the channel's *primary* metric says it worked. That is the
-    # rule as the owner wrote it and not a shift's to reinterpret — but it must
-    # not be read off a one-line verdict as if the two agreed.
+    # Only REVERT_TRIGGER fires (#18), so a metric that moved beyond its own
+    # limit without firing has to be said out loud, or the one-line verdict
+    # reads as if every metric agreed with it.
     moved = {c.metric: c.delta for c in comparisons
              if c.delta is not None and floors.get(c.metric) is not None
              and abs(c.delta) > floors[c.metric]}
+    quiet = {m: d for m, d in moved.items() if m not in REVERT_TRIGGER and d < 0}
+    if quiet:
+        also = ", ".join(f"{m} {d:+.0%}" for m, d in quiet.items())
+        out.append(f"    NOT A TRIGGER: {also}, beyond its detection limit. Reported only; "
+                   f"a revert fires on {' / '.join(REVERT_TRIGGER)} alone (owner, #18).")
     if any(d > 0 for d in moved.values()) and any(d < 0 for d in moved.values()):
         better = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d > 0)
         worse = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d < 0)
-        out.append(f"    CONFLICT: {better} but {worse}. §5 reverts on either, so this "
-                   f"is the owner's call, not an automatic one.")
+        out.append(f"    CONFLICT: {better} but {worse}. The verdict follows "
+                   f"{' / '.join(REVERT_TRIGGER)}.")
     out.append("")
     out.append(f"{release_verdict(comparisons, floors)}   (/shift §5 auto-revert rule)")
     return "\n".join(out)
