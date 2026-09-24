@@ -5,8 +5,10 @@ name: Run a shift
 #
 # Deliberately NOT given the upload secrets. A shift gets GEMINI_API_KEY for
 # the release gates and nothing else: it cannot upload to YouTube, post a
-# comment, or spend a cent on Polly from here. If a render is needed, it
-# dispatches run-reddit-video.yml with dry_run, which has its own secrets.
+# comment, or spend a cent on Polly from here. If a render is needed, it queues
+# one with scripts/dry_run.py and dry-run.yml renders it (#27). It never held a
+# way to dispatch a workflow itself: the Claude action replaces the workflow
+# token, so the `actions: write` this file once granted never reached it.
 
 on:
   schedule:
@@ -35,7 +37,7 @@ on:
 permissions:
   contents: write
   issues: write
-  actions: write      # to dispatch the dry-run workflow
+  actions: read       # the Actions-minutes guard lists recent runs
   id-token: write
 
 concurrency:
@@ -224,6 +226,27 @@ jobs:
               });
               thread = made.data;
             }
+            // What needs the owner goes first: they read this on a phone, and
+            // it should be the one place that says whether anything is theirs.
+            const isApproved = l => String(l.name || l).trim().toLowerCase() === 'approved';
+            const waiting = open.filter(i => !i.pull_request &&
+              i.labels.some(l => l.name === 'needs-owner') && !i.labels.some(isApproved));
+            const lines = [];
+            for (const i of waiting) {
+              let note = '';
+              if (i.comments) {
+                const said = await github.paginate(github.rest.issues.listComments, {
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: i.number, per_page: 100,
+                });
+                if (said.some(c => c.author_association === 'OWNER')) {
+                  note = ' — you replied; label it `approved` if that was a yes';
+                }
+              }
+              lines.push(`- [#${i.number}](${i.html_url}) ${i.title}${note}`);
+            }
+            body = (lines.length ? `**Waiting on you (${lines.length}):**\n\n${lines.join('\n')}`
+                                 : '**Nothing is waiting on you.**') + `\n\n---\n\n${body}`;
             await github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: thread.number, body,

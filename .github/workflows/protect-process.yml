@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0   # every commit the push brought in, not just the tip
 
       - name: Was this approved?
         id: verify
@@ -41,61 +41,100 @@ jobs:
         with:
           script: |
             const { execSync } = require('child_process');
-            const changed = execSync('git diff --name-only HEAD~1 HEAD')
-              .toString().split('\n').filter(Boolean)
-              // Workflows are protected because CI *is* the gate that replaced
-              // owner review -- a shift able to edit it could disable its own
-              // supervision, which matters more now shifts can run inside CI.
-              .filter(f => f === 'CLAUDE.md' || f.startsWith('.claude/skills/')
-                        || f.startsWith('.github/workflows/'));
-            if (changed.length === 0) { core.setOutput('ok', 'true'); return; }
+            const git = (args) => execSync(`git ${args}`, { encoding: 'utf8' });
+            // Workflows are protected because CI *is* the gate that replaced
+            // owner review -- a shift able to edit it could disable its own
+            // supervision, which matters more now shifts can run inside CI.
+            const isProtected = f => f === 'CLAUDE.md' || f.startsWith('.claude/skills/')
+                                  || f.startsWith('.github/workflows/');
 
-            const msg = execSync('git log -1 --pretty=%B').toString();
-            const m = msg.match(/Approved-In:\s*#(\d+)/i);
-            if (!m) {
-              core.setOutput('ok', 'false');
-              core.setOutput('files', changed.join(', '));
-              core.setOutput('why', 'no `Approved-In: #N` trailer on the commit');
-              return;
+            // Judge every commit the push brought in. Until 2026-09-24 this read
+            // only HEAD~1..HEAD, which let a protected edit through behind any
+            // later commit, and reverted approved work merged with a merge
+            // commit, whose own message carries no trailer.
+            const after = context.sha;
+            const before = context.payload.before || '';
+            let base = `${after}~1`;
+            if (before && !/^0+$/.test(before)) {
+              try { git(`cat-file -e ${before}^{commit}`); base = before; }
+              catch (e) { core.warning(`push base ${before} is not in history; checking the tip commit only`); }
             }
-            // A trailer alone proves nothing — check the issue is real and the
-            // owner actually marked it approved.
-            try {
-              const issue = await github.rest.issues.get({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: Number(m[1]),
-              });
-              // Case- and whitespace-insensitive: a label typed `Approved`
-              // should not silently fail a check whose whole job is to be
-              // unambiguous about whether the owner said yes.
-              const approved = issue.data.labels
-                .some(l => String(l.name || l).trim().toLowerCase() === 'approved');
-              if (!approved) {
-                core.setOutput('ok', 'false');
-                core.setOutput('files', changed.join(', '));
-                core.setOutput('why', `issue #${m[1]} is not labelled \`approved\``);
-                return;
+
+            // A trailer alone proves nothing -- the issue must be real, and the
+            // owner must have labelled it. Case- and whitespace-insensitive: a
+            // label typed `Approved` should not silently fail a check whose
+            // whole job is to be unambiguous about whether the owner said yes.
+            const isApproved = l => String((l && l.name) || l).trim().toLowerCase() === 'approved';
+            const verdicts = {};
+            const approvedIn = async (n) => {
+              if (!(n in verdicts)) {
+                try {
+                  const { owner, repo } = context.repo;
+                  const issue = await github.rest.issues.get({ owner, repo, issue_number: n });
+                  if (!issue.data.labels.some(isApproved)) {
+                    verdicts[n] = `issue #${n} is not labelled \`approved\``;
+                  } else {
+                    // The label is the owner's decision only if the owner put it
+                    // there. A shift's token can label issues -- it closes and
+                    // comments on them with the same permission -- so the most
+                    // recent `approved` must be the owner's own.
+                    const events = await github.paginate(github.rest.issues.listEvents,
+                      { owner, repo, issue_number: n, per_page: 100 });
+                    const last = events.filter(e => e.event === 'labeled' && isApproved(e.label)).pop();
+                    const by = last && last.actor && last.actor.login;
+                    verdicts[n] = by === owner ? null
+                      : `issue #${n} was labelled \`approved\` by ${by || 'someone unknown'}, not ${owner}`;
+                  }
+                } catch (e) { verdicts[n] = `issue #${n} could not be read`; }
               }
-              core.setOutput('ok', 'true');
-            } catch (e) {
-              core.setOutput('ok', 'false');
-              core.setOutput('files', changed.join(', '));
-              core.setOutput('why', `issue #${m[1]} could not be read`);
+              return verdicts[n];
+            };
+
+            const bad = [];
+            for (const sha of git(`rev-list --reverse ${base}..${after}`).split('\n').filter(Boolean)) {
+              // A merge is judged only on what it introduces itself (--cc).
+              // Merging an approved commit adds nothing new; a "conflict
+              // resolution" that slips in a protected edit does.
+              const merge = git(`rev-list --parents -n 1 ${sha}`).trim().split(' ').length > 2;
+              const files = git(`diff-tree -r --no-commit-id --name-only ${merge ? '--cc ' : ''}${sha}`)
+                .split('\n').filter(Boolean).filter(isProtected);
+              if (!files.length) continue;
+              const m = git(`log -1 --pretty=%B ${sha}`).match(/Approved-In:\s*#(\d+)/i);
+              const why = m ? await approvedIn(Number(m[1])) : 'no `Approved-In: #N` trailer';
+              if (why) bad.push({ sha: sha.slice(0, 7), files, why });
             }
+
+            if (!bad.length) { core.setOutput('ok', 'true'); return; }
+            const files = [...new Set(bad.flatMap(b => b.files))];
+            // One path per line in a file, never interpolated into a shell: a
+            // file name is chosen by whoever made the commit.
+            require('fs').writeFileSync(`${process.env.RUNNER_TEMP}/unapproved-files.txt`,
+                                        files.join('\n') + '\n');
+            core.setOutput('ok', 'false');
+            core.setOutput('base', base);
+            core.setOutput('files', files.join(', '));
+            core.setOutput('why', bad.map(b => `${b.sha}: ${b.why}`).join('; '));
 
       - name: Revert the unapproved change
         if: steps.verify.outputs.ok == 'false'
+        env:
+          BASE: ${{ steps.verify.outputs.base }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          for f in ${{ steps.verify.outputs.files }}; do
-            git checkout HEAD~1 -- "${f%,}" 2>/dev/null || true
-          done
+          # Back to how each file stood before the push. A file the push added
+          # has nothing to restore, so it is removed -- the old
+          # `checkout HEAD~1 || true` left new protected files in place.
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            if git cat-file -e "$BASE:$f" 2>/dev/null; then git checkout "$BASE" -- "$f"
+            else git rm -q -f -- "$f"; fi
+          done < "$RUNNER_TEMP/unapproved-files.txt"
           git commit -m "Revert unapproved process change
 
           Protected files changed on main without owner approval. The change is
-          not lost -- it is in the previous commit and can be re-proposed on a
-          branch with an approving issue." || echo "nothing to revert"
+          not lost -- it is in the history and can be re-proposed on a branch
+          with an approving issue." || echo "nothing to revert"
           for attempt in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
             sleep 5

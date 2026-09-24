@@ -18,6 +18,11 @@ Notes:
 - averageViewPercentage can exceed 100 for Shorts (loops count as re-watches).
 - Thumbnail impressions / swipe-away rate are NOT exposed by the Analytics API
   (Studio-only), so they are deliberately absent here.
+- engaged_views (added 2026-09-24): since 2025 a Shorts "view" is any play
+  start, while engagedViews keeps the older, stricter count, so their ratio is
+  the share of plays that get past the opening (PRD §0 backlog #8). Blank means
+  "not collected", never zero: rows before that date, or a week the API refused
+  the metric.
 
 Usage: venv/bin/python scripts/weekly_analytics.py
 Env:   YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN
@@ -33,9 +38,11 @@ from src import analytics, config, insights  # noqa: E402
 
 OUT = config.ANALYTICS_SNAPSHOTS
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
-          "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct"]
+          "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
+          "engaged_views"]
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
+ENGAGED_METRIC = "engagedViews"
 CHUNK = 200  # Analytics API filter-list limit is 500; stay well under
 
 START_DATE = "2024-01-01"  # predates the channel; effectively "all time"
@@ -55,7 +62,7 @@ def all_uploads(yt):
     ]
 
 
-def fetch_stats(ya, video_ids, end_date):
+def fetch_stats(ya, video_ids, end_date, metrics=METRICS):
     stats = {}
     for i in range(0, len(video_ids), CHUNK):
         chunk = video_ids[i:i + CHUNK]
@@ -63,7 +70,7 @@ def fetch_stats(ya, video_ids, end_date):
             ids="channel==MINE",
             startDate=START_DATE,
             endDate=end_date,
-            metrics=METRICS,
+            metrics=metrics,
             dimensions="video",
             filters="video==" + ",".join(chunk),
             maxResults=len(chunk),
@@ -74,6 +81,48 @@ def fetch_stats(ya, video_ids, end_date):
             d = dict(zip(columns, row))
             stats[d["video"]] = d
     return stats
+
+
+def fetch_stats_with_engaged(ya, video_ids, end_date):
+    """fetch_stats plus engagedViews, or without it if the API refuses.
+
+    The API reference lists engagedViews for dimensions=video, but a shift has
+    no YouTube credentials to confirm that against this channel. So a refusal
+    costs one extra query and a blank column, never the snapshot, which is the
+    measurement backbone.
+    """
+    try:
+        return fetch_stats(ya, video_ids, end_date, f"{METRICS},{ENGAGED_METRIC}")
+    except Exception as e:
+        print(f"::warning::{ENGAGED_METRIC} refused ({type(e).__name__}: {e}); "
+              f"snapshotting without it")
+        return fetch_stats(ya, video_ids, end_date)
+
+
+def ensure_header(path, fields):
+    """Extend an existing CSV's header to `fields` by rewriting line 1 only.
+
+    src/log.py's _migrate_header rewrites the whole file, which here would also
+    normalize ~7,500 mixed CRLF/LF rows of production data, a change TECH_DEBT
+    leaves to the owner. Appending a column needs only the header, because old
+    rows read back as blank for it. Refuses anything but a pure append of
+    columns, so a reordering can never silently misalign the history.
+    """
+    if not path.exists():
+        return
+    data = path.read_bytes()
+    end = data.find(b"\n")
+    first = data if end < 0 else data[:end]
+    eol = b"\r\n" if first.endswith(b"\r") else b"\n"
+    have = first.rstrip(b"\r").decode().split(",")
+    if have == fields:
+        return
+    if fields[:len(have)] != have:
+        raise SystemExit(f"{path.name}: header {have} is not a prefix of {fields}; "
+                         f"refusing to rewrite it")
+    rest = b"" if end < 0 else data[end + 1:]
+    path.write_bytes(",".join(fields).encode() + eol + rest)
+    print(f"{path.name}: header extended with {fields[len(have):]}")
 
 
 def print_experiment_summary(stats):
@@ -220,11 +269,12 @@ def main():
         yt = analytics.youtube_client()
         videos = all_uploads(yt)
         print(f"channel has {len(videos)} videos")
-        stats = fetch_stats(ya, [v for v, _ in videos], today)
+        stats = fetch_stats_with_engaged(ya, [v for v, _ in videos], today)
         print(f"analytics rows returned for {len(stats)} videos")
 
         is_new = not OUT.exists()
         OUT.parent.mkdir(exist_ok=True)
+        ensure_header(OUT, FIELDS)
         with open(OUT, "a", newline="") as f:
             # Pin LF for the same reason as the traffic CSV below: this file is
             # appended from both CI and local runs and is now ~88% CRLF / 12% LF.
@@ -246,6 +296,7 @@ def main():
                     "est_minutes_watched": s.get("estimatedMinutesWatched", 0),
                     "avg_view_duration_s": s.get("averageViewDuration", 0),
                     "avg_view_pct": s.get("averageViewPercentage", 0),
+                    "engaged_views": s.get(ENGAGED_METRIC, ""),
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)

@@ -165,26 +165,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   every offline run. Fix is a column in `weekly_analytics.py`; not worth one
   extra Data API call per snapshot until a question turns on it.
 
-- **A failed release gate cannot be read without Actions log access.** The gate
-  exists so a cold session learns the verdict without spending quota — but only
-  the PASS path delivers that. A FAIL records "do not merge" plus a link to a
-  run log a shift's token gets 403 on. Hit **three** times now: 2026-09-20
-  re-ran the gates locally to find out (8 requests), 2026-09-21 could not afford
-  to, and 2026-09-22 found both gates passing on `main` while CI had said FAIL
-  three runs running, with no way to see what CI saw. **Half-fixed 2026-09-22:**
-  `validate_release.py` now writes `.github/last-release-detail.md`; the one
-  workflow line that appends it to the verdict is escalated
-  (`release-gate-readable`) and does nothing until approved.
-  - **Two things this exposed.** A shift cannot push a workflow change *at all*
-    — not blocked by `protect-process.yml` but by the token: *"refusing to allow
-    a GitHub App to create or update workflow ... without `workflows`
-    permission"*. So "propose it on a branch", which is what `CLAUDE.md` §4 and
-    the shift skill both say to do, is not an available instruction; the patch
-    has to be inlined into the escalation. And this fix had already been queued
-    once, as "bundle it into #14's approval" — **#14 was approved, its other
-    half was done, and this half died with the issue.** Stacking a request
-    behind someone else's approval does not survive that approval closing.
-
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
   screen after they were caught passing a `sexual_suggestive` question with
@@ -227,13 +207,23 @@ a list nobody can read is the same as no list.
   counter before starting, rather than trusting three independent caps.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
   a meaningful fraction of the budget.
-- **Generated titles can contain emoji, while Reddit posts containing emoji are
-  filtered out at selection.** `sanitize_title` strips quotes and whitespace but
-  not emoji, so the pipeline rejects emoji in source content and then adds its
-  own: 1 of 127 shipped titles (`Your Pets' Secret Drama? Tell Us! 🤫`), and the
-  model volunteered one in 2 of 4 test generations on 2026-09-19. Low impact and
-  arguably fine on YouTube, but it is an inconsistency someone should decide on
-  rather than discover. Noticed 2026-09-19.
+- **Two workflows run unmerged branch code holding a token that can push to
+  `main` without triggering the guard.** `dry-run.yml` (any requested branch)
+  and `validate-release.yml` (`integration/preview`) check out the branch under
+  test next to a `contents: write` job token that `actions/checkout` persists
+  in `.git/config`. Pushes made with that token start no workflows, so
+  `protect-process.yml` and `guardrails.yml` never see them. A branch whose
+  code pushed an edit to `CLAUDE.md`, a skill, or `prev_post.txt` would keep
+  it, which is more than a shift can do by pushing directly. Nothing suggests
+  it has happened (found reading `dry-run.yml`, 2026-09-24). Dropping
+  `persist-credentials` alone does not close it: the branch's code shares the
+  runner's filesystem, so it can rewrite the main-side `scripts/dry_run.py`
+  that the later record step runs with the token. **Fix:** split each into
+  two jobs. The job that runs branch code gets `contents: read`. A second job,
+  on a fresh runner and running only `main`'s code, judges the artifact,
+  strips secrets and pushes. It is an untestable rework of the route `v7`
+  depends on, so it is deliberately not proposed for approval from a phone
+  during the owner's absence (2026-09-25 to 10-04). Draft the patch after.
 
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
@@ -245,46 +235,24 @@ a list nobody can read is the same as no list.
   query — so the column is effectively decorative today. Worth either fixing or
   dropping before anything starts reading it. Noticed 2026-09-09 during the
   R4.6 audit.
-- **The SRT track fails to upload roughly half the time.** The `caption_ok`
-  telemetry added 2026-09-07 has 5 rows and 2 are `0`; `comment_ok` is 5/5.
-  The telemetry did its job — this was invisible before. Deliberately not
+- **The SRT track fails to upload about one time in four.** First read
+  2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
+  `comment_ok` was 31/31, so it is real but not the half it first looked. The
+  telemetry did its job — this was invisible before. Deliberately not
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
-  accessibility nicety, not a growth lever. Revisit only if the failure rate
-  holds over a larger sample and the fix is cheap. Noticed 2026-09-09.
-- ~~**Scheduled runs now land ~4h25m after their cron slot**~~ — the two stale
-  doc claims were corrected 2026-09-19 (workflow cron comment, and PRD §1/§4's
-  "00:00 and 12:00 UTC"). The drift itself remains deliberately unchased; the
-  original note is kept below for the reasoning. **Scheduled runs land ~4h25m
-  after their cron slot**, up from ~40–90 min
-  in July (actual publish ~04:48 / ~16:45 UTC against a `23 0,12` cron). This
-  is GitHub Actions queue delay, not a bug in the job — but it is *drifting*,
-  which means publish time is an uncontrolled variable moving underneath every
-  cohort comparison. Already instrumented: `median_publish_drift` in
-  `weekly_digest.py` alerts above 120 min, so the 2026-09-14 digest will fire
-  it. **Two docs are now factually wrong** and want a one-line fix each: the
-  `run-reddit-video.yml` cron comment still claims "actual publish lands ~10
-  min later; acceptable", and README/PRD still describe the slots as 00:00 and
-  12:00 UTC. Noticed 2026-09-09.
-- **FIXED 2026-09-19 — `load_videos` silently dropped every 0-view upload**
-  (including both confirmed-suppression cases), because the Analytics API
-  returns no row for an exact 0 and the join treated a missing row as
-  "exclude" rather than "zero". A missing row now reads as a genuine zero.
+  accessibility nicety, not a growth lever. Revisit only if the fix is cheap.
+- **The runtime and two dependencies are ageing out.** Every workflow pins
+  Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
+  already warns it will stop shipping updates for it. And an OSV check of
+  `requirements.txt` (2026-09-23) finds published advisories against
+  **Pillow 10.4.0** (30+) and **requests 2.32.3** (4). Exposure is low: Pillow
+  only ever decodes our own fonts, b-roll and generated frames, never an
+  untrusted image, and requests only posts to fixed Google endpoints. Nothing
+  breaks on the EOL date, so this is not urgent — but bumping either
+  dependency, or Python, can change how frames render, so it is a video change:
+  it needs the dry-run gate (blocked, see above) and its own release, not a
+  ride-along in an experiment.
 
-- **The Gemini free-tier daily budget is smaller than the pipeline assumes, and
-  is shared between production and any local analysis.** On 2026-09-10 an R4.3
-  re-run exhausted it within ~90 minutes of the 07:00 UTC reset, which means the
-  16:45 UTC video run that day very likely executed with no Gemini at all:
-  keyword-backstop screening, and Reddit's own title instead of a generated one.
-  Nothing breaks — every path fails soft — but the upload is materially worse
-  and nothing in the logs said so at the time. PRD §2 says usage is "comfortably
-  inside the free tier at 2 runs/day", which is true for production alone and
-  false as soon as anything else shares the key. Worth deciding on: (a)
-  `screen_source` (v6 branch) will start showing how often production actually
-  loses Gemini; (b) local analysis should run right after a reset **and** be
-  budgeted rather than run opportunistically; (c) retry policy must treat a
-  repeated 429 as a stop signal rather than a reason to try harder —
-  `analyze_channel` now does, and `src/screen.py`'s widened retry is unverified
-  under quota pressure. Noticed 2026-09-10.
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
   local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
@@ -294,24 +262,43 @@ a list nobody can read is the same as no list.
   existing rows is deliberately deferred:** it is a ~7,500-line mechanical diff
   on a production data file, and worth doing on its own rather than buried in a
   feature commit. Owner's call.
-- **Digest surfaces `channel_7d` traffic, README says decide on `logged_uploads`.**
-  Both are correct for their purpose (7d is the drift series, logged_uploads is
-  the current-format cohort), but a reader skimming the digest could take the
-  weekly number as the decision number. Revisit if the two ever diverge much.
 
+- **The weekly shift breaker is ~2x looser on Opus 5.5, not the ~20% first
+  estimated.** First Opus 5.5 shift (2026-09-23): 0.044 quota units per turn,
+  against 0.059–0.098 on the three Opus 5 shifts. List prices fell 20%, but
+  cache reads — most of a long session's cost — fell 60% ($0.50 → $0.20/MTok).
+  So `SHIFT_WEEKLY_QUOTA_BUDGET=120` now permits roughly twice the real work it
+  did when set. Whether that matters depends on how the subscription meters
+  Opus 5.5, which units cannot show: compare the console's weekly % after a
+  shift with a pre-5.5 one. If a shift still costs a similar share, lower the
+  ceiling to ~60. One data point so far — confirm over a few shifts.
 
-- **`protect-process.yml` reverts approved changes merged via a merge commit.**
-  The guard reads `git log -1 --pretty=%B`, so it only ever sees the *head*
-  commit's message. That is correct for a direct push or a fast-forward, where
-  the head is the approved commit carrying `Approved-In: #N`. It is wrong for a
-  GitHub "Create a merge commit" merge, whose head message is
-  `Merge pull request #N from ...` — no trailer, so a legitimately approved
-  change is reverted and a `needs-owner` issue is filed against the owner's own
-  approval. Verified locally 2026-09-23 by simulating both strategies against
-  the guard's exact two commands. Not caught earlier because PR #19, the only
-  prior PR, touched no protected path, so the guard short-circuited on
-  `changed.length === 0`. **Workaround until fixed: merge protected-path changes
-  with "Rebase and merge" or a fast-forward, never a merge commit.** The fix is
-  to scan every commit in the push (`git log HEAD~1..HEAD`, or the push event's
-  `commits` array) rather than only the tip — but that widens what counts as an
-  approval, so it wants deliberate design, not a one-line patch.
+- **A release check whose unit tests fail leaves the previous PASS in place.**
+  In `validate-release.yml` a failing unit-test step ends the job before the
+  verdict is written, so `.github/last-release-validation.md` keeps showing
+  the last run's PASS: read its commit, not just its verdict. Less likely now
+  that the suite runs on every push (#33, applied 2026-09-24, after four new
+  modules importing an uninstalled `yaml` stopped it at collection). Fix: move
+  the tests after the verdict step, or record FAIL when they fail.
+
+- **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
+  checks that the cited issue is approved by the owner, not that the commit is
+  the change that issue described — so any commit can cite any approved issue,
+  including one approved for something else. A squash merge carrying several
+  trailers is judged on the first alone. Auto-apply does not share this: it
+  lands only the exact diff fingerprinted in the issue. Nothing suggests reuse
+  has happened, and self-approval is closed (#31: only the owner's label
+  counts). Options, cheapest first: refuse a cited issue that is closed, so an
+  approval cannot outlive the work it approved; require every cited issue to be
+  approved; move protected-file changes to the fingerprinted route. Found
+  2026-09-24.
+
+- **Gemini's API key travels in the request URL.** `src/llm.py` calls
+  `…:generateContent?key=<key>`, and HTTP errors quote the URL, so the key
+  lands in any log or file that records a failed request. GitHub masks it in
+  its own log view only. Two places now strip it before committing
+  (`dry-run.yml`, the release verdict in `validate-release.yml`), but that is
+  mitigation. **The fix at the source:** send it as the `x-goog-api-key`
+  header instead. It changes the live upload path, so it wants a dry run
+  before merging -- deliberately not done 2026-09-24, the day before the
+  owner's ten days away.

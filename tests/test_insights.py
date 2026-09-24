@@ -693,7 +693,7 @@ def test_a_release_becomes_age_matched_when_read_at_a_common_age(tmp_path, monke
     _two_eras(tmp_path, monkeypatch)
     verdict, comparisons = _verdict()
     assert all(c.age_matched for c in comparisons)
-    assert verdict == "KEEP — nothing degraded beyond the channel's own drift"
+    assert verdict == "KEEP — watch_seconds did not degrade beyond the channel's own drift"
 
 
 def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch):
@@ -702,12 +702,18 @@ def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch
     assert verdict == "REVERT — watch_seconds degraded beyond the channel's own drift"
 
 
-def test_either_metric_degrading_is_enough_to_revert(tmp_path, monkeypatch):
-    """The rule says watch-seconds *or* views, so a release that held retention
-    while halving distribution must not read as a pass."""
+def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
+    """The owner on #18: "the rule now triggers on watch-seconds only, with
+    views reported but never firing it". Until 2026-09-24 this tool still
+    applied the old either-metric rule and printed REVERT for the b-roll
+    library on views alone, which would have done the same to v7."""
     _two_eras(tmp_path, monkeypatch, new_views=100, old_views=200)
     verdict, _ = _verdict()
-    assert verdict == "REVERT — views degraded beyond the channel's own drift"
+    assert verdict == "KEEP — watch_seconds did not degrade beyond the channel's own drift"
+
+
+def test_a_verdict_needs_the_trigger_metric_compared():
+    assert insights.release_verdict([]).startswith("NO VERDICT")
 
 
 def test_a_release_too_young_to_judge_says_so_instead_of_nothing(tmp_path, monkeypatch):
@@ -846,7 +852,7 @@ def test_a_drop_larger_than_the_drift_still_reverts(tmp_path, monkeypatch):
     """The floor must not defang the rule: a degradation bigger than the
     channel's own movement is exactly what it exists to catch."""
     old_u, old_s = _noisy_era("old", 0, 32, "v4", [220, 200, 220, 200])
-    new_u, new_s = _era("new", 60, 16, "v5", 40, 10.0)
+    new_u, new_s = _era("new", 60, 16, "v5", 210, 5.0)   # watch-seconds halved
     _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
 
     load = insights.load_videos_at_age()
@@ -855,9 +861,26 @@ def test_a_drop_larger_than_the_drift_still_reverts(tmp_path, monkeypatch):
                    for m in (Metric.WATCH, Metric.VIEWS)]
     floors = {m: insights.drift_floor(b, m) for m in (Metric.WATCH, Metric.VIEWS)}
 
-    assert floors[Metric.VIEWS] < 0.2
+    assert floors[Metric.WATCH] < 0.2
     assert insights.release_verdict(comparisons, floors) == (
-        "REVERT — views degraded beyond the channel's own drift")
+        "REVERT — watch_seconds degraded beyond the channel's own drift")
+
+
+def test_a_views_drop_beyond_its_limit_is_printed_but_does_not_fire(tmp_path, monkeypatch):
+    """Reported, never a trigger: the drop must still be on screen."""
+    old_u, old_s = _noisy_era("old", 0, 32, "v4", [220, 200, 220, 200])
+    new_u, new_s = _era("new", 60, 16, "v5", 40, 10.0)   # views collapse, watch holds
+    _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
+
+    load = insights.load_videos_at_age()
+    a, b, _, _ = insights.release_cohorts(load.videos, "format_version", "v5")
+    metrics = (Metric.WATCH, Metric.VIEWS)
+    comparisons = [insights.compare(a, b, "r", "p", load.anchor, m) for m in metrics]
+    floors = {m: insights.drift_floor(b, m) for m in metrics}
+    out = insights.render_release(comparisons, floors)
+
+    assert insights.release_verdict(comparisons, floors).startswith("KEEP")
+    assert "NOT A TRIGGER: views" in out and "#18" in out
 
 
 def test_the_drift_floor_is_measured_before_the_change_not_on_it(tmp_path, monkeypatch):
@@ -898,9 +921,8 @@ def test_the_detection_limit_is_printed_with_every_release_answer(tmp_path, monk
 
 def test_metrics_pointing_opposite_ways_are_called_out_not_flattened(tmp_path, monkeypatch):
     """The b-roll library, live: watch-seconds +22% (limit 11%) and views -39%
-    (limit 38%). §5 reverts on either, so the verdict reads REVERT while the
-    channel's primary metric says the change worked. Both facts have to be on
-    screen or the one-line verdict misleads."""
+    (limit 38%). The verdict follows watch-seconds (#18) and reads KEEP, but
+    the views drop has to stay on screen or the one-line verdict misleads."""
     old_u, old_s = _era("old", 0, 24, "v4", 200, 6.0)
     new_u, new_s = _era("new", 60, 24, "v5", 100, 12.0)   # views halved, watch doubled
     _write_series(tmp_path, monkeypatch, old_u + new_u, old_s + new_s)
@@ -912,8 +934,8 @@ def test_metrics_pointing_opposite_ways_are_called_out_not_flattened(tmp_path, m
     out = insights.render_release(comparisons, {m: insights.drift_floor(b, m)
                                                 for m in metrics})
 
-    assert "CONFLICT" in out and "the owner's call" in out
-    assert "REVERT" in out
+    assert "CONFLICT" in out and "NOT A TRIGGER: views" in out
+    assert "KEEP" in out and "REVERT" not in out
 
 
 # ------------------------------------------------------------ trajectory

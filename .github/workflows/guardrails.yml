@@ -125,3 +125,21 @@ jobs:
             echo "::error::a secret file appears in git history"; exit 1
           fi
           echo "secrets ignored and never committed"
+
+  # CLAUDE.md §3 makes "tests green" a merge gate, and shifts merge their own
+  # work -- but nothing ran the suite on a push; only the daily release check
+  # did. On 2026-09-24 a push added four test modules needing a library nothing
+  # installed, so the suite could not even start, and the first thing to notice
+  # would have been the next morning's release check.
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+      - name: Install
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Unit tests
+        run: python -m pytest tests/ -q

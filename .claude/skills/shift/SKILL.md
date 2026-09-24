@@ -75,7 +75,8 @@ allocating:
 
 1. **Incident.** Did both uploads land (`upload_log.csv` tail)? Did the last
    workflow run succeed? Is `prev_post.txt` intact? A missed or duplicated
-   upload preempts everything.
+   upload preempts everything. You cannot read Actions logs, so to see *why* a
+   run failed, request a dry run of `main` (§6): the verdict carries the error.
 2. **Ship what's built.** Read `.github/last-release-validation.md` on `main`;
    CI writes the verdict there, so you never need quota to find out. PASS means
    merge. Unshipped work is inventory, not progress.
@@ -150,6 +151,12 @@ it becomes an issue that emails them. The same `--key` comments rather than
 duplicating. **Always include a recommendation** — one without it just moves
 the work.
 
+**A workflow change you cannot push:** make the edit, `git diff --
+.github/workflows/ > change.patch`, drop the edit, and add `--patch
+change.patch`. The owner's label then applies it — except to
+`protect-process.yml` and `apply-approved.yml`, which only the owner lands. If
+it is refused, the issue says why; raise it again.
+
 The list is in `CLAUDE.md` §4 — one rule, one home. In short: guardrails,
 spending, production data, publishing.
 
@@ -167,7 +174,11 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 
 - **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
   an hour of a scheduled run — exhausting it cost a real upload its title.
-- **Polly:** at most one dry run per shift.
+- **Polly:** at most one dry run per shift, and you cannot render one — ask:
+  `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
+  The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
+  a PASS naming the branch's current commit. A render spends 2–5 Gemini
+  requests, so the Gemini rule above applies to it.
 - **Never run `scripts/weekly_analytics.py`** to check something: it appends
   real rows. If you do, revert the file before committing.
 
