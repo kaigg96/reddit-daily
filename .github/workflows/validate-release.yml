@@ -100,6 +100,8 @@ jobs:
 
       - name: Record the verdict where a cold session can read it
         if: steps.check.outputs.proceed == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # only to strip it, below
         run: |
           RESULT="${{ steps.gates.outcome }}"
           git checkout main
@@ -123,9 +125,15 @@ jobs:
             echo "[Full output](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } > .github/last-release-validation.md
 
-          # Why it ruled that way, not just how.
-          cat .github/last-release-detail.md 2>/dev/null >> .github/last-release-validation.md \
-            || echo "_(the gates recorded no detail)_" >> .github/last-release-validation.md
+          # Why it ruled that way, not just how -- with the Gemini key stripped.
+          # The key travels in the request URL (src/llm.py), so a detail line
+          # that ever quoted an HTTP error would commit it to the repository.
+          if [ -f .github/last-release-detail.md ]; then
+            python3 -c 'import os, sys; k = os.environ.get("GEMINI_API_KEY", ""); t = open(sys.argv[1]).read(); sys.stdout.write(t.replace(k, "***") if len(k) >= 6 else t)' \
+              .github/last-release-detail.md >> .github/last-release-validation.md
+          else
+            echo "_(the gates recorded no detail)_" >> .github/last-release-validation.md
+          fi
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
