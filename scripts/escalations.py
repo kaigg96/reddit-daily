@@ -51,16 +51,32 @@ def _issues():
     return out
 
 
+def _owner_replies(issue):
+    """What the owner wrote on an escalation. The owner answers in comments --
+    on 2026-09-24 one reply read "not approved to spend real money on this,
+    other solutions acceptable" -- and this script used to print titles only,
+    so a shift could act on the label and never see the condition attached."""
+    if not issue.get("comments"):
+        return []
+    return [c["body"].strip() for c in
+            _api(f"/repos/{REPO}/issues/{issue['number']}/comments")
+            if c.get("author_association") == "OWNER" and c["body"].strip()]
+
+
 def show(want_approved):
     rows = [(i, l) for i, l in _issues() if ("approved" in l) == want_approved]
     if not rows:
         print("approved and waiting to be done: none" if want_approved
               else "awaiting the owner: none")
         return 0
-    print("DECIDED — do these, then close them:" if want_approved
-          else "AWAITING THE OWNER — do not act on these:")
+    print("DECIDED — do these, then close them. The owner's replies are part of "
+          "the decision and bind what you do:" if want_approved
+          else "AWAITING THE OWNER — do not act on these. Replies are shown so "
+          "you do not re-ask what they have answered; a reply is not approval:")
     for i, _ in rows:
         print(f"  #{i['number']}  {i['title']}")
+        for reply in _owner_replies(i):
+            print("      owner: " + reply.replace("\n", "\n             "))
     return 0
 
 
