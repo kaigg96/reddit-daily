@@ -64,16 +64,27 @@ jobs:
             // owner must have labelled it. Case- and whitespace-insensitive: a
             // label typed `Approved` should not silently fail a check whose
             // whole job is to be unambiguous about whether the owner said yes.
+            const isApproved = l => String((l && l.name) || l).trim().toLowerCase() === 'approved';
             const verdicts = {};
             const approvedIn = async (n) => {
               if (!(n in verdicts)) {
                 try {
-                  const issue = await github.rest.issues.get({
-                    owner: context.repo.owner, repo: context.repo.repo, issue_number: n,
-                  });
-                  verdicts[n] = issue.data.labels.some(
-                    l => String(l.name || l).trim().toLowerCase() === 'approved')
-                    ? null : `issue #${n} is not labelled \`approved\``;
+                  const { owner, repo } = context.repo;
+                  const issue = await github.rest.issues.get({ owner, repo, issue_number: n });
+                  if (!issue.data.labels.some(isApproved)) {
+                    verdicts[n] = `issue #${n} is not labelled \`approved\``;
+                  } else {
+                    // The label is the owner's decision only if the owner put it
+                    // there. A shift's token can label issues -- it closes and
+                    // comments on them with the same permission -- so the most
+                    // recent `approved` must be the owner's own.
+                    const events = await github.paginate(github.rest.issues.listEvents,
+                      { owner, repo, issue_number: n, per_page: 100 });
+                    const last = events.filter(e => e.event === 'labeled' && isApproved(e.label)).pop();
+                    const by = last && last.actor && last.actor.login;
+                    verdicts[n] = by === owner ? null
+                      : `issue #${n} was labelled \`approved\` by ${by || 'someone unknown'}, not ${owner}`;
+                  }
                 } catch (e) { verdicts[n] = `issue #${n} could not be read`; }
               }
               return verdicts[n];

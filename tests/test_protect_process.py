@@ -21,10 +21,19 @@ const fs = require('fs');
 const [script, approvals, payload] = process.argv.slice(2).map(p => fs.readFileSync(p, 'utf8'));
 const labels = JSON.parse(approvals), push = JSON.parse(payload), out = { warnings: [] };
 const core = { setOutput: (k, v) => { out[k] = v; }, warning: m => out.warnings.push(m), info: () => {} };
-const github = { rest: { issues: { get: async ({ issue_number }) => {
-  if (!(issue_number in labels)) throw new Error('Not Found');
-  return { data: { labels: labels[issue_number].map(name => ({ name })) } };
-} } } };
+// approvals: {issue: [labels]} (labelled by the owner, 'o') or {issue: {labels, by}}
+const entry = n => Array.isArray(labels[n]) ? { labels: labels[n], by: 'o' } : labels[n];
+const github = {
+  rest: { issues: {
+    get: async ({ issue_number }) => {
+      if (!(issue_number in labels)) throw new Error('Not Found');
+      return { data: { labels: entry(issue_number).labels.map(name => ({ name })) } };
+    },
+    listEvents: async ({ issue_number }) => ({ data: entry(issue_number).labels.map(name =>
+      ({ event: 'labeled', label: { name }, actor: { login: entry(issue_number).by } })) }),
+  } },
+  paginate: async (fn, params) => (await fn(params)).data,
+};
 const context = { sha: push.after, payload: { before: push.before }, repo: { owner: 'o', repo: 'r' } };
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 new AsyncFunction('github', 'context', 'core', 'require', 'process', script)(
@@ -199,3 +208,13 @@ def test_the_revert_restores_edits_removes_additions_and_keeps_the_rest(repo, en
     assert (repo / "README.md").read_text() == "legitimate docs change\n"
     assert not (repo / "PWNED").exists() and not (tmp_path / "PWNED").exists()
     assert run(repo, env, "rev-parse", "HEAD") == run(origin, env, "rev-parse", "main")
+
+
+def test_only_the_owners_label_is_an_approval(repo, env, tmp_path):
+    """A shift's token can add labels; an `approved` it added is not a decision."""
+    before = run(repo, env, "rev-parse", "HEAD")
+    write(repo, ".claude/skills/shift/SKILL.md", "skill v2\n")
+    commit(repo, env, "Self-approved\n\nApproved-In: #5")
+    out = guard(repo, env, tmp_path, before,
+                {5: {"labels": ["needs-owner", "approved"], "by": "claude[bot]"}})
+    assert out["ok"] == "false" and "by claude[bot], not o" in out["why"]

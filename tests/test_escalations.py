@@ -14,12 +14,16 @@ def issue(n, title, labels, comments):
             "labels": [{"name": l} for l in labels]}
 
 
-def fake_github(monkeypatch, issues, comments):
+def fake_github(monkeypatch, issues, comments, labelled_by="kaigg96"):
     def api(path, data=None, method=None):
         if path.endswith("/comments"):
             return comments[int(path.split("/")[-2])]
+        if "/events" in path:
+            return [{"event": "labeled", "label": {"name": "approved"},
+                     "actor": {"login": labelled_by}}]
         return issues
     monkeypatch.setattr(escalations, "_api", api)
+    monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
 
 
 REPLY = "Not approved to spend real money on this, other solutions acceptable."
@@ -64,3 +68,13 @@ def test_no_comments_costs_no_extra_request(monkeypatch, capsys):
     monkeypatch.setattr(escalations, "_api", api)
     escalations.show(True)
     assert not any(p.endswith("/comments") for p in calls)
+
+
+def test_an_approval_someone_else_added_is_not_a_decision(monkeypatch, capsys):
+    fake_github(monkeypatch,
+                [issue(40, "Loosen the Polly budget", ["needs-owner", "approved"], [])],
+                {}, labelled_by="claude[bot]")
+    escalations.show(True)
+    out = capsys.readouterr().out
+    assert "NOT BY THE OWNER" in out and "#40" in out
+    assert "DECIDED" not in out
