@@ -52,6 +52,16 @@ jobs:
           [ -n "$BRANCH" ] || refuse "no valid request in the queue"
           python3 -c "import sys; sys.path.insert(0,'scripts'); import dry_run; sys.exit(0 if dry_run.valid_branch(sys.argv[1]) else 1)" "$BRANCH" \
             || refuse "not a plain branch name"
+
+          # A render spends 2-5 of the day's 20 Gemini requests. Before the 07:00
+          # UTC reset, those are the requests the morning upload still needs
+          # until it has landed -- the upload last in the window shipped a raw
+          # title on 2026-09-20 with the budget gone. So an automated request
+          # waits for today's first upload, or for the reset.
+          if [ "$EVENT" = "push" ] && [ "$(date -u +%H)" -lt 7 ] \
+             && ! cut -d, -f1 upload_log.csv | grep -q "^$(date -u +%Y-%m-%d)"; then
+            refuse "the morning upload has not landed and needs today's Gemini requests; ask again after 07:00 UTC"
+          fi
           git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null || refuse "$BRANCH is not on origin"
 
           # One automated render per 12 hours, read from this workflow's own

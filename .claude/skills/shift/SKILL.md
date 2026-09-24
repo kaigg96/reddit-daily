@@ -177,7 +177,8 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 - **Polly:** at most one dry run per shift, and you cannot render one — ask:
   `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
   The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
-  a PASS naming the branch's current commit.
+  a PASS naming the branch's current commit. A render spends 2–5 Gemini
+  requests, so the Gemini rule above applies to it.
 - **Never run `scripts/weekly_analytics.py`** to check something: it appends
   real rows. If you do, revert the file before committing.
 
