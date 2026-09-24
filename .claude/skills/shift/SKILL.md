@@ -167,7 +167,10 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 
 - **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
   an hour of a scheduled run — exhausting it cost a real upload its title.
-- **Polly:** at most one dry run per shift.
+- **Polly:** at most one dry run per shift, and you cannot render one — ask:
+  `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
+  The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
+  a PASS naming the branch's current commit.
 - **Never run `scripts/weekly_analytics.py`** to check something: it appends
   real rows. If you do, revert the file before committing.
 

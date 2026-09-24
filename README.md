@@ -103,7 +103,10 @@ DRY_RUN=1 python -m src.run
 Renders everything to `assets/gen/` and prints the would-be metadata, but
 skips upload, thumbnail, and all state mutations. In GitHub: *Actions → Run
 workflow → dry_run: true* — the rendered video is attached as a workflow
-artifact for review.
+artifact for review. A shift holds no render credentials, so it asks instead:
+`scripts/dry_run.py request <branch>` queues a render that `dry-run.yml` runs
+with no YouTube credentials, recording the verdict in `.github/last-dry-run.md`
+(the video is attached to that run too).
 
 ## Development workflow (standing convention)
 
