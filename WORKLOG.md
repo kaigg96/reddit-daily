@@ -69,11 +69,10 @@ Read the allocation series with
 **Summary:** The new opening passed its sample video and goes live after tonight's upload, as agreed. This morning's upload shipped with the plain Reddit question as its title, the second time in this format. The likely cause is the shared daily AI allowance running out, and the fix for that is now due.
 
 ### Feature work
-- **Asked for the new opening's sample video.** First I updated it with everything that has gone live since it was built, so the sample tests exactly what would ship. All tests pass.
-- **The sample video passed** (right size, sound throughout, no silent gaps). The agreed rule is to wait for the 10th upload in the current format, which lands around 17:00 tonight. This shift has a 30-minute limit and can't wait that long, so tomorrow morning's shift puts it live.
+- **The new opening's sample video passed** (right size, sound throughout, no silent gaps). I first updated the opening with everything live since it was built, so the sample tests exactly what ships. The agreed rule waits for the 10th upload in the current format (~17:00 tonight), past this shift's 30-minute limit, so tomorrow's shift puts it live.
 
 ### Maintenance
-- **This morning's upload lost its generated title, search keywords and closing question.** It shipped with the Reddit question as the title instead. That is 2 of the 9 uploads in the current format, and both were morning runs. The morning run is the last one before the daily AI allowance resets, so it is the one that goes short when other jobs have spent it. The record can't yet say for certain that the allowance was the cause: it logs *that* the title failed, not *why*. Logged, with the fix, for the next shift.
+- **This morning's upload lost its generated title, search keywords and closing question.** It shipped with the Reddit question as the title instead. That is 2 of the 9 uploads in the current format, and both were morning runs. The morning run is the last one before the daily AI allowance resets, so it is the one that goes short when other jobs have spent it. The record logs *that* the title failed, not *why*, so the cause is inferred. Logged, with the fix.
 - Every scheduled upload landed, and the saved record of the last post is intact.
 
 ### Security
