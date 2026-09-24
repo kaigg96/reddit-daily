@@ -320,52 +320,6 @@ a list nobody can read is the same as no list.
   weekly number as the decision number. Revisit if the two ever diverge much.
 
 
-- **`protect-process.yml` inspects only the last commit of a push — both ways.**
-  **Unapproved changes can pass:** it diffs `HEAD~1 HEAD` with `fetch-depth: 2`,
-  so a push of [a skill edit, then any other commit] shows it only the second
-  commit, and the skill edit lands unchecked. Found 2026-09-24. Nothing so far
-  suggests it has happened — shifts have pushed escalations and hand-overs
-  separately — but nothing prevents it. **And approved changes can be reverted:**
-  it reads `git log -1 --pretty=%B`, so it only ever sees the *head*
-  commit's message. That is correct for a direct push or a fast-forward, where
-  the head is the approved commit carrying `Approved-In: #N`. It is wrong for a
-  GitHub "Create a merge commit" merge, whose head message is
-  `Merge pull request #N from ...` — no trailer, so a legitimately approved
-  change is reverted and a `needs-owner` issue is filed against the owner's own
-  approval. Verified locally 2026-09-23 by simulating both strategies against
-  the guard's exact two commands. Not caught earlier because PR #19, the only
-  prior PR, touched no protected path, so the guard short-circuited on
-  `changed.length === 0`. **Workaround until fixed: merge protected-path changes
-  with "Rebase and merge" or a fast-forward, never a merge commit.** **One fix
-  closes both:** diff the whole push (`github.event.before..github.sha`,
-  `fetch-depth: 0`) and require an approved `Approved-In:` on every non-merge
-  commit that touches a protected path. The approved branch commit then passes
-  through a merge commit, and nothing can ride in behind an unrelated tip. It
-  changes the guard itself, so it needs the owner's approval like any other
-  protected path.
-
-- **Shifts cannot render a dry run, and #27's proposed fix would bypass the
-  process guard.** The release gate needs a playable MP4 from a dry run, but a
-  shift holds no Polly credentials and its `actions: write` never reaches the
-  session — the Claude action swaps in its own app token. Found by the
-  2026-09-23 shift, which built `v7` and parked it on `feature/v7-open-on-hook`
-  for this reason. #27 proposes exposing the workflow's own token to the session
-  as `DISPATCH_TOKEN`. That token also has `contents: write` and full
-  `actions: write`: pushes made with it trigger no `on: push` workflow, so a
-  direct push of `CLAUDE.md` or a skill would never meet `protect-process.yml`
-  (nothing else blocks it — branch rules need GitHub Pro on a private repo), and
-  `actions: write` can disable workflows outright, guards included. It would
-  let a single commit skip the guard, and let the guard be switched off — both
-  wider than the multi-commit gap in the entry on `protect-process.yml`.
-  **Safer shape, same pattern as `.escalations/`:** the shift commits a request
-  file with its normal token; a workflow triggered by it renders `DRY_RUN=1` on
-  the named branch in a job holding no YouTube secrets — so nothing it runs can
-  publish, whatever the branch's own workflow file says — and writes the verdict
-  back for the next shift to read, as `validate-release.yml` already does.
-  Residual risk in any design that renders branch code in CI: that code runs
-  with Polly credentials, so the job wants a short timeout, and an AWS-side
-  budget is the real backstop.
-
 - **The weekly shift breaker is ~2x looser on Opus 5.5, not the ~20% first
   estimated.** First Opus 5.5 shift (2026-09-23): 0.044 quota units per turn,
   against 0.059–0.098 on the three Opus 5 shifts. List prices fell 20%, but
@@ -396,3 +350,13 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
+
+- **Gemini's API key travels in the request URL.** `src/llm.py` calls
+  `…:generateContent?key=<key>`, and HTTP errors quote the URL, so the key
+  lands in any log or file that records a failed request. GitHub masks it in
+  its own log view only. Two places now strip it before committing
+  (`dry-run.yml`, the release verdict in `validate-release.yml`), but that is
+  mitigation. **The fix at the source:** send it as the `x-goog-api-key`
+  header instead. It changes the live upload path, so it wants a dry run
+  before merging -- deliberately not done 2026-09-24, the day before the
+  owner's ten days away.
