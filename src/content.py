@@ -22,6 +22,7 @@ class PostContent:
     candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
     topic: str = ""           # R4.3 taxonomy, from the screen call (free)
     screen_source: str = ""   # gemini | backstop — which path actually screened this
+    slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined
 
 
 def make_reddit():
@@ -61,10 +62,13 @@ def _comment_pool(post, limit):
     ][:limit]
 
 
-def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, on_verdict=None):
+def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, on_verdict=None,
+                slate_classifier=None):
     """Pick the first candidate that passes the basic filters and the optional
     suppression screen. `screener(question, comments) -> ScreenResult`;
-    `on_verdict(post_title, result, action)` records non-pass outcomes."""
+    `on_verdict(post_title, result, action)` records non-pass outcomes.
+    `slate_classifier(titles) -> [topic] | None` labels the eligible slate for
+    telemetry only; its answer never influences which post is picked."""
     subreddit = reddit.subreddit(subreddit_name)
     candidates = [
         post
@@ -77,6 +81,19 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             and post.title != prev_title
         )
     ]
+
+    # R4.4 Step 0.5. Rank here is position in `candidates`, the same basis as
+    # candidate_rank, so slate[candidate_rank - 1] is the selected post and its
+    # agreement with the screen's topic comes free.
+    slate_topics = ""
+    if slate_classifier and candidates:
+        try:
+            slate = slate_classifier([p.title for p in candidates])
+        except Exception as e:  # telemetry must never cost an upload
+            print(f"Slate: classifier raised {type(e).__name__} (not logged this run)")
+            slate = None
+        if slate:
+            slate_topics = "|".join(t or "?" for t in slate)
 
     for rank, post in enumerate(candidates[: config.MAX_SCREENED_CANDIDATES], 1):
         pool = _comment_pool(post, config.COMMENT_POOL)
@@ -120,6 +137,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             candidate_rank=rank,
             topic=topic,
             screen_source=screen_source,
+            slate_topics=slate_topics,
         )
 
     raise ValueError("No suitable Reddit post found (after filters and screen).")

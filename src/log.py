@@ -26,6 +26,12 @@ FIELDS = [
     # — invisible in the logs, and it makes the R4.6 audit an audit of a screen
     # nobody can confirm ran.
     "screen_source",
+    # Added 2026-09-24 (PRD R4.4 Step 0.5): the topic of every eligible
+    # candidate, in rank order, "|"-joined ("?" = unrecognised label, blank =
+    # not collected). The log kept only the selected post's topic, so how often
+    # a topic ranker would override Reddit's order -- and therefore how long
+    # its own bake would take -- could not be estimated.
+    "slate_topics",
 ]
 
 

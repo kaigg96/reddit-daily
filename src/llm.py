@@ -22,7 +22,8 @@ from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
-             "gemini-2.5-flash:generateContent")
+             "{model}:generateContent")
+MODEL = "gemini-2.5-flash"
 
 # Generous because it is now only a backstop against a pathological response,
 # not a routine limit — with thinking off, calls land in about a second.
@@ -31,16 +32,18 @@ _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
 _TIMEOUT = 60
 
 
-def _generate(prompt, thinking_budget=0):
+def _generate(prompt, thinking_budget=0, model=MODEL):
     """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
     default, and what every caller here wants); pass a token budget only for a
-    task where reasoning demonstrably helps."""
+    task where reasoning demonstrably helps. `model` exists because the free
+    tier is counted per model: a caller on another model draws on its own
+    daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
     }
     resp = requests.post(
-        f"{_ENDPOINT}?key={os.environ['GEMINI_API_KEY']}",
+        f"{_ENDPOINT.format(model=model)}?key={os.environ['GEMINI_API_KEY']}",
         headers={"Content-Type": "application/json"},
         json=body,
         timeout=_TIMEOUT,

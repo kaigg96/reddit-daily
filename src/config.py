@@ -53,6 +53,13 @@ MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 CANDIDATE_LIMIT = 10          # top posts fetched per run
 COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS survive
 MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota
+# R4.4 Step 0.5: one batched topic call per run over every eligible candidate,
+# logged so the ranker's firing rate is measurable before any selection logic
+# ships. It runs on a different model from every other call here because the
+# free tier is counted per model (our 429 names the quota
+# GenerateRequestsPerDayPerProjectPerModel), so it spends that model's
+# allowance, never the one titles and the screen share. $0 either way (#22).
+SLATE_MODEL = "gemini-2.5-flash-lite"
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v6"  # v6 = R4.6 screen retiered (skip vs answer-level categories)

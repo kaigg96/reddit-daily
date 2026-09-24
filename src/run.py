@@ -49,8 +49,10 @@ def main():
     post = content.select_post(
         content.make_reddit(), prev_title,
         screener=screen.screen, on_verdict=record_verdict,
+        slate_classifier=screen.classify_slate,
     )
     print(f"Selected post: {post.title}")
+    print(f"Slate topics (rank order): {post.slate_topics or '(not collected)'}")
     for i, c in enumerate(post.comments, 1):
         print(f"  comment {i}: {c}")
 
@@ -166,6 +168,7 @@ def main():
         "candidate_rank": post.candidate_rank,
         "topic": post.topic,
         "screen_source": post.screen_source,
+        "slate_topics": post.slate_topics,
         "caption_ok": int(bool(caption_ok)),
         "comment_ok": int(bool(comment_ok)),
         "title_ok": int(title_ok),
