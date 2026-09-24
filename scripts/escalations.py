@@ -63,8 +63,26 @@ def _owner_replies(issue):
             if c.get("author_association") == "OWNER" and c["body"].strip()]
 
 
+def _approved_by_owner(issue):
+    """Only the owner's own label is a decision. A shift's token can add
+    labels -- it closes and comments with the same permission -- and the guard
+    applies this same rule before accepting an `Approved-In:`."""
+    owner = REPO.split("/")[0]
+    marks = [e for e in _api(f"/repos/{REPO}/issues/{issue['number']}/events?per_page=100")
+             if e.get("event") == "labeled"
+             and (e.get("label") or {}).get("name", "").strip().lower() == "approved"]
+    return bool(marks) and (marks[-1].get("actor") or {}).get("login") == owner
+
+
 def show(want_approved):
     rows = [(i, l) for i, l in _issues() if ("approved" in l) == want_approved]
+    if want_approved:
+        forged = [(i, l) for i, l in rows if not _approved_by_owner(i)]
+        rows = [r for r in rows if r not in forged]
+        if forged:
+            print("LABELLED APPROVED, BUT NOT BY THE OWNER — not a decision; do not act:")
+            for i, _ in forged:
+                print(f"  #{i['number']}  {i['title']}")
     if not rows:
         print("approved and waiting to be done: none" if want_approved
               else "awaiting the owner: none")
