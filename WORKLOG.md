@@ -62,6 +62,79 @@ Read the allocation series with
 
 ---
 
+## 2026-09-24 — the new opening is queued for its sample video, a wrong "revert" verdict is fixed, and the next experiment no longer waits on the AI allowance
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 25→25 · research 10→10 · feature 25→30 · close 10→10
+
+**Summary:** The new opening is ready for its sample video, which is requested as soon as the morning upload has landed, so the two don't compete for the day's AI allowance. The release check had been ignoring your 22 September decision to judge on watch time only, and would have undone good work on view-count noise. That is fixed, and the next experiment is built to run on a free allowance of its own.
+
+### Feature work
+- **The new opening can finally get its sample video.** Your change last night gave shifts a way to ask for one. The request waits for this morning's upload, so it doesn't use AI requests that upload still needs. It can go live after tonight's upload, the 10th in the current format, if the sample passes.
+- **Built the first step of the next experiment**: choosing between the day's
+  top few questions by topic. Every video now records the topic of every
+  question it could have used, not just the one it picked. That tells us how
+  often a topic-based choice would differ from Reddit's own order, which sets
+  how long the experiment must run. The choice itself is unchanged. It uses a
+  second AI model, so it doesn't draw on the daily allowance the uploads
+  share, and it costs nothing (your answer on the allowance: free routes only).
+  It needs its own sample video before it goes live.
+
+### Maintenance
+- **Caught a break before it reached you.** Last night's changes added tests
+  that need a library nothing installs, so the test suite could not start.
+  This morning's release check runs those tests. It would have failed, and
+  would have kept showing yesterday's "pass" while doing so. Fixed and live.
+- Every upload since the last shift landed. The saved record of the last post
+  is intact.
+
+### Security
+- No credentials committed; the secret files are still excluded.
+- **New finding, logged rather than fixed:** the two automatic jobs that try
+  out unfinished work (the sample video and the release check) run it next to
+  a key that can change the live branch. Changes made with that key skip the
+  guard that protects the rules. Nothing suggests it has been used. The fix is
+  a restructure I can't test from here, so I'm deliberately not asking you to
+  approve it from your phone while you're away. It's written up for after.
+
+### Project management
+- **The release check was applying the old rule.** You decided on 22 September
+  that only watch time can trigger an undo, with views shown but never
+  deciding. The check's code was never changed. It still said "undo the
+  background videos" on views alone, while watch time on them was up 22%. And
+  it would have said the same about the new opening on a bad week for views.
+  Fixed. The background videos now read "keep".
+- **Your decisions:** everything you approved yesterday is live, and I closed
+  those requests. You approved "run the tests on every change" within minutes
+  of my asking; it applied itself, so approving from your phone works end to
+  end.
+- Brought the tech-debt list back under its cap by closing items your changes
+  had already fixed.
+
+### Research
+- **YouTube reports "engaged views" per video**: plays that got past the first
+  moment. That is the most direct measure of what the new opening changes. We
+  collect it every week from Monday. It sits beside the agreed rule and never
+  replaces it.
+
+### Blocked
+- Nothing is blocked on you. The new opening waits only on its sample video and on tonight's upload.
+
+### Next
+- Read the sample-video verdict. If it passes and names the branch's current commit, put the new opening live (merge commit, so the verdict's commit is the one that ships), then update the plan.
+- Ask for the topic-logging step's own sample video (one render per 12 hours).
+- Check that the 08:17 release check now explains its verdict (your change #21). If it passes, close the stale release-failure alert.
+
+### Better?
+- **Than last shift:** yes. The new opening went from "no way to get a sample
+  video" to queued for one. And a verdict that would have undone good work on
+  noise now follows the rule you set.
+- **Than ~10 shifts ago:** yes, on evidence. Approvals now apply from your
+  phone within minutes (one did today). Tests run on every change. The
+  release check follows the rule you set. None of this was true ten shifts
+  ago. The channel itself is still flat, and nothing new has reached viewers
+  since mid-September, so the outcome hasn't moved yet.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-23 — the next experiment is built; one permission that exists only on paper stops it shipping
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→10 · pm 25→25 · research 10→10 · feature 30→30 · close 10→10
@@ -147,92 +220,3 @@ never to have had the access to request one. The fix is ready for you to apply.
   see since mid-September. But nothing new has reached viewers in that time,
   and several recent shifts ended blocked on access rather than on the work.
 - **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-22 — the check that guards every release has never once passed, and nobody could see why
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 40→35 · security 5→5 · pm 25→40 · research 10→0 · feature 0→0 · close 10→10
-
-**Summary:** The automatic check that decides whether new work is safe to put
-live has failed every day since it was built, and today I could show that the
-thing it was failing is healthy. One cause is fixed and live; seeing the rest
-needs a one-line change you have to approve.
-
-### Maintenance
-- **The release check has never passed.** Three runs, three refusals to ship.
-  I ran both halves of it by hand today against the live code: both pass. The
-  code was fine, the check was wrong about it, and meanwhile nothing could be
-  shipped.
-- **Fixed one cause.** We get a fixed number of free AI requests a day, shared
-  with the two live uploads. When they ran out, the check could not tell "I
-  could not check this" apart from "this is broken" — so it declared the
-  release unsafe and emailed you. It now tells those apart, and once it knows
-  the service is not answering it stops rather than spending five more requests
-  proving it again.
-- **That failure was quietly expensive.** A failed check is retried every
-  morning by design, so a permanently stuck one spent nearly a third of the
-  day's shared AI allowance daily to re-learn the same non-answer. The
-  early-morning upload is last in that queue and lost its title to exactly this
-  two days ago.
-- **What I still cannot see** is whether that was the whole story: the reason
-  exists only in a log this kind of session is not permitted to read. Third
-  shift running to hit that wall. One line fixes it; it is with you.
-
-### Security
-- Standing checks clean: no credentials have ever been committed, they remain
-  ignored, nothing secret-shaped is in the tracked files, and every automated
-  job's permissions are still scoped to what it does.
-
-### Project management
-- **The channel is flat** — viewing time has sat inside its own noise for six
-  periods. The rule for that is explicit: process work does not count as a
-  response, we have to change what we publish. Candidates generated and ranked;
-  the winner is now first in the plan.
-- **Titles matter less than we assumed.** Our three competing title styles
-  separate nothing across 119 videos — the first properly powered "no effect"
-  this channel has produced. And only about 1 view in 70 arrives through search:
-  96.6% come from the feed, where the opening second decides whether someone
-  stays. **So the new top experiment changes that opening second**, which today
-  is spent on our channel name and a label reading "today's top question"
-  rather than on the question itself. No AI requests, no new narration, and a
-  rollback rule agreed in advance.
-- **The AI allowance is now choosing our work, not just costing effort** — it
-  is what blocks the experiment previously ranked first. Raised with you, with
-  three costed ways out, one of them free.
-- **Applied your decision** on how a release is judged to that experiment,
-  which was still written against a measure that cannot be measured here. That
-  closes the previous shift's open item.
-- Two process notes, because they cost time: the rules tell me to propose a
-  change like this on a branch for you to review, and I cannot — my access
-  refuses to create or change automated jobs at all, so the patch has to be
-  pasted into the issue. And this same fix was queued once before as "add it to
-  the approval already waiting" — it died silently when you closed that one.
-
-### Research
-- Nothing this shift. The release-check failure and the flat-channel response
-  took the time, and neither left a question outside reading would settle.
-
-### Feature work
-- Nothing built. The check that guards shipping was itself broken, so fixing it
-  was what stood between us and shipping anything at all.
-
-### Blocked
-- The one-line approval, without which a failed release check stays unreadable.
-- Your call on the AI allowance; until then the previously-top experiment can
-  be prepared but not run.
-
-### Next
-- Build the opening-second change and dry-run it — that needs a render this
-  kind of session cannot do directly and must ask the video job to produce.
-- Check tomorrow's release check. If it passes, the three-day failure was the
-  allowance running out, and it closes.
-
-### Better?
-- **Than last shift:** yes. Last shift knew the check was failing and could not
-  find out why; this one proved the code healthy, removed one cause, and
-  stopped the daily waste the failure was causing.
-- **Than ~10 shifts ago:** yes, narrowly. Ten shifts ago a release could not be
-  measured at all; now it can, and that same tooling is what shows the channel
-  is flat — worse news, honestly arrived at. The uncomfortable pattern is how
-  many of those shifts went on the machinery rather than on what we publish.
-- **Than ~100 shifts ago:** too early to say.
-
