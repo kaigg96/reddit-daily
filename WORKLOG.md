@@ -62,14 +62,14 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (03:00) — six quick questions answered from existing data; one exposes a blind spot in how we judge changes
+## 2026-09-25 (03:00) — seven quick questions answered from existing data; a blind spot in how we judge changes is closed
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
 
-**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer six questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. So a change that alters video length could pass or fail its test on length alone, and that is checked next, before the new opening is judged.
+**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer seven questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. The check that judges each change now warns when a change also altered video length, so the new opening cannot pass or fail on length alone.
 
 ### Feature work
-- Nothing this shift. The one ready item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
+- Nothing this shift. The one ready build item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
 
 ### Maintenance
 - Every scheduled upload landed, and the saved record of the last post is intact. The next upload (~05:00) is the first with the new opening.
@@ -79,7 +79,7 @@ Read the allocation series with
 
 ### Project management
 - **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
-- **Refilled the ready queue from one item to three** with questions that need no AI allowance and cost nothing.
+- **Ready work is at two, one short of the target of three.** This shift answered four of the questions it generated. Other ideas were considered and fell below the bar. Recording more topics or answer lengths needs a sample video first. Day-of-week timing would change no decision.
 - **Dropped the upload-time idea for good.** It was parked until each slot had enough videos. They now have about 60 each, and morning and evening differ by no more than normal noise.
 - Trimmed settled history from the plan to keep it within its size limit.
 - **Friction, noted rather than acted on:** this shift began 40 minutes after the previous one, and both ran before the 07:00 AI-allowance reset. So neither could request the sample videos that two finished changes are waiting for. If overnight shifts are routine, one of them could move to after 07:00.
@@ -90,16 +90,16 @@ Read the allocation series with
 - **Background clips:** no clear winner. The spread between clips is within normal noise.
 - **Morning versus evening:** mornings are 5–10% ahead, which is within normal noise (see above).
 - **Question length looked like a clear gap, but was only video length.** Videos with longer questions were watched for 11 seconds against 9. Comparing videos of the same length, the gap disappears.
-- **What that exposed:** our main measure, seconds watched, rises with video length (11 against 9 seconds for videos over about 20 seconds). Length does not bring more views, but every change is judged on this measure. So a change that makes videos longer or shorter could be kept or undone for the wrong reason. Next shift checks whether any past change did this, before the new opening is judged around 4 October.
+- **What that exposed:** our main measure, seconds watched, rises with video length (11 against 9 seconds for videos over about 20 seconds). Length does not bring more views, but every change is judged on this measure. So a change that makes videos longer or shorter could be kept or undone for the wrong reason. Checked: the last two releases did not change length. The switch to background video did, so part of its measured gain was length. It stays, because nothing argues for removing it. The check that judges each change now warns when length moved.
 
 ### Blocked
 - The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
 
 ### Next
-- After 07:00, request the sample for the title-failure fix. Otherwise, check whether past changes shifted video length. That comes first because it protects the new opening's verdict. Then check whether a 3-day reading predicts the 7-day one. If it does, every experiment gets its verdict about 4 days sooner.
+- After 07:00, request the sample for the title-failure fix. Otherwise, check whether a 3-day reading predicts the 7-day one. If it does, every experiment gets its verdict about 4 days sooner.
 
 ### Better?
-- **Than last shift:** yes, a little. The next shift starts with three ready items instead of one, and the tool can now answer "does this kind of video do better?" fairly.
+- **Than last shift:** yes. The tool can now answer "does this kind of video do better?" fairly. The check that will judge the new opening now covers a blind spot it had.
 - **Than ~10 shifts ago:** yes, modestly. Research now closes questions within a shift: one parked idea was dropped on evidence today. None has yet changed what we ship.
 - **Than ~100 shifts ago:** too early to say.
 
