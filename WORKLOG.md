@@ -91,7 +91,7 @@ Read the allocation series with
 - Nothing is blocked on you.
 
 ### Next
-- After 07:00, request the sample for the title-failure fix and ship it if it passes. The topic-recording change for the next experiment is next in line.
+- After 07:00, request the sample for the title-failure fix and ship it if it passes. The topic-recording change for the next experiment is next in line. Both are now up to date with the live version, so either can be requested as is.
 
 ### Better?
 - **Than last shift:** yes. The new opening went from "passed, waiting" to live.
