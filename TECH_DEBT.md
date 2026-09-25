@@ -202,9 +202,15 @@ a list nobody can read is the same as no list.
   is last in that window, so it is always the one that starves — as it did on
   2026-09-20 (`title_ok=0 keywords_ok=0 cta_ok=0`, raw Reddit question shipped
   as the title). The dead skip in `validate-release.yml` that made this bite
-  daily is fixed (2026-09-20); the unbounded total is not. Cheapest fix if it
-  recurs: have the gate and the shift read the day's spend from a committed
-  counter before starting, rather than trusting three independent caps.
+  daily is fixed (2026-09-20); the unbounded total is not. **It recurred
+  2026-09-24 05:03** (same all-three-zero shape, screen still `gemini`): 2 of
+  the 9 `v6` uploads so far, both morning runs. The fix this item named for a
+  recurrence is now due: have the gate and the dry run read the window's
+  spend from a committed counter before starting, rather than trusting three
+  independent caps. First, confirm the cause: the ok-flags cannot tell a 429
+  from a timeout, so this diagnosis rests on timing. `fix/log-metadata-failure-kind`
+  (2026-09-24, tested, unmerged) logs the reason as `meta_failure`; it touches
+  the post-upload step, so dry-run it and merge after `v7`.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
   a meaningful fraction of the budget.
 - **Two workflows run unmerged branch code holding a token that can push to

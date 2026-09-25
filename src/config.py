@@ -62,7 +62,7 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 SLATE_MODEL = "gemini-2.5-flash-lite"
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v6"  # v6 = R4.6 screen retiered (skip vs answer-level categories)
+FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech

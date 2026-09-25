@@ -1093,3 +1093,14 @@ def test_a_big_diagnostic_move_is_never_silent():
     verdict, _, notes = insights.scorecard(then, now)
     assert verdict == "BETTER"
     assert any("views" in n and "watch if they repeat" in n for n in notes)
+
+
+def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
+    videos = [
+        v("a", 10, views=50, pct=120.0),   # replaying
+        v("b", 10, views=50, pct=100.0),   # watched once, exactly: not a replay
+        v("c", 10, views=50, pct=60.0),
+        v("d", 10, views=5, pct=300.0),    # one rewatcher on a thin video: excluded
+    ]
+    assert insights.replay_share(videos) == (1, 3)
+
