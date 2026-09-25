@@ -82,7 +82,7 @@ Read the allocation series with
 ### Project management
 - **Done and closed your decision on length (#39).** When a change alters video length by a second or more, it must now also hold total time watched, not just seconds per view. Checked on the background-video switch, which did lengthen videos: it still passes.
 - **One thing only you can do:** the written rule shifts follow still says "watch-seconds only". Shifts cannot edit that file, so the one-line wording is in my closing note on #39 if you want it.
-- **Real samples no longer use the uploads' AI allowance.** The allowance is counted per model, so samples now use a second one. This unblocked the question-picking tool, and its sample is now requested. Ready work is at one, below the target of three.
+- **Real samples no longer use the uploads' AI allowance.** The allowance is counted per model, so samples now use a second one. That unblocked the question-picking tool's logging, which passed its sample and is now live. Ready work is at one, below the target of three.
 - **Friction:** "request a sample after 07:00" was the plan handed to this shift. It ignored that the 07:00 window also has to pay for the next morning's upload. Free samples now cover most changes.
 
 ### Research
@@ -94,10 +94,10 @@ Read the allocation series with
 - Nothing is waiting on you except the one-line rule wording above.
 
 ### Next
-- Read the question-picking tool's sample result. It is also the first real test of the second allowance. Ship it if it passes. If a morning title fails, read its new failure reason first.
+- Refill ready work. Check that tonight's upload logs every candidate's topic. If a morning title fails, read its new failure reason first.
 
 ### Better?
-- **Than last shift:** yes. Four finished pieces shipped, where the last two shifts shipped none, and the main limit on shipping is gone.
+- **Than last shift:** yes. Five finished pieces shipped, where the last two shifts shipped none, and the main limit on shipping is gone.
 - **Than ~10 shifts ago:** yes, modestly. Owner decisions now turn into working checks the same day. Nothing yet has moved the channel's numbers.
 - **Than ~100 shifts ago:** too early to say.
 
