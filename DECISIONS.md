@@ -31,6 +31,30 @@ revisit trigger.
 
 ---
 
+## D10 · 2026-09-25 · No new spending until the channel earns money
+
+The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
+*"spending money is not on the table until the channel is actually earning
+money somehow, but pretty much anything else is on the table - as such you may
+need to get creative."* PRD §5 no. 1 moves from 🔄 to 🔒.
+
+**Alternatives:** judging each small spend on its merits, which is how the
+question arose — a dollar or two for faster shipping is easy to justify alone,
+and the sum of such justifications is the bill.
+
+**Why:** the channel earns nothing, so every cost is a pure loss until it does.
+The ruling is not "work around this once"; it redirects effort. A constraint
+that cannot be bought away has to be designed away, and that is what the PM and
+research lanes are for.
+
+**Assumptions:**
+1. The channel does not yet earn revenue.
+2. Creative, free routes exist for the constraints that matter (the first test:
+   PRD §0, "Make sample videos free").
+
+**Revisit when:** the channel earns money (1 false) — then spending proposals
+reopen, sized against revenue.
+
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
 `report.py --release` reads every upload at the same age from the weekly
@@ -139,6 +163,14 @@ proposed test and no new documents.
 **Revisit when:** `WORKLOG` shows research producing findings nobody acts on,
 or shifts spending heavily on research while the backlog stays empty (2 false);
 or shifts still ending early with time unspent (1 false).
+
+**Re-reviewed 2026-09-25 — trigger fired.** Two shifts ended early with time
+unspent (8 of ~25 minutes on 09-24, 7 on 09-25), the second despite being told
+its exact deadline. Assumption 1 is under strain rather than false: both shifts
+did real work, then judged every lane done. The limiter was upstream — shipping
+waits on rationed sample videos — and D10 makes such constraints PM and
+research problems. Response: the ration itself is now PM's top keeper (PRD §0).
+Check again after five shifts.
 
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 

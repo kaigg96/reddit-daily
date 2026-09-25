@@ -36,6 +36,8 @@
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | R4.6 | Shipped 2026-08-23; **first standing audit run 2026-09-09 → taxonomy retiered** (see §6). **Standing audit:** review `analysis/screen_log.csv` weekly (digest surfaces a line whenever skips occurred); if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert. Screen is mitigation, not a guarantee — the digest zero-view flag remains the detector for categories it hasn't learned yet. |
 | ~~Traffic-source telemetry~~ ✅ shipped | R4.7 | Shipped 2026-09-07 (no version bump). **Result: the SEO surface earns ~1.3% of views** — search-oriented work stays parked; see §4 Findings. Weekly `channel_7d` rows now accumulate a drift series, so this becomes re-checkable rather than a one-off read. |
 
+| **Make sample videos free** — now the binding constraint on shipping (2026-09-25) | — | Each sample costs Polly and 2–5 Gemini requests, so they are rationed (one per 12h, held before the morning upload); on 09-25 two finished changes waited while shifts ended early. More spending is ruled out (§5 no. 1): generate alternatives (`/backlog` §1), then build the best. One idea: re-render a shipped post from its cached narration and metadata. **Done when** a sample costs nothing, so the limit can loosen. |
+
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
 Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so the format-geometry experiments are cancelled and content/hook quality moves to the top. **Reordered again 2026-09-22**, on data rather than opinion: the channel reads **FLAT** (`--trajectory`: 11.0 → 12.0 watch-seconds over six periods, inside its own ~1.0s drift), and the item that was #1 is blocked — R4.4's per-candidate scan does not fit the Gemini cap, now escalated as due for elevation. A flat channel needs a change to *what we ship* that is actually shippable, so the opening-seconds experiment goes first; R4.4 keeps its rank behind it and is **blocked, not dropped**.
@@ -202,10 +204,10 @@ Gemini cap degrading real uploads — was managed around every time and never
 questioned. That is the wrong outcome: a constraint that costs more than it
 saves should be *proposed against*, not silently absorbed.
 
-- 🔒 **Inviolable** (2, 6, 7, 8, 9): the owner's money, the safety guard that
+- 🔒 **Inviolable** (1, 2, 6, 7, 8, 9): the owner's money, the safety guard that
   stops development touching the live channel, secrets, licensing, platform
   policy. Not open to challenge. Changing one needs the owner even to *discuss*.
-- 🔄 **Current choices** (1, 3, 4, 5, 10): true today, and reasonable, but they
+- 🔄 **Current choices** (3, 4, 5, 10): true today, and reasonable, but they
   are decisions rather than laws. **Open to challenge with justification.**
   Bring evidence that the constraint costs more than it buys, a concrete
   alternative, and its cost — then escalate it (`scripts/escalate.py`). The
@@ -215,7 +217,7 @@ Finding these is the project-management lane's job, not something that has to
 be pre-written here.
 
 
-1. 🔄 **$0 budget.** No new paid services. Existing Polly/Gemini/YouTube usage stays.
+1. 🔒 **No new spending until the channel earns money.** No new paid services, and no growth in what existing ones cost — Polly stays at its current line (no. 2). **Owner, 2026-09-25:** *"spending money is not on the table until the channel is actually earning money somehow, but pretty much anything else is on the table."* Unlocks only when the channel earns revenue (e.g. the YouTube Partner Program); until then, do not raise spending proposals. **A cost constraint is therefore a creative problem, not a purchase** — the project-management and research lanes' job (`/backlog` §3). Was 🔄 "$0 budget" until this ruling.
 2. 🔒 **AWS Polly is the one line item that costs the owner real money — treat call volume as the constraint.** Neural is $16/1M characters and every segment is synthesized **twice** (mp3 + speech marks), so characters bill double. Production is ~910 billed chars/video ≈ **$0.90/month** at 2/day, and must stay in that range. The exposure is not per-video cost but **bulk synthesis**: 10,000 test renders is ~$144, and 10,000 calls at Polly's 3K-char cap is ~$960. **No bulk synthesis, no un-capped retries, reuse `assets/gen/` audio when iterating on visuals, and ask the owner before any deliberate batch job.** Enforced in code by the per-process budget in `src/tts.py` (`POLLY_CHAR_BUDGET`) — prose is not an enforcement mechanism. **The neural engine is a deliberate paid quality choice** (the owner is past the 12-month free tier and pays from the first character): standard voices are 4x cheaper and would save ~$0.65/month while degrading the channel's core audio — never make that trade, and don't move to the pricier generative/long-form engines without asking either. Cost work here means removing wasted calls, never reducing audio quality. Full rules in [CLAUDE.md](CLAUDE.md) §1.
 3. 🔄 **Gemini's free tier is a shared daily request budget**, not per-process: local analysis and the live 2x/day pipeline draw on the same key, and exhausting it silently degrades real uploads to keyword-backstop screening and un-generated titles (observed 2026-09-10 — see TECH_DEBT.md). Budget local Gemini work rather than running it opportunistically. **Challenged 2026-09-22, decided 2026-09-24 (#22):** no paid tier; free routes accepted. The allowance is counted **per model** (our 429 names `GenerateRequestsPerDayPerProjectPerModel`), so new Gemini work goes on a second model with its own allowance (R4.4's slate call, `SLATE_MODEL`), and the model behind shipped titles and the screen stays as it is.
 4. 🔄 **100% automated per-video.** No human step per upload. One-time setup tasks (asset curation, OAuth re-consent) are allowed and must be clearly documented in the README when introduced.
