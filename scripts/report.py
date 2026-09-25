@@ -319,7 +319,8 @@ def main():
                    help="how many videos average over 100%% viewed, which only "
                         "replays can cause (backlog #9's first test)")
     p.add_argument("--metric", default=Metric.WATCH,
-                   choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS])
+                   choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
+                            Metric.TOTAL])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
