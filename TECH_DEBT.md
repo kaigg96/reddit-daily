@@ -207,9 +207,10 @@ a list nobody can read is the same as no list.
   the 9 `v6` uploads so far, both morning runs. The fix this item named for a
   recurrence is now due: have the gate and the dry run read the window's
   spend from a committed counter before starting, rather than trusting three
-  independent caps. First, though, the upload log should record
-  `MetadataResult.source`: it currently keeps only the ok-flags, so a 429 and
-  a timeout look identical, and this diagnosis is inferred from timing.
+  independent caps. First, confirm the cause: the ok-flags cannot tell a 429
+  from a timeout, so this diagnosis rests on timing. `fix/log-metadata-failure-kind`
+  (2026-09-24, tested, unmerged) logs the reason as `meta_failure`; it touches
+  the post-upload step, so dry-run it and merge after `v7`.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
   a meaningful fraction of the budget.
 - **Two workflows run unmerged branch code holding a token that can push to

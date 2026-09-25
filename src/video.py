@@ -144,7 +144,7 @@ class AssemblyResult:
     srt_events: list = field(default_factory=list)  # (start_s, end_s, text)
 
 
-def _truncate(text, limit=80):
+def _truncate(text, limit):
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
@@ -169,7 +169,6 @@ def assemble(question, segments, rng):
     audio_clips, overlays, sfx_times, srt_events = [], [], [], []
     n_answers = sum(1 for s in segments if s.kind == "comment")
     answer_i = 0
-    first_comment_start = None
 
     for seg in segments:
         audio = AudioFileClip(seg.audio_path)
@@ -185,14 +184,10 @@ def assemble(question, segments, rng):
         srt_events += [(t + g.start, t + g.end, g.text) for g in groups]  # R3.5
 
         if seg.kind == "title":
-            overlays.append(overlay_text(config.CHANNEL_NAME, t, display_dur, 46, 120, color=config.BRAND_ORANGE))
-            overlays.append(overlay_text("TODAY'S TOP QUESTION", t, display_dur, 58, 200))
             overlays += caption_clips(groups, t, font_size=130, y=640)
         elif seg.kind == "comment":
             answer_i += 1
             sfx_times.append(t)
-            if first_comment_start is None:
-                first_comment_start = t
             overlays.append(
                 overlay_text(f"ANSWER {answer_i}/{n_answers}", t, display_dur, 56, 330, color=config.BRAND_ORANGE)
             )
@@ -204,13 +199,15 @@ def assemble(question, segments, rng):
 
     total = t - config.INTER_SEGMENT_GAP + 0.35  # small tail so the last word breathes
 
-    # The question stays pinned from the first answer to the end of the video;
-    # only the ANSWER n/N badge swaps per answer.
-    if first_comment_start is not None:
-        overlays.append(
-            overlay_text(_truncate(question), first_comment_start,
-                         total - first_comment_start, 44, 120, width=920)
-        )
+    # v7: the question is pinned from the first frame to the last. The opening
+    # second is where the Shorts feed (~97% of views) decides, so it shows the
+    # hook rather than the channel name and a format label; the watermark below
+    # still brands every frame. Only the ANSWER n/N badge swaps per answer.
+    # Truncated only past the length selection already rejects: an opening that
+    # cut the question's last word would be showing the hook without its point.
+    overlays.append(
+        overlay_text(_truncate(question, config.MAX_TITLE_LENGTH), 0, total, 44, 120, width=920)
+    )
 
     # R3.4: persistent brand watermark, all frames, low in the safe area.
     overlays.append(

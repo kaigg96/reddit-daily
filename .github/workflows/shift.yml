@@ -109,7 +109,13 @@ jobs:
 
       - name: Remember where this shift started
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
-        run: echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+        run: |
+          echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          # The job is killed at 30 minutes and the agent has no clock of its
+          # own, so it guessed: on 2026-09-24 one stopped at 8 minutes, skipping
+          # research "because of the 30-minute limit". Its deadline now goes in
+          # the prompt. 25 leaves room for the handover and the steps after it.
+          echo "SHIFT_DEADLINE=$(date -u -d '+25 minutes' +%H:%M)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
@@ -133,7 +139,10 @@ jobs:
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: ${{ inputs.prompt || '/shift' }}
+          prompt: |
+            ${{ inputs.prompt || '/shift' }}
+
+            Your clock: hand over by ${{ env.SHIFT_DEADLINE }} UTC. The job is killed at 30 minutes, taking an unfinished handover with it, so check `date -u +%H:%M` rather than guessing how much time is left. Ending with more than 8 minutes to spare means every lane is done, research and project management included: spare time goes to them, it does not end the shift.
           # Without --allowedTools the action runs with NO shell or file
           # access, so the first scheduled shift "succeeded" having done
           # literally nothing. Blast radius is bounded elsewhere: this job has
@@ -154,7 +163,7 @@ jobs:
           claude_args: >-
             --model ${{ inputs.model || 'claude-opus-5-5' }}
             --effort ${{ inputs.effort || 'ultracode' }}
-            --max-turns 200
+            --max-turns 400
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite,Task,Agent"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

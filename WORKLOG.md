@@ -72,7 +72,7 @@ Read the allocation series with
 - **The new opening's sample video passed** (right size, sound throughout, no silent gaps). I first updated the opening with everything live since it was built, so the sample tests exactly what ships. The agreed rule waits for the 10th upload in the current format (~17:00 tonight), past this shift's 30-minute limit, so tomorrow's shift puts it live.
 
 ### Maintenance
-- **This morning's upload lost its generated title, search keywords and closing question.** It shipped with the Reddit question as the title instead. That is 2 of the 9 uploads in the current format, and both were morning runs. The morning run is the last one before the daily AI allowance resets, so it is the one that goes short when other jobs have spent it. The record logs *that* the title failed, not *why*, so the cause is inferred. Logged, with the fix.
+- **This morning's upload lost its generated title, search keywords and closing question.** It shipped with the Reddit question as the title instead. That is 2 of the 9 uploads in the current format, and both were morning runs. The morning run is the last one before the daily AI allowance resets, so it is the one that goes short when other jobs have spent it. The record logs *that* the title failed, not *why*, so I built a change that records why. It waits for its own sample run.
 - Every scheduled upload landed, and the saved record of the last post is intact.
 
 ### Security
@@ -89,7 +89,7 @@ Read the allocation series with
 
 ### Next
 - Put the new opening live, as long as tonight's upload landed and the branch hasn't changed since the sample. Then update the plan. Its result can be read after 20 uploads, no earlier than about 5 October.
-- Record *why* the title step fails on each upload, then make the release check and sample videos check what the day has already spent before they start. Both are in the tech-debt list.
+- Sample-run and ship the change that records why the title step fails. Then, if the allowance is confirmed, make the other jobs check the day's spend first.
 
 ### Better?
 - **Than last shift:** yes, a little. The new opening moved from "waiting to ask for a sample" to passed and ready to go live. The morning title failure is now counted, not just noticed.
