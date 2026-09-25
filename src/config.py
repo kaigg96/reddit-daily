@@ -24,7 +24,10 @@ def _load_dotenv():
 
 _load_dotenv()
 
-DRY_RUN = os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# SAMPLE=1 renders a fixed post over silent narration (src/sample.py): no
+# Reddit, Gemini or Polly call. Always a dry run -- nothing it makes is real.
+SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
+DRY_RUN = SAMPLE or os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30

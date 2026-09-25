@@ -10,7 +10,7 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, screen, thumbnail, tts, video, youtube
+from . import config, content, llm, log, sample, screen, thumbnail, tts, video, youtube
 
 
 def _probe_duration(path):
@@ -22,7 +22,7 @@ def _probe_duration(path):
 
 def main():
     rng = random.Random()
-    print(f"DRY_RUN={config.DRY_RUN} format={config.FORMAT_VERSION}")
+    print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} format={config.FORMAT_VERSION}")
 
     # --- content ---
     prev_title = ""
@@ -46,10 +46,13 @@ def main():
         else:
             log.append_screen_log(row)
 
-    post = content.select_post(
-        content.make_reddit(), prev_title,
-        screener=screen.screen, on_verdict=record_verdict,
-    )
+    if config.SAMPLE:
+        post = sample.POST
+    else:
+        post = content.select_post(
+            content.make_reddit(), prev_title,
+            screener=screen.screen, on_verdict=record_verdict,
+        )
     print(f"Selected post: {post.title}")
     for i, c in enumerate(post.comments, 1):
         print(f"  comment {i}: {c}")
@@ -64,7 +67,8 @@ def main():
 
     # One request for all three fields. Each fails soft independently, so a
     # missing CTA doesn't cost us the title -- see llm.get_metadata.
-    meta = llm.get_metadata(post.title, post.comments, style=title_style)
+    meta = (sample.METADATA if config.SAMPLE
+            else llm.get_metadata(post.title, post.comments, style=title_style))
 
     keywords_ok = meta.keywords is not None
     keywords = meta.keywords or []
@@ -83,12 +87,15 @@ def main():
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
-    polly = tts.make_polly()
+    polly = None if config.SAMPLE else tts.make_polly()
     print(f"Narrator voice: {voice}")
 
     def synth(name, text, kind):
         path = config.GEN / f"{name}.mp3"
-        marks = tts.synthesize_with_marks(polly, text, voice, path)
+        if config.SAMPLE:
+            marks = sample.synthesize(text, path)
+        else:
+            marks = tts.synthesize_with_marks(polly, text, voice, path)
         return video.Segment(kind=kind, text=text, audio_path=str(path), marks=marks)
 
     segments = [synth("title", post.title, kind="title")]
