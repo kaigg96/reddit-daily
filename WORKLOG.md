@@ -75,7 +75,7 @@ Read the allocation series with
 - Every scheduled upload landed, and the saved record of the last post is intact. The next upload (~05:00) is the first with the new opening.
 
 ### Security
-- Standing check clean: no credentials committed, and the secret files are still excluded.
+- Standing check clean: no credentials committed, and the secret files are still excluded. All nine automated jobs set their own limited permissions, and none uses the risky settings that would let outside code act with the repository's rights.
 
 ### Project management
 - **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
