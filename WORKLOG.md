@@ -82,7 +82,7 @@ Read the allocation series with
 ### Project management
 - **Done and closed your decision on length (#39).** When a change alters video length by a second or more, it must now also hold total time watched, not just seconds per view. Checked on the background-video switch, which did lengthen videos: it still passes.
 - **One thing only you can do:** the written rule shifts follow still says "watch-seconds only". Shifts cannot edit that file, so the one-line wording is in my closing note on #39 if you want it.
-- **Real samples no longer use the uploads' AI allowance.** The allowance is counted per model, so samples now use a second one. That unblocked the question-picking tool's logging, which passed its sample and is now live. Ready work is at one, below the target of three.
+- **Real samples no longer use the uploads' AI allowance.** The allowance is counted per model, so samples now use a second one. That unblocked the question-picking tool's logging, which passed its sample and is now live. Ready work is now zero, because every ready item shipped. Refilling it is the next shift's first job.
 - **Friction:** "request a sample after 07:00" was the plan handed to this shift. It ignored that the 07:00 window also has to pay for the next morning's upload. Free samples now cover most changes.
 
 ### Research
