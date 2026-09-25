@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-09-25 — the new opening is live; the next upload is the first to open on the question
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 20→15 · research 15→25 · feature 25→20 · close 10→15
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→15 · security 5→5 · pm 20→20 · research 15→20 · feature 25→15 · close 10→15
 
 **Summary:** The new opening, where the video starts on the question instead of the channel name, is live. This morning's upload (around 05:00) is the first to use it. It is the first change to the videos themselves since the channel went flat six weeks ago, and it can be judged after 20 uploads, around 4 October.
 
