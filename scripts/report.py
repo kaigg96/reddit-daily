@@ -13,6 +13,7 @@ Usage:
   venv/bin/python scripts/report.py --release broll --release-key background_type
   venv/bin/python scripts/report.py --zeros            # suppression candidates
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
+  venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -297,9 +298,11 @@ def main():
     p.add_argument("--release-key", default="format_version",
                    help="upload_log field --release splits on (default format_version; "
                         "use background_type for the b-roll switch)")
-    p.add_argument("--at-age", type=float, default=insights.AGE_MATCH_TARGET_DAYS,
-                   metavar="DAYS", help="age at which --release reads every upload "
-                                        f"(default {insights.AGE_MATCH_TARGET_DAYS:.0f})")
+    p.add_argument("--at-age", type=float, metavar="DAYS",
+                   help="read every upload at this age from the snapshot series "
+                        f"(--release defaults to {insights.AGE_MATCH_TARGET_DAYS:.0f}); "
+                        "with --compare or --by it age-matches an interleaved field "
+                        "like topic, which one snapshot of today cannot")
     p.add_argument("--scorecard", action="store_true",
                    help="many metrics at once: success, guardrails and "
                         "diagnostics, with one verdict that shows disagreement")
@@ -340,10 +343,20 @@ def main():
         return
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
-        release(args.release, args.release_key, args.at_age)
+        release(args.release, args.release_key,
+                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age)
         return
 
-    if args.offline:
+    if args.at_age is not None:
+        # A field that alternates between uploads (topic, voice) is not a flag
+        # day, but one snapshot still reads a recent-heavy cohort younger, and
+        # `compare` rightly refuses it. Every upload at one age removes that.
+        load = insights.load_videos_at_age(args.at_age)
+        videos, now = load.videos, load.anchor
+        for line in load.caveats():
+            print(f"AGE-MATCHED: {line}")
+        print()
+    elif args.offline:
         load = insights.load_videos_offline()
         videos, now = load.videos, load.asof
         for line in load.caveats():

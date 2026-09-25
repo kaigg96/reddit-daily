@@ -62,6 +62,42 @@ Read the allocation series with
 
 ---
 
+## 2026-09-25 (03:00) — a first hint that dark, morbid questions hold viewers longer, and the work queue is full again
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→20 · research 45→50 · feature 0→0 · close 10→10
+
+**Summary:** Our reporting tool can now compare kinds of video fairly at the same age. Its first reading hints that dark, morbid questions are watched about 3 seconds longer than the rest. That is too few videos to act on, so it is queued to re-check after Monday's data. Three pieces of work are ready for the next shift again, up from one.
+
+### Feature work
+- Nothing this shift. The one ready item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
+
+### Maintenance
+- Every scheduled upload landed, and the saved record of the last post is intact. The next upload (~05:00) is the first with the new opening.
+
+### Security
+- Standing check clean: no credentials committed, and the secret files are still excluded.
+
+### Project management
+- **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
+- **Refilled the ready queue from one item to three**, with two questions answerable from data we already hold. Do morning and evening uploads differ? Do shorter questions hold viewers longer?
+- Trimmed settled history from the plan to keep it within its size limit.
+
+### Research
+- **Narrator voice makes no difference:** both voices hold viewers for 10 seconds, across about 60 videos each.
+- **Topic may matter:** dark, morbid questions were watched for 14 seconds against 11 for the rest, compared at a week old. It is only 9 videos, and a reading at 3 days points the other way, so this is a lead, not a finding. If it holds after Monday's data, it becomes the first current evidence for the planned tool that picks which question to post.
+- **Background clips:** no clear winner. The spread between clips is within normal noise.
+
+### Blocked
+- The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
+
+### Next
+- After 07:00, request the sample for the title-failure fix. Otherwise, answer the morning-versus-evening question. It needs no allowance and settles whether the parked upload-time idea is dropped for good.
+
+### Better?
+- **Than last shift:** yes, a little. The next shift starts with three ready items instead of one, and the tool can now answer "does this kind of video do better?" fairly.
+- **Than ~10 shifts ago:** unclear. Research is producing answers in minutes, but none has yet changed what we ship.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-25 — the new opening is live; the next upload is the first to open on the question
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 15→15 · security 5→5 · pm 20→20 · research 15→20 · feature 25→15 · close 10→15
@@ -132,75 +168,3 @@ Read the allocation series with
 - **Than ~10 shifts ago:** unclear. The release process is much sturdier, but nothing new has reached viewers yet and the channel is still flat.
 - **Than ~100 shifts ago:** too early to say.
 
-## 2026-09-24 — the new opening is queued for its sample video, a wrong "revert" verdict is fixed, and the next experiment no longer waits on the AI allowance
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 25→25 · research 10→10 · feature 25→30 · close 10→10
-
-**Summary:** The new opening is ready for its sample video, which is requested as soon as the morning upload has landed, so the two don't compete for the day's AI allowance. The release check had been ignoring your 22 September decision to judge on watch time only, and would have undone good work on view-count noise. That is fixed, and the next experiment is built to run on a free allowance of its own.
-
-### Feature work
-- **The new opening can finally get its sample video.** Your change last night gave shifts a way to ask for one. The request waits for this morning's upload, so it doesn't use AI requests that upload still needs. It can go live after tonight's upload, the 10th in the current format, if the sample passes.
-- **Built the first step of the next experiment**: choosing between the day's
-  top few questions by topic. Every video now records the topic of every
-  question it could have used, not just the one it picked. That tells us how
-  often a topic-based choice would differ from Reddit's own order, which sets
-  how long the experiment must run. The choice itself is unchanged. It uses a
-  second AI model, so it doesn't draw on the daily allowance the uploads
-  share, and it costs nothing (your answer on the allowance: free routes only).
-  It needs its own sample video before it goes live.
-
-### Maintenance
-- **Caught a break before it reached you.** Last night's changes added tests
-  that need a library nothing installs, so the test suite could not start.
-  This morning's release check runs those tests. It would have failed, and
-  would have kept showing yesterday's "pass" while doing so. Fixed and live.
-- Every upload since the last shift landed. The saved record of the last post
-  is intact.
-
-### Security
-- No credentials committed; the secret files are still excluded.
-- **New finding, logged rather than fixed:** the two automatic jobs that try
-  out unfinished work (the sample video and the release check) run it next to
-  a key that can change the live branch. Changes made with that key skip the
-  guard that protects the rules. Nothing suggests it has been used. The fix is
-  a restructure I can't test from here, so I'm deliberately not asking you to
-  approve it from your phone while you're away. It's written up for after.
-
-### Project management
-- **The release check was applying the old rule.** You decided on 22 September
-  that only watch time can trigger an undo, with views shown but never
-  deciding. The check's code was never changed. It still said "undo the
-  background videos" on views alone, while watch time on them was up 22%. And
-  it would have said the same about the new opening on a bad week for views.
-  Fixed. The background videos now read "keep".
-- **Your decisions:** everything you approved yesterday is live, and I closed
-  those requests. You approved "run the tests on every change" within minutes
-  of my asking; it applied itself, so approving from your phone works end to
-  end.
-- Brought the tech-debt list back under its cap by closing items your changes
-  had already fixed.
-
-### Research
-- **YouTube reports "engaged views" per video**: plays that got past the first
-  moment. That is the most direct measure of what the new opening changes. We
-  collect it every week from Monday. It sits beside the agreed rule and never
-  replaces it.
-
-### Blocked
-- Nothing is blocked on you. The new opening waits only on its sample video and on tonight's upload.
-
-### Next
-- Read the sample-video verdict. If it passes and names the branch's current commit, put the new opening live (merge commit, so the verdict's commit is the one that ships), then update the plan.
-- Ask for the topic-logging step's own sample video (one render per 12 hours).
-- Check that the 08:17 release check now explains its verdict (your change #21). If it passes, close the stale release-failure alert.
-
-### Better?
-- **Than last shift:** yes. The new opening went from "no way to get a sample
-  video" to queued for one. And a verdict that would have undone good work on
-  noise now follows the rule you set.
-- **Than ~10 shifts ago:** yes, on evidence. Approvals now apply from your
-  phone within minutes (one did today). Tests run on every change. The
-  release check follows the rule you set. None of this was true ten shifts
-  ago. The channel itself is still flat, and nothing new has reached viewers
-  since mid-September, so the outcome hasn't moved yet.
-- **Than ~100 shifts ago:** too early to say.
