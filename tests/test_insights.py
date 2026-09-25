@@ -745,6 +745,16 @@ def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
     assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
 
 
+def test_a_release_that_shifts_video_length_says_so():
+    """R2: the b-roll switch moved median length 19.3s -> 20.4s, and longer
+    videos hold more watch-seconds, so the verdict line must carry it."""
+    mk = lambda d: insights.Video(video_id="v", published=None, views=0, watch_seconds=0,
+                                  avg_view_pct=0, likes=0, comments=0, meta={"duration_s": d})
+    assert "SHIFTED" in insights.render_duration([mk("20.4")], [mk("19.3")])
+    assert "SHIFTED" not in insights.render_duration([mk("20.4")], [mk("20.3")])
+    assert "not measurable" in insights.render_duration([mk("")], [mk("20.3")])
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still

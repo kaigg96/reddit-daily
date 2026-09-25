@@ -128,6 +128,7 @@ def release(version, key, target_age):
     # release's own uploads would let a volatile release excuse itself.
     floors = {m: insights.drift_floor(b, m) for m in metrics}
     print(insights.render_release(comparisons, floors))
+    print(insights.render_duration(a, b))
 
 
 

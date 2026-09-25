@@ -297,6 +297,28 @@ def release_verdict(comparisons, floors=None):
             f"channel's own drift")
 
 
+def median_duration(videos):
+    """Median logged video length, or None when no video records one.
+
+    Watch-seconds rises with length (+22% for videos over ~20s, 2026-09-25),
+    so a release that shifts length can pass or fail its trigger metric
+    mechanically. The b-roll switch moved it 19.3s -> 20.4s."""
+    d = [float(v.meta["duration_s"]) for v in videos
+         if str(v.meta.get("duration_s", "")).strip()]
+    return statistics.median(d) if d else None
+
+
+def render_duration(release, before, threshold=1.0):
+    """One line beside the release verdict: each cohort's median length."""
+    a, b = median_duration(release), median_duration(before)
+    if a is None or b is None:
+        return "duration: not measurable in both cohorts"
+    line = f"duration: {a:.1f}s vs {b:.1f}s before"
+    if abs(a - b) >= threshold:
+        line += " -- SHIFTED: watch-seconds rises with length, so part of this verdict is length"
+    return line
+
+
 def render_release(comparisons, floors):
     """The release answer in full: both metrics, each with the size of change
     that would have to be exceeded to mean anything, then the verdict."""
