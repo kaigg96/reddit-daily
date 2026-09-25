@@ -260,3 +260,35 @@ def test_failure_label_never_carries_the_keyed_url(monkeypatch):
 def test_the_upload_log_keeps_the_failure_kind():
     from src import log
     assert "meta_failure" in log.FIELDS
+
+
+def _called_url(monkeypatch, dry_run):
+    seen = {}
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+
+    def post(url, **kw):
+        seen["url"] = url
+        return Resp()
+
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+    monkeypatch.setattr(llm.requests, "post", post)
+    monkeypatch.setattr(llm.config, "DRY_RUN", dry_run)
+    llm._generate("p")
+    return seen["url"]
+
+
+def test_production_calls_keep_the_production_model(monkeypatch):
+    assert _called_url(monkeypatch, False) == (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-2.5-flash:generateContent?key=k")
+
+
+def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
+    """The free tier is counted per model: a sample must not starve an upload."""
+    assert "/gemini-2.5-flash-lite:generateContent" in _called_url(monkeypatch, True)

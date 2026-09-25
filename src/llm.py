@@ -22,7 +22,14 @@ from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
-             "gemini-2.5-flash:generateContent")
+             "{model}:generateContent")
+MODEL = "gemini-2.5-flash"
+# The free tier is counted per model (our 429 names the quota
+# GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
+# with its own allowance, so a sample never spends the requests the next
+# upload needs -- the 07:00 window also pays for the following 05:00 upload.
+# Release validation does not set DRY_RUN, so it still tests MODEL.
+SAMPLE_MODEL = "gemini-2.5-flash-lite"
 
 # Generous because it is now only a backstop against a pathological response,
 # not a routine limit — with thinking off, calls land in about a second.
@@ -31,7 +38,7 @@ _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
 _TIMEOUT = 60
 
 
-def _generate(prompt, thinking_budget=0):
+def _generate(prompt, thinking_budget=0, model=None):
     """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
     default, and what every caller here wants); pass a token budget only for a
     task where reasoning demonstrably helps."""
@@ -39,8 +46,9 @@ def _generate(prompt, thinking_budget=0):
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
     }
+    model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
     resp = requests.post(
-        f"{_ENDPOINT}?key={os.environ['GEMINI_API_KEY']}",
+        f"{_ENDPOINT.format(model=model)}?key={os.environ['GEMINI_API_KEY']}",
         headers={"Content-Type": "application/json"},
         json=body,
         timeout=_TIMEOUT,
