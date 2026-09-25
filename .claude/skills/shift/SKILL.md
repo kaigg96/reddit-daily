@@ -62,9 +62,10 @@ Allocating honestly:
 - **Count ready work, not work.** A blocked item is not supply. Run
   `scripts/backlog_status.py`: it counts backlog items whose next step you can
   take now. **Fewer than 3 ready is PM's first job** — generate and rank more
-  (`/backlog` §1–2) until there are 3. Research questions answerable from data
-  we already have (§0's research table) are always available. If generating
-  finds nothing above the bar, say what it considered and why; never pad.
+  (`/backlog` §1–2) until there are 3 — **research questions first**: their
+  worst case is wasted minutes, never a bad change. A build idea is ready only
+  if it ranks above the bar alone. If generating finds nothing above the bar,
+  say what it considered and why; never pad.
 - **Research has no ceiling**, but its output is governed by the value bar: a
   hypothesis with a proposed test, no new documents. That bar stops it becoming
   busywork, not a percentage.
