@@ -62,6 +62,41 @@ Read the allocation series with
 
 ---
 
+## 2026-09-25 — the new opening is live; the next upload is the first to open on the question
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 20→20 · research 15→15 · feature 25→25 · close 10→15
+
+**Summary:** The new opening, where the video starts on the question instead of the channel name, is live. This morning's upload (around 05:00) is the first to use it. It is the first change to the videos themselves since the channel went flat six weeks ago, and it can be judged after 20 uploads, around 4 October.
+
+### Feature work
+- **Put the new opening live.** Both agreed conditions were met: last night's upload was the 10th in the old format, and the sample passed on exactly the version that shipped. All tests pass.
+
+### Maintenance
+- Every scheduled upload landed, and the saved record of the last post is intact.
+- **The fix that records why titles fail is ready for its sample video**, updated to include the new opening. I did not request the sample: at this hour it would use the AI allowance this morning's upload needs, which is what cost an upload its title yesterday.
+
+### Security
+- Standing check clean: no credentials committed, and the secret files are still excluded.
+
+### Project management
+- **Channel still flat** at 11–12 seconds watched per view. The new opening is the right response: a change to what viewers see.
+- Nothing is waiting on your approval, and the process health check is clean.
+- **Friction, noted rather than acted on:** two finished changes each wait for a sample video. Shifts get one each, and only at hours that don't compete with an upload. This shift ran at 02:00, outside those hours, so the queue didn't move.
+
+### Research
+- **Added to the bottom of the plan: make the ending loop back into the opening.** Nearly all our views come from the Shorts feed, where a looping video plays again and every replay adds watch time. Ours end on a comment question, a natural point to swipe away. The first test costs nothing: count past videos watched for longer than they last on average, which only replays can cause. If almost none, the idea is dropped.
+
+### Blocked
+- Nothing is blocked on you.
+
+### Next
+- After 07:00, request the sample for the title-failure fix and ship it if it passes. The topic-recording change for the next experiment is next in line.
+
+### Better?
+- **Than last shift:** yes. The new opening went from "passed, waiting" to live.
+- **Than ~10 shifts ago:** yes, modestly. A tested change reached viewers without needing your review, which is what the automated release process was built for. Whether it helps is too early to say.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-24 (afternoon) — the new opening's sample video passed; this morning's upload went out without its generated title
 
     Allocation (planned→actual %): rounds 10→15 · maintenance 20→20 · security 5→5 · pm 15→10 · research 0→0 · feature 40→35 · close 10→15
@@ -167,90 +202,4 @@ Read the allocation series with
   release check follows the rule you set. None of this was true ten shifts
   ago. The channel itself is still flat, and nothing new has reached viewers
   since mid-September, so the outcome hasn't moved yet.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-23 — the next experiment is built; one permission that exists only on paper stops it shipping
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→10 · pm 25→25 · research 10→10 · feature 30→30 · close 10→10
-
-**Summary:** The top experiment is built, tested and waiting: each video opening
-on the question itself instead of on our channel name and a label. It cannot
-go live yet because the final check needs a sample video, and a shift turns out
-never to have had the access to request one. The fix is ready for you to apply.
-
-### Feature work
-- **Built the new opening.** From the first frame, the top of the screen now
-  shows the whole question where it used to show "AskReddit Shorts / Today's
-  top question". The channel name stays in its small mark near the bottom of
-  every frame. I compared old and new frames side by side before committing.
-- **Caught a flaw in my own first version.** Long questions were being cut
-  short at the top of the screen, and one sample opened on "...slowly started
-  becoming unwa…". That was harmless when the question only appeared after
-  the viewer had heard it. As the opening it hides the point, and it would
-  have affected about one video in seven. Fixed; the longest question we
-  accept fits on two lines.
-- **Added the first automatic check on how a video is put together.** Until
-  now a mistake there would first show up as a failed live upload.
-
-### Project management
-- **Why it can't ship yet.** The rules require a real sample video before
-  anything visual goes live. The shift's settings do grant permission to
-  request one, but that permission is swapped out before the session starts,
-  so it has never worked. Raised with you, with the two small edits that fix
-  it, including a safeguard that stops a shift ever publishing by accident.
-- **Timing, whatever you decide:** the new opening should not go live before
-  about 25 September. The current format needs a few more uploads before its
-  own check can give a verdict.
-- **Your decisions:** closed the two about running shifts on the newer model.
-  Both are live, and this shift ran on it. The third (making a failed release
-  check explain itself) is approved, but a shift is refused permission to make
-  that edit, so it needs applying by hand; I've said so on the issue.
-- **Process note:** the rules say "propose on a branch" and "dry-run before
-  merging", and a shift can do neither for anything touching automated jobs or
-  the video. Three of the last four shifts hit this same access wall.
-
-### Maintenance
-- Every upload since the last shift landed. The daily release check
-  **passed** for the first time, on live code. That matches yesterday's manual
-  re-run: the earlier failures were the check, not the release. I recommended
-  you close that alert.
-- Subtitle uploads fail about one time in four (7 of 31), fewer than the half
-  first feared. Still not worth chasing.
-
-### Security
-- No credentials committed, nothing secret-shaped in the files, job
-  permissions unchanged.
-- **New finding:** the image library and the web-request library we use have
-  published security fixes we don't have, and our Python version stops getting
-  support on 4 October. Real risk is low, because neither library ever handles
-  anything from outside. Upgrading can change how videos look, though, so it
-  needs its own tested release. Logged.
-
-### Research
-- **A better way to measure the new opening.** YouTube now counts a Short as
-  viewed the moment it starts, and separately reports how many plays got past
-  the first few seconds. That second figure measures the opening directly, and
-  we don't collect it. Added to the plan as a test to run beside the agreed
-  rule, never as a replacement for it.
-- YouTube's August change to how views are counted affected long videos only;
-  Shorts have counted this way since 2025. So it doesn't explain our view
-  counts swinging.
-
-### Blocked
-- The new opening: waiting on your approval of the sample-video fix.
-- Making a failed release check explain itself: approved, needs applying by you.
-
-### Next
-- If the fix lands: request the sample video, confirm it plays and that the
-  safeguard is working, then put the new opening live (not before ~25 Sept).
-- If it hasn't: collecting the engaged-plays figure is the best use of the
-  wait, so the old format has a baseline before the new one ships.
-
-### Better?
-- **Than last shift:** yes. The top experiment went from a line in the plan to
-  built and tested, and "ask for a sample video" turned out to be impossible
-  as written. Now we know exactly why, and the fix is ready.
-- **Than ~10 shifts ago:** unclear. This is the first change to what viewers
-  see since mid-September. But nothing new has reached viewers in that time,
-  and several recent shifts ended blocked on access rather than on the work.
 - **Than ~100 shifts ago:** too early to say.
