@@ -13,6 +13,19 @@ name: Guardrail integrity
 on:
   push:
     branches: [main]
+    # A push that only hands over, records a finding or a decision, files an
+    # escalation or asks for a sample video cannot change anything checked
+    # here -- and shifts make several a day, each a billed minute of the
+    # monthly 2,000 (measured 2026-09-25: ~20 runs a day). Code, config, the
+    # rules and PRD.md (the tracker test reads it) still trigger it.
+    paths-ignore:
+      - 'WORKLOG.md'
+      - 'TECH_DEBT.md'
+      - 'DECISIONS.md'
+      - '.escalations/**'
+      - '.dry-run-requests/**'
+      - '.github/shift-usage.csv'
+      - '.github/last-*.md'
   pull_request:
   workflow_dispatch:
 
