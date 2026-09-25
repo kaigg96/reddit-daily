@@ -82,6 +82,7 @@ Read the allocation series with
 - **Refilled the ready queue from one item to three** with questions that need no AI allowance and cost nothing.
 - **Dropped the upload-time idea for good.** It was parked until each slot had enough videos. They now have about 60 each, and morning and evening differ by no more than normal noise.
 - Trimmed settled history from the plan to keep it within its size limit.
+- **Friction, noted rather than acted on:** this shift began 40 minutes after the previous one, and both ran before the 07:00 AI-allowance reset. So neither could request the sample videos that two finished changes are waiting for. If overnight shifts are routine, one of them could move to after 07:00.
 
 ### Research
 - **Narrator voice makes no difference:** both voices hold viewers for 10 seconds, across about 60 videos each.

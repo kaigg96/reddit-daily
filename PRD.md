@@ -62,7 +62,7 @@ The source of ready work that never waits on a sample video or costs money. When
 |---|---|---|---|
 | R1 | blocked: 2026-09-28 snapshot | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
 | R2 | ready | **Is the long-question lead more than the extra length?** +22% watch-seconds, but ~2s longer videos (§4) | Compare `question_length` within each half of `duration_s`, `--at-age 7`. Still >12% → an R4.4 feature; gone → mechanical, drop. |
-| R3 | ready | **Does a 3-day reading predict the 7-day one?** | Per-upload rank correlation of 3-day vs 7-day watch-seconds from the snapshot series, in `src/insights.py` with a test. ≥0.8 → `--release` reads at 3 days and each experiment is judged ~4 days sooner. |
+| R3 | ready | **Does a 3-day reading predict the 7-day one?** | Rank-correlate each upload's 3- and 7-day watch-seconds, read from *different* snapshots (one can match both ages), in `src/insights.py` with a test. ≥0.8 → `--release` reads at 3 days, judging experiments ~4 days sooner. |
 
 #### Owner tasks (anytime, no version bump)
 - ~~**B-roll library** (R1.3)~~ ✅ 2026-08-15 — 7 dark/moody Pexels clips live (`assets/broll/`, sources in CREDITS.md). Nine curated, two dropped at the R1.4 legibility gate for washing out white captions. Pipeline auto-switched off the procedural background; `bg_clip` logged per upload so per-clip performance is separable later. Expectation (§4): first-impression/swipe margin, not the watch budget.
