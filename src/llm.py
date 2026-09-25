@@ -69,8 +69,25 @@ _STYLE_GUIDANCE = {
 # junk return None for every field, and the release gate has to tell them apart
 # -- one is "could not check", the other is "do not merge". Defaulted so the
 # upload path, which only ever reads the three content fields, is untouched.
-MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source")
-MetadataResult.__new__.__defaults__ = ("gemini",)
+#
+# `failure` says WHY the fields came back empty: `http_429` (the shared daily
+# cap), another `http_<status>`, `timeout`, `no_json`, `bad_json`. Blank when
+# Gemini answered with JSON. The upload log keeps it because the ok-flags alone
+# made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
+# could only be blamed on the quota by its timing.
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure")
+MetadataResult.__new__.__defaults__ = ("gemini", "")
+
+
+def _failure_kind(exc):
+    """A short label for a request that never landed. Never the message: an
+    HTTPError's message embeds the keyed URL."""
+    response = getattr(exc, "response", None)
+    if isinstance(exc, requests.HTTPError) and response is not None:
+        return f"http_{response.status_code}"
+    if isinstance(exc, requests.Timeout):
+        return "timeout"
+    return type(exc).__name__
 
 
 def get_metadata(reddit_title, comments, style="A"):
@@ -121,17 +138,17 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
               f"(title, keywords and CTA all fall back)")
         # The request never landed -- a 429 on the shared daily cap, a timeout,
         # a transport error. Nothing was learned about the prompt's quality.
-        return MetadataResult(None, None, None, "error")
+        return MetadataResult(None, None, None, "error", _failure_kind(e))
 
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         print("Gemini metadata returned no JSON object (all fields fall back)")
-        return MetadataResult(None, None, None)
+        return MetadataResult(None, None, None, failure="no_json")
     try:
         data = json.loads(match.group(0))
     except ValueError:
         print("Gemini metadata returned unparseable JSON (all fields fall back)")
-        return MetadataResult(None, None, None)
+        return MetadataResult(None, None, None, failure="bad_json")
 
     return MetadataResult(
         title=_clean_str(data.get("title")),
