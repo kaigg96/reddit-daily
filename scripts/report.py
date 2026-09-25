@@ -13,6 +13,7 @@ Usage:
   venv/bin/python scripts/report.py --release broll --release-key background_type
   venv/bin/python scripts/report.py --zeros            # suppression candidates
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
+  venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -120,13 +121,16 @@ def release(version, key, target_age):
     if later:
         print(f"({later} upload(s) postdate {version} — excluded, so this compares it "
               f"with what it replaced rather than with its own successors)")
-    metrics = (Metric.WATCH, Metric.VIEWS)
+    triggers = insights.release_triggers(a, b)
+    metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
+        t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
     comparisons = [insights.compare(a, b, f"{key}={version}", f"before {version}",
                                     load.anchor, metric) for metric in metrics]
     # The floor comes from the era BEFORE the change. Measuring it on the
     # release's own uploads would let a volatile release excuse itself.
     floors = {m: insights.drift_floor(b, m) for m in metrics}
-    print(insights.render_release(comparisons, floors))
+    print(insights.render_release(comparisons, floors, triggers))
+    print(insights.render_duration(a, b))
 
 
 
@@ -291,15 +295,19 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
+    p.add_argument("--within", metavar="KEY=VALUE",
+                   help="restrict --compare/--by to one group, e.g. video_length=short")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
     p.add_argument("--release-key", default="format_version",
                    help="upload_log field --release splits on (default format_version; "
                         "use background_type for the b-roll switch)")
-    p.add_argument("--at-age", type=float, default=insights.AGE_MATCH_TARGET_DAYS,
-                   metavar="DAYS", help="age at which --release reads every upload "
-                                        f"(default {insights.AGE_MATCH_TARGET_DAYS:.0f})")
+    p.add_argument("--at-age", type=float, metavar="DAYS",
+                   help="read every upload at this age from the snapshot series "
+                        f"(--release defaults to {insights.AGE_MATCH_TARGET_DAYS:.0f}); "
+                        "with --compare or --by it age-matches an interleaved field "
+                        "like topic, which one snapshot of today cannot")
     p.add_argument("--scorecard", action="store_true",
                    help="many metrics at once: success, guardrails and "
                         "diagnostics, with one verdict that shows disagreement")
@@ -313,7 +321,8 @@ def main():
                    help="how many videos average over 100%% viewed, which only "
                         "replays can cause (backlog #9's first test)")
     p.add_argument("--metric", default=Metric.WATCH,
-                   choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS])
+                   choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
+                            Metric.TOTAL])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -340,10 +349,20 @@ def main():
         return
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
-        release(args.release, args.release_key, args.at_age)
+        release(args.release, args.release_key,
+                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age)
         return
 
-    if args.offline:
+    if args.at_age is not None:
+        # A field that alternates between uploads (topic, voice) is not a flag
+        # day, but one snapshot still reads a recent-heavy cohort younger, and
+        # `compare` rightly refuses it. Every upload at one age removes that.
+        load = insights.load_videos_at_age(args.at_age)
+        videos, now = load.videos, load.anchor
+        for line in load.caveats():
+            print(f"AGE-MATCHED: {line}")
+        print()
+    elif args.offline:
         load = insights.load_videos_offline()
         videos, now = load.videos, load.asof
         for line in load.caveats():
@@ -359,6 +378,9 @@ def main():
                      f"unavailable.\nRe-run with --offline to use the committed "
                      f"weekly snapshot instead.")
 
+    if args.within:
+        videos = insights.within(videos, args.within)
+        print(f"(within {args.within}: {len(videos)} upload(s))")
     if not videos:
         sys.exit("No analyzable uploads found.")
 

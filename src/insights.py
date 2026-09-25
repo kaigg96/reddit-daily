@@ -42,6 +42,7 @@ class Metric:
     PCT = "avg_view_pct"         # diagnostic only; valid at fixed duration
     LIKES = "likes"
     COMMENTS = "comments"
+    TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
 
 
 @dataclass
@@ -57,6 +58,10 @@ class Video:
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
     true_published: datetime.datetime = None
+
+    @property
+    def total_watch_s(self):
+        return self.views * self.watch_seconds
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
@@ -186,6 +191,15 @@ def split_cohorts(videos, key, value):
     return a, b, unset
 
 
+def within(videos, spec):
+    """Keep only videos whose upload_log field equals a value ("key=value").
+
+    Lets one comparison be read inside another's halves, e.g. question length
+    within similar-length videos, so a mechanical cause can be ruled out."""
+    key, _, value = spec.partition("=")
+    return [v for v in videos if str(v.meta.get(key, "")).strip() == value]
+
+
 def split_by(videos, key):
     """Group videos by an upload_log field (format_version, topic, ...)."""
     out = {}
@@ -255,10 +269,24 @@ def drift_floor(videos, metric, block=MIN_COHORT):
 REVERT_TRIGGER = (Metric.WATCH,)
 
 
-def release_verdict(comparisons, floors=None):
+def release_triggers(release, before, threshold=1.0):
+    """What may fire a revert for this release.
+
+    Watch-seconds rises with length alone while views fall, so total watch time
+    stays flat: a release that only lengthens videos would read "keep". The
+    owner on #39 (2026-09-25): when median length shifts by `threshold` or more,
+    total watch time must not drop either. Tightens that one case only."""
+    a, b = median_duration(release), median_duration(before)
+    if a is not None and b is not None and abs(a - b) >= threshold:
+        return REVERT_TRIGGER + (Metric.TOTAL,)
+    return REVERT_TRIGGER
+
+
+def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
     """Fold `/shift` §5: a release that degraded **watch-seconds** is reverted,
     unless the drop is no bigger than the channel's own drift. Other metrics
-    are reported beside it and never fire (REVERT_TRIGGER).
+    are reported beside it and never fire, except total watch time when the
+    release shifted video length (`release_triggers`).
 
     Everything short of a clean, separable answer is an explicit "no verdict",
     never silence. The guardrail spent four releases returning nothing at all
@@ -266,8 +294,9 @@ def release_verdict(comparisons, floors=None):
     """
     if not comparisons:
         return "NO VERDICT — nothing to compare"
-    if not any(c.metric in REVERT_TRIGGER for c in comparisons):
-        return f"NO VERDICT — {' / '.join(REVERT_TRIGGER)} was not compared"
+    missing = [t for t in triggers if not any(c.metric == t for c in comparisons)]
+    if missing:
+        return f"NO VERDICT — {' / '.join(missing)} was not compared"
     for c in comparisons:
         if not (c.a.sufficient and c.b.sufficient):
             return (f"NO VERDICT — under {MIN_COHORT} measurable uploads on one side; "
@@ -278,18 +307,85 @@ def release_verdict(comparisons, floors=None):
     worse = []
     for c in comparisons:
         floor = floors.get(c.metric)
-        if (c.metric in REVERT_TRIGGER
+        if (c.metric in triggers
                 and c.delta is not None and c.delta < 0 and abs(c.delta) >= MATERIAL
                 and (floor is None or abs(c.delta) > floor)):
             worse.append(c.metric)
     if worse:
         return f"REVERT — {' and '.join(worse)} degraded beyond the channel's own drift"
-    return (f"KEEP — {' / '.join(REVERT_TRIGGER)} did not degrade beyond the "
+    return (f"KEEP — {' / '.join(triggers)} did not degrade beyond the "
             f"channel's own drift")
 
 
-def render_release(comparisons, floors):
-    """The release answer in full: both metrics, each with the size of change
+def _ranks(xs):
+    order = sorted(range(len(xs)), key=lambda i: xs[i])
+    r = [0.0] * len(xs)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and xs[order[j + 1]] == xs[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            r[order[k]] = (i + j) / 2
+        i = j + 1
+    return r
+
+
+def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH):
+    """(n, Spearman rho) between each upload's early and late reading.
+
+    Research row R3: if the early reading ranks uploads as the late one does,
+    a release can be judged sooner. Within tolerance one weekly snapshot can
+    match both ages, which would correlate a reading with itself; a pair is
+    kept only when its two readings came from different snapshots."""
+    early, late = load_videos_at_age(early_days), load_videos_at_age(late_days)
+    if not early.videos or not late.videos:
+        return 0, None
+    e = {v.video_id: v for v in early.videos}
+    pairs = []
+    for v in late.videos:
+        u = e.get(v.video_id)
+        if u is None:
+            continue
+        age_u = (early.anchor - u.published).total_seconds() / 86400
+        age_v = (late.anchor - v.published).total_seconds() / 86400
+        if abs(age_v - age_u) < 1:
+            continue    # same snapshot
+        pairs.append((getattr(u, metric), getattr(v, metric)))
+    if len(pairs) < 3:
+        return len(pairs), None
+    rx, ry = _ranks([p[0] for p in pairs]), _ranks([p[1] for p in pairs])
+    mx, my = statistics.mean(rx), statistics.mean(ry)
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    sx = math.sqrt(sum((a - mx) ** 2 for a in rx))
+    sy = math.sqrt(sum((b - my) ** 2 for b in ry))
+    return len(pairs), (cov / (sx * sy) if sx and sy else None)
+
+
+def median_duration(videos):
+    """Median logged video length, or None when no video records one.
+
+    Watch-seconds rises with length (+22% for videos over ~20s, 2026-09-25),
+    so a release that shifts length can pass or fail its trigger metric
+    mechanically. The b-roll switch moved it 19.3s -> 20.4s."""
+    d = [float(v.meta["duration_s"]) for v in videos
+         if str(v.meta.get("duration_s", "")).strip()]
+    return statistics.median(d) if d else None
+
+
+def render_duration(release, before, threshold=1.0):
+    """One line beside the release verdict: each cohort's median length."""
+    a, b = median_duration(release), median_duration(before)
+    if a is None or b is None:
+        return "duration: not measurable in both cohorts"
+    line = f"duration: {a:.1f}s vs {b:.1f}s before"
+    if abs(a - b) >= threshold:
+        line += " -- SHIFTED: watch-seconds rises with length, so part of this verdict is length"
+    return line
+
+
+def render_release(comparisons, floors, triggers=REVERT_TRIGGER):
+    """The release answer in full: every metric, each with the size of change
     that would have to be exceeded to mean anything, then the verdict."""
     out = []
     for c in comparisons:
@@ -308,18 +404,18 @@ def render_release(comparisons, floors):
     moved = {c.metric: c.delta for c in comparisons
              if c.delta is not None and floors.get(c.metric) is not None
              and abs(c.delta) > floors[c.metric]}
-    quiet = {m: d for m, d in moved.items() if m not in REVERT_TRIGGER and d < 0}
+    quiet = {m: d for m, d in moved.items() if m not in triggers and d < 0}
     if quiet:
         also = ", ".join(f"{m} {d:+.0%}" for m, d in quiet.items())
         out.append(f"    NOT A TRIGGER: {also}, beyond its detection limit. Reported only; "
-                   f"a revert fires on {' / '.join(REVERT_TRIGGER)} alone (owner, #18).")
+                   f"a revert fires on {' / '.join(triggers)} alone (owner, #18, #39).")
     if any(d > 0 for d in moved.values()) and any(d < 0 for d in moved.values()):
         better = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d > 0)
         worse = ", ".join(f"{m} {d:+.0%}" for m, d in moved.items() if d < 0)
         out.append(f"    CONFLICT: {better} but {worse}. The verdict follows "
-                   f"{' / '.join(REVERT_TRIGGER)}.")
+                   f"{' / '.join(triggers)}.")
     out.append("")
-    out.append(f"{release_verdict(comparisons, floors)}   (/shift §5 auto-revert rule)")
+    out.append(f"{release_verdict(comparisons, floors, triggers)}   (/shift §5 auto-revert rule)")
     return "\n".join(out)
 
 
@@ -536,6 +632,16 @@ def _with_derived_dimensions(row):
     bg = (r.get("bg_clip") or "").strip()
     r["background_type"] = ("(unknown)" if not bg else
                             "procedural" if bg.startswith("procedural") else "broll")
+    # The two daily runs have drifted (01-05 and 12-19 UTC), so split on noon
+    # rather than on a cron hour.
+    ts = (r.get("timestamp_utc") or "").strip()
+    r["slot"] = "" if not ts else "morning" if _parse_ts(ts).hour < 12 else "evening"
+    # 63 characters is the logged median (2026-09-25), so the halves are even.
+    q = (r.get("post_title") or "").strip()
+    r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # ~20 s: the logged median duration is 20.2 s (2026-09-25).
+    d = (r.get("duration_s") or "").strip()
+    r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
     return r
 
 

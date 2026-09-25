@@ -221,3 +221,74 @@ def test_sanitize_title_falls_back_when_generation_failed():
     assert llm.sanitize_title(None, fallback="Raw question?") == "Raw question?"
     assert llm.sanitize_title('  "Quoted"  ', fallback="x") == "Quoted"
     assert len(llm.sanitize_title("z" * 200, fallback="x")) == 100
+
+
+def _raises(exc):
+    def boom(*a, **k):
+        raise exc
+    return boom
+
+
+def test_failure_names_why_the_fields_are_empty(monkeypatch):
+    """The upload log's ok-flags cannot tell the shared daily cap (429) from a
+    timeout, and the two need different fixes. `failure` can."""
+    quota = llm.requests.Response()
+    quota.status_code = 429
+    monkeypatch.setattr(llm, "_generate",
+                        _raises(llm.requests.HTTPError("429", response=quota)))
+    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+
+    monkeypatch.setattr(llm, "_generate", _raises(llm.requests.ReadTimeout()))
+    assert llm.get_metadata("q", ["a"]).failure == "timeout"
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no json here")
+    assert llm.get_metadata("q", ["a"]).failure == "no_json"
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: "{not: json}")
+    assert llm.get_metadata("q", ["a"]).failure == "bad_json"
+
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: GOOD_JSON)
+    assert llm.get_metadata("q", ["a"]).failure == ""
+
+
+def test_failure_label_never_carries_the_keyed_url(monkeypatch):
+    monkeypatch.setattr(llm, "_generate", _raises(
+        llm.requests.ConnectionError("failed for url: ...?key=super-secret")))
+    assert llm.get_metadata("q", ["a"]).failure == "ConnectionError"
+
+
+def test_the_upload_log_keeps_the_failure_kind():
+    from src import log
+    assert "meta_failure" in log.FIELDS
+
+
+def _called_url(monkeypatch, dry_run):
+    seen = {}
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+
+    def post(url, **kw):
+        seen["url"] = url
+        return Resp()
+
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+    monkeypatch.setattr(llm.requests, "post", post)
+    monkeypatch.setattr(llm.config, "DRY_RUN", dry_run)
+    llm._generate("p")
+    return seen["url"]
+
+
+def test_production_calls_keep_the_production_model(monkeypatch):
+    assert _called_url(monkeypatch, False) == (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-2.5-flash:generateContent?key=k")
+
+
+def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
+    """The free tier is counted per model: a sample must not starve an upload."""
+    assert "/gemini-2.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
