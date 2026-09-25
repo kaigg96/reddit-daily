@@ -292,6 +292,8 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
+    p.add_argument("--within", metavar="KEY=VALUE",
+                   help="restrict --compare/--by to one group, e.g. video_length=short")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -372,6 +374,9 @@ def main():
                      f"unavailable.\nRe-run with --offline to use the committed "
                      f"weekly snapshot instead.")
 
+    if args.within:
+        videos = insights.within(videos, args.within)
+        print(f"(within {args.within}: {len(videos)} upload(s))")
     if not videos:
         sys.exit("No analyzable uploads found.")
 

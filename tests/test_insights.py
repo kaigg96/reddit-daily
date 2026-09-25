@@ -734,6 +734,17 @@ def test_question_length_splits_at_the_logged_median():
     assert length("") == ""
 
 
+def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
+    """Research row R2: question length within similar-length videos."""
+    rows = [{"post_title": "q", "duration_s": d} for d in ("18.0", "20.0", "24.5", "")]
+    videos = [insights.Video(video_id=str(i), published=None, views=0, watch_seconds=0,
+                             avg_view_pct=0, likes=0, comments=0,
+                             meta=insights._with_derived_dimensions(r))
+              for i, r in enumerate(rows)]
+    assert [v.video_id for v in insights.within(videos, "video_length=short")] == ["0", "1"]
+    assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still

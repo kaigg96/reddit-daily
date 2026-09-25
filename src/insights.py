@@ -186,6 +186,15 @@ def split_cohorts(videos, key, value):
     return a, b, unset
 
 
+def within(videos, spec):
+    """Keep only videos whose upload_log field equals a value ("key=value").
+
+    Lets one comparison be read inside another's halves, e.g. question length
+    within similar-length videos, so a mechanical cause can be ruled out."""
+    key, _, value = spec.partition("=")
+    return [v for v in videos if str(v.meta.get(key, "")).strip() == value]
+
+
 def split_by(videos, key):
     """Group videos by an upload_log field (format_version, topic, ...)."""
     out = {}
@@ -543,6 +552,9 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # ~20 s: the logged median duration is 20.2 s (2026-09-25).
+    d = (r.get("duration_s") or "").strip()
+    r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
     return r
 
 

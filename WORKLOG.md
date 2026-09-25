@@ -62,11 +62,11 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (03:00) — five quick questions answered from existing data; longer questions go with longer viewing
+## 2026-09-25 (03:00) — six quick questions answered from existing data; one exposes a blind spot in how we judge changes
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
 
-**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer five questions from data we already had. The clearest result: videos with longer questions are watched about 2 seconds longer. Part of that is simply that they are longer videos, so a follow-up test is queued before we act on it.
+**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer six questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. So a change that alters video length could pass or fail its test on length alone, and that is checked next, before the new opening is judged.
 
 ### Feature work
 - Nothing this shift. The one ready item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
@@ -89,13 +89,14 @@ Read the allocation series with
 - **Topic may matter:** dark, morbid questions were watched for 14 seconds against 11 for the rest, compared at a week old. It is only 9 videos, and a reading at 3 days points the other way, so this is a lead, not a finding. If it holds after Monday's data, it becomes the first current evidence for the planned tool that picks which question to post.
 - **Background clips:** no clear winner. The spread between clips is within normal noise.
 - **Morning versus evening:** mornings are 5–10% ahead, which is within normal noise (see above).
-- **Question length is the one clear gap.** Videos with longer questions are watched for 11 seconds against 9, the same at every age, across about 60 videos each. But longer questions also make the video about 2 seconds longer, and viewers watch a smaller share of it. So part of the gap is just length. The next test separates the two. If the gap survives, the planned question-picking tool gets it for free.
+- **Question length looked like a clear gap, but was only video length.** Videos with longer questions were watched for 11 seconds against 9. Comparing videos of the same length, the gap disappears.
+- **What that exposed:** our main measure, seconds watched, rises with video length (11 against 9 seconds for videos over about 20 seconds). Length does not bring more views, but every change is judged on this measure. So a change that makes videos longer or shorter could be kept or undone for the wrong reason. Next shift checks whether any past change did this, before the new opening is judged around 4 October.
 
 ### Blocked
 - The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
 
 ### Next
-- After 07:00, request the sample for the title-failure fix. Otherwise, run the question-length follow-up, or check whether a 3-day reading predicts the 7-day one. If it does, every experiment gets its verdict about 4 days sooner.
+- After 07:00, request the sample for the title-failure fix. Otherwise, check whether past changes shifted video length. That comes first because it protects the new opening's verdict. Then check whether a 3-day reading predicts the 7-day one. If it does, every experiment gets its verdict about 4 days sooner.
 
 ### Better?
 - **Than last shift:** yes, a little. The next shift starts with three ready items instead of one, and the tool can now answer "does this kind of video do better?" fairly.
