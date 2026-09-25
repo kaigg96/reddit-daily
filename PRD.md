@@ -36,6 +36,7 @@
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
 | ~~Traffic-source telemetry~~ ✅ shipped | done | R4.7 | Search earns ~1.3% of views, so search-oriented work stays parked (§4). |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run` renders a fixed post over silent narration: no Reddit, Gemini or Polly call, always a dry run, ~2 min, runnable by a shift itself. It proves a **render** change is playable; a change to the Reddit, screen, Gemini or Polly path still needs a real sample (`dry_run.py request`). |
+| **Real samples off production's Gemini allowance** (2026-09-25) | ready | — | A real sample (`dry_run.py request`) still spends 2–5 production Gemini requests, and the 07:00 window also pays the next 05:00 upload, so paid samples rarely fit (they blocked R4.4 below). The free tier is counted per model (`feature/r4.4-slate-telemetry` adds `model=` to `_generate`): route every Gemini call to flash-lite when `DRY_RUN`. **Done when** a real sample uses no production quota. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 

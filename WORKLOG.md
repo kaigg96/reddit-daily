@@ -82,7 +82,7 @@ Read the allocation series with
 ### Project management
 - **Done and closed your decision on length (#39).** When a change alters video length by a second or more, it must now also hold total time watched, not just seconds per view. Checked on the background-video switch, which did lengthen videos: it still passes.
 - **One thing only you can do:** the written rule shifts follow still says "watch-seconds only". Shifts cannot edit that file, so the one-line wording is in my closing note on #39 if you want it.
-- **Ready work is now zero,** because the one ready item shipped. The questions I generated were all answered on the spot (see Research). Refilling it is the next shift's first job.
+- **Ready work is at one, below the target of three.** New item: let real samples use a separate AI allowance, since the allowance is counted per model. That unblocks the question-picking tool. The other questions I generated were answered on the spot.
 - **Friction:** "request a sample after 07:00" was the plan handed to this shift. It ignored that the 07:00 window also has to pay for the next morning's upload. Free samples now cover most changes.
 
 ### Research
@@ -94,7 +94,7 @@ Read the allocation series with
 - The topic-logging change for the question-picking tool still needs a sample video. Unlike today's fix, it adds a new AI call before rendering, so it does need one. It waits for free samples or a day with spare allowance.
 
 ### Next
-- Refill ready work. If the next morning upload loses its title, read the new failure reason first.
+- Build the separate-allowance item, then request the question-picking tool's sample. If a morning title fails, read its new failure reason first.
 
 ### Better?
 - **Than last shift:** yes. Three finished pieces shipped, where the last two shifts shipped none, and the main limit on shipping is gone.
