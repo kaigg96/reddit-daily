@@ -62,11 +62,11 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (03:00) — eight quick questions answered from existing data; a blind spot in how we judge changes is closed
+## 2026-09-25 (03:00) — nine quick questions answered from existing data; a blind spot in how we judge changes is closed
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
 
-**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer eight questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. The check that judges each change now warns when a change also altered video length, so the new opening cannot pass or fail on length alone.
+**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer nine questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. The check that judges each change now warns when a change also altered video length, so the new opening cannot pass or fail on length alone.
 
 ### Feature work
 - Nothing this shift. The one ready build item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
@@ -79,7 +79,7 @@ Read the allocation series with
 
 ### Project management
 - **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
-- **Ready work is at two, one short of the target of three,** because this shift answered five of the six questions it generated. Other ideas were considered and fell below the bar. Recording more topics or answer lengths needs a sample video first. Day-of-week timing would change no decision.
+- **Ready work is at one, short of the target of three,** because this shift answered all six questions it generated. Other ideas were considered and fell below the bar. Recording more topics or answer lengths needs a sample video first. Day-of-week timing would change no decision.
 - **Dropped the upload-time idea for good.** It was parked until each slot had enough videos. They now have about 60 each, and morning and evening differ by no more than normal noise.
 - Trimmed settled history from the plan to keep it within its size limit.
 - **Friction, noted rather than acted on:** this shift began 40 minutes after the previous one, and both ran before the 07:00 AI-allowance reset. So neither could request the sample videos that two finished changes are waiting for. If overnight shifts are routine, one of them could move to after 07:00.
@@ -92,9 +92,10 @@ Read the allocation series with
 - **Question length looked like a clear gap, but was only video length.** Videos with longer questions were watched for 11 seconds against 9. Comparing videos of the same length, the gap disappears.
 - **What that exposed:** our main measure, seconds watched, rises with video length (11 against 9 seconds for videos over about 20 seconds). Length does not bring more views, but every change is judged on this measure. So a change that makes videos longer or shorter could be kept or undone for the wrong reason. Checked: the last two releases did not change length. The switch to background video did, so part of its measured gain was length. It stays, because nothing argues for removing it. The check that judges each change now warns when length moved. The new opening changes only what is on screen, not the timing, so it should not move length. The check will confirm that when it is judged.
 - **Changes can't be judged sooner, and needn't be judged later.** A video's standing at 3 days barely predicts its standing at a week. Its standing at a week already matches two weeks almost exactly. So a week stays the right time to judge a change.
-- **Queued, not yet answered:** longer videos get more seconds watched but, within normal noise, fewer views. If the total time watched comes out equal, our main measure would misjudge any change that alters length. That would be a question for you, not a change I would make.
+- **Longer videos trade seconds for views.** They get more seconds watched but fewer views, and the total time watched comes out about equal. So our main measure would favour any change that simply makes videos longer.
 
 ### Blocked
+- **One decision for you:** when a change also alters video length, should it have to hold total time watched, not just seconds per view? I recommend yes. It only tightens the rule, and it does not affect the new opening unless its length moves.
 - The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
 
 ### Next

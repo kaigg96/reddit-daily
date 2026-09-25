@@ -42,6 +42,7 @@ class Metric:
     PCT = "avg_view_pct"         # diagnostic only; valid at fixed duration
     LIKES = "likes"
     COMMENTS = "comments"
+    TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
 
 
 @dataclass
@@ -57,6 +58,10 @@ class Video:
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
     true_published: datetime.datetime = None
+
+    @property
+    def total_watch_s(self):
+        return self.views * self.watch_seconds
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400

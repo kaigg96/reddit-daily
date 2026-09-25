@@ -773,6 +773,12 @@ def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
     assert n == 6 and rho == pytest.approx(1.0)
 
 
+def test_total_watch_is_views_times_watch_seconds():
+    """R2: longer videos hold more seconds but may draw fewer views."""
+    v = Video(video_id="v", published=None, views=120, watch_seconds=11.0)
+    assert v.get(Metric.TOTAL) == 1320.0
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still
