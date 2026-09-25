@@ -755,6 +755,24 @@ def test_a_release_that_shifts_video_length_says_so():
     assert "not measurable" in insights.render_duration([mk("")], [mk("20.3")])
 
 
+def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
+    """R3. One snapshot at age 5 matches both 3 and 7 days within tolerance;
+    pairing it with itself would report a perfect correlation."""
+    base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+    uploads, snaps = [], []
+    for i in range(6):
+        published = base + datetime.timedelta(days=i * 10)
+        uploads.append((f"v{i}", published, "v6"))
+        for age, watch in ((2, 5.0 + i), (9, 10.0 + i)):   # two snapshots, same order
+            snaps.append(((published + datetime.timedelta(days=age)).date().isoformat(),
+                          f"v{i}", 100, watch))
+    uploads.append(("same", base + datetime.timedelta(days=70), "v6"))
+    snaps.append(((base + datetime.timedelta(days=75)).date().isoformat(), "same", 100, 9.0))
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    n, rho = insights.early_read_stability(3, 7)
+    assert n == 6 and rho == pytest.approx(1.0)
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still
