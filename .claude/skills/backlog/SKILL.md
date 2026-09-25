@@ -27,7 +27,10 @@ proposes the same safe list every time.
 **Supply that never runs dry: research questions.** Anything the channel's own
 data can answer is ready work — no sample video, no spend, no waiting on an
 experiment. Add it to §0's research table with the test that answers it, then
-run the test; the result becomes a finding, a new question, or a backlog item.
+run the test; the result becomes a finding (§4), a new question, or a backlog
+item — and **the row leaves the table**, so it can never grow into a second
+backlog. When the ready floor forces generation, fill it with these first: a
+wrong one costs minutes, where a weak build idea costs a change.
 #9 (loop the ending) is the model: tested and dropped in minutes. With one
 experiment live at a time and each baking ~2 weeks, the feature lane is waiting
 more often than not — this is what shifts do meanwhile.

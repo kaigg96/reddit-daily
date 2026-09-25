@@ -69,3 +69,15 @@ def test_a_row_cut_off_from_its_table_is_caught():
     broken = broken.replace("| ~~Old screen~~", "\n| ~~Old screen~~")
     assert b.malformed(broken) == ["| ~~Old screen~~ | done | R4.6 | shipped |"]
     assert b.malformed(TRACKER) == []
+
+
+def test_answered_research_questions_leave_the_tracker():
+    """The research table is a queue, not an archive: §0 is read every shift, so
+    an answered row that stays is context every shift pays for, forever."""
+    text = open(b.PRD).read()
+    section = b.section0(text)
+    table = section.split("#### Research questions", 1)[1].split("####", 1)[0]
+    rows = [line for line in table.splitlines() if line.startswith("|")][2:]
+    lingering = [r[:70] for r in rows
+                 if b._cells(r)[1].strip("` ").split(":")[0].lower() not in ("ready", "blocked")]
+    assert not lingering, f"answered research rows still in §0: {lingering}"
