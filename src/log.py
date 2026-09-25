@@ -30,6 +30,12 @@ FIELDS = [
     # The ok-flags above say THAT it failed; a 429 on the shared daily cap and
     # a timeout need different fixes, and the flags cannot tell them apart.
     "meta_failure",
+    # Added 2026-09-24 (PRD R4.4 Step 0.5): the topic of every eligible
+    # candidate, in rank order, "|"-joined ("?" = unrecognised label, blank =
+    # not collected). The log kept only the selected post's topic, so how often
+    # a topic ranker would override Reddit's order -- and therefore how long
+    # its own bake would take -- could not be estimated.
+    "slate_topics",
 ]
 
 

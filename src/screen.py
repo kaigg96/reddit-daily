@@ -28,7 +28,7 @@ import time
 
 import requests
 
-from . import llm
+from . import config, llm
 
 # Categories that may discard the whole post. Each addition risks over-filtering,
 # so the bar is high: either a confirmed zeroed upload of that shape, or a
@@ -233,3 +233,47 @@ def screen(question, comments):
                         category="unsafe_comments" if unsafe else "",
                         reason=reason if (unsafe or demoted) else "",
                         topic=topic, demoted=demoted)
+
+
+# --- R4.4 Step 0.5: slate telemetry ---------------------------------------
+
+_SLATE_PROMPT = """Classify each AskReddit question's topic into exactly one of:
+{topics}
+
+Questions:
+{numbered}
+
+Reply with JSON only: a list of {n} topic strings, in order."""
+
+
+def classify_slate(titles):
+    """Topics for every eligible candidate, in rank order, from ONE request.
+
+    Telemetry only: nothing reads it at selection time. The ranker R4.4 would
+    build fires only when the top candidate sits in a weak topic and one just
+    below it sits in a strong one, and how often that happens cannot be
+    known from the log's one topic per upload. This logs the whole slate.
+
+    Titles only, no comments, which is what makes one request enough. It runs
+    on config.SLATE_MODEL, whose free allowance is separate from the model
+    titles and the screen use. Never retried. Returns a list the length of
+    `titles` ("" where the answer was not a known topic), or None on any
+    failure. Nothing here can block an upload.
+    """
+    if not titles:
+        return None
+    numbered = "\n".join(f"{i}. {t}" for i, t in enumerate(titles, 1))
+    try:
+        raw = llm._generate(_SLATE_PROMPT.format(
+            topics=", ".join(TOPICS), numbered=numbered, n=len(titles)),
+            model=config.SLATE_MODEL)
+        match = re.search(r"\[.*\]", raw, re.S)
+        got = json.loads(match.group(0)) if match else None
+    except Exception as e:
+        # never echo the exception body: HTTPError messages embed the keyed URL
+        print(f"Slate: topic call failed with {type(e).__name__} (not logged this run)")
+        return None
+    if not isinstance(got, list) or len(got) != len(titles):
+        print("Slate: topic call returned the wrong shape (not logged this run)")
+        return None
+    return [t if t in TOPICS else "" for t in (str(x).strip().lower() for x in got)]

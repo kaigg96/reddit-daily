@@ -41,7 +41,9 @@ _TIMEOUT = 60
 def _generate(prompt, thinking_budget=0, model=None):
     """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
     default, and what every caller here wants); pass a token budget only for a
-    task where reasoning demonstrably helps."""
+    task where reasoning demonstrably helps. `model` exists because the free
+    tier is counted per model: a caller on another model draws on its own
+    daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
