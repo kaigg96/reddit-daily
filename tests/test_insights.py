@@ -702,6 +702,103 @@ def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch
     assert verdict == "REVERT — watch_seconds degraded beyond the channel's own drift"
 
 
+def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path, monkeypatch):
+    """`report.py --at-age 7 --compare topic=…`. One snapshot of today read the
+    recent-heavy dark-morbid cohort 11d old against 17d for the rest, and
+    compare refused it; read at a common age the same uploads compare."""
+    x_u, x_s = _era("x", 0, 10, "x", 200, 14.0)
+    y_u, y_s = _era("y", 20, 10, "y", 200, 11.0)
+    _write_series(tmp_path, monkeypatch, x_u + y_u, x_s + y_s)
+    load = insights.load_videos_at_age()
+    a, b, unset = insights.split_cohorts(load.videos, "format_version", "x")
+    c = insights.compare(a, b, "x", "not x", load.anchor, Metric.WATCH)
+    assert (len(a), len(b), unset) == (10, 10, 0)
+    assert c.age_matched
+
+
+def test_upload_slot_is_derived_from_the_log_timestamp():
+    """Research row R3. The runs drift within a slot, so noon is the split."""
+    slot = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["slot"]
+    assert slot("2026-09-24T05:03:08+00:00") == "morning"
+    assert slot("2026-09-24T01:40:00+00:00") == "morning"
+    assert slot("2026-09-24T17:20:09+00:00") == "evening"
+    assert slot("2026-09-24T12:05:00+00:00") == "evening"
+    assert slot("") == ""
+
+
+def test_question_length_splits_at_the_logged_median():
+    """Research row R2: do shorter questions hold viewers longer under v7?"""
+    length = lambda q: insights._with_derived_dimensions({"post_title": q})["question_length"]
+    assert length("x" * 63) == "short"
+    assert length("x" * 64) == "long"
+    assert length("") == ""
+
+
+def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
+    """Research row R2: question length within similar-length videos."""
+    rows = [{"post_title": "q", "duration_s": d} for d in ("18.0", "20.0", "24.5", "")]
+    videos = [insights.Video(video_id=str(i), published=None, views=0, watch_seconds=0,
+                             avg_view_pct=0, likes=0, comments=0,
+                             meta=insights._with_derived_dimensions(r))
+              for i, r in enumerate(rows)]
+    assert [v.video_id for v in insights.within(videos, "video_length=short")] == ["0", "1"]
+    assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
+
+
+def test_a_release_that_shifts_video_length_says_so():
+    """R2: the b-roll switch moved median length 19.3s -> 20.4s, and longer
+    videos hold more watch-seconds, so the verdict line must carry it."""
+    mk = lambda d: insights.Video(video_id="v", published=None, views=0, watch_seconds=0,
+                                  avg_view_pct=0, likes=0, comments=0, meta={"duration_s": d})
+    assert "SHIFTED" in insights.render_duration([mk("20.4")], [mk("19.3")])
+    assert "SHIFTED" not in insights.render_duration([mk("20.4")], [mk("20.3")])
+    assert "not measurable" in insights.render_duration([mk("")], [mk("20.3")])
+
+
+def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
+    """The owner on #39: longer videos gain watch-seconds and lose views, so a
+    release that only lengthens them would read "keep" on watch-seconds alone."""
+    from types import SimpleNamespace as NS
+    mk = lambda d: insights.Video(video_id="v", published=None, meta={"duration_s": d})
+    assert insights.release_triggers([mk("20.4")], [mk("20.3")]) == (Metric.WATCH,)
+    triggers = insights.release_triggers([mk("22.0")], [mk("20.0")])
+    assert triggers == (Metric.WATCH, Metric.TOTAL)
+
+    side = NS(sufficient=True)
+    cmp = lambda m, d: NS(metric=m, delta=d, a=side, b=side, age_matched=True)
+    comparisons = [cmp(Metric.WATCH, 0.20), cmp(Metric.VIEWS, -0.30), cmp(Metric.TOTAL, -0.15)]
+    floors = {Metric.WATCH: 0.1, Metric.VIEWS: 0.5, Metric.TOTAL: 0.1}
+    assert insights.release_verdict(comparisons, floors).startswith("KEEP")
+    assert insights.release_verdict(comparisons, floors, triggers) == (
+        "REVERT — total_watch_s degraded beyond the channel's own drift")
+    assert insights.release_verdict(comparisons[:2], floors, triggers) == (
+        "NO VERDICT — total_watch_s was not compared")
+
+
+def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
+    """R3. One snapshot at age 5 matches both 3 and 7 days within tolerance;
+    pairing it with itself would report a perfect correlation."""
+    base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+    uploads, snaps = [], []
+    for i in range(6):
+        published = base + datetime.timedelta(days=i * 10)
+        uploads.append((f"v{i}", published, "v6"))
+        for age, watch in ((2, 5.0 + i), (9, 10.0 + i)):   # two snapshots, same order
+            snaps.append(((published + datetime.timedelta(days=age)).date().isoformat(),
+                          f"v{i}", 100, watch))
+    uploads.append(("same", base + datetime.timedelta(days=70), "v6"))
+    snaps.append(((base + datetime.timedelta(days=75)).date().isoformat(), "same", 100, 9.0))
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    n, rho = insights.early_read_stability(3, 7)
+    assert n == 6 and rho == pytest.approx(1.0)
+
+
+def test_total_watch_is_views_times_watch_seconds():
+    """R2: longer videos hold more seconds but may draw fewer views."""
+    v = Video(video_id="v", published=None, views=120, watch_seconds=11.0)
+    assert v.get(Metric.TOTAL) == 1320.0
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still
@@ -1093,3 +1190,14 @@ def test_a_big_diagnostic_move_is_never_silent():
     verdict, _, notes = insights.scorecard(then, now)
     assert verdict == "BETTER"
     assert any("views" in n and "watch if they repeat" in n for n in notes)
+
+
+def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
+    videos = [
+        v("a", 10, views=50, pct=120.0),   # replaying
+        v("b", 10, views=50, pct=100.0),   # watched once, exactly: not a replay
+        v("c", 10, views=50, pct=60.0),
+        v("d", 10, views=5, pct=300.0),    # one rewatcher on a thin video: excluded
+    ]
+    assert insights.replay_share(videos) == (1, 3)
+
