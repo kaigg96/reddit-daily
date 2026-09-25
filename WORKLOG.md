@@ -62,11 +62,11 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (03:00) — a first hint that dark, morbid questions hold viewers longer, and the work queue is full again
+## 2026-09-25 (03:00) — five quick questions answered from existing data; longer questions go with longer viewing
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→20 · research 45→50 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
 
-**Summary:** Our reporting tool can now compare kinds of video fairly at the same age. Its first reading hints that dark, morbid questions are watched about 3 seconds longer than the rest. That is too few videos to act on, so it is queued to re-check after Monday's data. Three pieces of work are ready for the next shift again, up from one.
+**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer five questions from data we already had. The clearest result: videos with longer questions are watched about 2 seconds longer. Part of that is simply that they are longer videos, so a follow-up test is queued before we act on it.
 
 ### Feature work
 - Nothing this shift. The one ready item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
@@ -79,23 +79,26 @@ Read the allocation series with
 
 ### Project management
 - **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
-- **Refilled the ready queue from one item to three**, with two questions answerable from data we already hold. Do morning and evening uploads differ? Do shorter questions hold viewers longer?
+- **Refilled the ready queue from one item to three** with questions that need no AI allowance and cost nothing.
+- **Dropped the upload-time idea for good.** It was parked until each slot had enough videos. They now have about 60 each, and morning and evening differ by no more than normal noise.
 - Trimmed settled history from the plan to keep it within its size limit.
 
 ### Research
 - **Narrator voice makes no difference:** both voices hold viewers for 10 seconds, across about 60 videos each.
 - **Topic may matter:** dark, morbid questions were watched for 14 seconds against 11 for the rest, compared at a week old. It is only 9 videos, and a reading at 3 days points the other way, so this is a lead, not a finding. If it holds after Monday's data, it becomes the first current evidence for the planned tool that picks which question to post.
 - **Background clips:** no clear winner. The spread between clips is within normal noise.
+- **Morning versus evening:** mornings are 5–10% ahead, which is within normal noise (see above).
+- **Question length is the one clear gap.** Videos with longer questions are watched for 11 seconds against 9, the same at every age, across about 60 videos each. But longer questions also make the video about 2 seconds longer, and viewers watch a smaller share of it. So part of the gap is just length. The next test separates the two. If the gap survives, the planned question-picking tool gets it for free.
 
 ### Blocked
 - The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
 
 ### Next
-- After 07:00, request the sample for the title-failure fix. Otherwise, answer the morning-versus-evening question. It needs no allowance and settles whether the parked upload-time idea is dropped for good.
+- After 07:00, request the sample for the title-failure fix. Otherwise, run the question-length follow-up, or check whether a 3-day reading predicts the 7-day one. If it does, every experiment gets its verdict about 4 days sooner.
 
 ### Better?
 - **Than last shift:** yes, a little. The next shift starts with three ready items instead of one, and the tool can now answer "does this kind of video do better?" fairly.
-- **Than ~10 shifts ago:** unclear. Research is producing answers in minutes, but none has yet changed what we ship.
+- **Than ~10 shifts ago:** yes, modestly. Research now closes questions within a shift: one parked idea was dropped on evidence today. None has yet changed what we ship.
 - **Than ~100 shifts ago:** too early to say.
 
 ## 2026-09-25 — the new opening is live; the next upload is the first to open on the question

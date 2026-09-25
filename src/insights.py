@@ -536,6 +536,13 @@ def _with_derived_dimensions(row):
     bg = (r.get("bg_clip") or "").strip()
     r["background_type"] = ("(unknown)" if not bg else
                             "procedural" if bg.startswith("procedural") else "broll")
+    # The two daily runs have drifted (01-05 and 12-19 UTC), so split on noon
+    # rather than on a cron hour.
+    ts = (r.get("timestamp_utc") or "").strip()
+    r["slot"] = "" if not ts else "morning" if _parse_ts(ts).hour < 12 else "evening"
+    # 63 characters is the logged median (2026-09-25), so the halves are even.
+    q = (r.get("post_title") or "").strip()
+    r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
     return r
 
 

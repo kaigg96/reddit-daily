@@ -716,6 +716,24 @@ def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path,
     assert c.age_matched
 
 
+def test_upload_slot_is_derived_from_the_log_timestamp():
+    """Research row R3. The runs drift within a slot, so noon is the split."""
+    slot = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["slot"]
+    assert slot("2026-09-24T05:03:08+00:00") == "morning"
+    assert slot("2026-09-24T01:40:00+00:00") == "morning"
+    assert slot("2026-09-24T17:20:09+00:00") == "evening"
+    assert slot("2026-09-24T12:05:00+00:00") == "evening"
+    assert slot("") == ""
+
+
+def test_question_length_splits_at_the_logged_median():
+    """Research row R2: do shorter questions hold viewers longer under v7?"""
+    length = lambda q: insights._with_derived_dimensions({"post_title": q})["question_length"]
+    assert length("x" * 63) == "short"
+    assert length("x" * 64) == "long"
+    assert length("") == ""
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still
