@@ -702,6 +702,20 @@ def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch
     assert verdict == "REVERT — watch_seconds degraded beyond the channel's own drift"
 
 
+def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path, monkeypatch):
+    """`report.py --at-age 7 --compare topic=…`. One snapshot of today read the
+    recent-heavy dark-morbid cohort 11d old against 17d for the rest, and
+    compare refused it; read at a common age the same uploads compare."""
+    x_u, x_s = _era("x", 0, 10, "x", 200, 14.0)
+    y_u, y_s = _era("y", 20, 10, "y", 200, 11.0)
+    _write_series(tmp_path, monkeypatch, x_u + y_u, x_s + y_s)
+    load = insights.load_videos_at_age()
+    a, b, unset = insights.split_cohorts(load.videos, "format_version", "x")
+    c = insights.compare(a, b, "x", "not x", load.anchor, Metric.WATCH)
+    assert (len(a), len(b), unset) == (10, 10, 0)
+    assert c.age_matched
+
+
 def test_views_alone_never_trigger_a_revert(tmp_path, monkeypatch):
     """The owner on #18: "the rule now triggers on watch-seconds only, with
     views reported but never firing it". Until 2026-09-24 this tool still
