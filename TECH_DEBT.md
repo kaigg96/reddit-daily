@@ -285,7 +285,7 @@ a list nobody can read is the same as no list.
   the last run's PASS: read its commit, not just its verdict. Less likely now
   that the suite runs on every push (#33, applied 2026-09-24, after four new
   modules importing an uninstalled `yaml` stopped it at collection). Fix: move
-  the tests after the verdict step, or record FAIL when they fail.
+  the tests after the verdict step, or record FAIL when they fail. **Patch queued for approval 2026-09-25** (escalation key `release-tests-fail-verdict`).
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is

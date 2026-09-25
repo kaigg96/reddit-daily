@@ -88,7 +88,7 @@ Read the allocation series with
 - **Tested and dropped an idea within the shift: making the ending loop back into the opening.** Nearly all our views come from the Shorts feed, where a looping video plays again. The free check was whether any past videos were watched for longer than they last on average, which only replays can cause. Only 3 of 110 were, so we are not building it. The check stays in our reporting tool, so this can be revisited.
 
 ### Blocked
-- Nothing is blocked on you.
+- **One approval requested:** a small fix so the daily release check records a failure when its tests fail. Today it keeps showing the previous day's "safe to merge" instead. It tightens a safety check and loosens nothing. I recommend approving it.
 
 ### Next
 - After 07:00, request the sample for the title-failure fix and ship it if it passes. The topic-recording change for the next experiment is next in line. Both are now up to date with the live version, so either can be requested as is.
