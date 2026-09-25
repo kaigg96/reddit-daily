@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-09-25 — the new opening is live; the next upload is the first to open on the question
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 20→20 · research 15→15 · feature 25→25 · close 10→15
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→10 · security 5→5 · pm 20→15 · research 15→25 · feature 25→20 · close 10→15
 
 **Summary:** The new opening, where the video starts on the question instead of the channel name, is live. This morning's upload (around 05:00) is the first to use it. It is the first change to the videos themselves since the channel went flat six weeks ago, and it can be judged after 20 uploads, around 4 October.
 
@@ -84,7 +84,7 @@ Read the allocation series with
 - **Friction, noted rather than acted on:** two finished changes each wait for a sample video. Shifts get one each, and only at hours that don't compete with an upload. This shift ran at 02:00, outside those hours, so the queue didn't move.
 
 ### Research
-- **Added to the bottom of the plan: make the ending loop back into the opening.** Nearly all our views come from the Shorts feed, where a looping video plays again and every replay adds watch time. Ours end on a comment question, a natural point to swipe away. The first test costs nothing: count past videos watched for longer than they last on average, which only replays can cause. If almost none, the idea is dropped.
+- **Tested and dropped an idea within the shift: making the ending loop back into the opening.** Nearly all our views come from the Shorts feed, where a looping video plays again. The free check was whether any past videos were watched for longer than they last on average, which only replays can cause. Only 3 of 110 were, so we are not building it. The check stays in our reporting tool, so this can be revisited.
 
 ### Blocked
 - Nothing is blocked on you.
