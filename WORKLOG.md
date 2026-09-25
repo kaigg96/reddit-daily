@@ -62,19 +62,19 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (14:40) — your length decision is live, and the title-failure fix shipped without spending a sample video
+## 2026-09-25 (14:40) — sample videos are now free, your length decision is live, and the title-failure fix shipped
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→20 · security 5→5 · pm 35→35 · research 20→10 · feature 10→10 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 35→25 · research 20→10 · feature 10→25 · close 10→10
 
-**Summary:** Your decision on judging length-changing releases is now built into the check, and the fix that records why titles fail is live, so the next lost title will tell us its cause. Neither needed a sample video, so neither used the AI allowance that tomorrow morning's upload depends on.
+**Summary:** Sample videos now cost nothing, and a shift can make one itself in two minutes. That removes the limit that held finished work for days. Your length decision is built into the check that judges each change, and the fix that records why titles fail is live.
 
 ### Feature work
-- **Worked out how to make sample videos free,** the one item ready to build. The best option is a sample mode that renders a fixed, stored question over silent placeholder audio. It would use no voice or AI calls at all. Not built yet: it needs longer than this window.
+- **Sample videos are now free.** A sample mode renders a fixed question over silent audio, with no voice or AI calls, and passed the same playability check as a real sample. It covers changes to the video. Changes to how questions, titles or voices are fetched still need a real one.
 
 ### Maintenance
 - Every scheduled upload landed, including this morning's first upload with the new opening, and the saved record of the last post is intact.
 - **Shipped the fix that records why a title failed.** It had waited two days for a sample video, but it changes nothing in the video itself. The step it changes only runs after a real upload, so a sample could not have tested it anyway. All tests pass, and it cannot cause a duplicate upload.
-- **Chose not to request a sample video today.** The AI allowance resets at 07:00, so today's allowance also has to cover tomorrow's 05:00 upload, and this morning's check already used about six of the twenty requests. That squeeze is exactly how an upload lost its title yesterday.
+- **Chose not to request a paid sample today.** Today's AI allowance must also cover tomorrow's 05:00 upload, and this morning's check used about six of the twenty requests. That squeeze cost an upload its title yesterday.
 
 ### Security
 - Standing check clean: no credentials are stored in the project, and today's changes contain none.
@@ -82,8 +82,8 @@ Read the allocation series with
 ### Project management
 - **Done and closed your decision on length (#39).** When a change alters video length by a second or more, it must now also hold total time watched, not just seconds per view. Checked on the background-video switch, which did lengthen videos: it still passes.
 - **One thing only you can do:** the written rule shifts follow still says "watch-seconds only". Shifts cannot edit that file, so the one-line wording is in my closing note on #39 if you want it.
-- Ready work is still one item, below the target of three. The questions I generated this shift were all answered on the spot (see Research), so none stays queued.
-- **Friction:** "request a sample after 07:00" was the plan handed to this shift. It ignored that the 07:00 window also has to pay for the next morning's upload. A sample only fits on a day with no morning check, which is why making samples free matters.
+- **Ready work is now zero,** because the one ready item shipped. The questions I generated were all answered on the spot (see Research). Refilling it is the next shift's first job.
+- **Friction:** "request a sample after 07:00" was the plan handed to this shift. It ignored that the 07:00 window also has to pay for the next morning's upload. Free samples now cover most changes.
 
 ### Research
 - **Title style still makes no difference:** at a week old, 11, 10 and 9 seconds across roughly 40 videos each, the same answer as on 22 September.
@@ -94,10 +94,10 @@ Read the allocation series with
 - The topic-logging change for the question-picking tool still needs a sample video. Unlike today's fix, it adds a new AI call before rendering, so it does need one. It waits for free samples or a day with spare allowance.
 
 ### Next
-- Build the free sample mode, then use it for the topic-logging change. If the next morning upload loses its title, read the new failure reason before anything else.
+- Refill ready work. If the next morning upload loses its title, read the new failure reason first.
 
 ### Better?
-- **Than last shift:** yes. Two finished pieces of work shipped, where the last two shifts shipped none, and neither spent the allowance tomorrow's upload needs.
+- **Than last shift:** yes. Three finished pieces shipped, where the last two shifts shipped none, and the main limit on shipping is gone.
 - **Than ~10 shifts ago:** yes, modestly. Owner decisions now turn into working checks the same day. Nothing yet has moved the channel's numbers.
 - **Than ~100 shifts ago:** too early to say.
 
