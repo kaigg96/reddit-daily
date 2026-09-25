@@ -62,7 +62,7 @@ Read the allocation series with
 
 ---
 
-## 2026-09-25 (03:00) — nine quick questions answered from existing data; a blind spot in how we judge changes is closed
+## 2026-09-25 (03:00) — nine quick questions answered from existing data; a blind spot in how we judge changes is now flagged, with one decision for you
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
 
