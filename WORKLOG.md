@@ -81,6 +81,7 @@ Read the allocation series with
 ### Project management
 - **Channel still flat** at 11–12 seconds watched per view. The new opening is the right response: a change to what viewers see.
 - Nothing is waiting on your approval, and the process health check is clean.
+- **Tidying, for when convenient:** five of your own branches (the pre-trip work and four fixes from 23 September) are already fully in the live version. They can be deleted, but I've left them because they're yours.
 - **Friction, noted rather than acted on:** two finished changes each wait for a sample video. Shifts get one each, and only at hours that don't compete with an upload. This shift ran at 02:00, outside those hours, so the queue didn't move.
 
 ### Research
