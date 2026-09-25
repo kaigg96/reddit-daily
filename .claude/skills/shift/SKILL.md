@@ -59,8 +59,12 @@ evidence available that we are toiling.
 Allocating honestly:
 
 - **A lane with no actionable work gets 0%** — a finding, not a failure. Say so.
-- **An empty feature lane is a project-management problem.** Give that time to
-  PM to populate the backlog rather than inventing features to build.
+- **Count ready work, not work.** A blocked item is not supply. Run
+  `scripts/backlog_status.py`: it counts backlog items whose next step you can
+  take now. **Fewer than 3 ready is PM's first job** — generate and rank more
+  (`/backlog` §1–2) until there are 3. Research questions answerable from data
+  we already have (§0's research table) are always available. If generating
+  finds nothing above the bar, say what it considered and why; never pad.
 - **Research has no ceiling**, but its output is governed by the value bar: a
   hypothesis with a proposed test, no new documents. That bar stops it becoming
   busywork, not a percentage.
@@ -196,8 +200,9 @@ than idleness. Forbidden:
   mid-shift.**
 
 If a lane has nothing above that bar, the time goes to PM and research (§2),
-not back to the clock. Stopping early is the last resort: it means even
-planning and research had nothing worth doing. Say the queue is empty and why.
+not back to the clock. Stopping early is the last resort: it means nothing is
+`ready` and generating more (§2) found nothing above the bar. Say what it
+considered and why each fell short.
 
 ## 8. Leave the context no bigger than you found it
 
@@ -234,7 +239,8 @@ Before the shift ends — and early enough that it still happens if usage runs
 out mid-task:
 
 1. Commit work in progress on a branch; never leave `main` half-finished.
-2. Update `PRD.md` §0 if anything shipped; `TECH_DEBT.md` for findings you did
+2. Update `PRD.md` §0 if anything shipped, and keep every item's **Status**
+   true — it is what the ready count reads. `TECH_DEBT.md` for findings you did
    not fix.
 3. Prepend a `WORKLOG.md` entry **following the template in that file's
    header**. It is emailed to the owner verbatim as the shift report and is the
