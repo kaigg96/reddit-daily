@@ -6,15 +6,15 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `feature/v7-open-on-hook`
-- **Commit:** `fa8190d`
-- **When:** 2026-09-24T14:20:01Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 14.2 s, audio, no dead air
+- **Branch:** `feature/r4.4-slate-telemetry`
+- **Commit:** `2720369`
+- **When:** 2026-09-25T14:55:55Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 19.4 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/36011745814)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/36150514340)
 
 ## Last request
 
-- **Branch:** `feature/v7-open-on-hook`
-- **When:** 2026-09-24T14:20:01Z
+- **Branch:** `feature/r4.4-slate-telemetry`
+- **When:** 2026-09-25T14:55:55Z
 - **Outcome:** rendered -- see above
