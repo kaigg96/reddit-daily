@@ -755,6 +755,26 @@ def test_a_release_that_shifts_video_length_says_so():
     assert "not measurable" in insights.render_duration([mk("")], [mk("20.3")])
 
 
+def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
+    """The owner on #39: longer videos gain watch-seconds and lose views, so a
+    release that only lengthens them would read "keep" on watch-seconds alone."""
+    from types import SimpleNamespace as NS
+    mk = lambda d: insights.Video(video_id="v", published=None, meta={"duration_s": d})
+    assert insights.release_triggers([mk("20.4")], [mk("20.3")]) == (Metric.WATCH,)
+    triggers = insights.release_triggers([mk("22.0")], [mk("20.0")])
+    assert triggers == (Metric.WATCH, Metric.TOTAL)
+
+    side = NS(sufficient=True)
+    cmp = lambda m, d: NS(metric=m, delta=d, a=side, b=side, age_matched=True)
+    comparisons = [cmp(Metric.WATCH, 0.20), cmp(Metric.VIEWS, -0.30), cmp(Metric.TOTAL, -0.15)]
+    floors = {Metric.WATCH: 0.1, Metric.VIEWS: 0.5, Metric.TOTAL: 0.1}
+    assert insights.release_verdict(comparisons, floors).startswith("KEEP")
+    assert insights.release_verdict(comparisons, floors, triggers) == (
+        "REVERT — total_watch_s degraded beyond the channel's own drift")
+    assert insights.release_verdict(comparisons[:2], floors, triggers) == (
+        "NO VERDICT — total_watch_s was not compared")
+
+
 def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
     """R3. One snapshot at age 5 matches both 3 and 7 days within tolerance;
     pairing it with itself would report a perfect correlation."""

@@ -121,13 +121,15 @@ def release(version, key, target_age):
     if later:
         print(f"({later} upload(s) postdate {version} — excluded, so this compares it "
               f"with what it replaced rather than with its own successors)")
-    metrics = (Metric.WATCH, Metric.VIEWS)
+    triggers = insights.release_triggers(a, b)
+    metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
+        t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
     comparisons = [insights.compare(a, b, f"{key}={version}", f"before {version}",
                                     load.anchor, metric) for metric in metrics]
     # The floor comes from the era BEFORE the change. Measuring it on the
     # release's own uploads would let a volatile release excuse itself.
     floors = {m: insights.drift_floor(b, m) for m in metrics}
-    print(insights.render_release(comparisons, floors))
+    print(insights.render_release(comparisons, floors, triggers))
     print(insights.render_duration(a, b))
 
 
