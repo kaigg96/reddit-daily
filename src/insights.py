@@ -485,6 +485,19 @@ def scorecard(then, now, guardrails=None):
     return verdict, rows, notes
 
 
+# A Short replays in the feed until swiped and YouTube counts every loop, so an
+# average view above 100% of the video's length can only come from replays.
+# Thin videos are left out: at a handful of views one rewatcher decides it.
+REPLAY_MIN_VIEWS = 20
+
+
+def replay_share(videos, min_views=REPLAY_MIN_VIEWS):
+    """(replaying, eligible): of the videos with at least `min_views`, how many
+    average over 100% viewed. Backlog #9's first test — almost none, drop it."""
+    eligible = [x for x in videos if x.views >= min_views]
+    return sum(1 for x in eligible if x.avg_view_pct > 100), len(eligible)
+
+
 def age_adjusted_residuals(videos, now):
     """Residual of log-views against the channel's own log-age trend.
 

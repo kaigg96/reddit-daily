@@ -309,6 +309,9 @@ def main():
     p.add_argument("--zeros", action="store_true",
                    help="list 0-view videos, classified into suppression candidates / "
                         "cold-spell / non-public")
+    p.add_argument("--replays", action="store_true",
+                   help="how many videos average over 100%% viewed, which only "
+                        "replays can cause (backlog #9's first test)")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS])
     p.add_argument("--offline", action="store_true",
@@ -359,12 +362,25 @@ def main():
     if not videos:
         sys.exit("No analyzable uploads found.")
 
-    if args.compare:
+    if args.replays:
+        show_replays(videos)
+    elif args.compare:
         compare(videos, args.compare, args.metric, now)
     elif args.by:
         by_dimension(videos, args.by, args.metric, now)
     else:
         overview(videos, now)
+
+
+def show_replays(videos):
+    print(f"REPLAYS — videos with >= {insights.REPLAY_MIN_VIEWS} views averaging over 100% viewed")
+    groups = {"all": videos, **insights.split_by(videos, "format_version")}
+    for label, group in groups.items():
+        replaying, eligible = insights.replay_share(group)
+        if eligible < insights.MIN_COHORT:
+            print(f"  {label:<8} insufficient data ({eligible} eligible)")
+        else:
+            print(f"  {label:<8} {replaying}/{eligible} ({100 * replaying / eligible:.0f}%)")
 
 
 if __name__ == "__main__":
