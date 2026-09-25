@@ -297,6 +297,51 @@ def release_verdict(comparisons, floors=None):
             f"channel's own drift")
 
 
+def _ranks(xs):
+    order = sorted(range(len(xs)), key=lambda i: xs[i])
+    r = [0.0] * len(xs)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and xs[order[j + 1]] == xs[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            r[order[k]] = (i + j) / 2
+        i = j + 1
+    return r
+
+
+def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH):
+    """(n, Spearman rho) between each upload's early and late reading.
+
+    Research row R3: if the early reading ranks uploads as the late one does,
+    a release can be judged sooner. Within tolerance one weekly snapshot can
+    match both ages, which would correlate a reading with itself; a pair is
+    kept only when its two readings came from different snapshots."""
+    early, late = load_videos_at_age(early_days), load_videos_at_age(late_days)
+    if not early.videos or not late.videos:
+        return 0, None
+    e = {v.video_id: v for v in early.videos}
+    pairs = []
+    for v in late.videos:
+        u = e.get(v.video_id)
+        if u is None:
+            continue
+        age_u = (early.anchor - u.published).total_seconds() / 86400
+        age_v = (late.anchor - v.published).total_seconds() / 86400
+        if abs(age_v - age_u) < 1:
+            continue    # same snapshot
+        pairs.append((getattr(u, metric), getattr(v, metric)))
+    if len(pairs) < 3:
+        return len(pairs), None
+    rx, ry = _ranks([p[0] for p in pairs]), _ranks([p[1] for p in pairs])
+    mx, my = statistics.mean(rx), statistics.mean(ry)
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    sx = math.sqrt(sum((a - mx) ** 2 for a in rx))
+    sy = math.sqrt(sum((b - my) ** 2 for b in ry))
+    return len(pairs), (cov / (sx * sy) if sx and sy else None)
+
+
 def median_duration(videos):
     """Median logged video length, or None when no video records one.
 
