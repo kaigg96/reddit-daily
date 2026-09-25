@@ -196,9 +196,18 @@ def build(worklog, ledger, since_sha, run_url=""):
 
     cost = last_cost(ledger)
     if cost:
-        out.append(f"*{cost.get('turns','?')} steps · "
-                   f"{cost.get('duration_min','?')} min · "
-                   f"{cost.get('quota_units','?')} quota units*")
+        # Minutes against the shift's budget, and the ready work it left: the
+        # two numbers that show a shift stopping with work available.
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import backlog_status
+        try:
+            ready = f"{len(backlog_status.ready(open(backlog_status.PRD).read()))}"
+        except OSError:
+            ready = "?"
+        out.append(f"*{cost.get('duration_min','?')} of 25 min · "
+                   f"{cost.get('turns','?')} steps · "
+                   f"{cost.get('quota_units','?')} quota units · "
+                   f"ready work left: {ready} (floor {backlog_status.FLOOR})*")
     if run_url:
         out.append(f"*[Full log]({run_url})*")
     return "\n".join(out)

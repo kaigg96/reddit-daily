@@ -31,6 +31,35 @@ revisit trigger.
 
 ---
 
+## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
+
+A shift's supply is backlog items whose next step can be taken **now**
+(`scripts/backlog_status.py`). Below 3 `ready`, generating and ranking more is
+the PM lane's first job; research questions answerable from existing data are
+the source that never runs dry. The unused-capacity alarm reads minutes from
+the usage ledger, and every shift report states minutes used and ready work left.
+
+**Alternatives:** seeding problems by hand when shifts run short (done once,
+and correctly called a bandaid); forcing a second agent turn onto leftover time
+(mechanical, but spends quota whether or not anything is worth doing).
+
+**Why:** generation triggered on "the feature lane is empty", and blocked items
+kept it from ever looking empty; the alarm compared self-reported percentages,
+which always add up, so two short shifts went unflagged. With one experiment
+live at a time and each baking ~2 weeks, a waiting feature lane is the normal
+state, not the exception.
+
+**Assumptions:**
+1. Generation keeps finding work above the bar — research questions especially.
+2. Shifts keep Status values true. A test fails a push on an unknown status or a
+   row cut off from its table; truthfulness itself is the audit's to check.
+3. A floor of 3 fills a 25-minute shift.
+
+**Revisit when:** the alarm fires with ready work at or above the floor (3
+false, or shifts stop with work available); ready items pile up undone (1 is
+producing padding); generation keeps reporting nothing above the bar (1 false —
+itself a finding about the channel).
+
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
 The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
@@ -169,8 +198,9 @@ unspent (8 of ~25 minutes on 09-24, 7 on 09-25), the second despite being told
 its exact deadline. Assumption 1 is under strain rather than false: both shifts
 did real work, then judged every lane done. The limiter was upstream — shipping
 waits on rationed sample videos — and D10 makes such constraints PM and
-research problems. Response: the ration itself is now PM's top keeper (PRD §0).
-Check again after five shifts.
+research problems. The first response -- seeding the sample-video ration as PM's top item -- the
+owner called a bandaid the same evening: it refills the queue once. The
+durable response is D11.
 
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 

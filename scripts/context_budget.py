@@ -32,6 +32,7 @@ that is what skills and PRD §6 are for, and moving detail there is usually the
 right fix when a budget is breached.
 """
 import argparse
+import csv
 import glob
 import subprocess
 import json
@@ -48,7 +49,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALWAYS = {"CLAUDE.md": 1200}
 ORIENT = {
     "README.md#Picking this up": 400,
-    "PRD.md#0.": 1800,
+    # 1800 -> 1950 on 2026-09-25: every backlog row gained a Status and the
+    # section a research-questions queue -- what the ready-work count reads
+    # (D11). The tracker became machine-readable, not longer for its own sake.
+    "PRD.md#0.": 1950,
     # Raised from 900 on 2026-09-20: it contradicted the 10-entry retention
     # cap in CORPUS below. Entries run ~200 words, so ten of them plus the
     # template header can never fit in 900 — one of the two controls had to
@@ -73,7 +77,9 @@ ORIENT = {
     # gained a way to propose the one change they cannot push (workflow files,
     # applied on the owner's label) and to see why an upload failed. Two
     # mechanisms that remove the owner from the loop, not prose creep.
-    ".claude/skills/shift/SKILL.md": 2050,
+    # 2050 -> 2100 on 2026-09-25: the ready-work floor (D11) replaced "an empty
+    # lane is PM's problem", which never fired while blocked items filled it.
+    ".claude/skills/shift/SKILL.md": 2100,
     ".claude/skills/pickup/SKILL.md": 700,
 }
 
@@ -295,8 +301,31 @@ def allocation_history():
 
 
 # Process-health thresholds. Guesses, like the caps — see DECISIONS.md D4.
-WASTE_SHIFTS = 3      # consecutive shifts using far less than planned
-WASTE_RATIO = 0.6     # ...where actual total is below this share of planned
+WASTE_SHIFTS = 3      # consecutive shifts using far less than their time
+WASTE_RATIO = 0.6     # ...where minutes actually run are below this share
+SHIFT_MINUTES = 25    # the hand-over deadline shift.yml gives a shift (killed at 30)
+LEDGER = os.path.join(ROOT, ".github", "shift-usage.csv")
+
+
+def shift_minutes(path=None):
+    """Minutes each completed shift ran, most recent first -- from the usage
+    ledger the workflow writes, which a shift cannot inflate. The old check
+    compared planned with reported *percentages*, and a shift reports
+    percentages of whatever time it used, so an 8-minute shift read as
+    "planned 100%, used 100%" and two short shifts went unflagged."""
+    try:
+        rows = list(csv.DictReader(open(path or LEDGER)))
+    except OSError:
+        return []
+    out = []
+    for r in reversed(rows):
+        if r.get("is_error") == "1":
+            continue            # a failed run is a different problem
+        try:
+            out.append(float(r["duration_min"]))
+        except (KeyError, ValueError):
+            continue
+    return out
 STARVED_SHIFTS = 5    # consecutive shifts a lane sat at 0%
 
 
@@ -331,24 +360,27 @@ def health(raise_issues=False):
     rows = _allocation_rows()
     problems = []
 
-    recent = rows[:WASTE_SHIFTS]
-    if len(recent) == WASTE_SHIFTS:
-        planned = sum(p for r in recent for p, _ in r.values())
-        actual = sum(a for r in recent for _, a in r.values())
-        if planned and actual / planned < WASTE_RATIO:
+    minutes = shift_minutes()[:WASTE_SHIFTS]
+    if len(minutes) == WASTE_SHIFTS:
+        used = sum(minutes) / (WASTE_SHIFTS * SHIFT_MINUTES)
+        if used < WASTE_RATIO:
+            sys.path.insert(0, os.path.join(ROOT, "scripts"))
+            import backlog_status
+            ready = len(backlog_status.ready(open(backlog_status.PRD).read()))
             problems.append((
                 "process-capacity-underused",
-                "Shifts are consistently using far less than they plan",
-                f"The last {WASTE_SHIFTS} shifts used {actual / planned:.0%} of "
-                f"planned capacity (threshold {WASTE_RATIO:.0%}).\n\n"
-                "Slices are ceilings, so landing under plan is fine — but this "
-                "much, this consistently, means we are not finding valuable "
-                "work rather than working efficiently.\n\n"
-                "Worth deciding: is the backlog thin (a project-management "
-                "problem), are the allocations wrong, or should unused budget "
-                "roll into another lane instead of ending the shift?",
-                "Look at what the lanes actually had available. If the backlog "
-                "is genuinely thin, that is the finding — not the allocation."))
+                "Shifts are ending with most of their time unspent",
+                f"The last {WASTE_SHIFTS} shifts ran "
+                f"{', '.join(f'{m:.0f}' for m in minutes)} of their {SHIFT_MINUTES} "
+                f"minutes ({used:.0%}, threshold {WASTE_RATIO:.0%}), from the usage "
+                f"ledger. Ready work in the tracker now: {ready} "
+                f"(floor {backlog_status.FLOOR}).\n\n"
+                "Ending early is right only when nothing is ready and generating "
+                "more found nothing above the bar. Below the floor, replenishing "
+                "was the project-management lane's first job and was skipped; at "
+                "or above it, shifts are stopping with work available.",
+                "Read why each of the last three shifts stopped (WORKLOG) and fix "
+                "that reason, not the symptom."))
 
     for lane in LANES:
         zeros = 0
