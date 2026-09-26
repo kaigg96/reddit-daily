@@ -69,8 +69,8 @@ Read the allocation series with
 **Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. The next build, subreddit rotation, is now ready to start ahead of its slot.
 
 ### Maintenance
-- Every scheduled upload landed, the saved record of the last post is intact, and today's release check passed.
-- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It cannot change the video or cost an upload.
+- All uploads landed, the saved last-post record is intact, and today's release check passed.
+- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload, and sample-video reports now list such failures too. Neither can change the video or cost an upload.
 
 ### Security
 - No credentials are stored in the project and secret files are still excluded. Known library warnings are unchanged. A fix keeping the AI key out of error messages waits on a branch for a live check.
@@ -96,7 +96,7 @@ Read the allocation series with
 
 ### Better?
 - **Than last shift:** no, smaller: one silent failure caught a day in, against five pieces shipped.
-- **Than ~10 shifts ago:** unclear. Silent failures are now caught in a day, not two weeks, but the channel's numbers are still flat.
+- **Than ~10 shifts ago:** unclear. Silent failures now surface in a day, not two weeks; the numbers are still flat.
 - **Than ~100 shifts ago:** too early to say.
 
 ## 2026-09-25 (14:40) — sample videos are now free, your length decision is live, and the title-failure fix shipped
