@@ -62,22 +62,22 @@ Read the allocation series with
 
 ---
 
-## 2026-09-26 (13:47) — the new topic logging was failing silently; it now records why, and a diagnosis of why ready work keeps running out
+## 2026-09-26 (13:47) — the new topic logging was failing silently; it now records why, and ready work is no longer zero
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→30 · security 5→5 · pm 40→30 · research 20→15 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→15 · feature 0→0 · close 10→10
 
-**Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. Ready work is still zero because every build idea queues behind the one experiment running now. I've recommended a way round that.
+**Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. The next build, subreddit rotation, is now ready to start ahead of its slot.
 
 ### Maintenance
 - Every scheduled upload landed, the saved record of the last post is intact, and today's release check passed.
-- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It changes nothing in the video and cannot cost an upload.
+- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It cannot change the video or cost an upload.
 
 ### Security
-- No credentials are stored in the project and secret files are still excluded. The known library warnings are unchanged and already logged. Today's fix records only the error type, never its text, which can contain a key.
+- No credentials are stored in the project and secret files are still excluded. The known library warnings are unchanged and already logged. A fix that stops the AI key appearing in error messages is ready on a branch; it needs a live check first.
 
 ### Project management
-- **Ready work is still zero, and the automatic health check flagged that recent shifts used only about half their time.** I added the cause to that note for you. Every build idea waits on the one experiment running now, which is read around 4 October, and questions our data can answer run out between weekly data drops. **Recommendation:** allow one alternating-days test alongside a whole-video change. The title-style test ran that way beside three releases and still gave a clean answer. No rule changed; the next shift should rank it in a separate pass.
-- Corrected the tracker, which said the topic logging was working.
+- **The automatic health check flagged that recent shifts used only about half their time**, with ready work at zero. Cause: every build idea waits on the running experiment, and questions our data can answer run out between weekly data drops. I first recommended running a second test on alternating days. Two blind rankings both put it last, so I withdrew it on the issue. Both ranked this near the top instead: **build the subreddit rotation now so it ships the day the current experiment is read.** It is now marked ready.
+- Corrected the tracker, which said topic logging worked.
 - **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long paragraph that is easy to miss. It cost about ten minutes.
 
 ### Research
@@ -92,10 +92,10 @@ Read the allocation series with
 - The note on unused shift time is with you. Nothing else waits on you.
 
 ### Next
-- Read tonight's upload record; if the topic column shows a failure reason, fix it. Rank the alternating-days proposal in a separate pass. After the 28 September data drop, answer the two waiting research questions.
+- Read tonight's upload record; if the topic column shows a failure reason, fix it. After 07:00, check the prepared key-safety fix against the live AI service and merge it. Build the subreddit rotation. After the 28 September data drop, answer the two waiting research questions.
 
 ### Better?
-- **Than last shift:** no, smaller. One silent failure caught a day in, against five pieces shipped.
+- **Than last shift:** no, smaller: one silent failure caught a day in, against five pieces shipped.
 - **Than ~10 shifts ago:** unclear. Silent failures are now caught in a day, not two weeks, but the channel's numbers are still flat.
 - **Than ~100 shifts ago:** too early to say.
 
