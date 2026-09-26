@@ -246,6 +246,15 @@ Questions:
 Reply with JSON only: a list of {n} topic strings, in order."""
 
 
+class SlateFailed(Exception):
+    """Why the slate went unlogged, as `kind`: safe to write to the log because
+    it is never the exception text, which for an HTTPError embeds the keyed URL."""
+
+    def __init__(self, kind):
+        super().__init__(kind)
+        self.kind = kind
+
+
 def classify_slate(titles):
     """Topics for every eligible candidate, in rank order, from ONE request.
 
@@ -257,8 +266,10 @@ def classify_slate(titles):
     Titles only, no comments, which is what makes one request enough. It runs
     on config.SLATE_MODEL, whose free allowance is separate from the model
     titles and the screen use. Never retried. Returns a list the length of
-    `titles` ("" where the answer was not a known topic), or None on any
-    failure. Nothing here can block an upload.
+    `titles` ("" where the answer was not a known topic), None for an empty
+    slate, and raises SlateFailed on any failure so the log records why: the
+    first two live runs logged nothing and the reason only reached the console.
+    The caller catches it, so nothing here can block an upload.
     """
     if not titles:
         return None
@@ -271,9 +282,12 @@ def classify_slate(titles):
         got = json.loads(match.group(0)) if match else None
     except Exception as e:
         # never echo the exception body: HTTPError messages embed the keyed URL
-        print(f"Slate: topic call failed with {type(e).__name__} (not logged this run)")
-        return None
+        status = getattr(getattr(e, "response", None), "status_code", None)
+        kind = f"{type(e).__name__} {status}" if status else type(e).__name__
+        print(f"Slate: topic call failed with {kind} (not logged this run)")
+        raise SlateFailed(kind) from None
     if not isinstance(got, list) or len(got) != len(titles):
-        print("Slate: topic call returned the wrong shape (not logged this run)")
-        return None
+        kind = f"shape {len(got)}/{len(titles)}" if isinstance(got, list) else "shape"
+        print(f"Slate: topic call returned the wrong {kind} (not logged this run)")
+        raise SlateFailed(kind)
     return [t if t in TOPICS else "" for t in (str(x).strip().lower() for x in got)]

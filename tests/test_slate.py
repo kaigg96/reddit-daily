@@ -66,23 +66,31 @@ def test_unknown_labels_are_blanked_not_trusted(monkeypatch):
     assert screen.classify_slate(TITLES) == ["money-work", "", "nostalgia"]
 
 
-@pytest.mark.parametrize("reply", ['["money-work"]', "no json", '{"a": 1}'])
-def test_a_wrong_shape_logs_nothing_rather_than_misaligned_ranks(monkeypatch, reply):
+@pytest.mark.parametrize("reply, kind", [('["money-work"]', "shape 1/3"),
+                                         ("no json", "shape"), ('{"a": 1}', "shape")])
+def test_a_wrong_shape_logs_why_rather_than_misaligned_ranks(monkeypatch, reply, kind):
     monkeypatch.setattr(screen.llm, "_generate", lambda *a, **k: reply)
-    assert screen.classify_slate(TITLES) is None
+    with pytest.raises(screen.SlateFailed) as e:
+        screen.classify_slate(TITLES)
+    assert e.value.kind == kind
 
 
-def test_a_failed_call_is_not_retried_and_does_not_raise(monkeypatch, capsys):
+def test_a_failed_call_is_not_retried_and_names_only_type_and_status(monkeypatch, capsys):
     calls = []
+
+    class HTTPError(Exception):
+        response = type("R", (), {"status_code": 429})()
 
     def boom(*a, **k):
         calls.append(1)
-        raise RuntimeError("HTTPError 429 for url ...?key=secret")
+        raise HTTPError("429 for url ...?key=secret")
 
     monkeypatch.setattr(screen.llm, "_generate", boom)
-    assert screen.classify_slate(TITLES) is None
+    with pytest.raises(screen.SlateFailed) as e:
+        screen.classify_slate(TITLES)
+    assert e.value.kind == "HTTPError 429"
     assert len(calls) == 1
-    assert "secret" not in capsys.readouterr().out
+    assert "secret" not in capsys.readouterr().out and e.value.__cause__ is None
 
 
 def test_the_model_reaches_the_url(monkeypatch):
@@ -117,7 +125,15 @@ def test_a_classifier_that_raises_costs_only_the_column(selection):
         raise RuntimeError("anything")
 
     post = content.select_post(FakeReddit(TITLES), "", slate_classifier=boom)
-    assert post.title == TITLES[0] and post.slate_topics == ""
+    assert post.title == TITLES[0] and post.slate_topics == "!RuntimeError"
+
+
+def test_a_failed_slate_logs_why(selection):
+    def failed(titles):
+        raise screen.SlateFailed("Timeout")
+
+    post = content.select_post(FakeReddit(TITLES), "", slate_classifier=failed)
+    assert post.title == TITLES[0] and post.slate_topics == "!Timeout"
 
 
 def test_slate_ranks_match_candidate_rank_after_filters(selection):

@@ -22,7 +22,7 @@ class PostContent:
     candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
     topic: str = ""           # R4.3 taxonomy, from the screen call (free)
     screen_source: str = ""   # gemini | backstop — which path actually screened this
-    slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined
+    slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined; "!<why>" if the call failed
 
 
 def make_reddit():
@@ -91,6 +91,8 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             slate = slate_classifier([p.title for p in candidates])
         except Exception as e:  # telemetry must never cost an upload
             print(f"Slate: classifier raised {type(e).__name__} (not logged this run)")
+            # "!" + why, so a failed call is told apart from one that never ran
+            slate_topics = "!" + getattr(e, "kind", type(e).__name__)
             slate = None
         if slate:
             slate_topics = "|".join(t or "?" for t in slate)
