@@ -50,9 +50,12 @@ def _generate(prompt, thinking_budget=0, model=None):
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
         body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
+    # The key goes in a header, not the URL: HTTP errors quote the URL, which
+    # put the key in any log or file that recorded a failed request.
     resp = requests.post(
-        f"{_ENDPOINT.format(model=model)}?key={os.environ['GEMINI_API_KEY']}",
-        headers={"Content-Type": "application/json"},
+        _ENDPOINT.format(model=model),
+        headers={"Content-Type": "application/json",
+                 "x-goog-api-key": os.environ["GEMINI_API_KEY"]},
         json=body,
         timeout=_TIMEOUT,
     )

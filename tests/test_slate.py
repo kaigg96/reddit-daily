@@ -103,12 +103,30 @@ def test_the_model_reaches_the_url(monkeypatch):
         def json(self):
             return {"candidates": [{"content": {"parts": [{"text": "[]"}]}}]}
 
-    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: seen.append(url) or R())
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: seen.append((url, kw)) or R())
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     llm._generate("x", model="some-other-model")
     llm._generate("x")
-    assert "/models/some-other-model:generateContent" in seen[0]
-    assert f"/models/{llm.MODEL}:generateContent" in seen[1]
+    assert "/models/some-other-model:generateContent" in seen[0][0]
+    assert f"/models/{llm.MODEL}:generateContent" in seen[1][0]
+
+
+def test_the_key_travels_in_a_header_never_the_url(monkeypatch):
+    """An HTTPError quotes the URL, so a key in it lands in every log."""
+    seen = []
+
+    class R:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"candidates": [{"content": {"parts": [{"text": "[]"}]}}]}
+
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: seen.append((url, kw)) or R())
+    monkeypatch.setenv("GEMINI_API_KEY", "sekrit")
+    llm._generate("x")
+    url, kw = seen[0]
+    assert "sekrit" not in url and kw["headers"]["x-goog-api-key"] == "sekrit"
 
 
 # --- selection ----------------------------------------------------------------
