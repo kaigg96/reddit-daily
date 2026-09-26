@@ -62,15 +62,15 @@ Read the allocation series with
 
 ---
 
-## 2026-09-26 (13:47) — the new topic logging was failing silently; it now records why, and ready work is no longer zero
+## 2026-09-26 (13:47) — the new topic logging and sample videos were silently failing; both fixed, and ready work is no longer zero
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→10 · feature 0→5 · close 10→10
 
-**Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. The next build, subreddit rotation, is now ready to start ahead of its slot.
+**Summary:** Google retired the cheaper AI model we switched to yesterday, so the new topic logging and the AI parts of sample videos had silently failed since. Both now use its replacement, checked live. The next build, subreddit rotation, is ready to start ahead of its slot.
 
 ### Maintenance
 - All uploads landed, the saved last-post record is intact, and today's release check passed.
-- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload, and sample-video reports now list such failures too. Neither can change the video or cost an upload.
+- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. The cause: Google withdrew the model it used. Moved it and sample videos to the replacement and checked it live; failures now record their reason, and sample reports list them. Uploads' own AI model is unchanged.
 
 ### Security
 - No credentials are stored in the project and secret files are still excluded. Known library warnings are unchanged. A fix keeping the AI key out of error messages waits on a branch for a live check.
@@ -92,7 +92,7 @@ Read the allocation series with
 - The note on unused shift time is with you; nothing else is.
 
 ### Next
-- Read tonight's upload record; if the topic column shows a failure reason, fix it. After 07:00, check the prepared key-safety fix against the live AI service and merge it. Finish the subreddit rotation: its mechanism is built on a branch; picking subreddits and screening them remain. After the 28 September data drop, answer the two waiting research questions.
+- Confirm tonight's upload logged topics. After 07:00, update the key-safety branch to today's change, check it live, merge. Finish the subreddit rotation: its mechanism is built on a branch; picking subreddits and screening them remain. After the 28 September data drop, answer the two waiting research questions.
 
 ### Better?
 - **Than last shift:** no, smaller: one silent failure caught a day in, against five pieces shipped.
