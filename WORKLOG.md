@@ -77,19 +77,19 @@ Read the allocation series with
 
 ### Project management
 - **The automatic health check flagged that recent shifts used only about half their time**, with ready work at zero. Cause: every build idea waits on the running experiment, and questions our data can answer run out between weekly data drops. I first recommended running a second test on alternating days. Two blind rankings both put it last, so I withdrew it on the issue. Both ranked this near the top instead: **build the subreddit rotation now so it ships the day the current experiment is read.** It is now marked ready.
-- Corrected the tracker, which said topic logging worked.
-- **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long paragraph that is easy to miss. It cost about ten minutes.
+- Corrected the tracker: topic logging was broken, and the subreddit test still judged on views, which you ruled out.
+- **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long, easily missed paragraph.
 
 ### Research
-- **Does a failed title hurt a video?** Now answerable from older uploads too: 12 went out titled with the raw Reddit question. Today the answer is "not enough data" (7 are old enough, 8 needed). They lean worse, 8 seconds watched against 10. The 28 September data drop should settle it. If failed titles do no worse, the title step could be dropped to free AI allowance.
+- **Does a failed title hurt a video?** Now answerable from older uploads too: 12 went out titled with the raw Reddit question. Today the answer is "not enough data" (7 are old enough, 8 needed). They lean worse, 8 seconds against 10. The 28 September data drop should settle it. If failed titles do no worse, the title step could be dropped to free AI allowance.
 - **Background clips:** one clip leads by 18%, mostly because its videos run longer; likely luck. Not acted on.
 - **Music:** all 117 measured uploads used the same track, so music cannot be tested until more tracks are added. That is your standing task.
 
 ### Feature work
-- Nothing this shift: every build item waits on the current experiment.
+- Nothing shipped: every build item waits on the current experiment.
 
 ### Blocked
-- The note on unused shift time is with you. Nothing else waits on you.
+- The note on unused shift time is with you; nothing else is.
 
 ### Next
 - Read tonight's upload record; if the topic column shows a failure reason, fix it. After 07:00, check the prepared key-safety fix against the live AI service and merge it. Build the subreddit rotation. After the 28 September data drop, answer the two waiting research questions.
