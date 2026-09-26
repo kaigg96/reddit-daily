@@ -639,6 +639,10 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # A failed title call ships the Reddit question verbatim. title_ok only
+    # exists from 2026-09-19; comparing the two titles covers the older rows.
+    t = (r.get("video_title") or "").strip()
+    r["title_source"] = "" if not (q and t) else "raw" if t == q else "generated"
     # ~20 s: the logged median duration is 20.2 s (2026-09-25).
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"

@@ -62,6 +62,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 2026-09-28 snapshot | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
+| R2 | blocked: 2026-09-28 snapshot | **Does a failed title cost watch-seconds?** Raw-question titles read 8.0 vs 10.0 at 7 days, n=7 — refused 2026-09-26 | `report.py --at-age 7 --compare title_source=raw`. Null → the title call buys nothing and could free Gemini cap; worse beyond drift → title reliability is worth work. |
 
 #### Owner tasks (anytime, no version bump)
 - ~~**B-roll library** (R1.3)~~ ✅ 2026-08-15 — 7 dark/moody Pexels clips live (`assets/broll/`, sources in CREDITS.md). Nine curated, two dropped at the R1.4 legibility gate for washing out white captions. Pipeline auto-switched off the procedural background; `bg_clip` logged per upload so per-clip performance is separable later. Expectation (§4): first-impression/swipe margin, not the watch budget.

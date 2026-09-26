@@ -734,6 +734,15 @@ def test_question_length_splits_at_the_logged_median():
     assert length("") == ""
 
 
+def test_title_source_marks_uploads_that_shipped_the_raw_question():
+    """Research row R2: does a failed title cost watch-seconds?"""
+    source = lambda q, t: insights._with_derived_dimensions(
+        {"post_title": q, "video_title": t})["title_source"]
+    assert source("What is it?", " What is it? ") == "raw"
+    assert source("What is it?", "You Won't Believe It!") == "generated"
+    assert source("What is it?", "") == ""
+
+
 def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
     """Research row R2: question length within similar-length videos."""
     rows = [{"post_title": "q", "duration_s": d} for d in ("18.0", "20.0", "24.5", "")]
