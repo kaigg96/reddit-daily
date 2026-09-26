@@ -147,3 +147,22 @@ def test_slate_ranks_match_candidate_rank_after_filters(selection):
 
 def test_no_classifier_means_no_column(selection):
     assert content.select_post(FakeReddit(TITLES), "").slate_topics == ""
+
+
+def test_thinking_budget_goes_only_to_models_that_accept_it(monkeypatch):
+    """Gemini 3.x returns 400 on thinkingBudget; 2.5 needs it to stay fast."""
+    bodies = []
+
+    class R:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"candidates": [{"content": {"parts": [{"text": "[]"}]}}]}
+
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: bodies.append(kw["json"]) or R())
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+    llm._generate("x", model="gemini-2.5-flash")
+    llm._generate("x", model="gemini-3.5-flash-lite")
+    assert bodies[0]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
+    assert "generationConfig" not in bodies[1]

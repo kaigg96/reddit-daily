@@ -291,4 +291,4 @@ def test_production_calls_keep_the_production_model(monkeypatch):
 
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     """The free tier is counted per model: a sample must not starve an upload."""
-    assert "/gemini-2.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
+    assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)

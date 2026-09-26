@@ -62,7 +62,7 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel), so it spends that model's
 # allowance, never the one titles and the screen share. $0 either way (#22).
-SLATE_MODEL = "gemini-2.5-flash-lite"
+SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since at least 2026-09-25
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label

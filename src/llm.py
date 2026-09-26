@@ -29,7 +29,7 @@ MODEL = "gemini-2.5-flash"
 # with its own allowance, so a sample never spends the requests the next
 # upload needs -- the 07:00 window also pays for the following 05:00 upload.
 # Release validation does not set DRY_RUN, so it still tests MODEL.
-SAMPLE_MODEL = "gemini-2.5-flash-lite"
+SAMPLE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 "no longer available to new users" (2026-09-26)
 
 # Generous because it is now only a backstop against a pathological response,
 # not a routine limit — with thinking off, calls land in about a second.
@@ -44,11 +44,12 @@ def _generate(prompt, thinking_budget=0, model=None):
     task where reasoning demonstrably helps. `model` exists because the free
     tier is counted per model: a caller on another model draws on its own
     daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"thinkingConfig": {"thinkingBudget": thinking_budget}},
-    }
     model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
+    body = {"contents": [{"parts": [{"text": prompt}]}]}
+    # Gemini 3.x answers thinkingBudget with HTTP 400 (measured 2026-09-26),
+    # so the budget goes only to the 2.5 models that take it.
+    if model.startswith("gemini-2.5"):
+        body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
     resp = requests.post(
         f"{_ENDPOINT.format(model=model)}?key={os.environ['GEMINI_API_KEY']}",
         headers={"Content-Type": "application/json"},
