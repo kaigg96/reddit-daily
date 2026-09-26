@@ -62,6 +62,17 @@ def _comment_pool(post, limit):
     ][:limit]
 
 
+def subreddit_for_run(now, subreddits=None):
+    """R4.1: the subreddit this run draws from, deterministic per run.
+
+    Morning and evening take consecutive entries and the start moves on a day
+    each day, so every subreddit gets both slots over a rotation; indexing on
+    runs alone would pin each of two subreddits to one slot, confounding the
+    comparison with upload time."""
+    subs = subreddits or config.SUBREDDITS
+    return subs[(now.toordinal() + (now.hour >= 12)) % len(subs)]
+
+
 def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, on_verdict=None,
                 slate_classifier=None):
     """Pick the first candidate that passes the basic filters and the optional

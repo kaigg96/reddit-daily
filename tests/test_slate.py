@@ -184,3 +184,32 @@ def test_thinking_budget_goes_only_to_models_that_accept_it(monkeypatch):
     llm._generate("x", model="gemini-3.5-flash-lite")
     assert bodies[0]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
     assert "generationConfig" not in bodies[1]
+
+
+# --- R4.1 subreddit rotation ---------------------------------------------------
+
+def _runs(days):
+    import datetime
+    start = datetime.datetime(2026, 10, 5, 5, tzinfo=datetime.timezone.utc)
+    for d in range(days):
+        for hour in (5, 17):
+            yield (hour, start.replace(hour=hour) + datetime.timedelta(days=d))
+
+
+def test_rotation_gives_every_subreddit_both_slots():
+    subs = ["AskReddit", "NoStupidQuestions"]
+    seen = {(s, h): 0 for s in subs for h in (5, 17)}
+    for hour, now in _runs(6):
+        seen[(content.subreddit_for_run(now, subs), hour)] += 1
+    assert set(seen.values()) == {3}
+
+
+def test_rotation_never_repeats_a_subreddit_within_a_day():
+    subs = ["AskReddit", "NoStupidQuestions", "AskUK"]
+    picks = [content.subreddit_for_run(now, subs) for _, now in _runs(3)]
+    assert all(picks[i] != picks[i + 1] for i in range(0, len(picks), 2))
+    assert {picks.count(s) for s in subs} == {2}
+
+
+def test_the_shipped_list_is_askreddit_only_until_the_screen_is_replayed():
+    assert content.subreddit_for_run(next(_runs(1))[1]) == "AskReddit"

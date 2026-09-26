@@ -28,11 +28,13 @@ def main():
     prev_title = ""
     if config.PREV_POST_FILE.exists():
         prev_title = config.PREV_POST_FILE.read_text().strip()
+    subreddit_name = content.subreddit_for_run(datetime.datetime.now(datetime.timezone.utc))
+
     # R4.6: log every non-pass verdict for weekly false-positive audit.
     def record_verdict(post_title, result, action):
         row = {
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-            "subreddit": "AskReddit",
+            "subreddit": subreddit_name,
             "post_title": post_title,
             "action": action,
             # A demoted row's payload is the category we chose not to skip on.
@@ -51,6 +53,7 @@ def main():
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,
+            subreddit_name=subreddit_name,
             screener=screen.screen, on_verdict=record_verdict,
             slate_classifier=screen.classify_slate,
         )
