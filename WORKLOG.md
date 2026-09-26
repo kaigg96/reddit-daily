@@ -62,6 +62,43 @@ Read the allocation series with
 
 ---
 
+## 2026-09-26 (13:47) — the new topic logging was failing silently; it now records why, and a diagnosis of why ready work keeps running out
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→30 · security 5→5 · pm 40→30 · research 20→15 · feature 0→0 · close 10→10
+
+**Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. Ready work is still zero because every build idea queues behind the one experiment running now. I've recommended a way round that.
+
+### Maintenance
+- Every scheduled upload landed, the saved record of the last post is intact, and today's release check passed.
+- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It changes nothing in the video and cannot cost an upload.
+
+### Security
+- Standing check clean: no credentials are stored in the project, and the secret files are still excluded. Today's fix records only the type of error, never its text, which can contain a key.
+
+### Project management
+- **Ready work is still zero, and the automatic health check flagged that recent shifts used only about half their time.** I added the cause to that note for you. Every build idea waits on the one experiment running now, which is read around 4 October, and questions our data can answer run out between weekly data drops. **Recommendation:** allow one alternating-days test alongside a whole-video change. The title-style test ran that way beside three releases and still gave a clean answer. No rule changed; the next shift should rank it in a separate pass.
+- Corrected the tracker, which said the topic logging was working.
+- **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long paragraph that is easy to miss. It cost about ten minutes.
+
+### Research
+- **Does a failed title hurt a video?** Now answerable from older uploads too: 12 went out titled with the raw Reddit question. Today the answer is "not enough data" (7 are old enough, 8 needed). They lean worse, 8 seconds watched against 10. The 28 September data drop should settle it. If failed titles do no worse, the title step could be dropped to free AI allowance.
+- **Background clips:** one clip leads by 18%, mostly because its videos run longer; likely luck. Not acted on.
+- **Music:** all 117 measured uploads used the same track, so music cannot be tested until more tracks are added. That is your standing task.
+
+### Feature work
+- Nothing this shift: every build item waits on the current experiment.
+
+### Blocked
+- The note on unused shift time is with you. Nothing else waits on you.
+
+### Next
+- Read tonight's upload record. If the topic column shows a failure reason, fix that cause. Rank the alternating-days proposal in a separate pass. After the 28 September data drop, answer the two waiting research questions.
+
+### Better?
+- **Than last shift:** no, smaller. One silent failure caught a day in, against five pieces shipped.
+- **Than ~10 shifts ago:** unclear. Silent failures are now caught in a day, not two weeks, but the channel's numbers are still flat.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-25 (14:40) — sample videos are now free, your length decision is live, and the title-failure fix shipped
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 35→25 · research 20→10 · feature 10→25 · close 10→10
@@ -144,40 +181,3 @@ Read the allocation series with
 - **Than last shift:** yes. The tool can now answer "does this kind of video do better?" fairly. The check that will judge the new opening now covers a blind spot it had.
 - **Than ~10 shifts ago:** yes, modestly. Research now closes questions within a shift: one parked idea was dropped on evidence today. None has yet changed what we ship.
 - **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-25 — the new opening is live; the next upload is the first to open on the question
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→15 · security 5→5 · pm 20→20 · research 15→20 · feature 25→15 · close 10→15
-
-**Summary:** The new opening, where the video starts on the question instead of the channel name, is live. This morning's upload (around 05:00) is the first to use it. It is the first change to the videos themselves since the channel went flat six weeks ago, and it can be judged after 20 uploads, around 4 October.
-
-### Feature work
-- **Put the new opening live.** Both agreed conditions were met: last night's upload was the 10th in the old format, and the sample passed on exactly the version that shipped. All tests pass.
-
-### Maintenance
-- Every scheduled upload landed, and the saved record of the last post is intact.
-- **The fix that records why titles fail is ready for its sample video**, updated to include the new opening. I did not request the sample: at this hour it would use the AI allowance this morning's upload needs, which is what cost an upload its title yesterday.
-
-### Security
-- Standing check clean: no credentials committed, and the secret files are still excluded.
-
-### Project management
-- **Channel still flat** at 11–12 seconds watched per view. The new opening is the right response: a change to what viewers see.
-- Nothing you had approved was left undone, and the process health check is clean.
-- **Tidying, for when convenient:** five of your own branches (the pre-trip work and four fixes from 23 September) are already fully in the live version. They can be deleted, but I've left them because they're yours.
-- **Friction, noted rather than acted on:** two finished changes each wait for a sample video. Shifts get one each, and only at hours that don't compete with an upload. This shift ran at 02:00, outside those hours, so the queue didn't move.
-
-### Research
-- **Tested and dropped an idea within the shift: making the ending loop back into the opening.** Nearly all our views come from the Shorts feed, where a looping video plays again. The free check was whether any past videos were watched for longer than they last on average, which only replays can cause. Only 3 of 110 were, so we are not building it. The check stays in our reporting tool, so this can be revisited.
-
-### Blocked
-- **One approval requested:** a small fix so the daily release check records a failure when its tests fail. Today it keeps showing the previous day's "safe to merge" instead. It tightens a safety check and loosens nothing. I recommend approving it.
-
-### Next
-- After 07:00, request the sample for the title-failure fix and ship it if it passes. The topic-recording change for the next experiment is next in line. Both are now up to date with the live version, so either can be requested as is.
-
-### Better?
-- **Than last shift:** yes. The new opening went from "passed, waiting" to live.
-- **Than ~10 shifts ago:** yes, modestly. A tested change reached viewers without needing your review, which is what the automated release process was built for. Whether it helps is too early to say.
-- **Than ~100 shifts ago:** too early to say.
-
