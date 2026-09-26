@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-09-26 (13:47) — the new topic logging was failing silently; it now records why, and ready work is no longer zero
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→15 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→10 · feature 0→5 · close 10→10
 
 **Summary:** The new logging of every candidate question's topic has recorded nothing on both runs since it went live. It now writes down why it fails, so tonight's upload should show the cause. The next build, subreddit rotation, is now ready to start ahead of its slot.
 
@@ -73,26 +73,26 @@ Read the allocation series with
 - **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It cannot change the video or cost an upload.
 
 ### Security
-- No credentials are stored in the project and secret files are still excluded. The known library warnings are unchanged and already logged. A fix that stops the AI key appearing in error messages is ready on a branch; it needs a live check first.
+- No credentials are stored in the project and secret files are still excluded. Known library warnings are unchanged. A fix keeping the AI key out of error messages waits on a branch for a live check.
 
 ### Project management
-- **The automatic health check flagged that recent shifts used only about half their time**, with ready work at zero. Cause: every build idea waits on the running experiment, and questions our data can answer run out between weekly data drops. I first recommended running a second test on alternating days. Two blind rankings both put it last, so I withdrew it on the issue. Both ranked this near the top instead: **build the subreddit rotation now so it ships the day the current experiment is read.** It is now marked ready.
+- **The automatic health check flagged that recent shifts used only about half their time**, with ready work at zero. Cause: every build idea waits on the running experiment, and questions our data can answer run out between weekly data drops. I first recommended running a second test on alternating days. Two blind rankings put it last, so I withdrew it. Both ranked this near the top: **build the subreddit rotation now so it ships the day the current experiment is read.** It is now marked ready.
 - Corrected the tracker: topic logging was broken, and the subreddit test still judged on views, which you ruled out.
 - **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long, easily missed paragraph.
 
 ### Research
 - **Does a failed title hurt a video?** Now answerable from older uploads too: 12 went out titled with the raw Reddit question. Today the answer is "not enough data" (7 are old enough, 8 needed). They lean worse, 8 seconds against 10. The 28 September data drop should settle it. If failed titles do no worse, the title step could be dropped to free AI allowance.
 - **Background clips:** one clip leads by 18%, mostly because its videos run longer; likely luck. Not acted on.
-- **Music:** all 117 measured uploads used the same track, so music cannot be tested until more tracks are added. That is your standing task.
+- **Music:** all 117 measured uploads used one track, so music cannot be tested until you add more.
 
 ### Feature work
-- Nothing shipped: every build item waits on the current experiment.
+- Started the subreddit rotation on a branch; it cannot go live before the current experiment is read.
 
 ### Blocked
 - The note on unused shift time is with you; nothing else is.
 
 ### Next
-- Read tonight's upload record; if the topic column shows a failure reason, fix it. After 07:00, check the prepared key-safety fix against the live AI service and merge it. Build the subreddit rotation. After the 28 September data drop, answer the two waiting research questions.
+- Read tonight's upload record; if the topic column shows a failure reason, fix it. After 07:00, check the prepared key-safety fix against the live AI service and merge it. Finish the subreddit rotation: its mechanism is built on a branch; picking subreddits and screening them remain. After the 28 September data drop, answer the two waiting research questions.
 
 ### Better?
 - **Than last shift:** no, smaller: one silent failure caught a day in, against five pieces shipped.
