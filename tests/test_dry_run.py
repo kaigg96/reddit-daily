@@ -78,6 +78,18 @@ def test_a_pass_names_the_commit(tmp_path, monkeypatch):
     assert "<details>" not in out
 
 
+def test_a_pass_still_shows_calls_that_failed_soft(tmp_path, monkeypatch):
+    (tmp_path / "check.txt").write_text("PASS -- playable")
+    (tmp_path / "run.log").write_text("Selected post: q\n"
+                                      "Slate: topic call failed with HTTPError 429 (not logged this run)\n"
+                                      "Slate topics (rank order): (not collected)\nUploaded fine\n")
+    out = record(tmp_path, monkeypatch, "--branch", "feature/v7", "--commit", "abc1234",
+                 "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
+                 "--run-url", "u")
+    assert "✅ PASS" in out and "HTTPError 429" in out and "(not collected)" in out
+    assert "Selected post" not in out and "Uploaded fine" not in out
+
+
 def test_a_failure_carries_the_end_of_the_log(tmp_path, monkeypatch):
     (tmp_path / "run.log").write_text("\n".join(f"line {i}" for i in range(100)))
     out = record(tmp_path, monkeypatch, "--branch", "feature/v7", "--commit", "abc1234",

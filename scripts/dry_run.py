@@ -140,6 +140,9 @@ a PASS that names the branch's current commit.
 """
 
 
+SOFT_FAILURE = re.compile(r"failed|not logged|not collected|fall(?:ing)? ?back", re.I)
+
+
 def record(args):
     """Rewrite the verdict file. A refusal leaves the last render intact."""
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -161,6 +164,13 @@ def record(args):
         body = [f"- **Branch:** `{args.branch}`", f"- **Commit:** `{args.commit}`",
                 f"- **When:** {now}", f"- **Verdict:** {verdict}", "",
                 f"[Sample video and full output]({args.run_url})"]
+        if passed and args.log and os.path.exists(args.log):
+            # A PASS only proves the video plays. A Gemini call that failed soft
+            # (raw title, no slate) says so only in the log, which shifts cannot read.
+            soft = [l for l in open(args.log, errors="replace").read().splitlines()
+                    if SOFT_FAILURE.search(l)][:10]
+            if soft:
+                body += ["", "Failed soft (the video still passed):", "", "```", *soft, "```"]
         if not passed and args.log and os.path.exists(args.log):
             tail = open(args.log, errors="replace").read().splitlines()[-40:]
             body += ["", "<details><summary>Last 40 lines of the run "
