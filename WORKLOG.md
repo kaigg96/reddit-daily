@@ -73,7 +73,7 @@ Read the allocation series with
 - **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. Shipped a fix that records it with the upload. It changes nothing in the video and cannot cost an upload.
 
 ### Security
-- Standing check clean: no credentials are stored in the project, and the secret files are still excluded. Today's fix records only the type of error, never its text, which can contain a key.
+- No credentials are stored in the project and secret files are still excluded. The known library warnings are unchanged and already logged. Today's fix records only the error type, never its text, which can contain a key.
 
 ### Project management
 - **Ready work is still zero, and the automatic health check flagged that recent shifts used only about half their time.** I added the cause to that note for you. Every build idea waits on the one experiment running now, which is read around 4 October, and questions our data can answer run out between weekly data drops. **Recommendation:** allow one alternating-days test alongside a whole-video change. The title-style test ran that way beside three releases and still gave a clean answer. No rule changed; the next shift should rank it in a separate pass.
@@ -92,7 +92,7 @@ Read the allocation series with
 - The note on unused shift time is with you. Nothing else waits on you.
 
 ### Next
-- Read tonight's upload record. If the topic column shows a failure reason, fix that cause. Rank the alternating-days proposal in a separate pass. After the 28 September data drop, answer the two waiting research questions.
+- Read tonight's upload record; if the topic column shows a failure reason, fix it. Rank the alternating-days proposal in a separate pass. After the 28 September data drop, answer the two waiting research questions.
 
 ### Better?
 - **Than last shift:** no, smaller. One silent failure caught a day in, against five pieces shipped.
