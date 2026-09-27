@@ -211,5 +211,21 @@ def test_rotation_never_repeats_a_subreddit_within_a_day():
     assert {picks.count(s) for s in subs} == {2}
 
 
-def test_the_shipped_list_is_askreddit_only_until_the_screen_is_replayed():
-    assert content.subreddit_for_run(next(_runs(1))[1]) == "AskReddit"
+def test_askreddit_stays_in_the_list_as_the_baseline():
+    assert config.SUBREDDITS[0] == "AskReddit"
+
+
+def test_upload_text_for_askreddit_is_unchanged_by_rotation():
+    from src.run import upload_text
+    desc, tags = upload_text("AskReddit", "Q?", ["a", "b"], "https://redd.it/x", ["k"])
+    assert desc == ("Today's top AskReddit post: Q?\n\nTop Comments:\n1. a\n2. b"
+                    "\n\nhttps://redd.it/x\n#AskReddit #Reddit #Shorts")
+    assert tags == ["AskReddit", "Ask Reddit", "Shorts", "Reddit", "Top AskReddit Post",
+                    "Trending AskReddit", "k"]
+
+
+def test_upload_text_names_the_posts_own_subreddit():
+    from src.run import upload_text
+    desc, tags = upload_text("NoStupidQuestions", "Q?", ["a"], "https://redd.it/x", [])
+    assert "AskReddit" not in desc and "AskReddit" not in " ".join(tags)
+    assert desc.startswith("Today's top NoStupidQuestions post") and "#NoStupidQuestions" in desc

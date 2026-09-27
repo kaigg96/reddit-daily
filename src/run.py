@@ -20,6 +20,21 @@ def _probe_duration(path):
     return duration
 
 
+def upload_text(subreddit, post_title, comments, shortlink, keywords):
+    """Description and tags naming the post's own subreddit (R4.1). AskReddit's
+    output is unchanged, so rotation stays the only variable against it."""
+    description = (
+        f"Today's top {subreddit} post: {post_title}\n\n"
+        f"Top Comments:\n"
+        + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
+        + f"\n\n{shortlink}\n#{subreddit} #Reddit #Shorts"
+    )
+    tags = ([subreddit] + (["Ask Reddit"] if subreddit == "AskReddit" else [])
+            + ["Shorts", "Reddit", f"Top {subreddit} Post", f"Trending {subreddit}"]
+            + keywords)
+    return description, tags
+
+
 def main():
     rng = random.Random()
     print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} format={config.FORMAT_VERSION}")
@@ -130,15 +145,9 @@ def main():
 
     # --- upload metadata (R2.1: no hashtag suffix — Shorts are auto-detected) ---
     full_title = video_title
-    description = (
-        f"Today's top AskReddit post: {post.title}\n\n"
-        f"Top Comments:\n"
-        + "\n".join(f"{i}. {s.text}" for i, s in enumerate(
-            (s for s in segments if s.kind == "comment"), 1))
-        + f"\n\n{post.shortlink}\n#AskReddit #Reddit #Shorts"
-    )
-    tags = ["AskReddit", "Ask Reddit", "Shorts", "Reddit", "Top AskReddit Post",
-            "Trending AskReddit"] + keywords
+    description, tags = upload_text(
+        post.subreddit, post.title,
+        [s.text for s in segments if s.kind == "comment"], post.shortlink, keywords)
 
     # R3.3: engagement comment posted from the channel account (the CTA doubles as it)
     comment_text = outro_text
