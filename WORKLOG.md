@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-09-27 (14:44) — the AI key no longer leaks into error logs, and the performance reports stopped reading reporting delay as real results
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 20→30 · security 5→10 · pm 20→10 · research 15→5 · feature 20→25 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 20→25 · security 5→15 · pm 20→10 · research 15→5 · feature 20→25 · close 10→10
 
 **Summary:** The fix that keeps the AI key out of error logs is live, checked against Google first. The reports we use to judge experiments were reading videos before YouTube had counted their views; they now wait five days, and I withdrew one reading of my own that relied on it.
 
@@ -77,6 +77,7 @@ Read the allocation series with
 
 ### Project management
 - Weekly check of the safety screen: 17 uploads since its last adjustment, none skipped (the limit for concern is 15%). This morning it dropped two answers while saying they fit no risky category, which looks like a false alarm. It costs little, since other answers fill in. If it recurs, that's the case for narrowing the screen, which would come to you.
+- **Friction:** only one real sample video is allowed per shift, and two finished pieces now queue for it (the rotation and the library update). If the queue grows, that limit is the thing to question.
 - Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
 
 ### Research
@@ -92,7 +93,7 @@ Read the allocation series with
 - Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
 
 ### Better?
-- **Than last shift:** yes, modestly: two fixes shipped, against one. Yesterday's key fix had waited three days, and the reporting flaw is now closed.
+- **Than last shift:** yes, modestly: three fixes shipped, against one, including the key fix that had waited three days.
 - **Than ~10 shifts ago:** unclear. Measurement is more trustworthy than it was, but the channel's numbers are still flat.
 - **Than ~100 shifts ago:** too early to say.
 
