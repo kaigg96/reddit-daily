@@ -330,7 +330,14 @@ def main():
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
-    if args.scorecard:      # many metrics; no single one can judge this channel
+    if args.at_age is not None and args.at_age < insights.MIN_AGE_DAYS:
+        # Younger reads are mostly reporting lag: excluding the zeros leaves a
+        # median over whichever videos Analytics happened to report first.
+        sys.exit(f"--at-age {args.at_age:g} is under {insights.MIN_AGE_DAYS} days, where "
+                 f"Analytics has not yet reported many uploads; read at "
+                 f"{insights.MIN_AGE_DAYS} or later.")
+
+    if args.scorecard:     # many metrics; no single one can judge this channel
         show_scorecard(args)
         return
 

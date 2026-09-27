@@ -32,8 +32,11 @@ from . import config
 MIN_COHORT = 8
 # Below this relative change, two cohorts are "the same".
 MATERIAL = 0.05
-# Analytics lags ~1-2 days; younger videos have meaningless stats.
-MIN_AGE_DAYS = 3
+# Analytics lags, and by more than the ~1-2 days once assumed: in the weekly
+# snapshots (2026-09-27), `report.py --at-age 3` read 35% of uploads as
+# zero-view, `--at-age 4` 20%, and 5 through 7 a steady 4-6%. Below this, a
+# zero mostly means "not reported yet", and medians skip those videos.
+MIN_AGE_DAYS = 5
 
 
 class Metric:
@@ -933,7 +936,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
 
 ZERO_NEIGHBOURS = 4          # uploads either side used to judge "was the channel alive?"
 COLD_SPELL_MEDIAN = 5        # neighbour median at/below this = channel-wide dead patch
-ZERO_MIN_AGE_DAYS = 3        # below this, 0 views means "new", not "suppressed"
+ZERO_MIN_AGE_DAYS = MIN_AGE_DAYS  # below this, 0 views means "new", not "suppressed"
 
 
 def classify_zero_views(channel_videos, now=None):

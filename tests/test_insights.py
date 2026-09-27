@@ -1210,3 +1210,13 @@ def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
     ]
     assert insights.replay_share(videos) == (1, 3)
 
+
+
+def test_report_refuses_an_age_read_inside_the_reporting_lag():
+    """At 3-4 days a third of uploads still read zero from Analytics lag, so a
+    median there is over whichever videos happened to be reported first."""
+    import subprocess
+    import sys
+    r = subprocess.run([sys.executable, "scripts/report.py", "--offline", "--at-age", "3",
+                        "--compare", "topic=dark-morbid"], capture_output=True, text=True)
+    assert r.returncode != 0 and "under 5 days" in r.stderr
