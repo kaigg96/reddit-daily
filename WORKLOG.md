@@ -77,7 +77,7 @@ Read the allocation series with
 
 ### Project management
 - Weekly check of the safety screen: 17 uploads since its last adjustment, none skipped (the limit for concern is 15%). This morning it dropped two answers while saying they fit no risky category, which looks like a false alarm. It costs little, since other answers fill in. If it recurs, that's the case for narrowing the screen, which would come to you.
-- Cleared nine finished branches whose work was already live, so the list of open branches now shows only real open work: the rotation, the library update, and your pre-trip snapshot.
+- Cleared nine finished branches whose work was already live, so the list of open branches now shows only real open work: the rotation, the library update, your pre-trip snapshot, and the branch the daily release check reads.
 - **Friction:** only one real sample video is allowed per shift, and two finished pieces now queue for it (the rotation and the library update). If the queue grows, that limit is the thing to question.
 - Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
 
