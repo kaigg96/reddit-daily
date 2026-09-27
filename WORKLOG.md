@@ -62,6 +62,39 @@ Read the allocation series with
 
 ---
 
+## 2026-09-27 (14:44) — the AI key no longer leaks into error logs, and the performance reports stopped reading reporting delay as real results
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 20→30 · security 5→10 · pm 20→10 · research 15→5 · feature 20→25 · close 10→10
+
+**Summary:** The fix that keeps the AI key out of error logs is live, checked against Google first. The reports we use to judge experiments were reading videos before YouTube had counted their views; they now wait five days, and I withdrew one reading of my own that relied on it.
+
+### Maintenance
+- Both uploads since the last shift landed, the saved last-post record is intact, and today's release check passed. The new topic logging is working again: both uploads since yesterday's fix recorded their topics.
+- **Found a measurement flaw.** A third of videos still show zero views at three to four days old, falling to a steady 4–6% from five days on. YouTube simply hasn't counted them yet. The reporting tool treated three days as old enough, so early readings rested on whichever videos happened to be counted first, and the check for hidden (suppressed) videos counted slow counts as suppression. It now waits five days and refuses younger readings. The seven-day readings every experiment is judged on are unaffected.
+
+### Security
+- **Shipped the fix that keeps the AI key out of error logs**, parked since 24 September. I checked Google accepts the key the new way with one call on the sample videos' own allowance, which tonight's upload doesn't use. Standing check otherwise clean: no credentials in the project, secret files still excluded. The library vulnerability scanner isn't installed here, so I didn't re-check library warnings.
+
+### Project management
+- Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
+
+### Research
+- Tried to answer early whether a failed title costs viewing. It read slightly better, but the early reading was the flawed kind above, so it is not evidence, and I removed it from the tracker. Tomorrow's seven-day reading decides.
+
+### Feature work
+- **Subreddit rotation:** each video's description and tags now name its own subreddit instead of always saying AskReddit, with AskReddit's left exactly as before. Added r/NoStupidQuestions on the branch; its sample video passed. But which posts the safety screen turned down showed only in a log shifts cannot open, so the sample reports now include them. The next sample will show the screen's verdict on the new subreddit. Rotation still cannot go live before the current experiment is read (~4 October).
+
+### Blocked
+- Nothing is waiting on you.
+
+### Next
+- Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
+
+### Better?
+- **Than last shift:** yes, modestly: two fixes shipped, against one. Yesterday's key fix had waited three days, and the reporting flaw is now closed.
+- **Than ~10 shifts ago:** unclear. Measurement is more trustworthy than it was, but the channel's numbers are still flat.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-26 (13:47) — the new topic logging and sample videos were silently failing; both fixed, and ready work is no longer zero
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→10 · feature 0→5 · close 10→10
@@ -136,48 +169,4 @@ Read the allocation series with
 ### Better?
 - **Than last shift:** yes. Five finished pieces shipped, where the last two shifts shipped none, and the main limit on shipping is gone.
 - **Than ~10 shifts ago:** yes, modestly. Owner decisions now turn into working checks the same day. Nothing yet has moved the channel's numbers.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-25 (03:00) — nine quick questions answered from existing data; a blind spot in how we judge changes is now flagged, with one decision for you
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 25→15 · research 45→55 · feature 0→0 · close 10→10
-
-**Summary:** Our reporting tool can now compare kinds of video fairly at the same age, and this shift used it to answer nine questions from data we already had. The one that matters: longer videos score better on our main measure simply by being longer. The check that judges each change now warns when a change also altered video length, so the new opening cannot pass or fail on length alone.
-
-### Feature work
-- Nothing this shift. The one ready build item, making sample videos free, needs design work longer than this window. The two finished changes still wait for sample videos, which cannot be requested before the 07:00 AI-allowance reset.
-
-### Maintenance
-- Every scheduled upload landed, and the saved record of the last post is intact. The next upload (~05:00) is the first with the new opening.
-
-### Security
-- Standing check clean: no credentials committed, and the secret files are still excluded. All nine automated jobs set their own limited permissions, and none uses the risky settings that would let outside code act with the repository's rights.
-
-### Project management
-- **Your approval for shifts refilling their own work is done and closed.** It was already live, and this shift used it.
-- **Ready work is at one, short of the target of three,** because this shift answered all six questions it generated. Other ideas were considered and fell below the bar. Recording more topics or answer lengths needs a sample video first. Day-of-week timing would change no decision.
-- **Dropped the upload-time idea for good.** It was parked until each slot had enough videos. They now have about 60 each, and morning and evening differ by no more than normal noise.
-- Trimmed settled history from the plan to keep it within its size limit.
-- **Friction, noted rather than acted on:** this shift began 40 minutes after the previous one, and both ran before the 07:00 AI-allowance reset. So neither could request the sample videos that two finished changes are waiting for. If overnight shifts are routine, one of them could move to after 07:00.
-
-### Research
-- **Narrator voice makes no difference:** both voices hold viewers for 10 seconds, across about 60 videos each.
-- **Topic may matter:** dark, morbid questions were watched for 14 seconds against 11 for the rest, compared at a week old. It is only 9 videos, and a reading at 3 days points the other way, so this is a lead, not a finding. If it holds after Monday's data, it becomes the first current evidence for the planned tool that picks which question to post.
-- **Background clips:** no clear winner. The spread between clips is within normal noise.
-- **Morning versus evening:** mornings are 5–10% ahead, which is within normal noise (see above).
-- **Question length looked like a clear gap, but was only video length.** Videos with longer questions were watched for 11 seconds against 9. Comparing videos of the same length, the gap disappears.
-- **What that exposed:** our main measure, seconds watched, rises with video length (11 against 9 seconds for videos over about 20 seconds). Length does not bring more views, but every change is judged on this measure. So a change that makes videos longer or shorter could be kept or undone for the wrong reason. Checked: the last two releases did not change length. The switch to background video did, so part of its measured gain was length. It stays, because nothing argues for removing it. The check that judges each change now warns when length moved. The new opening changes only what is on screen, not the timing, so it should not move length. The check will confirm that when it is judged.
-- **Changes can't be judged sooner, and needn't be judged later.** A video's standing at 3 days barely predicts its standing at a week. Its standing at a week already matches two weeks almost exactly. So a week stays the right time to judge a change.
-- **Longer videos trade seconds for views.** They get more seconds watched but fewer views, and the total time watched comes out about equal. So our main measure would favour any change that simply makes videos longer.
-
-### Blocked
-- **One decision for you:** when a change also alters video length, should it have to hold total time watched, not just seconds per view? I recommend yes. It only tightens the rule, and it does not affect the new opening unless its length moves.
-- The title-failure fix and the topic-recording change each wait for a sample video, which can only be requested after 07:00.
-
-### Next
-- After 07:00, request the sample for the title-failure fix. Then refill the ready queue. Monday's data re-checks the dark, morbid topic lead.
-
-### Better?
-- **Than last shift:** yes. The tool can now answer "does this kind of video do better?" fairly. The check that will judge the new opening now covers a blind spot it had.
-- **Than ~10 shifts ago:** yes, modestly. Research now closes questions within a shift: one parked idea was dropped on evidence today. None has yet changed what we ship.
 - **Than ~100 shifts ago:** too early to say.
