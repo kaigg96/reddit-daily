@@ -77,6 +77,7 @@ Read the allocation series with
 
 ### Project management
 - Weekly check of the safety screen: 17 uploads since its last adjustment, none skipped (the limit for concern is 15%). This morning it dropped two answers while saying they fit no risky category, which looks like a false alarm. It costs little, since other answers fill in. If it recurs, that's the case for narrowing the screen, which would come to you.
+- Cleared nine finished branches whose work was already live, so the list of open branches now shows only real open work: the rotation, the library update, and your pre-trip snapshot.
 - **Friction:** only one real sample video is allowed per shift, and two finished pieces now queue for it (the rotation and the library update). If the queue grows, that limit is the thing to question.
 - Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
 
@@ -90,7 +91,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. Five unmerged branches from 22–24 September may be superseded or awaiting your approval; check each. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
+- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
 
 ### Better?
 - **Than last shift:** yes, modestly: three fixes shipped, against one, including the key fix that had waited three days.
