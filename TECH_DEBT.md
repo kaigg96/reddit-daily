@@ -298,13 +298,3 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
-
-- **Gemini's API key travels in the request URL.** `src/llm.py` calls
-  `…:generateContent?key=<key>`, and HTTP errors quote the URL, so the key
-  lands in any log or file that records a failed request. GitHub masks it in
-  its own log view only. Two places now strip it before committing
-  (`dry-run.yml`, the release verdict in `validate-release.yml`), but that is
-  mitigation. **The fix at the source:** send it as the `x-goog-api-key`
-  header instead. It changes the live upload path, so it wants a dry run
-  before merging -- deliberately not done 2026-09-24, the day before the
-  owner's ten days away.
