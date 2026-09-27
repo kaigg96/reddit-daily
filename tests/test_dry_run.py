@@ -87,7 +87,20 @@ def test_a_pass_still_shows_calls_that_failed_soft(tmp_path, monkeypatch):
                  "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
                  "--run-url", "u")
     assert "✅ PASS" in out and "HTTPError 429" in out and "(not collected)" in out
-    assert "Selected post" not in out and "Uploaded fine" not in out
+    assert "Uploaded fine" not in out
+
+
+def test_a_pass_shows_what_the_screen_picked_and_skipped(tmp_path, monkeypatch):
+    """A screen replay on a new subreddit is read from here, not from Actions."""
+    (tmp_path / "check.txt").write_text("PASS -- playable")
+    (tmp_path / "run.log").write_text("Screen: skipping post (named_wrongdoing) — q1\n"
+                                      "Selected post: q2\n  comment 1: an answer\n"
+                                      "Today's top NoStupidQuestions post: q2\n")
+    out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
+                 "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
+                 "--run-url", "u")
+    assert "skipping post (named_wrongdoing)" in out and "Selected post: q2" in out
+    assert "NoStupidQuestions" in out and "an answer" not in out
 
 
 def test_a_failure_carries_the_end_of_the_log(tmp_path, monkeypatch):
