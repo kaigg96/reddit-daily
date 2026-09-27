@@ -76,6 +76,7 @@ Read the allocation series with
 - **Shipped the fix that keeps the AI key out of error logs**, parked since 24 September. I checked Google accepts the key the new way with one call on the sample videos' own allowance, which tonight's upload doesn't use. Standing check otherwise clean: no credentials in the project, secret files still excluded. Library warnings re-checked: the same two known, low-exposure libraries, already logged.
 
 ### Project management
+- Weekly check of the safety screen: 17 uploads since its last adjustment, none skipped (the limit for concern is 15%). This morning it dropped two answers while saying they fit no risky category, which looks like a false alarm. It costs little, since other answers fill in. If it recurs, that's the case for narrowing the screen, which would come to you.
 - Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
 
 ### Research
