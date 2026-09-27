@@ -90,7 +90,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
+- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. Five unmerged branches from 22–24 September may be superseded or awaiting your approval; check each. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
 
 ### Better?
 - **Than last shift:** yes, modestly: three fixes shipped, against one, including the key fix that had waited three days.
