@@ -73,7 +73,7 @@ Read the allocation series with
 - **Found a measurement flaw.** A third of videos still show zero views at three to four days old, falling to a steady 4–6% from five days on. YouTube simply hasn't counted them yet. The reporting tool treated three days as old enough, so early readings rested on whichever videos happened to be counted first, and the check for hidden (suppressed) videos counted slow counts as suppression. It now waits five days and refuses younger readings. The seven-day readings every experiment is judged on are unaffected.
 
 ### Security
-- **Shipped the fix that keeps the AI key out of error logs**, parked since 24 September. I checked Google accepts the key the new way with one call on the sample videos' own allowance, which tonight's upload doesn't use. Standing check otherwise clean: no credentials in the project, secret files still excluded. The library vulnerability scanner isn't installed here, so I didn't re-check library warnings.
+- **Shipped the fix that keeps the AI key out of error logs**, parked since 24 September. I checked Google accepts the key the new way with one call on the sample videos' own allowance, which tonight's upload doesn't use. Standing check otherwise clean: no credentials in the project, secret files still excluded. Library warnings re-checked: the same two known, low-exposure libraries, already logged.
 
 ### Project management
 - Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
@@ -88,7 +88,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
+- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch (it draws from the new subreddit on alternate days) and read what the screen skipped. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
 
 ### Better?
 - **Than last shift:** yes, modestly: two fixes shipped, against one. Yesterday's key fix had waited three days, and the reporting flaw is now closed.

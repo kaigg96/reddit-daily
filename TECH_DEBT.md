@@ -256,8 +256,9 @@ a list nobody can read is the same as no list.
   untrusted image, and requests only posts to fixed Google endpoints. Nothing
   breaks on the EOL date, so this is not urgent — but bumping either
   dependency, or Python, can change how frames render, so it is a video change:
-  it needs the dry-run gate (blocked, see above) and its own release, not a
-  ride-along in an experiment.
+  it needs a real sample (`dry_run.py request`, one per shift) and its own
+  release, not a ride-along in an experiment. Re-checked 2026-09-27 with
+  `pip-audit`: 37 advisories, the same two packages.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
