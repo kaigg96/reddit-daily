@@ -64,12 +64,13 @@ Read the allocation series with
 
 ## 2026-09-28 (17:42) — the first lead in weeks: one title style gets about 40% more views
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 30→30 · research 35→40 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 30→25 · research 35→40 · feature 0→0 · close 10→10
 
 **Summary:** Today's weekly data answered one waiting question: a failed title costs no watching time. Looking further, titles that speak to the viewer ("You…") get about 40% more views, at one and two weeks old and in both periods checked. That is the first measured difference that could lift a flat channel, and it is now the proposed next test.
 
 ### Maintenance
 - Last night's and this morning's uploads landed with AI-written titles, and the saved last-post record is intact. Tonight's upload had not landed by 17:48 UTC, which is normal: evening uploads have arrived between 16:00 and 18:15. Today's release check passed.
+- **The reporting tool now warns when a comparison mixes periods unevenly.** That is the mistake that briefly made the voice lead look real (below). It also flags that all nine dark-topic videos come from one period, which the next reading of that question has to allow for.
 
 ### Security
 - Standing check clean: no credentials in the project, and secret files are still excluded.
