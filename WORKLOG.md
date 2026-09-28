@@ -62,11 +62,11 @@ Read the allocation series with
 
 ---
 
-## 2026-09-28 (17:42) — the first lead in weeks: the male narrator gets about half again as many views
+## 2026-09-28 (17:42) — the first lead in weeks: one title style gets about 40% more views
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 30→30 · research 35→40 · feature 0→0 · close 10→10
 
-**Summary:** Today's weekly data answered one waiting question: a failed title costs no watching time. Looking further, uploads read by the male narrator, Stephen, get about 50% more views than those read by Danielle, at one and two weeks old, in every title style. That is the first measured difference that could lift a flat channel. It is now the proposed next test.
+**Summary:** Today's weekly data answered one waiting question: a failed title costs no watching time. Looking further, titles that speak to the viewer ("You…") get about 40% more views, at one and two weeks old and in both periods checked. That is the first measured difference that could lift a flat channel, and it is now the proposed next test.
 
 ### Maintenance
 - Last night's and this morning's uploads landed with AI-written titles, and the saved last-post record is intact. Tonight's upload had not landed by 17:48 UTC, which is normal: evening uploads have arrived between 16:00 and 18:15. Today's release check passed.
@@ -75,14 +75,14 @@ Read the allocation series with
 - Standing check clean: no credentials in the project, and secret files are still excluded.
 
 ### Project management
-- **The channel still reads flat**, so this slice had to propose a change to what we ship. Proposed: have Stephen read three videos in four, keeping Danielle on the rest so the comparison continues. It waits for the current experiment's result (~4 October), because only one change is tested at a time. I recommend it takes the next slot, ahead of the subreddit rotation. The rotation is built but has no measured evidence yet.
+- **The channel still reads flat**, so this slice had to propose a change to what we ship. Proposed: use the "You…" title style on two videos in three, keeping the other two styles on the rest so the comparison continues. It waits for the current experiment's result (~4 October), because only one change is tested at a time. I recommend it takes the next slot, ahead of the subreddit rotation. The rotation is built but has no measured evidence yet.
 - Ready work is still one item against a floor of three. The new test is real work, but it is waiting its turn.
-- **Friction:** every earlier test of voice and title style judged on seconds watched per view, and all came back flat. Your rule that views never trigger a revert protects before-and-after comparisons, where views swing on their own. Videos mixed on the same days don't have that problem, but that rule had also stopped anyone looking at their views. That is how a 50% difference went unseen.
+- **Friction:** every earlier test of voice and title style judged on seconds watched per view, and all came back flat. Your rule that views never trigger a revert protects before-and-after comparisons, where views swing on their own. Videos mixed on the same days don't have that problem, but that rule had also stopped anyone looking at their views. That is how a 40% difference went unseen.
 
 ### Research
 - **A failed title costs no watching time** (11 vs 10 seconds per view, 11 videos). The title step stays: failed-title videos drew about half the views, and dropping the title would not save any AI allowance. The dark-topics question still has only 9 videos and needs 12, so it waits.
-- **Voice:** Stephen leads on views by 50% at one week and 51% at two, across 130 videos. The narrator is picked at random for each upload, so this is close to a clean test. Seconds per view are identical, so viewers aren't staying longer. More of them are shown the video or start watching it.
-- **Title style:** the second-person style ("You…") also leads on views by 47%. But most of that is inside Stephen's videos (+102%), and inside Danielle's it shrinks to 9%. So that style partly rides on the voice, and it gets re-checked after the voice test.
+- **Title style:** the "You…" style leads on views by 47% at one week and 41% at two, across 129 videos, and within each of the two older periods (+40% and +82%). Seconds per view are unchanged, so more people are shown the video or start it; nobody watches longer. It is weaker on Danielle's videos (+9%), so it is not settled.
+- **Voice:** Stephen first appeared to lead by 50%, and I briefly proposed him as the next test. Checking by period undid most of that. He happened to read far more videos in an older period when every video got more views; within it he leads by only 6%. The next weekly data re-checks it on recent videos.
 
 ### Feature work
 - Nothing this shift. I did not request a sample of the rotation branch: tonight's upload was still due, and today's sample would draw AskReddit rather than the new subreddit.
@@ -91,7 +91,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- Confirm tonight's upload landed. Request the rotation branch's sample in the afternoon (UTC), when it draws from the new subreddit. From ~4 October, read the current experiment, then build the voice weighting (a one-line change to how the narrator is picked) if the result allows. Before that, check the voice lead holds in the next weekly data (5 October).
+- Confirm tonight's upload landed. Request the rotation branch's sample in the afternoon (UTC), when it draws from the new subreddit. From ~4 October, read the current experiment, then build the title weighting (a one-line change to how the style is picked) if the result allows. Before that, re-check both the title and voice leads on recent videos in the next weekly data (5 October).
 
 ### Better?
 - **Than last shift:** yes. A measured lead on views with a test ready, where last shift had fixes but no new lever.
