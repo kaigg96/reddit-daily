@@ -99,6 +99,10 @@ def compare(videos, spec, metric, now):
     if unset:
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
     print(insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric).render())
+    if key != "format_version":
+        for era, sa, sb in insights.era_imbalance(a, b):
+            print(f"    WARNING: uneven across releases ({era}: {sa:.0%} vs {sb:.0%}) — "
+                  f"check with --within format_version={era}")
 
 
 def release(version, key, target_age):

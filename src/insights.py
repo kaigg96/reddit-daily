@@ -32,6 +32,9 @@ from . import config
 MIN_COHORT = 8
 # Below this relative change, two cohorts are "the same".
 MATERIAL = 0.05
+# Two cohorts whose share of one release differs by more than this compare
+# eras as much as the field (`era_imbalance`).
+ERA_MIX_TOLERANCE = 0.15
 # Analytics lags, and by more than the ~1-2 days once assumed: in the weekly
 # snapshots (2026-09-27), `report.py --at-age 3` read 35% of uploads as
 # zero-view, `--at-age 4` 20%, and 5 through 7 a steady 4-6%. Below this, a
@@ -192,6 +195,26 @@ def split_cohorts(videos, key, value):
         else:
             b.append(v)
     return a, b, unset
+
+
+def era_imbalance(videos_a, videos_b, key="format_version", tolerance=ERA_MIX_TOLERANCE):
+    """Eras whose share differs between two cohorts by more than `tolerance`.
+
+    Views moved several-fold between releases, so a field that is not spread
+    evenly across them compares eras, not the field. On 2026-09-28 voice read
+    +50% on views pooled, but Stephen had read 37 of 57 `v4` uploads, the
+    high-view era; within `v4` his lead was 6%. Returns [(era, share_a,
+    share_b)], largest gap first; empty when the mix is even."""
+    def shares(vs):
+        out = {}
+        for v in vs:
+            era = str(v.meta.get(key, "")).strip() or "(unset)"
+            out[era] = out.get(era, 0) + 1
+        return {k: n / len(vs) for k, n in out.items()} if vs else {}
+    sa, sb = shares(videos_a), shares(videos_b)
+    gaps = [(era, sa.get(era, 0.0), sb.get(era, 0.0)) for era in set(sa) | set(sb)]
+    gaps = [g for g in gaps if abs(g[1] - g[2]) > tolerance]
+    return sorted(gaps, key=lambda g: -abs(g[1] - g[2]))
 
 
 def within(videos, spec):

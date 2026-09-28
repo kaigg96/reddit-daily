@@ -1220,3 +1220,18 @@ def test_report_refuses_an_age_read_inside_the_reporting_lag():
     r = subprocess.run([sys.executable, "scripts/report.py", "--offline", "--at-age", "3",
                         "--compare", "topic=dark-morbid"], capture_output=True, text=True)
     assert r.returncode != 0 and "under 5 days" in r.stderr
+
+
+def test_era_imbalance_flags_a_field_that_clusters_in_one_release():
+    """Voice read +50% on views pooled on 2026-09-28 only because Stephen had
+    read most of the high-view `v4` era; within it the lead was 6%."""
+    stephen = cohort(37, 7, "s", format_version="v4") + cohort(30, 7, "s5", format_version="v5")
+    danielle = cohort(20, 7, "d", format_version="v4") + cohort(43, 7, "d5", format_version="v5")
+    gaps = insights.era_imbalance(stephen, danielle)
+    assert {era for era, _, _ in gaps} == {"v4", "v5"}
+
+
+def test_era_imbalance_is_quiet_when_the_mix_is_even():
+    b_style = cohort(19, 7, "b", format_version="v4") + cohort(23, 7, "b5", format_version="v5")
+    rest = cohort(38, 7, "r", format_version="v4") + cohort(49, 7, "r5", format_version="v5")
+    assert insights.era_imbalance(b_style, rest) == []
