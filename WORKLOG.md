@@ -87,7 +87,7 @@ Read the allocation series with
 - **Voice:** Stephen first appeared to lead by 50%, and I briefly proposed him as the next test. Most of that came from him reading more videos in an older period when every video got more views; within that period he leads by only 6%.
 
 ### Feature work
-- Only the background-video retirement (above). I did not request a sample of the rotation branch: tonight's upload was still due, and today's sample would draw AskReddit rather than the new subreddit.
+- Nothing this shift; the background-video fix is under maintenance. I did not request a sample of the rotation branch: tonight's upload was still due, and today's sample would draw AskReddit rather than the new subreddit.
 
 ### Blocked
 - Nothing is waiting on you.
