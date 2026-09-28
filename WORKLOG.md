@@ -62,28 +62,29 @@ Read the allocation series with
 
 ---
 
-## 2026-09-28 (17:42) — the first lead in weeks: one title style gets about 40% more views
+## 2026-09-28 (17:42) — one background video appears to bury half the uploads it's used on, and one title style gets about 40% more views
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 30→25 · research 35→40 · feature 0→0 · close 10→10
 
-**Summary:** Today's weekly data answered one waiting question: a failed title costs no watching time. Looking further, titles that speak to the viewer ("You…") get about 40% more views, at one and two weeks old and in both periods checked. That is the first measured difference that could lift a flat channel, and it is now the proposed next test.
+**Summary:** One of the seven background videos left half its uploads with almost no views; retiring it is the next shift's first job. Titles that speak to the viewer ("You…") get about 40% more views, the first measured difference that could lift a flat channel, and are now the proposed next test.
 
 ### Maintenance
-- Last night's and this morning's uploads landed with AI-written titles, and the saved last-post record is intact. Tonight's upload had not landed by 17:48 UTC, which is normal: evening uploads have arrived between 16:00 and 18:15. Today's release check passed.
+- Last night's and this morning's uploads landed, the saved last-post record is intact, and today's release check passed. Tonight's had not landed by 17:48 UTC, which is within its usual window.
 - **The reporting tool now warns when a comparison mixes periods unevenly.** That is the mistake that briefly made the voice lead look real (below). It also flags that all nine dark-topic videos come from one period, which the next reading of that question has to allow for.
+- **One background video looks like it gets uploads buried.** At a week old, 8 of the 16 uploads that used it had 5 views or fewer. Across the other six videos it was 3 of 62. People who do see those uploads watch them normally, so YouTube is not showing them. The cause is unknown; one guess is that it's a stock clip used by many other channels. I left it for the next shift rather than rush a live change in my last minutes; waiting risks about a third of one upload.
 
 ### Security
 - Standing check clean: no credentials in the project, and secret files are still excluded.
 
 ### Project management
-- **The channel still reads flat**, so this slice had to propose a change to what we ship. Proposed: use the "You…" title style on two videos in three, keeping the other two styles on the rest so the comparison continues. It waits for the current experiment's result (~4 October), because only one change is tested at a time. I recommend it takes the next slot, ahead of the subreddit rotation. The rotation is built but has no measured evidence yet.
-- Ready work is still one item against a floor of three. The new test is real work, but it is waiting its turn.
-- **Friction:** every earlier test of voice and title style judged on seconds watched per view, and all came back flat. Your rule that views never trigger a revert protects before-and-after comparisons, where views swing on their own. Videos mixed on the same days don't have that problem, but that rule had also stopped anyone looking at their views. That is how a 40% difference went unseen.
+- **The channel still reads flat**, so this slice had to propose a change to what we ship. Proposed: use the "You…" title style on two videos in three, keeping the other two styles on the rest so the comparison continues. Once the current experiment is read (~4 October), I recommend it takes the next slot, ahead of the subreddit rotation, which has no measured evidence yet.
+- Ready work is now two items against a floor of three: the background-video fix and the subreddit rotation.
+- **Friction:** earlier tests of voice, title style and background videos judged only seconds watched per view. Your rule that views never trigger a revert is right for before-and-after comparisons, but it had also stopped anyone looking at views for these side-by-side ones. Both of today's findings were hiding there.
 
 ### Research
 - **A failed title costs no watching time** (11 vs 10 seconds per view, 11 videos). The title step stays: failed-title videos drew about half the views, and dropping the title would not save any AI allowance. The dark-topics question still has only 9 videos and needs 12, so it waits.
-- **Title style:** the "You…" style leads on views by 47% at one week and 41% at two, across 129 videos, and within each of the two older periods (+40% and +82%). Seconds per view are unchanged, so more people are shown the video or start it; nobody watches longer. It is weaker on Danielle's videos (+9%), so it is not settled.
-- **Voice:** Stephen first appeared to lead by 50%, and I briefly proposed him as the next test. Checking by period undid most of that. He happened to read far more videos in an older period when every video got more views; within it he leads by only 6%. The next weekly data re-checks it on recent videos.
+- **Title style:** the "You…" style leads on views by 47% at one week and 41% at two, across 129 videos, and in both older periods. Viewers don't watch longer; more of them are shown the video. It is weaker on Danielle's videos, so it is not settled.
+- **Voice:** Stephen first appeared to lead by 50%, and I briefly proposed him as the next test. Most of that came from him reading more videos in an older period when every video got more views; within that period he leads by only 6%.
 
 ### Feature work
 - Nothing this shift. I did not request a sample of the rotation branch: tonight's upload was still due, and today's sample would draw AskReddit rather than the new subreddit.
@@ -92,11 +93,11 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- Confirm tonight's upload landed. Request the rotation branch's sample in the afternoon (UTC), when it draws from the new subreddit. From ~4 October, read the current experiment, then build the title weighting (a one-line change to how the style is picked) if the result allows. Before that, re-check both the title and voice leads on recent videos in the next weekly data (5 October).
+- **First: retire the background video that buries uploads** (tests, a free sample, merge). Then confirm tonight's upload landed. Request the rotation branch's sample in the afternoon (UTC), when it draws from the new subreddit. From ~4 October, read the current experiment, then build the title weighting (a one-line change to how the style is picked) if the result allows. Before that, re-check both the title and voice leads on recent videos in the next weekly data (5 October).
 
 ### Better?
-- **Than last shift:** yes. A measured lead on views with a test ready, where last shift had fixes but no new lever.
-- **Than ~10 shifts ago:** unclear. This is the first candidate with evidence behind it, but it has not been tested live yet.
+- **Than last shift:** yes. A background video burying uploads, plus a measured lead on views, where last shift had fixes but no new lever.
+- **Than ~10 shifts ago:** unclear. The first candidates with evidence behind them, but untested live.
 - **Than ~100 shifts ago:** too early to say.
 
 ## 2026-09-27 (14:44) — the AI key no longer leaks into error logs, and the performance reports stopped reading reporting delay as real results
