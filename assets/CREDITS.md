@@ -14,5 +14,5 @@ Every media asset committed to this repo must be listed here with its source and
 | `broll/pexels_12488544.mp4` | https://www.pexels.com/video/12488544/ | Pexels License |
 | `broll/pexels_15022349.mp4` | https://www.pexels.com/video/15022349/ | Pexels License |
 | `broll/pexels_15168364.mp4` | https://www.pexels.com/video/15168364/ | Pexels License |
-| `broll/pexels_16482908.mp4` | https://www.pexels.com/video/16482908/ | Pexels License |
+| `broll_retired/pexels_16482908.mp4` | https://www.pexels.com/video/16482908/ | Pexels License — retired 2026-09-28: 8 of 16 uploads using it sat at ≤5 views |
 | `music/` | *(empty — optional: add more Audio Library tracks for variety)* | Record each track here |
