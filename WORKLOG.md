@@ -66,24 +66,24 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 30→25 · research 35→45 · feature 0→0 · close 10→10
 
-**Summary:** Yesterday's finding that one background video was burying half its uploads was counted by hand; the reporting tool now does that count, so it can be re-checked every week rather than when someone remembers. The "You…" title lead is not a side effect of that video, which strengthens the case for making it the next test.
+**Summary:** Yesterday's finding that one background video was burying half its uploads was counted by hand; the reporting tool now does that count, so each week's check is routine. The "You…" title lead is not a side effect of that video, which strengthens the case for making it the next test.
 
 ### Maintenance
-- Last night's and this morning's uploads landed, neither used the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's upload had not landed by 16:05 UTC, which is normal.
+- Last night's and this morning's uploads landed without the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's is not due yet.
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
 
 ### Project management
 - Nothing you approved is waiting to be done, and the weekly process check reads healthy.
-- The main plan went 43 words over its size limit with today's notes; I trimmed it back, so the loaded documents are slightly smaller than at the start of the shift.
-- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions: whether one voice gets buried more, whether the "You…" lead just means fewer buried videos, and which of the other two title styles makes the better comparison group. All three were answerable today (below), so none stays open as work. Nothing else I found would change a decision.
+- Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
+- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions: whether one voice gets buried more, whether the "You…" lead just means fewer buried videos, and which of the other two title styles makes the better comparison group. All three were answered today (below). Nothing else I found would change a decision.
 - **Friction:** yesterday's key finding came from a hand count because the reporting tool could not produce it, which is exactly the kind of one-off analysis the project rules forbid. Fixed rather than just noted.
 
 ### Research
 - **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly: 8 of 16 on the retired video, 3 of 62 on the other six.
 - **The "You…" title lead is not caused by the retired video.** That video carried the "You…" style more often than the others, so if anything it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform about the same, so either works as the comparison group.
-- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3 of 68), but half of hers were on the retired video. On the remaining background videos it is 3 of 32 against 0 of 30, too few to tell apart. Title style and version show nothing either.
+- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3 of 68), but half of hers were on the retired video. On the other background videos it is 3 of 32 against 0 of 30, too few to tell apart. Title style and version show nothing.
 
 ### Feature work
 - Nothing this shift. I did not request a sample of the rotation branch: tonight's upload is still due, and today's AI allowance is shared with it.
@@ -96,7 +96,7 @@ Read the allocation series with
 
 ### Better?
 - **Than last shift:** yes, modestly. The check behind yesterday's biggest finding now runs from the tool, and the proposed next test has survived its most obvious confound.
-- **Than ~10 shifts ago:** unclear. There are more measured leads, but none tested live yet.
+- **Than ~10 shifts ago:** unclear. More measured leads, none tested live yet.
 - **Than ~100 shifts ago:** too early to say.
 
 ## 2026-09-28 (17:42) — retired a background video that appeared to bury half the uploads it was used on; one title style gets about 40% more views
@@ -171,41 +171,4 @@ Read the allocation series with
 ### Better?
 - **Than last shift:** yes, modestly: three fixes shipped, against one, including the key fix that had waited three days.
 - **Than ~10 shifts ago:** unclear. Measurement is more trustworthy than it was, but the channel's numbers are still flat.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-26 (13:47) — the new topic logging and sample videos were silently failing; both fixed, and ready work is no longer zero
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→10 · pm 40→30 · research 20→10 · feature 0→5 · close 10→10
-
-**Summary:** Google retired the cheaper AI model we switched to yesterday, so the new topic logging and the AI parts of sample videos had silently failed since. Both now use its replacement, checked live. The next build, subreddit rotation, is ready to start ahead of its slot.
-
-### Maintenance
-- All uploads landed, the saved last-post record is intact, and today's release check passed.
-- **Found a silent failure.** The topic logging that the question-picking tool's schedule depends on went live yesterday, but both runs since recorded nothing. The reason only reached a log shifts cannot read. The cause: Google withdrew the model it used. Moved it and sample videos to the replacement and checked it live; failures now record their reason, and sample reports list them. Uploads' own AI model is unchanged.
-
-### Security
-- No credentials are stored in the project and secret files are still excluded. Known library warnings are unchanged. A fix keeping the AI key out of error messages waits on a branch for a live check.
-
-### Project management
-- **The automatic health check flagged that recent shifts used only about half their time**, with ready work at zero. Cause: every build idea waits on the running experiment, and questions our data can answer run out between weekly data drops. I first recommended running a second test on alternating days. Two blind rankings put it last, so I withdrew it. Both ranked this near the top: **build the subreddit rotation now so it ships the day the current experiment is read.** It is now marked ready.
-- Corrected the tracker: topic logging was broken, and the subreddit test still judged on views, which you ruled out.
-- **Friction:** I re-tested two questions the previous shift had already answered (narrator voice, and how old a video must be before judging it). Answered questions leave the research list, and their results sit in one long, easily missed paragraph.
-
-### Research
-- **Does a failed title hurt a video?** Now answerable from older uploads too: 12 went out titled with the raw Reddit question. Today the answer is "not enough data" (7 are old enough, 8 needed). They lean worse, 8 seconds against 10. The 28 September data drop should settle it. If failed titles do no worse, the title step could be dropped to free AI allowance.
-- **Background clips:** one clip leads by 18%, mostly because its videos run longer; likely luck. Not acted on.
-- **Music:** all 117 measured uploads used one track, so music cannot be tested until you add more.
-
-### Feature work
-- Started the subreddit rotation on a branch; it cannot go live before the current experiment is read.
-
-### Blocked
-- The note on unused shift time is with you; nothing else is.
-
-### Next
-- Confirm tonight's upload logged topics. After 07:00, update the key-safety branch to today's change, check it live, merge. Finish the subreddit rotation: its mechanism is built on a branch; picking subreddits and screening them remain. After the 28 September data drop, answer the two waiting research questions.
-
-### Better?
-- **Than last shift:** no, smaller: one silent failure caught a day in, against five pieces shipped.
-- **Than ~10 shifts ago:** unclear. Silent failures now surface in a day, not two weeks; the numbers are still flat.
 - **Than ~100 shifts ago:** too early to say.
