@@ -76,7 +76,7 @@ Read the allocation series with
 - Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
-- Ready work is still one item against a floor of three. Nothing new clears the bar: the open questions all wait on the 5 October data or on the rotation sample, which needs tomorrow morning's window.
+- Ready work rose from one item to two (floor three): the minutes question below is ready to build. Nothing else clears the bar; the rest waits on the 5 October data or the rotation sample.
 - Kept the tracker within its size limit after adding today's findings, dropping the oldest shift report to make room for this one.
 - **The neglected-work check could never fire.** It needs five shifts of history, but the work log only keeps three or four, and it misread the template at the top of the log as the newest shift. It now reads older shifts from the project's history and skips the template. It shows feature work at zero for three shifts running, not yet neglected. Security is now counted too.
 - The process check flags the last three shifts as ending with too much time unused (about 59%). This shift runs its full time, which should clear it.
