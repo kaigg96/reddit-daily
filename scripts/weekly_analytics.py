@@ -96,7 +96,14 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
     except Exception as e:
         print(f"::warning::{ENGAGED_METRIC} refused ({type(e).__name__}: {e}); "
               f"snapshotting without it")
-        return fetch_stats(ya, video_ids, end_date)
+        # The warning above reaches only the Actions log, which no shift can
+        # read; the 2026-09-28 snapshot came back blank with no reason. The
+        # column is committed, so the reason goes there.
+        reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+        stats = fetch_stats(ya, video_ids, end_date)
+        for d in stats.values():
+            d[ENGAGED_METRIC] = reason
+        return stats
 
 
 def ensure_header(path, fields):

@@ -94,5 +94,5 @@ def test_a_refused_metric_costs_the_column_not_the_snapshot():
     ya = _FakeAnalytics(refuse_engaged=True)
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert set(stats) == {"a", "b"} and stats["a"]["views"] == 9
-    assert wa.ENGAGED_METRIC not in stats["a"]
+    assert stats["a"][wa.ENGAGED_METRIC].startswith("refused: RuntimeError: HttpError 400")
     assert ya.calls[-1] == wa.METRICS
