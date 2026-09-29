@@ -95,7 +95,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, read why the engaged-view measure was refused, and test whether the minutes column reproduces it. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
+- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). Build the minutes-based engaged share into the reporting tool, age-matched; on 5 October test it against the real count. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
 
 ### Better?
 - **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, a flaw in the topic ranking's evidence surfaced before anything was built on it, and a safeguard that had been silently dead works again.
