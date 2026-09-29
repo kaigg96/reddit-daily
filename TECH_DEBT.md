@@ -155,8 +155,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 
 - **Two residuals from the 2026-09-21 reporting work.** (a) `report.py --release`
   answers the §5 auto-revert question but is **wired into no automation** — it
-  fires only when a shift remembers, and "the ritual says to" is prose. `v6` is
-  the first release that needs it, from ~2026-10-05. (It replaced
+  fires only when a shift remembers, and "the ritual says to" is prose. Next
+  due: `v7` (§0 #1) at the 2026-10-12 snapshot, with `--min-uploads 20`. (It replaced
   `age_adjusted_residuals`, which this item and #16 both proposed: a release's
   date and its videos' ages are collinear, so that fit absorbed the effect into
   its slope.) (b) `--offline` reads the weekly snapshot, which records no
