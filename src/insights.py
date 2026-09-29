@@ -313,7 +313,7 @@ def release_triggers(release, before, threshold=1.0):
     return REVERT_TRIGGER
 
 
-def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
+def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER, min_uploads=MIN_COHORT):
     """Fold `/shift` §5: a release that degraded **watch-seconds** is reverted,
     unless the drop is no bigger than the channel's own drift. Other metrics
     are reported beside it and never fire, except total watch time when the
@@ -322,6 +322,10 @@ def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
     Everything short of a clean, separable answer is an explicit "no verdict",
     never silence. The guardrail spent four releases returning nothing at all
     and reading, to anyone glancing at it, like approval.
+
+    `min_uploads` is the experiment's own pre-committed size (PRD §0: v7
+    commits to 20). MIN_COHORT is only this module's floor, so without it a
+    read taken as soon as 8 uploads were a week old would answer anyway.
     """
     if not comparisons:
         return "NO VERDICT — nothing to compare"
@@ -332,6 +336,9 @@ def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
         if not (c.a.sufficient and c.b.sufficient):
             return (f"NO VERDICT — under {MIN_COHORT} measurable uploads on one side; "
                     f"bake longer")
+        if min_uploads > MIN_COHORT and c.a.n + c.a.zero_view_count < min_uploads:
+            return (f"NO VERDICT — {c.a.n + c.a.zero_view_count} measurable release "
+                    f"uploads, the rule commits to {min_uploads}; bake longer")
         if not c.age_matched:
             return "NO VERDICT — cohorts are not age-matched"
     floors = floors or {}
@@ -415,7 +422,7 @@ def render_duration(release, before, threshold=1.0):
     return line
 
 
-def render_release(comparisons, floors, triggers=REVERT_TRIGGER):
+def render_release(comparisons, floors, triggers=REVERT_TRIGGER, min_uploads=MIN_COHORT):
     """The release answer in full: every metric, each with the size of change
     that would have to be exceeded to mean anything, then the verdict."""
     out = []
@@ -446,7 +453,7 @@ def render_release(comparisons, floors, triggers=REVERT_TRIGGER):
         out.append(f"    CONFLICT: {better} but {worse}. The verdict follows "
                    f"{' / '.join(triggers)}.")
     out.append("")
-    out.append(f"{release_verdict(comparisons, floors, triggers)}   (/shift §5 auto-revert rule)")
+    out.append(f"{release_verdict(comparisons, floors, triggers, min_uploads)}   (/shift §5 auto-revert rule)")
     return "\n".join(out)
 
 

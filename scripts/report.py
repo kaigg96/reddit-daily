@@ -107,7 +107,7 @@ def compare(videos, spec, metric, now):
                   f"check with --within format_version={era}")
 
 
-def release(version, key, target_age):
+def release(version, key, target_age, min_uploads=insights.MIN_COHORT):
     """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
 
     Has its own loader rather than using the shared one: it reads every upload
@@ -135,7 +135,7 @@ def release(version, key, target_age):
     # The floor comes from the era BEFORE the change. Measuring it on the
     # release's own uploads would let a volatile release excuse itself.
     floors = {m: insights.drift_floor(b, m) for m in metrics}
-    print(insights.render_release(comparisons, floors, triggers))
+    print(insights.render_release(comparisons, floors, triggers, min_uploads))
     print(insights.render_duration(a, b))
 
 
@@ -306,6 +306,9 @@ def main():
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
+    p.add_argument("--min-uploads", type=int, default=insights.MIN_COHORT,
+                   help="--release: no verdict until the release has this many "
+                        "measurable uploads — the experiment's pre-committed size")
     p.add_argument("--release-key", default="format_version",
                    help="upload_log field --release splits on (default format_version; "
                         "use background_type for the b-roll switch)")
@@ -363,7 +366,8 @@ def main():
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
         release(args.release, args.release_key,
-                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age)
+                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
+                args.min_uploads)
         return
 
     if args.at_age is not None:

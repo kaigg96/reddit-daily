@@ -706,6 +706,16 @@ def test_a_release_becomes_age_matched_when_read_at_a_common_age(tmp_path, monke
     assert verdict == "KEEP — watch_seconds did not degrade beyond the channel's own drift"
 
 
+def test_a_release_below_its_committed_size_gets_no_verdict(tmp_path, monkeypatch):
+    """v7 commits to 20 uploads; at 8 aged the module's floor is met, and it
+    would have answered on 8 (2026-09-29)."""
+    _two_eras(tmp_path, monkeypatch, n=10)
+    _, comparisons = _verdict()
+    assert insights.release_verdict(comparisons, min_uploads=20) == (
+        "NO VERDICT — 10 measurable release uploads, the rule commits to 20; bake longer")
+    assert insights.release_verdict(comparisons, min_uploads=10).startswith("KEEP")
+
+
 def test_a_release_that_degraded_watch_seconds_is_reverted(tmp_path, monkeypatch):
     _two_eras(tmp_path, monkeypatch, new_watch=6.0, old_watch=10.0)
     verdict, _ = _verdict()
