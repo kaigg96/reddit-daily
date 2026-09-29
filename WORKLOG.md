@@ -77,7 +77,7 @@ Read the allocation series with
 
 ### Project management
 - Nothing you approved is waiting; the process check is healthy.
-- Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
+- Kept every document within its size limit (dropping the oldest shift report), and closed a code-health item already fixed.
 - Ready work is still one item (the rotation) against a floor of three; fixing the measure waits on next week's data. Three new questions I considered were answered today (below); nothing else would change a decision.
 - **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
 - **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed, as is a document check that flagged a correct reference.
