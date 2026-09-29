@@ -243,7 +243,8 @@ a list nobody can read is the same as no list.
   R4.6 audit. **2026-09-29: do not drop it — it may be the engaged count.** On
   the 2026-09-28 snapshot (555 videos ≥50 views), `est_minutes × 60 / (views ×
   avg_view_duration_s)` has quartiles 0.14 / 0.18 / 0.24: a steady fraction,
-  not noise. If `averageViewDuration` is per engaged view while `views` counts
+  not noise, never above 1 (max 0.94), median 0.176–0.180 on every snapshot
+  since 2026-08-24. If `averageViewDuration` is per engaged view while `views` counts
   every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
   **Test:** when backlog #8 first collects `engaged_views`, compare the two on
   the same rows; a match backfills #8 from every snapshot since July.
