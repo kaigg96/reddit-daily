@@ -289,6 +289,15 @@ a list nobody can read is the same as no list.
   modules importing an uninstalled `yaml` stopped it at collection). Fix: move
   the tests after the verdict step, or record FAIL when they fail. **Patch queued for approval 2026-09-25** (escalation key `release-tests-fail-verdict`).
 
+- **`engaged_views` has never been collected, and nothing said so.** The
+  2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
+  `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
+  raised, and the fallback's `::warning::` went to the Actions log only (the
+  workflow commits the CSVs, nothing else). Fix: write the refusal where a
+  shift reads it — e.g. `refused: <HttpError reason>` in the column — then try
+  the likely causes (`sort=-views` with the extra metric; the metric needing
+  its own query). Blocks PRD §0 #8. Found 2026-09-29.
+
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
   the change that issue described — so any commit can cite any approved issue,
