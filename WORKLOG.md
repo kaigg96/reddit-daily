@@ -79,11 +79,11 @@ Read the allocation series with
 - Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
 - Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions (whether one voice gets buried more, whether the "You…" lead is just fewer buried videos, which other style is the better comparison) and answered all three today. Nothing else I found would change a decision.
 - **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
-- **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed.
+- **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed, as is a document check that flagged a correct reference.
 
 ### Research
 - **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly.
-- **The "You…" title lead is not caused by the retired video.** That video carried the style more often than the others, so it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform about the same, so either works as the comparison group.
+- **The "You…" title lead is not caused by the retired video.** That video carried the style more often than the others, so it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform alike.
 - **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3), but half were on the retired video; the rest is too few to tell apart. Title style and version show nothing.
 
 ### Feature work
