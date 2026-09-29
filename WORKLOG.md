@@ -75,10 +75,10 @@ Read the allocation series with
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
 
 ### Project management
-- Nothing you approved is waiting to be done, and the weekly process check reads healthy.
+- Nothing you approved is waiting, and the weekly process check is healthy.
 - Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
 - Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions (whether one voice gets buried more, whether the "You…" lead is just fewer buried videos, which other style is the better comparison) and answered all three today. Nothing else I found would change a decision.
-- **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would answer anyway. The two items queued behind it move a week.
+- **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
 - **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed.
 
 ### Research
@@ -87,7 +87,7 @@ Read the allocation series with
 - **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3), but half were on the retired video; the rest is too few to tell apart. Title style and version show nothing.
 
 ### Feature work
-- Nothing this shift. I did not request a sample of the rotation branch: tonight's upload is still due, and today's AI allowance is shared with it.
+- Nothing this shift. No rotation sample: tonight's upload is still due and shares today's AI allowance.
 
 ### Blocked
 - Nothing is waiting on you.
@@ -96,7 +96,7 @@ Read the allocation series with
 - **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit, the morning upload is already done, and the evening one is hours away. After that, a morning sample draws AskReddit until 2 October. At the 5 October data, re-read the buried counts per background video. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
 
 ### Better?
-- **Than last shift:** yes, modestly. The check behind yesterday's biggest finding now runs from the tool, and the proposed next test has survived its most obvious confound.
+- **Than last shift:** yes, modestly. Yesterday's key check now runs from the tool, the proposed next test survived its obvious confound, and an early read can no longer pass for the real one.
 - **Than ~10 shifts ago:** unclear. More measured leads, none tested live yet.
 - **Than ~100 shifts ago:** too early to say.
 
