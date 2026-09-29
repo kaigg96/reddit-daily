@@ -242,24 +242,17 @@ def corpus_health():
     return over
 
 
-LANES = ["rounds", "maintenance", "pm", "research", "feature", "close"]
+LANES = ["rounds", "maintenance", "security", "pm", "research", "feature", "close"]
 STARVED_AFTER = 5   # consecutive shifts at ~0% before a lane takes priority
 
 
-def allocation_history():
-    """Planned vs actual per lane, from WORKLOG.md's allocation lines.
+def allocation_entries(raw):
+    """(heading, {lane: (planned, actual)}) per WORKLOG entry, newest first.
 
-    Two questions this answers that prose cannot: is a lane being starved, and
-    are slices being *finished* or merely *filled*? Consistently landing under
-    plan is not a problem — slices are ceilings — but landing under plan on
-    every lane, every shift, means we are not finding valuable work, which is a
-    process finding rather than a good shift.
-    """
-    try:
-        raw = open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read()
-    except OSError:
-        print("no WORKLOG.md")
-        return
+    Fenced blocks are dropped first: the header's template is itself an entry
+    with an allocation line, and until 2026-09-29 it was read as the newest
+    shift, so no lane it gave time to could ever be flagged starved."""
+    raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
     entries = []
     for block in raw.split("\n## ")[1:]:
         m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
@@ -271,6 +264,50 @@ def allocation_history():
             if hit:
                 row[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
         entries.append((block.split("\n")[0].strip()[:28], row))
+    return entries
+
+
+def worklog_history(commits=40):
+    """allocation_entries over WORKLOG.md now and in its recent commits, one
+    per heading, newest first. The log's word budget keeps ~4 entries, fewer
+    than STARVED_AFTER, so the current file alone could never trip the floor;
+    dropped entries are still in git history (shift.yml checks out in full)."""
+    texts = []
+    try:
+        texts.append(open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read())
+    except OSError:
+        pass
+    try:
+        shas = subprocess.run(["git", "log", f"-n{commits}", "--format=%H", "--", "WORKLOG.md"],
+                              cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+        for sha in shas:
+            texts.append(subprocess.run(["git", "show", f"{sha}:WORKLOG.md"], cwd=ROOT,
+                                        capture_output=True, text=True).stdout)
+    except (OSError, subprocess.CalledProcessError):
+        pass                                    # no git: the current file is all there is
+    # Keyed on the date and time: a shift may reword its headline or even its
+    # time, so only entries older than the current file's oldest were dropped.
+    seen, oldest = {}, None
+    for i, text in enumerate(texts):            # current file first, so its edits win
+        for label, row in allocation_entries(text):
+            key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", label).group(0)
+            if i == 0 or oldest is None or key < oldest:
+                seen.setdefault(key, (label, row))
+        if i == 0 and seen:
+            oldest = min(seen)
+    return [seen[k] for k in sorted(seen, reverse=True)]
+
+
+def allocation_history():
+    """Planned vs actual per lane, from WORKLOG.md's allocation lines.
+
+    Two questions this answers that prose cannot: is a lane being starved, and
+    are slices being *finished* or merely *filled*? Consistently landing under
+    plan is not a problem — slices are ceilings — but landing under plan on
+    every lane, every shift, means we are not finding valuable work, which is a
+    process finding rather than a good shift.
+    """
+    entries = worklog_history()
     if not entries:
         print("\nno allocation lines in WORKLOG.md yet")
         return
@@ -330,23 +367,8 @@ STARVED_SHIFTS = 5    # consecutive shifts a lane sat at 0%
 
 
 def _allocation_rows():
-    try:
-        raw = open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read()
-    except OSError:
-        return []
-    rows = []
-    for block in raw.split("\n## ")[1:]:
-        m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
-        if not m:
-            continue
-        row = {}
-        for part in m.group(1).split("·"):
-            hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
-            if hit:
-                row[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
-        if any(p for p, _ in row.values()):     # skip unplanned/outlier shifts
-            rows.append(row)
-    return rows
+    return [row for _, row in worklog_history()
+            if any(p for p, _ in row.values())]     # skip unplanned/outlier shifts
 
 
 def health(raise_issues=False):
