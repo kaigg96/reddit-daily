@@ -62,14 +62,15 @@ Read the allocation series with
 
 ---
 
-## 2026-09-29 (16:05) — the check that caught the burying background video is now built into the reporting tool; the title-style lead survives a confound check
+## 2026-09-29 (16:10) — a measure we thought we had was never collected, and the current experiment's verdict moves to 12 October
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 30→25 · research 35→45 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 30→30 · research 35→30 · feature 0→0 · close 10→10
 
-**Summary:** Yesterday's finding that one background video was burying half its uploads was counted by hand; the reporting tool now does that count, so each week's check is routine. The "You…" title lead is not a side effect of that video, which strengthens the case for making it the next test.
+**Summary:** A measure gathered for the current experiment was never actually collected, and its verdict was scheduled a week before enough videos would be old enough; both are now corrected or queued. The check that caught yesterday's burying background video is built into the reporting tool, and the "You…" title lead survived a confound check.
 
 ### Maintenance
 - Last night's and this morning's uploads landed without the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's is not due yet.
+- **A measure we thought we were collecting never was.** The share of plays that get past the opening, gathered for the current experiment since last week, came back empty, and the only warning went to a log no shift reads. Recorded with a fix for the next shift.
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
@@ -77,14 +78,14 @@ Read the allocation series with
 ### Project management
 - Nothing you approved is waiting, and the weekly process check is healthy.
 - Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
-- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions (whether one voice gets buried more, whether the "You…" lead is just fewer buried videos, which other style is the better comparison) and answered all three today. Nothing else I found would change a decision.
+- Ready work is now two items against a floor of three: the rotation and fixing that measure. Three new questions I considered were answered today (below); nothing else would change a decision.
 - **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
 - **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed, as is a document check that flagged a correct reference.
 
 ### Research
 - **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly.
 - **The "You…" title lead is not caused by the retired video.** That video carried the style more often than the others, so it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform alike.
-- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3), but half were on the retired video; the rest is too few to tell apart. Title style and version show nothing.
+- **No second cause of burying** by voice, title style or version, once the retired video is set aside.
 
 ### Feature work
 - Nothing this shift. No rotation sample: tonight's upload is still due and shares today's AI allowance.
@@ -93,7 +94,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. After that, a morning sample draws AskReddit until 2 October. At the 5 October data, re-read the buried counts per background video. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
+- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. Fix the missing measure; it needs no sample. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
 
 ### Better?
 - **Than last shift:** yes, modestly. Yesterday's key check now runs from the tool, the proposed next test survived its obvious confound, and an early read can no longer pass for the real one.
