@@ -77,13 +77,14 @@ Read the allocation series with
 ### Project management
 - Nothing you approved is waiting to be done, and the weekly process check reads healthy.
 - Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
-- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions: whether one voice gets buried more, whether the "You…" lead just means fewer buried videos, and which of the other two title styles makes the better comparison group. All three were answered today (below). Nothing else I found would change a decision.
-- **Friction:** yesterday's key finding came from a hand count because the reporting tool could not produce it, which is exactly the kind of one-off analysis the project rules forbid. Fixed rather than just noted.
+- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions (whether one voice gets buried more, whether the "You…" lead is just fewer buried videos, which other style is the better comparison) and answered all three today. Nothing else I found would change a decision.
+- **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would answer anyway. The two items queued behind it move a week.
+- **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed.
 
 ### Research
-- **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly: 8 of 16 on the retired video, 3 of 62 on the other six.
-- **The "You…" title lead is not caused by the retired video.** That video carried the "You…" style more often than the others, so if anything it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform about the same, so either works as the comparison group.
-- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3 of 68), but half of hers were on the retired video. On the other background videos it is 3 of 32 against 0 of 30, too few to tell apart. Title style and version show nothing.
+- **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly.
+- **The "You…" title lead is not caused by the retired video.** That video carried the style more often than the others, so it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform about the same, so either works as the comparison group.
+- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3), but half were on the retired video; the rest is too few to tell apart. Title style and version show nothing.
 
 ### Feature work
 - Nothing this shift. I did not request a sample of the rotation branch: tonight's upload is still due, and today's AI allowance is shared with it.
@@ -92,7 +93,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit, the morning upload is already done, and the evening one is hours away. After that, a morning sample draws AskReddit until 2 October. From ~4 October, read the current experiment and then build the title weighting if the result allows. At the 5 October data, re-read the buried counts per background video with the new tool.
+- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit, the morning upload is already done, and the evening one is hours away. After that, a morning sample draws AskReddit until 2 October. At the 5 October data, re-read the buried counts per background video. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
 
 ### Better?
 - **Than last shift:** yes, modestly. The check behind yesterday's biggest finding now runs from the tool, and the proposed next test has survived its most obvious confound.
