@@ -93,7 +93,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit, the morning upload is already done, and the evening one is hours away. After that, a morning sample draws AskReddit until 2 October. At the 5 October data, re-read the buried counts per background video. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
+- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. After that, a morning sample draws AskReddit until 2 October. At the 5 October data, re-read the buried counts per background video. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
 
 ### Better?
 - **Than last shift:** yes, modestly. Yesterday's key check now runs from the tool, the proposed next test survived its obvious confound, and an early read can no longer pass for the real one.
