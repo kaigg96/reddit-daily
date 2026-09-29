@@ -73,7 +73,7 @@ Read the allocation series with
 - **A measure we thought we were collecting never was.** The share of plays that get past the opening, gathered for the current experiment since last week, came back empty, and the only warning went to a log no shift reads. The next weekly data will now say why.
 
 ### Security
-- Standing check clean: no credentials in the project, and the secret files are still excluded.
+- Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
 - Nothing you approved is waiting; the process check is healthy.
