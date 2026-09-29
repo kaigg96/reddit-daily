@@ -247,6 +247,10 @@ a list nobody can read is the same as no list.
   telemetry did its job — this was invisible before. Deliberately not
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
   accessibility nicety, not a growth lever. Revisit only if the fix is cheap.
+  **2026-09-29: none since.** The last failure was 2026-09-22; the 14 uploads
+  after it all passed (~3% likely at 23%). No caption-path commit explains it,
+  so YouTube's side or chance. **Close** if the tail of `upload_log.csv` still
+  shows no `caption_ok=0` after 2026-10-06 (~28 straight passes).
 - **The runtime and two dependencies are ageing out.** Every workflow pins
   Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
   already warns it will stop shipping updates for it. And an OSV check of

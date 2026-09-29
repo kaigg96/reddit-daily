@@ -70,6 +70,7 @@ Read the allocation series with
 
 ### Maintenance
 - This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload had not landed at 17:52 UTC, within its usual window.
+- **Subtitle uploads have stopped failing.** They used to fail about one time in four; the 14 uploads since 22 September all succeeded, and nothing we changed explains it. If another week stays clean, the item closes.
 
 ### Security
 - Standing check clean: no credentials in the project; secret files still excluded.
@@ -81,6 +82,7 @@ Read the allocation series with
 ### Research
 - **"You…" titles are not clickbait.** Within one era, the share of each video watched is the same as for the other styles (59% vs 58%); the earlier gap was era mix. Viewers who click these titles stay as long as anyone else.
 - **The two topic labellers disagree on 4 of 6 posts.** The newer one (titles only) is usually more specific: it says "nostalgia" where the older one says "other". This matters because the topic ranking queued behind the current experiment would pick posts using one labeller's buckets while its evidence came mostly from the other's. The reporting tool now counts this, and the ranking's first reading will check it first. Six posts is too few to act on.
+- **The rotation's first new subreddit rests on old evidence only.** It was chosen because nostalgia topics did well historically; on the current format there are only four nostalgia videos a week old, too few to confirm it. The rotation's own reading will be the first real test.
 
 ### Feature work
 - Nothing this shift. The only ready item needs a sample video, and tonight's upload shares today's AI allowance.
