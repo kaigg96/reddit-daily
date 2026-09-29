@@ -76,7 +76,7 @@ Read the allocation series with
 - Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
-- Ready work rose from one item to two (floor three): the minutes question below is ready to build. Nothing else clears the bar; the rest waits on the 5 October data or the rotation sample.
+- Ready work is one item (floor three). The minutes question below became ready and was built the same shift; its test waits on 5 October, like everything else but the rotation.
 - Kept the tracker within its size limit after adding today's findings, dropping the oldest shift report to make room for this one.
 - **The neglected-work check could never fire.** It needs five shifts of history, but the work log only keeps three or four, and it misread the template at the top of the log as the newest shift. It now reads older shifts from the project's history and skips the template. It shows feature work at zero for three shifts running, not yet neglected. Security is now counted too.
 - The process check flags the last three shifts as ending with too much time unused (about 59%). This shift runs its full time, which should clear it.
@@ -86,7 +86,7 @@ Read the allocation series with
 - **"You…" titles are not clickbait.** Within one era, the share of each video watched is the same as for the other styles (59% vs 58%); the earlier gap was era mix. Viewers who click these titles stay as long as anyone else.
 - **The two topic labellers disagree on 4 of 6 posts.** The newer one (titles only) is usually more specific: it says "nostalgia" where the older one says "other". This matters because the topic ranking queued behind the current experiment would pick posts using one labeller's buckets while its evidence came mostly from the other's. The reporting tool now counts this, and the ranking's first reading will check it first. Six posts is too few to act on.
 - **The rotation's first new subreddit rests on old evidence only.** It was chosen because nostalgia topics did well historically; the current format has only four such videos a week old, too few to confirm it.
-- **The measure the API refused may already be in our data.** A column long written off as broken (minutes watched) turns out to be a steady fraction of what it "should" be. The likeliest reason is that it counts only the plays that get past the opening, which is the measure the current experiment most needs. Next week's data can test this directly. If it holds, we get that measure for every video back to July. A rough first look fits: the share more than doubled on the day July's format overhaul shipped, which our main measure had called flat. Unconfirmed.
+- **The measure the API refused may already be in our data.** A column long written off as broken (minutes watched) turns out to be a steady fraction of what it "should" be. The likeliest reason is that it counts only the plays that get past the opening, which is the measure the current experiment most needs. Next week's data can test this directly. If it holds, we get that measure for every video back to July. A rough first look fits: the share more than doubled on the day July's format overhaul shipped, which our main measure had called flat. The reporting tool now reads it, marked unconfirmed.
 
 ### Feature work
 - Nothing built. The only ready item needs a sample video, and tonight's upload shares today's AI allowance. Brought the rotation branch up to date with the live code again, so tomorrow's sample shows what would ship.
@@ -95,7 +95,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). Build the minutes-based engaged share into the reporting tool, age-matched; on 5 October test it against the real count. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
+- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, test the reporting tool's new engaged-share estimate against the real count. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
 
 ### Better?
 - **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, a flaw in the topic ranking's evidence surfaced before anything was built on it, and a safeguard that had been silently dead works again.

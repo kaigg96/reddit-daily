@@ -62,7 +62,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
-| R2 | ready | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Add to `src/insights.py` with a test; read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
+| R2 | blocked: the 2026-10-05 snapshot | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Built 2026-09-29 (`--metric implied_engaged`); read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
 
 #### Owner tasks (anytime, no version bump)
 - ~~**B-roll library** (R1.3)~~ ✅ 2026-08-15 — 7 dark/moody Pexels clips live (`assets/broll/`, sources in CREDITS.md). Nine curated, two dropped at the R1.4 legibility gate for washing out white captions. Pipeline auto-switched off the procedural background; `bg_clip` logged per upload so per-clip performance is separable later. Expectation (§4): first-impression/swipe margin, not the watch budget.
