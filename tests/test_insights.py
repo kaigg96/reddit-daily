@@ -87,6 +87,16 @@ def test_zero_view_videos_excluded_from_median_but_counted():
     assert c.median == 10.0          # and not dragged toward 0
 
 
+def test_buried_uploads_counted_including_zero_views():
+    """The retired clip (PRD §0 #11) had a normal median but half its uploads
+    barely shown; the count is what exposes that."""
+    videos = cohort(6, 7, "ok", views=100) + cohort(3, 7, "low", views=4) + [
+        v("edge", 7, views=insights.BURIED_VIEWS), v("zero", 7, views=0)]
+    c = insights.summarize(videos, "clip", Metric.VIEWS, NOW)
+    assert c.buried_count == 5
+    assert c.median == 100.0         # the median alone looks normal
+
+
 # --- rule 1: watch-seconds is the default metric ----------------------------
 
 def test_default_metric_is_watch_seconds_not_percentage():

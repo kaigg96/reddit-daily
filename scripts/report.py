@@ -52,11 +52,13 @@ def by_dimension(videos, key, metric, now):
         c = insights.summarize(vids, label, metric, now)
         rows.append(c)
     rows.sort(key=lambda c: (c.median if c.median == c.median else -1), reverse=True)
-    print(f"  {'group':24} {'n':>4} {'median':>9} {'med age':>8} {'zero':>5}")
+    print(f"  {'group':24} {'n':>4} {'median':>9} {'med age':>8} {'zero':>5} "
+          f"{'<=' + str(insights.BURIED_VIEWS) + ' views':>11}")
     for c in rows:
         mark = "" if c.sufficient else "  (thin)"
+        total = c.n + c.zero_view_count
         print(f"  {c.label:24} {c.n:>4} {c.median:>9.1f} {c.median_age:>7.0f}d "
-              f"{c.zero_view_count:>5}{mark}")
+              f"{c.zero_view_count:>5} {c.buried_count:>4}/{total:<4}  {mark}")
 
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]

@@ -32,6 +32,9 @@ from . import config
 MIN_COHORT = 8
 # Below this relative change, two cohorts are "the same".
 MATERIAL = 0.05
+# At or below this many views an upload was barely shown at all — the
+# retired-clip signal (PRD §0 #11), which a median of the rest cannot see.
+BURIED_VIEWS = 5
 # Two cohorts whose share of one release differs by more than this compare
 # eras as much as the field (`era_imbalance`).
 ERA_MIX_TOLERANCE = 0.15
@@ -83,6 +86,7 @@ class Cohort:
     median: float
     zero_view_count: int
     median_age: float
+    buried_count: int = 0   # views <= BURIED_VIEWS, zero-view included
 
     @property
     def sufficient(self):
@@ -146,6 +150,7 @@ def summarize(videos, label, metric, now):
         median=median([v.get(metric) for v in live]),
         zero_view_count=zeros,
         median_age=median([v.age_days(now) for v in live]) if live else float("nan"),
+        buried_count=sum(1 for v in videos if v.views <= BURIED_VIEWS),
     )
 
 
