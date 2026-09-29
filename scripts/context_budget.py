@@ -229,6 +229,7 @@ def corpus_health():
             raw = open(os.path.join(ROOT, path), encoding="utf-8").read()
         except OSError:
             continue
+        raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)   # e.g. WORKLOG's template
         n = len(re.findall(pattern, raw, re.M))
         flag = "OVER" if n > cap else "ok"
         bar = "#" * min(int(n / cap * 20), 30)
