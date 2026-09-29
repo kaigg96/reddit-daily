@@ -66,7 +66,7 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→10 · security 5→5 · pm 20→30 · research 50→35 · feature 0→0 · close 10→10
 
-**Summary:** An evening shift on research and process. The title style we plan to test next holds viewers as well as the others once eras are matched, so its extra views are not bought with early swipe-aways. The two AI labellers that sort posts into topics disagree on four of the six recent posts, which the topic-ranking build must settle before its first reading means anything. The check that stops a kind of work being neglected for five shifts could never fire; it now can.
+**Summary:** The title style we plan to test next keeps viewers as well as the others, so its extra views are not bought with early swipe-aways, and a measure we thought lost may be recoverable back to July. Two problems surfaced before they could mislead: the topic labels behind the next build disagree, and the check for neglected work could never fire (fixed).
 
 ### Maintenance
 - This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload had not landed at 17:52 UTC, within its usual window.
@@ -80,12 +80,12 @@ Read the allocation series with
 - Kept the tracker within its size limit after adding today's findings, dropping the oldest shift report to make room for this one.
 - **The neglected-work check could never fire.** It needs five shifts of history, but the work log only keeps three or four, and it misread the template at the top of the log as the newest shift. It now reads older shifts from the project's history and skips the template. It shows feature work at zero for three shifts running, not yet neglected. Security is now counted too.
 - The process check flags the last three shifts as ending with too much time unused (about 59%). This shift runs its full time, which should clear it.
-- **Friction:** the size limit on the work log and a rule that needs five shifts of it were in conflict, and nobody could see it because the check stayed silent rather than failing.
+- **Friction:** the work log's size limit and a rule needing five shifts of it conflicted, invisibly, because the check stayed silent.
 
 ### Research
 - **"You…" titles are not clickbait.** Within one era, the share of each video watched is the same as for the other styles (59% vs 58%); the earlier gap was era mix. Viewers who click these titles stay as long as anyone else.
 - **The two topic labellers disagree on 4 of 6 posts.** The newer one (titles only) is usually more specific: it says "nostalgia" where the older one says "other". This matters because the topic ranking queued behind the current experiment would pick posts using one labeller's buckets while its evidence came mostly from the other's. The reporting tool now counts this, and the ranking's first reading will check it first. Six posts is too few to act on.
-- **The rotation's first new subreddit rests on old evidence only.** It was chosen because nostalgia topics did well historically; on the current format there are only four nostalgia videos a week old, too few to confirm it. The rotation's own reading will be the first real test.
+- **The rotation's first new subreddit rests on old evidence only.** It was chosen because nostalgia topics did well historically; the current format has only four such videos a week old, too few to confirm it.
 - **The measure the API refused may already be in our data.** A column long written off as broken (minutes watched) turns out to be a steady fraction of what it "should" be. The likeliest reason is that it counts only the plays that get past the opening, which is the measure the current experiment most needs. Next week's data can test this directly. If it holds, we get that measure for every video back to July.
 
 ### Feature work
@@ -95,7 +95,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, read why the engaged-view measure was refused. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
+- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, read why the engaged-view measure was refused, and test whether the minutes column reproduces it. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
 
 ### Better?
 - **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, a flaw in the topic ranking's evidence surfaced before anything was built on it, and a safeguard that had been silently dead works again.
