@@ -32,6 +32,12 @@ from . import config
 MIN_COHORT = 8
 # Below this relative change, two cohorts are "the same".
 MATERIAL = 0.05
+# At or below this many views an upload was barely shown at all — the
+# retired-clip signal (PRD §0 #11), which a median of the rest cannot see.
+BURIED_VIEWS = 5
+# Two cohorts whose share of one release differs by more than this compare
+# eras as much as the field (`era_imbalance`).
+ERA_MIX_TOLERANCE = 0.15
 # Analytics lags, and by more than the ~1-2 days once assumed: in the weekly
 # snapshots (2026-09-27), `report.py --at-age 3` read 35% of uploads as
 # zero-view, `--at-age 4` 20%, and 5 through 7 a steady 4-6%. Below this, a
@@ -80,6 +86,7 @@ class Cohort:
     median: float
     zero_view_count: int
     median_age: float
+    buried_count: int = 0   # views <= BURIED_VIEWS, zero-view included
 
     @property
     def sufficient(self):
@@ -143,6 +150,7 @@ def summarize(videos, label, metric, now):
         median=median([v.get(metric) for v in live]),
         zero_view_count=zeros,
         median_age=median([v.age_days(now) for v in live]) if live else float("nan"),
+        buried_count=sum(1 for v in videos if v.views <= BURIED_VIEWS),
     )
 
 
@@ -192,6 +200,26 @@ def split_cohorts(videos, key, value):
         else:
             b.append(v)
     return a, b, unset
+
+
+def era_imbalance(videos_a, videos_b, key="format_version", tolerance=ERA_MIX_TOLERANCE):
+    """Eras whose share differs between two cohorts by more than `tolerance`.
+
+    Views moved several-fold between releases, so a field that is not spread
+    evenly across them compares eras, not the field. On 2026-09-28 voice read
+    +50% on views pooled, but Stephen had read 37 of 57 `v4` uploads, the
+    high-view era; within `v4` his lead was 6%. Returns [(era, share_a,
+    share_b)], largest gap first; empty when the mix is even."""
+    def shares(vs):
+        out = {}
+        for v in vs:
+            era = str(v.meta.get(key, "")).strip() or "(unset)"
+            out[era] = out.get(era, 0) + 1
+        return {k: n / len(vs) for k, n in out.items()} if vs else {}
+    sa, sb = shares(videos_a), shares(videos_b)
+    gaps = [(era, sa.get(era, 0.0), sb.get(era, 0.0)) for era in set(sa) | set(sb)]
+    gaps = [g for g in gaps if abs(g[1] - g[2]) > tolerance]
+    return sorted(gaps, key=lambda g: -abs(g[1] - g[2]))
 
 
 def within(videos, spec):
@@ -285,7 +313,7 @@ def release_triggers(release, before, threshold=1.0):
     return REVERT_TRIGGER
 
 
-def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
+def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER, min_uploads=MIN_COHORT):
     """Fold `/shift` §5: a release that degraded **watch-seconds** is reverted,
     unless the drop is no bigger than the channel's own drift. Other metrics
     are reported beside it and never fire, except total watch time when the
@@ -294,6 +322,10 @@ def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
     Everything short of a clean, separable answer is an explicit "no verdict",
     never silence. The guardrail spent four releases returning nothing at all
     and reading, to anyone glancing at it, like approval.
+
+    `min_uploads` is the experiment's own pre-committed size (PRD §0: v7
+    commits to 20). MIN_COHORT is only this module's floor, so without it a
+    read taken as soon as 8 uploads were a week old would answer anyway.
     """
     if not comparisons:
         return "NO VERDICT — nothing to compare"
@@ -304,6 +336,9 @@ def release_verdict(comparisons, floors=None, triggers=REVERT_TRIGGER):
         if not (c.a.sufficient and c.b.sufficient):
             return (f"NO VERDICT — under {MIN_COHORT} measurable uploads on one side; "
                     f"bake longer")
+        if min_uploads > MIN_COHORT and c.a.n + c.a.zero_view_count < min_uploads:
+            return (f"NO VERDICT — {c.a.n + c.a.zero_view_count} measurable release "
+                    f"uploads, the rule commits to {min_uploads}; bake longer")
         if not c.age_matched:
             return "NO VERDICT — cohorts are not age-matched"
     floors = floors or {}
@@ -387,7 +422,7 @@ def render_duration(release, before, threshold=1.0):
     return line
 
 
-def render_release(comparisons, floors, triggers=REVERT_TRIGGER):
+def render_release(comparisons, floors, triggers=REVERT_TRIGGER, min_uploads=MIN_COHORT):
     """The release answer in full: every metric, each with the size of change
     that would have to be exceeded to mean anything, then the verdict."""
     out = []
@@ -418,7 +453,7 @@ def render_release(comparisons, floors, triggers=REVERT_TRIGGER):
         out.append(f"    CONFLICT: {better} but {worse}. The verdict follows "
                    f"{' / '.join(triggers)}.")
     out.append("")
-    out.append(f"{release_verdict(comparisons, floors, triggers)}   (/shift §5 auto-revert rule)")
+    out.append(f"{release_verdict(comparisons, floors, triggers, min_uploads)}   (/shift §5 auto-revert rule)")
     return "\n".join(out)
 
 

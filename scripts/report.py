@@ -52,11 +52,13 @@ def by_dimension(videos, key, metric, now):
         c = insights.summarize(vids, label, metric, now)
         rows.append(c)
     rows.sort(key=lambda c: (c.median if c.median == c.median else -1), reverse=True)
-    print(f"  {'group':24} {'n':>4} {'median':>9} {'med age':>8} {'zero':>5}")
+    print(f"  {'group':24} {'n':>4} {'median':>9} {'med age':>8} {'zero':>5} "
+          f"{'<=' + str(insights.BURIED_VIEWS) + ' views':>11}")
     for c in rows:
         mark = "" if c.sufficient else "  (thin)"
+        total = c.n + c.zero_view_count
         print(f"  {c.label:24} {c.n:>4} {c.median:>9.1f} {c.median_age:>7.0f}d "
-              f"{c.zero_view_count:>5}{mark}")
+              f"{c.zero_view_count:>5} {c.buried_count:>4}/{total:<4}  {mark}")
 
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]
@@ -99,9 +101,13 @@ def compare(videos, spec, metric, now):
     if unset:
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
     print(insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric).render())
+    if key != "format_version":
+        for era, sa, sb in insights.era_imbalance(a, b):
+            print(f"    WARNING: uneven across releases ({era}: {sa:.0%} vs {sb:.0%}) — "
+                  f"check with --within format_version={era}")
 
 
-def release(version, key, target_age):
+def release(version, key, target_age, min_uploads=insights.MIN_COHORT):
     """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
 
     Has its own loader rather than using the shared one: it reads every upload
@@ -129,7 +135,7 @@ def release(version, key, target_age):
     # The floor comes from the era BEFORE the change. Measuring it on the
     # release's own uploads would let a volatile release excuse itself.
     floors = {m: insights.drift_floor(b, m) for m in metrics}
-    print(insights.render_release(comparisons, floors, triggers))
+    print(insights.render_release(comparisons, floors, triggers, min_uploads))
     print(insights.render_duration(a, b))
 
 
@@ -300,6 +306,9 @@ def main():
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
+    p.add_argument("--min-uploads", type=int, default=insights.MIN_COHORT,
+                   help="--release: no verdict until the release has this many "
+                        "measurable uploads — the experiment's pre-committed size")
     p.add_argument("--release-key", default="format_version",
                    help="upload_log field --release splits on (default format_version; "
                         "use background_type for the b-roll switch)")
@@ -357,7 +366,8 @@ def main():
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
         release(args.release, args.release_key,
-                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age)
+                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
+                args.min_uploads)
         return
 
     if args.at_age is not None:
