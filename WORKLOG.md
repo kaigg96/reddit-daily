@@ -62,6 +62,43 @@ Read the allocation series with
 
 ---
 
+## 2026-09-29 (16:05) — the check that caught the burying background video is now built into the reporting tool; the title-style lead survives a confound check
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→5 · security 5→5 · pm 30→25 · research 35→45 · feature 0→0 · close 10→10
+
+**Summary:** Yesterday's finding that one background video was burying half its uploads was counted by hand; the reporting tool now does that count, so it can be re-checked every week rather than when someone remembers. The "You…" title lead is not a side effect of that video, which strengthens the case for making it the next test.
+
+### Maintenance
+- Last night's and this morning's uploads landed, neither used the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's upload had not landed by 16:05 UTC, which is normal.
+
+### Security
+- Standing check clean: no credentials in the project, and the secret files are still excluded.
+
+### Project management
+- Nothing you approved is waiting to be done, and the weekly process check reads healthy.
+- The main plan went 43 words over its size limit with today's notes; I trimmed it back, so the loaded documents are slightly smaller than at the start of the shift.
+- Ready work is still one item (the subreddit rotation) against a floor of three. I considered three new questions: whether one voice gets buried more, whether the "You…" lead just means fewer buried videos, and which of the other two title styles makes the better comparison group. All three were answerable today (below), so none stays open as work. Nothing else I found would change a decision.
+- **Friction:** yesterday's key finding came from a hand count because the reporting tool could not produce it, which is exactly the kind of one-off analysis the project rules forbid. Fixed rather than just noted.
+
+### Research
+- **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly: 8 of 16 on the retired video, 3 of 62 on the other six.
+- **The "You…" title lead is not caused by the retired video.** That video carried the "You…" style more often than the others, so if anything it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform about the same, so either works as the comparison group.
+- **No second cause of burying.** Danielle's uploads looked buried more often (10 of 67 against Stephen's 3 of 68), but half of hers were on the retired video. On the remaining background videos it is 3 of 32 against 0 of 30, too few to tell apart. Title style and version show nothing either.
+
+### Feature work
+- Nothing this shift. I did not request a sample of the rotation branch: tonight's upload is still due, and today's AI allowance is shared with it.
+
+### Blocked
+- Nothing is waiting on you.
+
+### Next
+- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit, the morning upload is already done, and the evening one is hours away. After that, a morning sample draws AskReddit until 2 October. From ~4 October, read the current experiment and then build the title weighting if the result allows. At the 5 October data, re-read the buried counts per background video with the new tool.
+
+### Better?
+- **Than last shift:** yes, modestly. The check behind yesterday's biggest finding now runs from the tool, and the proposed next test has survived its most obvious confound.
+- **Than ~10 shifts ago:** unclear. There are more measured leads, but none tested live yet.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-28 (17:42) — retired a background video that appeared to bury half the uploads it was used on; one title style gets about 40% more views
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→10 · security 5→5 · pm 30→25 · research 35→40 · feature 0→0 · close 10→10
