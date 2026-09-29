@@ -632,6 +632,31 @@ def replay_share(videos, min_views=REPLAY_MIN_VIEWS):
     return sum(1 for x in eligible if x.avg_view_pct > 100), len(eligible)
 
 
+def slate_agreement(rows):
+    """(agreeing, labelled, disagreements) over upload_log rows: how often the
+    slate's label for the selected post (`slate[candidate_rank - 1]`) matches
+    the screen's `topic`. R4.4's firing rate is counted on slate labels, so
+    read this first — disagreement means the two classifiers bucket the same
+    post differently. `disagreements` is a list of (screen, slate) pairs.
+    Rows with no slate, a failed call ("!…") or an unlabelled entry are skipped."""
+    agree, pairs = 0, []
+    for r in rows:
+        slate = (r.get("slate_topics") or "").strip()
+        topic = (r.get("topic") or "").strip()
+        rank = (r.get("candidate_rank") or "").strip()
+        if not slate or slate.startswith("!") or not topic or not rank.isdigit():
+            continue
+        labels = slate.split("|")
+        k = int(rank)
+        if not 1 <= k <= len(labels) or labels[k - 1] in ("", "?"):
+            continue
+        if labels[k - 1] == topic:
+            agree += 1
+        else:
+            pairs.append((topic, labels[k - 1]))
+    return agree, agree + len(pairs), pairs
+
+
 def age_adjusted_residuals(videos, now):
     """Residual of log-views against the channel's own log-age trend.
 

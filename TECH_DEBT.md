@@ -155,8 +155,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 
 - **Two residuals from the 2026-09-21 reporting work.** (a) `report.py --release`
   answers the §5 auto-revert question but is **wired into no automation** — it
-  fires only when a shift remembers, and "the ritual says to" is prose. `v6` is
-  the first release that needs it, from ~2026-10-05. (It replaced
+  fires only when a shift remembers, and "the ritual says to" is prose. Next
+  due: `v7` (§0 #1) at the 2026-10-12 snapshot, with `--min-uploads 20`. (It replaced
   `age_adjusted_residuals`, which this item and #16 both proposed: a release's
   date and its videos' ages are collinear, so that fit absorbed the effect into
   its slope.) (b) `--offline` reads the weekly snapshot, which records no
@@ -247,6 +247,10 @@ a list nobody can read is the same as no list.
   telemetry did its job — this was invisible before. Deliberately not
   chased: R4.7 measured the search surface at 1.3% of views, so the SRT is an
   accessibility nicety, not a growth lever. Revisit only if the fix is cheap.
+  **2026-09-29: none since.** The last failure was 2026-09-22; the 14 uploads
+  after it all passed (~3% likely at 23%). No caption-path commit explains it,
+  so YouTube's side or chance. **Close** if the tail of `upload_log.csv` still
+  shows no `caption_ok=0` after 2026-10-06 (~28 straight passes).
 - **The runtime and two dependencies are ageing out.** Every workflow pins
   Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
   already warns it will stop shipping updates for it. And an OSV check of
@@ -281,13 +285,14 @@ a list nobody can read is the same as no list.
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
 
-- **A release check whose unit tests fail leaves the previous PASS in place.**
-  In `validate-release.yml` a failing unit-test step ends the job before the
-  verdict is written, so `.github/last-release-validation.md` keeps showing
-  the last run's PASS: read its commit, not just its verdict. Less likely now
-  that the suite runs on every push (#33, applied 2026-09-24, after four new
-  modules importing an uninstalled `yaml` stopped it at collection). Fix: move
-  the tests after the verdict step, or record FAIL when they fail. **Patch queued for approval 2026-09-25** (escalation key `release-tests-fail-verdict`).
+- **`engaged_views` has never been collected, and nothing said so.** The
+  2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
+  `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
+  raised, and the fallback's `::warning::` went to the Actions log only (the
+  workflow commits the CSVs, nothing else). The column now records the refusal
+  (`refused: <error>`, 2026-09-29): read it at the 10-05 snapshot, then try
+  the likely causes (`sort=-views` with the extra metric; the metric needing
+  its own query). Blocks PRD §0 #8. Found 2026-09-29.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is

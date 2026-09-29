@@ -80,6 +80,21 @@ def check_upload_counts():
     return True, f"no current-cohort claim lags the log's {actual} rows"
 
 
+OPEN_WORDS = ("awaiting", "waiting on", "open", "pending")
+NEAR = 80   # characters either side of a citation
+
+
+def describes_as_open(text, n):
+    """Whether a mention of #n sits near a word calling it open. A whole line
+    was too wide: a PRD §0 row is one long line, so a row citing closed #18
+    and titled "Open on the hook" read as describing #18 as open (2026-09-29)."""
+    for m in re.finditer(rf"#{n}\b", text):
+        near = text[max(0, m.start() - NEAR):m.end() + NEAR].lower()
+        if any(w in near for w in OPEN_WORDS):
+            return True
+    return False
+
+
 def check_open_escalations():
     """A doc pointing at an issue that has since been closed."""
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -102,9 +117,7 @@ def check_open_escalations():
                 issue = json.load(r)
         except Exception:
             continue
-        near = " ".join(l for l in text.splitlines() if f"#{n}" in l).lower()
-        if issue.get("state") == "closed" and any(
-                w in near for w in ("awaiting", "waiting on", "open", "pending")):
+        if issue.get("state") == "closed" and describes_as_open(text, n):
             stale.append(n)
     if stale:
         return False, f"describes closed issue(s) as still open: {stale}"

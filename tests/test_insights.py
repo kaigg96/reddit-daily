@@ -1231,6 +1231,20 @@ def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
     assert insights.replay_share(videos) == (1, 3)
 
 
+def test_slate_agreement_reads_the_selected_posts_label():
+    """On 2026-09-29 the slate and the screen agreed on 2 of 6 selected posts,
+    found by hand; R4.4's firing rate is counted on slate labels."""
+    rows = [
+        {"topic": "nostalgia", "candidate_rank": "1", "slate_topics": "nostalgia|other"},
+        {"topic": "other", "candidate_rank": "2", "slate_topics": "humor-absurd|nostalgia"},
+        {"topic": "other", "candidate_rank": "1", "slate_topics": "!SlateFailed"},
+        {"topic": "other", "candidate_rank": "1", "slate_topics": ""},
+        {"topic": "other", "candidate_rank": "1", "slate_topics": "?|other"},
+        {"topic": "other", "candidate_rank": "3", "slate_topics": "other"},
+    ]
+    assert insights.slate_agreement(rows) == (1, 2, [("other", "nostalgia")])
+
+
 
 def test_report_refuses_an_age_read_inside_the_reporting_lag():
     """At 3-4 days a third of uploads still read zero from Analytics lag, so a

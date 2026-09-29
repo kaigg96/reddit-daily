@@ -329,6 +329,9 @@ def main():
     p.add_argument("--replays", action="store_true",
                    help="how many videos average over 100%% viewed, which only "
                         "replays can cause (backlog #9's first test)")
+    p.add_argument("--slate", action="store_true",
+                   help="how often the slate's topic for the selected post matches "
+                        "the screen's (read before R4.4's firing rate)")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL])
@@ -352,6 +355,10 @@ def main():
 
     if args.trajectory:     # the only surface that answers "are we improving?"
         show_trajectory(args)
+        return
+
+    if args.slate:          # reads only the upload log: no analytics involved
+        show_slate_agreement()
         return
 
     if args.zeros:          # uses the Data API (near-real-time), not the weekly snapshot
@@ -420,6 +427,22 @@ def show_replays(videos):
             print(f"  {label:<8} insufficient data ({eligible} eligible)")
         else:
             print(f"  {label:<8} {replaying}/{eligible} ({100 * replaying / eligible:.0f}%)")
+
+
+def show_slate_agreement():
+    import csv
+    from collections import Counter
+    from src import config
+    with open(config.UPLOAD_LOG) as f:
+        agree, labelled, pairs = insights.slate_agreement(csv.DictReader(f))
+    print("SLATE AGREEMENT — the slate's topic for the selected post vs the screen's")
+    if labelled < insights.MIN_COHORT:
+        print(f"  insufficient data for a rate: {agree}/{labelled} agree "
+              f"(need {insights.MIN_COHORT})")
+    else:
+        print(f"  {agree}/{labelled} agree ({100 * agree / labelled:.0f}%)")
+    for (screen, slate), n in Counter(pairs).most_common():
+        print(f"  screen {screen:<20} slate {slate:<20} x{n}")
 
 
 if __name__ == "__main__":
