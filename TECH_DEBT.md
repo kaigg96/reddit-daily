@@ -240,7 +240,13 @@ a list nobody can read is the same as no list.
   views and watch-seconds, and the traffic CSV's minutes come from a separate
   query — so the column is effectively decorative today. Worth either fixing or
   dropping before anything starts reading it. Noticed 2026-09-09 during the
-  R4.6 audit.
+  R4.6 audit. **2026-09-29: do not drop it — it may be the engaged count.** On
+  the 2026-09-28 snapshot (555 videos ≥50 views), `est_minutes × 60 / (views ×
+  avg_view_duration_s)` has quartiles 0.14 / 0.18 / 0.24: a steady fraction,
+  not noise. If `averageViewDuration` is per engaged view while `views` counts
+  every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
+  **Test:** when backlog #8 first collects `engaged_views`, compare the two on
+  the same rows; a match backfills #8 from every snapshot since July.
 - **The SRT track fails to upload about one time in four.** First read
   2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
   `comment_ok` was 31/31, so it is real but not the half it first looked. The
