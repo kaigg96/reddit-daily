@@ -1269,3 +1269,10 @@ def test_era_imbalance_is_quiet_when_the_mix_is_even():
     b_style = cohort(19, 7, "b", format_version="v4") + cohort(23, 7, "b5", format_version="v5")
     rest = cohort(38, 7, "r", format_version="v4") + cohort(49, 7, "r5", format_version="v5")
     assert insights.era_imbalance(b_style, rest) == []
+
+
+def test_implied_engaged_is_minutes_over_views_times_watch_seconds():
+    """R2: est_minutes x 60 / (views x watch-seconds) — 0.18 pre-v2, ~0.4 after."""
+    x = Video("a", NOW, views=100, watch_seconds=12.0, est_minutes=4.0)
+    assert x.implied_engaged == pytest.approx(0.2)
+    assert Video("b", NOW).implied_engaged == 0.0          # no views: no share
