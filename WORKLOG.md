@@ -66,19 +66,19 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 30→30 · research 35→30 · feature 0→0 · close 10→10
 
-**Summary:** A measure gathered for the current experiment was never actually collected, and its verdict was scheduled a week before enough videos would be old enough; both are now corrected or queued. The check that caught yesterday's burying background video is built into the reporting tool, and the "You…" title lead survived a confound check.
+**Summary:** A measure gathered for the current experiment was never actually collected, and its verdict was scheduled a week too early; the date is corrected and next week's data will show why the measure failed. The check that caught yesterday's burying background video is built into the reporting tool, and the "You…" title lead survived a confound check.
 
 ### Maintenance
 - Last night's and this morning's uploads landed without the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's is not due yet.
-- **A measure we thought we were collecting never was.** The share of plays that get past the opening, gathered for the current experiment since last week, came back empty, and the only warning went to a log no shift reads. Recorded with a fix for the next shift.
+- **A measure we thought we were collecting never was.** The share of plays that get past the opening, gathered for the current experiment since last week, came back empty, and the only warning went to a log no shift reads. The next weekly data will now say why.
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
 
 ### Project management
-- Nothing you approved is waiting, and the weekly process check is healthy.
+- Nothing you approved is waiting; the process check is healthy.
 - Trimmed the main plan back under its size limit after today's notes, and dropped the oldest shift report to keep this log under its own.
-- Ready work is now two items against a floor of three: the rotation and fixing that measure. Three new questions I considered were answered today (below); nothing else would change a decision.
+- Ready work is still one item (the rotation) against a floor of three; fixing the measure waits on next week's data. Three new questions I considered were answered today (below); nothing else would change a decision.
 - **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
 - **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed, as is a document check that flagged a correct reference.
 
@@ -94,7 +94,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. Fix the missing measure; it needs no sample. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
+- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. On 5 October, read why the measure was refused and fix it. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
 
 ### Better?
 - **Than last shift:** yes, modestly. Yesterday's key check now runs from the tool, the proposed next test survived its obvious confound, and an early read can no longer pass for the real one.

@@ -293,8 +293,8 @@ a list nobody can read is the same as no list.
   2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
   `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
   raised, and the fallback's `::warning::` went to the Actions log only (the
-  workflow commits the CSVs, nothing else). Fix: write the refusal where a
-  shift reads it — e.g. `refused: <HttpError reason>` in the column — then try
+  workflow commits the CSVs, nothing else). The column now records the refusal
+  (`refused: <error>`, 2026-09-29): read it at the 10-05 snapshot, then try
   the likely causes (`sort=-views` with the extra metric; the metric needing
   its own query). Blocks PRD §0 #8. Found 2026-09-29.
 
