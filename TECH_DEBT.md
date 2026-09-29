@@ -281,14 +281,6 @@ a list nobody can read is the same as no list.
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
 
-- **A release check whose unit tests fail leaves the previous PASS in place.**
-  In `validate-release.yml` a failing unit-test step ends the job before the
-  verdict is written, so `.github/last-release-validation.md` keeps showing
-  the last run's PASS: read its commit, not just its verdict. Less likely now
-  that the suite runs on every push (#33, applied 2026-09-24, after four new
-  modules importing an uninstalled `yaml` stopped it at collection). Fix: move
-  the tests after the verdict step, or record FAIL when they fail. **Patch queued for approval 2026-09-25** (escalation key `release-tests-fail-verdict`).
-
 - **`engaged_views` has never been collected, and nothing said so.** The
   2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
   `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
