@@ -248,6 +248,8 @@ a list nobody can read is the same as no list.
   (before YouTube's 2025-03-31 Shorts view change), 0.13–0.23 from 2025-04 to
   2026-06, then **0.36–0.40 since the 2026-07 v2 overhaul**, as if v2
   doubled the share of plays past the opening that watch-seconds called flat.
+  It splits on v2's release day: 0.17 (n=16, 2026-06-01..07-17) vs 0.43
+  (n=21, 07-18..07-31).
   Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
   every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
   **Test:** when backlog #8 first collects `engaged_views`, compare the two on
