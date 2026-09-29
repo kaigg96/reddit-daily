@@ -62,6 +62,40 @@ Read the allocation series with
 
 ---
 
+## 2026-09-29 (17:52) — the "You…" title lead is not clickbait, and the topic labels the next build depends on disagree more often than they agree
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→5 · pm 20→15 · research 50→60 · feature 0→0 · close 10→5
+
+**Summary:** A short evening shift on research. The title style we plan to test next holds viewers as well as the others once eras are matched, so its extra views are not bought with early swipe-aways. The two AI labellers that sort posts into topics disagree on four of the six recent posts, which the topic-ranking build must settle before its first reading means anything.
+
+### Maintenance
+- This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload had not landed at 17:52 UTC, within its usual window.
+
+### Security
+- Standing check clean: no credentials in the project; secret files still excluded.
+
+### Project management
+- Ready work is still one item against a floor of three. Nothing new clears the bar: the open questions all wait on the 5 October data or on the rotation sample, which needs tomorrow morning's window.
+- Kept the tracker within its size limit after adding today's findings, dropping the oldest shift report to make room for this one.
+
+### Research
+- **"You…" titles are not clickbait.** Within one era, the share of each video watched is the same as for the other styles (59% vs 58%); the earlier gap was era mix. Viewers who click these titles stay as long as anyone else.
+- **The two topic labellers disagree on 4 of 6 posts.** The newer one (titles only) is usually more specific: it says "nostalgia" where the older one says "other". This matters because the topic ranking queued behind the current experiment would pick posts using one labeller's buckets while its evidence came mostly from the other's. The reporting tool now counts this, and the ranking's first reading will check it first. Six posts is too few to act on.
+
+### Feature work
+- Nothing this shift. The only ready item needs a sample video, and tonight's upload shares today's AI allowance.
+
+### Blocked
+- Nothing is waiting on you.
+
+### Next
+- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, read why the engaged-view measure was refused. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
+
+### Better?
+- **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, and a flaw in the topic ranking's evidence surfaced before anything was built on it.
+- **Than ~10 shifts ago:** unclear. More checked leads, none tested live yet.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-29 (16:10) — a measure we thought we had was never collected, and the current experiment's verdict moves to 12 October
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 30→30 · research 35→30 · feature 0→0 · close 10→10
@@ -137,40 +171,4 @@ Read the allocation series with
 ### Better?
 - **Than last shift:** yes. A background video that was burying uploads is gone, and there's a measured lead on views. Last shift shipped fixes but found no new lever.
 - **Than ~10 shifts ago:** unclear. The first candidates with evidence behind them, but untested live.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-27 (14:44) — the AI key no longer leaks into error logs, and the performance reports stopped reading reporting delay as real results
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 20→25 · security 5→15 · pm 20→10 · research 15→5 · feature 20→25 · close 10→10
-
-**Summary:** The fix that keeps the AI key out of error logs is live, checked against Google first. The reports we use to judge experiments were reading videos before YouTube had counted their views; they now wait five days, and I withdrew one reading of my own that relied on it.
-
-### Maintenance
-- Both uploads since the last shift landed, the saved last-post record is intact, and today's release check passed. The new topic logging is working again: both uploads since yesterday's fix recorded their topics.
-- **Found a measurement flaw.** A third of videos still show zero views at three to four days old, falling to a steady 4–6% from five days on. YouTube simply hasn't counted them yet. The reporting tool treated three days as old enough, so early readings rested on whichever videos happened to be counted first, and the check for hidden (suppressed) videos counted slow counts as suppression. It now waits five days and refuses younger readings. The seven-day readings every experiment is judged on are unaffected.
-
-### Security
-- **Shipped the fix that keeps the AI key out of error logs**, parked since 24 September. I checked Google accepts the key the new way with one call on the sample videos' own allowance, which tonight's upload doesn't use. Standing check otherwise clean: no credentials in the project, secret files still excluded. Library warnings re-checked: the same two known, low-exposure libraries. Prepared an update that clears one library's four warnings; it waits for a sample video before going live.
-
-### Project management
-- Weekly check of the safety screen: 17 uploads since its last adjustment, none skipped (the limit for concern is 15%). This morning it dropped two answers while saying they fit no risky category, which looks like a false alarm. It costs little, since other answers fill in. If it recurs, that's the case for narrowing the screen, which would come to you.
-- Cleared nine finished branches whose work was already live, so the list of open branches now shows only real open work: the rotation, the library update, your pre-trip snapshot, and the branch the daily release check reads.
-- **Friction:** only one real sample video is allowed per shift, and two finished pieces now queue for it (the rotation and the library update). If the queue grows, that limit is the thing to question.
-- Ready work is still one item against a floor of three. I considered four questions: whether failed captions cost viewing (7 cases), day of week, videos picked below Reddit's top post (3 cases), and a nostalgia-heavy subreddit for the rotation. The first three change no decision or can't get enough data; the last is a detail of the rotation build, not a separate item. Two questions become answerable with tomorrow's weekly data.
-
-### Research
-- Tried to answer early whether a failed title costs viewing. It read slightly better, but the early reading was the flawed kind above, so it is not evidence, and I removed it from the tracker. Tomorrow's seven-day reading decides.
-
-### Feature work
-- **Subreddit rotation:** each video's description and tags now name its own subreddit instead of always saying AskReddit, with AskReddit's left exactly as before. Added r/NoStupidQuestions on the branch; its sample video passed. But which posts the safety screen turned down showed only in a log shifts cannot open, so the sample reports now include them. The next sample will show the screen's verdict on the new subreddit. Rotation still cannot go live before the current experiment is read (~4 October).
-
-### Blocked
-- Nothing is waiting on you.
-
-### Next
-- Confirm tonight's upload got its AI-written title: it is the first to send the AI key the new way. Request another sample of the rotation branch and read what the screen skipped. Timing matters: an afternoon (UTC) sample draws from the new subreddit on 29 September, not 28 September, when it would draw AskReddit. After tomorrow's weekly data, answer the two waiting questions (dark topics, failed titles) at seven days. The library update also needs a sample; rotation has priority for the one sample per shift. Keep building the rotation: screen more candidate subreddits, and decide whether the on-video channel name still fits non-AskReddit posts.
-
-### Better?
-- **Than last shift:** yes, modestly: three fixes shipped, against one, including the key fix that had waited three days.
-- **Than ~10 shifts ago:** unclear. Measurement is more trustworthy than it was, but the channel's numbers are still flat.
 - **Than ~100 shifts ago:** too early to say.
