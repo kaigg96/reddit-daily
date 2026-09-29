@@ -244,7 +244,11 @@ a list nobody can read is the same as no list.
   the 2026-09-28 snapshot (555 videos ≥50 views), `est_minutes × 60 / (views ×
   avg_view_duration_s)` has quartiles 0.14 / 0.18 / 0.24: a steady fraction,
   not noise, never above 1 (max 0.94), median 0.176–0.180 on every snapshot
-  since 2026-08-24. If `averageViewDuration` is per engaged view while `views` counts
+  since 2026-08-24. By publish month: 0.60 for the two videos from 2025-03
+  (before YouTube's 2025-03-31 Shorts view change), 0.13–0.23 from 2025-04 to
+  2026-06, then **0.36–0.40 since the 2026-07 v2 overhaul**, as if v2
+  doubled the share of plays past the opening that watch-seconds called flat.
+  Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
   every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
   **Test:** when backlog #8 first collects `engaged_views`, compare the two on
   the same rows; a match backfills #8 from every snapshot since July.
