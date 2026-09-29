@@ -4,11 +4,11 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `main`
-- **Commit:** `9c62f02`
-- **When:** 2026-09-28T16:45:08Z
+- **Commit:** `ab7d628`
+- **When:** 2026-09-29T14:51:10Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/36453151153)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/36585635282)
 
 ## What the gates said
 
@@ -18,9 +18,9 @@ Budget: at most 8 Gemini requests of the 20/day cap shared with production.
 
 ### Gate 1 — merged metadata prompt
 
-- ✅ `title`: Hobbies That Broke the Bank! 💸
-- ✅ `keywords`: expensive hobbies, hobbies too expensive, average person hobbies, photography cost, warham
-- ✅ `cta`: What hobby broke YOUR bank? Comment below!
+- ✅ `title`: Hobbies That Broke the Bank: Is Yours on This List?
+- ✅ `keywords`: expensive hobbies, hobbies too expensive, reddit expensive hobbies, photography cost, warh
+- ✅ `cta`: Which hobby broke YOUR bank? Tell us in the comments!
 
 ### Gate 2 — R4.6 screen replay
 
