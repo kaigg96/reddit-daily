@@ -277,6 +277,10 @@ a list nobody can read is the same as no list.
   release, not a ride-along in an experiment. Re-checked 2026-09-27 with
   `pip-audit`: 37 advisories, the same two packages. requests 2.33.1 merged
   2026-09-30 on a PASS sample, clearing its four; Pillow and Python remain.
+  **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
+  flags 12.3.0 incompatible; found 2026-09-30). A seeded `SAMPLE=1` render on
+  12.3.0 completed, but the pin means `pip install -r` would not resolve, so
+  the fix is a moviepy upgrade first — a render change, after `v7`'s read.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

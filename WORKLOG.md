@@ -73,6 +73,7 @@ Read the allocation series with
 
 ### Security
 - **Shipped the web-library update** that clears its four published weaknesses. It had waited since 27 September for a sample video. Today's sample slot was free because the rotation's window had closed. The sample passed, every test passed, and the video itself is unchanged. The image library and the Python version still carry older weaknesses (low exposure; logged).
+- **The image library cannot be updated on its own.** The video-making library only accepts older versions of it, so fixing it means upgrading the video library first. That changes how videos are made, so it waits until after the current experiment is read on 12 October.
 - Standing check clean: no credentials in the project; secret files still excluded; every automated job declares narrow permissions.
 
 ### Project management
