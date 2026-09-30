@@ -289,6 +289,15 @@ a list nobody can read is the same as no list.
   `SAMPLE=1` render is playable (1080x1920, 30 fps, 24.5 s, audio). So the bump
   is the six `python-version: '3.10'` pins in the workflows (a workflow change,
   so it may need `escalate.py --patch`), plus a real sample, as its own release.
+  **The moviepy upgrade buys no security (2026-09-30):** moviepy 2.2.1 +
+  pillow 11.3.0 resolves and passes 273/273, but `pip-audit` finds **35**
+  Pillow advisories on 11.3.0 (33 on 10.4.0). Every fix is ≥12.1.1, above
+  moviepy's cap, so clearing Pillow means overriding the pin (the seeded
+  12.3.0 render above completed), not upgrading moviepy. Also new since
+  09-27: **oauthlib 3.2.2, CVE-2026-49265** (server-side PKCE timing leak).
+  Exposure nil: only `regen_refresh_token.py` imports it, as a client.
+  4.0.0 resolves cleanly and passes 273/273; fold into the next dependency
+  release rather than spend a sample on it.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

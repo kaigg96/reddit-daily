@@ -74,6 +74,8 @@ Read the allocation series with
 
 ### Security
 - **The Python upgrade looks straightforward.** The version the pipeline runs on stops getting security fixes on 4 October. On the newer version every test passes and a free test video renders correctly, with no library changes needed. The upgrade still waits until after the 12 October read and ships as its own release, because it could change how videos render.
+- **Upgrading the video library would not fix the image library's weaknesses**, contrary to last shift's plan. The newest image-library version it allows still has 35 of them; every fix is in a version above its cap. The real fix means overriding that cap, which a test render already survived. Worth one release after 12 October; I would not upgrade the video library for this.
+- A new published weakness in the sign-in library has no exposure here. It affects servers that check sign-ins, and we only ever sign in as a client, from a one-off setup script. The fixed version installs cleanly and passes every test, so it goes in the next dependency release.
 - Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
@@ -89,7 +91,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, upgrade the video library and the Python version, each as its own release.
+- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, two separate releases: the Python upgrade, then the image-library override bundled with the sign-in library fix.
 
 ### Better?
 - **Than last shift:** marginally. Nothing shipped, but the next build is ready for its sample, and one more doubt (background clips) was settled with evidence.
