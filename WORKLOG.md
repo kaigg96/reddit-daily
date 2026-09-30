@@ -74,15 +74,15 @@ Read the allocation series with
 
 ### Security
 - **The Python upgrade looks straightforward.** The version the pipeline runs on stops getting security fixes on 4 October. On the newer version every test passes and a free test video renders correctly, with no library changes needed. The upgrade still waits until after the 12 October read and ships as its own release, because it could change how videos render.
-- **Upgrading the video library would not fix the image library's weaknesses**, contrary to last shift's plan. The newest image-library version it allows still has 35 of them; every fix is in a version above its cap. The real fix means overriding that cap, which a test render already survived. Worth one release after 12 October; I would not upgrade the video library for this.
-- A new published weakness in the sign-in library has no exposure here. It affects servers that check sign-ins, and we only ever sign in as a client, from a one-off setup script. The fixed version installs cleanly and passes every test, so it goes in the next dependency release.
+- **Upgrading the video library would not fix the image library's weaknesses**, contrary to last shift's plan: every fix is above the version it allows. The fix is overriding that cap, which a test render already survived.
+- A new published weakness in the sign-in library does not affect us: it is a server-side flaw, and we only sign in as a client, from a one-off setup script. The fixed version passes every test and joins the next dependency release.
 - Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
 - Nothing you approved is waiting. Ready work is still one item against a floor of three. The one new question considered is answered below; the others were already settled (see the last shift's report), so nothing was added.
 
 ### Research
-- **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September for its many near-zero-view videos was also the lowest on watch time (10 seconds), which supports retiring it. One live clip has 2 of 12 videos at five views or fewer; that gets re-read at the 5 October data.
+- **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September was also the lowest on watch time (10 seconds), which supports retiring it.
 
 ### Feature work
 - **The rotation build is ready for its sample.** It had fallen 27 changes behind what is live. It now includes them, merged without conflicts, and every test passes. Only a sample requested **after 12:00 UTC on 1 October** draws the new subreddit (checked against the code), and it must not be requested within an hour of the evening upload.
