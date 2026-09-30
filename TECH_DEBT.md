@@ -240,7 +240,20 @@ a list nobody can read is the same as no list.
   views and watch-seconds, and the traffic CSV's minutes come from a separate
   query — so the column is effectively decorative today. Worth either fixing or
   dropping before anything starts reading it. Noticed 2026-09-09 during the
-  R4.6 audit.
+  R4.6 audit. **2026-09-29: do not drop it — it may be the engaged count.** On
+  the 2026-09-28 snapshot (555 videos ≥50 views), `est_minutes × 60 / (views ×
+  avg_view_duration_s)` has quartiles 0.14 / 0.18 / 0.24: a steady fraction,
+  not noise, never above 1 (max 0.94), median 0.176–0.180 on every snapshot
+  since 2026-08-24. By publish month: 0.60 for the two videos from 2025-03
+  (before YouTube's 2025-03-31 Shorts view change), 0.13–0.23 from 2025-04 to
+  2026-06, then **0.36–0.40 since the 2026-07 v2 overhaul**, as if v2
+  doubled the share of plays past the opening that watch-seconds called flat.
+  It splits on v2's release day: 0.17 (n=16, 2026-06-01..07-17) vs 0.43
+  (n=21, 07-18..07-31).
+  Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
+  every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
+  **Test:** when backlog #8 first collects `engaged_views`, compare the two on
+  the same rows; a match backfills #8 from every snapshot since July.
 - **The SRT track fails to upload about one time in four.** First read
   2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
   `comment_ok` was 31/31, so it is real but not the half it first looked. The
@@ -262,8 +275,14 @@ a list nobody can read is the same as no list.
   dependency, or Python, can change how frames render, so it is a video change:
   it needs a real sample (`dry_run.py request`, one per shift) and its own
   release, not a ride-along in an experiment. Re-checked 2026-09-27 with
-  `pip-audit`: 37 advisories, the same two packages. `chore/requests-2.33`
-  clears requests' four and waits for a sample.
+  `pip-audit`: 37 advisories, the same two packages. requests 2.33.1 merged
+  2026-09-30 on a PASS sample, clearing its four; Pillow and Python remain.
+  **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
+  flags 12.3.0 incompatible; found 2026-09-30). A seeded `SAMPLE=1` render on
+  12.3.0 completed, but the pin means `pip install -r` would not resolve, so
+  the fix is a moviepy upgrade first — a render change, after `v7`'s read.
+  Even the latest moviepy (2.2.1) caps `pillow<12.0`, so 11.3.0 is the
+  reachable ceiling; re-run `pip-audit` on it before assuming it clears all.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

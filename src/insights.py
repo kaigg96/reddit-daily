@@ -52,6 +52,7 @@ class Metric:
     LIKES = "likes"
     COMMENTS = "comments"
     TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
+    ENGAGED = "implied_engaged"  # UNCONFIRMED share of plays past the opening (PRD §0 R2)
 
 
 @dataclass
@@ -63,6 +64,7 @@ class Video:
     avg_view_pct: float = 0.0
     likes: float = 0.0
     comments: float = 0.0
+    est_minutes: float = 0.0
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
@@ -71,6 +73,14 @@ class Video:
     @property
     def total_watch_s(self):
         return self.views * self.watch_seconds
+
+    @property
+    def implied_engaged(self):
+        """est_minutes x 60 / (views x watch-seconds): ~0.18 before v2 and ~0.4
+        after. Hypothesis (R2): watch-seconds is per engaged view, so this is
+        engagedViews / views. Unconfirmed until checked against engaged_views."""
+        denom = self.views * self.watch_seconds
+        return self.est_minutes * 60 / denom if denom else 0.0
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
@@ -730,7 +740,7 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
         resp = ya.reports().query(
             ids="channel==MINE", startDate="2024-01-01",
             endDate=now.date().isoformat(),
-            metrics="views,averageViewDuration,averageViewPercentage,likes,comments",
+            metrics="views,averageViewDuration,averageViewPercentage,likes,comments,estimatedMinutesWatched",
             dimensions="video", filters="video==" + ",".join(chunk),
             maxResults=len(chunk)).execute()
         cols = [h["name"] for h in resp.get("columnHeaders", [])]
@@ -774,6 +784,7 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
             video_id=r["video_id"], published=published,
             views=float(s.get("views", 0)),
             watch_seconds=float(s.get("averageViewDuration", 0)),
+            est_minutes=float(s.get("estimatedMinutesWatched", 0)),
             avg_view_pct=float(s.get("averageViewPercentage", 0)),
             likes=float(s.get("likes", 0)), comments=float(s.get("comments", 0)),
             meta=r,
@@ -871,6 +882,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
             video_id=r["video_id"], published=published,
             views=float(s.get("views") or 0),
             watch_seconds=float(s.get("avg_view_duration_s") or 0),
+            est_minutes=float(s.get("est_minutes_watched") or 0),
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0), comments=float(s.get("comments") or 0),
             meta=r,
@@ -984,6 +996,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             true_published=published,
             views=float(s.get("views") or 0),
             watch_seconds=float(s.get("avg_view_duration_s") or 0),
+            est_minutes=float(s.get("est_minutes_watched") or 0),
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0),
             comments=float(s.get("comments") or 0),

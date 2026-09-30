@@ -334,7 +334,7 @@ def main():
                         "the screen's (read before R4.4's firing rate)")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
-                            Metric.TOTAL])
+                            Metric.TOTAL, Metric.ENGAGED])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
