@@ -64,15 +64,16 @@ Read the allocation series with
 
 ## 2026-09-30 (12:44) — the rotation sample window was missed and tomorrow's is the other half of the day; upload time and question length are not levers
 
-    Allocation (planned→actual %): rounds 10→15 · maintenance 5→5 · security 5→5 · pm 20→25 · research 40→40 · feature 10→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→25 · pm 20→20 · research 40→30 · feature 10→0 · close 10→10
 
-**Summary:** Two questions about what drives watch time came back no: upload time and question length make no consistent difference, which frees the rotation's and the extra uploads' scheduling. The planned sample of the new subreddit could not run because this shift started after its window. Tomorrow's window is the afternoon, not the morning.
+**Summary:** A security update that had waited three days for a sample video is now live, clearing four published weaknesses in the library the pipeline uses to reach Reddit and Google. Upload time and question length turn out to make no consistent difference to watch time, and tomorrow's window for the new-subreddit sample is the afternoon, not the morning.
 
 ### Maintenance
 - Last night's and this morning's uploads landed and the saved last-post record is intact. Tonight's is not due yet.
 
 ### Security
-- Standing check clean: no credentials in the project; secret files still excluded.
+- **Shipped the web-library update** that clears its four published weaknesses. It had waited since 27 September for a sample video. Today's sample slot was free because the rotation's window had closed. The sample passed, every test passed, and the video itself is unchanged. The image library and the Python version still carry older weaknesses (low exposure; logged).
+- Standing check clean: no credentials in the project; secret files still excluded; every automated job declares narrow permissions.
 
 ### Project management
 - Nothing you approved is waiting. Kept the documents within their size limits, dropping the oldest shift report.
@@ -83,9 +84,10 @@ Read the allocation series with
 ### Research
 - **Upload time does not matter.** Read at the same age, morning uploads led evening ones by 17% in one format era and trailed by 12% in the next. The overall 10% gap is noise. The rotation and any extra daily uploads can go at any hour.
 - **Longer questions only look better.** They earn about 20% more watch time, in both eras, but only because they make longer videos. Among videos of the same length the gap disappears, and viewers watch a smaller share. This matches the earlier finding that length is not a lever.
+- The two topic labellers now agree on 3 of 8 posts (2 of 6 yesterday), still too few to act on.
 
 ### Feature work
-- No rotation sample. A sample taken after noon today draws AskReddit, not the new subreddit, so it would have spent the day's AI allowance proving nothing.
+- No rotation sample. A sample taken after noon today draws AskReddit, not the new subreddit, so it would have proved nothing. The day's sample went to the security update instead.
 
 ### Blocked
 - Nothing is waiting on you except the automatic issue above.
@@ -94,7 +96,7 @@ Read the allocation series with
 - **The rotation sample: on 1 October the new subreddit is drawn after 12:00 UTC**, which is when shifts have actually been starting. On 2 October it is before noon. Check which one a sample would draw before requesting it. On 5 October, test the engaged-share estimate against the real count. Around 6 October, read the topic labellers' agreement. At the 12 October data, read the current experiment.
 
 ### Better?
-- **Than last shift:** slightly. Two standing doubts are retired with evidence (upload time was called an uncontrolled variable for two months), and a mistimed sample was avoided rather than wasted. Nothing new was tested live.
+- **Than last shift:** yes, modestly. Something shipped: a security fix that had sat unmerged for three days. Two standing doubts were retired with evidence; upload time had been called an uncontrolled variable for two months.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
 - **Than ~100 shifts ago:** too early to say.
 

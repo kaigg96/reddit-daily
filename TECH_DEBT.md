@@ -275,8 +275,8 @@ a list nobody can read is the same as no list.
   dependency, or Python, can change how frames render, so it is a video change:
   it needs a real sample (`dry_run.py request`, one per shift) and its own
   release, not a ride-along in an experiment. Re-checked 2026-09-27 with
-  `pip-audit`: 37 advisories, the same two packages. `chore/requests-2.33`
-  clears requests' four and waits for a sample.
+  `pip-audit`: 37 advisories, the same two packages. requests 2.33.1 merged
+  2026-09-30 on a PASS sample, clearing its four; Pillow and Python remain.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
