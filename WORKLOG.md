@@ -91,7 +91,7 @@ Read the allocation series with
 - Nothing is waiting on you.
 
 ### Next
-- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, two separate releases: the Python upgrade, then the image-library override bundled with the sign-in library fix.
+- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, two separate releases: the Python upgrade, then the image-library override bundled with the sign-in library fix. Any shift can first test for free whether that override changes a single pixel (today's attempt used two different background clips); if it doesn't, it can ship sooner.
 
 ### Better?
 - **Than last shift:** marginally. Nothing shipped, but the next build is ready for its sample, and one more doubt (background clips) was settled with evidence.
