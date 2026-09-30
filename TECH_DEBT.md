@@ -283,6 +283,12 @@ a list nobody can read is the same as no list.
   the fix is a moviepy upgrade first — a render change, after `v7`'s read.
   Even the latest moviepy (2.2.1) caps `pillow<12.0`, so 11.3.0 is the
   reachable ceiling; re-run `pip-audit` on it before assuming it clears all.
+  **Python 3.12 pre-check (2026-09-30):** a scratch venv on the runner's
+  3.12.14 resolves `requirements.txt` unchanged, and the suite passes (273/273
+  on `main`) once `requirements-dev.txt`'s PyYAML is installed too, and a
+  `SAMPLE=1` render is playable (1080x1920, 30 fps, 24.5 s, audio). So the bump
+  is the six `python-version: '3.10'` pins in the workflows (a workflow change,
+  so it may need `escalate.py --patch`), plus a real sample, as its own release.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

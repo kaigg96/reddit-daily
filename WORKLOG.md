@@ -62,6 +62,40 @@ Read the allocation series with
 
 ---
 
+## 2026-09-30 (15:58) — the new-subreddit build is ready for tomorrow afternoon's sample; background clips do not differ on watch time
+
+    Allocation (planned→actual %): rounds 10→15 · maintenance 10→10 · security 20→25 · pm 20→10 · research 20→15 · feature 10→10 · close 10→15
+
+**Summary:** A short shift (24 minutes) that got the subreddit-rotation build ready for tomorrow's sample video, and showed that the Python upgrade due after 12 October needs no other changes. The only new question worth testing had a clear answer: once the weak clip retired on 28 September is set aside, the background clip makes no difference to watch time.
+
+### Maintenance
+- This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload is not due yet.
+- Subtitle uploads: 16 in a row have now succeeded since the last failure on 22 September. The item closes if none fail by 6 October.
+
+### Security
+- **The Python upgrade looks straightforward.** The version the pipeline runs on stops getting security fixes on 4 October. On the newer version every test passes and a free test video renders correctly, with no library changes needed. The upgrade still waits until after the 12 October read and ships as its own release, because it could change how videos render.
+- Standing check clean: no credentials in the project; secret files still excluded.
+
+### Project management
+- Nothing you approved is waiting. Ready work is still one item against a floor of three. The one new question considered is answered below; the others were already settled (see the last shift's report), so nothing was added.
+
+### Research
+- **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September for its many near-zero-view videos was also the lowest on watch time (10 seconds), which supports retiring it. One live clip has 2 of 12 videos at five views or fewer; that gets re-read at the 5 October data.
+
+### Feature work
+- **The rotation build is ready for its sample.** It had fallen 27 changes behind what is live. It now includes them, merged without conflicts, and every test passes. Only a sample requested **after 12:00 UTC on 1 October** draws the new subreddit (checked against the code), and it must not be requested within an hour of the evening upload.
+
+### Blocked
+- Nothing is waiting on you.
+
+### Next
+- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, upgrade the video library and the Python version, each as its own release.
+
+### Better?
+- **Than last shift:** marginally. Nothing shipped, but the next build is ready for its sample, and one more doubt (background clips) was settled with evidence.
+- **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-30 (12:44) — the rotation sample window was missed and tomorrow's is the other half of the day; upload time and question length are not levers
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→25 · pm 20→20 · research 40→30 · feature 10→0 · close 10→10
@@ -140,43 +174,3 @@ Read the allocation series with
 - **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, a flaw in the topic ranking's evidence surfaced before anything was built on it, and a safeguard that had been silently dead works again.
 - **Than ~10 shifts ago:** unclear. More checked leads, none tested live yet.
 - **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-29 (16:10) — a measure we thought we had was never collected, and the current experiment's verdict moves to 12 October
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 30→30 · research 35→30 · feature 0→0 · close 10→10
-
-**Summary:** A measure gathered for the current experiment was never actually collected, and its verdict was scheduled a week too early; the date is corrected and next week's data will show why the measure failed. The check that caught yesterday's burying background video is built into the reporting tool, and the "You…" title lead survived a confound check.
-
-### Maintenance
-- Last night's and this morning's uploads landed without the retired background video, and the saved last-post record is intact. Today's release check passed. Tonight's is not due yet.
-- **A measure we thought we were collecting never was.** The share of plays that get past the opening, gathered for the current experiment since last week, came back empty, and the only warning went to a log no shift reads. The next weekly data will now say why.
-
-### Security
-- Standing check clean: no credentials in the project; secret files still excluded.
-
-### Project management
-- Nothing you approved is waiting; the process check is healthy.
-- Kept every document within its size limit (dropping the oldest shift report), and closed a code-health item already fixed.
-- Ready work is still one item (the rotation) against a floor of three; fixing the measure waits on next week's data. Three new questions I considered were answered today (below); nothing else would change a decision.
-- **Corrected a date:** the current experiment is read at the 12 October data, not 5 October. By the 5th only about 8 of its videos are a week old, against the 20 it committed to, and the tool would have answered anyway; it now refuses below an experiment's committed size. The two items queued behind it move a week.
-- **Friction:** yesterday's key finding needed a hand count the tool could not do, which the project rules forbid. Now fixed, as is a document check that flagged a correct reference.
-
-### Research
-- **The reporting tool now counts buried uploads** (5 views or fewer) for any grouping. It reproduces yesterday's hand count exactly.
-- **The "You…" title lead is not caused by the retired video.** That video carried the style more often than the others, so it held the lead down. The lead is in the typical video, not in fewer buried ones. The other two styles perform alike.
-- **No second cause of burying** by voice, title style or version, once the retired video is set aside.
-
-### Feature work
-- Nothing this shift. No rotation sample: tonight's upload is still due and shares today's AI allowance.
-
-### Blocked
-- Nothing is waiting on you.
-
-### Next
-- **Tomorrow's morning shift is the window for the rotation sample:** before 12:00 UTC on 30 September the sample draws the new subreddit and no upload is near. The branch is now up to date with the live code. On 5 October, read why the measure was refused and fix it. At the 12 October data, read the current experiment, then build the title weighting if the result allows.
-
-### Better?
-- **Than last shift:** yes, modestly. Yesterday's key check now runs from the tool, the proposed next test survived its obvious confound, and an early read can no longer pass for the real one.
-- **Than ~10 shifts ago:** unclear. More measured leads, none tested live yet.
-- **Than ~100 shifts ago:** too early to say.
-
