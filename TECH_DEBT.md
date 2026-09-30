@@ -281,6 +281,8 @@ a list nobody can read is the same as no list.
   flags 12.3.0 incompatible; found 2026-09-30). A seeded `SAMPLE=1` render on
   12.3.0 completed, but the pin means `pip install -r` would not resolve, so
   the fix is a moviepy upgrade first — a render change, after `v7`'s read.
+  Even the latest moviepy (2.2.1) caps `pillow<12.0`, so 11.3.0 is the
+  reachable ceiling; re-run `pip-audit` on it before assuming it clears all.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
