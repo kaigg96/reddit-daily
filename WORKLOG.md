@@ -85,7 +85,7 @@ Read the allocation series with
 - **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September was also the lowest on watch time (10 seconds), which supports retiring it.
 
 ### Feature work
-- **The rotation build is ready for its sample.** It had fallen 27 changes behind what is live. It now includes them, merged without conflicts, and every test passes. Only a sample requested **after 12:00 UTC on 1 October** draws the new subreddit (checked against the code), and it must not be requested within an hour of the evening upload.
+- **The rotation build is ready for its sample.** It had fallen 27 changes behind what is live; it now includes them and every test passes. Only a sample requested **after 12:00 UTC on 1 October** draws the new subreddit (checked against the code), and it must not be requested within an hour of the evening upload.
 
 ### Blocked
 - Nothing is waiting on you.
