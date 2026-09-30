@@ -79,7 +79,7 @@ Read the allocation series with
 - Standing check clean: no credentials in the project; secret files still excluded.
 
 ### Project management
-- Nothing you approved is waiting. Ready work is still one item against a floor of three. The one new question considered is answered below; the others were already settled (see the last shift's report), so nothing was added.
+- Nothing you approved is waiting. Ready work is still one item against a floor of three. The one new question considered is answered below; nothing else cleared the bar.
 
 ### Research
 - **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September was also the lowest on watch time (10 seconds), which supports retiring it.
