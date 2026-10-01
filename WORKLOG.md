@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-10-01 (06:46) — two queued changes can start on 6 October instead of after the 12 October read; the title change is built
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 35→30 · research 15→10 · feature 15→20 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→10 · pm 35→30 · research 15→10 · feature 15→15 · close 10→10
 
 **Summary:** The next two changes no longer have to wait for the current experiment's result on 12 October. The data shows they cannot disturb it, so both can start on 6 October, six days sooner. The first, more "You…" titles in the rotation, is built and tested and can be merged that day.
 
@@ -75,6 +75,7 @@ Read the allocation series with
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
+- **The image-library fix does change the video, or the render is not repeatable.** Rendered the same sample on the old and new versions: the thumbnail and sound are identical, but about a quarter of the video frames differ. The next shift renders the same version twice to tell which. Until then the fix stays a separate release after 12 October.
 
 ### Project management
 - **Your decision on shifts ending early (issue #43) is done and closed.** The three short shifts each stopped because only one piece of work was ready. There were two causes. Most queued work was dated to the 12 October read, but that read only measures uploads up to 5 October. And research questions get answered in the shift that raises them, so a supply never builds up. This shift fixed the first cause and used its full time.

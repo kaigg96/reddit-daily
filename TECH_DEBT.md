@@ -304,11 +304,14 @@ a list nobody can read is the same as no list.
   09-27: **oauthlib 3.2.2, CVE-2026-49265** (server-side PKCE timing leak).
   Exposure nil: only `regen_refresh_token.py` imports it, as a client.
   4.0.0 resolves cleanly and passes 273/273; fold into the next dependency
-  release rather than spend a sample on it. **Open test:** is the Pillow
-  override pixel-identical? If so it is not a video change and need not wait
-  for `v7`'s read. A seeded pair (10.4.0 vs 12.3.0, `random.seed(7)`) failed
-  to compare because `bg_clip` is not chosen from `random`; pin the clip, then
-  diff `ffmpeg -f framemd5` of the two renders.
+  release rather than spend a sample on it. **Is the Pillow override
+  pixel-identical? Not proven (2026-10-01).** Patching `random.Random` to
+  `Random(7)` pins clip and voice; `SAMPLE=1` under 10.4.0 vs 12.3.0
+  (`pip install --target`, `PYTHONPATH`): thumbnail and audio identical, but
+  **185 of 735 video frames** differ by `framemd5`. Missing control: render
+  twice on 10.4.0. Identical → the override changes captions and needs its
+  own release; different → the render is nondeterministic, and this test can
+  never pass.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
