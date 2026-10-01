@@ -143,6 +143,10 @@ class ScreenResult:
                 f"category={self.category!r}, source={self.source})")
 
 
+class NoJSONReply(ValueError):
+    """The screen answered, but with nothing parseable as a verdict."""
+
+
 def _backstop(question, comments, failure=""):
     """Keyword-only fallback used when Gemini is unavailable."""
     if _BACKSTOP_POST.search(question):
@@ -212,7 +216,11 @@ def screen(question, comments):
         raw = _generate_screened(_PROMPT.format(
             question=question, numbered=numbered, topics=", ".join(TOPICS)))
         match = re.search(r"\{.*\}", raw, re.S)
-        data = json.loads(match.group(0)) if match else {}
+        if not match:
+            # Treating this as {} would pass the post as screened by Gemini
+            # while skipping even the backstop.
+            raise NoJSONReply()
+        data = json.loads(match.group(0))
     except Exception as e:
         print(f"Screen: Gemini failed with {type(e).__name__} — using keyword backstop")
         return _backstop(question, comments, failure=llm._failure_kind(e))
