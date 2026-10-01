@@ -195,6 +195,13 @@ def test_a_reply_without_json_is_a_failure_not_a_pass(monkeypatch):
     assert r.verdict == "skip_post"   # the backstop still gets its say
 
 
+def test_a_malformed_json_reply_is_a_failure_not_a_pass(monkeypatch):
+    monkeypatch.setattr(screen, "_generate_screened", lambda prompt: '{"post_risk": none,}')
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "bad_json"
+
+
 def test_429_is_not_retried(monkeypatch):
     """A 429 here is a daily-budget exhaustion that persists for hours. Retrying
     cannot succeed and spends requests the title/keyword/CTA calls still need."""
