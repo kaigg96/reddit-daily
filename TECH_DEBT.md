@@ -212,7 +212,11 @@ a list nobody can read is the same as no list.
   upload log's `meta_failure` column now records the reason (`http_429`,
   `timeout`, ...); the next all-three-zero morning row confirms or kills it.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
-  a meaningful fraction of the budget.
+  a meaningful fraction of the budget. **2026-10-01 06:09: the screen fell to
+  the keyword backstop** (`screen_source=backstop`, first since that column
+  began 09-09) while the title call succeeded, so not a whole-window 429. The
+  screen's failure reason is only printed, never logged; on a second
+  occurrence, log it as `meta_failure` does.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
