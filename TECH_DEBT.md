@@ -214,9 +214,10 @@ a list nobody can read is the same as no list.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
   a meaningful fraction of the budget. **2026-10-01 06:09: the screen fell to
   the keyword backstop** (`screen_source=backstop`, first since that column
-  began 09-09) while the title call succeeded, so not a whole-window 429. The
-  screen's failure reason is only printed, never logged; on a second
-  occurrence, log it as `meta_failure` does. The backstop's regex matches
+  began 09-09) while the title call succeeded, so not a whole-window 429.
+  **Merged 2026-10-01 (evening):** the upload log's `screen_failure` column now
+  records why (`http_503`, `timeout`, `JSONDecodeError`, ...) — built before a
+  second occurrence, since waiting would lose that one's reason. The backstop's regex matches
   **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
   a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
   that is ~0.1% of runs — act only if the backstop rate rises.
