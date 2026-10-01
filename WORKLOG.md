@@ -62,6 +62,42 @@ Read the allocation series with
 
 ---
 
+## 2026-10-01 (06:46) — two queued changes can start on 6 October instead of after the 12 October read; the title change is built
+
+    Allocation (planned→actual %): rounds 10→15 · maintenance 10→10 · security 5→5 · pm 35→35 · research 15→10 · feature 15→15 · close 10→10
+
+**Summary:** The next two changes no longer have to wait for the current experiment's result on 12 October. The data shows they cannot disturb it, so both can start on 6 October, six days sooner. The first, more "You…" titles in the rotation, is built and tested and can be merged that day.
+
+### Maintenance
+- Last night's and this morning's uploads landed, and the saved last-post record is intact.
+- **This morning's content check ran on its keyword-only fallback**, the first time since we started recording which check ran (9 September). The question itself was harmless ("something you can't prove but believe"). The title service answered in the same run, so the daily limit had not run out. Nothing we can read records why it failed. If it happens again, the next step is to start recording the reason.
+
+### Security
+- Standing check clean: no credentials in the project, and the secret files are still excluded.
+
+### Project management
+- **Your decision on shifts ending early (issue #43) is done and closed.** The three short shifts each stopped because only one piece of work was ready. There were two causes. Most queued work was dated to the 12 October read, but that read only measures uploads up to 5 October. And research questions get answered in the shift that raises them, so a supply never builds up. This shift fixed the first cause and used its full time.
+- Ready work is still one item against a floor of three, but two blocked items now unblock on 6 October rather than 12.
+- **Friction:** the list of your approved decisions shows only titles, so I had to open the issue itself to read what it asked for.
+
+### Research
+- **"You…" titles do not change watch time.** It is 10 seconds either way across 129 videos: a little higher in one period, a little lower in the next. So using more of them cannot move the current experiment's measure, which is watch time.
+- **The title change and the new subreddit can run side by side.** Each day's two uploads share a title style and go to different subreddits, so neither comparison skews the other. This holds for two subreddits only; a third would need the schedule changed.
+
+### Feature work
+- **Built the title-weighting change:** four "You…" days in every six, with the other two styles kept for comparison. The tests and a free sample run passed. Merge it on or after 6 October.
+
+### Blocked
+- Nothing is waiting on you.
+
+### Next
+- **Today after 12:00 UTC:** request the new-subreddit sample, but not within an hour of the evening upload. **5 October:** read the new data (engaged-share estimate, clips, voice). **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment. After that, the Python upgrade and the library fixes, one release each.
+
+### Better?
+- **Than last shift:** yes. A change is built and ready to ship, and two changes move six days earlier, based on data.
+- **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-09-30 (15:58) — the new-subreddit build is ready for tomorrow afternoon's sample; background clips do not differ on watch time
 
     Allocation (planned→actual %): rounds 10→15 · maintenance 10→10 · security 20→25 · pm 20→10 · research 20→15 · feature 10→10 · close 10→15
@@ -135,44 +171,4 @@ Read the allocation series with
 ### Better?
 - **Than last shift:** yes, modestly. Something shipped: a security fix that had sat unmerged for three days. Two standing doubts were retired with evidence; upload time had been called an uncontrolled variable for two months.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-29 (17:52) — the "You…" title lead is not clickbait, the topic labels the next build depends on disagree, and the check for neglected work can fire again
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 5→10 · security 5→5 · pm 20→30 · research 50→35 · feature 0→0 · close 10→10
-
-**Summary:** The title style we plan to test next keeps viewers as well as the others, so its extra views are not bought with early swipe-aways, and a measure we thought lost may be recoverable back to July. Two problems surfaced before they could mislead: the topic labels behind the next build disagree, and the check for neglected work could never fire (fixed).
-
-### Maintenance
-- This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload had not landed at 17:52 UTC, within its usual window.
-- **Subtitle uploads have stopped failing.** They used to fail about one time in four; the 14 uploads since 22 September all succeeded, and nothing we changed explains it. If another week stays clean, the item closes.
-
-### Security
-- Standing check clean: no credentials in the project; secret files still excluded.
-
-### Project management
-- Ready work is one item (floor three). The minutes question below became ready and was built the same shift; its test waits on 5 October, like everything else but the rotation.
-- Kept the tracker within its size limit after adding today's findings, dropping the oldest shift report to make room for this one.
-- **The neglected-work check could never fire.** It needs five shifts of history, but the work log only keeps three or four, and it misread the template at the top of the log as the newest shift. It now reads older shifts from the project's history and skips the template. It shows feature work at zero for three shifts running, not yet neglected. Security is now counted too.
-- The process check flags the last three shifts as ending with too much time unused (about 59%). This shift runs its full time, which should clear it.
-- **Friction:** the work log's size limit and a rule needing five shifts of it conflicted, invisibly, because the check stayed silent.
-
-### Research
-- **"You…" titles are not clickbait.** Within one era, the share of each video watched is the same as for the other styles (59% vs 58%); the earlier gap was era mix. Viewers who click these titles stay as long as anyone else.
-- **The two topic labellers disagree on 4 of 6 posts.** The newer one (titles only) is usually more specific: it says "nostalgia" where the older one says "other". This matters because the topic ranking queued behind the current experiment would pick posts using one labeller's buckets while its evidence came mostly from the other's. The reporting tool now counts this, and the ranking's first reading will check it first. Six posts is too few to act on.
-- **The rotation's first new subreddit rests on old evidence only.** It was chosen because nostalgia topics did well historically; the current format has only four such videos a week old, too few to confirm it.
-- **The measure the API refused may already be in our data.** A column long written off as broken (minutes watched) turns out to be a steady fraction of what it "should" be. The likeliest reason is that it counts only the plays that get past the opening, which is the measure the current experiment most needs. Next week's data can test this directly. If it holds, we get that measure for every video back to July. A rough first look fits: the share more than doubled on the day July's format overhaul shipped, which our main measure had called flat. The reporting tool now reads it, marked unconfirmed.
-
-### Feature work
-- Nothing built. The only ready item needs a sample video, and tonight's upload shares today's AI allowance. Brought the rotation branch up to date with the live code again, so tomorrow's sample shows what would ship.
-
-### Blocked
-- Nothing is waiting on you.
-
-### Next
-- **Tomorrow morning, before 12:00 UTC: the rotation sample** (the branch is up to date). On 5 October, test the reporting tool's new engaged-share estimate against the real count. At about 20 uploads with topic labels (~6 October), read the labeller agreement before anything else on the topic ranking. At the 12 October data, read the current experiment.
-
-### Better?
-- **Than last shift:** yes, slightly. The next planned test cleared its obvious risk, a flaw in the topic ranking's evidence surfaced before anything was built on it, and a safeguard that had been silently dead works again.
-- **Than ~10 shifts ago:** unclear. More checked leads, none tested live yet.
 - **Than ~100 shifts ago:** too early to say.
