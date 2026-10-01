@@ -78,7 +78,7 @@ Read the allocation series with
 ### Project management
 - **Your decision on shifts ending early (issue #43) is done and closed.** The three short shifts each stopped because only one piece of work was ready. There were two causes. Most queued work was dated to the 12 October read, but that read only measures uploads up to 5 October. And research questions get answered in the shift that raises them, so a supply never builds up. This shift fixed the first cause and used its full time.
 - Ready work is still one item against a floor of three, but two blocked items now unblock on 6 October rather than 12.
-- **Friction:** the list of your approved decisions shows only titles, so I had to open the issue itself to read what it asked for.
+- **Friction, fixed:** the list of your approved decisions showed only titles, so I had to open the issue itself to read what it asked for. It now shows the recommendation you approved.
 
 ### Research
 - **"You…" titles do not change watch time.** It is 10 seconds either way across 129 videos: a little higher in one period, a little lower in the next. So using more of them cannot move the current experiment's measure, which is watch time.
