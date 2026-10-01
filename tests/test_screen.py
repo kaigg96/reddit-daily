@@ -161,6 +161,7 @@ def test_persistent_timeout_still_fails_open(monkeypatch):
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.verdict == "pass"
     assert r.source == "backstop"
+    assert r.failure == "timeout"
 
 
 def test_screen_source_reaches_the_upload_log(monkeypatch):
@@ -176,10 +177,11 @@ def test_screen_source_reaches_the_upload_log(monkeypatch):
             return S()
 
     def degraded(question, comments):
-        return screen.ScreenResult("pass", source="backstop")
+        return screen.ScreenResult("pass", source="backstop", failure="http_503")
 
     post = content.select_post(FakeReddit(), "", screener=degraded)
     assert post.screen_source == "backstop"
+    assert post.screen_failure == "http_503"   # why, not just that
     assert post.topic == ""
 
 
@@ -200,6 +202,7 @@ def test_429_is_not_retried(monkeypatch):
     r = screen.screen("q", ["a", "b", "c"])
     assert len(calls) == 1          # one attempt, no retry
     assert r.source == "backstop"   # still fails open
+    assert r.failure == "http_429"  # the daily cap, distinguishable from a timeout
 
 
 def test_the_screen_asks_for_reasoning(monkeypatch):
