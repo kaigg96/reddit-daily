@@ -93,7 +93,7 @@ Read the allocation series with
 - The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.
 
 ### Next
-- **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
+- **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Both queued changes include everything up to tonight's handover; if anything else lands first, bring them up to date before requesting, or the sample tests the wrong code. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
 
 ### Better?
 - **Than last shift:** slightly. A fallback that left no trace this morning will now explain itself. But no change aimed at the channel's numbers moved.
