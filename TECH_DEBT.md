@@ -216,7 +216,10 @@ a list nobody can read is the same as no list.
   the keyword backstop** (`screen_source=backstop`, first since that column
   began 09-09) while the title call succeeded, so not a whole-window 429. The
   screen's failure reason is only printed, never logged; on a second
-  occurrence, log it as `meta_failure` does.
+  occurrence, log it as `meta_failure` does. The backstop's regex matches
+  **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
+  a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
+  that is ~0.1% of runs — act only if the backstop rate rises.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under

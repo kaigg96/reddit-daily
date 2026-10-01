@@ -64,13 +64,14 @@ Read the allocation series with
 
 ## 2026-10-01 (06:46) — two queued changes can start on 6 October instead of after the 12 October read; the title change is built
 
-    Allocation (planned→actual %): rounds 10→15 · maintenance 10→10 · security 5→5 · pm 35→35 · research 15→10 · feature 15→15 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→5 · pm 35→30 · research 15→10 · feature 15→20 · close 10→10
 
 **Summary:** The next two changes no longer have to wait for the current experiment's result on 12 October. The data shows they cannot disturb it, so both can start on 6 October, six days sooner. The first, more "You…" titles in the rotation, is built and tested and can be merged that day.
 
 ### Maintenance
 - Last night's and this morning's uploads landed, and the saved last-post record is intact.
 - **This morning's content check ran on its keyword-only fallback**, the first time since we started recording which check ran (9 September). The question itself was harmless ("something you can't prove but believe"). The title service answered in the same run, so the daily limit had not run out. Nothing we can read records why it failed. If it happens again, the next step is to start recording the reason.
+- **The keyword fallback is close to no protection.** It would have caught none of the four questions the full check has ever turned away. Because the fallback ran once in about 44 uploads, the risk is about one upload in a thousand. Worth watching, not yet worth fixing.
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
