@@ -185,6 +185,16 @@ def test_screen_source_reaches_the_upload_log(monkeypatch):
     assert post.topic == ""
 
 
+def test_a_reply_without_json_is_a_failure_not_a_pass(monkeypatch):
+    """A prose-only reply used to parse as {} -- risk none, logged as gemini --
+    so the post shipped unscreened while the log said it had been screened."""
+    monkeypatch.setattr(screen, "_generate_screened", lambda prompt: "Looks fine to me.")
+    r = screen.screen("What's a sign someone is amazing in bed?", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "NoJSONReply"
+    assert r.verdict == "skip_post"   # the backstop still gets its say
+
+
 def test_429_is_not_retried(monkeypatch):
     """A 429 here is a daily-budget exhaustion that persists for hours. Retrying
     cannot succeed and spends requests the title/keyword/CTA calls still need."""
