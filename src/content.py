@@ -22,6 +22,7 @@ class PostContent:
     candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
     topic: str = ""           # R4.3 taxonomy, from the screen call (free)
     screen_source: str = ""   # gemini | backstop — which path actually screened this
+    screen_failure: str = ""  # why the screen fell back, blank when Gemini answered
     slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined; "!<why>" if the call failed
 
 
@@ -113,10 +114,11 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         if len(pool) < config.NUM_COMMENTS:
             continue
 
-        topic = screen_source = ""
+        topic = screen_source = screen_failure = ""
         if screener:
             result = screener(post.title, pool)
             topic, screen_source = result.topic, result.source
+            screen_failure = result.failure
             if result.verdict == "skip_post":
                 print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                 if on_verdict:
@@ -150,6 +152,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             candidate_rank=rank,
             topic=topic,
             screen_source=screen_source,
+            screen_failure=screen_failure,
             slate_topics=slate_topics,
         )
 

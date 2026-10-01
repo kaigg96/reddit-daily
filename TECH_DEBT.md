@@ -212,7 +212,15 @@ a list nobody can read is the same as no list.
   upload log's `meta_failure` column now records the reason (`http_429`,
   `timeout`, ...); the next all-three-zero morning row confirms or kills it.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
-  a meaningful fraction of the budget.
+  a meaningful fraction of the budget. **2026-10-01 06:09: the screen fell to
+  the keyword backstop** (`screen_source=backstop`, first since that column
+  began 09-09) while the title call succeeded, so not a whole-window 429.
+  **Merged 2026-10-01 (evening):** the upload log's `screen_failure` column now
+  records why (`http_503`, `timeout`, `JSONDecodeError`, ...) — built before a
+  second occurrence, since waiting would lose that one's reason. The backstop's regex matches
+  **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
+  a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
+  that is ~0.1% of runs — act only if the backstop rate rises.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
@@ -283,6 +291,27 @@ a list nobody can read is the same as no list.
   the fix is a moviepy upgrade first — a render change, after `v7`'s read.
   Even the latest moviepy (2.2.1) caps `pillow<12.0`, so 11.3.0 is the
   reachable ceiling; re-run `pip-audit` on it before assuming it clears all.
+  **Python 3.12 pre-check (2026-09-30):** a scratch venv on the runner's
+  3.12.14 resolves `requirements.txt` unchanged, and the suite passes (273/273
+  on `main`) once `requirements-dev.txt`'s PyYAML is installed too, and a
+  `SAMPLE=1` render is playable (1080x1920, 30 fps, 24.5 s, audio). So the bump
+  is the six `python-version: '3.10'` pins in the workflows (a workflow change,
+  so it may need `escalate.py --patch`), plus a real sample, as its own release.
+  **The moviepy upgrade buys no security (2026-09-30):** moviepy 2.2.1 +
+  pillow 11.3.0 resolves and passes 273/273, but `pip-audit` finds **35**
+  Pillow advisories on 11.3.0 (33 on 10.4.0). Every fix is ≥12.1.1, above
+  moviepy's cap, so clearing Pillow means overriding the pin (the seeded
+  12.3.0 render above completed), not upgrading moviepy. Also new since
+  09-27: **oauthlib 3.2.2, CVE-2026-49265** (server-side PKCE timing leak).
+  Exposure nil: only `regen_refresh_token.py` imports it, as a client.
+  4.0.0 resolves cleanly and passes 273/273; fold into the next dependency
+  release rather than spend a sample on it. **Is the Pillow override
+  pixel-identical? Not proven (2026-10-01).** Patching `random.Random` to
+  `Random(7)` pins clip and voice; `SAMPLE=1` under 10.4.0 vs 12.3.0
+  (`pip install --target`, `PYTHONPATH`): thumbnail and audio identical, but
+  **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
+  0 differ, so the render is deterministic and **the override is a video
+  change** — its own release with a real sample, after `v7`'s read.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

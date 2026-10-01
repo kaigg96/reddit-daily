@@ -194,6 +194,7 @@ def main():
         "keywords_ok": int(keywords_ok),
         "cta_ok": int(cta_ok),
         "meta_failure": meta.failure,
+        "screen_failure": post.screen_failure,
     })
 
 

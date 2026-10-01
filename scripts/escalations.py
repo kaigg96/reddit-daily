@@ -14,6 +14,7 @@ Needs GH_TOKEN (locally, from .env) or GITHUB_TOKEN (in CI).
 """
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -63,6 +64,15 @@ def _owner_replies(issue):
             if c.get("author_association") == "OWNER" and c["body"].strip()]
 
 
+def _recommendation(issue):
+    """What the owner approved when they labelled it. An approval with no
+    reply printed as a bare title, so the shift had to open the issue to learn
+    what it was asked to do (#43, 2026-10-01)."""
+    m = re.search(r"^## Recommendation\s*$(.*?)(?=^---|^## |\Z)",
+                  issue.get("body") or "", re.S | re.M)
+    return " ".join(m.group(1).split()) if m else ""
+
+
 def _approved_by_owner(issue):
     """Only the owner's own label is a decision. A shift's token can add
     labels -- it closes and comments with the same permission -- and the guard
@@ -93,6 +103,8 @@ def show(want_approved):
           "you do not re-ask what they have answered; a reply is not approval:")
     for i, _ in rows:
         print(f"  #{i['number']}  {i['title']}")
+        if want_approved and _recommendation(i):
+            print("      approved: " + _recommendation(i))
         for reply in _owner_replies(i):
             print("      owner: " + reply.replace("\n", "\n             "))
     return 0
