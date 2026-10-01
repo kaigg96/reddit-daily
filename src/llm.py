@@ -192,6 +192,16 @@ def _clean_keywords(value):
     return [k for k in (_clean_str(v) for v in value) if k]
 
 
+# R2.2, weighted by PRD §0 #10: B ("You...") 4 : A 1 : C 1, with A and C kept as
+# the control. One style per calendar day, so both daily uploads share it; with
+# two rotating subreddits each day also splits them, keeping both reads balanced.
+TITLE_STYLE_CYCLE = "BABBCB"
+
+
+def title_style_for(day):
+    return TITLE_STYLE_CYCLE[day.toordinal() % len(TITLE_STYLE_CYCLE)]
+
+
 TitleResult = collections.namedtuple("TitleResult", "title style ok")
 
 

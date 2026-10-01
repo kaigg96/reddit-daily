@@ -292,3 +292,17 @@ def test_production_calls_keep_the_production_model(monkeypatch):
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     """The free tier is counted per model: a sample must not starve an upload."""
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
+
+
+def test_title_styles_run_four_b_to_one_a_to_one_c():
+    """§0 #10: any six consecutive days carry B:A:C = 4:1:1, A and C the control.
+    Keyed on the date, so both daily uploads share a style and each day splits
+    the rotation's two subreddits under one style (PRD §0 #3)."""
+    import collections
+    import datetime
+    start = datetime.date(2026, 10, 6)
+    for offset in range(12):
+        days = [start + datetime.timedelta(d) for d in range(offset, offset + 6)]
+        counts = collections.Counter(llm.title_style_for(d) for d in days)
+        assert counts == {"B": 4, "A": 1, "C": 1}
+
