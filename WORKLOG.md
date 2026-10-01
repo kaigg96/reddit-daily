@@ -62,6 +62,43 @@ Read the allocation series with
 
 ---
 
+## 2026-10-01 (16:30) — the log now records why the content check falls back; a timing rule that delayed the new-subreddit sample is raised with you
+
+    Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→25 · research 20→10 · feature 0→0 · close 10→15
+
+**Summary:** A short evening shift. It shipped the record the morning shift asked for: each upload now notes why the content check fell back to keywords, so the next fallback explains itself. The new-subreddit sample video could not be requested today, and the rule that prevented it no longer protects anything, so I have asked you to retire it.
+
+### Maintenance
+- **Shipped:** every upload's record now says *why* the content check fell back to its keyword-only version: the daily limit, a timeout, a garbled reply, and so on. This morning's fallback left no reason anywhere we can read. It was built now rather than after a second fallback, because waiting would have lost that one's reason too. It changes no video. All tests pass.
+- This morning's upload landed and the saved last-post record is intact. Tonight's upload was not due yet when this shift ran.
+
+### Security
+- Standing check clean: no credentials in the project, and the secret files are still excluded.
+
+### Project management
+- **New request for you (dry-run-timing-rule):** the sample video for the new-subreddit build was due this afternoon, but no shift ran in the window the rules allow. Today's shift started with the evening upload already due, so it held back. That rule dates from when sample videos used the same daily allowance as real uploads. Since 25 September they use a separate one, and the only thing a real upload uses from it is a piece of tracking data. I recommend letting shifts request a sample at any time; the request has the exact wording. Until you decide, the 09:17 shift tomorrow can request it, and the 6 October plan still holds.
+- The channel is still flat on watch time (11→12 seconds over six weeks, within its normal swing). The two changes aimed at views are already queued for 6 October, so nothing new was added.
+- Ready work is still one item, the new subreddit, and today's rule kept even that from moving. The questions considered are below; neither cleared the bar.
+- **Friction:** the project's rules say to propose a process change on a branch, but this shift was not allowed to edit the process file even there, so the proposal went into the request text instead. Separately, this shift wrote its plan after starting rather than before.
+
+### Research
+- **Do videos titled from the raw Reddit question (when the title service failed) do worse?** There is not enough data: only 2 such uploads have been recorded, against a minimum of 8. Not worth queuing; it would take months.
+- **Do shorter videos get more views?** Yes, about 28% more, but each view is about 3 seconds shorter, so total watch time is the same. This was already found on 25 September. Discarded.
+
+### Feature work
+- Nothing this shift: the only ready item's next step is the sample video, which the timing rule above held back.
+
+### Blocked
+- The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.
+
+### Next
+- **Tomorrow, 09:17 shift:** request the new-subreddit sample. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
+
+### Better?
+- **Than last shift:** slightly. A fallback that left no trace this morning will now explain itself. But no change aimed at the channel's numbers moved.
+- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-10-01 (06:46) — two queued changes can start on 6 October instead of after the 12 October read; the title change is built
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→10 · pm 35→30 · research 15→10 · feature 15→15 · close 10→10
