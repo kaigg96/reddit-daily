@@ -92,7 +92,7 @@ Read the allocation series with
 - The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.
 
 ### Next
-- **Tomorrow, 09:17 shift:** request the new-subreddit sample. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
+- **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
 
 ### Better?
 - **Than last shift:** slightly. A fallback that left no trace this morning will now explain itself. But no change aimed at the channel's numbers moved.
@@ -170,44 +170,5 @@ Read the allocation series with
 
 ### Better?
 - **Than last shift:** marginally. Nothing shipped, but the next build is ready for its sample, and one more doubt (background clips) was settled with evidence.
-- **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-09-30 (12:44) — the rotation sample window was missed and tomorrow's is the other half of the day; upload time and question length are not levers
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 5→5 · security 5→25 · pm 20→20 · research 40→30 · feature 10→0 · close 10→10
-
-**Summary:** A security update that had waited three days for a sample video is now live, clearing four published weaknesses in the library the pipeline uses to reach Reddit and Google. Upload time and question length turn out to make no consistent difference to watch time, and tomorrow's window for the new-subreddit sample is the afternoon, not the morning.
-
-### Maintenance
-- Last night's and this morning's uploads landed and the saved last-post record is intact. Tonight's is not due yet.
-
-### Security
-- **Shipped the web-library update** that clears its four published weaknesses. It had waited since 27 September for a sample video. Today's sample slot was free because the rotation's window had closed. The sample passed, every test passed, and the video itself is unchanged. The image library and the Python version still carry older weaknesses (low exposure; logged).
-- **The image library cannot be updated on its own.** The video-making library only accepts older versions of it, so fixing it means upgrading the video library first. That changes how videos are made, so it waits until after the current experiment is read on 12 October.
-- Standing check clean: no credentials in the project; secret files still excluded; every automated job declares narrow permissions.
-
-### Project management
-- Nothing you approved is waiting. Kept the documents within their size limits, dropping the oldest shift report.
-- Ready work is still one item against a floor of three. I considered five questions: two are answered below, and three were already settled or have nothing to compare (AI titles vs raw questions was answered on 28 September; voice shows no consistent difference across eras; there is only one music track). Nothing new cleared the bar to add.
-- **The process check raised an issue with you automatically:** the last three shifts used about 59% of their time while ready work sat below the floor. My read: the floor stays low because nearly every open question waits on 5 or 12 October data, and each shift answers the cheap questions the same day, which removes them from the count.
-- **Friction:** the shift is scheduled for 09:17 UTC but started at 12:44, so the plan to sample the rotation "before noon" could not happen. Plans tied to a clock window need to allow for starts running hours late.
-
-### Research
-- **Upload time does not matter.** Read at the same age, morning uploads led evening ones by 17% in one format era and trailed by 12% in the next. The overall 10% gap is noise. The rotation and any extra daily uploads can go at any hour.
-- **Longer questions only look better.** They earn about 20% more watch time, in both eras, but only because they make longer videos. Among videos of the same length the gap disappears, and viewers watch a smaller share. This matches the earlier finding that length is not a lever.
-- The two topic labellers now agree on 3 of 8 posts (2 of 6 yesterday), still too few to act on.
-
-### Feature work
-- No rotation sample. A sample taken after noon today draws AskReddit, not the new subreddit, so it would have proved nothing. The day's sample went to the security update instead.
-
-### Blocked
-- Nothing is waiting on you except the automatic issue above.
-
-### Next
-- **The rotation sample: on 1 October the new subreddit is drawn after 12:00 UTC**, which is when shifts have actually been starting. On 2 October it is before noon. Check which one a sample would draw before requesting it. On 5 October, test the engaged-share estimate against the real count. Around 6 October, read the topic labellers' agreement. At the 12 October data, read the current experiment.
-
-### Better?
-- **Than last shift:** yes, modestly. Something shipped: a security fix that had sat unmerged for three days. Two standing doubts were retired with evidence; upload time had been called an uncontrolled variable for two months.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
 - **Than ~100 shifts ago:** too early to say.
