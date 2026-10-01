@@ -308,10 +308,9 @@ a list nobody can read is the same as no list.
   pixel-identical? Not proven (2026-10-01).** Patching `random.Random` to
   `Random(7)` pins clip and voice; `SAMPLE=1` under 10.4.0 vs 12.3.0
   (`pip install --target`, `PYTHONPATH`): thumbnail and audio identical, but
-  **185 of 735 video frames** differ by `framemd5`. Missing control: render
-  twice on 10.4.0. Identical → the override changes captions and needs its
-  own release; different → the render is nondeterministic, and this test can
-  never pass.
+  **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
+  0 differ, so the render is deterministic and **the override is a video
+  change** — its own release with a real sample, after `v7`'s read.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and

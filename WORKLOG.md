@@ -75,7 +75,7 @@ Read the allocation series with
 
 ### Security
 - Standing check clean: no credentials in the project, and the secret files are still excluded.
-- **The image-library fix does change the video, or the render is not repeatable.** Rendered the same sample on the old and new versions: the thumbnail and sound are identical, but about a quarter of the video frames differ. The next shift renders the same version twice to tell which. Until then the fix stays a separate release after 12 October.
+- **The image-library fix changes the video.** Rendered the same sample on the old and new versions: the thumbnail and sound match, but about a quarter of the video frames differ. Two renders on the same version match exactly, so the difference is real. The fix therefore ships as its own release, with a sample video, after 12 October.
 
 ### Project management
 - **Your decision on shifts ending early (issue #43) is done and closed.** The three short shifts each stopped because only one piece of work was ready. There were two causes. Most queued work was dated to the 12 October read, but that read only measures uploads up to 5 October. And research questions get answered in the shift that raises them, so a supply never builds up. This shift fixed the first cause and used its full time.
