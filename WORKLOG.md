@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-10-01 (16:30) — the log now records why the content check falls back; a timing rule that delayed the new-subreddit sample is raised with you
 
-    Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→25 · research 20→10 · feature 0→0 · close 10→15
+    Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→20 · research 20→10 · feature 0→5 · close 10→15
 
 **Summary:** A short evening shift. It shipped the record the morning shift asked for: each upload now notes why the content check fell back to keywords, so the next fallback explains itself. The new-subreddit sample video could not be requested today, and the rule that prevented it no longer protects anything, so I have asked you to retire it.
 
@@ -86,7 +86,7 @@ Read the allocation series with
 - **Do shorter videos get more views?** Yes, about 28% more, but each view is about 3 seconds shorter, so total watch time is the same. This was already found on 25 September. Discarded.
 
 ### Feature work
-- Nothing this shift: the only ready item's next step is the sample video, which the timing rule above held back.
+- The sample video was held back by the timing rule above. Instead, both queued changes (the new subreddit and the title weighting) now include today's code. Together they combine cleanly and every test passes, so tomorrow's sample tests what will actually ship. A sample taken tomorrow morning was confirmed to draw the new subreddit.
 
 ### Blocked
 - The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.

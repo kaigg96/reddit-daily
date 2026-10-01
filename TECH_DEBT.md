@@ -220,7 +220,9 @@ a list nobody can read is the same as no list.
   second occurrence, since waiting would lose that one's reason. The backstop's regex matches
   **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
   a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
-  that is ~0.1% of runs — act only if the backstop rate rises.
+  that is ~0.1% of runs — act only if the backstop rate rises. (A reply with
+  no JSON used to pass as `gemini`, skipping even the backstop; 0 of 22 rows
+  showed it. Since 2026-10-01 it falls to the backstop as `NoJSONReply`.)
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
