@@ -191,7 +191,7 @@ def test_a_reply_without_json_is_a_failure_not_a_pass(monkeypatch):
     monkeypatch.setattr(screen, "_generate_screened", lambda prompt: "Looks fine to me.")
     r = screen.screen("What's a sign someone is amazing in bed?", ["a", "b", "c"])
     assert r.source == "backstop"
-    assert r.failure == "NoJSONReply"
+    assert r.failure == "no_json"     # same label as the metadata call's
     assert r.verdict == "skip_post"   # the backstop still gets its say
 
 
