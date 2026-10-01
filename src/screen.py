@@ -143,10 +143,6 @@ class ScreenResult:
                 f"category={self.category!r}, source={self.source})")
 
 
-class NoJSONReply(ValueError):
-    """The screen answered, but with nothing parseable as a verdict."""
-
-
 def _backstop(question, comments, failure=""):
     """Keyword-only fallback used when Gemini is unavailable."""
     if _BACKSTOP_POST.search(question):
@@ -209,21 +205,28 @@ def _generate_screened(prompt, tries=2):
             time.sleep(4 * (attempt + 1))
 
 
+def _fall_back(question, comments, failure):
+    print(f"Screen: Gemini failed ({failure}) — using keyword backstop")
+    return _backstop(question, comments, failure=failure)
+
+
 def screen(question, comments):
     """Screen one candidate. Never raises — worst case returns a permissive result."""
     numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(comments))
     try:
         raw = _generate_screened(_PROMPT.format(
             question=question, numbered=numbered, topics=", ".join(TOPICS)))
-        match = re.search(r"\{.*\}", raw, re.S)
-        if not match:
-            # Treating this as {} would pass the post as screened by Gemini
-            # while skipping even the backstop.
-            raise NoJSONReply()
-        data = json.loads(match.group(0))
     except Exception as e:
-        print(f"Screen: Gemini failed with {type(e).__name__} — using keyword backstop")
-        return _backstop(question, comments, failure=llm._failure_kind(e))
+        return _fall_back(question, comments, llm._failure_kind(e))
+    match = re.search(r"\{.*\}", raw, re.S)
+    if not match:
+        # Parsing this as {} would pass the post as screened by Gemini while
+        # skipping even the backstop. Labels match llm.get_metadata's.
+        return _fall_back(question, comments, "no_json")
+    try:
+        data = json.loads(match.group(0))
+    except ValueError:
+        return _fall_back(question, comments, "bad_json")
 
     risk = str(data.get("post_risk", "none")).strip().lower()
     topic = str(data.get("topic", "")).strip().lower()
