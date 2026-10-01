@@ -69,7 +69,7 @@ Read the allocation series with
 **Summary:** A short evening shift. It shipped the record the morning shift asked for: each upload now notes why the content check fell back to keywords, so the next fallback explains itself. The new-subreddit sample video could not be requested today, and the rule that prevented it no longer protects anything, so I have asked you to retire it.
 
 ### Maintenance
-- **Shipped:** every upload's record now says *why* the content check fell back to its keyword-only version: the daily limit, a timeout, a garbled reply, and so on. This morning's fallback left no reason anywhere we can read. It was built now rather than after a second fallback, because waiting would have lost that one's reason too. It changes no video. All tests pass.
+- **Shipped:** every upload's record now says *why* the content check fell back to its keyword-only version: the daily limit, a timeout, a garbled reply, and so on. This morning's fallback left no reason anywhere we can read. It was built now rather than after a second fallback, because waiting would have lost that one's reason too. It changes no video. All tests pass, and the change was checked against a copy of the real upload record.
 - **Closed a quieter gap in the same check.** If the content service replied with something unreadable, the post was treated as checked and approved, skipping even the keyword fallback, and the record said the full check had run. It has not happened in 22 uploads. It now goes to the keyword fallback and the reason is recorded. Tests pass; the video is unchanged.
 - This morning's upload landed and the saved last-post record is intact. Tonight's upload was not due yet when this shift ran.
 
@@ -79,12 +79,12 @@ Read the allocation series with
 ### Project management
 - **New request for you (dry-run-timing-rule):** the sample video for the new-subreddit build was due this afternoon, but no shift ran in the window the rules allow. Today's shift started with the evening upload already due, so it held back. That rule dates from when sample videos used the same daily allowance as real uploads. Since 25 September they use a separate one, and the only thing a real upload uses from it is a piece of tracking data. I recommend letting shifts request a sample at any time; the request has the exact wording. Until you decide, the 09:17 shift tomorrow can request it, and the 6 October plan still holds.
 - The channel is still flat on watch time (11→12 seconds over six weeks, within its normal swing). The two changes aimed at views are already queued for 6 October, so nothing new was added.
-- Ready work is still one item, the new subreddit, and today's rule kept even that from moving. The questions considered are below; neither cleared the bar.
-- **Friction:** the project's rules say to propose a process change on a branch, but this shift was not allowed to edit the process file even there, so the proposal went into the request text instead. Separately, this shift wrote its plan after starting rather than before.
+- Ready work is still one item, the new subreddit, and today's rule kept even that from moving. Besides the two research questions below, I considered making the release check test the content check on a question worded differently from its built-in examples. A miss would block releases before 6 October, so it waits until after.
+- **Friction:** the rules say to propose process changes on a branch, but this shift could not edit the process file even there, so the wording went into the request. This shift also wrote its plan after starting.
 
 ### Research
-- **Do videos titled from the raw Reddit question (when the title service failed) do worse?** There is not enough data: only 2 such uploads have been recorded, against a minimum of 8. Not worth queuing; it would take months.
-- **Do shorter videos get more views?** Yes, about 28% more, but each view is about 3 seconds shorter, so total watch time is the same. This was already found on 25 September. Discarded.
+- **Do videos titled with the raw Reddit question do worse?** Only 2 such uploads are recorded, against a minimum of 8; months away, so not queued.
+- **Do shorter videos get more views?** About 28% more, but each view is ~3 seconds shorter, so total watch time is the same. Already known since 25 September; discarded.
 
 ### Feature work
 - The sample video was held back by the timing rule above. Instead, both queued changes (the new subreddit and the title weighting) now include today's code. Together they combine cleanly and every test passes, so tomorrow's sample tests what will actually ship. A sample taken tomorrow morning was confirmed to draw the new subreddit.
@@ -96,7 +96,7 @@ Read the allocation series with
 - **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Both queued changes include everything up to tonight's handover; if anything else lands first, bring them up to date before requesting, or the sample tests the wrong code. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
 
 ### Better?
-- **Than last shift:** slightly. A fallback that left no trace this morning will now explain itself. But no change aimed at the channel's numbers moved.
+- **Than last shift:** slightly. A fallback that left no trace will now explain itself, but nothing aimed at the channel's numbers moved.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
 
