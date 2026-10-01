@@ -9,9 +9,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts import escalations
 
 
-def issue(n, title, labels, comments):
+def issue(n, title, labels, comments, body=""):
     return {"number": n, "title": title, "comments": len(comments),
-            "labels": [{"name": l} for l in labels]}
+            "labels": [{"name": l} for l in labels], "body": body}
 
 
 def fake_github(monkeypatch, issues, comments, labelled_by="kaigg96"):
@@ -78,3 +78,15 @@ def test_an_approval_someone_else_added_is_not_a_decision(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "NOT BY THE OWNER" in out and "#40" in out
     assert "DECIDED" not in out
+
+
+def test_an_approval_without_a_reply_shows_what_was_approved(monkeypatch, capsys):
+    body = ("Shifts stop early.\n\n## Recommendation\n\nRead why each shift "
+            "stopped and fix that reason.\n\n---\n\n*Raised automatically*")
+    fake_github(monkeypatch,
+                [issue(43, "Shifts end early", ["needs-owner", "approved"], [], body)],
+                {})
+    escalations.show(True)
+    out = capsys.readouterr().out
+    assert "approved: Read why each shift stopped and fix that reason." in out
+    assert "Raised automatically" not in out

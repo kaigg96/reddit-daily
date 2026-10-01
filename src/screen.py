@@ -128,7 +128,7 @@ TOPICS = (
 
 class ScreenResult:
     def __init__(self, verdict, unsafe=(), category="", reason="", source="gemini",
-                 topic="", demoted=""):
+                 topic="", demoted="", failure=""):
         self.verdict = verdict          # "pass" | "skip_post"
         self.unsafe = set(unsafe)       # 0-based indices into the comment pool
         self.category = category
@@ -136,22 +136,24 @@ class ScreenResult:
         self.source = source            # gemini | backstop | error
         self.topic = topic              # R4.3 taxonomy, logged for performance tracking
         self.demoted = demoted          # a DROP_ONLY category the model raised on the post
+        self.failure = failure          # why Gemini never answered, when source=backstop
 
     def __repr__(self):
         return (f"ScreenResult({self.verdict}, unsafe={sorted(self.unsafe)}, "
                 f"category={self.category!r}, source={self.source})")
 
 
-def _backstop(question, comments):
+def _backstop(question, comments, failure=""):
     """Keyword-only fallback used when Gemini is unavailable."""
     if _BACKSTOP_POST.search(question):
         return ScreenResult("skip_post", category="backstop_match",
-                            reason="keyword backstop matched question", source="backstop")
+                            reason="keyword backstop matched question", source="backstop",
+                            failure=failure)
     unsafe = [i for i, c in enumerate(comments) if _BACKSTOP_COMMENT.search(c)]
     return ScreenResult("pass", unsafe=unsafe,
                         category="backstop_match" if unsafe else "",
                         reason="keyword backstop matched comment(s)" if unsafe else "",
-                        source="backstop")
+                        source="backstop", failure=failure)
 
 
 # The screen is the one genuine judgment task in the pipeline, and disabling
@@ -213,7 +215,7 @@ def screen(question, comments):
         data = json.loads(match.group(0)) if match else {}
     except Exception as e:
         print(f"Screen: Gemini failed with {type(e).__name__} — using keyword backstop")
-        return _backstop(question, comments)
+        return _backstop(question, comments, failure=llm._failure_kind(e))
 
     risk = str(data.get("post_risk", "none")).strip().lower()
     topic = str(data.get("topic", "")).strip().lower()

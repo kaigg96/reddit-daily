@@ -214,9 +214,13 @@ a list nobody can read is the same as no list.
   Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
   a meaningful fraction of the budget. **2026-10-01 06:09: the screen fell to
   the keyword backstop** (`screen_source=backstop`, first since that column
-  began 09-09) while the title call succeeded, so not a whole-window 429. The
-  screen's failure reason is only printed, never logged; on a second
-  occurrence, log it as `meta_failure` does.
+  began 09-09) while the title call succeeded, so not a whole-window 429.
+  **Merged 2026-10-01 (evening):** the upload log's `screen_failure` column now
+  records why (`http_503`, `timeout`, `JSONDecodeError`, ...) — built before a
+  second occurrence, since waiting would lose that one's reason. The backstop's regex matches
+  **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
+  a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
+  that is ~0.1% of runs — act only if the backstop rate rises.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
@@ -301,11 +305,13 @@ a list nobody can read is the same as no list.
   09-27: **oauthlib 3.2.2, CVE-2026-49265** (server-side PKCE timing leak).
   Exposure nil: only `regen_refresh_token.py` imports it, as a client.
   4.0.0 resolves cleanly and passes 273/273; fold into the next dependency
-  release rather than spend a sample on it. **Open test:** is the Pillow
-  override pixel-identical? If so it is not a video change and need not wait
-  for `v7`'s read. A seeded pair (10.4.0 vs 12.3.0, `random.seed(7)`) failed
-  to compare because `bg_clip` is not chosen from `random`; pin the clip, then
-  diff `ffmpeg -f framemd5` of the two renders.
+  release rather than spend a sample on it. **Is the Pillow override
+  pixel-identical? Not proven (2026-10-01).** Patching `random.Random` to
+  `Random(7)` pins clip and voice; `SAMPLE=1` under 10.4.0 vs 12.3.0
+  (`pip install --target`, `PYTHONPATH`): thumbnail and audio identical, but
+  **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
+  0 differ, so the render is deterministic and **the override is a video
+  change** — its own release with a real sample, after `v7`'s read.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
