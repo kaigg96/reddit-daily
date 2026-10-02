@@ -80,7 +80,8 @@ Read the allocation series with
 - **Your decision on sample timing (#44) is done and closed, with one part left for you.** Shifts now treat the old timing rule as retired. But the rule's wording is unchanged, because shift sessions cannot edit the process files. Automatic applying works only for workflow files, so an approved process-file change has no way to land without you. The issue says what to paste.
 - The new-subreddit sample can now be requested tomorrow afternoon. The rotation draws the new subreddit after 12:00 UTC on 3 October and before 12:00 on 4 October.
 - Ready work is still one item against a floor of three. I considered whether Reddit's top post does better than its runners-up (4 cases, minimum 8, already tracked), whether subscriber gains follow watch time (per-video subscriber counts are not collected; you deferred them until about 100 subscribers), and the topic-label check behind the ranking idea (now 5 of 10 agree, up from 2 of 6; its read is already scheduled at 20 uploads, about 7 October). None was new and above the bar, so nothing was added.
-- **Friction:** this is the second shift running that could not apply a process change, the first by proposing one and this one by carrying out your approval. This shift again wrote its plan after starting.
+- **New request for you (process-file-landing-path):** this is the second shift running that could not apply a process change. Last shift could not propose the wording, and this one could not carry out your approval. I recommend letting approved changes to the process files apply automatically, under the same checks that workflow changes already pass. The request explains it.
+- **Friction:** this shift again wrote its plan after starting.
 
 ### Research
 - Only the three questions above, all already tracked or not answerable from data we have.
@@ -89,7 +90,7 @@ Read the allocation series with
 - Both queued changes now include today's fix, and all their tests pass. The title change's sample video was requested at 15:58. It uses today's one sample but leaves tomorrow afternoon's free for the new subreddit.
 
 ### Blocked
-- The process wording for sample timing is waiting on your edit (issue #44).
+- The process wording for sample timing is waiting on your edit (issue #44), or on the request above.
 
 ### Next
 - **Read the title change's sample result.** If it passed on the branch's current commit, the 6 October merge needs nothing more.
