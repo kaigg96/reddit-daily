@@ -74,7 +74,7 @@ Read the allocation series with
 - Today's release check could not reach the content service, for the same reason, and said so rather than failing. Nothing to act on.
 
 ### Security
-- Standing check clean: no credentials in the project, and the secret files are still excluded.
+- Standing check clean: no credentials in the project, the secret files are still excluded, every automated job still has limited permissions, and the only known library advisories are the image-library ones already scheduled after 12 October.
 
 ### Project management
 - **Your decision on sample timing (#44) is done and closed, with one part left for you.** Shifts now treat the old timing rule as retired. But the rule's wording is unchanged, because shift sessions cannot edit the process files. Automatic applying works only for workflow files, so an approved process-file change has no way to land without you. The issue says what to paste.
@@ -84,7 +84,7 @@ Read the allocation series with
 - **Friction:** this shift again wrote its plan after starting.
 
 ### Research
-- Only the three questions above, all already tracked or not answerable from data we have.
+- The three questions above, plus whether lost search keywords matter (no: search brings about 1% of views, already known). None was new and above the bar. The shift ended about ten minutes early because the remaining work is time-locked: the new-subreddit sample opens tomorrow afternoon, and today's one sample is used.
 
 ### Feature work
 - Both queued changes now include today's fix, and all their tests pass. **The title change's sample video passed** (playable, sound, no gaps) on its current version, so it can merge on 6 October as planned. It used today's one sample but leaves tomorrow afternoon's free for the new subreddit.
