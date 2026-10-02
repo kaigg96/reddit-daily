@@ -13,3 +13,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-09-18T04:51:39+00:00,AskReddit,What famous person died the worse death?,drop_comments,unsafe_comments,,gemini,2
 2026-09-27T05:25:34+00:00,AskReddit,Divorce lawyers of Reddit - What's the most evil thing you've seen during a divorce?,drop_comments,unsafe_comments,not in specified categories,gemini,2
 2026-09-30T05:40:56+00:00,AskReddit,What's an obsure item you own that you're sure 99.99% of the population does not have?,drop_comments,unsafe_comments,Question is a general curiosity prompt.,gemini,1
+2026-10-02T17:54:29+00:00,AskReddit,What happened to the friend you thought you'd have for the rest of your life?,drop_comments,unsafe_comments,"Question is about lost friendships, not forbidden topics.",gemini,1
