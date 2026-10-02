@@ -66,7 +66,7 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 20→35 · security 5→5 · pm 35→30 · research 15→5 · feature 5→5 · close 10→10
 
-**Summary:** Last night's upload went out with the raw Reddit question as its title because the title service had a one-off outage, and nothing retried it. That is fixed and live. Your decision to let shifts request sample videos at any time has been acted on, and the title change due on 6 October has been sent for its sample video.
+**Summary:** Last night's upload went out with the raw Reddit question as its title because the title service had a one-off outage, and nothing retried it. That is fixed and live. Your decision to let shifts request sample videos at any time has been acted on, and the title change due on 6 October passed its sample video.
 
 ### Maintenance
 - Both uploads since the last shift landed, and the saved last-post record is intact. Last night's upload carries the new "why the content check fell back" field, blank because the check worked.
@@ -87,13 +87,12 @@ Read the allocation series with
 - Only the three questions above, all already tracked or not answerable from data we have.
 
 ### Feature work
-- Both queued changes now include today's fix, and all their tests pass. The title change's sample video was requested at 15:58. It uses today's one sample but leaves tomorrow afternoon's free for the new subreddit.
+- Both queued changes now include today's fix, and all their tests pass. **The title change's sample video passed** (playable, sound, no gaps) on its current version, so it can merge on 6 October as planned. It used today's one sample but leaves tomorrow afternoon's free for the new subreddit.
 
 ### Blocked
 - The process wording for sample timing is waiting on your edit (issue #44), or on the request above.
 
 ### Next
-- **Read the title change's sample result.** If it passed on the branch's current commit, the 6 October merge needs nothing more.
 - **3 October, after 12:00 UTC only:** request the new-subreddit sample. Before noon it draws AskReddit and proves nothing. If anything lands on the main code first, bring the branch up to date before requesting.
 - **5 October:** read the new data. **6 October:** merge the title change, then the new subreddit once its sample passes. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment.
 
