@@ -24,9 +24,6 @@ if that also passes, the post ships.
 
 import json
 import re
-import time
-
-import requests
 
 from . import config, llm
 
@@ -178,31 +175,8 @@ SCREEN_THINKING_BUDGET = 512
 def _generate_screened(prompt, tries=2):
     """Retry a transient failure once — falling back to the keyword backstop is
     a real downgrade in protection, so it is worth a few seconds to avoid.
-
-    **A 429 is never retried.** On this project's free tier a 429 is a *daily*
-    budget exhaustion, not a per-minute burst: it persists for hours and clears
-    at midnight PT. Retrying it cannot succeed, and every wasted request comes
-    out of the same budget the title, keyword and CTA calls later in this run
-    still need — so retrying a 429 makes the run's output worse, not better.
-    Measured 2026-09-11: a verification pass retried 429s and burned ~40
-    requests to make 8 useful calls.
-
-    Timeouts and 503s are genuinely transient and are retried once. The budget
-    is tight enough that `tries` is deliberately 2, not 3."""
-    for attempt in range(tries):
-        last = attempt == tries - 1
-        try:
-            return llm._generate(prompt, thinking_budget=SCREEN_THINKING_BUDGET)
-        except requests.HTTPError as e:
-            code = e.response.status_code if e.response is not None else 0
-            if code == 503 and not last:
-                time.sleep(4 * (attempt + 1))
-                continue
-            raise
-        except (requests.Timeout, requests.ConnectionError):
-            if last:
-                raise
-            time.sleep(4 * (attempt + 1))
+    The policy (never a 429) lives in `llm.generate_retrying`."""
+    return llm.generate_retrying(prompt, tries, thinking_budget=SCREEN_THINKING_BUDGET)
 
 
 def _fall_back(question, comments, failure):
