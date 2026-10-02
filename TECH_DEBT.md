@@ -223,6 +223,12 @@ a list nobody can read is the same as no list.
   that is ~0.1% of runs — act only if the backstop rate rises. (A reply with
   no JSON used to pass as `gemini`, skipping even the backstop; 0 of 22 rows
   showed it. Since 2026-10-01 it falls to the backstop as `no_json`.)
+  **2026-10-01 18:29: the title call failed with `http_503`**, the first
+  reason recorded since the column began; title, keywords and CTA all fell
+  back. The screen retried a 503 once, the metadata call never did. **Merged
+  2026-10-02:** both go through `llm.generate_retrying` (503 or timeout once,
+  never a 429). The 10-02 14:46 release check hit a 503 the retry did not
+  clear, so a 503 that outlasts ~4s still falls back.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
