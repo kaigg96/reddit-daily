@@ -62,6 +62,45 @@ Read the allocation series with
 
 ---
 
+## 2026-10-02 (15:52) — a momentary outage no longer costs an upload its title; your sample-timing decision is acted on
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 20→35 · security 5→5 · pm 35→30 · research 15→5 · feature 5→5 · close 10→10
+
+**Summary:** Last night's upload went out with the raw Reddit question as its title because the title service had a one-off outage, and nothing retried it. That is fixed and live. Your decision to let shifts request sample videos at any time has been acted on, and the title change due on 6 October has been sent for its sample video.
+
+### Maintenance
+- Both uploads since the last shift landed, and the saved last-post record is intact. Last night's upload carries the new "why the content check fell back" field, blank because the check worked.
+- **Shipped:** last night's upload lost its generated title, search keywords and closing line to a single "service busy" reply. The new record named the cause, its first use. The content check already tried a second time after that kind of reply, but the title request did not. Both now follow the same rule: one more try after a short pause, and never a retry when the daily allowance is used up, since that only wastes what is left. All tests pass. The video itself is unchanged.
+- Today's release check could not reach the content service, for the same reason, and said so rather than failing. Nothing to act on.
+
+### Security
+- Standing check clean: no credentials in the project, and the secret files are still excluded.
+
+### Project management
+- **Your decision on sample timing (#44) is done and closed, with one part left for you.** Shifts now treat the old timing rule as retired. But the rule's wording is unchanged, because shift sessions cannot edit the process files. Automatic applying works only for workflow files, so an approved process-file change has no way to land without you. The issue says what to paste.
+- The new-subreddit sample can now be requested tomorrow afternoon. The rotation draws the new subreddit after 12:00 UTC on 3 October and before 12:00 on 4 October.
+- Ready work is still one item against a floor of three. I considered whether Reddit's top post does better than its runners-up (4 cases, minimum 8, already tracked), whether subscriber gains follow watch time (per-video subscriber counts are not collected; you deferred them until about 100 subscribers), and the topic-label check behind the ranking idea (now 5 of 10 agree, up from 2 of 6; its read is already scheduled at 20 uploads, about 7 October). None was new and above the bar, so nothing was added.
+- **Friction:** this is the second shift running that could not apply a process change, the first by proposing one and this one by carrying out your approval. This shift again wrote its plan after starting.
+
+### Research
+- Only the three questions above, all already tracked or not answerable from data we have.
+
+### Feature work
+- Both queued changes now include today's fix, and all their tests pass. The title change's sample video was requested at 16:00. It uses today's one sample but leaves tomorrow afternoon's free for the new subreddit.
+
+### Blocked
+- The process wording for sample timing is waiting on your edit (issue #44).
+
+### Next
+- **Read the title change's sample result.** If it passed on the branch's current commit, the 6 October merge needs nothing more.
+- **3 October, after 12:00 UTC only:** request the new-subreddit sample. Before noon it draws AskReddit and proves nothing. If anything lands on the main code first, bring the branch up to date before requesting.
+- **5 October:** read the new data. **6 October:** merge the title change, then the new subreddit once its sample passes. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment.
+
+### Better?
+- **Than last shift:** yes. A fault that cost a real upload its title is fixed, where last shift only made such faults visible. It was the first fault that visibility caught.
+- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-10-01 (16:30) — the log now records why the content check falls back; a timing rule that delayed the new-subreddit sample is raised with you
 
     Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→20 · research 20→10 · feature 0→5 · close 10→15
