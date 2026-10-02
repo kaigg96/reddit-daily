@@ -306,3 +306,35 @@ def test_title_styles_run_four_b_to_one_a_to_one_c():
         counts = collections.Counter(llm.title_style_for(d) for d in days)
         assert counts == {"B": 4, "A": 1, "C": 1}
 
+def test_metadata_retries_a_503_once(monkeypatch):
+    """One 503 cost the 2026-10-01 18:29 upload its title, keywords and CTA:
+    the screen retried transient failures, the metadata call did not."""
+    calls = []
+
+    def flaky(*a, **k):
+        calls.append(1)
+        if len(calls) == 1:
+            resp = FakeResponse(status=503)
+            raise llm.requests.HTTPError("503", response=resp)
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", flaky)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert len(calls) == 2
+    assert meta.title == "A Great Title"
+
+
+def test_metadata_never_retries_a_429(monkeypatch):
+    """A 429 is the shared daily cap; a retry only spends what is left."""
+    calls = []
+
+    def capped(*a, **k):
+        calls.append(1)
+        raise llm.requests.HTTPError("429", response=FakeResponse(status=429))
+
+    monkeypatch.setattr(llm, "_generate", capped)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert len(calls) == 1
+    assert meta.failure == "http_429"

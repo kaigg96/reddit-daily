@@ -4,6 +4,7 @@ import collections
 import json
 import os
 import re
+import time
 
 import requests
 
@@ -61,6 +62,36 @@ def _generate(prompt, thinking_budget=0, model=None):
     )
     resp.raise_for_status()
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def generate_retrying(prompt, tries=2, **kw):
+    """`_generate`, retrying a transient failure once. Shared by the screen and
+    the metadata call so the two cannot drift: the metadata call had no retry,
+    and one 503 cost the 2026-10-01 18:29 upload its title, keywords and CTA.
+
+    **A 429 is never retried.** On this project's free tier a 429 is a *daily*
+    budget exhaustion, not a per-minute burst: it persists for hours and clears
+    at midnight PT. Retrying it cannot succeed, and every wasted request comes
+    out of the same budget the rest of the run still needs. Measured
+    2026-09-11: a verification pass retried 429s and burned ~40 requests to
+    make 8 useful calls.
+
+    Timeouts and 503s are genuinely transient and are retried once. The budget
+    is tight enough that `tries` is deliberately 2, not 3."""
+    for attempt in range(tries):
+        last = attempt == tries - 1
+        try:
+            return _generate(prompt, **kw)
+        except requests.HTTPError as e:
+            code = e.response.status_code if e.response is not None else 0
+            if code == 503 and not last:
+                time.sleep(4 * (attempt + 1))
+                continue
+            raise
+        except (requests.Timeout, requests.ConnectionError):
+            if last:
+                raise
+            time.sleep(4 * (attempt + 1))
 
 
 # PRD R2.2: three title-style experiments, rotated deterministically per day
@@ -145,7 +176,7 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
 """
     try:
-        raw = _generate(prompt)
+        raw = generate_retrying(prompt)
     except Exception as e:
         # never echo the exception body: HTTPError messages embed the keyed URL
         print(f"Gemini metadata failed with {type(e).__name__} "
