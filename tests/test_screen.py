@@ -144,7 +144,7 @@ def test_timeout_is_retried_once(monkeypatch):
                            "topic": "other"})
 
     monkeypatch.setattr(screen.llm, "_generate", flaky)
-    monkeypatch.setattr(screen.time, "sleep", lambda s: None)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
     r = screen.screen("q", ["a", "b", "c"])
     assert len(calls) == 2
     assert r.source == "gemini"
@@ -157,7 +157,7 @@ def test_persistent_timeout_still_fails_open(monkeypatch):
         raise requests.Timeout("slow")
 
     monkeypatch.setattr(screen.llm, "_generate", always_slow)
-    monkeypatch.setattr(screen.time, "sleep", lambda s: None)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.verdict == "pass"
     assert r.source == "backstop"
@@ -215,7 +215,7 @@ def test_429_is_not_retried(monkeypatch):
         raise requests.HTTPError(response=resp)
 
     monkeypatch.setattr(screen.llm, "_generate", limited)
-    monkeypatch.setattr(screen.time, "sleep", lambda s: None)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
     r = screen.screen("q", ["a", "b", "c"])
     assert len(calls) == 1          # one attempt, no retry
     assert r.source == "backstop"   # still fails open
