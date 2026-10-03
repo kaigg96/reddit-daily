@@ -62,11 +62,11 @@ Read the allocation series with
 
 ---
 
-## 2026-10-03 (14:21) — the new-subreddit sample video is requested, in the window that makes it meaningful
+## 2026-10-03 (14:21) — the new-subreddit sample video passed, so both 6 October changes are ready
 
     Allocation (planned→actual %): rounds 10→15 · maintenance 10→5 · security 5→5 · pm 30→25 · research 20→20 · feature 15→20 · close 10→10
 
-**Summary:** A short afternoon shift (about 25 minutes). It requested the one thing that had to happen today: the sample video for the new-subreddit change, which only proves anything when made after noon on 3 October. Everything else the channel needs next is date-locked to 5–12 October.
+**Summary:** A short shift that did the one thing due today: the new-subreddit sample video, which only proves anything after noon on 3 October. It passed, so both changes aimed at views can merge on 6 October.
 
 ### Maintenance
 - Both uploads since the last shift landed (last night's and this morning's), and the saved last-post record is intact. Today's release check passed.
@@ -78,7 +78,7 @@ Read the allocation series with
 ### Project management
 - **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
 - No decisions came due and you have approved nothing new; your open question is still the one about letting approved process changes apply automatically (#45). The channel is still flat on watch time, and both changes aimed at views are queued for 6 October, so nothing new was added.
-- **Ready work is still one item against a floor of three.** The three questions under Research were the candidates; none cleared the bar.
+- **Ready work is now none against a floor of three:** the new subreddit, the last ready item, waits only for 6 October. The questions under Research were the candidates; none cleared the bar.
 - **Friction:** the doc check flags yesterday's entry about #44 as stale, though what it describes is still true. It reads past log entries as current claims; it clears as the entry ages out.
 
 ### Research
@@ -86,13 +86,13 @@ Read the allocation series with
 - Whether a failed title costs watch time was already answered on 28 September (it does not), and the voices on the newest format cannot be compared until the 5 October data.
 
 ### Feature work
-- Sample video for the new subreddit: requested at 14:21; the verdict had not arrived by handover. The next shift reads it before anything else on this item, and requests again if it failed.
+- **The new-subreddit sample video passed** (playable, sound, no gaps). It drew the day's top post from the new subreddit, so it tests the real path. It can merge on 6 October after the title change.
 
 ### Blocked
 - Automatic landing for approved process changes is waiting on your decision (#45).
 
 ### Next
-- **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit if its sample passed. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python and image-library upgrade as its own release.
+- **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit (its sample passed today). **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python and image-library upgrade as its own release.
 
 ### Better?
 - **Than last shift:** about the same. This shift's one job was time-locked and is done; last shift fixed a live fault.
