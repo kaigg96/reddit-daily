@@ -70,20 +70,20 @@ Read the allocation series with
 
 ### Maintenance
 - Both uploads since the last shift landed (last night's and this morning's), and the saved last-post record is intact. Today's release check passed.
-- Nothing else needed doing. The ageing Python version reaches end of life tomorrow; nothing breaks on that date, and its upgrade is already scheduled after the current experiment's read on 12 October.
+- The ageing Python version reaches end of life tomorrow. Nothing breaks then; its upgrade is already scheduled after 12 October.
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and nothing new since yesterday's library check.
 
 ### Project management
-- **Requested the new-subreddit sample video** (feature branch for subreddit rotation). The branch needed no update first: nothing in the main code has changed since it was last brought up to date. Verdict below under Feature work.
+- **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
 - No decisions came due and you have approved nothing new; your open question is still the one about letting approved process changes apply automatically (#45). The channel is still flat on watch time, and both changes aimed at views are queued for 6 October, so nothing new was added.
-- **Ready work is still one item against a floor of three.** I considered three new questions: whether some background clips hold viewers longer than others, whether a failed (raw-question) title costs watch time, and whether the newest format changes how the two voices compare. None cleared the bar (see Research).
-- **Friction:** the automatic doc check flags yesterday's entry for describing a closed request (#44) as still waiting. The issue was closed, but the work it describes still waits on you, so the history is accurate and the check is reading the log's past entries as current claims. Not fixed; it clears itself as the entry ages out.
+- **Ready work is still one item against a floor of three.** The three questions under Research were the candidates; none cleared the bar.
+- **Friction:** the doc check flags yesterday's entry about #44 as stale, though what it describes is still true. It reads past log entries as current claims; it clears as the entry ages out.
 
 ### Research
-- Background clips: on watch time the six clips in use sit between 10.5 and 13 seconds, inside the channel's normal one-second swing, so none should be retired on it. On views they range from 75 to 171, but views do not trigger changes here.
-- A failed title was already answered on 28 September (no watch-time cost; views lower), and the voices on the newest format cannot be compared until the 5 October data. Nothing new is above the bar; the shift ran to its handover time anyway.
+- Background clips: on watch time the six in use sit within the channel's normal one-second swing, so none should be retired on it.
+- Whether a failed title costs watch time was already answered on 28 September (it does not), and the voices on the newest format cannot be compared until the 5 October data.
 
 ### Feature work
 - Sample video for the new subreddit: requested at 14:21; the verdict had not arrived by handover. The next shift reads it before anything else on this item, and requests again if it failed.
