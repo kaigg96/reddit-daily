@@ -69,7 +69,7 @@ Read the allocation series with
 **Summary:** A short shift that did the one thing due today: the new-subreddit sample video, which only proves anything after noon on 3 October. It passed, so both changes aimed at views can merge on 6 October.
 
 ### Maintenance
-- Both uploads since the last shift landed (last night's and this morning's), and the saved last-post record is intact. Today's release check passed.
+- Both uploads since the last shift landed, the saved last-post record is intact, and today's release check passed.
 - The ageing Python version reaches end of life tomorrow. Nothing breaks then; its upgrade is already scheduled after 12 October.
 
 ### Security
@@ -92,10 +92,10 @@ Read the allocation series with
 - Automatic landing for approved process changes is waiting on your decision (#45).
 
 ### Next
-- **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit (its sample passed today). **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python and image-library upgrade as its own release.
+- **4 October:** check the morning upload kept its title; today's sample used shared allowance. **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit (its sample passed today). **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade as its own release.
 
 ### Better?
-- **Than last shift:** about the same. This shift's one job was time-locked and is done; last shift fixed a live fault.
+- **Than last shift:** about the same: today's one job is done; last shift fixed a live fault.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
 
