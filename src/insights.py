@@ -23,6 +23,7 @@ that hit the YouTube API are not.
 import csv
 import datetime
 import math
+import re
 import statistics
 from dataclasses import dataclass, field
 
@@ -712,6 +713,10 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # The question is the narrated opening: does addressing the viewer hold
+    # them? 90 of 154 logged questions say "you" (2026-10-03).
+    r["question_person"] = "" if not q else (
+        "you" if re.search(r"\byou(?:r|rs|'re|'ve|'d|'ll)?\b", q, re.I) else "other")
     # A failed title call ships the Reddit question verbatim. title_ok only
     # exists from 2026-09-19; comparing the two titles covers the older rows.
     t = (r.get("video_title") or "").strip()

@@ -754,6 +754,17 @@ def test_question_length_splits_at_the_logged_median():
     assert length("") == ""
 
 
+def test_question_person_marks_questions_that_address_the_viewer():
+    """Does a narrated opening that says "you" hold viewers longer?"""
+    person = lambda q: insights._with_derived_dimensions({"post_title": q})["question_person"]
+    assert person("What's something you can't prove?") == "you"
+    assert person("What's your best one-liner?") == "you"
+    assert person("You're a billionaire. Now what?") == "you"
+    assert person("Which famous person died in the dumbest way?") == "other"
+    assert person("What happened to young people's hobbies?") == "other"
+    assert person("") == ""
+
+
 def test_title_source_marks_uploads_that_shipped_the_raw_question():
     """Research row R2: does a failed title cost watch-seconds?"""
     source = lambda q, t: insights._with_derived_dimensions(
