@@ -77,7 +77,7 @@ Read the allocation series with
 
 ### Project management
 - **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
-- No decisions came due and you have approved nothing new; your open question is still the one about letting approved process changes apply automatically (#45). The channel is still flat on watch time, and both changes aimed at views are queued for 6 October, so nothing new was added.
+- No decisions came due and nothing new is approved. The channel is still flat on watch time; both changes aimed at views are queued for 6 October.
 - **Ready work is now none against a floor of three:** the new subreddit, the last ready item, waits only for 6 October. The questions under Research were the candidates; none cleared the bar.
 - **Friction:** the doc check flags yesterday's entry about #44 as stale, though what it describes is still true. It reads past log entries as current claims; it clears as the entry ages out.
 
@@ -86,6 +86,7 @@ Read the allocation series with
 
 ### Feature work
 - **The new-subreddit sample video passed** (playable, sound, no gaps). It drew the day's top post from the new subreddit, so it tests the real path. It can merge on 6 October after the title change.
+- **The two 6 October changes combine cleanly:** merged together they touch separate parts of the code, and every test passes.
 
 ### Blocked
 - Automatic landing for approved process changes is waiting on your decision (#45).
