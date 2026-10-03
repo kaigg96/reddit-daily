@@ -229,6 +229,10 @@ a list nobody can read is the same as no list.
   2026-10-02:** both go through `llm.generate_retrying` (503 or timeout once,
   never a 429). The 10-02 14:46 release check hit a 503 the retry did not
   clear, so a 503 that outlasts ~4s still falls back.
+  **2026-10-03:** the window from 07:00 10-03 holds one release check (~6,
+  13:23) and one sample render (2–5, 14:24) before the evening and 10-04
+  morning runs (4–10): worst case 21. An `http_429` on the 10-04 morning row
+  is this item's first confirmed recurrence; none means the typical ~15 fits.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
