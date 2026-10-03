@@ -78,8 +78,8 @@ Read the allocation series with
 ### Project management
 - **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
 - No decisions came due and nothing new is approved. The channel is still flat on watch time; both changes aimed at views are queued for 6 October.
-- **Ready work is now none against a floor of three:** the new subreddit, the last ready item, waits only for 6 October. The questions under Research were the candidates; none cleared the bar.
-- **Friction:** the doc check flags yesterday's entry about #44 as stale, though what it describes is still true. It reads past log entries as current claims; it clears as the entry ages out.
+- **Ready work is now none against a floor of three:** the new subreddit, the last ready item, waits only for 6 October. Besides the Research questions, I set aside avoiding life-advice posts (too few uploads to read) and weekday timing (would not change what we post).
+- **Friction:** the doc check flags yesterday's still-true entry about #44 as stale: it reads past log entries as current claims.
 
 ### Research
 - Three new questions, tested on our own data, all came back as noise: no background clip holds viewers measurably longer; one title style looked 18% worse, but the gap reverses between periods; and questions that say "you" hold viewers no longer. Recorded so they are not re-asked.
