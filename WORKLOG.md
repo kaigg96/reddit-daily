@@ -62,6 +62,43 @@ Read the allocation series with
 
 ---
 
+## 2026-10-03 (14:21) — the new-subreddit sample video is requested, in the window that makes it meaningful
+
+    Allocation (planned→actual %): rounds 10→15 · maintenance 10→5 · security 5→5 · pm 30→25 · research 20→20 · feature 15→20 · close 10→10
+
+**Summary:** A short afternoon shift (about 25 minutes). It requested the one thing that had to happen today: the sample video for the new-subreddit change, which only proves anything when made after noon on 3 October. Everything else the channel needs next is date-locked to 5–12 October.
+
+### Maintenance
+- Both uploads since the last shift landed (last night's and this morning's), and the saved last-post record is intact. Today's release check passed.
+- Nothing else needed doing. The ageing Python version reaches end of life tomorrow; nothing breaks on that date, and its upgrade is already scheduled after the current experiment's read on 12 October.
+
+### Security
+- Standing check clean: no credentials in the project, the secret files are still excluded, and nothing new since yesterday's library check.
+
+### Project management
+- **Requested the new-subreddit sample video** (feature branch for subreddit rotation). The branch needed no update first: nothing in the main code has changed since it was last brought up to date. Verdict below under Feature work.
+- No decisions came due and you have approved nothing new; your open question is still the one about letting approved process changes apply automatically (#45). The channel is still flat on watch time, and both changes aimed at views are queued for 6 October, so nothing new was added.
+- **Ready work is still one item against a floor of three.** I considered three new questions: whether some background clips hold viewers longer than others, whether a failed (raw-question) title costs watch time, and whether the newest format changes how the two voices compare. None cleared the bar (see Research).
+- **Friction:** the automatic doc check flags yesterday's entry for describing a closed request (#44) as still waiting. The issue was closed, but the work it describes still waits on you, so the history is accurate and the check is reading the log's past entries as current claims. Not fixed; it clears itself as the entry ages out.
+
+### Research
+- Background clips: on watch time the six clips in use sit between 10.5 and 13 seconds, inside the channel's normal one-second swing, so none should be retired on it. On views they range from 75 to 171, but views do not trigger changes here.
+- A failed title was already answered on 28 September (no watch-time cost; views lower), and the voices on the newest format cannot be compared until the 5 October data. Nothing new is above the bar; the shift ran to its handover time anyway.
+
+### Feature work
+- Sample video for the new subreddit: requested at 14:21; the verdict had not arrived by handover. The next shift reads it before anything else on this item, and requests again if it failed.
+
+### Blocked
+- Automatic landing for approved process changes is waiting on your decision (#45).
+
+### Next
+- **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit if its sample passed. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python and image-library upgrade as its own release.
+
+### Better?
+- **Than last shift:** about the same. This shift's one job was time-locked and is done; last shift fixed a live fault.
+- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-10-02 (15:52) — a momentary outage no longer costs an upload its title; your sample-timing decision is acted on
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 20→35 · security 5→5 · pm 35→30 · research 15→5 · feature 5→5 · close 10→10
