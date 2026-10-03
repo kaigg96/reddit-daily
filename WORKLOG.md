@@ -73,7 +73,7 @@ Read the allocation series with
 - The ageing Python version reaches end of life tomorrow. Nothing breaks then; its upgrade is already scheduled after 12 October.
 
 ### Security
-- Standing check clean: no credentials in the project, the secret files are still excluded, and nothing new since yesterday's library check.
+- No credentials in the project and the secret files are still excluded. The library-advisory scan was not rerun (its tool is not installed here); yesterday's stands.
 
 ### Project management
 - **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
@@ -82,8 +82,7 @@ Read the allocation series with
 - **Friction:** the doc check flags yesterday's entry about #44 as stale, though what it describes is still true. It reads past log entries as current claims; it clears as the entry ages out.
 
 ### Research
-- Background clips: on watch time the six in use sit within the channel's normal one-second swing, so none should be retired on it.
-- Whether a failed title costs watch time was already answered on 28 September (it does not), and the voices on the newest format cannot be compared until the 5 October data.
+- Three new questions, tested on our own data, all came back as noise: no background clip holds viewers measurably longer; one title style looked 18% worse, but the gap reverses between periods; and questions that say "you" hold viewers no longer. Recorded so they are not re-asked.
 
 ### Feature work
 - **The new-subreddit sample video passed** (playable, sound, no gaps). It drew the day's top post from the new subreddit, so it tests the real path. It can merge on 6 October after the title change.
