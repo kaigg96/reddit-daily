@@ -66,11 +66,11 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 25→25 · security 5→5 · pm 30→25 · research 20→25 · feature 0→0 · close 10→10
 
-**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research turned up one lead worth reading tomorrow: uploads narrated by Danielle reach almost nobody (5 views or fewer) far more often than Stephen's, even though viewers who do see them watch just as long.
+**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody; it is probably a one-off mid-September cluster, and tomorrow's data will tell.
 
 ### Maintenance
 - Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, search keywords and closing line to a "service overloaded" reply. That is the second time a 4-second wait was too short. Last shift's worry, that the shared daily allowance would run out, did not happen.
-- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged, all tests pass, and it costs nothing but half a minute when it fires. Earlier data says a lost title costs no watch time. But Tuesday's title-style change needs every upload to carry a generated title, or its measurement fills with noise. If it happens again even after 30 seconds, the next step is retrying on a different model with its own allowance.
+- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged, all tests pass, and it costs nothing but half a minute when it fires. Earlier data says a lost title costs no watch time. But the 6 October title-style change needs every upload to carry a generated title, or its measurement fills with noise. If it happens again even after 30 seconds, the next step is retrying on a different model with its own allowance.
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan ran for the first time in three shifts and found only the two advisories already on file.
@@ -82,8 +82,8 @@ Read the allocation series with
 - **Friction:** this shift wrote its plan at the end, not the start, again. With 24 minutes, a written plan first costs a tenth of the shift.
 
 ### Research
-- **New lead, read tomorrow:** uploads narrated by Danielle reach 5 views or fewer 4–5 times as often as Stephen's. That holds in both earlier formats and after removing the background clip already retired for the same problem (6 of 58 against 0 of 60). How long viewers watch is the same for both voices. As a check, I ran the same test on five other features. One showed a gap in one format only, about what chance predicts. Voice was the only one that held in both. Tomorrow's data adds the two newest formats. If it holds there, I will propose a one-voice experiment, a change to what we ship.
-- The reporting tool now runs this test whenever it splits uploads into two groups, and pools it across formats so that tomorrow's few new uploads can be read together with the older ones. Pooled, the voice gap is about a 1-in-100 chance.
+- **A lead, probably weaker than it looks:** uploads narrated by Danielle reach 5 views or fewer far more often than Stephen's (11 of 67 against 2 of 65), and morning uploads more than evening ones, the same shape. How long viewers watch is equal. But 9 of those uploads are Danielle in the morning, and 7 of them fell in one fortnight in mid-September, 5 on the background clip already retired for this problem. That looks like a one-off cluster rather than the voice. Tomorrow's data covers the newer formats, after that fortnight: if the gap is still there, I will propose a one-voice experiment; if not, it was the cluster.
+- The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap.
 
 ### Feature work
 - Nothing this shift: both queued changes wait for 6 October, and their samples already passed.
@@ -92,11 +92,11 @@ Read the allocation series with
 - Automatic landing for approved process changes still awaits your decision (#45).
 
 ### Next
-- **5 October:** read the new data: the voice lead above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
+- **5 October:** read the new data: the voice and time-of-day gap above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
 - Watch the next uploads for another overloaded-service failure.
 
 ### Better?
-- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a new lead found in our own data.
+- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a lead from our own data checked down to its likely cause before it could mislead.
 - **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
 
