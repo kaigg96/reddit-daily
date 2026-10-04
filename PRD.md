@@ -23,9 +23,8 @@
 - `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration (music ~10 dB under voice, SFX ~−20 dBFS peaks), "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
-- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R4.3 historical topic analysis (2026-07-19) · OAuth production consent (2026-07-19) · R1.3 b-roll library (2026-08-15, 7 clips) · R4.7 traffic-source telemetry (2026-09-07; §4) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **no verdict** until ~2026-10-05. It also measured the channel's own drift — see §4
+- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R1.3 b-roll library (2026-08-15, 7 clips) · R4.7 traffic-source telemetry (2026-09-07; §4) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **no verdict** until ~2026-10-05
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
-- The Sprint-1-era open question — *did production quality move retention?* — was answered 2026-07-27: distribution yes (3.5× median views), retention no. See §4 Findings.
 - **`v6` — merged to `main` 2026-09-19** (four branches: cost guardrails, Gemini thinking-timeout fix, R4.6 screen retiering, analytics zero-view fix).
 - **`v7` — opens on the question (2026-09-25):** experiment #1 below, judged under its rule at the 2026-10-12 snapshot.
 
@@ -40,7 +39,7 @@
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
-Reordered 2026-08-23 after Review 2 (§4 Findings): duration is not a lever, so the format-geometry experiments are cancelled and content/hook quality moves to the top. **Reordered again 2026-09-22**, on data rather than opinion: the channel reads **FLAT** (`--trajectory`: 11.0 → 12.0 watch-seconds over six periods, inside its own ~1.0s drift), and the item that was #1 is blocked — R4.4's per-candidate scan does not fit the Gemini cap, now escalated as due for elevation. A flat channel needs a change to *what we ship* that is actually shippable, so the opening-seconds experiment goes first; R4.4 keeps its rank behind it and is **blocked, not dropped**.
+**Reordered 2026-09-22**, on data rather than opinion: the channel reads **FLAT** (`--trajectory`: 11.0 → 12.0 watch-seconds over six periods, inside its own ~1.0s drift), and the item that was #1 is blocked — R4.4's per-candidate scan does not fit the Gemini cap, now escalated as due for elevation. A flat channel needs a change to *what we ship* that is actually shippable, so the opening-seconds experiment goes first; R4.4 keeps its rank behind it and is **blocked, not dropped**.
 
 | # | Status | Item | Req | Decision rule (pre-committed) |
 |---|---|---|---|---|
@@ -62,7 +61,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
-| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Uploads at ≤5 views, within era: Danielle **3/22 vs Stephen 0/37** (`v4`, Fisher p=0.047), **8/27 vs 2/26** (`v5`, p=0.076); median watch-seconds equal (2026-10-04). Same direction twice, but one of many dimensions tried, so a lead | `report.py --by voice --within format_version=v7` now prints the Fisher p. Holds in `v6`/`v7` → propose a one-voice experiment (a change to what we ship); fades → noise, recorded. |
+| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views), within era: Danielle 3/22 vs Stephen 0/37 (`v4`, p=0.047), 8/27 vs 2/26 (`v5`, p=0.076); off retired clip #11, 6/58 vs 0/60 (p=0.012). Watch-seconds equal. A lead: one of many dimensions tried (2026-10-04) | `report.py --by voice --within format_version=v7` prints the p. Holds → propose a one-voice experiment; fades → noise. |
 | R2 | blocked: the 2026-10-05 snapshot | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Built 2026-09-29 (`--metric implied_engaged`); read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
 
 #### Owner tasks (anytime, no version bump)
