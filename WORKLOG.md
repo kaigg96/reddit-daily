@@ -64,12 +64,13 @@ Read the allocation series with
 
 ## 2026-10-04 (14:49) — today's release check failed on a tracker slip, now fixed; title length ruled out
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→15 · security 5→5 · pm 30→25 · research 30→35 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→5 · pm 30→20 · research 30→30 · feature 0→0 · close 10→10
 
-**Summary:** Today's automatic release check failed. The cause was a bookkeeping slip in the tracker, not the video code, and it is fixed. Research ruled out title length as the reason raw-question titles get fewer views. Ready work is still none: the rest waits on 5 and 6 October.
+**Summary:** Today's automatic release check failed. The cause was a bookkeeping slip in the tracker, not the video code, and it is fixed. Research ruled out title length as the reason raw-question titles get fewer views, and tomorrow's statistics run makes a second try at a figure we have never collected. Ready work is still none: the rest waits on 5 and 6 October.
 
 ### Maintenance
 - No upload has run since this morning's shift checked them. Today's release check failed: a research question answered this morning was left in the tracker, which a test forbids, so the check stopped before testing the live code. The answer now sits with the findings, and every test passes. Uploads were never affected.
+- **Shipped:** the weekly statistics job has never collected the figure for plays that get past the opening, because the service refused that request. When refused, it now also asks for the figure in a smaller request, so tomorrow's run either collects it or shows whether request size was the cause. The snapshot is never at risk, and the video is unchanged.
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and no automated job's permissions changed.
