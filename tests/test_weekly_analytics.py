@@ -61,8 +61,9 @@ def test_old_rows_read_back_blank_for_the_new_column(tmp_path):
 class _FakeAnalytics:
     """Stands in for the Analytics client; refuses engagedViews if told to."""
 
-    def __init__(self, refuse_engaged):
+    def __init__(self, refuse_engaged, only_beside_all=False):
         self.refuse_engaged = refuse_engaged
+        self.only_beside_all = only_beside_all
         self.calls = []
 
     def reports(self):
@@ -75,7 +76,8 @@ class _FakeAnalytics:
         return self
 
     def execute(self):
-        if self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics:
+        if (self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics
+                and not (self.only_beside_all and len(self._metrics) == 2)):
             raise RuntimeError("HttpError 400: Unknown identifier (engagedViews)")
         headers = [{"name": "video"}] + [{"name": m} for m in self._metrics]
         rows = [[v] + [3 if m == wa.ENGAGED_METRIC else 9 for m in self._metrics]
@@ -95,4 +97,12 @@ def test_a_refused_metric_costs_the_column_not_the_snapshot():
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert set(stats) == {"a", "b"} and stats["a"]["views"] == 9
     assert stats["a"][wa.ENGAGED_METRIC].startswith("refused: RuntimeError: HttpError 400")
-    assert ya.calls[-1] == wa.METRICS
+    assert "; alone: RuntimeError" in stats["a"][wa.ENGAGED_METRIC]
+    assert wa.METRICS in ya.calls
+
+
+def test_engaged_views_refused_beside_every_metric_are_asked_for_alone():
+    ya = _FakeAnalytics(refuse_engaged=True, only_beside_all=True)
+    stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
+    assert stats["a"][wa.ENGAGED_METRIC] == 3 and stats["a"]["views"] == 9
+    assert ya.calls[-1] == f"views,{wa.ENGAGED_METRIC}"

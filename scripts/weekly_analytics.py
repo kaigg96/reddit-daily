@@ -88,8 +88,8 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
 
     The API reference lists engagedViews for dimensions=video, but a shift has
     no YouTube credentials to confirm that against this channel. So a refusal
-    costs one extra query and a blank column, never the snapshot, which is the
-    measurement backbone.
+    costs two extra queries and at worst a blank column, never the snapshot,
+    which is the measurement backbone.
     """
     try:
         return fetch_stats(ya, video_ids, end_date, f"{METRICS},{ENGAGED_METRIC}")
@@ -100,10 +100,19 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
         # read; the 2026-09-28 snapshot came back blank with no reason. The
         # column is committed, so the reason goes there.
         reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
-        stats = fetch_stats(ya, video_ids, end_date)
+    stats = fetch_stats(ya, video_ids, end_date)
+    # One likely cause is the combination, not the metric (TECH_DEBT): asking
+    # for it beside views alone tests that in this run instead of next week's.
+    try:
+        alone = fetch_stats(ya, video_ids, end_date, f"views,{ENGAGED_METRIC}")
+    except Exception as e:
+        reason += " ".join(f"; alone: {type(e).__name__}: {e}".split())[:120]
         for d in stats.values():
             d[ENGAGED_METRIC] = reason
         return stats
+    for video, d in stats.items():
+        d[ENGAGED_METRIC] = alone.get(video, {}).get(ENGAGED_METRIC, "")
+    return stats
 
 
 def ensure_header(path, fields):

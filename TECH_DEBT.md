@@ -353,7 +353,9 @@ a list nobody can read is the same as no list.
   workflow commits the CSVs, nothing else). The column now records the refusal
   (`refused: <error>`, 2026-09-29): read it at the 10-05 snapshot, then try
   the likely causes (`sort=-views` with the extra metric; the metric needing
-  its own query). Blocks PRD §0 #8. Found 2026-09-29.
+  its own query). Since 2026-10-04 a refusal also asks for `views,engagedViews`
+  alone, filling the column if that works or appending `; alone: <error>`, so
+  the 10-05 run tests the second cause itself. Blocks PRD §0 #8. Found 2026-09-29.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
