@@ -313,6 +313,23 @@ def test_metadata_retries_a_503_once(monkeypatch):
     assert meta.title == "A Great Title"
 
 
+def test_a_503_waits_out_an_overload_before_retrying(monkeypatch):
+    """A 4s wait did not outlast the 503s on the 2026-10-02 release check or
+    the 2026-10-04 06:04 upload, which lost its title."""
+    waits = []
+
+    def overloaded(*a, **k):
+        if not waits:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert waits == [llm._OVERLOAD_WAIT] and llm._OVERLOAD_WAIT >= 30
+    assert meta.title == "A Great Title"
+
+
 def test_metadata_never_retries_a_429(monkeypatch):
     """A 429 is the shared daily cap; a retry only spends what is left."""
     calls = []
