@@ -66,25 +66,25 @@ Read the allocation series with
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 25→15 · security 5→10 · pm 30→20 · research 20→35 · feature 0→0 · close 10→10
 
-**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody; it is probably a one-off mid-September cluster, and tomorrow's data will tell.
+**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody, probably a one-off mid-September cluster; tomorrow's data will tell. Ready work is back to none: everything left waits on 5 or 6 October.
 
 ### Maintenance
 - Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, keywords and closing line to a "service overloaded" reply, the second time a 4-second wait was too short. The daily allowance did not run out.
 - **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged and all tests pass. A lost title costs no watch time, but the 6 October title-style test needs generated titles to measure. If 30 seconds is not enough either, retry on another model next.
 
 ### Security
-- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan ran for the first time in three shifts and found only the two advisories already on file.
+- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan found only the two advisories already on file.
 
 ### Project management
 - The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
 - **The automatic process check raised a request for you:** recent shifts used about half their time, because the remaining work waited on a date. My recommendation, in the request: no rule change yet.
 - The document checker no longer flags a true past note as out of date. It now reads only the newest shift report as current, which ends the false alarm last shift recorded as friction.
-- **Friction:** this shift wrote its plan at the end, not the start, again. With 24 minutes, a written plan first costs a tenth of the shift.
+- **Friction:** this shift wrote its plan at the end, not the start, again.
 
 ### Research
 - **A lead, probably weaker than it looks:** uploads narrated by Danielle reach 5 views or fewer far more often than Stephen's (11 of 67 against 2 of 65), and morning uploads more than evening ones, the same shape. How long viewers watch is equal. But 9 of those uploads are Danielle in the morning, and 7 of them fell in one fortnight in mid-September, 5 on the background clip already retired for this problem. That looks like a one-off cluster rather than the voice. Tomorrow's data covers the newer formats, after that fortnight: if the gap is still there, the next shift proposes a one-voice experiment; if not, it was the cluster.
-- The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap. The burial clusters in the two mid-September weeks (7 of 28, against 6 of 115 in all other weeks). Those were the weeks the content service kept timing out, but neither of its effects explains the burial: uploads that lost their title, or skipped the content check, were buried no more often. The cause is still unknown.
+- The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap; topic is too thin to read (10 uploads or fewer each). The burial clusters in the two mid-September weeks (7 of 28, against 6 of 115 in all other weeks). Those were the weeks the content service kept timing out, but neither of its effects explains the burial: uploads that lost their title, or skipped the content check, were buried no more often. The cause is still unknown.
 - **Asked and answered: does a background clip get buried once it has been reused? No.** The clip retired on 28 September went bad after its fourth use, but across all the other clips, later uses were buried no more often than early ones. That clip was a one-off, so no cap on reuse is needed.
 
 ### Feature work
