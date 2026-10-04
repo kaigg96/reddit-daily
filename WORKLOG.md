@@ -62,6 +62,44 @@ Read the allocation series with
 
 ---
 
+## 2026-10-04 (07:37) — this morning's upload lost its title to a second outage; the retry now waits it out
+
+    Allocation (planned→actual %): rounds 10→10 · maintenance 25→25 · security 5→5 · pm 30→25 · research 20→25 · feature 0→0 · close 10→10
+
+**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research turned up one lead worth reading tomorrow: uploads narrated by Danielle reach almost nobody (5 views or fewer) far more often than Stephen's, even though viewers who do see them watch just as long.
+
+### Maintenance
+- Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, search keywords and closing line to a "service overloaded" reply. That is the second time a 4-second wait was too short. Last shift's worry, that the shared daily allowance would run out, did not happen.
+- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged, all tests pass, and it costs nothing but half a minute when it fires. Earlier data says a lost title costs no watch time. But Tuesday's title-style change needs every upload to carry a generated title, or its measurement fills with noise. If it happens again even after 30 seconds, the next step is retrying on a different model with its own allowance.
+
+### Security
+- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions.
+
+### Project management
+- The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
+- No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
+- **The automatic process check raised a request for you:** the last three shifts used about half their time. The two I can still read both stopped because the remaining work was waiting on a date. This shift used all of its time.
+- **Friction:** this shift wrote its plan at the end, not the start, again. With 24 minutes, a written plan first costs a tenth of the shift.
+
+### Research
+- **New lead, read tomorrow:** uploads narrated by Danielle reach 5 views or fewer 4–5 times as often as Stephen's. That holds in both earlier formats and after removing the background clip already retired for the same problem (6 of 58 against 0 of 60). How long viewers watch is the same for both voices. As a check, I ran the same test on five other features. One showed a gap in one format only, about what chance predicts. Voice was the only one that held in both. Tomorrow's data adds the two newest formats. If it holds there, I will propose a one-voice experiment, a change to what we ship.
+- The reporting tool now runs this test whenever it splits uploads into two groups.
+
+### Feature work
+- Nothing this shift: both queued changes wait for 6 October, and their samples already passed.
+
+### Blocked
+- Automatic landing for approved process changes still awaits your decision (#45).
+
+### Next
+- **5 October:** read the new data: the voice lead above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
+- Watch the next uploads for another overloaded-service failure.
+
+### Better?
+- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a new lead found in our own data.
+- **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-10-03 (14:21) — the new-subreddit sample video passed, so both 6 October changes are ready
 
     Allocation (planned→actual %): rounds 10→15 · maintenance 10→5 · security 5→5 · pm 30→25 · research 20→20 · feature 15→20 · close 10→10
@@ -135,43 +173,5 @@ Read the allocation series with
 
 ### Better?
 - **Than last shift:** yes. A fault that cost a real upload its title is fixed, where last shift only made such faults visible. It was the first fault that visibility caught.
-- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-10-01 (16:30) — the log now records why the content check falls back; a timing rule that delayed the new-subreddit sample is raised with you
-
-    Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→20 · research 20→10 · feature 0→5 · close 10→15
-
-**Summary:** A short evening shift. It shipped the record the morning shift asked for: each upload now notes why the content check fell back to keywords, so the next fallback explains itself. The new-subreddit sample video could not be requested today, and the rule that prevented it no longer protects anything, so I have asked you to retire it.
-
-### Maintenance
-- **Shipped:** every upload's record now says *why* the content check fell back to its keyword-only version: the daily limit, a timeout, a garbled reply, and so on. This morning's fallback left no reason anywhere we can read. It was built now rather than after a second fallback, because waiting would have lost that one's reason too. It changes no video. All tests pass, and the change was checked against a copy of the real upload record.
-- **Closed a quieter gap in the same check.** If the content service replied with something unreadable, the post was treated as checked and approved, skipping even the keyword fallback, and the record said the full check had run. It has not happened in 22 uploads. It now goes to the keyword fallback and the reason is recorded. Tests pass; the video is unchanged.
-- This morning's upload landed and the saved last-post record is intact. Tonight's upload was not due yet when this shift ran.
-
-### Security
-- Standing check clean: no credentials in the project, and the secret files are still excluded.
-
-### Project management
-- **New request for you (dry-run-timing-rule):** the sample video for the new-subreddit build was due this afternoon, but no shift ran in the window the rules allow. Today's shift started with the evening upload already due, so it held back. That rule dates from when sample videos used the same daily allowance as real uploads. Since 25 September they use a separate one, and the only thing a real upload uses from it is a piece of tracking data. I recommend letting shifts request a sample at any time; the request has the exact wording. Until you decide, the 09:17 shift tomorrow can request it, and the 6 October plan still holds.
-- The channel is still flat on watch time (11→12 seconds over six weeks, within its normal swing). The two changes aimed at views are already queued for 6 October, so nothing new was added.
-- Ready work is still one item, the new subreddit, and today's rule kept even that from moving. Besides the two research questions below, I considered making the release check test the content check on a question worded differently from its built-in examples. A miss would block releases before 6 October, so it waits until after.
-- **Friction:** the rules say to propose process changes on a branch, but this shift could not edit the process file even there, so the wording went into the request. This shift also wrote its plan after starting.
-
-### Research
-- **Do videos titled with the raw Reddit question do worse?** Only 2 such uploads are recorded, against a minimum of 8; months away, so not queued.
-- **Do shorter videos get more views?** About 28% more, but each view is ~3 seconds shorter, so total watch time is the same. Already known since 25 September; discarded.
-
-### Feature work
-- The sample video was held back by the timing rule above. Instead, both queued changes (the new subreddit and the title weighting) now include today's code. Together they combine cleanly and every test passes, so tomorrow's sample tests what will actually ship. A sample taken tomorrow morning was confirmed to draw the new subreddit.
-
-### Blocked
-- The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.
-
-### Next
-- **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Both queued changes include everything up to tonight's handover; if anything else lands first, bring them up to date before requesting, or the sample tests the wrong code. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
-
-### Better?
-- **Than last shift:** slightly. A fallback that left no trace will now explain itself, but nothing aimed at the channel's numbers moved.
 - **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
