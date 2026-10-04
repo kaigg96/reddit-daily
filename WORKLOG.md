@@ -74,7 +74,7 @@ Read the allocation series with
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and no automated job's permissions changed.
-- **Now due:** a known gap lets the two jobs that test unmerged code hold a key that can change the live branch. Its fix was held until your return today, as it reworks the path every sample video uses. I drafted the fix for both jobs and saved it, untested, for the next shift. Nothing live changed.
+- **Now due:** a known gap lets the two jobs that test unmerged code hold a key that can change the live branch. Its fix was held until your return today, as it reworks the path every sample video uses. I drafted the fix for both jobs. A close read already caught three flaws in it, one of which would have exposed a key, so it gets one more review before it reaches you. Nothing live changed.
 
 ### Project management
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October. **They still combine cleanly with today's code, and every test passes with both merged,** so 6 October needs only the merges. Removed one finished branch.
