@@ -69,7 +69,7 @@ Read the allocation series with
 **Summary:** Today's automatic release check failed. The cause was a bookkeeping slip in the tracker, not the video code, and it is fixed. Research ruled out title length as the reason raw-question titles get fewer views, and tomorrow's statistics run makes a second try at a figure we have never collected. Ready work is still none: the rest waits on 5 and 6 October.
 
 ### Maintenance
-- No upload has run since this morning's shift checked them. Today's release check failed: a research question answered this morning was left in the tracker, which a test forbids, so the check stopped before testing the live code. The answer now sits with the findings, and every test passes. Uploads were never affected.
+- No upload has run since this morning's shift checked them. Today's release check failed: a research question answered this morning was left in the tracker, which a test forbids, so the check stopped before testing the live code. The answer now sits with the findings, and every test passes. Uploads were never affected. I closed the automatic alert this raised for you (#47), saying why; if tomorrow's check fails again, it opens a new one.
 - **Shipped:** the weekly statistics job has never collected the figure for plays that get past the opening, because the service refused that request. When refused, it now also asks for the figure in a smaller request, so tomorrow's run either collects it or shows whether request size was the cause. The snapshot is never at risk, and the video is unchanged.
 
 ### Security
