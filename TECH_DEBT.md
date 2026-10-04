@@ -250,7 +250,10 @@ a list nobody can read is the same as no list.
   on a fresh runner and running only `main`'s code, judges the artifact,
   strips secrets and pushes. It is an untestable rework of the route `v7`
   depends on, so it is deliberately not proposed for approval from a phone
-  during the owner's absence (2026-09-25 to 10-04). Draft the patch after.
+  during the owner's absence (2026-09-25 to 10-04). **Drafted 2026-10-04**
+  as two patches on `wip/dry-run-token-split` (untested; YAML parses, both
+  apply to main). Before escalating with `--patch`: check `download-artifact`
+  works under a job-level `permissions` block without `actions: read`.
 
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
