@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | `v6` live since 2026-09-19 (R4.6 screen retiered after the first standing audit, Gemini thinking-timeout fix, analytics zero-view fix); R4.7 traffic-source telemetry shipped 2026-09-07 (measurement-only, no version bump); next: R4.4 topic/hook ranker, whose Step-0 gate needs a decision — see §0 Delivery plan |
+| **Status** | See §0 below — the single tracker (this row restated it and fell out of date) |
 | **Date** | 2026-07-18 |
 | **Owner** | kaigg96 |
 | **Implementer** | Automated tooling with full repo access |
