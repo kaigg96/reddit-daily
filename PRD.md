@@ -20,10 +20,10 @@
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*
 
 **Shipped**
-- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration (music ~10 dB under voice, SFX ~−20 dBFS peaks), "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
+- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration, "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
-- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R1.3 b-roll library (2026-08-15, 7 clips) · R4.7 traffic-source telemetry (2026-09-07; §4) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **no verdict** until ~2026-10-05
+- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R1.3 b-roll library (2026-08-15, 7 clips) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **no verdict** until ~2026-10-05
 - `v5` — suppression-risk screen (2026-08-23, via `feature/r4.6-suppression-screen`): R4.6. Validated pre-merge: 3/3 confirmed-suppressed cases skipped with correct category; replay over 18 live uploads = skip 6% / drop 11% / pass 83%, the single skip being exactly the video that was zeroed. Also fixed a digest false-positive (zero-view alert fired on videos postdating the last snapshot: 12 → 1).
 - **`v6` — merged to `main` 2026-09-19** (four branches: cost guardrails, Gemini thinking-timeout fix, R4.6 screen retiering, analytics zero-view fix).
 - **`v7` — opens on the question (2026-09-25):** experiment #1 below, judged under its rule at the 2026-10-12 snapshot.
@@ -35,7 +35,7 @@
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
 | ~~Traffic-source telemetry~~ ✅ shipped | done | R4.7 | Search earns ~1.3% of views, so search-oriented work stays parked (§4). |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run` renders a fixed post over silent narration: no Reddit, Gemini or Polly call, always a dry run, ~2 min, runnable by a shift itself. It proves a **render** change is playable; a change to the Reddit, screen, Gemini or Polly path still needs a real sample (`dry_run.py request`). |
-| ~~Real samples off production's Gemini allowance~~ ✅ 2026-09-25 | done | — | With `DRY_RUN`, every Gemini call goes to flash-lite (the free tier is counted per model), so `dry_run.py request` no longer spends the window the next upload needs. 2.5-flash-lite was retired for our key; moved to 3.5-flash-lite, verified live 2026-09-26. Release validation still tests production's model. |
+| ~~Real samples off production's Gemini allowance~~ ✅ 2026-09-25 | done | — | With `DRY_RUN`, Gemini calls go to `SAMPLE_MODEL` (`src/llm.py`), whose free tier is counted separately, so samples spare production's window. Release validation still tests production's model. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -61,7 +61,8 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
-| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65, pooled within formats p=0.010; morning vs evening, the same shape (p=0.016). But 9 are Danielle-morning, 7 of them 09-06→09-19 (5 on retired clip #11): likely a cluster, not a voice (2026-10-04) | Rerun `report.py --by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → the cluster, recorded. |
+| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
+| R4 | ready | **Does a clip get buried once reused?** Clip #11: 4 uses fine, then 7 of 10 buried from 08-29, before R3's cluster | Add `clip_use` (nth use of its clip) to `insights.py`, tested; compare early vs late uses. Rises → propose a per-clip use cap. |
 | R2 | blocked: the 2026-10-05 snapshot | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Built 2026-09-29 (`--metric implied_engaged`); read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
 
 #### Owner tasks (anytime, no version bump)

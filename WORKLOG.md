@@ -85,6 +85,7 @@ Read the allocation series with
 ### Research
 - **A lead, probably weaker than it looks:** uploads narrated by Danielle reach 5 views or fewer far more often than Stephen's (11 of 67 against 2 of 65), and morning uploads more than evening ones, the same shape. How long viewers watch is equal. But 9 of those uploads are Danielle in the morning, and 7 of them fell in one fortnight in mid-September, 5 on the background clip already retired for this problem. That looks like a one-off cluster rather than the voice. Tomorrow's data covers the newer formats, after that fortnight: if the gap is still there, I will propose a one-voice experiment; if not, it was the cluster.
 - The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap. The burial clusters in the two mid-September weeks (7 of 28, against 6 of 115 in all other weeks). Those were the weeks the content service kept timing out, but neither of its effects explains the burial: uploads that lost their title, or skipped the content check, were buried no more often. The cause is still unknown.
+- **New question, ready for the next shift:** does a background clip get buried once it has been reused? The clip retired on 28 September was fine for its first 4 uses, then buried 7 of its next 10 times, starting in late August, before that cluster. If burial rises with reuse, capping each clip's uses is a change to what we ship.
 
 ### Feature work
 - Nothing this shift: both queued changes wait for 6 October, and their samples already passed.
@@ -94,6 +95,7 @@ Read the allocation series with
 
 ### Next
 - **5 October:** read the new data: the voice and time-of-day gap above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
+- Any day: the clip-reuse question above (ready now, needs only a small addition to the reporting tool).
 - Watch the next uploads for another overloaded-service failure.
 
 ### Better?
