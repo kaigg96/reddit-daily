@@ -76,7 +76,7 @@ Read the allocation series with
 - Standing check clean: no credentials in the project, the secret files are still excluded, and no automated job's permissions changed.
 
 ### Project management
-- No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
+- No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October. **They still combine cleanly with today's code, and every test passes with both merged,** so 6 October needs only the merges. Removed one finished branch.
 - **Ready work is still none against a floor of three.** Considered and dropped: whether runner-up posts do worse (4 uploads), whether a missing closing question costs comments (4 uploads, and tangled with lost titles), and music (one track). An early-read question I added turned out to be answered on 25 September, so I removed it.
 - **Friction:** the change that broke the test went live because its shift did not rerun the tests after its last edit, and the follow-up check failed after that shift had ended. It has happened once, so I recorded it rather than proposing a rule. **Also:** I re-asked an answered question because its answer sits mid-paragraph in a long findings section. Checking the history first would have caught it.
 
