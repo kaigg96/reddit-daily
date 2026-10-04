@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-10-04 (07:37) — this morning's upload lost its title to a second outage; the retry now waits it out
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 25→25 · security 5→5 · pm 30→25 · research 20→25 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 25→20 · security 5→10 · pm 30→20 · research 20→30 · feature 0→0 · close 10→10
 
 **Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody; it is probably a one-off mid-September cluster, and tomorrow's data will tell.
 
@@ -79,6 +79,7 @@ Read the allocation series with
 - The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
 - **The automatic process check raised a request for you:** the last three shifts used about half their time. The two I can still read both stopped because the remaining work was waiting on a date. This shift used all of its time.
+- The document checker no longer flags a true past note as out of date. It now reads only the newest shift report as current, which ends the false alarm last shift recorded as friction.
 - **Friction:** this shift wrote its plan at the end, not the start, again. With 24 minutes, a written plan first costs a tenth of the shift.
 
 ### Research
