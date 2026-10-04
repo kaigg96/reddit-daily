@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-10-04 (14:49) — today's release check failed on a tracker slip, now fixed; title length ruled out
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→5 · pm 30→20 · research 30→30 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→15 · pm 30→15 · research 30→25 · feature 0→0 · close 10→10
 
 **Summary:** Today's automatic release check failed. The cause was a bookkeeping slip in the tracker, not the video code, and it is fixed. Research ruled out title length as the reason raw-question titles get fewer views, and tomorrow's statistics run makes a second try at a figure we have never collected. Ready work is still none: the rest waits on 5 and 6 October.
 
@@ -74,7 +74,7 @@ Read the allocation series with
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and no automated job's permissions changed.
-- **Now due:** a known gap lets the two jobs that test unmerged code hold a key that can change the live branch. Its fix was held until your return today, as it reworks the path every sample video uses. Too large to do safely in this shift's remaining minutes, so it is queued below.
+- **Now due:** a known gap lets the two jobs that test unmerged code hold a key that can change the live branch. Its fix was held until your return today, as it reworks the path every sample video uses. I drafted the fix for the sample-video job and saved it untested for the next shift. Nothing live changed.
 
 ### Project management
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October. **They still combine cleanly with today's code, and every test passes with both merged,** so 6 October needs only the merges. Removed one finished branch.
@@ -93,7 +93,7 @@ Read the allocation series with
 ### Next
 - **5 October:** read the new data: the voice and time-of-day gap in the newest formats, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
 - Confirm the next release check passes.
-- Draft the security fix above as a proposed change for your approval: run the unmerged code without write access, and record the result in a separate step.
+- Finish the security fix above: review the draft, apply the same split to the daily release check, then send both to you for approval.
 
 ### Better?
 - **Than last shift:** about the same. A broken check was fixed within hours and one more lead was closed, but nothing moved the channel.
