@@ -88,7 +88,7 @@ Read the allocation series with
 - **New question, ready for the next shift:** does a background clip get buried once it has been reused? The clip retired on 28 September was fine for its first 4 uses, then buried 7 of its next 10 times, starting in late August, before that cluster. If burial rises with reuse, capping each clip's uses is a change to what we ship.
 
 ### Feature work
-- Nothing this shift: both queued changes wait for 6 October, and their samples already passed.
+- Nothing this shift: both queued changes wait for 6 October; their samples passed.
 
 ### Blocked
 - Automatic landing for approved process changes still awaits your decision (#45).
@@ -99,7 +99,7 @@ Read the allocation series with
 - Watch the next uploads for another overloaded-service failure.
 
 ### Better?
-- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a lead from our own data checked down to its likely cause before it could mislead.
+- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a lead checked down to its likely cause before it could mislead.
 - **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
 
