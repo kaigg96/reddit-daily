@@ -36,6 +36,7 @@ MATERIAL = 0.05
 # At or below this many views an upload was barely shown at all — the
 # retired-clip signal (PRD §0 #11), which a median of the rest cannot see.
 BURIED_VIEWS = 5
+CLIP_EARLY_USES = 4   # R4: retired clip #11 was buried only after its 4th use
 # Two cohorts whose share of one release differs by more than this compare
 # eras as much as the field (`era_imbalance`).
 ERA_MIX_TOLERANCE = 0.15
@@ -743,6 +744,27 @@ def _parse_ts(value):
     return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
+def _read_upload_log():
+    with open(config.UPLOAD_LOG) as f:
+        return with_clip_use([r for r in csv.DictReader(f) if r.get("video_id")])
+
+
+def with_clip_use(rows):
+    """Add `clip_use`: "early" for a b-roll clip's first CLIP_EARLY_USES
+    uploads, "late" after (R4). It counts across the whole log, so it cannot
+    live in _with_derived_dimensions, which sees one row. The threshold came
+    from retired clip #11 itself, so read R4 on the other clips."""
+    seen = {}
+    for r in sorted(rows, key=lambda r: r.get("timestamp_utc") or ""):
+        bg = (r.get("bg_clip") or "").strip()
+        if not bg or bg.startswith("procedural"):
+            r["clip_use"] = ""
+            continue
+        seen[bg] = seen.get(bg, 0) + 1
+        r["clip_use"] = "early" if seen[bg] <= CLIP_EARLY_USES else "late"
+    return rows
+
+
 def _with_derived_dimensions(row):
     """Group-able dimensions computed from an upload_log row.
 
@@ -783,8 +805,7 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     if not config.UPLOAD_LOG.exists():
         return []
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     ya = analytics.youtube_analytics_client()
     stats, ids = {}, [r["video_id"] for r in rows]
@@ -920,8 +941,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
     asof = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
     stats = {r["video_id"]: r for r in snapshot_rows if r["snapshot_date"] == latest}
 
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     videos, too_new, absent = [], [], []
     for r in rows:
@@ -1021,8 +1041,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
     latest = max(r["snapshot_date"] for rows in by_video.values() for r in rows)
     anchor = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
 
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     videos, not_yet, no_coverage = [], [], []
     for row in rows:

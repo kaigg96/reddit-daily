@@ -1318,3 +1318,15 @@ def test_buried_strata_pairs_only_shared_values():
     a = [v("v4", 0), v("v4", 50), v("v5", 3), v("v6", 1)]
     b = [v("v4", 90), v("v5", 80), v("v5", 2)]
     assert insights.buried_strata(a, b) == [(1, 2, 0, 1), (1, 1, 1, 2)]
+
+
+def test_clip_use_counts_each_broll_clip_in_log_order():
+    rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
+            for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
+                         (3, "a.mp4"), (4, "a.mp4"), (6, "b.mp4"), (7, "")]]
+    out = {r["timestamp_utc"][8:10]: r["clip_use"] for r in insights.with_clip_use(rows)}
+    assert insights.CLIP_EARLY_USES == 4
+    assert out == {"01": "early", "03": "early", "04": "early", "05": "early",
+                   "06": "early", "02": "", "07": ""}
+    late = insights.with_clip_use(rows + [{"timestamp_utc": "2026-09-08", "bg_clip": "a.mp4"}])
+    assert late[-1]["clip_use"] == "late"

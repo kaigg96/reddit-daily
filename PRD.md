@@ -62,7 +62,7 @@ The source of ready work that never waits on a sample video or costs money. When
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
 | R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
-| R4 | ready | **Does a clip get buried once reused?** Clip #11: 4 uses fine, then 7 of 10 buried from 08-29, before R3's cluster | Add `clip_use` (nth use of its clip) to `insights.py`, tested; compare early vs late uses. Rises → propose a per-clip use cap. |
+| ~~R4~~ | done | **Does a clip get buried once reused? No (2026-10-04).** Without clip #11, uses 1–4 were buried 1/24, later uses 3/37 (p=1.0): #11 was that clip, not reuse. | `--by clip_use` keeps it checkable. |
 | R2 | blocked: the 2026-10-05 snapshot | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Built 2026-09-29 (`--metric implied_engaged`); read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
 
 #### Owner tasks (anytime, no version bump)

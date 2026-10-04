@@ -64,7 +64,7 @@ Read the allocation series with
 
 ## 2026-10-04 (07:37) — this morning's upload lost its title to a second outage; the retry now waits it out
 
-    Allocation (planned→actual %): rounds 10→10 · maintenance 25→20 · security 5→10 · pm 30→20 · research 20→30 · feature 0→0 · close 10→10
+    Allocation (planned→actual %): rounds 10→10 · maintenance 25→15 · security 5→10 · pm 30→20 · research 20→35 · feature 0→0 · close 10→10
 
 **Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody; it is probably a one-off mid-September cluster, and tomorrow's data will tell.
 
@@ -85,7 +85,7 @@ Read the allocation series with
 ### Research
 - **A lead, probably weaker than it looks:** uploads narrated by Danielle reach 5 views or fewer far more often than Stephen's (11 of 67 against 2 of 65), and morning uploads more than evening ones, the same shape. How long viewers watch is equal. But 9 of those uploads are Danielle in the morning, and 7 of them fell in one fortnight in mid-September, 5 on the background clip already retired for this problem. That looks like a one-off cluster rather than the voice. Tomorrow's data covers the newer formats, after that fortnight: if the gap is still there, I will propose a one-voice experiment; if not, it was the cluster.
 - The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap. The burial clusters in the two mid-September weeks (7 of 28, against 6 of 115 in all other weeks). Those were the weeks the content service kept timing out, but neither of its effects explains the burial: uploads that lost their title, or skipped the content check, were buried no more often. The cause is still unknown.
-- **New question, ready for the next shift:** does a background clip get buried once it has been reused? The clip retired on 28 September was fine for its first 4 uses, then buried 7 of its next 10 times, starting in late August, before that cluster. If burial rises with reuse, capping each clip's uses is a change to what we ship.
+- **Asked and answered: does a background clip get buried once it has been reused? No.** The clip retired on 28 September went bad after its fourth use, but across all the other clips, later uses were buried no more often than early ones. That clip was a one-off, so no cap on reuse is needed.
 
 ### Feature work
 - Nothing this shift: both queued changes wait for 6 October; their samples passed.
@@ -95,7 +95,6 @@ Read the allocation series with
 
 ### Next
 - **5 October:** read the new data: the voice and time-of-day gap above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
-- Any day: the clip-reuse question above (ready now, needs only a small addition to the reporting tool).
 - Watch the next uploads for another overloaded-service failure.
 
 ### Better?
