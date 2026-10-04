@@ -60,6 +60,14 @@ def by_dimension(videos, key, metric, now):
         print(f"  {c.label:24} {c.n:>4} {c.median:>9.1f} {c.median_age:>7.0f}d "
               f"{c.zero_view_count:>5} {c.buried_count:>4}/{total:<4}  {mark}")
 
+    pair = [c for c in rows if c.label != "(unset)"]
+    if len(pair) == 2:
+        a, b = pair
+        p = insights.buried_rate_p(a.buried_count, a.n + a.zero_view_count,
+                                   b.buried_count, b.n + b.zero_view_count)
+        print(f"\n  <={insights.BURIED_VIEWS} views, {a.label} vs {b.label}: "
+              f"Fisher p={p:.3f} (two-sided; not age-matched, so read --within an era)")
+
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]
     if len(ages) >= 2 and max(ages) > 1.5 * min(ages):

@@ -1287,3 +1287,15 @@ def test_implied_engaged_is_minutes_over_views_times_watch_seconds():
     x = Video("a", NOW, views=100, watch_seconds=12.0, est_minutes=4.0)
     assert x.implied_engaged == pytest.approx(0.2)
     assert Video("b", NOW).implied_engaged == 0.0          # no views: no share
+
+
+def test_buried_rate_p_matches_fishers_exact_test():
+    """Fisher's tea-tasting table [[3,1],[1,3]] is p=0.4857 two-sided."""
+    assert insights.buried_rate_p(3, 4, 1, 4) == pytest.approx(0.4857, abs=1e-4)
+    assert insights.buried_rate_p(3, 4, 1, 4) == insights.buried_rate_p(1, 4, 3, 4)
+
+
+def test_buried_rate_p_is_one_when_nothing_can_differ():
+    assert insights.buried_rate_p(0, 10, 0, 12) == 1.0
+    assert insights.buried_rate_p(2, 2, 3, 3) == 1.0
+    assert insights.buried_rate_p(0, 0, 1, 5) == 1.0

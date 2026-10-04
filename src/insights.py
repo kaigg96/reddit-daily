@@ -165,6 +165,22 @@ def summarize(videos, label, metric, now):
     )
 
 
+def buried_rate_p(hit_a, n_a, hit_b, n_b):
+    """Two-sided Fisher exact p that two cohorts are buried (<= BURIED_VIEWS)
+    at the same rate. Medians exclude zero-view videos, so a cohort YouTube
+    distributes less can tie on watch-seconds and differ only here (R3)."""
+    k, n = hit_a + hit_b, n_a + n_b
+    if not (n_a and n_b and 0 < k < n):
+        return 1.0
+
+    def pmf(x):
+        return math.comb(n_a, x) * math.comb(n_b, k - x) / math.comb(n, k)
+
+    observed = pmf(hit_a)
+    tables = range(max(0, k - n_b), min(k, n_a) + 1)
+    return min(1.0, sum(p for p in map(pmf, tables) if p <= observed * (1 + 1e-9)))
+
+
 def ages_comparable(a, b, tolerance=0.5):
     """True when two cohorts' median ages are close enough to compare.
 
