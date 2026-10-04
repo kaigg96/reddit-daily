@@ -181,6 +181,38 @@ def buried_rate_p(hit_a, n_a, hit_b, n_b):
     return min(1.0, sum(p for p in map(pmf, tables) if p <= observed * (1 + 1e-9)))
 
 
+def buried_strata(videos_a, videos_b, key="format_version"):
+    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share."""
+    def value(v):
+        return str(v.meta.get(key, "")).strip()
+
+    out = []
+    for val in sorted({value(v) for v in videos_a} & {value(v) for v in videos_b}):
+        a = [v for v in videos_a if value(v) == val]
+        b = [v for v in videos_b if value(v) == val]
+        out.append((sum(v.views <= BURIED_VIEWS for v in a), len(a),
+                    sum(v.views <= BURIED_VIEWS for v in b), len(b)))
+    return out
+
+
+def buried_rate_p_pooled(strata):
+    """Mantel-Haenszel p (continuity-corrected) that two cohorts are buried at
+    the same rate, pooling strata such as formats without comparing across
+    them. Per-format reads are thin (~10 per voice per format), so R3 needs
+    the pooled one to reach a verdict."""
+    diff = var = 0.0
+    for hit_a, n_a, hit_b, n_b in strata:
+        n, k = n_a + n_b, hit_a + hit_b
+        if n < 2 or k in (0, n):
+            continue
+        diff += hit_a - n_a * k / n
+        var += n_a * n_b * k * (n - k) / (n * n * (n - 1))
+    if not var:
+        return 1.0
+    stat = max(0.0, abs(diff) - 0.5) ** 2 / var
+    return math.erfc(math.sqrt(stat / 2))
+
+
 def ages_comparable(a, b, tolerance=0.5):
     """True when two cohorts' median ages are close enough to compare.
 

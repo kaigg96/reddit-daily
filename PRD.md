@@ -61,7 +61,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
-| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views), within era: Danielle 3/22 vs Stephen 0/37 (`v4`, p=0.047), 8/27 vs 2/26 (`v5`, p=0.076); off retired clip #11, 6/58 vs 0/60 (p=0.012). Watch-seconds equal. A lead: one of many dimensions tried (2026-10-04) | `report.py --by voice --within format_version=v7` prints the p. Holds → propose a one-voice experiment; fades → noise. |
+| R3 | blocked: the 2026-10-05 snapshot's `v6`/`v7` uploads | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views), within era: Danielle 3/22 vs Stephen 0/37 (`v4`, p=0.047), 8/27 vs 2/26 (`v5`, p=0.076); off retired clip #11, 6/58 vs 0/60 (p=0.012). Watch-seconds equal. A lead: one of many dimensions tried (2026-10-04) | `report.py --by voice` pools formats: p=0.010 now; rerun with `v6`/`v7`. Holds → propose a one-voice experiment; fades → noise. |
 | R2 | blocked: the 2026-10-05 snapshot | **Does the minutes column encode engaged views?** Implied share ~0.18 before `v2`, ~0.4 after (TECH_DEBT) | Built 2026-09-29 (`--metric implied_engaged`); read `v6` vs `v7` age-matched; on 2026-10-05 compare with `engaged_views`. Match unblocks #8 from history. |
 
 #### Owner tasks (anytime, no version bump)

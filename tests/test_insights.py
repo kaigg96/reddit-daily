@@ -1299,3 +1299,22 @@ def test_buried_rate_p_is_one_when_nothing_can_differ():
     assert insights.buried_rate_p(0, 10, 0, 12) == 1.0
     assert insights.buried_rate_p(2, 2, 3, 3) == 1.0
     assert insights.buried_rate_p(0, 0, 1, 5) == 1.0
+
+
+def test_buried_rate_p_pooled_tests_within_strata_only():
+    # One stratum with no difference contributes nothing; the gap is in the other.
+    gap = insights.buried_rate_p_pooled([(8, 27, 2, 26)])
+    assert insights.buried_rate_p_pooled([(8, 27, 2, 26), (0, 10, 0, 10)]) == gap
+    assert insights.buried_rate_p_pooled([(3, 22, 0, 37), (8, 27, 2, 26)]) < gap
+    # Opposite gaps in two strata cancel rather than add.
+    assert insights.buried_rate_p_pooled([(5, 20, 0, 20), (0, 20, 5, 20)]) == 1.0
+    assert insights.buried_rate_p_pooled([]) == 1.0
+
+
+def test_buried_strata_pairs_only_shared_values():
+    def v(fmt, views):
+        return Video("x", datetime.datetime(2026, 9, 1), views=views,
+                     meta={"format_version": fmt})
+    a = [v("v4", 0), v("v4", 50), v("v5", 3), v("v6", 1)]
+    b = [v("v4", 90), v("v5", 80), v("v5", 2)]
+    assert insights.buried_strata(a, b) == [(1, 2, 0, 1), (1, 1, 1, 2)]

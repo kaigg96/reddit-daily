@@ -67,6 +67,10 @@ def by_dimension(videos, key, metric, now):
                                    b.buried_count, b.n + b.zero_view_count)
         print(f"\n  <={insights.BURIED_VIEWS} views, {a.label} vs {b.label}: "
               f"Fisher p={p:.3f} (two-sided; not age-matched, so read --within an era)")
+        strata = insights.buried_strata(groups[a.label], groups[b.label])
+        if len(strata) > 1:
+            print(f"  pooled within each of {len(strata)} formats (Mantel-Haenszel): "
+                  f"p={insights.buried_rate_p_pooled(strata):.3f}")
 
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]

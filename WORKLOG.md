@@ -73,7 +73,7 @@ Read the allocation series with
 - **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged, all tests pass, and it costs nothing but half a minute when it fires. Earlier data says a lost title costs no watch time. But Tuesday's title-style change needs every upload to carry a generated title, or its measurement fills with noise. If it happens again even after 30 seconds, the next step is retrying on a different model with its own allowance.
 
 ### Security
-- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions.
+- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan ran for the first time in three shifts and found only the two advisories already on file.
 
 ### Project management
 - The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
@@ -83,7 +83,7 @@ Read the allocation series with
 
 ### Research
 - **New lead, read tomorrow:** uploads narrated by Danielle reach 5 views or fewer 4–5 times as often as Stephen's. That holds in both earlier formats and after removing the background clip already retired for the same problem (6 of 58 against 0 of 60). How long viewers watch is the same for both voices. As a check, I ran the same test on five other features. One showed a gap in one format only, about what chance predicts. Voice was the only one that held in both. Tomorrow's data adds the two newest formats. If it holds there, I will propose a one-voice experiment, a change to what we ship.
-- The reporting tool now runs this test whenever it splits uploads into two groups.
+- The reporting tool now runs this test whenever it splits uploads into two groups, and pools it across formats so that tomorrow's few new uploads can be read together with the older ones. Pooled, the voice gap is about a 1-in-100 chance.
 
 ### Feature work
 - Nothing this shift: both queued changes wait for 6 October, and their samples already passed.
