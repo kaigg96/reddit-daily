@@ -69,8 +69,8 @@ Read the allocation series with
 **Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody; it is probably a one-off mid-September cluster, and tomorrow's data will tell.
 
 ### Maintenance
-- Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, search keywords and closing line to a "service overloaded" reply. That is the second time a 4-second wait was too short. Last shift's worry, that the shared daily allowance would run out, did not happen.
-- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged, all tests pass, and it costs nothing but half a minute when it fires. Earlier data says a lost title costs no watch time. But the 6 October title-style change needs every upload to carry a generated title, or its measurement fills with noise. If it happens again even after 30 seconds, the next step is retrying on a different model with its own allowance.
+- Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, keywords and closing line to a "service overloaded" reply, the second time a 4-second wait was too short. The daily allowance did not run out.
+- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged and all tests pass. A lost title costs no watch time, but the 6 October title-style test needs generated titles to measure. If 30 seconds is not enough either, retry on another model next.
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan ran for the first time in three shifts and found only the two advisories already on file.
@@ -78,7 +78,7 @@ Read the allocation series with
 ### Project management
 - The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
-- **The automatic process check raised a request for you:** the last three shifts used about half their time. The two I can still read both stopped because the remaining work was waiting on a date. This shift used all of its time.
+- **The automatic process check raised a request for you:** recent shifts used about half their time, because the remaining work waited on a date. My recommendation, in the request: no rule change yet.
 - The document checker no longer flags a true past note as out of date. It now reads only the newest shift report as current, which ends the false alarm last shift recorded as friction.
 - **Friction:** this shift wrote its plan at the end, not the start, again. With 24 minutes, a written plan first costs a tenth of the shift.
 
