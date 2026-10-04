@@ -252,8 +252,8 @@ a list nobody can read is the same as no list.
   depends on, so it is deliberately not proposed for approval from a phone
   during the owner's absence (2026-09-25 to 10-04). **Drafted 2026-10-04**
   as two patches on `wip/dry-run-token-split` (untested; YAML parses, both
-  apply to main). Before escalating with `--patch`: check `download-artifact`
-  works under a job-level `permissions` block without `actions: read`.
+  apply to main; same-run `download-artifact` needs no `actions: read`, per
+  its docs). Next: a second read, then one escalation with `--patch`.
 
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
