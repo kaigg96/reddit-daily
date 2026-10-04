@@ -774,6 +774,14 @@ def test_title_source_marks_uploads_that_shipped_the_raw_question():
     assert source("What is it?", "") == ""
 
 
+def test_title_length_splits_at_the_generated_median():
+    """Is title length, not title source, behind raw titles' views gap?"""
+    length = lambda t: insights._with_derived_dimensions({"video_title": t})["title_length"]
+    assert length("x" * 41) == "short"
+    assert length(" " + "x" * 42) == "long"
+    assert length("") == ""
+
+
 def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
     """Research row R2: question length within similar-length videos."""
     rows = [{"post_title": "q", "duration_s": d} for d in ("18.0", "20.0", "24.5", "")]

@@ -791,6 +791,9 @@ def _with_derived_dimensions(row):
     # exists from 2026-09-19; comparing the two titles covers the older rows.
     t = (r.get("video_title") or "").strip()
     r["title_source"] = "" if not (q and t) else "raw" if t == q else "generated"
+    # Raw titles run ~64 characters, generated ~41 (the generated median,
+    # 2026-10-04): is length, not source, behind raw titles' views gap?
+    r["title_length"] = "" if not t else "short" if len(t) <= 41 else "long"
     # ~20 s: the logged median duration is 20.2 s (2026-09-25).
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
