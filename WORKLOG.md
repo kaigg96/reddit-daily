@@ -74,6 +74,7 @@ Read the allocation series with
 
 ### Security
 - Standing check clean: no credentials in the project, the secret files are still excluded, and no automated job's permissions changed.
+- **Now due:** a known gap lets the two jobs that test unmerged code hold a key that can change the live branch. Its fix was held until your return today, as it reworks the path every sample video uses. Too large to do safely in this shift's remaining minutes, so it is queued below.
 
 ### Project management
 - No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October. **They still combine cleanly with today's code, and every test passes with both merged,** so 6 October needs only the merges. Removed one finished branch.
@@ -92,6 +93,7 @@ Read the allocation series with
 ### Next
 - **5 October:** read the new data: the voice and time-of-day gap in the newest formats, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
 - Confirm the next release check passes.
+- Draft the security fix above as a proposed change for your approval: run the unmerged code without write access, and record the result in a separate step.
 
 ### Better?
 - **Than last shift:** about the same. A broken check was fixed within hours and one more lead was closed, but nothing moved the channel.
