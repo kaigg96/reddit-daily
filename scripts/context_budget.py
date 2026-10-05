@@ -339,7 +339,7 @@ def allocation_history():
 # Process-health thresholds. Guesses, like the caps — see DECISIONS.md D4.
 WASTE_SHIFTS = 3      # consecutive shifts using far less than their time
 WASTE_RATIO = 0.6     # ...where minutes actually run are below this share
-SHIFT_MINUTES = 25    # the hand-over deadline shift.yml gives a shift (killed at 30)
+SHIFT_MINUTES = 60    # the hand-over deadline shift.yml gives a shift (killed at 70)
 LEDGER = os.path.join(ROOT, ".github", "shift-usage.csv")
 
 

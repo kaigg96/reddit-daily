@@ -20,9 +20,22 @@ def _probe_duration(path):
     return duration
 
 
+def check_channel_name():
+    """Refuse a real upload without the channel's name.
+
+    The name is a secret, so the public repo does not carry it. Without it the
+    watermark and thumbnail would show a placeholder on a live video, which is
+    worse than a missed upload."""
+    if not config.DRY_RUN and not config.CHANNEL_NAME_SET:
+        raise SystemExit("CHANNEL_NAME is not set: refusing to upload a video "
+                         "branded with a placeholder. Add the CHANNEL_NAME secret.")
+
+
 def main():
     rng = random.Random()
-    print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} format={config.FORMAT_VERSION}")
+    print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} "
+          f"SILENT_NARRATION={config.SILENT_NARRATION} format={config.FORMAT_VERSION}")
+    check_channel_name()
 
     # --- content ---
     prev_title = ""
@@ -89,12 +102,13 @@ def main():
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
-    polly = None if config.SAMPLE else tts.make_polly()
+    silent = config.SAMPLE or config.SILENT_NARRATION
+    polly = None if silent else tts.make_polly()
     print(f"Narrator voice: {voice}")
 
     def synth(name, text, kind):
         path = config.GEN / f"{name}.mp3"
-        if config.SAMPLE:
+        if silent:
             marks = sample.synthesize(text, path)
         else:
             marks = tts.synthesize_with_marks(polly, text, voice, path)
@@ -157,7 +171,7 @@ def main():
     youtube.upload_thumbnail(video_id, config.OUT_THUMBNAIL)
     caption_ok = youtube.upload_caption(video_id, config.OUT_SRT)  # R3.5, fail-soft
     comment_ok = youtube.post_comment(video_id, comment_text)      # R3.3, fail-soft
-    print(f"Video live: https://www.youtube.com/watch?v={video_id}")
+    print(f"Uploaded: {video_id}")
 
     config.PREV_POST_FILE.write_text(post.title)
     log.append_upload_log({

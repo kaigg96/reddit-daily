@@ -7,7 +7,8 @@ description: The company's weekly, monthly and quarterly reviews, where the func
 
 A shift works the queue; a review steps back from it. `ORG.md` §5 sets the
 rhythm and `scripts/cadence.py` says what is due. **A due review is the
-shift's work that day**, one per shift. Its `WORKLOG.md` entry is the report,
+shift's first work that day**, one per shift. When it is done and time
+remains, the shift carries on with the queue. Its `WORKLOG.md` entry is the report,
 headed `## <date> — <Weekly|Monthly> review: <one line>`.
 
 **Finish by updating the review's row in `PLAN.md` §5** with today's date —

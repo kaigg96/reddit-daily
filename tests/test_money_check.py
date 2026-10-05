@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts import money_check as mc
 
-ACCOUNT = "851725656965"
+ACCOUNT = "123456789012"   # a placeholder; the real one is not in the repo
 SYNTH_ONLY = {"Version": "2012-10-17", "Statement": [{
     "Effect": "Allow", "Action": "polly:SynthesizeSpeech", "Resource": "*",
     "Condition": {"StringEquals": {"aws:RequestedRegion": "us-west-2"}}}]}

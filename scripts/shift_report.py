@@ -196,7 +196,8 @@ def build(worklog, ledger, since_sha, run_url=""):
                    if r in cadence.ORDER]
         except Exception:
             due = []
-        out.append(f"*{cost.get('duration_min','?')} of 25 min · "
+        import context_budget
+        out.append(f"*{cost.get('duration_min','?')} of {context_budget.SHIFT_MINUTES} min · "
                    f"{cost.get('turns','?')} steps · "
                    f"{cost.get('quota_units','?')} quota units · "
                    f"ready work left: {ready} (floor {backlog_status.FLOOR})"

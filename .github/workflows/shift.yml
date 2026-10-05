@@ -12,7 +12,15 @@ name: Run a shift
 
 on:
   schedule:
-    - cron: '17 9 * * *'   # after the 07:00 Gemini reset and the 08:17 validation
+    # Three a day, about an hour each, since the repo went public (2026-10-05).
+    # Standard runners cost no minutes there. Fewer, longer shifts beat more,
+    # shorter ones up to a point: each shift pays ~5 minutes to orient, and a
+    # sample video takes 5-10 minutes to come back, so a 25-minute shift kept
+    # spilling build-sample-merge into the next one. Past an hour, the growing
+    # context costs more than another hand-over would. 11:17 follows the 07:00
+    # Gemini reset, the morning upload and the 08:17 validation; 19:17 follows
+    # the evening upload. The concurrency group below queues any that overlap.
+    - cron: '17 3,11,19 * * *'
   workflow_dispatch:
     inputs:
       prompt:
@@ -47,11 +55,11 @@ concurrency:
 jobs:
   shift:
     runs-on: ubuntu-latest
-    # Actions minutes are finite (2,000/mo on this private repo) and the video
-    # pipeline needs ~210 of them. Exhausting the allowance STOPS publishing,
-    # which is far worse than a shift being cut short, so the shift is capped
-    # well under the headroom: 30 min/day is ~900/mo, leaving ~45% spare.
-    timeout-minutes: 30
+    # 60 minutes of work plus the hand-over and the steps after it. On a
+    # private repo Actions minutes are finite (2,000/mo) and exhausting them
+    # STOPS publishing, so the minutes guard below skips shifts there; on a
+    # public repo standard runners are free and it stands down.
+    timeout-minutes: 70
     steps:
       - name: Is the subscription token set up yet?
         id: auth
@@ -111,11 +119,11 @@ jobs:
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         run: |
           echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-          # The job is killed at 30 minutes and the agent has no clock of its
+          # The job is killed at 70 minutes and the agent has no clock of its
           # own, so it guessed: on 2026-09-24 one stopped at 8 minutes, skipping
           # research "because of the 30-minute limit". Its deadline now goes in
-          # the prompt. 25 leaves room for the handover and the steps after it.
-          echo "SHIFT_DEADLINE=$(date -u -d '+25 minutes' +%H:%M)" >> "$GITHUB_ENV"
+          # the prompt. 60 leaves room for the handover and the steps after it.
+          echo "SHIFT_DEADLINE=$(date -u -d '+60 minutes' +%H:%M)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
@@ -142,7 +150,7 @@ jobs:
           prompt: |
             ${{ inputs.prompt || '/shift' }}
 
-            Your working time runs until ${{ env.SHIFT_DEADLINE }} UTC. Use it: keep taking the next piece of ready work until about then, then commit and push your handover. The job is cut off at 30 minutes, taking an unpushed handover with it, so check `date -u +%H:%M` rather than guessing. Finishing early is not a goal: stopping with more than 8 minutes left means nothing is ready and generating more found nothing above the bar.
+            Your working time runs until ${{ env.SHIFT_DEADLINE }} UTC. Use it: keep taking the next piece of ready work until about then, then commit and push your handover. The job is cut off at 70 minutes, taking an unpushed handover with it, so check `date -u +%H:%M` rather than guessing. Finishing early is not a goal: stopping with more than 15 minutes left means nothing is ready and generating more found nothing above the bar.
           # Without --allowedTools the action runs with NO shell or file
           # access, so the first scheduled shift "succeeded" having done
           # literally nothing. Blast radius is bounded elsewhere: this job has
@@ -171,7 +179,7 @@ jobs:
           claude_args: >-
             --model ${{ inputs.model || 'claude-opus-5-5' }}
             --effort ${{ inputs.effort || 'ultracode' }}
-            --max-turns 400
+            --max-turns 900
             --append-system-prompt-file ${{ github.workspace }}/.github/workflows/shift-standing-instruction.md
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite,Task,Agent"
         env:

@@ -32,6 +32,13 @@ on:
 permissions:
   contents: read
 
+# A shift pushes 15-20 times, and these are checks on the current state, so the
+# newest push's run covers every earlier one. At most one runs and one waits;
+# a newer push replaces the waiting run instead of queueing another.
+concurrency:
+  group: guardrails-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   invariants:
     runs-on: ubuntu-latest

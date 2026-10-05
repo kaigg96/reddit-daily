@@ -106,8 +106,15 @@ jobs:
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-          AWS_POLLY_ACCESS_KEY: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
-          AWS_POLLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
+          # Unmerged code never holds the Polly keys (PLAN.md C6). Every branch
+          # but main narrates silently over the real post. main is what
+          # production runs, and the guardrails check it on every push. A key
+          # that reached branch code could be printed into a log, and since
+          # 2026-10-05 the logs are public. The channel name is never passed:
+          # the sample is a public artifact and shows a placeholder.
+          SILENT_NARRATION: ${{ steps.req.outputs.branch != 'main' && '1' || '' }}
+          AWS_POLLY_ACCESS_KEY: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_ACCESS_KEY || '' }}
+          AWS_POLLY_SECRET_ACCESS_KEY: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_SECRET_ACCESS_KEY || '' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           set +e
@@ -123,8 +130,11 @@ jobs:
         env:
           S1: ${{ secrets.REDDIT_CLIENT_ID }}
           S2: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          S3: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
-          S4: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
+          # Only when main was rendered. Branch code ran in this job and may
+          # have changed the Python it shares with this step, so a branch
+          # render's later steps must not hold the keys either.
+          S3: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_ACCESS_KEY || '' }}
+          S4: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_SECRET_ACCESS_KEY || '' }}
           S5: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python3 - "$RUNNER_TEMP/render.log" <<'PY'

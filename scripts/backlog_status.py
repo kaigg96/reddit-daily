@@ -25,7 +25,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRD = os.path.join(ROOT, "PRD.md")
 PLAN = os.path.join(ROOT, "PLAN.md")
-FLOOR = 3
+# 3 until 2026-10-05, when shifts grew from 25 to 60 minutes (D11).
+FLOOR = 5
 STATUSES = ("ready", "blocked", "baking", "parked", "done")
 
 

@@ -9,7 +9,7 @@ this map are in `DECISIONS.md` D12.
 ## 1. What the company is
 
 **Show of Hands** (working name, owner 2026-10-05) is a small media company.
-The YouTube Shorts channel ("AskReddit Shorts") is its
+The YouTube Shorts channel is its
 first product, not the whole of it. **The goal is monetization:** revenue above
 costs. The YouTube Partner Program is one route to it and is not set in stone.
 Pivots of format, platform, product or revenue route are allowed when evidence

@@ -42,3 +42,33 @@ def test_a_sample_is_always_a_dry_run(monkeypatch):
     finally:
         monkeypatch.delenv("SAMPLE")
         importlib.reload(config)
+
+
+def test_silent_narration_is_always_a_dry_run(monkeypatch):
+    """Branch dry runs narrate silently because they hold no Polly keys
+    (dry-run.yml). They must never reach an upload either."""
+    import importlib
+    from src import config
+    monkeypatch.delenv("DRY_RUN", raising=False)
+    monkeypatch.setenv("SILENT_NARRATION", "1")
+    try:
+        assert importlib.reload(config).DRY_RUN is True
+    finally:
+        monkeypatch.delenv("SILENT_NARRATION")
+        importlib.reload(config)
+
+
+def test_a_real_upload_refuses_to_start_without_the_channel_name(monkeypatch):
+    """The name is a secret since the repo went public. A live video showing
+    the placeholder would be worse than a missed upload."""
+    import pytest
+    from src import config, run
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    monkeypatch.setattr(config, "CHANNEL_NAME_SET", False)
+    with pytest.raises(SystemExit, match="CHANNEL_NAME"):
+        run.check_channel_name()
+    monkeypatch.setattr(config, "CHANNEL_NAME_SET", True)
+    run.check_channel_name()
+    monkeypatch.setattr(config, "CHANNEL_NAME_SET", False)
+    monkeypatch.setattr(config, "DRY_RUN", True)
+    run.check_channel_name()          # a dry run may use the placeholder

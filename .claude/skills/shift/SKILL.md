@@ -43,8 +43,10 @@ open. **`STOP`** — close the loop and end.
    failed, request a dry run of `main` (§6): the verdict carries the error.
 2. **Ship what's built.** Read `.github/last-release-validation.md` on `main`;
    CI writes the verdict there. PASS means merge. Unshipped work is inventory.
-3. **A review is due.** `cadence.py` names it; it is this shift's work
-   (`/review`). One per shift, in the order it prints.
+3. **A review is due.** `cadence.py` names it; it is this shift's first work
+   (`/review`). One per shift, in the order it prints. When it is done and
+   time remains, carry on with the queue (§3) — a review is not a reason to
+   hand over early.
 4. **The owner has decided something.** `scripts/escalations.py approved`
    lists what they labelled — **work items, not questions**. Do them, then
    `escalations.py close <n> "…"`. Leaving one open keeps notifying them.
@@ -142,11 +144,14 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 
 - **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
   an hour of a scheduled run — exhausting it cost a real upload its title.
-- **Polly:** at most one dry run per shift, and you cannot render one — ask:
+- **Dry runs:** at most one per shift, and you cannot render one — ask:
   `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
   The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
-  a PASS naming the branch's current commit. A render spends 2–5 Gemini
-  requests, so the Gemini rule above applies to it.
+  a PASS naming the branch's current commit. A branch renders the real post
+  over **silent narration**: unmerged code never holds the Polly keys, because
+  the repo's logs are public. Only `main` renders with real narration. A change
+  to narration itself needs the owner to run that by hand. A render spends 2–5
+  Gemini requests, so the Gemini rule above applies to it.
 - **AWS read-only key:** `money_check.py` only. Its policy denies every
   billable call, and the script refuses any other identity.
 - **Never run `scripts/weekly_analytics.py`** to check something: it appends

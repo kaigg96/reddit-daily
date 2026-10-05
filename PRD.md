@@ -20,7 +20,7 @@
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*
 
 **Shipped**
-- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration, "AskReddit Shorts" branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
+- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration, channel-name branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
 - `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
 - `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
 - Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R1.3 b-roll library (2026-08-15, 7 clips) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **no verdict** until ~2026-10-05
@@ -361,7 +361,7 @@ High-confidence, non-regression keepers. Ship together through the review gate (
 
 #### R3.4 — Persistent watermark/brand mark — **✅ v4**
 - Small semi-transparent channel mark, inside the safe area, all frames. Use the `CHANNEL_NAME` constant rendered as a text mark in the brand font — no logo file required, zero manual steps.
-- **As-built:** "AskReddit Shorts", 34px, 55% opacity, low-center (y=1500) — clear of captions, header, and the Shorts UI.
+- **As-built:** the channel name, 34px, 55% opacity, low-center (y=1500) — clear of captions, header, and the Shorts UI.
 
 #### R3.5 — Machine-readable content surfaces — **✅ v4 (caption tracks live-verified 2026-07-27)**
 - Upload a real subtitle track per video via `captions().insert` (requires `youtube.force-ssl` scope). The word-level timings from Polly speech marks make generating an accurate `.srt` nearly free — the pipeline already has every timestamp. Real caption tracks improve accessibility, search indexing, and how well every legitimate machine reader (YouTube's own content-understanding systems, search engines, AI assistants that surface and summarize video) can parse the video.
@@ -555,7 +555,7 @@ Attribution only has *value* if you'll act on it. For high-confidence changes we
 ## 10. Open questions (defaults apply if unanswered)
 
 - **OQ-1 — B-roll sourcing:** ~~resolved 2026-08-15~~ — manual curation chosen and done (7 Pexels clips). No API key needed. Selection criterion learned in practice: dark/mid-tone only; two of nine candidates were rejected at the R1.4 legibility gate for washing out white captions.
-- **OQ-2 — Channel brand name:** ~~resolved 2026-07-22~~ — hardcoded `CHANNEL_NAME = "AskReddit Shorts"` in `src/config.py` rather than fetched per run; it never changes, and a constant avoids an API call plus a failure mode on the render path.
+- **OQ-2 — Channel brand name:** ~~resolved 2026-07-22~~ — a fixed `CHANNEL_NAME` rather than fetched per run: it never changes, and a constant avoids an API call plus a failure mode on the render path. **Since 2026-10-05 it comes from the `CHANNEL_NAME` secret** so the public repo does not name the channel, and a real upload refuses to start without it.
 - **OQ-3 — Caption styling:** ~~resolved as-built~~ — white fill, black stroke, Anton, brand orange `#ff5d01` reserved for the `ANSWER n/N` badge and channel tag. The only open sliver is a second-voice highlight colour, which is moot unless R3.2 ships.
 - **OQ-4 — R4.3 credentials:** ~~resolved 2026-07-19~~ — owner created a Data API key as `YOUTUBE_DATA_API_KEY`. ~~Superseded 2026-07-21~~ — R4.3 migrated to OAuth in the refactor pass; the key is unused by any script now and doesn't need to exist as an Actions secret.
 - **OQ-5 — Localization pilot language:** default Spanish (largest Shorts-population overlap with zero new rendering technology); Arabic deliberately deferred to R5.2 because of the RTL/shaping work.

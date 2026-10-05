@@ -98,6 +98,9 @@ false, or shifts stop with work available); ready items pile up undone (1 is
 producing padding); generation keeps reporting nothing above the bar (1 false —
 itself a finding about the channel).
 
+**Re-reviewed 2026-10-05:** assumption 3 changed with the shift. Shifts went
+from 25 to 60 minutes, three a day (D12, approved in #54), so the floor rose to 5.
+
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
 The owner's ruling, when asked to let sample videos cost ~$1.80/month more:

@@ -24,14 +24,14 @@ def flagged(tmp_path, monkeypatch, rows):
 
 def test_the_real_short_shifts_are_flagged(tmp_path, monkeypatch):
     problems = flagged(tmp_path, monkeypatch, [(24.4, 0), (8.0, 0), (6.9, 0)])
-    assert problems and "ran 7, 8, 24 of their 25 minutes" in problems[0][2]
+    assert problems and "ran 7, 8, 24 of their 60 minutes" in problems[0][2]
     assert "Ready work in the tracker now:" in problems[0][2]
 
 
 def test_shifts_that_use_their_time_are_not(tmp_path, monkeypatch):
-    assert not flagged(tmp_path, monkeypatch, [(24.0, 0), (22.0, 0), (23.0, 0)])
+    assert not flagged(tmp_path, monkeypatch, [(58.0, 0), (52.0, 0), (55.0, 0)])
 
 
 def test_a_failed_run_is_not_counted_as_a_short_shift(tmp_path, monkeypatch):
     # The Opus 5.5 failure recorded 0.0 minutes; it is not idleness.
-    assert not flagged(tmp_path, monkeypatch, [(22.0, 0), (0.0, 1), (23.0, 0), (21.0, 0)])
+    assert not flagged(tmp_path, monkeypatch, [(52.0, 0), (0.0, 1), (55.0, 0), (50.0, 0)])
