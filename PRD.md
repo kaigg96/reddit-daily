@@ -137,6 +137,8 @@ Directional, not contractual — the algorithm is stochastic, and the strongest 
 
 ### Findings — data reviews
 
+**Watch time grows with length up to ~31s; past that it is unmeasured (2026-10-05, for TikTok's 60-second bar, PLAN §1).** Within `v5`, uploads over 20s earned 37% more watch-seconds at 7 days than shorter ones (13.0 vs 9.5, n=29/22, `--compare video_length=long --within format_version=v5`); `v6`/`v7` are refused as too thin. Observational, since longer posts differ in content too. No upload has run past 31.5s, so a 60-second format would need its own measured test on YouTube before any TikTok pilot.
+
 **Looping the ending into the opening was dropped (2026-09-25):** `report.py --replays` finds 3/110 videos averaging over 100% viewed, so heavy replay is rare; light replay is unmeasured. Reopen only with a direct replay measure.
 
 **Measurement capacity (2026-09-21, n=117 uploads read at 7 days old from the weekly snapshot series) — how big a change has to be before we can see it at all.**
