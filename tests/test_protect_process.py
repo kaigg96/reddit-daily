@@ -218,3 +218,14 @@ def test_only_the_owners_label_is_an_approval(repo, env, tmp_path):
     out = guard(repo, env, tmp_path, before,
                 {5: {"labels": ["needs-owner", "approved"], "by": "claude[bot]"}})
     assert out["ok"] == "false" and "by claude[bot], not o" in out["why"]
+
+
+def test_an_unapproved_edit_to_the_org_map_is_caught(repo, env, tmp_path):
+    """ORG.md sets which decisions a shift may take alone (D12). A shift that
+    could edit it could promote "Propose" to "Act" for itself."""
+    write(repo, "ORG.md", "| Pivot proposals | Trigger | Propose |\n")
+    before = commit(repo, env, "Add the map (approved)\n\nApproved-In: #5")
+    write(repo, "ORG.md", "| Pivot proposals | Trigger | Act |\n")
+    commit(repo, env, "Let shifts pivot")
+    out = guard(repo, env, tmp_path, before, APPROVED)
+    assert out["ok"] == "false" and "ORG.md" in out["files"]

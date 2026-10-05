@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Start a session on the reddit-digest YouTube Shorts project. Orients from the delivery plan, reports where things stand, applies the standing conventions, and closes the loop so the next session inherits accurate state. Use at the beginning of any new session, with or without a specific task.
+description: Start a session on the reddit-digest media company (its first product is a YouTube Shorts channel). Orients from the plans, reports where things stand, applies the standing conventions, and closes the loop so the next session inherits accurate state. Use at the beginning of any new session, with or without a specific task.
 ---
 
 # Pick up work on reddit-digest
@@ -18,8 +18,11 @@ looks stale, the doc wins — fix the doc, not just this skill.
 Read, in this order:
 
 1. **`README.md` → "Picking this up"** — reading order and the standing conventions.
-2. **`PRD.md` §0 "Delivery plan"** — the single tracker: shipped, next keepers,
-   experiment backlog with pre-committed decision rules, open owner tasks.
+2. **`PRD.md` §0 "Delivery plan"** — the product's tracker: shipped, next
+   keepers, experiment backlog with pre-committed decision rules, open owner tasks.
+3. **`PLAN.md`** — the company's: its goal, the queue for every function
+   outside the product, its risks, and when each review last ran. Who owns
+   what is in `ORG.md`, read when a task needs it.
 
 Then read further **only as the task requires** — `PRD.md` §4 (Findings) for
 anything touching metrics or experiments, §6 for a specific requirement's spec,
@@ -36,8 +39,9 @@ recommendation — including disagreeing with §0 if the data supports it.
 
 Then **get on with it.** ~~Stop unless told to build~~ — that rule was retired
 2026-09-19; the owner would rather work proceed than wait on a go-ahead. For a
-session with no specific task, use **`/shift`**, which picks the lane and
-carries the authorization rules and external budgets. What still needs the
+session with no specific task, use **`/shift`**, which ranks the one queue
+across the company's functions and carries the authorization rules and
+external budgets. What still needs the
 owner is listed in `CLAUDE.md` §4, and the usage reserve in §2.
 
 ## 3. Conventions
@@ -45,7 +49,7 @@ owner is listed in `CLAUDE.md` §4, and the usage reserve in §2.
 Follow the **"Standing conventions"** list in `README.md` as binding. It is
 deliberately not copied here so the two can't drift.
 
-## 4. Task lanes
+## 4. Kinds of task
 
 - **Feature work** — branch first (`main` runs live twice daily). Dry-run the
   pipeline (`DRY_RUN=1 venv/bin/python -m src.run`) and show a sample before
@@ -66,7 +70,8 @@ deliberately not copied here so the two can't drift.
 
 Work isn't done until the next session can trust the tracker:
 
-- **Update `PRD.md` §0** whenever anything ships, and propagate the result to
+- **Update `PRD.md` §0 and `PLAN.md`** whenever anything ships or a company
+  item moves, and propagate the result to
   any requirement that was waiting on it — a measurement often settles a
   deferred decision elsewhere in §6.
 - **Record findings you don't fix** in `TECH_DEBT.md` → "Open items (logged

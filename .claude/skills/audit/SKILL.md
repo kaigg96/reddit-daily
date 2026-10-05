@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Deep audit of the reddit-digest agentic workflow itself — is the process producing value, are the rules still right, what external guidance should we adopt, and where is it bloating. A project-management task that comes due once about ten shifts of evidence have accumulated; check WORKLOG.md for when one last ran.
+description: Deep audit of the reddit-digest agentic workflow itself — is the process producing value, are the rules still right, what external guidance should we adopt, and where is it bloating. A General management task that comes due once about ten shifts of evidence have accumulated; check WORKLOG.md for when one last ran.
 ---
 
 # Audit the workflow
@@ -39,7 +39,8 @@ opinion.** Process churn is as costly as code churn.
 - **Closed and open escalation issues** — which decisions really needed a human.
 - **`git log`** — what got reverted, re-done, or abandoned on a branch.
 - `scripts/context_budget.py --session --allocation` — what a session spent,
-  and planned vs actual per lane.
+  and where each shift's time went, by function.
+- `PLAN.md` — whether the reviews ran (§5) and what the coverage says (§1).
 
 ## Re-test the decisions
 
@@ -55,12 +56,13 @@ unexamined until the owner happened to ask.
 
 ## What to ask
 
-**Are slices being finished or filled?** `--allocation` shows planned vs
-actual. Landing under plan is fine — slices are ceilings. *Every* lane under
-plan on *every* shift means we are not finding valuable work, which is a
-process finding. Consistently over means the allocation is wrong.
+**Is the time going where the value is?** `--allocation` shows time by
+function. A function with ready work that never gets time is a ranking failure.
+A function with no work that never gets time is fine, as long as its reviews
+run. Shifts spent only on product and reliability mean the queue is still being
+ranked the old way, on watch-seconds instead of the path to revenue (D12).
 
-**Is the channel better than it was?** Read `scripts/report.py --scorecard`
+**Is the company closer to revenue than it was?** Read `scripts/report.py --scorecard`
 for the numbers and the last ten `WORKLOG` "Better?" sections for the
 subjective series. The two disagreeing is information, not a problem: numbers
 lag, and a run of "unclear" answers alongside a flat scorecard is the strongest
@@ -75,8 +77,9 @@ needed or a doc nobody reads, that is a process failure, not a one-off — the
 value bar (`/shift` §7) is not working.
 
 **Are we working on the right things?** Is the triage order still right, or is
-something important always losing? Is a lane never chosen — and is that correct
-(nothing to do there) or a bug (the trigger never fires)?
+something important always losing? Is a function never worked — and is that
+correct (nothing to do there) or a bug (its review never runs, or its items
+never rank)?
 
 **Are the gates real or theatre?** Have the merge gates ever *caught* anything?
 A gate that has never failed is either protecting well or not testing anything;

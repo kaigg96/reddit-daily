@@ -1,6 +1,6 @@
 ---
 name: backlog
-description: How the project-management lane runs the channel's decision cycle — generating candidate work, prioritising it, evaluating an experiment whose decision rule has come due, and challenging a constraint that costs more than it buys. Load when fewer than 3 backlog items are ready (scripts/backlog_status.py), when a rule comes due, or when a constraint keeps forcing workarounds.
+description: How the company decides what to work on next — generating candidate work, prioritising the one queue, evaluating an experiment whose decision rule has come due, and challenging a constraint that costs more than it buys. Load when fewer than 3 items are ready (scripts/backlog_status.py), when ranking the queue, when a rule comes due, or when a constraint keeps forcing workarounds.
 ---
 
 # Decide what to work on next
@@ -49,6 +49,9 @@ three of these, and say which you used:
 - **Distribution** — `analysis/traffic_sources.csv`. Where views actually come
   from, which killed the SEO work once already.
 - **Constraints** — anything in §3 below that is forcing workarounds.
+- **The company** — `PLAN.md`: the revenue routes, and any risk in §4 with no
+  item answering it. Candidates need not be product work: a price, a policy
+  read, a platform, a proposal to the owner.
 - **The gap** — decision rules in `PRD.md` §0 that cannot be answered yet, and
   what would make them answerable.
 
@@ -89,14 +92,16 @@ judgement. Dimensions, in this project's terms:
 
 | | |
 |---|---|
-| **Effect on watch-seconds** | The primary metric (`PRD.md` §4). Views are noisy — 27–50% at fixed age. |
+| **Effect on the path to revenue** | The company's goal (`PLAN.md` §1, D12). Scored first, for every candidate, product or not. |
+| **Effect on watch-seconds** | The product's primary metric (`PRD.md` §4), for product candidates. Views are noisy — 27–50% at fixed age. |
 | **Evidence** | Measured on *our* channel / measured elsewhere / reasoned. |
 | **Cost** | Gemini requests, Polly characters, Actions minutes, shift time. |
 | **Reversibility** | One `FORMAT_VERSION` bump, or something that cannot be undone. |
 | **Blocked?** | Gated on uploads accumulating is not a reason to rank it high now. |
 
 Rank on the dimensions, not on enthusiasm. Then write the top item into
-`PRD.md` §0's backlog **with its decision rule already stated** — an item
+`PRD.md` §0 (product) or `PLAN.md` §3 (everything else) **with its decision
+rule, or its done-when, already stated** — an item
 without one cannot be evaluated later, which is how an experiment becomes
 permanent by default.
 

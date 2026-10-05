@@ -80,6 +80,10 @@ ORIENT = {
     # 2050 -> 2100 on 2026-09-25: the ready-work floor (D11) replaced "an empty
     # lane is PM's problem", which never fired while blocked items filled it.
     ".claude/skills/shift/SKILL.md": 2100,
+    # Added 2026-10-05 with the company reframe (D12): the company's goal, its
+    # queue outside the channel product, its risks and the review dates. Read
+    # at shift start, like PRD §0, so it is budgeted like it.
+    "PLAN.md": 1300,
     ".claude/skills/pickup/SKILL.md": 700,
 }
 
@@ -243,36 +247,46 @@ def corpus_health():
     return over
 
 
-LANES = ["rounds", "maintenance", "security", "pm", "research", "feature", "close"]
-STARVED_AFTER = 5   # consecutive shifts at ~0% before a lane takes priority
+# The company's functions (ORG.md), by the short name a WORKLOG entry uses.
+# Since 2026-10-05 a shift works one ranked queue, so an entry records where its
+# time went ("Worked") rather than planned-vs-actual slices per lane. The old
+# lanes still parse, so the history /audit reads stays whole.
+FUNCTIONS = ["strategy", "gm", "market", "audience", "distribution", "monetization",
+             "product", "editorial", "engineering", "reliability", "data",
+             "finance", "legal", "security"]
 
 
 def allocation_entries(raw):
-    """(heading, {lane: (planned, actual)}) per WORKLOG entry, newest first.
+    """(heading, {function or old lane: % of the shift}) per entry, newest first.
 
-    Fenced blocks are dropped first: the header's template is itself an entry
-    with an allocation line, and until 2026-09-29 it was read as the newest
-    shift, so no lane it gave time to could ever be flagged starved."""
+    Fenced blocks are dropped first: the header's template is itself an entry,
+    and until 2026-09-29 it was read as the newest shift."""
     raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
     entries = []
     for block in raw.split("\n## ")[1:]:
-        m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
-        if not m:
-            continue
         row = {}
-        for part in m.group(1).split("·"):
-            hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
-            if hit:
-                row[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
+        m = re.search(r"Worked \(% of the shift\):(.+)", block)
+        if m:
+            for part in m.group(1).split("·"):
+                hit = re.match(r"\s*([a-z]+)\s*(\d+)", part.strip())
+                if hit:
+                    row[hit.group(1)] = int(hit.group(2))
+        else:
+            m = re.search(r"Allocation \(planned→actual %\):(.+)", block)
+            if not m:
+                continue
+            for part in m.group(1).split("·"):
+                hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
+                if hit:
+                    row[hit.group(1)] = int(hit.group(3))
         entries.append((block.split("\n")[0].strip()[:28], row))
     return entries
 
 
 def worklog_history(commits=40):
     """allocation_entries over WORKLOG.md now and in its recent commits, one
-    per heading, newest first. The log's word budget keeps ~4 entries, fewer
-    than STARVED_AFTER, so the current file alone could never trip the floor;
-    dropped entries are still in git history (shift.yml checks out in full)."""
+    per heading, newest first. The log keeps ~10 entries; older ones are still
+    in git history (shift.yml checks out in full)."""
     texts = []
     try:
         texts.append(open(os.path.join(ROOT, "WORKLOG.md"), encoding="utf-8").read())
@@ -300,42 +314,26 @@ def worklog_history(commits=40):
 
 
 def allocation_history():
-    """Planned vs actual per lane, from WORKLOG.md's allocation lines.
+    """Where each shift's time went, by function, for /audit.
 
-    Two questions this answers that prose cannot: is a lane being starved, and
-    are slices being *finished* or merely *filled*? Consistently landing under
-    plan is not a problem — slices are ceilings — but landing under plan on
-    every lane, every shift, means we are not finding valuable work, which is a
-    process finding rather than a good shift.
-    """
+    A function that never gets time is not by itself a problem -- the reviews
+    give every function its turn (cadence.py) -- but a function with ready work
+    in the queue that never gets time is a ranking problem worth reading for."""
     entries = worklog_history()
     if not entries:
-        print("\nno allocation lines in WORKLOG.md yet")
+        print("\nno time records in WORKLOG.md yet")
         return
-
-    print(f"\nALLOCATION, last {len(entries)} shift(s)   (planned→actual %)")
-    header = "  " + "shift".ljust(30) + "".join(l[:7].ljust(9) for l in LANES)
-    print(header)
+    keys = [k for k in FUNCTIONS if any(k in row for _, row in entries)] + \
+           sorted({k for _, row in entries for k in row} - set(FUNCTIONS))
+    print(f"\nTIME BY FUNCTION, last {len(entries)} shift(s)   (% of the shift)")
+    print("  " + "shift".ljust(30) + "".join(k[:7].ljust(9) for k in keys))
     for label, row in entries:
-        cells = "".join((f"{row[l][0]}→{row[l][1]}" if l in row else "-").ljust(9)
-                        for l in LANES)
-        print(f"  {label.ljust(30)}{cells}")
-
-    print()
-    for lane in LANES:
-        zeros = 0
-        for _, row in entries:                       # newest first
-            if row.get(lane, (0, 0))[1] > 0:
-                break
-            zeros += 1
-        if zeros >= STARVED_AFTER:
-            print(f"  ⚠️ {lane}: {zeros} consecutive shifts at 0% — "
-                  f"takes priority next shift if it has queued work")
-    under = [l for l in LANES
-             if all(row.get(l, (0, 0))[1] < row.get(l, (1, 0))[0] for _, row in entries)]
-    if len(entries) >= 3 and len(under) >= len(LANES) - 1:
-        print("  ⚠️ every lane landed under plan on every recorded shift — "
-              "we are not finding valuable work. Process finding, not a good shift.")
+        print(f"  {label.ljust(30)}" + "".join(str(row.get(k, "-")).ljust(9) for k in keys))
+    untouched = [k for k in FUNCTIONS if not any(row.get(k) for _, row in entries)]
+    # Before 2026-10-05 entries named lanes, so "never worked" would list every
+    # function until shifts have written a few entries the new way.
+    if untouched and any(k in FUNCTIONS and k != "security" for _, row in entries for k in row):
+        print(f"\n  never worked in these shifts: {', '.join(untouched)}")
 
 
 # Process-health thresholds. Guesses, like the caps — see DECISIONS.md D4.
@@ -364,12 +362,6 @@ def shift_minutes(path=None):
         except (KeyError, ValueError):
             continue
     return out
-STARVED_SHIFTS = 5    # consecutive shifts a lane sat at 0%
-
-
-def _allocation_rows():
-    return [row for _, row in worklog_history()
-            if any(p for p, _ in row.values())]     # skip unplanned/outlier shifts
 
 
 def health(raise_issues=False):
@@ -380,7 +372,6 @@ def health(raise_issues=False):
     and have no route to report it. These checks close that: a threshold trip
     queues a GitHub issue, which emails the owner.
     """
-    rows = _allocation_rows()
     problems = []
 
     minutes = shift_minutes()[:WASTE_SHIFTS]
@@ -389,7 +380,7 @@ def health(raise_issues=False):
         if used < WASTE_RATIO:
             sys.path.insert(0, os.path.join(ROOT, "scripts"))
             import backlog_status
-            ready = len(backlog_status.ready(open(backlog_status.PRD).read()))
+            ready = len(backlog_status.ready_all())
             problems.append((
                 "process-capacity-underused",
                 "Shifts are ending with most of their time unspent",
@@ -400,32 +391,35 @@ def health(raise_issues=False):
                 f"(floor {backlog_status.FLOOR}).\n\n"
                 "Ending early is right only when nothing is ready and generating "
                 "more found nothing above the bar. Below the floor, replenishing "
-                "was the project-management lane's first job and was skipped; at "
-                "or above it, shifts are stopping with work available.",
+                "was the shift's first job and was skipped; at or above it, "
+                "shifts are stopping with work available.",
                 "Read why each of the last three shifts stopped (WORKLOG) and fix "
                 "that reason, not the symptom."))
 
-    for lane in LANES:
-        zeros = 0
-        for r in rows:
-            if r.get(lane, (0, 0))[1] > 0:
-                break
-            zeros += 1
-        if zeros >= STARVED_SHIFTS:
-            problems.append((
-                f"process-lane-starved-{lane}",
-                f"The {lane} lane has had no time for {zeros} shifts",
-                f"`{lane}` has been allocated ~0% for {zeros} consecutive "
-                f"shifts.\n\nThe starvation floor should have promoted it. "
-                "Either it is not firing, or the lane genuinely has no work — "
-                "and if it has none for this long, it may not be a lane.",
-                "Check whether the lane has queued work. If it never does, "
-                "propose removing it rather than leaving a slice that is "
-                "always zero."))
+    # A review overdue by weeks means the slower functions (strategy, money,
+    # policy, audience) have silently stopped getting their turn.
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import cadence
+    import datetime
+    try:
+        held = cadence.last_held(open(cadence.PLAN, encoding="utf-8").read())
+        today = datetime.datetime.now(datetime.timezone.utc).date()
+        late = cadence.overdue(held, today, cadence.newest_snapshot())
+    except OSError:
+        late = []
+    for review, days in late:
+        problems.append((
+            f"process-review-overdue-{review.replace(' ', '-')}",
+            f"The {review} review is {days} days old",
+            f"PLAN.md §5 says the last {review} review was {days} days ago "
+            f"(overdue past {cadence.OVERDUE_DAYS[review]}). Reviews are where "
+            "the functions on slower clocks get their turn (ORG.md §5), so "
+            "while one is overdue, those functions are not being run.",
+            "Find why shifts are not taking the due review (cadence.py "
+            "puts it ahead of the queue) and fix that."))
 
     if not problems:
-        print("\nPROCESS HEALTH: ok"
-              + ("" if rows else "  (no planned shifts recorded yet)"))
+        print("\nPROCESS HEALTH: ok")
         return []
 
     print("\nPROCESS HEALTH: %d problem(s)" % len(problems))
@@ -449,7 +443,7 @@ def main():
     ap.add_argument("--session", action="store_true",
                     help="also report what the latest session actually spent")
     ap.add_argument("--allocation", action="store_true",
-                    help="planned vs actual per lane, from WORKLOG.md")
+                    help="where each shift's time went, by function, from WORKLOG.md")
     ap.add_argument("--health", action="store_true",
                     help="detect process dysfunction and queue escalations for it")
     args = ap.parse_args()

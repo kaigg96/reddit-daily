@@ -73,6 +73,11 @@ The source of ready work that never waits on a sample video or costs money. When
 
 ## 1. Background & goal
 
+> **Company context (2026-10-05, D12):** this is the Shorts channel's product
+> document. The company's goal is monetization by whatever route, and its plan
+> and organisation are in `PLAN.md` and `ORG.md`. The Partner Program target
+> below is one route to that goal, not the goal itself.
+
 This repo generates and uploads a YouTube Short twice daily from the top r/AskReddit post of the day (cron `23 0,12 * * *`; actual publish has drifted to ~04:50 and ~16:45 UTC — GitHub queue delay, see R4.5). Videos currently average **under 100 views each**. The owner's goal is YouTube Partner Program monetization, whose Shorts route requires **1,000 subscribers + 10M valid public Shorts views in a trailing 90-day window** (the long-form route is 4,000 watch-hours/12mo). At 2 posts/day, 10M/90d implies ~55K average views per video — the strategy is to (a) raise the floor via production quality and (b) raise the ceiling (hit probability) via better hooks and content variety.
 
 Sub-100 views on Shorts means the algorithm's initial test pool (a few hundred impressions served automatically to every new Short) is not converting. The dominant signal for further distribution is **retention** (viewed vs. swiped away, average % watched), followed by engagement (likes/comments/shares per view). "Click rate" in the classic thumbnail sense barely applies inside the Shorts feed — the real analog is **surviving the first 1–2 seconds**. Titles/thumbnails matter mainly on search, channel page, and browse surfaces.

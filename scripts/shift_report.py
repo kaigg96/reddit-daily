@@ -2,10 +2,13 @@
 """Build the per-shift summary the owner reads by email.
 
 The owner does not watch the repo work; they need to know what moved without
-opening it. So every shift posts a short report, broken down by workstream, as
-a comment on one long-lived GitHub issue -- one email per shift, one thread,
-and no clutter in the issue tracker, which is reserved for decisions that need
-them.
+opening it. So every shift posts a short report as a comment on one long-lived
+GitHub issue -- one email per shift, one thread, and no clutter in the issue
+tracker, which is reserved for decisions that need them.
+
+Since 2026-10-05 a shift works one ranked queue across the company's functions
+(ORG.md), not a slice per lane, so the report shows where the time went by
+function and keeps the sections in the order the shift wrote them.
 
 Source of truth is the shift's own WORKLOG.md entry, so the report cannot
 drift from the handover: if a shift did not write an entry it has nothing to
@@ -19,15 +22,19 @@ import re
 import subprocess
 import sys
 
-LANES = ["rounds", "maintenance", "security", "pm", "research", "feature", "close"]
-LANE_NAMES = {
-    "rounds": "Routine checks", "maintenance": "Maintenance",
-    "security": "Security", "pm": "Project management", "research": "Research",
-    "feature": "Feature work", "close": "Wrap-up",
+# The functions in ORG.md, in its order, by the short name a WORKLOG entry uses.
+FUNCTIONS = {
+    "strategy": "Strategy", "gm": "General management", "market": "Market intelligence",
+    "audience": "Audience", "distribution": "Distribution", "monetization": "Monetization",
+    "product": "Product", "editorial": "Editorial", "engineering": "Engineering",
+    "reliability": "Reliability", "data": "Data & insights",
+    "finance": "Finance", "legal": "Legal & policy", "security": "Security",
 }
-# Overhead, not workstreams: they consume time and belong in the table, but
-# nobody needs a bullet saying the routine checks were run.
-OVERHEAD = {"rounds", "close"}
+# The old lanes, so an entry written before 2026-10-05 still renders.
+OLD_LANES = {
+    "rounds": "Routine checks", "maintenance": "Maintenance", "pm": "Project management",
+    "research": "Research", "feature": "Feature work", "close": "Wrap-up",
+}
 
 
 def _strip_fences(raw):
@@ -60,16 +67,30 @@ def latest_entry(worklog):
     return block.split("\n")[0].strip(), "\n".join(block.split("\n")[1:]).strip()
 
 
-def allocation(text):
+def worked(text):
+    """{function: % of the shift} from the entry's `Worked` line.
+
+    Falls back to the old `Allocation (planned→actual %)` line, keeping the
+    actual share, so entries from before the change still report."""
+    m = re.search(r"Worked \(% of the shift\):(.+)", text or "")
+    if m:
+        out = {}
+        for part in m.group(1).split("·"):
+            hit = re.match(r"\s*([a-z]+)\s*(\d+)", part.strip())
+            if hit:
+                out[hit.group(1)] = int(hit.group(2))
+        return out
     m = re.search(r"Allocation \(planned→actual %\):(.+)", text or "")
-    if not m:
-        return {}
     out = {}
-    for part in m.group(1).split("·"):
+    for part in (m.group(1).split("·") if m else []):
         hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
         if hit:
-            out[hit.group(1)] = (int(hit.group(2)), int(hit.group(3)))
+            out[hit.group(1)] = int(hit.group(3))
     return out
+
+
+def _name(key):
+    return FUNCTIONS.get(key) or OLD_LANES.get(key) or key.replace("_", " ").capitalize()
 
 
 def changes(since_sha):
@@ -125,71 +146,33 @@ def build(worklog, ledger, since_sha, run_url=""):
     if summary:
         out += [summary, ""]
 
-    # 2. Where the time went.
-    alloc = allocation(body)
-    if alloc:
-        out += ["| Workstream | Planned | Actual |", "|---|---|---|"]
-        # Ordered list first, then anything the shift invented. A lane missing
-        # from LANES used to be dropped silently, which made the percentages
-        # not add up -- `security` went missing exactly that way.
-        ordered = [l for l in LANES if l in alloc] + \
-                  [l for l in alloc if l not in LANES]
-        for lane in ordered:
-            planned, actual = alloc[lane]
-            name = LANE_NAMES.get(lane, lane.replace("_", " ").capitalize())
-            out.append(f"| {name} | {planned}% | {actual}% |")
-        tp = sum(p for p, _ in alloc.values())
-        ta = sum(a for _, a in alloc.values())
-        flag = "" if (tp == 100 and ta == 100) else "  ⚠️ should each be 100%"
-        out += [f"| **Total** | **{tp}%** | **{ta}%** |{flag}", ""]
+    # 2. Where the time went, by function.
+    share = worked(body)
+    if share:
+        out += ["| Function | Share of the shift |", "|---|---|"]
+        order = [k for k in FUNCTIONS if k in share] + [k for k in share if k not in FUNCTIONS]
+        out += [f"| {_name(k)} | {share[k]}% |" for k in order if share[k]]
+        total = sum(share.values())
+        flag = "" if total == 100 else "  ⚠️ should total 100%"
+        out += [f"| **Total** | **{total}%** |{flag}", ""]
 
-    # 3. One heading per workstream, bullets underneath. Same shape every time,
-    #    so it can be skimmed without reading.
+    # 3. The sections in the order the shift wrote them: "Toward revenue" first
+    #    by the template, then what was done, blocked, next. A function the
+    #    shift did not touch gets no heading -- with fourteen of them, a
+    #    "nothing this shift" line each would bury what did happen.
     blocks = sections(body)
     if blocks:
-        written = {h.strip().lower(): c for h, c in blocks}
-
-        def take(*names):
-            for n in names:
-                if n.lower() in written:
-                    return written.pop(n.lower())
-            return None
-
-        # Every allocated workstream gets a heading whether or not the shift
-        # wrote one. Dropping a silent lane would hide it from the owner, and
-        # the table above already promised a row for it.
-        for lane in ordered:
-            if lane in OVERHEAD:
-                continue          # overhead needs no narrative
-            name = LANE_NAMES.get(lane, lane.replace("_", " ").capitalize())
-            content = take(name, lane)
-            out += [f"### {name}", ""]
-            if content:
-                lines = [l for l in content.splitlines() if l.strip()]
-                if not any(l.lstrip().startswith(("-", "*")) for l in lines):
-                    lines = [f"- {' '.join(' '.join(lines).split())}"]
-                out += lines
-            elif alloc[lane][1] == 0:
-                out.append("- Nothing this shift. **The shift did not say why "
-                           "— it should have.**")
-            else:
-                out.append(f"- **No report written**, though {alloc[lane][1]}% "
-                           f"of the shift went here.")
-            out.append("")
-
-        # Anything else the shift wrote (Blocked, Next, …) keeps its place.
         for heading, content in blocks:
-            if heading.strip().lower() not in written:
-                continue
-            out += [f"### {heading}", ""]
             lines = [l for l in content.splitlines() if l.strip()]
+            if not lines:
+                continue
             if not any(l.lstrip().startswith(("-", "*")) for l in lines):
                 lines = [f"- {' '.join(' '.join(lines).split())}"]
-            out += lines + [""]
+            out += [f"### {heading}", ""] + lines + [""]
     else:
         # A shift that ignored the template still gets reported, rather than
         # the owner silently receiving less than they asked for.
-        narrative = re.sub(r"\s*Allocation \(planned→actual %\):.+", "", body)
+        narrative = re.sub(r"\s*(Allocation \(planned→actual %\)|Worked \(% of the shift\)):.+", "", body)
         narrative = re.sub(r"\*\*Summary:\*\*.+?(?=\n\n|$)", "", narrative, flags=re.S)
         out += ["### Details", "", narrative.strip(),
                 "", "*(This shift did not follow the report template.)*", ""]
@@ -201,13 +184,23 @@ def build(worklog, ledger, since_sha, run_url=""):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import backlog_status
         try:
-            ready = f"{len(backlog_status.ready(open(backlog_status.PRD).read()))}"
+            ready = f"{len(backlog_status.ready_all())}"
         except OSError:
             ready = "?"
+        try:
+            import datetime
+            import cadence
+            today = datetime.datetime.now(datetime.timezone.utc).date()
+            due = [r for r, _ in cadence.due(cadence.last_held(open(cadence.PLAN).read()),
+                                             today, cadence.newest_snapshot())
+                   if r in cadence.ORDER]
+        except Exception:
+            due = []
         out.append(f"*{cost.get('duration_min','?')} of 25 min · "
                    f"{cost.get('turns','?')} steps · "
                    f"{cost.get('quota_units','?')} quota units · "
-                   f"ready work left: {ready} (floor {backlog_status.FLOOR})*")
+                   f"ready work left: {ready} (floor {backlog_status.FLOOR})"
+                   + (f" · review due: {', '.join(due)}" if due else "") + "*")
     if run_url:
         out.append(f"*[Full log]({run_url})*")
     return "\n".join(out)

@@ -12,9 +12,11 @@ delivery plan, then reports where things stand before touching anything. Doing
 it by hand instead — read in this order; it's ~5 minutes and avoids re-deriving
 decisions:
 
-1. **`PRD.md` §0 "Delivery plan"** — the single source of truth for what's
+1. **`PRD.md` §0 "Delivery plan"** — the product's source of truth: what's
    shipped, what's next, and the experiment backlog with its pre-committed
-   decision rules. **Update it whenever anything ships.**
+   decision rules. **Update it whenever anything ships.** The company around
+   the product — its goal, its other functions' queue and its risks — is in
+   **`PLAN.md`**, and who owns what in **`ORG.md`**.
 2. **This README's "How it works"** (below) — the actual pipeline.
 3. **`PRD.md` §4 Findings** — read this for almost any question, not just
    metrics ones. Review 2 item 6 (age-matching, and that Review 1 is "not

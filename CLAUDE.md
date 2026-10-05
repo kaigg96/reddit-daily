@@ -11,6 +11,10 @@ or CI.** Enforced rules are marked ⚙ and named in `.github/workflows/guardrail
 When you add a rule, decide which kind it is. If advisory compliance is not good
 enough, enforcing it is part of adding it.
 
+**What this is:** a small media company. The Shorts channel is its first
+product, and the goal is **monetization** — improve the company, not just the
+channel (D12). Who owns what and who decides: `ORG.md`.
+
 Start a session with `/pickup`, or `/shift` when there is no specific task.
 
 ## 1. Money — Polly is the only billed service
@@ -26,6 +30,10 @@ AWS Polly is a real invoice (~$0.90/month). Gemini and YouTube are free-tier.
 - ⚙ **`Engine="neural"` is a deliberate paid choice.** Do not downgrade it to
   save money, or upgrade to generative, without asking. Cost work here means
   removing wasted calls, never reducing audio quality.
+- ⚙ **The AWS-side controls must stay as the owner set them** (key scope,
+  budget, its automatic deny, the usage alarm). `scripts/money_check.py` checks
+  them every shift with a read-only key. Any change that could spend more needs
+  the owner's approval *and* a control at the provider.
 
 **Gemini is capped at 20 requests/day, shared with production**, which spends
 4–10. Local work competes with live uploads — budget it rather than running it
@@ -67,16 +75,17 @@ blocking:
   secrets handling, the R4.6 screen's skip categories.
 - Spending beyond the current Polly line.
 - Deleting or rewriting production data, including historical backfills.
-- Publishing anything outside the channel's normal upload.
+- Publishing beyond the normal upload, except under the publishing policy in
+  `ORG.md` (Audience & community).
 
-**Changing `CLAUDE.md` or a skill** — propose on a branch, escalate, and land
+**Changing `CLAUDE.md`, `ORG.md` or a skill** — propose on a branch, escalate, and land
 only with `Approved-In: #N` naming an issue the owner labelled `approved`.
 Enforced by `protect-process.yml`, which reverts unapproved changes.
 
 **And when the process itself is failing** — not a permission question, but a
 signal the owner needs. `scripts/context_budget.py --health` detects these and
-queues the issue automatically: capacity consistently unused, a lane starved
-for many shifts, a cap producing dishonesty rather than hygiene. If you notice
+queues the issue automatically: capacity consistently unused, a review
+overdue for weeks, a cap producing dishonesty rather than hygiene. If you notice
 one the tool doesn't measure, escalate it yourself.
 
 ## 5. No AI attribution, anywhere
@@ -100,5 +109,5 @@ commit message is invisible to the next session.
 
 ---
 
-Status: `PRD.md` §0 · Pipeline: `README.md` · Code health: `TECH_DEBT.md` ·
-Handover: `WORKLOG.md`
+Company: `PLAN.md` · Product: `PRD.md` §0 · Who decides: `ORG.md` ·
+Pipeline: `README.md` · Code health: `TECH_DEBT.md` · Handover: `WORKLOG.md`

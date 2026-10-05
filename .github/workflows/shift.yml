@@ -176,6 +176,13 @@ jobs:
             --allowedTools "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,TodoWrite,Task,Agent"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Read-only AWS access for scripts/money_check.py, which checks every
+          # shift that the owner's money controls are still in place (D12).
+          # The key's policy denies every billable call, including Polly, and
+          # the script refuses any identity but claude-readonly -- so nothing
+          # in this job can spend through it.
+          AWS_READONLY_ACCESS_KEY_ID: ${{ secrets.AWS_READONLY_ACCESS_KEY_ID }}
+          AWS_READONLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_READONLY_SECRET_ACCESS_KEY }}
           # So the shift can pick up decisions the owner has already made and
           # close them out. Scoped to this repo, and no wider than what the
           # action can already do.

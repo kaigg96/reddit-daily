@@ -1,7 +1,8 @@
 # Work log
 
 One entry per shift, newest first. **This is not a status tracker** — status
-lives in [PRD.md](PRD.md) §0 and code health in [TECH_DEBT.md](TECH_DEBT.md).
+lives in [PLAN.md](PLAN.md) (the company), [PRD.md](PRD.md) §0 (the product) and
+[TECH_DEBT.md](TECH_DEBT.md) (code health).
 This file records *what happened, what's queued next, and what's blocked on
 what*, so a cold session can resume without re-deriving anything.
 
@@ -14,24 +15,20 @@ next shift looks. Follow this template exactly — the report is generated from
 its structure:
 
 ```
-## 2026-09-21 — one line on what actually mattered
+## 2026-10-06 — one line on what actually mattered
 
-    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · security 10→5 · pm 15→12 · research 10→0 · feature 30→40 · close 10→10
+    Worked (% of the shift): reliability 10 · product 30 · engineering 30 · strategy 20 · gm 10
 
-**Summary:** Two sentences. What the shift achieved, and why it matters to the
-channel. No detail — this is the part read on a phone.
+**Summary:** Two sentences. What moved, and whether it brought the company
+closer to revenue. No detail — this is the part read on a phone.
 
-### Maintenance
-- One bullet per thing done, in plain words.
+### Toward revenue
+- What this shift did that moves the company toward revenue, or "nothing
+  directly, because …". Say it plainly either way.
 
-### Security
-- Nothing this shift — the standing checks were clean.
-
-### Project management
-- Nothing this shift — no decisions came due.
-
-### Research
-- Nothing this shift, because maintenance took the time.
+### Done
+- **Engineering:** one bullet per thing done, in plain words, led by its
+  function. Say whether it fixed something or was a bet, when that isn't obvious.
 
 ### Blocked
 - What is stuck, and what it is waiting on.
@@ -40,25 +37,26 @@ channel. No detail — this is the part read on a phone.
 - What the following shift should pick up.
 
 ### Better?
-- **Than last shift:** yes/no/unclear, and the specific thing that is better.
+- **Than last shift:** is the company closer to revenue — yes/no/unclear, and the specific thing.
 - **Than ~10 shifts ago:** same, naming evidence rather than impression.
 - **Than ~100 shifts ago:** same, or "too early to say".
 ```
 
-**On the "Better?" section.** Numbers lag and no single one judges this channel
-(`report.py --scorecard`), so a subjective read is part of the record — but a
-shift grading its own work is exactly the bias the research warns about. Two
-rules make it worth having: answer **comparatively** against a named horizon
-rather than rating out of ten, and **name the evidence**, not the feeling.
-"Unclear" is a real answer and more useful than a confident guess.
-
-**Every workstream gets a heading, including ones that did nothing** — with a
-one-line "nothing this shift, because …". Silence and inactivity must not look
-alike, and the report flags a missing reason rather than hiding it. Routine
-checks and wrap-up are overhead and need no section. **The planned and actual
-columns must each total 100%**; the report shows the sum and flags it if not.
-Read the allocation series with
+**`Worked`** uses the short names of the functions in `ORG.md` (strategy, gm,
+market, audience, distribution, monetization, product, editorial, engineering,
+reliability, data, finance, legal, security), and it must total 100%. Since
+2026-10-05 a shift works one ranked queue, so there is no planned column and no
+heading per function: a function the shift did not touch is simply absent.
+Reviews (`/review`) use the same shape, and the monthly one adds the sections
+its skill lists. Read the series with
 `venv/bin/python scripts/context_budget.py --allocation`.
+
+**On the "Better?" section.** Numbers lag and no single one judges the
+company, so a subjective read is part of the record — but a shift grading its
+own work is exactly the bias the research warns about. Two rules make it worth
+having: answer **comparatively** against a named horizon rather than rating out
+of ten, and **name the evidence**, not the feeling. "Unclear" is a real answer
+and more useful than a confident guess.
 
 ---
 
