@@ -62,7 +62,7 @@ and more useful than a confident guess.
 
 ## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
 
-    Worked (% of the shift): data 35 · reliability 25 · product 15 · distribution 5 · gm 20
+    Worked (% of the shift): data 30 · reliability 20 · product 10 · editorial 20 · distribution 5 · gm 15
 
 **Summary:** This is the first weekly review. The weekly statistics run collected the share of plays that get past the opening for the first time, which unblocks two research items. Nothing this shift moved the company directly toward revenue. Today's afternoon upload is late, but GitHub's own scheduler is running seven to nine hours behind today. That points to delay, not a broken pipeline.
 
@@ -77,6 +77,7 @@ and more useful than a confident guess.
 - **Product:** Whether one narrator gets fewer videos distributed still cannot be answered: within the two newest releases each voice has only 3 to 7 measured uploads, and the analysis tool refuses. I moved it to the 12 October snapshot.
 - **Distribution:** The Shorts feed is still 96% of views (96.3% this week, 96.3% last week). Search is 1.6%, so nothing has changed.
 - **Audience:** Viewer comments are still not collected (queued), so there was nothing to read.
+- **Editorial:** Started the top-ranked item, making the format our own. The "second voice reacts to a comment" idea, shelved in July for making videos longer, is now the first candidate, because YouTube pays for videos where the channel comments and not for read-outs. It is judged on whether it costs watch time, since some commentary is required regardless. It queues behind the two changes already lined up, and its extra narration needs your approval before it is built (about 6 cents a month). Still to draft: a storyline candidate and a curation candidate.
 - **General management:** The trackers check clean. The ready queue is 10 items. Ranked by path to revenue: make the format our own (it decides whether YouTube can ever pay), price the revenue routes, record subscribers (half of YouTube's bar, a small job), then the other platforms' terms and comparable channels. The two measurement items rank below those. They help the product, not revenue.
 
 ### Blocked
