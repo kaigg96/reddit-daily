@@ -254,6 +254,29 @@ a list nobody can read is the same as no list.
   as two patches on `wip/dry-run-token-split` (untested; YAML parses, both
   apply to main; same-run `download-artifact` needs no `actions: read`, per
   its docs). Reviewed by a fresh agent the same day; its one bug is fixed. Next: one escalation with `--patch`.
+  **Same root, money side (2026-10-05).** `dry-run.yml` also hands the
+  branch's code the live Polly keys, and `POLLY_CHAR_BUDGET` is enforced by
+  the branch's own `src/tts.py`; `guardrails.yml` only checks `main`. A loop
+  in a branch runs at Polly's neural limit (8 req/s × 3,000 chars), about $350
+  per 15-minute render. A key copied out at that rate is about $33K/day. The
+  token split does not close this, because the branch job still holds the
+  keys. **Fix:** branch code never holds them. Either `main`'s code
+  synthesizes the narration in its own job and hands over the files, or
+  branch renders use only the free sample mode. **Provider-side backstops,
+  set up by the owner and read back 2026-10-05:**
+  - The `polly` IAM user holds only inline `PollySynthesizeOnly`
+    (`polly:SynthesizeSpeech`, us-west-2). `AmazonPollyFullAccess` is
+    removed; it allowed 100K-char async tasks.
+  - A $3/month all-services cost budget automatically attaches `DenyPolicy`
+    (deny `polly:*`) to `polly` at 100% of actual spend.
+  - CloudWatch alarm `Polly-Usage-Exceeding-10k` (us-west-2) emails the owner
+    when `RequestCharacters` sums past 10,000 in an hour.
+
+  Budget data lags up to a day, so the alarm is the fast signal and the
+  budget is the stop. Google (billing disabled on both projects), GitHub (no
+  payment method) and Claude (usage credits off) cannot bill. Re-check from a
+  local session with AWS profile `reddit-digest-readonly`; its policy denies
+  every billable read.
 
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
