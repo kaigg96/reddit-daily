@@ -1338,3 +1338,18 @@ def test_clip_use_counts_each_broll_clip_in_log_order():
                    "06": "early", "02": "", "07": ""}
     late = insights.with_clip_use(rows + [{"timestamp_utc": "2026-09-08", "bg_clip": "a.mp4"}])
     assert late[-1]["clip_use"] == "late"
+
+
+def test_engaged_check_reads_the_minutes_column_against_engaged_views():
+    from src import insights as _ins
+    # 100 views, 40 engaged, 10 s per engaged view -> 400 s = 6.667 minutes
+    match = {"views": "100", "avg_view_duration_s": "10", "engaged_views": "40",
+             "est_minutes_watched": str(400 / 60)}
+    off = dict(match, engaged_views="80")      # implied 0.4 vs actual 0.8
+    blank = dict(match, engaged_views="")
+    small = dict(match, views="5")
+    n, med, within = _ins.engaged_check([match, match, off, blank, small])
+    assert n == 3
+    assert abs(med - 1.0) < 1e-9
+    assert abs(within - 2 / 3) < 1e-9
+    assert _ins.engaged_check([blank]) == (0, None, None)

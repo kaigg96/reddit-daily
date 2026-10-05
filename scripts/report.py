@@ -341,6 +341,8 @@ def main():
     p.add_argument("--replays", action="store_true",
                    help="how many videos average over 100%% viewed, which only "
                         "replays can cause (backlog #9's first test)")
+    p.add_argument("--engaged-check", action="store_true",
+                   help="R2: does the minutes column encode engaged views? latest snapshot only")
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
@@ -367,6 +369,20 @@ def main():
 
     if args.trajectory:     # the only surface that answers "are we improving?"
         show_trajectory(args)
+        return
+
+    if args.engaged_check:  # one snapshot, per video: no ages to match
+        import csv as _csv
+        from src import config
+        with open(config.ANALYTICS_SNAPSHOTS) as f:
+            rows = list(_csv.DictReader(f))
+        latest = max(r["snapshot_date"] for r in rows)
+        n, med, within = insights.engaged_check(r for r in rows if r["snapshot_date"] == latest)
+        if not n:
+            print(f"{latest}: no rows carry engaged_views")
+        else:
+            print(f"{latest}: implied/actual engaged share, n={n} videos with >=20 views: "
+                  f"median {med:.2f}, {within:.0%} within 10% of 1")
         return
 
     if args.slate:          # reads only the upload log: no analytics involved

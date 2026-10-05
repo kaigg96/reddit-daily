@@ -299,8 +299,9 @@ a list nobody can read is the same as no list.
   (n=21, 07-18..07-31).
   Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
   every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
-  **Test:** when backlog #8 first collects `engaged_views`, compare the two on
-  the same rows; a match backfills #8 from every snapshot since July.
+  **Tested 2026-10-05 (`report.py --engaged-check`): no match.** Implied/actual
+  median 1.26, 13% of 830 rows within 10%, so this is not the engaged count and
+  #8 has no backfill. The column is decorative again: fix or drop.
 - **The SRT track fails to upload about one time in four.** First read
   2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
   `comment_ok` was 31/31, so it is real but not the half it first looked. The

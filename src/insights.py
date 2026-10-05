@@ -54,7 +54,7 @@ class Metric:
     LIKES = "likes"
     COMMENTS = "comments"
     TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
-    ENGAGED = "implied_engaged"  # UNCONFIRMED share of plays past the opening (PRD §0 R2)
+    ENGAGED = "implied_engaged"  # NOT the engaged share: refuted 2026-10-05 (engaged_check)
 
 
 @dataclass
@@ -80,7 +80,7 @@ class Video:
     def implied_engaged(self):
         """est_minutes x 60 / (views x watch-seconds): ~0.18 before v2 and ~0.4
         after. Hypothesis (R2): watch-seconds is per engaged view, so this is
-        engagedViews / views. Unconfirmed until checked against engaged_views."""
+        engagedViews / views. Refuted 2026-10-05: `engaged_check` reads it 26% high."""
         denom = self.views * self.watch_seconds
         return self.est_minutes * 60 / denom if denom else 0.0
 
@@ -1252,3 +1252,30 @@ def format_traffic_mix(rows, top_n=3, min_share=1.0):
     if rest >= 0.05:
         parts.append(f"other {rest:.1f}%")
     return " · ".join(parts)
+
+
+def engaged_check(snapshot_rows, min_views=20, tolerance=0.10):
+    """PRD §0 R2: does est_minutes x 60 / (views x avg_view_duration_s) equal
+    engaged_views / views? Read on rows where the API returned both.
+
+    Returns (n, median implied/actual ratio, share of rows within `tolerance`
+    of 1), or (0, None, None). A median near 1 with most rows inside the band
+    means the minutes column encodes engaged views, so history can be read.
+    """
+    ratios = []
+    for r in snapshot_rows:
+        try:
+            views = float(r["views"])
+            dur = float(r["avg_view_duration_s"])
+            engaged = float(r["engaged_views"])
+            minutes = float(r["est_minutes_watched"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if views < min_views or dur <= 0 or engaged <= 0:
+            continue
+        implied = minutes * 60 / (views * dur)
+        ratios.append(implied / (engaged / views))
+    if not ratios:
+        return 0, None, None
+    within = sum(1 for x in ratios if abs(x - 1) <= tolerance) / len(ratios)
+    return len(ratios), statistics.median(ratios), within

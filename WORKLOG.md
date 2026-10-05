@@ -72,12 +72,13 @@ and more useful than a confident guess.
 ### Done
 - **Reliability:** This afternoon's upload had not landed by 18:43, but that is not unprecedented: 28 September's landed at 19:46. GitHub also started every scheduled job seven to nine hours late today, so it should land around 21:00. I did not request a sample run, because it would use the AI quota the late upload still needs.
 - **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month.
-- **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). Two research items are now ready, and an old code-health item is closed.
+- **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). That unblocks two research items and closes an old code-health item.
+- **Data:** One of the two unblocked questions is answered: older statistics do not hold the "past the opening" figure, so it can only be read from now on.
 - **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
 - **Editorial:** Started the top-ranked item, making the format our own. The idea of a second voice reacting to a comment, shelved in July, is now the first candidate: YouTube pays for videos where the channel comments, not for read-outs. It is judged on whether it costs watch time, and it needs your approval for about 6 cents a month of extra narration before it is built. Still to draft: a storyline candidate and a curation candidate.
 - **Product:** No decision rule is due. Whether one narrator is distributed less still has too few uploads per voice to answer, so I moved it to 12 October. Watch time per view is slightly up and views slightly down. The channel is still flat.
 - **Distribution:** The Shorts feed is still 96% of views. **Audience:** comments are not collected yet, so there was nothing to read.
-- **General management:** The trackers check clean. Nine items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those.
+- **General management:** The trackers check clean. Nine items are ready; finishing one research question left eight. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those.
 
 ### Blocked
 - **For you:** a one-line change so the weekly job saves the subscriber count (filed as an issue with the patch). Recommend approving: without it the figure is collected and thrown away.
