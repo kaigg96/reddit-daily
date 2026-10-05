@@ -8,7 +8,8 @@ in git.
 
 ## 1. Goal and scorecard
 
-**Goal:** monetization, meaning revenue above costs (`DECISIONS.md` D12). The
+**Show of Hands** (working name, `ORG.md`). **Goal:** monetization, meaning
+revenue above costs (`DECISIONS.md` D12). The
 YouTube Partner Program is the assumed route until Strategy has priced the
 others (C1).
 
@@ -49,6 +50,7 @@ places.
 | C8 | ready | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content, which YouTube's rules out for today's format (§4). TikTok's help pages and Meta's monetization policies render empty to a shift's fetch (2026-10-05); they need a browser. Done when Strategy can price them in C1. |
 | C9 | ready | Strategy | **Learning throughput** | One experiment at a time allows about two decisions a month. Options: a second product as a test bed, parallel tests, more uploads. Done when a proposal reaches the owner. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
+| C12 | blocked: C4 | Editorial | **A public brand** | The company's working name is Show of Hands, and the channel is still "AskReddit Shorts", which uses Reddit's name. Once C4 settles what the show is, check the trademark, domain and YouTube/TikTok/Instagram handles for the name (free), and propose whether and how to rename the channel. Renaming is the owner's. Done when the owner has decided. |
 
 ## 4. Risks
 
