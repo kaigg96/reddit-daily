@@ -60,6 +60,16 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-05 (21:15) — the evening upload was lost to a GitHub outage, not a fault
+
+**Summary:** This evening's scheduled upload was created eight hours late and then cancelled before it started, during GitHub's "Incident with Actions" (runner assignment failing, from 19:11 UTC). No code ran and nothing was uploaded, so there is nothing to diagnose and no sample run is needed.
+
+### Done
+- **Reliability:** traced the failed run. It never got a machine, billed 0 minutes, and was cancelled after 15 minutes in the queue. The saved record of the last post is untouched. The Polly permission was already proven by the 18:17 dry run.
+
+### Next
+- If the morning upload lands, the missing evening one needs no follow-up. A sample run of the live code is worth requesting only if a run fails *after starting*, with steps in its log.
+
 ## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
 
     Worked (% of the shift): data 25 · engineering 15 · audience 10 · reliability 10 · product 10 · editorial 15 · distribution 5 · gm 10
