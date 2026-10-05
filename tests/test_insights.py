@@ -1145,6 +1145,44 @@ def test_too_little_history_says_unknown_rather_than_guessing():
     assert verdict == "unknown"
 
 
+def _week_of_uploads(start_day, snapshot_day, views, vid="v"):
+    """One upload a day for a week, all read by one snapshot."""
+    return [_snap(f"{vid}{i}", start_day + i, snapshot_day, v)
+            for i, v in enumerate(views)]
+
+
+def test_weekly_totals_sum_every_upload_including_zero_views():
+    """Bet 2 is a total: a zero-view upload is still part of the week, and a
+    median would hide both a lost upload and an added one."""
+    # 2026-07-06 is a Monday (day 5); a snapshot on day 16 reads the week's
+    # uploads at 5-11 days old, all within 4 of 7.
+    rows = _week_of_uploads(5, 16, [10, 0, 20, 30, 40, 50, 60])
+    rows += _week_of_uploads(5, 24, [99] * 7)          # later readings ignored
+    series = insights.weekly_totals(rows)
+    assert series == [("2026-W28", 7, 210)]
+
+
+def test_weekly_totals_leave_out_a_week_still_filling_in():
+    """A week whose Sunday upload is too young to read would report low."""
+    rows = _week_of_uploads(5, 13, [10] * 7)    # Sunday's upload is 2 days old
+    assert insights.weekly_totals(rows) == []
+
+
+def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
+    """Uploads from before the first snapshot appear only at 30+ days old;
+    the week is known but unread, so it is left out rather than summed low."""
+    rows = _week_of_uploads(5, 45, [10] * 7)
+    rows += [_snap("late", 11, 18, 5)]           # its Sunday upload, read at 7 days
+    assert insights.weekly_totals(rows) == []
+
+
+def test_totals_change_compares_the_last_four_weeks_with_the_four_before():
+    series = [(f"w{i}", 14, t) for i, t in enumerate([100] * 4 + [250] * 4)]
+    prior, recent, ratio = insights.totals_change(series)
+    assert (prior, recent, ratio) == (400, 1000, 2.5)
+    assert insights.totals_change(series[:7]) is None
+
+
 # ------------------------------------------------------------- scorecard
 
 def test_longer_videos_are_not_called_success():

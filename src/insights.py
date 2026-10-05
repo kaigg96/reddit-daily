@@ -537,11 +537,23 @@ def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     holds ~10 readings per video, so a July upload can be read at seven days
     old alongside a September one. Returns [(period, n, median)] oldest first.
     """
+    buckets = {}
+    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance):
+        buckets.setdefault(pub.strftime("%G-W%V"), []).append(value)
+    return [(period, len(v), median(v))
+            for period, v in sorted(buckets.items())
+            if len(v) >= TRAJECTORY_MIN_N]
+
+
+def _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=False):
+    """[(value, published)] — each video's reading nearest `at_age` days old."""
     best = {}
     for row in snapshot_rows:
         pub, snap = row.get("published"), row.get("snapshot")
         value = row.get("value")
-        if not pub or not snap or not value or value <= 0:
+        if not pub or not snap or value is None or value < 0:
+            continue
+        if not value and not keep_zero:
             continue
         age = (snap - pub).days
         if abs(age - at_age) > tolerance:
@@ -550,13 +562,54 @@ def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
         prev = best.get(key)
         if prev is None or abs(age - at_age) < abs(prev[0] - at_age):
             best[key] = (age, value, pub)
+    return [(value, pub) for _, value, pub in best.values()]
 
-    buckets = {}
-    for _, value, pub in best.values():
-        buckets.setdefault(pub.strftime("%Y-W%V"), []).append(value)
-    return [(period, len(v), median(v))
-            for period, v in sorted(buckets.items())
-            if len(v) >= TRAJECTORY_MIN_N]
+
+def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+    """Total views per publish-week, every upload read at the same age.
+
+    Bet 2 (PLAN §2) is judged on total weekly views, because the Partner
+    Program's bar is a total: more uploads count, and so does a lost one.
+    A median would hide both. Zero-view uploads count, since they are part
+    of the total.
+
+    A sum is only honest over a week whose every upload was read, so a week
+    is reported only when each of its uploads that any snapshot knows of has
+    a reading at the age, and its Sunday upload is old enough to have one.
+    That leaves out the newest weeks, still filling in, and the weeks before
+    the snapshots began or across a missed one, rather than reporting them
+    low. Returns [(period, n, total)] oldest first.
+    """
+    stamps = [r["snapshot"] for r in snapshot_rows if r.get("snapshot")]
+    if not stamps:
+        return []
+    newest = (max(stamps) - datetime.timedelta(days=at_age - tolerance)).date()
+    week = lambda pub: pub.strftime("%G-W%V")
+    known = {}
+    for r in snapshot_rows:
+        if r.get("published") and r.get("video_id"):
+            known.setdefault(week(r["published"]), set()).add(r["video_id"])
+    read = {}
+    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=True):
+        read.setdefault(week(pub), []).append((value, pub))
+    out = []
+    for period, values in sorted(read.items()):
+        pub = values[0][1]
+        sunday = (pub - datetime.timedelta(days=pub.weekday() - 6)).date()
+        if len(values) < len(known.get(period, ())) or sunday > newest:
+            continue
+        out.append((period, len(values), sum(v for v, _ in values)))
+    return out
+
+
+def totals_change(series, weeks=4):
+    """(prior total, recent total, ratio) over the last `weeks` against the
+    `weeks` before, or None without enough complete weeks to compare."""
+    if len(series) < weeks * 2:
+        return None
+    recent = sum(t for _, _, t in series[-weeks:])
+    prior = sum(t for _, _, t in series[-weeks * 2:-weeks])
+    return prior, recent, (recent / prior if prior else None)
 
 
 def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):

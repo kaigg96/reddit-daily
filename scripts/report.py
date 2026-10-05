@@ -14,6 +14,7 @@ Usage:
   venv/bin/python scripts/report.py --zeros            # suppression candidates
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
+  venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -288,6 +289,11 @@ def show_scorecard(args):
 
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
+    if args.metric == Metric.VIEWS:
+        return show_weekly_views(args)
+    if args.metric != Metric.WATCH:
+        print(f"--trajectory reads watch-seconds or views, not {args.metric}")
+        return
     rows = _snapshot_metric_rows()
     series = insights.trajectory(rows, at_age=args.at_age or 7)
     if not series:
@@ -307,6 +313,29 @@ def show_trajectory(args):
     if verdict == "flat":
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
+
+
+def show_weekly_views(args):
+    """`--trajectory --metric views`: total weekly views, bet 2's measure."""
+    age = args.at_age or 7
+    series = insights.weekly_totals(_snapshot_metric_rows("views"), at_age=age)
+    if not series:
+        print("no publish week is fully read yet")
+        return
+    print(f"Total views per publish week, every upload read at ~{age} days old")
+    print("(complete weeks only: the newest are still filling in)\n")
+    print(f"  {'week':10} {'n':>4} {'total':>8} {'per upload':>11}")
+    for period, n, total in series:
+        print(f"  {period:10} {n:>4} {total:>8.0f} {total / n:>11.0f}")
+    change = insights.totals_change(series)
+    if change is None:
+        print(f"\n  only {len(series)} complete weeks: 8 are needed to compare 4 with 4")
+        return
+    prior, recent, ratio = change
+    print(f"\n  last 4 weeks {recent:.0f} vs the 4 before {prior:.0f}"
+          + (f" (x{ratio:.2f})" if ratio else ""))
+    print("  Views swing 27-50% at a fixed age with nothing changed, so read"
+          "\n  only a doubling or a halving as a change. Never a revert trigger.")
 
 
 def main():
