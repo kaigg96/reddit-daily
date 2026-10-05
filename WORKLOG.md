@@ -67,33 +67,33 @@ and more useful than a confident guess.
 **Summary:** This is the first monthly review, and it found two blocks to revenue. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, while the channel has had about 90,000 in its whole life. And YouTube's own policy refuses to pay for videos that only read out other people's text, which is what we make. Next month should decide how the format becomes ours, and which way to earn.
 
 ### Where we stand
-- Revenue is $0. Watch time per view is up slightly over three weeks (12.0 to 12.5 seconds a view). Views per video are down (75 to 65), and the weekly trend is flat.
+- Revenue is $0. Over three weeks, watch time per view rose slightly (12.0 to 12.5 seconds) and views per video fell (75 to 65); the trend is flat.
 - **The distance to revenue, in numbers.** YouTube's own page, read today, sets the bar at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. The channel's lifetime watch time is about 96 hours.
 - We do not record the subscriber count, though it is half the bar. Collecting it is now queued.
 - **Plainly, the current path does not reach the goal.** Pricing the other platforms will show whether another route does.
 
 ### Money
-- Speech costs are $0.14 so far this month, forecast at $0.96, against the $3 budget. All four controls checked at Amazon are intact. Nothing was priced or proposed this month.
+- Speech costs: $0.14 so far this month, forecast $0.96, against the $3 budget; all four controls intact. Nothing was priced or proposed.
 
 ### Risks
 - Two risks now carry evidence: revenue too small at our scale (the views gap), and an unpayable format (confirmed below). Every risk has an item answering it.
 
 ### Market and policy
 - **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work.
-- Not done: Reddit's terms and a scan of comparable channels. Nobody has started either.
+- **Reddit's terms could not be read:** Reddit's own pages refuse automated reads, even through an archive copy. Five minutes in a browser would settle whether a paid channel needs Reddit's written approval. Comparable channels: not started.
 
 ### Proposals for you
-- **Apply one patch (#50).** Automatic landing for approved rule changes, which you approved, is built and tested. It touches a file only you may change.
+- **Apply one patch (#50):** the automatic landing you approved, built and tested, in a file only you may change.
 
 ### Next month
-- **Today's afternoon upload had not landed when this review was written (18:27).** Earlier ones have landed as late as 18:29, so it may simply be slow. The next shift checks it first.
-- Next shift: the weekly review of today's statistics, then quarterly prep built around the views gap.
+- **Today's afternoon upload had not landed by 18:33**; earlier ones landed as late as 18:29. The next shift checks it first.
+- Next shift: the weekly review, then quarterly prep built on both findings.
 - Your two decisions are done and closed. Shifts ended early because their only work was waiting on dates, and today's redesign gave them nine items that do not (#46). The other is #50 above.
 - **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.
 
 ### Better?
 - **Than last shift:** Yes. For the first time the company knows how far its assumed revenue route is, and that the format itself must change before that route can pay.
-- **Than ~10 shifts ago:** Unclear. Watch time per view is up about 4% over three weeks, but views are flat and no revenue route has moved.
+- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4%, views are flat, and no revenue route has moved.
 - **Than ~100 shifts ago:** Too early to say.
 
 ---
