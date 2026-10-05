@@ -52,6 +52,9 @@ TRAFFIC_FIELDS = ["snapshot_date", "scope", "traffic_source", "views",
                   "est_minutes_watched", "share_pct"]
 WEEK_DAYS = 7
 
+CHANNEL_OUT = config.CHANNEL_LOG
+CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos"]
+
 
 def all_uploads(yt):
     """[(video_id, published_at)] for every video on the channel."""
@@ -258,6 +261,30 @@ def snapshot_traffic(ya, today):
     print(f"appended {written} traffic-source rows to {TRAFFIC_OUT}")
 
 
+def snapshot_channel(yt, today, path=None):
+    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11).
+
+    The Data API rounds subscriber counts to three significant figures, which is
+    exact below 1,000 -- the threshold that matters.
+    """
+    path = path or CHANNEL_OUT
+    stats = yt.channels().list(mine=True, part="statistics").execute()["items"][0]["statistics"]
+    is_new = not path.exists()
+    path.parent.mkdir(exist_ok=True)
+    with open(path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CHANNEL_FIELDS, lineterminator="\n")
+        if is_new:
+            writer.writeheader()
+        writer.writerow({
+            "snapshot_date": today,
+            "subscribers": stats.get("subscriberCount", ""),
+            "subscribers_hidden": int(bool(stats.get("hiddenSubscriberCount"))),
+            "views": stats.get("viewCount", ""),
+            "videos": stats.get("videoCount", ""),
+        })
+    print(f"channel: {stats.get('subscriberCount', '?')} subscribers -> {path}")
+
+
 def already_snapshotted(path, today):
     """True if this file already has rows for today (both CSVs lead with the date)."""
     if not path.exists():
@@ -271,7 +298,8 @@ def main():
 
     snapshot_done = already_snapshotted(OUT, today)
     traffic_done = already_snapshotted(TRAFFIC_OUT, today)
-    if snapshot_done and traffic_done:
+    channel_done = already_snapshotted(CHANNEL_OUT, today)
+    if snapshot_done and traffic_done and channel_done:
         # benign: manual rerun on snapshot day — keep exit 0 so the digest step
         # still runs afterward
         print(f"snapshot and traffic for {today} already present; skipping append")
@@ -326,6 +354,16 @@ def main():
             snapshot_traffic(ya, today)
         except Exception as e:
             print(f"::warning::traffic-source snapshot failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
+
+    if channel_done:
+        print(f"channel stats for {today} already present; skipping append")
+    else:
+        # Fail soft, as the traffic snapshot does.
+        try:
+            snapshot_channel(analytics.youtube_client(), today)
+        except Exception as e:
+            print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
                   f"per-video snapshot is unaffected")
 
 

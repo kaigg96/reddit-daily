@@ -106,3 +106,38 @@ def test_engaged_views_refused_beside_every_metric_are_asked_for_alone():
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert stats["a"][wa.ENGAGED_METRIC] == 3 and stats["a"]["views"] == 9
     assert ya.calls[-1] == f"views,{wa.ENGAGED_METRIC}"
+
+
+class _FakeYT:
+    """channels().list(...).execute() -> one channel's statistics."""
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    def channels(self):
+        return self
+
+    def list(self, **kwargs):
+        assert kwargs == {"mine": True, "part": "statistics"}
+        return self
+
+    def execute(self):
+        return {"items": [{"statistics": self.stats}]}
+
+
+def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):
+    p = tmp_path / "channel.csv"
+    yt = _FakeYT({"subscriberCount": "142", "hiddenSubscriberCount": False,
+                  "viewCount": "91000", "videoCount": "180"})
+    wa.snapshot_channel(yt, "2026-10-12", p)
+    wa.snapshot_channel(yt, "2026-10-19", p)
+    lines = p.read_text().splitlines()
+    assert lines == [",".join(wa.CHANNEL_FIELDS),
+                     "2026-10-12,142,0,91000,180",
+                     "2026-10-19,142,0,91000,180"]
+
+
+def test_hidden_subscriber_count_is_flagged_not_guessed(tmp_path):
+    p = tmp_path / "channel.csv"
+    wa.snapshot_channel(_FakeYT({"hiddenSubscriberCount": True, "viewCount": "1"}), "2026-10-12", p)
+    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,"

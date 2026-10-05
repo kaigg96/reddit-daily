@@ -94,5 +94,6 @@ UPLOAD_LOG = ROOT / "upload_log.csv"
 SCREEN_LOG = ROOT / "analysis" / "screen_log.csv"  # R4.6 audit trail
 ANALYTICS_SNAPSHOTS = ROOT / "analysis" / "analytics_snapshots.csv"  # R4.2 weekly series
 TRAFFIC_LOG = ROOT / "analysis" / "traffic_sources.csv"  # R4.7 traffic-source series
+CHANNEL_LOG = ROOT / "analysis" / "channel_stats.csv"  # PLAN C11: subscribers, weekly
 
 GEN.mkdir(parents=True, exist_ok=True)

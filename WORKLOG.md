@@ -62,32 +62,32 @@ and more useful than a confident guess.
 
 ## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
 
-    Worked (% of the shift): data 30 · reliability 20 · product 10 · editorial 20 · distribution 5 · gm 15
+    Worked (% of the shift): data 25 · engineering 15 · reliability 15 · product 10 · editorial 15 · distribution 5 · gm 15
 
-**Summary:** This is the first weekly review. The weekly statistics run collected the share of plays that get past the opening for the first time, which unblocks two research items. Nothing this shift moved the company directly toward revenue. Today's afternoon upload is late, but GitHub's own scheduler is running seven to nine hours behind today. That points to delay, not a broken pipeline.
+**Summary:** This is the first weekly review. We now measure how many plays get past the opening and, once you approve one line, the subscriber count, which is half of YouTube's bar. The format work aimed at revenue has started. Today's late upload looks like a GitHub delay, not a failure.
 
 ### Toward revenue
-- Nothing directly. Measuring the opening sharpens product decisions, but the revenue blocks the monthly review found (the views gap and a format YouTube will not pay for) are unchanged. Those come first in the queue below.
+- A first step: the first candidate for a format YouTube would pay for is drafted, and the subscriber count, half of the payment bar, is now collected. The views gap is unchanged.
 
 ### Done
-- **Reliability:** This afternoon's upload had not landed by 18:43. It is not the latest on record: 28 September's landed at 19:46. And today GitHub started every scheduled job very late: the release check due at 08:17 ran at 17:08, and the statistics run due at 06:00 ran at 12:59. On that delay the afternoon upload would land around 21:00 to 21:30. I did not request a sample run: it would use the AI quota the late upload still needs, and running short of that quota has cost an upload its title before.
-- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to a temporary outage at the AI service (1 and 4 October). The longer wait before retrying, added on 4 October, has had no failure since. All four spending controls at Amazon are intact, with $0.14 spent this month.
-- **Data:** The weekly statistics run filled the "plays that get past the opening" figure on 1,000 of 1,041 rows. Every earlier run had been refused. That unblocks the experiment that reads it and the question of whether older data already holds it, and it closes a long-open code-health item. Both items are now ready.
-- **Product:** No decision rule is due. The opening-question release is judged on 12 October, and the title-style change is due to merge from 6 October. Watch time per view is slightly up (12.0 to 12.5 seconds) and views per video slightly down (75 to 65). The channel is still flat by its own measure.
-- **Product:** Whether one narrator gets fewer videos distributed still cannot be answered: within the two newest releases each voice has only 3 to 7 measured uploads, and the analysis tool refuses. I moved it to the 12 October snapshot.
-- **Distribution:** The Shorts feed is still 96% of views (96.3% this week, 96.3% last week). Search is 1.6%, so nothing has changed.
-- **Audience:** Viewer comments are still not collected (queued), so there was nothing to read.
-- **Editorial:** Started the top-ranked item, making the format our own. The "second voice reacts to a comment" idea, shelved in July for making videos longer, is now the first candidate, because YouTube pays for videos where the channel comments and not for read-outs. It is judged on whether it costs watch time, since some commentary is required regardless. It queues behind the two changes already lined up, and its extra narration needs your approval before it is built (about 6 cents a month). Still to draft: a storyline candidate and a curation candidate.
-- **General management:** The trackers check clean. The ready queue is 10 items. Ranked by path to revenue: make the format our own (it decides whether YouTube can ever pay), price the revenue routes, record subscribers (half of YouTube's bar, a small job), then the other platforms' terms and comparable channels. The two measurement items rank below those. They help the product, not revenue.
+- **Reliability:** This afternoon's upload had not landed by 18:43, but that is not unprecedented: 28 September's landed at 19:46. GitHub also started every scheduled job seven to nine hours late today, so it should land around 21:00. I did not request a sample run, because it would use the AI quota the late upload still needs.
+- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month.
+- **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). Two research items are now ready, and an old code-health item is closed.
+- **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
+- **Editorial:** Started the top-ranked item, making the format our own. The idea of a second voice reacting to a comment, shelved in July, is now the first candidate: YouTube pays for videos where the channel comments, not for read-outs. It is judged on whether it costs watch time, and it needs your approval for about 6 cents a month of extra narration before it is built. Still to draft: a storyline candidate and a curation candidate.
+- **Product:** No decision rule is due. Whether one narrator is distributed less still has too few uploads per voice to answer, so I moved it to 12 October. Watch time per view is slightly up and views slightly down. The channel is still flat.
+- **Distribution:** The Shorts feed is still 96% of views. **Audience:** comments are not collected yet, so there was nothing to read.
+- **General management:** The trackers check clean. Nine items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those.
 
 ### Blocked
+- **For you:** a one-line change so the weekly job saves the subscriber count (filed as an issue with the patch). Recommend approving: without it the figure is collected and thrown away.
 - Reddit's terms still need a browser read. Whether the narrator question has an answer waits on the 12 October snapshot.
 
 ### Next
 - First check that today's afternoon upload landed. If it is still missing tomorrow morning, request a sample run of the live code after the 07:00 reset and away from the upload times. Merge the title-style change (due 6 October). Then the quarterly prep, which is still due, and after that the top of the queue: making the format our own.
 
 ### Better?
-- **Than last shift:** Slightly. The company can now measure what the opening does to viewers, but it is no closer to revenue.
+- **Than last shift:** Slightly. A first format candidate now targets YouTube's payment rule, and half of its bar is measured. Views have not moved.
 - **Than ~10 shifts ago:** Unclear: watch time per view is up about 4% and views are flat.
 - **Than ~100 shifts ago:** Too early to say.
 
@@ -166,45 +166,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** about the same. A broken check was fixed within hours and one more lead was closed, but nothing moved the channel.
-- **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-10-04 (07:37) — this morning's upload lost its title to a second outage; the retry now waits it out
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 25→15 · security 5→10 · pm 30→20 · research 20→35 · feature 0→0 · close 10→10
-
-**Summary:** This morning's upload went out with the raw Reddit question as its title: the title service was briefly overloaded, and the retry added on 2 October waited only 4 seconds. The retry now waits 30 seconds and still makes no extra requests. Research found that uploads narrated by Danielle more often reach almost nobody, probably a one-off mid-September cluster; tomorrow's data will tell. Ready work is back to none: everything left waits on 5 or 6 October.
-
-### Maintenance
-- Both uploads since the last shift landed and the saved last-post record is intact. This morning's lost its title, keywords and closing line to a "service overloaded" reply, the second time a 4-second wait was too short. The daily allowance did not run out.
-- **Shipped:** before retrying an overloaded reply, the title and content check now wait 30 seconds instead of 4. The video is unchanged and all tests pass. A lost title costs no watch time, but the 6 October title-style test needs generated titles to measure. If 30 seconds is not enough either, retry on another model next.
-
-### Security
-- Standing check clean: no credentials in the project, the secret files are still excluded, and every automated job still has limited permissions. The library-advisory scan found only the two advisories already on file.
-
-### Project management
-- The plan document's header still said the previous format was live. It now points to the status section instead of repeating it.
-- No decisions came due and nothing new is approved. The channel is still flat; both changes aimed at views are queued for 6 October.
-- **The automatic process check raised a request for you:** recent shifts used about half their time, because the remaining work waited on a date. My recommendation, in the request: no rule change yet.
-- The document checker no longer flags a true past note as out of date. It now reads only the newest shift report as current, which ends the false alarm last shift recorded as friction.
-- **Friction:** this shift wrote its plan at the end, not the start, again.
-
-### Research
-- **A lead, probably weaker than it looks:** uploads narrated by Danielle reach 5 views or fewer far more often than Stephen's (11 of 67 against 2 of 65), and morning uploads more than evening ones, the same shape. How long viewers watch is equal. But 9 of those uploads are Danielle in the morning, and 7 of them fell in one fortnight in mid-September, 5 on the background clip already retired for this problem. That looks like a one-off cluster rather than the voice. Tomorrow's data covers the newer formats, after that fortnight: if the gap is still there, the next shift proposes a one-voice experiment; if not, it was the cluster.
-- The reporting tool now runs this test whenever it splits uploads into two groups, pooled across formats so tomorrow's few new uploads count. Of seven splits tried, only voice and time of day showed a gap; topic is too thin to read (10 uploads or fewer each). The burial clusters in the two mid-September weeks (7 of 28, against 6 of 115 in all other weeks). Those were the weeks the content service kept timing out, but neither of its effects explains the burial: uploads that lost their title, or skipped the content check, were buried no more often. The cause is still unknown.
-- **Asked and answered: does a background clip get buried once it has been reused? No.** The clip retired on 28 September went bad after its fourth use, but across all the other clips, later uses were buried no more often than early ones. That clip was a one-off, so no cap on reuse is needed.
-
-### Feature work
-- Nothing this shift: both queued changes wait for 6 October; their samples passed.
-
-### Blocked
-- Automatic landing for approved process changes still awaits your decision (#45).
-
-### Next
-- **5 October:** read the new data: the voice and time-of-day gap above in the newest formats, the voice watch-time read, and the engaged-view column. **6 October:** merge the title change, then the new subreddit. **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade.
-- Watch the next uploads for another overloaded-service failure.
-
-### Better?
-- **Than last shift:** yes: a live fault fixed the same morning it recurred, and a lead checked down to its likely cause before it could mislead.
 - **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
