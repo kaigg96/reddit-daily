@@ -29,8 +29,11 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 ## 2. This quarter's bets
 
-None yet. The first quarterly planning session with the owner is due (§5).
-Until then, the queue is ranked on its effect on the path to revenue.
+None yet. Three are drafted for the owner's first planning session
+(escalation `quarterly-planning-2026-Q4`, 2026-10-05): make the format ours
+(C4, PRD #7); double weekly views (PRD #10, #3, #4); price the other routes
+and pilot the best (C1, C8, C3). Until the owner sets them, the queue is
+ranked on its effect on the path to revenue.
 
 ## 3. Work queue
 
@@ -72,5 +75,5 @@ own row when it finishes.
 |---|---|
 | Weekly | 2026-10-05 |
 | Monthly | 2026-10-05 |
-| Quarterly prep | never |
+| Quarterly prep | 2026-10-05 |
 | Quarterly planning | never |
