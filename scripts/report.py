@@ -379,6 +379,9 @@ def main():
                         "replays can cause (backlog #9's first test)")
     p.add_argument("--engaged-check", action="store_true",
                    help="R2: does the minutes column encode engaged views? latest snapshot only")
+    p.add_argument("--placebo", action="store_true",
+                   help="noise with nothing changed: consecutive batches (how a release "
+                        "is judged) vs alternate days in the same weeks (PLAN C9)")
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
@@ -419,6 +422,21 @@ def main():
         else:
             print(f"{latest}: implied/actual engaged share, n={n} videos with >=20 views: "
                   f"median {med:.2f}, {within:.0%} within 10% of 1")
+        return
+
+    if args.placebo:        # nothing switched: what each test design reads as noise
+        load = insights.load_videos_at_age(args.at_age or 7)
+        print(f"Noise with nothing changed, uploads read at ~{args.at_age or 7} days old "
+              f"(n={len(load.videos)})\n")
+        print(f"  {'metric':15} {'release-style':>14} {'alternate days':>15}")
+        for m in (Metric.WATCH, Metric.VIEWS):
+            r = insights.drift_floor(load.videos, m)
+            a = insights.alternation_floor(load.videos, m)
+            fmt = lambda x: f"{x:.0%}" if x is not None else "-"
+            print(f"  {m:15} {fmt(r):>14} {fmt(a):>15}")
+        print("\n  release-style: median swing between consecutive batches of 8"
+              "\n  alternate days: median gap between odd- and even-day uploads"
+              "\n  within the same 16. Smaller is a finer detection limit.")
         return
 
     if args.slate:          # reads only the upload log: no analytics involved

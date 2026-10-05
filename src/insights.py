@@ -352,6 +352,35 @@ def drift_floor(videos, metric, block=MIN_COHORT):
     return median(deltas) if deltas else None
 
 
+def alternation_floor(videos, metric, block=MIN_COHORT):
+    """`drift_floor`'s counterpart for a test that alternates by day.
+
+    A release is judged against the batch before it, so it carries the
+    calendar's swing. A change switched on and off on alternate days is
+    judged against uploads from the same weeks. This measures that design's
+    noise with nothing switched: take `2 * block` consecutive uploads, split
+    them by the parity of their publish day, and record how far apart the two
+    halves' medians sit. Returns the median of that across the history, or
+    None without enough of it. Compare with `drift_floor` at the same
+    `block`: the gap is what alternating would buy (PLAN C9, 2026-10-05).
+    """
+    live = sorted([v for v in videos if v.views > 0],
+                  key=lambda v: v.true_published or v.published)
+    size = block * 2
+    deltas = []
+    for i in range(0, len(live) - size + 1, size):
+        chunk = live[i:i + size]
+        day = lambda v: (v.true_published or v.published).toordinal() % 2
+        on = [v.get(metric) for v in chunk if day(v)]
+        off = [v.get(metric) for v in chunk if not day(v)]
+        if len(on) < block // 2 or len(off) < block // 2:
+            continue
+        mx, my = median(off), median(on)
+        if mx:
+            deltas.append(abs(my - mx) / mx)
+    return median(deltas) if deltas else None
+
+
 # What may fire a revert. The owner settled it on #18 (2026-09-22): "the rule
 # now triggers on watch-seconds only, with views reported but never firing it".
 # Views at a fixed age move 27-52% between batches with nothing changed, five

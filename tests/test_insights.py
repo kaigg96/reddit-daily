@@ -1050,6 +1050,19 @@ def test_drift_floor_is_unmeasurable_rather_than_zero_on_thin_history():
         [v(f"a{i}", 10, views=100) for i in range(9)], Metric.VIEWS) is None
 
 
+def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
+    """The design it measures: halves split by alternate days share the
+    calendar. A steady trend moves both halves together, so it reads as no
+    noise; a gap between odd and even days is exactly what it reports."""
+    # Two uploads a day for 16 days. Even age offsets get 12s, odd get 10s.
+    parity = [v(f"p{d}{k}", 30 - d, watch=12.0 if d % 2 else 10.0)
+              for d in range(16) for k in range(2)]
+    assert 0.16 < insights.alternation_floor(parity, Metric.WATCH) <= 0.2   # 2s on 10 or 12
+    trend = [v(f"t{d}{k}", 30 - d, watch=10.0 + d) for d in range(16) for k in range(2)]
+    assert insights.alternation_floor(trend, Metric.WATCH) < insights.drift_floor(trend, Metric.WATCH)
+    assert insights.alternation_floor(parity[:15], Metric.WATCH) is None
+
+
 def test_the_detection_limit_is_printed_with_every_release_answer(tmp_path, monkeypatch):
     """A verdict without its detection limit invites reading "KEEP" as "proven
     safe" — on views, this channel cannot prove anything under ~50%."""
