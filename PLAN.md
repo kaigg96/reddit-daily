@@ -30,7 +30,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 ## 2. This quarter's bets
 
 None yet. Three are drafted for the owner's first planning session
-(escalation `quarterly-planning-2026-Q4`, 2026-10-05): make the format ours
+(#55, 2026-10-05): make the format ours
 (PRD #7, #12); double weekly views (PRD #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, 56 uploads, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four complete weeks); price the other routes
 and pilot the best (C8, C3). Until the owner sets them, the queue is
 ranked on its effect on the path to revenue.
