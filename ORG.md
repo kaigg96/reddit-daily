@@ -1,4 +1,4 @@
-# Organisation
+# Show of Hands — organisation
 
 Who owns what in the company, and who decides. **This file is protected:**
 changing it needs the owner's approval, like `CLAUDE.md` and the skills,
@@ -8,7 +8,8 @@ this map are in `DECISIONS.md` D12.
 
 ## 1. What the company is
 
-A small media company. The YouTube Shorts channel ("AskReddit Shorts") is its
+**Show of Hands** (working name, owner 2026-10-05) is a small media company.
+The YouTube Shorts channel ("AskReddit Shorts") is its
 first product, not the whole of it. **The goal is monetization:** revenue above
 costs. The YouTube Partner Program is one route to it and is not set in stone.
 Pivots of format, platform, product or revenue route are allowed when evidence
