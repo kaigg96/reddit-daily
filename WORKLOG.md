@@ -68,7 +68,7 @@ and more useful than a confident guess.
 
 ### Where we stand
 - Revenue is $0. Over three weeks, watch time per view rose slightly (12.0 to 12.5 seconds) and views per video fell (75 to 65); the trend is flat.
-- **The distance to revenue, in numbers.** YouTube's own page, read today, sets the bar at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. The channel's lifetime watch time is about 96 hours.
+- **YouTube's own page, read today, sets the bar** at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. Lifetime watch time: about 96 hours.
 - We do not record the subscriber count, though it is half the bar. Collecting it is now queued.
 - **Plainly, the current path does not reach the goal.** Pricing the other platforms will show whether another route does.
 
@@ -76,17 +76,17 @@ and more useful than a confident guess.
 - Speech costs: $0.14 so far this month, forecast $0.96, against the $3 budget; all four controls intact. Nothing was priced or proposed.
 
 ### Risks
-- Two risks now carry evidence: revenue too small at our scale (the views gap), and an unpayable format (confirmed below). Every risk has an item answering it.
+- Two risks now carry evidence: revenue too small (the views gap) and an unpayable format (below). Every risk has an answering item.
 
 ### Market and policy
 - **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work.
-- **Reddit's terms could not be read:** Reddit's own pages refuse automated reads, even through an archive copy. Five minutes in a browser would settle whether a paid channel needs Reddit's written approval. Comparable channels: not started.
+- **Reddit's terms could not be read:** its pages refuse automated reads, even archived. Five minutes in a browser would settle whether a paid channel needs Reddit's written approval. Comparable channels: not started.
 
 ### Proposals for you
 - **Apply one patch (#50):** the automatic landing you approved, built and tested, in a file only you may change.
 
 ### Next month
-- **Today's afternoon upload had not landed by 18:33**; earlier ones landed as late as 18:29. The next shift checks it first.
+- **Today's afternoon upload had not landed by 18:35**, later than any on record (18:29), and a shift cannot see why. If it never lands, the next shift requests a sample run of the live code to see the error.
 - Next shift: the weekly review, then quarterly prep built on both findings.
 - Both your decisions are closed. Shifts ended early because all their remaining work depended on dates; today's redesign gave them nine items that do not (#46). The other is #50 above.
 - **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.

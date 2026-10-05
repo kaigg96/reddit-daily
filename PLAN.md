@@ -46,7 +46,7 @@ places.
 | C5 | ready | Audience | **Collect viewer comments into the repo** | The weekly analytics job already holds the YouTube keys, so it saves recent comments. That is a workflow change, so Propose. Done when a shift can read last week's comments. |
 | C6 | ready | Security | **Branch code never holds the Polly keys** | See `TECH_DEBT.md` (dry runs). Real narration is made by `main`'s code in its own job, or branch renders use only the free sample mode. A workflow change, so Propose. |
 | C7 | ready | Market intelligence | **Scan comparable channels** | 5–10 Reddit-story or AskReddit Shorts channels: format, cadence, views, monetization signals. Done when there is at least one hypothesis with a test, or the finding that nothing transfers. |
-| C8 | ready | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content. Done when Strategy can price them in C1. |
+| C8 | ready | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content, which YouTube's rules out for today's format (§4). TikTok's help pages render empty to a shift's fetch (2026-10-05). Done when Strategy can price them in C1. |
 | C9 | ready | Strategy | **Learning throughput** | One experiment at a time allows about two decisions a month. Options: a second product as a test bed, parallel tests, more uploads. Done when a proposal reaches the owner. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
 
