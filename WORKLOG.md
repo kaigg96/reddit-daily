@@ -88,7 +88,7 @@ and more useful than a confident guess.
 ### Next month
 - **Today's afternoon upload had not landed by 18:33**; earlier ones landed as late as 18:29. The next shift checks it first.
 - Next shift: the weekly review, then quarterly prep built on both findings.
-- Your two decisions are done and closed. Shifts ended early because their only work was waiting on dates, and today's redesign gave them nine items that do not (#46). The other is #50 above.
+- Both your decisions are closed. Shifts ended early because all their remaining work depended on dates; today's redesign gave them nine items that do not (#46). The other is #50 above.
 - **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.
 
 ### Better?
