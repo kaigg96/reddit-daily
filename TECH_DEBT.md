@@ -372,17 +372,6 @@ a list nobody can read is the same as no list.
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
 
-- **`engaged_views` has never been collected, and nothing said so.** The
-  2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
-  `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
-  raised, and the fallback's `::warning::` went to the Actions log only (the
-  workflow commits the CSVs, nothing else). The column now records the refusal
-  (`refused: <error>`, 2026-09-29): read it at the 10-05 snapshot, then try
-  the likely causes (`sort=-views` with the extra metric; the metric needing
-  its own query). Since 2026-10-04 a refusal also asks for `views,engagedViews`
-  alone, filling the column if that works or appending `; alone: <error>`, so
-  the 10-05 run tests the second cause itself. Blocks PRD §0 #8. Found 2026-09-29.
-
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
   the change that issue described — so any commit can cite any approved issue,

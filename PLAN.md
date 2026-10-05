@@ -70,7 +70,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | never |
+| Weekly | 2026-10-05 |
 | Monthly | 2026-10-05 |
 | Quarterly prep | never |
 | Quarterly planning | never |

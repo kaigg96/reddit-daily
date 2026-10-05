@@ -60,6 +60,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
+
+    Worked (% of the shift): data 35 · reliability 25 · product 15 · distribution 5 · gm 20
+
+**Summary:** This is the first weekly review. The weekly statistics run collected the share of plays that get past the opening for the first time, which unblocks two research items. Nothing this shift moved the company directly toward revenue. Today's afternoon upload is late, but GitHub's own scheduler is running seven to nine hours behind today. That points to delay, not a broken pipeline.
+
+### Toward revenue
+- Nothing directly. Measuring the opening sharpens product decisions, but the revenue blocks the monthly review found (the views gap and a format YouTube will not pay for) are unchanged. Those come first in the queue below.
+
+### Done
+- **Reliability:** This afternoon's upload had not landed by 18:43. It is not the latest on record: 28 September's landed at 19:46. And today GitHub started every scheduled job very late: the release check due at 08:17 ran at 17:08, and the statistics run due at 06:00 ran at 12:59. On that delay the afternoon upload would land around 21:00 to 21:30. I did not request a sample run: it would use the AI quota the late upload still needs, and running short of that quota has cost an upload its title before.
+- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to a temporary outage at the AI service (1 and 4 October). The longer wait before retrying, added on 4 October, has had no failure since. All four spending controls at Amazon are intact, with $0.14 spent this month.
+- **Data:** The weekly statistics run filled the "plays that get past the opening" figure on 1,000 of 1,041 rows. Every earlier run had been refused. That unblocks the experiment that reads it and the question of whether older data already holds it, and it closes a long-open code-health item. Both items are now ready.
+- **Product:** No decision rule is due. The opening-question release is judged on 12 October, and the title-style change is due to merge from 6 October. Watch time per view is slightly up (12.0 to 12.5 seconds) and views per video slightly down (75 to 65). The channel is still flat by its own measure.
+- **Product:** Whether one narrator gets fewer videos distributed still cannot be answered: within the two newest releases each voice has only 3 to 7 measured uploads, and the analysis tool refuses. I moved it to the 12 October snapshot.
+- **Distribution:** The Shorts feed is still 96% of views (96.3% this week, 96.3% last week). Search is 1.6%, so nothing has changed.
+- **Audience:** Viewer comments are still not collected (queued), so there was nothing to read.
+- **General management:** The trackers check clean. The ready queue is 10 items. Ranked by path to revenue: make the format our own (it decides whether YouTube can ever pay), price the revenue routes, record subscribers (half of YouTube's bar, a small job), then the other platforms' terms and comparable channels. The two measurement items rank below those. They help the product, not revenue.
+
+### Blocked
+- Reddit's terms still need a browser read. Whether the narrator question has an answer waits on the 12 October snapshot.
+
+### Next
+- First check that today's afternoon upload landed. If it is still missing tomorrow morning, request a sample run of the live code after the 07:00 reset and away from the upload times. Merge the title-style change (due 6 October). Then the quarterly prep, which is still due, and after that the top of the queue: making the format our own.
+
+### Better?
+- **Than last shift:** Slightly. The company can now measure what the opening does to viewers, but it is no closer to revenue.
+- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4% and views are flat.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-05 — Monthly review: at today's views the Partner Program is hundreds of times out of reach
 
     Worked (% of the shift): strategy 30 · legal 20 · finance 5 · data 10 · reliability 5 · gm 30
