@@ -62,7 +62,7 @@ and more useful than a confident guess.
 
 ## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
 
-    Worked (% of the shift): data 25 · engineering 15 · reliability 15 · product 10 · editorial 15 · distribution 5 · gm 15
+    Worked (% of the shift): data 25 · engineering 15 · audience 10 · reliability 10 · product 10 · editorial 15 · distribution 5 · gm 10
 
 **Summary:** This is the first weekly review. We now measure how many plays get past the opening and, once you approve one line, the subscriber count, which is half of YouTube's bar. The format work aimed at revenue has started. Today's late upload looks like a GitHub delay, not a failure.
 
@@ -77,12 +77,13 @@ and more useful than a confident guess.
 - **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
 - **Editorial:** Started the top-ranked item, making the format our own. The idea of a second voice reacting to a comment, shelved in July, is now the first candidate: YouTube pays for videos where the channel comments, not for read-outs. It is judged on whether it costs watch time, and it needs your approval for about 6 cents a month of extra narration before it is built. Still to draft: a storyline candidate and a curation candidate.
 - **Product:** No decision rule is due. Whether one narrator is distributed less still has too few uploads per voice to answer, so I moved it to 12 October. Watch time per view is slightly up and views slightly down. The channel is still flat.
-- **Distribution:** The Shorts feed is still 96% of views. **Audience:** comments are not collected yet, so there was nothing to read.
-- **General management:** The trackers check clean. Seven items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those. The upload check and the tracker corrections were fixes. The format candidate and the subscriber count were improvements.
+- **Distribution:** The Shorts feed is still 96% of views.
+- **Audience:** There were no comments to read, because none were collected. The weekly job now saves the past week's comments on the 20 newest videos, without names, failing soft like the subscriber count. It also needs one line from you.
+- **General management:** The trackers check clean. Six items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those. The upload check and the tracker corrections were fixes. The format candidate, the subscriber count and the comments were improvements.
 - **Friction:** the tool that files issues for you waited silently for input when not given a description, and cost a few minutes. Recorded so the next shift passes one; not worth a change on one occurrence.
 
 ### Blocked
-- **For you:** a one-line change so the weekly job saves the subscriber count (filed as an issue with the patch). Recommend approving: without it the figure is collected and thrown away.
+- **For you:** two one-line changes so the weekly job keeps the subscriber count and the viewer comments, filed as two issues with patches that apply in either order. Recommend approving both: without them, the data is collected and thrown away.
 - Reddit's terms still need a browser read. Whether the narrator question has an answer waits on the 12 October snapshot.
 
 ### Next

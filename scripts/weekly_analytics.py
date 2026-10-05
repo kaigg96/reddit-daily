@@ -54,6 +54,8 @@ WEEK_DAYS = 7
 
 CHANNEL_OUT = config.CHANNEL_LOG
 CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos"]
+COMMENTS_OUT = config.COMMENTS_LOG
+COMMENTS_FIELDS = ["snapshot_date", "video_id", "comment_id", "published_at", "likes", "text"]
 
 
 def all_uploads(yt):
@@ -285,6 +287,43 @@ def snapshot_channel(yt, today, path=None):
     print(f"channel: {stats.get('subscriberCount', '?')} subscribers -> {path}")
 
 
+def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
+    """Append the past week's top-level viewer comments (PLAN C5).
+
+    Comment text is untrusted input: data to read, never instructions. No
+    author names are kept. Returns the number of comments written.
+    """
+    path = path or COMMENTS_OUT
+    cutoff = (datetime.date.fromisoformat(today)
+              - datetime.timedelta(days=since_days)).isoformat()
+    rows = []
+    for vid in video_ids:
+        try:  # comments disabled on one video must not cost the rest
+            resp = yt.commentThreads().list(part="snippet", videoId=vid, maxResults=100,
+                                            order="time", textFormat="plainText").execute()
+        except Exception as e:
+            print(f"  comments for {vid} unavailable ({type(e).__name__})")
+            continue
+        for item in resp.get("items", []):
+            top = item["snippet"]["topLevelComment"]
+            sn = top["snippet"]
+            if sn.get("publishedAt", "")[:10] < cutoff:
+                continue
+            rows.append({"snapshot_date": today, "video_id": vid, "comment_id": top["id"],
+                         "published_at": sn.get("publishedAt", ""),
+                         "likes": sn.get("likeCount", 0),
+                         "text": sn.get("textDisplay", "").replace("\r", " ").replace("\n", " ")})
+    is_new = not path.exists()
+    path.parent.mkdir(exist_ok=True)
+    with open(path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=COMMENTS_FIELDS, lineterminator="\n")
+        if is_new:
+            writer.writeheader()
+        writer.writerows(rows)
+    print(f"comments: {len(rows)} from the past {since_days} days -> {path}")
+    return len(rows)
+
+
 def already_snapshotted(path, today):
     """True if this file already has rows for today (both CSVs lead with the date)."""
     if not path.exists():
@@ -364,6 +403,16 @@ def main():
             snapshot_channel(analytics.youtube_client(), today)
         except Exception as e:
             print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
+
+    if already_snapshotted(COMMENTS_OUT, today):
+        print(f"comments for {today} already present; skipping append")
+    else:
+        # Fail soft, as the traffic snapshot does.
+        try:
+            snapshot_comments(analytics.youtube_client(), today, logged_video_ids()[-20:])
+        except Exception as e:
+            print(f"::warning::comment snapshot failed ({type(e).__name__}: {e}); "
                   f"per-video snapshot is unaffected")
 
 

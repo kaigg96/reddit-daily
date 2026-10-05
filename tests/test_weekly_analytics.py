@@ -141,3 +141,32 @@ def test_hidden_subscriber_count_is_flagged_not_guessed(tmp_path):
     p = tmp_path / "channel.csv"
     wa.snapshot_channel(_FakeYT({"hiddenSubscriberCount": True, "viewCount": "1"}), "2026-10-12", p)
     assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,"
+
+
+class _FakeComments:
+    def __init__(self, items):
+        self.items = items
+
+    def commentThreads(self):
+        return self
+
+    def list(self, **kwargs):
+        return self
+
+    def execute(self):
+        return {"items": self.items}
+
+
+def _thread(cid, when, text):
+    return {"snippet": {"topLevelComment": {"id": cid, "snippet": {
+        "publishedAt": when, "likeCount": 2, "textDisplay": text, "authorDisplayName": "x"}}}}
+
+
+def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
+    p = tmp_path / "comments.csv"
+    yt = _FakeComments([_thread("new", "2026-10-10T01:00:00Z", "great\nvideo"),
+                        _thread("old", "2026-09-01T01:00:00Z", "stale")])
+    assert wa.snapshot_comments(yt, "2026-10-12", ["v1"], p) == 1
+    lines = p.read_text().splitlines()
+    assert lines == [",".join(wa.COMMENTS_FIELDS),
+                     "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]
