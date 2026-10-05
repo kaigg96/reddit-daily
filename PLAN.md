@@ -16,7 +16,7 @@ others (C1).
 |---|---|
 | Revenue | $0 |
 | Costs | Claude subscription, plus about $0.90/month of Polly (AWS budget $3/month; `scripts/money_check.py`) |
-| Path to revenue | Not yet priced (C1) |
+| Path to revenue | Partner Program out of reach at current scale: it needs 1,000 subscribers and 10M Shorts views in 90 days (YouTube's own page, 2026-10-05); the channel's best 90 days at its weekly rate is ~8k–39k, and ~90k in its whole life. Other routes not yet priced (C1) |
 | Product scorecard | `venv/bin/python scripts/report.py --scorecard` |
 
 **Function coverage.** General management updates this at each monthly review.
@@ -24,7 +24,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 | None | Thin | Partial | Strong |
 |---|---|---|---|
-| Strategy, Audience, Monetization, Market intelligence | Distribution, Editorial, Legal | General management, Product management, Finance, Security | Engineering, Reliability, Data |
+| Audience, Monetization, Market intelligence | Strategy, Distribution, Editorial, Legal | General management, Product management, Finance, Security | Engineering, Reliability, Data |
 
 ## 2. This quarter's bets
 
@@ -39,7 +39,8 @@ places.
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C1 | ready | Strategy | **Price the revenue routes** | For each route: views needed, earnings per 1,000 views, eligibility, risk. Shorts pay roughly $0.01–$0.10 per 1,000 views, so the Partner Program at its threshold is about $30–$330 a month. Done when the monthly review can say whether the current path reaches the goal. |
+| C1 | ready | Strategy | **Price the revenue routes** | For each route: views needed, earnings per 1,000 views, eligibility, risk. Partner Program distance done (§1): 250–1,250× short on views. Left: confirm the per-1,000 pay (secondary sources say $0.01–$0.10, so ~$30–$330 a month at the threshold) and price the C8 platforms. Done when the monthly review can say which route, if any, the current path reaches. |
+| C11 | ready | Data | **Collect the subscriber count** | Half of the Partner Program's bar, and no snapshot records it. Add it to the weekly statistics job's output. Done when a snapshot carries it. |
 | C2 | ready | Legal | **What YouTube's reused-content policy means for the current format** | The policy lists "content exclusively features readings of other materials you did not originally create, like text from websites" as not monetizable. Read YouTube's own pages and quote them. Done when the risk is stated and Editorial has the question (C4). |
 | C3 | ready | Legal | **Reddit's terms for monetized use** | Secondary sources say the free API tier is non-commercial and that commercial use needs Reddit's written approval. Confirm from Reddit's own pages. Done when the risk is stated, with a proposed response if one is needed. |
 | C4 | blocked: C2 | Editorial | **Originality: what would make the format ours** | Candidate transformations (commentary, narrative, curation), each one a Product experiment with a decision rule. |
@@ -56,7 +57,7 @@ places.
 |---|---|---|---|
 | The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | High / ends the Partner Program route | C2, C4 |
 | Reddit's terms forbid monetized use of API data | Legal | Unknown / high | C3 |
-| Shorts revenue is too small at any reachable scale | Strategy | High / high | C1 |
+| Shorts revenue is too small at any reachable scale | Strategy | High / high — the Partner Program threshold alone is 250–1,250× today's views (§1) | C1, C9 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | C8 |
 | Loss of the YouTube channel or the Google account | Security | Low / fatal | Quarterly account-security check |
 | A runaway Polly bill | Security, Finance | Low / bounded by the budget action | `money_check.py` every shift; C6 |
@@ -69,6 +70,6 @@ own row when it finishes.
 | Review | Last held |
 |---|---|
 | Weekly | never |
-| Monthly | never |
+| Monthly | 2026-10-05 |
 | Quarterly prep | never |
 | Quarterly planning | never |

@@ -60,6 +60,43 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-05 — Monthly review: at today's views the Partner Program is hundreds of times out of reach
+
+    Worked (% of the shift): strategy 40 · finance 10 · data 15 · reliability 10 · gm 25
+
+**Summary:** This is the first monthly review. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, but the channel has had about 90,000 in its whole life, so its current path cannot reach revenue at this scale. Next month should decide between growing views by orders of magnitude and pricing other ways to earn. Spending is $0.14 so far this month, and every money control is intact.
+
+### Where we stand
+- Revenue is $0. Watch time per view is up slightly over three weeks (12.0 to 12.5 seconds a view). Views per video are down (75 to 65), and the weekly trend is flat.
+- **The distance to revenue, in numbers.** YouTube's own page, read today, sets the bar at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. The channel's lifetime watch time is about 96 hours.
+- We do not record the subscriber count at all, though it is half the bar. Collecting it is now a ready item.
+- **Plainly, the current path does not reach the goal at the current scale.** Nobody knows yet whether another route does. Pricing the other platforms and confirming the pay per view will tell us.
+
+### Money
+- Speech costs are $0.14 so far this month, forecast at $0.96, against the $3 budget. All four controls checked at Amazon are intact. Nothing was priced or proposed this month.
+
+### Risks
+- "Shorts revenue is too small" stays rated high, now with the number attached. The other risks are unchanged, because the legal checks that would move them have not run yet. Every risk has an item answering it.
+
+### Market and policy
+- **Not done this month:** re-reading YouTube's reused-content policy and Reddit's terms, and scanning comparable channels. Each is a queued item that nobody has started yet, and none fit in this shift's 25 minutes. They come first next month: the two legal checks can end the route outright, so they rank above further pricing.
+
+### Proposals for you
+- None separately. The views gap goes into the quarterly planning packet, which is due next.
+
+### Next month
+- **Today's afternoon upload had not landed when this review was written (18:27).** Earlier ones have landed as late as 18:29, so it may simply be slow. The next shift checks it first.
+- Next shift: the weekly review of today's statistics, then quarterly prep built around the views gap.
+- Two of your decisions are still waiting for a shift: shifts ending with time unspent (#46), and automatic landing for approved process changes (#45). Neither was started this shift.
+- **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review. All three have ready items that no shift has picked up yet.
+
+### Better?
+- **Than last shift:** Yes, slightly. For the first time the company knows, in numbers, how far its assumed revenue route is.
+- **Than ~10 shifts ago:** Unclear. Watch time per view is up about 4% over three weeks, but views are flat and no revenue route has moved.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-04 (14:49) — today's release check failed on a tracker slip, now fixed; title length ruled out
 
     Allocation (planned→actual %): rounds 10→10 · maintenance 15→25 · security 5→15 · pm 30→15 · research 30→25 · feature 0→0 · close 10→10
@@ -136,41 +173,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** yes: a live fault fixed the same morning it recurred, and a lead checked down to its likely cause before it could mislead.
 - **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-10-03 (14:21) — the new-subreddit sample video passed, so both 6 October changes are ready
-
-    Allocation (planned→actual %): rounds 10→15 · maintenance 10→5 · security 5→5 · pm 30→25 · research 20→20 · feature 15→20 · close 10→10
-
-**Summary:** A short shift that did the one thing due today: the new-subreddit sample video, which only proves anything after noon on 3 October. It passed, so both changes aimed at views can merge on 6 October.
-
-### Maintenance
-- Both uploads since the last shift landed, the saved last-post record is intact, and today's release check passed.
-- The ageing Python version reaches end of life tomorrow. Nothing breaks then; its upgrade is already scheduled after 12 October.
-
-### Security
-- No credentials in the project and the secret files are still excluded. The library-advisory scan was not rerun (its tool is not installed here); yesterday's stands.
-
-### Project management
-- **Requested the new-subreddit sample video.** The branch needed no update first: the main code has not changed since. Verdict under Feature work.
-- No decisions came due and nothing new is approved. The channel is still flat on watch time; both changes aimed at views are queued for 6 October.
-- **Ready work is now none against a floor of three:** the new subreddit, the last ready item, waits only for 6 October. Besides the Research questions, I set aside avoiding life-advice posts (too few uploads to read) and weekday timing (would not change what we post).
-- **Friction:** the doc check flags yesterday's still-true entry about #44 as stale: it reads past log entries as current claims.
-
-### Research
-- Three new questions, tested on our own data, all came back as noise: no background clip holds viewers measurably longer; one title style looked 18% worse, but the gap reverses between periods; and questions that say "you" hold viewers no longer. Recorded so they are not re-asked.
-
-### Feature work
-- **The new-subreddit sample video passed** (playable, sound, no gaps). It drew the day's top post from the new subreddit, so it tests the real path. It can merge on 6 October after the title change.
-- **The two 6 October changes combine cleanly:** merged together they touch separate parts of the code, and every test passes.
-
-### Blocked
-- Automatic landing for approved process changes is waiting on your decision (#45).
-
-### Next
-- **4 October:** check the morning upload kept its title; today's sample used shared allowance. **5 October:** read the new data (voices within the newest format, the engaged-view column). **6 October:** merge the title change (its sample passed), then the new subreddit (its sample passed today). **About 7 October:** the topic-ranking idea's 20-upload read. **12 October:** read the current experiment, then plan the Python upgrade as its own release.
-
-### Better?
-- **Than last shift:** about the same: today's one job is done; last shift fixed a live fault.
-- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
 - **Than ~100 shifts ago:** too early to say.
