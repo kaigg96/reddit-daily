@@ -327,6 +327,13 @@ def show_weekly_views(args):
     print(f"  {'week':10} {'n':>4} {'total':>8} {'per upload':>11}")
     for period, n, total in series:
         print(f"  {period:10} {n:>4} {total:>8.0f} {total / n:>11.0f}")
+    gained = insights.views_gained(_snapshot_metric_rows("views"))[-13:]
+    if gained:
+        days = sum(d for _, _, d in gained)
+        total = sum(g for _, g, _ in gained)
+        print(f"\n  Channel-wide, every video counted (the Partner Program's measure):"
+              f"\n  {total:.0f} views gained over the last {days} days between snapshots"
+              f" (~{total * 90 / days:.0f} per 90 days)")
     change = insights.totals_change(series)
     if change is None:
         print(f"\n  only {len(series)} complete weeks: 8 are needed to compare 4 with 4")

@@ -602,6 +602,29 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     return out
 
 
+def views_gained(snapshot_rows):
+    """[(snapshot date, views gained since the previous snapshot, days)].
+
+    The Partner Program counts every Shorts view in 90 days, the back
+    catalogue's included, while `weekly_totals` counts only new uploads'
+    first week. This is the channel-wide figure the bar is read against:
+    the rise in the summed views of every video between consecutive
+    snapshots. A video first seen in a snapshot counts in full, since it
+    was published after the one before.
+    """
+    by_snap = {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+    out = []
+    dates = sorted(by_snap)
+    for prev, cur in zip(dates, dates[1:]):
+        before, after = by_snap[prev], by_snap[cur]
+        gained = sum(max(v - before.get(vid, 0), 0) for vid, v in after.items())
+        out.append((cur, gained, (cur - prev).days))
+    return out
+
+
 def totals_change(series, weeks=4):
     """(prior total, recent total, ratio) over the last `weeks` against the
     `weeks` before, or None without enough complete weeks to compare."""

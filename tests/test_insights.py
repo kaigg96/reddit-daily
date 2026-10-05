@@ -1176,6 +1176,17 @@ def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
     assert insights.weekly_totals(rows) == []
 
 
+def test_views_gained_counts_the_back_catalogue_and_new_uploads():
+    """The Partner Program's bar counts every view in the window, so an old
+    video's growth counts, and a video new since the last snapshot counts in
+    full. A dip in a lifetime count (YouTube revises them) subtracts nothing."""
+    rows = [_snap("old", 0, 10, 100), _snap("dip", 0, 10, 50),
+            _snap("old", 0, 17, 130), _snap("dip", 0, 17, 45),
+            _snap("new", 12, 17, 20)]
+    gained = insights.views_gained(rows)
+    assert [(g, d) for _, g, d in gained] == [(50, 7)]
+
+
 def test_totals_change_compares_the_last_four_weeks_with_the_four_before():
     series = [(f"w{i}", 14, t) for i, t in enumerate([100] * 4 + [250] * 4)]
     prior, recent, ratio = insights.totals_change(series)
