@@ -64,7 +64,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): strategy 30 · legal 20 · finance 5 · data 10 · reliability 5 · gm 30
 
-**Summary:** This is the first monthly review, and it found two blocks to revenue. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, while the channel has had about 90,000 in its whole life. And YouTube's own policy refuses to pay for videos that only read out other people's text, which is what we make. Next month should decide how the format becomes ours, and which way to earn.
+**Summary:** The first monthly review found two blocks to revenue. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, while the channel has had about 90,000 in its whole life. And YouTube's own policy refuses to pay for videos that only read out other people's text, which is what we make. Next month should decide how the format becomes ours, and which way to earn.
 
 ### Where we stand
 - Revenue is $0. Over three weeks, watch time per view rose slightly (12.0 to 12.5 seconds) and views per video fell (75 to 65); the trend is flat.
@@ -79,8 +79,8 @@ and more useful than a confident guess.
 - Two risks now carry evidence: revenue too small (the views gap) and an unpayable format (below). Every risk has an answering item.
 
 ### Market and policy
-- **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work.
-- **Reddit's terms could not be read:** its pages refuse automated reads, even archived. Five minutes in a browser would settle whether a paid channel needs Reddit's written approval. Comparable channels: not started.
+- **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work. A second rule refuses videos that look "made with a template", which ours also do.
+- **Reddit's terms could not be read:** its pages refuse automated reads, even archived. A browser read would settle whether a paid channel needs Reddit's approval. Comparable channels: not started.
 
 ### Proposals for you
 - **Apply one patch (#50):** the automatic landing you approved, built and tested, in a file only you may change.
@@ -88,12 +88,12 @@ and more useful than a confident guess.
 ### Next month
 - **Today's afternoon upload had not landed by 18:35**, later than any on record (18:29), and a shift cannot see why. If it never lands, the next shift requests a sample run of the live code to see the error.
 - Next shift: the weekly review, then quarterly prep built on both findings.
-- Both your decisions are closed. Shifts ended early because all their remaining work depended on dates; today's redesign gave them nine items that do not (#46). The other is #50 above.
+- Both your decisions are closed: shifts ended early because their remaining work depended on dates, and the redesign gave them nine items that do not (#46); the other is #50.
 - **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.
 
 ### Better?
 - **Than last shift:** Yes. For the first time the company knows how far its assumed revenue route is, and that the format itself must change before that route can pay.
-- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4%, views are flat, and no revenue route has moved.
+- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4%; views are flat.
 - **Than ~100 shifts ago:** Too early to say.
 
 ---
