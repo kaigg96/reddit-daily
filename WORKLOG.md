@@ -62,13 +62,13 @@ and more useful than a confident guess.
 
 ## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
 
-    Worked (% of the shift): strategy 30 · data 20 · market 10 · editorial 10 · reliability 10 · product 10 · gm 10
+    Worked (% of the shift): strategy 25 · data 20 · market 10 · editorial 10 · engineering 10 · reliability 10 · product 5 · legal 5 · gm 5
 
 **Summary:** The first quarterly packet is with you: three bets for October to December, each with a first step and a rule for judging it. Pricing the other platforms found none within reach either. The nearest, TikTok, is about 8 times short and pays only for videos over a minute, so making the format our own (bet 1) comes before any route.
 
 ### Toward revenue
 - The company now has a drafted plan for the quarter instead of a ranked list: make the format ours, raise weekly views, and price and pilot another platform. It waits on your planning session.
-- The gap is measured properly for the first time, counting every view as YouTube does. It is about 37,000 views per 90 days against a bar of 10 million, so about 270 times short.
+- The gap is measured properly for the first time, counting every view as YouTube does. It is 32,000 to 37,000 views per 90 days against a bar of 10 million, about 300 times short. We have 21 subscribers against the 1,000 needed, 48 times short, so views are the half that binds.
 - The "You…" title style, which earned 47% more views, is merged and starts with tomorrow morning's upload.
 
 ### Done
@@ -76,14 +76,17 @@ and more useful than a confident guess.
 - **Strategy:** priced the other routes from creator guides, because the platforms' own pages refuse automated reads. TikTok needs 10,000 followers and 100,000 views a month (about 8 times short), and pays only for original videos over one minute. Facebook is invite-only and about 160 times short. Instagram pays no reliable rate.
 - **Market:** scanned eight comparable channels; this function's first work. Every large one has a human voice or face and gives a verdict. The text-to-speech ones stay small even when they post 9 times a day. That suggests AI commentary may not be enough for bet 1, and I have asked you whether a human voice is ever part of the show.
 - **Editorial:** drafted the second format candidate, a host storyline: a setup line before the answers and a verdict line after them, with the length held. Curation is folded into it, because picking other people's text is still a reading. You can now choose between the candidates.
-- **Data:** the report tool now gives total weekly views and the channel-wide views the bar counts. Both are needed to judge bet 2.
+- **Data:** the report tool now gives total weekly views and the channel-wide views the bar counts. Both are needed to judge bet 2. I fixed bet 2's starting point now, before new data arrives: 8,300 views over September's last four weeks, so doubling means 16,600.
 - **Data:** found that watch time rises with length up to about 31 seconds, and nothing longer has ever been measured. So any TikTok route needs a one-minute test on YouTube first.
 - **Data:** tested my own proposal to run tests on alternating days, and it failed. Split by alternate days, uploads differ as much as consecutive batches do (12% against 13%), so it would not sharpen our tests. I withdrew it on your issue before you spent time on it.
+- **Engineering:** checked whether 3 to 4 uploads a day fits the AI service's free daily cap, which bet 2 needs. It fits: 80 of 84 runs used 2 requests, so 4 a day comes to about 16 of the 20. A free setting covers the rare worst case, to be applied when volume ships.
+- **Legal:** Reddit's own pages still refuse automated reads, but the guides agree that using its content in a monetized product needs Reddit's written approval. I raised that risk from unknown to likely. Asking Reddit comes before any application for payment.
 - **Product:** merged the title-style weighting. Its sample run passed, and no upload runs between now and midnight, so the effect is the same as merging on the 6th.
 - **Reliability:** your approval of the viewer-comments change never landed. The job that applies it was cancelled in GitHub's outage before it ran. I have asked you to re-run it. The tool that lists your decisions now flags any approval that never landed. This was a fix.
 - **Security:** standing check clean. No credentials are in the project, the secret files are still excluded, no workflow changed this shift, and the Amazon spending controls are intact ($0.15 this month).
 - **General management:** brought both trackers back under their reading budgets and retired five finished items. The process-health check raised "shifts end with most of their time unspent" again. I filed it with context: the last three short shifts include the monthly and weekly reviews.
 - Fixing against improving: mostly improving. The fixes were the lost approval, the gap figure and the tracker trims.
+- **Friction:** I re-ran a check that the newer Python version works, which the code-health log already recorded on 30 September, because I read only part of that entry. It cost about six minutes and taught nothing new. It was my mistake, not a process gap.
 
 ### Blocked
 - **For you:** the quarterly planning session, one re-run of the comments job, landing the auto-apply extension by hand (a shift cannot), and the browser read of TikTok's, Meta's and Reddit's terms (bet 3's first step).
@@ -91,7 +94,7 @@ and more useful than a confident guess.
 
 ### Next
 - Check that tomorrow's morning upload landed with a title. Then merge subreddit rotation, which passed its sample run.
-- Then the one ready item: work out how 3 to 4 uploads a day fits inside the AI service's daily cap, which bet 2's volume step needs.
+- No work is ready: everything waits on your session or on 12 October. Generating more considered a single-story format test and a one-minute test (both wait on your bet choices), a faster testing method (refuted tonight), and the Python upgrade (scheduled after the 12 October read). Until your session, the next shift's best use is the rotation merge above, then the 12 October reads.
 - On 12 October: judge the "open on the question" change under its rule, and read the narrator and topic questions.
 
 ### Better?
