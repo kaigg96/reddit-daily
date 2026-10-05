@@ -60,6 +60,45 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
+
+    Worked (% of the shift): strategy 30 · data 20 · market 10 · editorial 10 · reliability 10 · product 10 · gm 10
+
+**Summary:** The first quarterly packet is with you: three bets for October to December, each with a first step and a rule for judging it. Pricing the other platforms found none within reach either. The nearest, TikTok, is about 8 times short and pays only for videos over a minute, so making the format our own (bet 1) comes before any route.
+
+### Toward revenue
+- The company now has a drafted plan for the quarter instead of a ranked list: make the format ours, raise weekly views, and price and pilot another platform. It waits on your planning session.
+- The gap is measured properly for the first time, counting every view as YouTube does. It is about 37,000 views per 90 days against a bar of 10 million, so about 270 times short.
+- The "You…" title style, which earned 47% more views, is merged and starts with tomorrow morning's upload.
+
+### Done
+- **Strategy:** drafted the three bets and sent them to you as one issue, asking you to hold the planning session. Bet 1: add commentary or a storyline of our own, without which YouTube will not pay. Bet 2: double weekly views. Bet 3: price the other platforms and pilot the best one.
+- **Strategy:** priced the other routes from creator guides, because the platforms' own pages refuse automated reads. TikTok needs 10,000 followers and 100,000 views a month (about 8 times short), and pays only for original videos over one minute. Facebook is invite-only and about 160 times short. Instagram pays no reliable rate.
+- **Market:** scanned eight comparable channels; this function's first work. Every large one has a human voice or face and gives a verdict. The text-to-speech ones stay small even when they post 9 times a day. That suggests AI commentary may not be enough for bet 1, and I have asked you whether a human voice is ever part of the show.
+- **Editorial:** drafted the second format candidate, a host storyline: a setup line before the answers and a verdict line after them, with the length held. Curation is folded into it, because picking other people's text is still a reading. You can now choose between the candidates.
+- **Data:** the report tool now gives total weekly views and the channel-wide views the bar counts. Both are needed to judge bet 2.
+- **Data:** found that watch time rises with length up to about 31 seconds, and nothing longer has ever been measured. So any TikTok route needs a one-minute test on YouTube first.
+- **Data:** tested my own proposal to run tests on alternating days, and it failed. Split by alternate days, uploads differ as much as consecutive batches do (12% against 13%), so it would not sharpen our tests. I withdrew it on your issue before you spent time on it.
+- **Product:** merged the title-style weighting. Its sample run passed, and no upload runs between now and midnight, so the effect is the same as merging on the 6th.
+- **Reliability:** your approval of the viewer-comments change never landed. The job that applies it was cancelled in GitHub's outage before it ran. I have asked you to re-run it. The tool that lists your decisions now flags any approval that never landed. This was a fix.
+- **Security:** standing check clean. No credentials are in the project, the secret files are still excluded, no workflow changed this shift, and the Amazon spending controls are intact ($0.15 this month).
+- **General management:** brought both trackers back under their reading budgets and retired five finished items. The process-health check raised "shifts end with most of their time unspent" again. I filed it with context: the last three short shifts include the monthly and weekly reviews.
+- Fixing against improving: mostly improving. The fixes were the lost approval, the gap figure and the tracker trims.
+
+### Blocked
+- **For you:** the quarterly planning session, one re-run of the comments job, landing the auto-apply extension by hand (a shift cannot), and the browser read of TikTok's, Meta's and Reddit's terms (bet 3's first step).
+- The first format test cannot start before you approve bet 1. The format and narrator reads wait on the 12 October snapshot.
+
+### Next
+- Check that tomorrow's morning upload landed with a title. Then merge subreddit rotation, which passed its sample run.
+- Then the one ready item: work out how 3 to 4 uploads a day fits inside the AI service's daily cap, which bet 2's volume step needs.
+- On 12 October: judge the "open on the question" change under its rule, and read the narrator and topic questions.
+
+### Better?
+- **Than last shift:** Yes. The quarter has a drafted plan, the gap is measured correctly, and one change aimed at views is live from tomorrow.
+- **Than ~10 shifts ago:** Somewhat. We now know what blocks revenue: the format and the scale. We did not know that two weeks ago. Watch time per view is flat, and views per upload fell by about 40% over September, which is still within normal swings.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-05 (21:15) — the evening upload was lost to a GitHub outage, not a fault
 
 **Summary:** This evening's scheduled upload was created eight hours late and then cancelled before it started, during GitHub's "Incident with Actions" (runner assignment failing, from 19:11 UTC). No code ran and nothing was uploaded, so there is nothing to diagnose and no sample run is needed.
@@ -103,43 +142,3 @@ and more useful than a confident guess.
 - **Than last shift:** Slightly. A first format candidate now targets YouTube's payment rule, and half of its bar is measured. Views have not moved.
 - **Than ~10 shifts ago:** Unclear: watch time per view is up about 4% and views are flat.
 - **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-05 — Monthly review: at today's views the Partner Program is hundreds of times out of reach
-
-    Worked (% of the shift): strategy 30 · legal 20 · finance 5 · data 10 · reliability 5 · gm 30
-
-**Summary:** The first monthly review found two blocks to revenue. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, while the channel has had about 90,000 in its whole life. And YouTube's own policy refuses to pay for videos that only read out other people's text, which is what we make. Next month should decide how the format becomes ours, and which way to earn.
-
-### Where we stand
-- Revenue is $0. Over three weeks, watch time per view rose slightly (12.0 to 12.5 seconds) and views per video fell (75 to 65); the trend is flat.
-- **YouTube's own page, read today, sets the bar** at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. Lifetime watch time: about 96 hours.
-- We do not record subscribers, half the bar; collecting them is now queued.
-- **Plainly, the current path does not reach the goal.** Pricing the other platforms will show whether another route does.
-
-### Money
-- Speech costs: $0.14 this month, forecast $0.96, against the $3 budget; all four controls intact. Nothing was priced or proposed.
-
-### Risks
-- Two risks now carry evidence: revenue too small (the views gap) and an unpayable format (below). Every risk has an answering item, and the standing security check was clean.
-
-### Market and policy
-- **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work. A second rule refuses videos that look "made with a template", which ours also do.
-- **Reddit's terms could not be read:** its pages refuse automated reads, even archived. A browser read would settle whether a paid channel needs Reddit's approval. Comparable channels: not started.
-
-### Proposals for you
-- **Apply one patch (#50):** the automatic landing you approved, built and tested, in a file only you may change.
-
-### Next month
-- **Today's afternoon upload had not landed by 18:38**, later than any on record (18:29), and a shift cannot see why. If it never lands, the next shift requests a sample run of the live code to see the error.
-- Next shift: the weekly review, then quarterly prep built on both findings.
-- Both your decisions are closed: shifts ended early because their remaining work depended on dates, and the redesign gave them nine items that do not (#46); the other is #50.
-- **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.
-
-### Better?
-- **Than last shift:** Yes. For the first time the company knows how far its assumed revenue route is, and that the format itself must change before that route can pay.
-- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4%; views are flat.
-- **Than ~100 shifts ago:** Too early to say.
-
----
