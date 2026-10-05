@@ -24,3 +24,4 @@ timestamp_utc,run_id,model,effort,turns,duration_min,quota_units,is_error
 2026-10-04T15:10:59+00:00,37210623249,claude-opus-5-5,ultracode,106,21.3,4.6488,0
 2026-10-05T18:39:52+00:00,37355395724,claude-opus-5-5,ultracode,145,15.5,4.2776,0
 2026-10-05T18:57:42+00:00,37356572532,claude-opus-5-5,ultracode,82,16.5,3.3614,0
+2026-10-05T22:52:15+00:00,37380829313,claude-opus-5-5,ultracode,164,40.0,10.1168,0
