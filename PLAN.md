@@ -56,7 +56,7 @@ places.
 | Risk | Function | Likelihood / impact | Response |
 |---|---|---|---|
 | The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | **Confirmed** from YouTube's page (2026-10-05): "Content exclusively features readings of other materials you did not originally create, like text from websites" is not monetizable, and "applies to your channel as a whole". Today's format is exactly that. A second rule, generic or repetitive content, refuses content "that looks like it's made with a template" and "AI-generated content made with generic or unoriginal templates" / ends the Partner Program route | Bet 1 (PRD #7, #12) |
-| Reddit's terms forbid monetized use of API data | Legal | Unknown / high | C3 |
+| Reddit's terms forbid monetized use of API data | Legal | **Likely** / high: secondary sources agree (2026-10-05) that use "as part of a monetized product or service" needs Reddit's express written approval and a contract. We read Reddit through its authenticated API, so this applies before any payout. Reddit's own pages still refuse a shift's reads | C3; ask Reddit before any monetization application |
 | Shorts revenue is too small at any reachable scale | Strategy | High / high — the Partner Program threshold alone is 250–1,250× today's views, and no other route is nearer (§1) | Bets 2 and 3 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | C8 |
 | Loss of the YouTube channel or the Google account | Security | Low / fatal | Quarterly account-security check |
