@@ -77,8 +77,8 @@ def main():
     # exactly why the outcome has to be logged. Title fallbacks ran at ~25% for
     # two weeks in Sept 2026 and were only discoverable by comparing the shipped
     # title back to the Reddit question (PRD §2, TECH_DEBT 2026-09-19).
-    # R2.2: rotate title style by day so both daily uploads share it; logged per upload
-    title_style = "ABC"[datetime.date.today().timetuple().tm_yday % 3]
+    # R2.2: one title style per day so both daily uploads share it; logged per upload
+    title_style = llm.title_style_for(datetime.date.today())
 
     # One request for all three fields. Each fails soft independently, so a
     # missing CTA doesn't cost us the title -- see llm.get_metadata.
