@@ -41,9 +41,8 @@ places.
 |---|---|---|---|---|
 | C1 | ready | Strategy | **Price the revenue routes** | For each route: views needed, earnings per 1,000 views, eligibility, risk. Partner Program distance done (§1): 250–1,250× short on views. Left: confirm the per-1,000 pay (secondary sources say $0.01–$0.10, so ~$30–$330 a month at the threshold) and price the C8 platforms. Done when the monthly review can say which route, if any, the current path reaches. |
 | C11 | ready | Data | **Collect the subscriber count** | Half of the Partner Program's bar, and no snapshot records it. Add it to the weekly statistics job's output. Done when a snapshot carries it. |
-| C2 | ready | Legal | **What YouTube's reused-content policy means for the current format** | The policy lists "content exclusively features readings of other materials you did not originally create, like text from websites" as not monetizable. Read YouTube's own pages and quote them. Done when the risk is stated and Editorial has the question (C4). |
 | C3 | ready | Legal | **Reddit's terms for monetized use** | Secondary sources say the free API tier is non-commercial and that commercial use needs Reddit's written approval. Confirm from Reddit's own pages. Done when the risk is stated, with a proposed response if one is needed. |
-| C4 | blocked: C2 | Editorial | **Originality: what would make the format ours** | Candidate transformations (commentary, narrative, curation), each one a Product experiment with a decision rule. |
+| C4 | ready | Editorial | **Originality: what would make the format ours** | YouTube's page lists what it monetizes: "a critical review", "reaction videos where you comment", "a storyline and commentary", or content where "the creator is either visible in the content or explains how the creator added to the content". Turn the candidates (commentary, narrative, curation) into Product experiments with decision rules. Done when one is in PRD §0. |
 | C5 | ready | Audience | **Collect viewer comments into the repo** | The weekly analytics job already holds the YouTube keys, so it saves recent comments. That is a workflow change, so Propose. Done when a shift can read last week's comments. |
 | C6 | ready | Security | **Branch code never holds the Polly keys** | See `TECH_DEBT.md` (dry runs). Real narration is made by `main`'s code in its own job, or branch renders use only the free sample mode. A workflow change, so Propose. |
 | C7 | ready | Market intelligence | **Scan comparable channels** | 5–10 Reddit-story or AskReddit Shorts channels: format, cadence, views, monetization signals. Done when there is at least one hypothesis with a test, or the finding that nothing transfers. |
@@ -55,7 +54,7 @@ places.
 
 | Risk | Function | Likelihood / impact | Response |
 |---|---|---|---|
-| The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | High / ends the Partner Program route | C2, C4 |
+| The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | **Confirmed** from YouTube's page (2026-10-05): "Content exclusively features readings of other materials you did not originally create, like text from websites" is not monetizable, and "applies to your channel as a whole". Today's format is exactly that / ends the Partner Program route | C4 |
 | Reddit's terms forbid monetized use of API data | Legal | Unknown / high | C3 |
 | Shorts revenue is too small at any reachable scale | Strategy | High / high — the Partner Program threshold alone is 250–1,250× today's views (§1) | C1, C9 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | C8 |

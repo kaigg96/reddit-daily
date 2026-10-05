@@ -62,36 +62,37 @@ and more useful than a confident guess.
 
 ## 2026-10-05 — Monthly review: at today's views the Partner Program is hundreds of times out of reach
 
-    Worked (% of the shift): strategy 40 · finance 10 · data 15 · reliability 10 · gm 25
+    Worked (% of the shift): strategy 30 · legal 20 · finance 5 · data 10 · reliability 5 · gm 30
 
-**Summary:** This is the first monthly review. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, but the channel has had about 90,000 in its whole life, so its current path cannot reach revenue at this scale. Next month should decide between growing views by orders of magnitude and pricing other ways to earn. Spending is $0.14 so far this month, and every money control is intact.
+**Summary:** This is the first monthly review, and it found two blocks to revenue. YouTube's ad-revenue programme needs 10 million Shorts views in 90 days, while the channel has had about 90,000 in its whole life. And YouTube's own policy refuses to pay for videos that only read out other people's text, which is what we make. Next month should decide how the format becomes ours, and which way to earn.
 
 ### Where we stand
 - Revenue is $0. Watch time per view is up slightly over three weeks (12.0 to 12.5 seconds a view). Views per video are down (75 to 65), and the weekly trend is flat.
 - **The distance to revenue, in numbers.** YouTube's own page, read today, sets the bar at 1,000 subscribers plus either 10 million Shorts views in 90 days or 4,000 watch hours in a year. Our weeks run from about 600 to 3,000 views, which is 8,000 to 39,000 per 90 days, or 250 to 1,250 times short. The channel's lifetime watch time is about 96 hours.
-- We do not record the subscriber count at all, though it is half the bar. Collecting it is now a ready item.
-- **Plainly, the current path does not reach the goal at the current scale.** Nobody knows yet whether another route does. Pricing the other platforms and confirming the pay per view will tell us.
+- We do not record the subscriber count, though it is half the bar. Collecting it is now queued.
+- **Plainly, the current path does not reach the goal.** Pricing the other platforms will show whether another route does.
 
 ### Money
 - Speech costs are $0.14 so far this month, forecast at $0.96, against the $3 budget. All four controls checked at Amazon are intact. Nothing was priced or proposed this month.
 
 ### Risks
-- "Shorts revenue is too small" stays rated high, now with the number attached. The other risks are unchanged, because the legal checks that would move them have not run yet. Every risk has an item answering it.
+- Two risks now carry evidence: revenue too small at our scale (the views gap), and an unpayable format (confirmed below). Every risk has an item answering it.
 
 ### Market and policy
-- **Not done this month:** re-reading YouTube's reused-content policy and Reddit's terms, and scanning comparable channels. Each is a queued item that nobody has started yet, and none fit in this shift's 25 minutes. They come first next month: the two legal checks can end the route outright, so they rank above further pricing.
+- **YouTube's reused-content policy, read today on its own page, rules out today's format.** It will not pay for content that "exclusively features readings of other materials you did not originally create, like text from websites", and it judges the whole channel. It does pay for commentary, reactions, an added storyline, or a visible creator, so making the format our own is now ready work.
+- Not done: Reddit's terms and a scan of comparable channels. Nobody has started either.
 
 ### Proposals for you
-- None separately. The views gap goes into the quarterly planning packet, which is due next.
+- **Apply one patch (#50).** Automatic landing for approved rule changes, which you approved, is built and tested. It touches a file only you may change.
 
 ### Next month
 - **Today's afternoon upload had not landed when this review was written (18:27).** Earlier ones have landed as late as 18:29, so it may simply be slow. The next shift checks it first.
 - Next shift: the weekly review of today's statistics, then quarterly prep built around the views gap.
-- Two of your decisions are still waiting for a shift: shifts ending with time unspent (#46), and automatic landing for approved process changes (#45). Neither was started this shift.
-- **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review. All three have ready items that no shift has picked up yet.
+- Your two decisions are done and closed. Shifts ended early because their only work was waiting on dates, and today's redesign gave them nine items that do not (#46). The other is #50 above.
+- **Finding:** Audience, Monetization and Market intelligence still have no work done after their first monthly review, despite having ready items.
 
 ### Better?
-- **Than last shift:** Yes, slightly. For the first time the company knows, in numbers, how far its assumed revenue route is.
+- **Than last shift:** Yes. For the first time the company knows how far its assumed revenue route is, and that the format itself must change before that route can pay.
 - **Than ~10 shifts ago:** Unclear. Watch time per view is up about 4% over three weeks, but views are flat and no revenue route has moved.
 - **Than ~100 shifts ago:** Too early to say.
 
