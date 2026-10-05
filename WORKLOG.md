@@ -71,7 +71,7 @@ and more useful than a confident guess.
 
 ### Done
 - **Reliability:** This afternoon's upload had not landed by 18:43, but that is not unprecedented: 28 September's landed at 19:46. GitHub also started every scheduled job seven to nine hours late today, so it should land around 21:00. I did not request a sample run, because it would use the AI quota the late upload still needs.
-- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month.
+- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month. The security check was clean: no credentials in the project, the secret files are still excluded, and no automated job changed.
 - **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). That answered one research question (below) and closes an old code-health item. The experiment that reads it needs a week more: the two releases it compares share no common age until the 12 October snapshot.
 - **Data:** Answered: older statistics do not hold the "past the opening" figure, so it can only be read from now on.
 - **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
