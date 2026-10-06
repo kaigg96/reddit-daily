@@ -85,7 +85,7 @@ and more useful than a confident guess.
 - **Friction:** the merge could not be tested until 10:51, because last night's 22:51 check of the live code used the one automatic render allowed per 12 hours. An evening render on code the next morning's upload will exercise anyway costs the next shift its merge.
 
 ### Blocked
-- **For you:** the quarterly planning session (#55). It is now the main thing holding the queue: nearly every item waits on it, on your browser read for bet 3, or on the 12 October statistics. Also one re-run of the comments change (#53), and the security change above (I recommend approving).
+- **For you:** the quarterly planning session (#55). It is now the main thing holding the queue: nearly every item waits on it, on your browser read for bet 3, or on the 12 October statistics. Also one re-run of the comments change (#53), and the security change above (#58; I recommend approving).
 
 ### Next
 - Check that this evening's upload lands, and that the first NoStupidQuestions upload (7 October, evening) lands with a title.

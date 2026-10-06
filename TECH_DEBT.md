@@ -272,7 +272,7 @@ a list nobody can read is the same as no list.
   code picks the artifact's files, and downloading into `.github` can
   overwrite tracked files (at worst breaking the rebase-push), so download to
   `$RUNNER_TEMP` and copy the one expected file. Both edits made on the
-  branch and escalated as one patch, 2026-10-06 (key
+  branch and escalated as one patch, #58, 2026-10-06 (key
   `branch-code-write-token-split`); main's 337 tests pass with it applied.
   **Same root, money side (2026-10-05) — closed 2026-10-05 by PLAN C6:** branch
   renders narrate silently and only `main` gets the Polly keys. History: `dry-run.yml` also hands the
