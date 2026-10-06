@@ -67,9 +67,9 @@ and more useful than a confident guess.
 **Summary:** Two facts changed the company's picture; both are with you, with recommendations. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
 
 ### Toward revenue
-- Nothing moved revenue directly; this shift corrected the map the quarter's bets will be set on.
+- Nothing moved revenue directly; this shift corrected the map the bets rest on.
 - **The gap is wider than we thought.** YouTube counts a view whenever a Short starts playing, but the 10-million bar counts only "engaged" views, and only 36% of ours are, so we earn about 11,000 to 13,000 of the views that count per 90 days, roughly 800 times short. I recommended on the planning issue that bet 2 ("double weekly views") be measured in engaged views, so a change that wins only swipe-past plays cannot pass it.
-- **Reddit's terms are now first-hand.** Earning from Reddit content needs "express written approval from Reddit" and "a separate agreement". Its newer terms (September 2024) go further: any use "by or on behalf of a business" needs written approval, paid or not. The licence to posts covers showing them inside our own app, unmodified. Republishing them as YouTube videos sits outside a plain reading, paid or not. I recommend asking Reddit now, before the quarter is committed to this format; the answer decides whether any of the three bets has a future. Nothing changes in production meanwhile. If Reddit says no, Stack Exchange is a fallback: its users' posts are licensed for reuse, commercial use included, with credit and the same licence passed on (its terms, updated November 2025).
+- **Reddit's terms are now first-hand.** Earning from Reddit content needs "express written approval from Reddit" and "a separate agreement". Its newer terms (September 2024) go further: any use "by or on behalf of a business" needs written approval, paid or not. The licence to posts covers showing them inside our own app, unmodified. Republishing them as YouTube videos sits outside a plain reading. I recommend asking Reddit now, before the quarter is committed to this format; the answer decides whether any of the three bets has a future. Nothing changes in production meanwhile. If Reddit says no, Stack Exchange is a fallback: its users' posts are licensed for reuse, commercial use included, with credit and the same licence passed on (its terms, updated November 2025).
 - **TikTok's own page adds a rule:** the account must be based in one of eight countries (US, UK, Germany, Japan, South Korea, France, Mexico, Brazil). If you are not, bet 3's TikTok pilot is closed.
 
 ### Done
@@ -84,7 +84,7 @@ and more useful than a confident guess.
 - **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
 
 ### Blocked
-- **For you:** whether to ask Reddit for an agreement (#60, new); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
+- **For you:** whether to ask Reddit for an agreement (#60, new; a ready-to-send draft is on it); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
 
 ### Next
 - Check that tonight's upload landed (it had not started by 17:30, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
