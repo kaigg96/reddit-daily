@@ -1486,3 +1486,22 @@ def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     assert (c.n, c.zero_view_count) == (2, 1)
     assert abs(c.median - 0.4) < 1e-9
     assert _ins.summarize(vids, "all", _ins.Metric.VIEWS, t).n == 3
+
+
+def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    csv_path = tmp_path / "snap.csv"
+    csv_path.write_text(
+        "snapshot_date,video_id,published_at,views,engaged_views\n"
+        "2026-09-28,a,2026-09-21T12:00:00Z,100,\n"      # before the column
+        "2026-10-05,a,2026-09-21T12:00:00Z,120,40\n"
+        "2026-10-05,b,2026-09-29T12:00:00Z,0,0\n")      # a real zero stays
+    engaged = report._snapshot_metric_rows("engaged_views", path=str(csv_path))
+    assert [(r["video_id"], r["value"]) for r in engaged] == [("a", 40.0), ("b", 0.0)]
+    views = report._snapshot_metric_rows("views", path=str(csv_path))
+    assert len(views) == 3

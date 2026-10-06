@@ -153,13 +153,17 @@ def release(version, key, target_age, min_uploads=insights.MIN_COHORT):
 
 
 
-def _snapshot_metric_rows(metric_col="avg_view_duration_s"):
-    """Weekly-snapshot rows shaped for insights.trajectory."""
+def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):
+    """Weekly-snapshot rows shaped for insights.trajectory.
+
+    A blank engaged_views means the snapshot predates the column (2026-10-05)
+    or the API did not report it: the row is skipped, never read as zero, so
+    a week read before the column is incomplete rather than reported low."""
     import csv as _csv
     import datetime as _dt
     import os as _os
     root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-    path = _os.path.join(root, "analysis", "analytics_snapshots.csv")
+    path = path or _os.path.join(root, "analysis", "analytics_snapshots.csv")
     out = []
     try:
         with open(path, encoding="utf-8", errors="ignore") as f:
@@ -169,6 +173,8 @@ def _snapshot_metric_rows(metric_col="avg_view_duration_s"):
                         (r.get("published_at") or "").replace("Z", "+00:00"))
                     snap = _dt.datetime.fromisoformat(
                         (r.get("snapshot_date") or "") + "T00:00:00+00:00")
+                    if metric_col == Metric.ENGAGED_VIEWS and not r.get(metric_col):
+                        continue
                     val = float(r.get(metric_col) or 0)
                 except (ValueError, TypeError):
                     continue
@@ -289,10 +295,10 @@ def show_scorecard(args):
 
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
-    if args.metric == Metric.VIEWS:
+    if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
     if args.metric != Metric.WATCH:
-        print(f"--trajectory reads watch-seconds or views, not {args.metric}")
+        print(f"--trajectory reads watch-seconds, views or engaged_views, not {args.metric}")
         return
     rows = _snapshot_metric_rows()
     series = insights.trajectory(rows, at_age=args.at_age or 7)
@@ -316,24 +322,28 @@ def show_trajectory(args):
 
 
 def show_weekly_views(args):
-    """`--trajectory --metric views`: total weekly views, bet 2's measure."""
+    """`--trajectory --metric views`: total weekly views, bet 2's measure.
+    `--metric engaged_views` reads the same totals in the bar's own unit."""
     age = args.at_age or 7
-    series = insights.weekly_totals(_snapshot_metric_rows("views"), at_age=age)
+    col = args.metric
+    series = insights.weekly_totals(_snapshot_metric_rows(col), at_age=age)
     if not series:
         print("no publish week is fully read yet")
         return
-    print(f"Total views per publish week, every upload read at ~{age} days old")
+    print(f"Total {col} per publish week, every upload read at ~{age} days old")
     print("(complete weeks only: the newest are still filling in)\n")
     print(f"  {'week':10} {'n':>4} {'total':>8} {'per upload':>11}")
     for period, n, total in series:
         print(f"  {period:10} {n:>4} {total:>8.0f} {total / n:>11.0f}")
-    gained = insights.views_gained(_snapshot_metric_rows("views"))[-13:]
+    gained = insights.views_gained(_snapshot_metric_rows(col))[-13:]
     if gained:
         days = sum(d for _, _, d in gained)
         total = sum(g for _, g, _ in gained)
-        print(f"\n  Channel-wide, every video counted, in play starts (the Partner Program"
-              f"\n  counts only the engaged share of these: --engaged-share):"
-              f"\n  {total:.0f} views gained over the last {days} days between snapshots"
+        unit = ("in engaged views, the Partner Program's unit:" if col == Metric.ENGAGED_VIEWS
+                else "in play starts (the Partner Program\n  counts only the engaged share of "
+                     "these: --engaged-share):")
+        print(f"\n  Channel-wide, every video counted, {unit}"
+              f"\n  {total:.0f} {col} gained over the last {days} days between snapshots"
               f" (~{total * 90 / days:.0f} per 90 days)")
     change = insights.totals_change(series)
     if change is None:
