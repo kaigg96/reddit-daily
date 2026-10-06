@@ -779,6 +779,33 @@ def hit_rates(videos, key, top=0.10):
     return rows, cut
 
 
+def buried_vs_rest(groups, min_n=MIN_COHORT):
+    """[(label, hits, n, p)]: each group's buried rate (<= BURIED_VIEWS)
+    against every other group pooled, Mantel-Haenszel within formats so an
+    era mix cannot pass for an effect (#11's clip read uneven across releases).
+    Groups under `min_n` and "(unset)" are skipped; `p` is uncorrected, so a
+    reader of k rows compares it with 0.05 / k (PRD §0 #11). A group that
+    clears that bar is left out of every other group's "rest" on a second
+    pass: the retired clip's 9 buried of 18 would otherwise raise the baseline
+    and hide a second bad clip behind it."""
+    def tests(exclude):
+        rows = []
+        for label, vids in groups.items():
+            if label == "(unset)" or len(vids) < min_n:
+                continue
+            rest = [v for other, vs in groups.items()
+                    if other not in (label, "(unset)") and other not in exclude for v in vs]
+            if not rest:
+                continue
+            hits = sum(v.views <= BURIED_VIEWS for v in vids)
+            rows.append((label, hits, len(vids), buried_rate_p_pooled(buried_strata(vids, rest))))
+        return sorted(rows, key=lambda r: r[3])
+
+    first = tests(exclude=())
+    flagged = {label for label, _, _, p in first if p < 0.05 / len(first)}
+    return tests(exclude=flagged) if flagged else first
+
+
 def totals_change(series, weeks=4):
     """(prior total, recent total, ratio) over the last `weeks` against the
     `weeks` before, or None without enough complete weeks to compare."""

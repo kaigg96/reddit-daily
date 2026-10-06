@@ -1432,6 +1432,34 @@ def test_buried_strata_pairs_only_shared_values():
     assert insights.buried_strata(a, b) == [(1, 2, 0, 1), (1, 1, 1, 2)]
 
 
+def test_buried_vs_rest_tests_each_group_against_the_others_pooled():
+    """#11's rule: a clip whose uploads are buried far more often than every
+    other clip's, within the same format, ranks first with a small p."""
+    def v(views, fmt="v5"):
+        return Video("x", datetime.datetime(2026, 9, 1), views=views,
+                     meta={"format_version": fmt})
+    groups = {"bad.mp4": [v(1)] * 8 + [v(90)] * 8,
+              "ok1.mp4": [v(1)] + [v(90)] * 29,     # the real retirement: 8/16 vs 3/62
+              "ok2.mp4": [v(2)] * 2 + [v(90)] * 30,
+              "thin.mp4": [v(90)] * 3,
+              "(unset)": [v(0)] * 20}
+    rows = insights.buried_vs_rest(groups)
+    assert [r[0] for r in rows][0] == "bad.mp4"
+    assert {r[0] for r in rows} == {"bad.mp4", "ok1.mp4", "ok2.mp4"}  # thin and unset skipped
+    label, hits, n, p = rows[0]
+    assert (hits, n) == (8, 16) and p < 0.05 / len(rows)
+    assert rows[-1][3] > 0.05
+    # A second bad group is not hidden by the first one raising "the rest".
+    groups["bad2.mp4"] = [v(1)] * 5 + [v(90)] * 11      # p=0.17 with bad.mp4 in its rest
+    flagged = [r[0] for r in insights.buried_vs_rest(groups) if r[3] < 0.05 / 4]
+    assert flagged == ["bad.mp4", "bad2.mp4"]
+    # A gap that is only an era mix is not one: same rates within each format.
+    era = {"a": [v(1, "v4")] * 10 + [v(90, "v5")] * 6,
+           "b": [v(1, "v4")] * 2 + [v(90, "v5")] * 14}
+    assert insights.buried_rate_p(10, 16, 2, 16) < 0.05   # pooled naively, it would flag
+    assert all(p > 0.05 for *_, p in insights.buried_vs_rest(era))
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),

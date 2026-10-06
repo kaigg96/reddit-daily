@@ -72,6 +72,13 @@ def by_dimension(videos, key, metric, now):
         if len(strata) > 1:
             print(f"  pooled within each of {len(strata)} formats (Mantel-Haenszel): "
                   f"p={insights.buried_rate_p_pooled(strata):.3f}")
+    elif len(pair) > 2:
+        tests = insights.buried_vs_rest(groups)
+        if tests:
+            print(f"\n  <={insights.BURIED_VIEWS} views, each group (n>={insights.MIN_COHORT}) vs the rest, "
+                  f"pooled within formats: {len(tests)} tests, so only p < {0.05 / len(tests):.4f} counts")
+            for label, hits, n, p in tests:
+                print(f"    {label:24} {hits:>3}/{n:<4} p={p:.3f}")
 
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]
