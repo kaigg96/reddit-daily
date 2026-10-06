@@ -71,16 +71,17 @@ and more useful than a confident guess.
 - The views bar is now sharper. About 90% of our views arrive in a video's first week, so old videos do not keep earning. At four uploads a day, YouTube's bar needs about 28,000 first-week views per video. We average 186.
 
 ### Done
-- **Reliability:** this morning's upload landed with an AI-written title, in the newly favoured "You…" style. The subscriber-count change you approved landed overnight. Its first reading comes on 12 October.
+- **Reliability:** this morning's upload landed with an AI-written "You…" title. Your subscriber-count change landed overnight; first reading 12 October.
 - **Product:** merged subreddit rotation. Uploads now alternate between AskReddit and NoStupidQuestions, each taking mornings and evenings in turn. Its sample run passed on the final code with a real NoStupidQuestions post. Before that, I fixed a gap the branch had left: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it unnoticed. A test now pins it.
 - **Data:** asked whether a few hit videos earn most of our views. The best tenth earn 42%, and the single best 3%. By the rule set before looking, nothing changes. Of seven traits the hits might share (title style, voice, topic, time of day, length, background, title source), none stands out beyond chance.
 - **Product:** a decision rule had come due unrecorded: the 19 September release (safety-screen and AI-timeout fixes). Read as its rule is written, it is **kept**: watch time per view held (up 10%, inside normal drift). Views read 62% lower, but views never trigger a revert, because they swing that much with nothing changed.
 - **Data:** refreshed one research question's count (dark-morbid topic, 10 of the 12 uploads it needs). Re-read the background clips: one is at 3 buried uploads of 13, against 3 of 61 for the others. That is not significant yet, so I'm watching it, not acting.
-- **Monetization:** this function's first work. YouTube's own eligibility page lists no lower tier with an easier bar: still 1,000 subscribers and 10 million Shorts views in 90 days. The route tracker stands as it was.
+- **Data:** found and fixed a fault in the channel scorecard: it could flag a fall in uploads stuck at zero views, but never a rise. Read correctly, the last three weeks are **mixed**, not better. Watch time is up slightly, but zero-view uploads rose from 2.4% to 5.6%, just past their 3-point limit. One period, so noise unless it repeats. A fix.
+- **Monetization:** first work for this function. YouTube's own page lists no easier lower tier: still 1,000 subscribers and 10 million Shorts views in 90 days.
 - **General management:** started the process audit, which looks due. I re-checked the past process decisions against today's evidence and added notes to six. One was out of date (shifts no longer slice time by function) and is now marked replaced. Two weak points are recorded. Your approvals reach the code by an automatic step that has failed twice in three tries. And the planned 3 to 4 uploads a day would change the normal-noise yardstick our release checks use, so it must be re-measured then. From current best practice, I tried a fresh second review of the rotation code before merging. It found a formatting slip (fixed) and a quirk in how rotation pairs with title styles (documented; the planned reads are unaffected). Still to do: pruning old text from the product document.
 - **General management:** closed September's caption-upload problem (26 clean uploads since). Your pending comments change still applies cleanly, so a re-run will work. The process-health check again flagged short shifts; I added the cause to your issue: the queue waits on your planning session.
-- **Security:** standing check clean. No credentials in the project, the secret files still excluded, the only workflow changes are your own approved ones, and the Amazon controls are intact ($0.17 this month).
-- Fixing against improving: mostly improving (the merge and the research). The fixes were the analysis gap and the tracker closures.
+- **Security:** standing check clean: no credentials committed, secrets still excluded, only your approved workflow changes, Amazon controls intact ($0.17 this month).
+- Fixing against improving: mostly improving (the merge and the research). The fixes were the scorecard, the analysis gap and the tracker closures.
 - **Friction:** the merge could not be tested until 10:51, because last night's 22:51 check of the live code used the one automatic render allowed per 12 hours. An evening render on code the next morning's upload will exercise anyway costs the next shift its merge.
 
 ### Blocked
@@ -93,7 +94,7 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly. The supply step for more uploads a day is live. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
-- **Than ~10 shifts ago:** Somewhat. The levers for bet 2 are now in place or ready, but views per upload have not moved yet.
+- **Than ~10 shifts ago:** Somewhat. Bet 2's levers are in place or ready, but views per upload have not moved, and the scorecard reads mixed.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
