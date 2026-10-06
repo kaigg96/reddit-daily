@@ -244,6 +244,11 @@ def test_topic_analysis_reads_back_every_subreddits_description():
     for sub in config.SUBREDDITS:
         desc, _ = upload_text(sub, "Why is the sky blue?", ["a", "b"], "https://redd.it/x", [])
         assert mod.parse_description(desc) == ("Why is the sky blue?", "a b")
+        # C15's credits are neither the question nor the answers.
+        from src.content import Answer
+        desc, _ = upload_text(sub, "Why is the sky blue?", [Answer("a", "al_1"), Answer("b", "")],
+                              "https://redd.it/x", [], asker="Q-er")
+        assert mod.parse_description(desc) == ("Why is the sky blue?", "a b")
 
 
 def test_description_credits_each_author_by_username_when_known():

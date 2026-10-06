@@ -77,9 +77,12 @@ def fetch_all_videos(yt):
 
 def parse_description(desc):
     """Recover (question, answers_text) from the stable description format."""
-    # R4.1: the description names the post's own subreddit.
-    q = re.search(r"Today's top \w+ post:\s*(.+)", desc)
-    answers = re.findall(r"^\s*\d+\.\s*(.+)$", desc, flags=re.MULTILINE)
+    # R4.1: the description names the post's own subreddit. C15: it credits
+    # the asker after it and each answerer in a " (u/name)" suffix; neither
+    # is the question's or the answers' text.
+    q = re.search(r"Today's top \w+ post(?:, asked by u/\S+?)?:\s*(.+)", desc)
+    answers = [re.sub(r"\s*\(u/[^)\s]+\)$", "", a) for a in
+               re.findall(r"^\s*\d+\.\s*(.+)$", desc, flags=re.MULTILINE)]
     return (q.group(1).strip() if q else None), " ".join(answers)
 
 
