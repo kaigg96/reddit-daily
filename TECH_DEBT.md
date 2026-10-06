@@ -180,6 +180,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   question is also in the prompt — swap in a fresh paraphrase before trusting
   a pass on it as proof the category holds.
 
+- **C15's name credits drop silently (2026-10-06).** `content.credit_name`
+  leaves out deleted, profane and over-matched names: the substring check
+  (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
+  Grape, by design, since a missed credit beats printing a slur. Nothing
+  records how often it fires, and shifts cannot read Actions logs. If the
+  attribution term ever turns on it, add an upload-log column (asker credited,
+  answers credited of shown) through a sample run, then tune the word floor.
+
 **Retention — open items must close, not accumulate** (cap: 25, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
