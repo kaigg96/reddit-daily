@@ -79,7 +79,7 @@ and more useful than a confident guess.
 - **Legal:** read Reddit's terms first-hand and sent them to you (#60). Our pipeline only reformats Reddit text: it strips formatting, and it skips posts with profanity rather than editing them. So the exposure is the licence's scope and the money clause, not editing. The channel's name also uses Reddit's, which its terms restrict.
 - **Distribution:** confirmed TikTok's terms from its own page, including the country rule above. Meta's pages still refuse.
 - **Security:** standing check clean: $0.19 spent this month, you are the only collaborator, no secrets in the project, and the only workflow change was your approved security fix. The quarterly account-security check, the plan's only answer to losing the channel, had never run. I sent you six checks, about 15 minutes, all needing your logins (#59). Your security fix from this afternoon works: the 15:08 release check ran on the new split and recorded its result, so I closed it in the code-health list.
-- **General management:** trackers updated; two finished items left the plan, one the code-health list.
+- **General management:** trackers updated; three finished items closed.
 - Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video; every product change waits on 12 October or your session.
 - **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
 
