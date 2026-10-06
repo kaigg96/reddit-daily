@@ -654,9 +654,10 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
 def views_gained(snapshot_rows):
     """[(snapshot date, views gained since the previous snapshot, days)].
 
-    The Partner Program counts every Shorts view in 90 days, the back
+    The Partner Program counts Shorts views over 90 days, the back
     catalogue's included, while `weekly_totals` counts only new uploads'
-    first week. This is the channel-wide figure the bar is read against:
+    first week. This is the channel-wide figure the bar is read against, in
+    play starts: the bar counts only their engaged share (`engaged_share`):
     the rise in the summed views of every video between consecutive
     snapshots. A video first seen in a snapshot counts in full, since it
     was published after the one before.
