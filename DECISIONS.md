@@ -291,6 +291,11 @@ three times that advisory loses — the R4.6 tier guarantee moved into
 **Revisit when:** approval becomes a bottleneck the way review did (1 or 3
 failing); or a revert loses work rather than unlanding it (2 false).
 
+**Re-reviewed 2026-10-06:** 3 holds; the owner approved #52 and #54 within a
+day. The weak link is the apply step after approval. Of the last three
+approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
+#50's could not be read. Each failure costs the owner another round trip.
+
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
 `WORKLOG.md` 10 entries, `DECISIONS.md` 15, `TECH_DEBT.md` 25 open items,
@@ -311,7 +316,12 @@ doc becomes unmaintainable while still under cap (1 too high, or 3 false); or
 items get closed by deletion-without-reasoning to stay under (2 false — the
 cap is then producing dishonesty rather than hygiene).
 
-## D3 · 2026-09-19 · Full allocation across workstreams each shift
+## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
+
+**Re-reviewed 2026-10-06:** no longer in force. Since D12 (2026-10-05) a shift
+ranks one queue across the functions and slices are gone (`/shift` §3). Reviews
+replace the starvation floor. Kept for its reasoning, which D12's ranking still
+leans on: filling capacity, not running out of it, caused the real failures.
 
 Every shift allocates across all lanes rather than spending itself on one.
 
