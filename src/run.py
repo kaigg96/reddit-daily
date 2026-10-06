@@ -20,13 +20,18 @@ def _probe_duration(path):
     return duration
 
 
-def upload_text(subreddit, post_title, comments, shortlink, keywords):
-    """Description and tags naming the post's own subreddit (R4.1). AskReddit's
-    output is unchanged, so rotation stays the only variable against it."""
+def upload_text(subreddit, post_title, comments, shortlink, keywords, asker=""):
+    """Description and tags naming the post's own subreddit (R4.1). Each
+    author is credited by username where known (Reddit's attribution term,
+    PLAN C15): the same in both subreddits, so rotation stays the only
+    variable between them."""
+    def by(name):
+        return f" (u/{name})" if name else ""
+
     description = (
-        f"Today's top {subreddit} post: {post_title}\n\n"
+        f"Today's top {subreddit} post{', asked by u/' + asker if asker else ''}: {post_title}\n\n"
         f"Top Comments:\n"
-        + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
+        + "\n".join(f"{i}. {c}{by(getattr(c, 'author', ''))}" for i, c in enumerate(comments, 1))
         + f"\n\n{shortlink}\n#{subreddit} #Reddit #Shorts"
     )
     tags = ([subreddit] + (["Ask Reddit"] if subreddit == "AskReddit" else [])
@@ -161,7 +166,8 @@ def main():
     full_title = video_title
     description, tags = upload_text(
         post.subreddit, post.title,
-        [s.text for s in segments if s.kind == "comment"], post.shortlink, keywords)
+        [s.text for s in segments if s.kind == "comment"], post.shortlink, keywords,
+        asker=post.author)
 
     # R3.3: engagement comment posted from the channel account (the CTA doubles as it)
     comment_text = outro_text

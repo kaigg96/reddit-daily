@@ -244,3 +244,15 @@ def test_topic_analysis_reads_back_every_subreddits_description():
     for sub in config.SUBREDDITS:
         desc, _ = upload_text(sub, "Why is the sky blue?", ["a", "b"], "https://redd.it/x", [])
         assert mod.parse_description(desc) == ("Why is the sky blue?", "a b")
+
+
+def test_description_credits_each_author_by_username_when_known():
+    """Reddit's attribution term (PLAN C15): the question's and each answer's
+    author by name, beside the link back. A plain string credits no one."""
+    from src.content import Answer
+    from src.run import upload_text
+    desc, _ = upload_text("AskReddit", "Q?", [Answer("a", "alice"), Answer("b", ""), "c"],
+                          "https://redd.it/x", [], asker="quentin")
+    assert desc.startswith("Today's top AskReddit post, asked by u/quentin: Q?\n")
+    assert "1. a (u/alice)\n2. b\n3. c\n" in desc
+    assert "https://redd.it/x" in desc

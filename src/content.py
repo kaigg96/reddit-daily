@@ -24,6 +24,39 @@ class PostContent:
     screen_source: str = ""   # gemini | backstop — which path actually screened this
     screen_failure: str = ""  # why the screen fell back, blank when Gemini answered
     slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined; "!<why>" if the call failed
+    author: str = ""          # the question's author, for the description's credit ("" if not printable)
+
+
+class Answer(str):
+    """A cleaned comment that remembers its author, so the description can
+    credit it (Reddit's attribution term, PLAN C15). Riding on the string
+    keeps the name with its text through the screen's drops and the length
+    guard, with no parallel list to keep in step; a plain str credits no one."""
+    author = ""
+
+    def __new__(cls, text, author=""):
+        obj = super().__new__(cls, text)
+        obj.author = author
+        return obj
+
+
+# Usernames run words together ("shitlord99"), which the whole-word check
+# misses, so names are also searched for list words as substrings. Only words
+# of 4+ letters: "len" would catch "Allen". An over-match costs one credit.
+_NAME_WORDS = sorted({str(w) for w in profanity.CENSOR_WORDSET
+                      if len(str(w)) >= 4 and str(w).isalpha()})
+
+
+def credit_name(author):
+    """A Reddit username we may print, else "". Names are untrusted input:
+    deleted accounts and profane names are left uncredited."""
+    name = str(getattr(author, "name", "") or "")
+    if name in ("", "[deleted]", "[removed]"):
+        return ""
+    low = name.lower()
+    if profanity.contains_profanity(re.sub(r"[_\-\d]+", " ", name)) or any(w in low for w in _NAME_WORDS):
+        return ""
+    return name
 
 
 def make_reddit():
@@ -52,7 +85,7 @@ def _comment_pool(post, limit):
     post.comment_sort = "top"
     post.comments.replace_more(limit=0)
     return [
-        clean_text(c.body)
+        Answer(clean_text(c.body), credit_name(getattr(c, "author", None)))
         for c in post.comments
         if (
             len(c.body) <= config.MAX_COMMENT_LENGTH
@@ -161,6 +194,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             screen_source=screen_source,
             screen_failure=screen_failure,
             slate_topics=slate_topics,
+            author=credit_name(getattr(post, "author", None)),
         )
 
     raise ValueError("No suitable Reddit post found (after filters and screen).")

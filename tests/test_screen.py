@@ -257,3 +257,50 @@ def test_prompt_generalizes_sexual_suggestive_beyond_one_example():
     an explicit calibration example too, not just a held-out test case.
     """
     assert "dangerously flirty" in screen._PROMPT
+
+
+# --- author credit (PLAN C15) -------------------------------------------------
+
+def test_comment_pool_keeps_each_author_and_leaves_unprintable_names_out():
+    """Reddit's terms ask for each user's name. Names are untrusted input:
+    a deleted account or a profane name is left uncredited, not printed."""
+    from types import SimpleNamespace as NS
+
+    class Comments(list):
+        def replace_more(self, limit):
+            pass
+
+    who = lambda name: None if name is None else NS(name=name)
+    post = NS(comments=Comments([NS(body="first", author=who("alice")),
+                                 NS(body="second", author=who(None)),
+                                 NS(body="third", author=who("shitlord99")),
+                                 NS(body="fourth", author=who("[deleted]"))]))
+    pool = content._comment_pool(post, 10)
+    assert pool == ["first", "second", "third", "fourth"]
+    assert [c.author for c in pool] == ["alice", "", "", ""]
+
+
+def test_screen_drops_keep_each_author_with_their_answer(monkeypatch):
+    """A dropped answer must take its name with it, or credits shift by one."""
+    pool = [content.Answer(t, n) for t, n in [("a", "ann"), ("b", "bob"), ("c", "cat"),
+                                              ("d", "dan"), ("e", "eve")]]
+    monkeypatch.setattr(content, "_comment_pool", lambda post, n: list(pool))
+    monkeypatch.setattr(content.profanity, "contains_profanity", lambda t: False)
+    monkeypatch.setattr(content.config, "NUM_COMMENTS", 3)
+
+    class FakeReddit:
+        def subreddit(self, name):
+            class S:
+                def top(self, time_filter, limit):
+                    p = FakePost("What is a question?")
+                    p.author = type("R", (), {"name": "quinn"})()
+                    return [p]
+            return S()
+
+    def screener(question, comments):
+        return screen.ScreenResult("pass", unsafe=[1], category="unsafe_comments")
+
+    post = content.select_post(FakeReddit(), "", screener=screener)
+    assert post.comments == ["a", "c", "d"]
+    assert [c.author for c in post.comments] == ["ann", "cat", "dan"]
+    assert post.author == "quinn"
