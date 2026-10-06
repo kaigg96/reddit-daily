@@ -62,6 +62,12 @@ INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
 MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 
 # --- candidate selection / suppression screen (R4.6) ---
+# R4.1: rotated per run by content.subreddit_for_run. AskReddit stays in as
+# the baseline the others are judged against (PRD §0 #3). Owner-editable; a
+# new entry needs the R4.6 screen replayed on its top posts first (§6 R4.1).
+# NoStupidQuestions: closest general-audience analogue; its first screen
+# replay is the branch's dry run (PRD §6 R4.1 build note).
+SUBREDDITS = ["AskReddit", "NoStupidQuestions"]
 CANDIDATE_LIMIT = 10          # top posts fetched per run
 COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS survive
 MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota

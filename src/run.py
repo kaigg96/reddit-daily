@@ -20,6 +20,21 @@ def _probe_duration(path):
     return duration
 
 
+def upload_text(subreddit, post_title, comments, shortlink, keywords):
+    """Description and tags naming the post's own subreddit (R4.1). AskReddit's
+    output is unchanged, so rotation stays the only variable against it."""
+    description = (
+        f"Today's top {subreddit} post: {post_title}\n\n"
+        f"Top Comments:\n"
+        + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
+        + f"\n\n{shortlink}\n#{subreddit} #Reddit #Shorts"
+    )
+    tags = ([subreddit] + (["Ask Reddit"] if subreddit == "AskReddit" else [])
+            + ["Shorts", "Reddit", f"Top {subreddit} Post", f"Trending {subreddit}"]
+            + keywords)
+    return description, tags
+
+
 def check_channel_name():
     """Refuse a real upload without the channel's name.
 
@@ -41,11 +56,13 @@ def main():
     prev_title = ""
     if config.PREV_POST_FILE.exists():
         prev_title = config.PREV_POST_FILE.read_text().strip()
+    subreddit_name = content.subreddit_for_run(datetime.datetime.now(datetime.timezone.utc))
+
     # R4.6: log every non-pass verdict for weekly false-positive audit.
     def record_verdict(post_title, result, action):
         row = {
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-            "subreddit": "AskReddit",
+            "subreddit": subreddit_name,
             "post_title": post_title,
             "action": action,
             # A demoted row's payload is the category we chose not to skip on.
@@ -64,6 +81,7 @@ def main():
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,
+            subreddit_name=subreddit_name,
             screener=screen.screen, on_verdict=record_verdict,
             slate_classifier=screen.classify_slate,
         )
@@ -141,15 +159,9 @@ def main():
 
     # --- upload metadata (R2.1: no hashtag suffix — Shorts are auto-detected) ---
     full_title = video_title
-    description = (
-        f"Today's top AskReddit post: {post.title}\n\n"
-        f"Top Comments:\n"
-        + "\n".join(f"{i}. {s.text}" for i, s in enumerate(
-            (s for s in segments if s.kind == "comment"), 1))
-        + f"\n\n{post.shortlink}\n#AskReddit #Reddit #Shorts"
-    )
-    tags = ["AskReddit", "Ask Reddit", "Shorts", "Reddit", "Top AskReddit Post",
-            "Trending AskReddit"] + keywords
+    description, tags = upload_text(
+        post.subreddit, post.title,
+        [s.text for s in segments if s.kind == "comment"], post.shortlink, keywords)
 
     # R3.3: engagement comment posted from the channel account (the CTA doubles as it)
     comment_text = outro_text
