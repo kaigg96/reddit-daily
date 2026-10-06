@@ -267,8 +267,12 @@ a list nobody can read is the same as no list.
   12-hour count still sees the artifact). One residual: `record` runs
   ffmpeg on the branch-made MP4 while `actions/checkout` persists its write
   token, so give that checkout `persist-credentials: false` and the token to
-  the push alone. The `validate-release` patch is not yet re-reviewed. Then
-  one escalation with `--patch`.
+  the push alone. The `validate-release` patch (its workflow unchanged since)
+  holds too: `record` stages only the verdict file. Harden one step: branch
+  code picks the artifact's files, and downloading into `.github` can
+  overwrite tracked files (at worst breaking the rebase-push), so download to
+  `$RUNNER_TEMP` and copy the one expected file. Apply both edits, then one
+  escalation with `--patch`.
   **Same root, money side (2026-10-05) — closed 2026-10-05 by PLAN C6:** branch
   renders narrate silently and only `main` gets the Polly keys. History: `dry-run.yml` also hands the
   branch's code the live Polly keys, and `POLLY_CHAR_BUDGET` is enforced by
