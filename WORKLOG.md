@@ -84,15 +84,15 @@ and more useful than a confident guess.
 - **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
 
 ### Blocked
-- **For you:** whether to ask Reddit for an agreement (#60, new; a ready-to-send draft is on it); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
+- **For you:** whether to ask Reddit for an agreement (#60, new; a ready-to-send draft is on it); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); the review-step proposal (#61, new; I recommend approving); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
 
 ### Next
-- Check that tonight's upload landed (not started by 17:45, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
+- Check that tonight's upload landed (not started by 17:50, normal for the evening slot) and tomorrow evening's first NoStupidQuestions one.
 - Tomorrow, once the morning upload lands: read the topic ranker's count under its rule.
 - On 12 October: judge "open on the question" under its rule. Read the engaged-view question beside it with the new measure, at 14 days old. Then the narrator and dark-morbid questions, and the first subscriber count.
 - If you accept bet 2 in engaged views, fix its baseline once four complete weeks exist (early November).
 - The next sample-run request is the first on the new security split: confirm its verdict lands.
-- A fresh second review of today's code caught a real counting error (fixed; no reported number changed). Two uses, two catches: propose it as a standing step before merges, which needs your approval.
+- A fresh second review of today's code caught a real counting error (fixed; no reported number changed). Two uses, two catches, so I proposed it as a standing merge step (#61).
 - Considered and not taken: a catch-up run after a missed slot (one miss in about 80 runs), and pinning the Ubuntu version (unaffected).
 
 ### Better?
