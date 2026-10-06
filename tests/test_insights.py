@@ -1517,3 +1517,23 @@ def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():
     then, now = {"watch_seconds": 12, "engaged_per_100": 30.0}, {"watch_seconds": 12}
     _, rows, _ = _ins.scorecard(then, now)
     assert "engaged_per_100" not in [r["metric"] for r in rows]   # one side unread: no row
+
+
+def test_latest_releases_are_newest_first_by_upload_order():
+    rows = [{"format_version": v} for v in ("v4", "v5", "v5", "v6", "", "v7", "v7")]
+    assert insights.latest_releases(rows) == ["v7", "v6"]
+    assert insights.latest_releases([]) == []
+
+
+def test_the_digest_line_reads_each_release_at_its_committed_size(tmp_path, monkeypatch):
+    """The Monday digest carries the auto-revert verdict, and a release that
+    committed to more uploads than the floor is not answered early."""
+    import csv as _csv
+    from src import config
+    _two_eras(tmp_path, monkeypatch, n=10)
+    rows = list(_csv.DictReader(open(config.UPLOAD_LOG)))
+    line = insights.release_digest_line(rows)
+    assert "`v5`: KEEP" in line and "`v4`:" in line
+    monkeypatch.setitem(insights.RELEASE_MIN_UPLOADS, "v5", 20)
+    assert "`v5`: NO VERDICT — 10 measurable release uploads, the rule commits to 20" in (
+        insights.release_digest_line(rows))

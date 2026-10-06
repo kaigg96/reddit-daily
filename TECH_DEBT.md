@@ -153,18 +153,10 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **Two residuals from the 2026-09-21 reporting work.** (a) `report.py --release`
-  answers the §5 auto-revert question but is **wired into no automation** — it
-  fires only when a shift remembers, and "the ritual says to" is prose. Next
-  due: `v7` (§0 #1) at the 2026-10-12 snapshot, with `--min-uploads 20`. (It replaced
-  `age_adjusted_residuals`, which this item and #16 both proposed: a release's
-  date and its videos' ages are collinear, so that fit absorbed the effect into
-  its slope.) **Bit on 2026-10-06:** `v6`'s read came due ~10-05 and sat
-  unrecorded until a shift stumbled on it (KEEP). Cheapest fix: the Monday
-  digest prints `--release` for the live and previous `FORMAT_VERSION`, so a
-  due verdict reaches the owner's email whether or not a shift remembers. It
-  must pass each release's pre-committed size (`v7`: 20 via `--min-uploads`),
-  or it answers at 8 and pre-empts the rule.
+- **A residual from the 2026-09-21 reporting work.** ((a), the release check
+  wired into no automation, fixed 2026-10-06: the Monday digest prints the
+  verdict for the live and previous release at each one's committed size,
+  `insights.RELEASE_MIN_UPLOADS`, and `--release` defaults to it.)
   (b) `--offline` reads the weekly snapshot, which records no
   `privacy_status`, so an owner-privatised upload reads as zero-view there.
   Bounded — medians exclude zeros, so only the zero count moves — and printed on

@@ -120,37 +120,29 @@ def compare(videos, spec, metric, now):
                   f"check with --within format_version={era}")
 
 
-def release(version, key, target_age, min_uploads=insights.MIN_COHORT):
+def release(version, key, target_age, min_uploads=None):
     """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
 
-    Has its own loader rather than using the shared one: it reads every upload
-    at a *common age* from the weekly snapshot series, which is the only way a
-    release ever becomes age-matched against the era it replaced. Needs no
-    YouTube credentials, so a scheduled shift can run it."""
-    load = insights.load_videos_at_age(target_age)
-    for line in load.caveats():
+    Reads every upload at a *common age* from the weekly snapshot series, which
+    is the only way a release ever becomes age-matched against the era it
+    replaced (`insights.release_read`, shared with the Monday digest). Needs no
+    YouTube credentials, so a scheduled shift can run it. `min_uploads`
+    defaults to the release's pre-committed size (`RELEASE_MIN_UPLOADS`)."""
+    if min_uploads is None:
+        min_uploads = insights.RELEASE_MIN_UPLOADS.get(version, insights.MIN_COHORT)
+    read = insights.release_read(version, key, target_age)
+    if read is None:
+        sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
+    for line in read.load.caveats():
         print(f"AGE-MATCHED: {line}")
     print()
-    if not load.videos:
-        sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
-
-    a, b, unset, later = insights.release_cohorts(load.videos, key, version)
-    if unset:
-        print(f"({unset} upload(s) have no {key} recorded — in neither cohort)")
-    if later:
-        print(f"({later} upload(s) postdate {version} — excluded, so this compares it "
+    if read.unset:
+        print(f"({read.unset} upload(s) have no {key} recorded — in neither cohort)")
+    if read.later:
+        print(f"({read.later} upload(s) postdate {version} — excluded, so this compares it "
               f"with what it replaced rather than with its own successors)")
-    triggers = insights.release_triggers(a, b)
-    metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
-        t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
-    comparisons = [insights.compare(a, b, f"{key}={version}", f"before {version}",
-                                    load.anchor, metric) for metric in metrics]
-    # The floor comes from the era BEFORE the change. Measuring it on the
-    # release's own uploads would let a volatile release excuse itself.
-    floors = {m: insights.drift_floor(b, m) for m in metrics}
-    print(insights.render_release(comparisons, floors, triggers, min_uploads))
-    print(insights.render_duration(a, b))
-
+    print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
+    print(insights.render_duration(read.release, read.before))
 
 
 def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):
@@ -395,9 +387,10 @@ def main():
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
-    p.add_argument("--min-uploads", type=int, default=insights.MIN_COHORT,
+    p.add_argument("--min-uploads", type=int, default=None,
                    help="--release: no verdict until the release has this many "
-                        "measurable uploads — the experiment's pre-committed size")
+                        "measurable uploads — the experiment's pre-committed size "
+                        "(default: insights.RELEASE_MIN_UPLOADS, else 8)")
     p.add_argument("--release-key", default="format_version",
                    help="upload_log field --release splits on (default format_version; "
                         "use background_type for the b-roll switch)")

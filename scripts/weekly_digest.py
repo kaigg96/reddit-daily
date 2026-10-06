@@ -236,6 +236,15 @@ def main():
     lines.append(f"- Subscribers: **{subs}**")
     lines.append(f"- ~90d views: ~{humanize(views_90)} (approx)")
     lines.append("")
+    # The auto-revert verdict, so a due one reaches the owner whether or not a
+    # shift remembers (v6's sat unrecorded, 2026-10-06). It must never cost the
+    # digest, and a failure says so rather than leaving the line out.
+    try:
+        lines.append(insights.release_digest_line(log_rows))
+    except Exception as e:  # noqa: BLE001
+        lines.append(f"**Release checks** — could not run ({type(e).__name__}: {e}); "
+                     f"run `scripts/report.py --release {config.FORMAT_VERSION}` by hand")
+    lines.append("")
     if measurable:
         top = max(measurable, key=lambda v: views(v["id"]))
         # No link: the repo is public, and a link names the channel (2026-10-05).

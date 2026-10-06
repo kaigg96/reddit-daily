@@ -531,6 +531,75 @@ def render_duration(release, before, threshold=1.0):
     return line
 
 
+# Each release's pre-committed size (PRD §0); one not listed is read at
+# MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
+# that committed to more (#1: `v7` commits to 20).
+RELEASE_MIN_UPLOADS = {"v7": 20}
+
+
+@dataclass
+class ReleaseRead:
+    load: object
+    release: list
+    before: list
+    unset: int
+    later: int
+    triggers: tuple
+    comparisons: list
+    floors: dict
+
+
+def release_read(version, key="format_version", target_age=None):
+    """The auto-revert check's inputs (`report.py --release`, the Monday
+    digest), computed in one place so the two cannot drift. Every upload read
+    at a common age; the drift floor comes from the era BEFORE the change, so
+    a volatile release cannot excuse itself. None when no upload has a reading
+    at the age."""
+    target_age = AGE_MATCH_TARGET_DAYS if target_age is None else target_age
+    load = load_videos_at_age(target_age)
+    if not load.videos:
+        return None
+    a, b, unset, later = release_cohorts(load.videos, key, version)
+    triggers = release_triggers(a, b)
+    metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
+        t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
+    comparisons = [compare(a, b, f"{key}={version}", f"before {version}", load.anchor, m)
+                   for m in metrics]
+    floors = {m: drift_floor(b, m) for m in metrics}
+    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
+
+
+def latest_releases(log_rows, key="format_version", n=2):
+    """The last `n` releases in upload order, newest first. The previous one
+    matters: `v6`'s read came due after `v7` shipped and sat unrecorded until a
+    shift stumbled on it (2026-10-06)."""
+    order = []
+    for r in log_rows:
+        v = r.get(key)
+        if v:
+            if v in order:
+                order.remove(v)
+            order.append(v)
+    return order[::-1][:n]
+
+
+def release_digest_line(log_rows, target_age=None):
+    """One line for the Monday digest, so a due verdict reaches the owner
+    whether or not a shift remembers to run the check (TECH_DEBT)."""
+    target_age = AGE_MATCH_TARGET_DAYS if target_age is None else target_age
+    parts = []
+    for version in latest_releases(log_rows):
+        read = release_read(version, target_age=target_age)
+        if read is None:
+            verdict = f"NO VERDICT — no upload has a snapshot at ~{target_age:g} days old"
+        else:
+            verdict = release_verdict(read.comparisons, read.floors, read.triggers,
+                                      RELEASE_MIN_UPLOADS.get(version, MIN_COHORT))
+        parts.append(f"`{version}`: {verdict}")
+    return (f"**Release checks** (auto-revert, every upload read at ~{target_age:g} days) — "
+            + (" · ".join(parts) if parts else "no release logged"))
+
+
 def render_release(comparisons, floors, triggers=REVERT_TRIGGER, min_uploads=MIN_COHORT):
     """The release answer in full: every metric, each with the size of change
     that would have to be exceeded to mean anything, then the verdict."""
