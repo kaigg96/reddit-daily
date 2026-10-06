@@ -87,8 +87,8 @@ and more useful than a confident guess.
 - **For you:** whether to ask Reddit for an agreement (#60, new; a ready-to-send draft is on it); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
 
 ### Next
-- Check that tonight's upload landed (it had not started by 17:30, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
-- Tomorrow evening: read the topic ranker's count under its rule.
+- Check that tonight's upload landed (not started by 17:45, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
+- Tomorrow, once the morning upload lands: read the topic ranker's count under its rule.
 - On 12 October: judge "open on the question" under its rule. Read the engaged-view question beside it with the new measure, at 14 days old. Then the narrator and dark-morbid questions, and the first subscriber count.
 - If you accept bet 2 in engaged views, fix its baseline once four complete weeks exist (early November).
 - The next sample-run request is the first on the new security split: confirm its verdict lands.
