@@ -64,7 +64,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): data 35 · legal 15 · security 15 · distribution 10 · reliability 10 · gm 10 · engineering 5
 
-**Summary:** Two facts changed the company's picture, and both are with you with a recommendation. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
+**Summary:** Two facts changed the company's picture; both are with you, with recommendations. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
 
 ### Toward revenue
 - Nothing moved revenue directly; this shift corrected the map the quarter's bets will be set on.
@@ -73,13 +73,14 @@ and more useful than a confident guess.
 - **TikTok's own page adds a rule:** the account must be based in one of eight countries (US, UK, Germany, Japan, South Korea, France, Mexico, Brazil). If you are not, bet 3's TikTok pilot is closed.
 
 ### Done
-- **Reliability:** last night's evening upload never happened. GitHub could not give the job a machine during its outage, so the run failed before any of our code ran, and neither of today's earlier shifts noticed it. Nothing of ours to fix; Monday's digest will list the missed day. GitHub's default machine moves to a newer Ubuntu on 19 October. I checked that our video job is unaffected: it installs no system packages, and our Python version is already built for the new system. Separately, your Monday digest now carries the keep-or-revert verdict for the current and previous release, each at the size its rule committed to. So the opening test's verdict reaches your email from 12 October even if no shift remembers. A fix.
+- **Reliability:** last night's evening upload never happened. GitHub could not give the job a machine during its outage, so the run failed before any of our code ran, and neither of today's earlier shifts noticed it. Nothing of ours to fix; Monday's digest will list the missed day. GitHub's machines move to a newer Ubuntu on 19 October; I checked our video job is unaffected. Separately, your Monday digest now carries the keep-or-revert verdict for the current and previous release, each at the size its rule committed to. So the opening test's verdict reaches your email from 12 October even if no shift remembers. A fix.
 - **Data:** built the measure of engaged views and checked it with tests. Our "You…" titles keep their lead in engaged views (+60%), so that change counts toward the bar. No trait we log moves the engaged share: title style, voice, length and time of day all sit between 0.29 and 0.32. Only what the video itself does can move it, which is what the opening-seconds test and bet 1 target. The weekly totals for bet 2 can now be read in engaged views from the 12 and 19 October data, and the scorecard shows the engaged share by itself from about mid-November. I also fixed a report line that mislabelled total plays.
+- **Product:** built the topic ranker's go/no-go count, set in September: how often Reddit's top post is a weak topic with a strong one close behind. Due with tomorrow's uploads (18 of 20 runs; 5 fired), it sets the ranker's test length.
 - **Legal:** read Reddit's terms first-hand and sent them to you (#60). Our pipeline only reformats Reddit text: it strips formatting, and it skips posts with profanity rather than editing them. So the exposure is the licence's scope and the money clause, not editing. The channel's name also uses Reddit's, which its terms restrict.
-- **Distribution:** confirmed TikTok's terms from its own page: 10,000 followers and 100,000 views in 30 days, videos over one minute, and the country rule above. Meta's pages still refuse even a plain download.
+- **Distribution:** confirmed TikTok's terms from its own page, including the country rule above. Meta's pages still refuse.
 - **Security:** standing check clean: $0.19 spent this month, you are the only collaborator, no secrets in the project, and the only workflow change was your approved security fix. The quarterly account-security check, the plan's only answer to losing the channel, had never run. I sent you six checks, about 15 minutes, all needing your logins (#59). Your security fix from this afternoon works: the 15:08 release check ran on the new split and recorded its result, so I closed it in the code-health list.
 - **General management:** trackers updated; two finished items left the plan, one the code-health list.
-- Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video, and with every product item waiting on 12 October or your session, the shift found no product change ready to make.
+- Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video; every product change waits on 12 October or your session.
 - **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
 
 ### Blocked
@@ -87,6 +88,7 @@ and more useful than a confident guess.
 
 ### Next
 - Check that tonight's upload landed (it had not started by 17:30, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
+- Tomorrow evening: read the topic ranker's count under its rule.
 - On 12 October: judge "open on the question" under its rule. Read the engaged-view question beside it with the new measure, at 14 days old. Then the narrator and dark-morbid questions, and the first subscriber count.
 - If you accept bet 2 in engaged views, fix its baseline once four complete weeks exist (early November).
 - The next sample-run request is the first on the new security split: confirm its verdict lands.
@@ -94,7 +96,7 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Unclear for revenue, but better informed. The gap is wider than we believed, and a legal question that could end the format now has a first-hand answer before bet 1 is built on it.
-- **Than ~10 shifts ago:** Somewhat. We now measure in the bar's own unit and know YouTube's, Reddit's and TikTok's rules from their own pages. Views per upload have not moved, and watch time reads flat.
+- **Than ~10 shifts ago:** Somewhat. We measure in the bar's own unit and know three platforms' rules first-hand. Views per upload have not moved; watch time reads flat.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-06 (11:15) — Subreddit rotation is live; our views are not a lottery of a few hits
