@@ -101,6 +101,13 @@ itself a finding about the channel).
 **Re-reviewed 2026-10-05:** assumption 3 changed with the shift. Shifts went
 from 25 to 60 minutes, three a day (D12, approved in #54), so the floor rose to 5.
 
+**Re-reviewed 2026-10-06:** assumption 1 holds only in part. Generation found
+two research questions above the bar (PRD R4, R5), but each was answered within
+the shift, so the ready count stayed at 0 against the floor of 5. Research
+refills a shift's time, not the floor. While the owner's planning session (#55)
+is pending, the floor measures that wait, not the shift. Not yet a trigger: one
+day.
+
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
 The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
@@ -124,6 +131,12 @@ research lanes are for.
 
 **Revisit when:** the channel earns money (1 false) — then spending proposals
 reopen, sized against revenue.
+
+**Re-reviewed 2026-10-06:** assumption 1 still holds (revenue $0). The drafted
+bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
+1–2 cents per extra upload. The packet asks for it explicitly, so the owner's
+answer there re-decides this ruling for those items. No shift may read it as
+lifted until then.
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
@@ -149,6 +162,11 @@ running — without it there is no age-matched read at all.
 lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
 watch-seconds *or* views, and views is 5× noisier — escalated as
 `release-rule-metric-conflict`, owner's call.
+
+**Re-reviewed 2026-10-06:** still holds at 2 uploads a day. Bet 2's volume step
+(PRD #4, 3–4 a day) would break (b): batches of 8 would span two days, not
+four. Any release judged during it needs its floor re-measured on uploads at
+the new cadence, not borrowed from the 2-a-day era.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
@@ -243,6 +261,12 @@ research problems. The first response -- seeding the sample-video ration as PM's
 owner called a bandaid the same evening: it refills the queue once. The
 durable response is D11.
 
+**Re-reviewed 2026-10-06:** the trigger's shape for 2 appeared: about a third
+of a shift went on research while the ready count stayed at 0. It was not
+padding. Both questions (PRD R4, R5) had decision rules fixed before the data
+and tied to bet 2, and both were answered. If the next shifts' research again
+changes no rule, 2 is false.
+
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
 `CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
@@ -267,6 +291,11 @@ three times that advisory loses — the R4.6 tier guarantee moved into
 **Revisit when:** approval becomes a bottleneck the way review did (1 or 3
 failing); or a revert loses work rather than unlanding it (2 false).
 
+**Re-reviewed 2026-10-06:** 3 holds; the owner approved #52 and #54 within a
+day. The weak link is the apply step after approval. Of the last three
+approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
+#50's could not be read. Each failure costs the owner another round trip.
+
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
 `WORKLOG.md` 10 entries, `DECISIONS.md` 15, `TECH_DEBT.md` 25 open items,
@@ -287,28 +316,9 @@ doc becomes unmaintainable while still under cap (1 too high, or 3 false); or
 items get closed by deletion-without-reasoning to stay under (2 false — the
 cap is then producing dishonesty rather than hygiene).
 
-## D3 · 2026-09-19 · Full allocation across workstreams each shift
+## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
-Every shift allocates across all lanes rather than spending itself on one.
-
-**Alternatives:** one lane per shift (cheapest, but starves lanes); parallel
-subagents (avoids the context-switch cost, far more machinery).
-
-**Why:** at this size no lane has a shift's worth of high-value work — of six
-experiment-backlog items only one is actionable, and seven decision rules are
-gated on uploads accumulating rather than on effort. A large uninterrupted
-allocation to one stream invites filling it, and this project's real failures
-(R1.8/R1.9, the b-roll retention claim, a taxonomy fitted to n=1) were all
-capacity being filled, never capacity running out.
-
-**Assumptions:**
-1. No single lane holds a shift's worth of genuinely valuable work.
-2. The ~1.3–1.6x context-switching cost is acceptable at this scale.
-3. Slices behave as ceilings, not quotas — shifts end early rather than pad.
-
-**Revisit when:** a lane repeatedly cannot fit its valuable work in its slice
-(1 false); or usage becomes the binding constraint on progress (2 false); or
-`WORKLOG` shows slices being filled rather than finished (3 false).
+Per-lane time slices each shift; replaced by one ranked queue (re-reviewed 2026-10-06). Full text in git history.
 
 ## D2 · 2026-09-19 · Autonomy bounded by guardrails, not by review
 

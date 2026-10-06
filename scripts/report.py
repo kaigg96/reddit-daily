@@ -345,6 +345,33 @@ def show_weekly_views(args):
           "\n  only a doubling or a halving as a change. Never a revert trigger.")
 
 
+def show_concentration(args):
+    """`--concentration`: are the views earned by a few hits? (PRD §0 R4)"""
+    age = args.at_age or 7
+    result = insights.views_concentration(_snapshot_metric_rows("views"), at_age=age)
+    if result is None:
+        print(f"fewer than {insights.MIN_COHORT} uploads read at ~{age} days: no answer")
+        return
+    n, total, top_n, top_total, biggest = result
+    print(f"Views concentration, every upload read at ~{age} days old (n={n}, "
+          f"{total:.0f} views)\n")
+    print(f"  top 10% ({top_n} uploads) earned {top_total:.0f}: {top_total / total:.0%}")
+    print(f"  biggest single upload: {biggest:.0f} ({biggest / total:.0%})")
+    print(f"  mean upload {total / n:.0f}")
+
+
+def show_hit_rates(videos, key):
+    """`--concentration --by F`: which values of F are over-represented among
+    the top 10% of uploads by views? (PRD §0 R5)"""
+    rows, cut = insights.hit_rates(videos, key)
+    print(f"Hits (the top 10% by views, {cut} of {len(videos)}) by {key}\n")
+    print(f"  {'group':24} {'n':>4} {'hits':>5} {'rate':>6} {'Fisher p':>9}")
+    for label, n, hits, p in rows:
+        print(f"  {label:24} {n:>4} {hits:>5} {hits / n:>6.0%} {p:>9.3f}")
+    print("\n  p is each group against the rest, two-sided. Read it at the bar its "
+          "\n  question pre-committed, and within an era: eras differ in views.")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
@@ -385,6 +412,9 @@ def main():
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
+    p.add_argument("--concentration", action="store_true",
+                   help="share of 7-day views the top 10%% of uploads earn: "
+                        "are views a hit-rate problem? (PRD R4)")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL, Metric.ENGAGED])
@@ -437,6 +467,10 @@ def main():
         print("\n  release-style: median swing between consecutive batches of 8"
               "\n  alternate days: median gap between odd- and even-day uploads"
               "\n  within the same 16. Smaller is a finer detection limit.")
+        return
+
+    if args.concentration and not args.by:  # the snapshot series, like --trajectory
+        show_concentration(args)
         return
 
     if args.slate:          # reads only the upload log: no analytics involved
@@ -494,6 +528,8 @@ def main():
         show_replays(videos)
     elif args.compare:
         compare(videos, args.compare, args.metric, now)
+    elif args.by and args.concentration:
+        show_hit_rates(videos, args.by)
     elif args.by:
         by_dimension(videos, args.by, args.metric, now)
     else:

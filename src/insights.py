@@ -654,6 +654,40 @@ def views_gained(snapshot_rows):
     return out
 
 
+def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
+    """How much of the views the best uploads earn, each read at the same age.
+
+    The Partner Program's bar is a total, and a total over a lottery is set by
+    its few winners: if a tenth of uploads earn most of the views, the views
+    half of the bar is a hit-rate problem, and a change that moves the median
+    upload is the smaller lever (PRD §0 R4). Zero-view uploads count, since
+    they are part of the total. Returns (n, total, top_n, top_total, biggest),
+    or None below a cohort's worth of reads.
+    """
+    values = sorted((v for v, _ in _read_at_age(snapshot_rows, at_age, tolerance,
+                                                 keep_zero=True)), reverse=True)
+    if len(values) < MIN_COHORT:
+        return None
+    top_n = max(1, round(len(values) * top))
+    return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
+
+
+def hit_rates(videos, key, top=0.10):
+    """([(group, n, hits, p)], cut): how often each value of `key` makes the
+    top `top` share of `videos` by views, highest rate first, with Fisher's
+    two-sided p against every other upload (PRD §0 R5). Zero-view uploads
+    count in n; they can never be hits."""
+    cut = max(1, round(len(videos) * top))
+    hits = {id(v) for v in sorted(videos, key=lambda v: v.views, reverse=True)[:cut]}
+    rows = []
+    for label, vids in split_by(videos, key).items():
+        h = sum(id(v) in hits for v in vids)
+        rows.append((label, len(vids), h,
+                     buried_rate_p(h, len(vids), cut - h, len(videos) - len(vids))))
+    rows.sort(key=lambda r: (r[2] / r[1], r[1]), reverse=True)
+    return rows, cut
+
+
 def totals_change(series, weeks=4):
     """(prior total, recent total, ratio) over the last `weeks` against the
     `weeks` before, or None without enough complete weeks to compare."""
