@@ -159,7 +159,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   due: `v7` (§0 #1) at the 2026-10-12 snapshot, with `--min-uploads 20`. (It replaced
   `age_adjusted_residuals`, which this item and #16 both proposed: a release's
   date and its videos' ages are collinear, so that fit absorbed the effect into
-  its slope.) (b) `--offline` reads the weekly snapshot, which records no
+  its slope.) **Bit on 2026-10-06:** `v6`'s read came due ~10-05 and sat
+  unrecorded until a shift stumbled on it (KEEP). Cheapest fix: the Monday
+  digest prints `--release` for the live and previous `FORMAT_VERSION`, so a
+  due verdict reaches the owner's email whether or not a shift remembers.
+  (b) `--offline` reads the weekly snapshot, which records no
   `privacy_status`, so an owner-privatised upload reads as zero-view there.
   Bounded — medians exclude zeros, so only the zero count moves — and printed on
   every offline run. Fix is a column in `weekly_analytics.py`; not worth one
