@@ -360,6 +360,18 @@ def show_concentration(args):
     print(f"  mean upload {total / n:.0f}")
 
 
+def show_hit_rates(videos, key):
+    """`--concentration --by F`: which values of F are over-represented among
+    the top 10% of uploads by views? (PRD §0 R5)"""
+    rows, cut = insights.hit_rates(videos, key)
+    print(f"Hits (the top 10% by views, {cut} of {len(videos)}) by {key}\n")
+    print(f"  {'group':24} {'n':>4} {'hits':>5} {'rate':>6} {'Fisher p':>9}")
+    for label, n, hits, p in rows:
+        print(f"  {label:24} {n:>4} {hits:>5} {hits / n:>6.0%} {p:>9.3f}")
+    print("\n  p is each group against the rest, two-sided. Read it at the bar its "
+          "\n  question pre-committed, and within an era: eras differ in views.")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
@@ -457,7 +469,7 @@ def main():
               "\n  within the same 16. Smaller is a finer detection limit.")
         return
 
-    if args.concentration:  # reads the committed snapshot series, like --trajectory
+    if args.concentration and not args.by:  # the snapshot series, like --trajectory
         show_concentration(args)
         return
 
@@ -516,6 +528,8 @@ def main():
         show_replays(videos)
     elif args.compare:
         compare(videos, args.compare, args.metric, now)
+    elif args.by and args.concentration:
+        show_hit_rates(videos, args.by)
     elif args.by:
         by_dimension(videos, args.by, args.metric, now)
     else:
