@@ -1,8 +1,8 @@
 # reddit-daily
 
 Automated YouTube Shorts channel: twice a day, a GitHub Action turns the top
-r/AskReddit post + its top 3 comments into a captioned vertical video and
-uploads it. See [PRD.md](PRD.md) for the quality roadmap and requirement IDs,
+post of a question subreddit (`config.SUBREDDITS`, rotated per run; PRD R4.1)
++ its top 3 comments into a captioned vertical video and uploads it. See [PRD.md](PRD.md) for the quality roadmap and requirement IDs,
 and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
 ## Picking this up (new session / new contributor)
@@ -49,7 +49,8 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
 `python -m src.run` (entry point, run by
 [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml)):
 
-1. `src/content.py` — walk today's top AskReddit posts, applying the basic
+1. `src/content.py` — pick this run's subreddit (morning and evening split
+   the list, and the start moves on each day), walk its top posts, applying the basic
    filters (NSFW, profanity, emoji, >90-char titles, yesterday's repeat), and
    gather a pool of ~8 eligible comments per candidate.
 2. `src/screen.py` — **suppression-risk screen** (PRD R4.6). One Gemini call
