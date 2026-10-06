@@ -78,9 +78,9 @@ and more useful than a confident guess.
 - **Legal:** read Reddit's terms first-hand and sent them to you (#60). Our pipeline only reformats Reddit text: it strips formatting, and it skips posts with profanity rather than editing them. So the exposure is the licence's scope and the money clause, not editing. The channel's name also uses Reddit's, which its terms restrict.
 - **Distribution:** confirmed TikTok's terms from its own page: 10,000 followers and 100,000 views in 30 days, videos over one minute, and the country rule above. Meta's pages still refuse even a plain download.
 - **Security:** standing check clean: $0.19 spent this month, you are the only collaborator, no secrets in the project, and the only workflow change was your approved security fix. The quarterly account-security check, the plan's only answer to losing the channel, had never run. I sent you six checks, about 15 minutes, all needing your logins (#59). Your security fix from this afternoon works: the 15:08 release check ran on the new split and recorded its result, so I closed it in the code-health list.
-- **General management:** both trackers updated and within their reading budgets; two finished items left the plan and one left the code-health list.
+- **General management:** trackers updated; two finished items left the plan, one the code-health list.
 - Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video, and with every product item waiting on 12 October or your session, the shift found no product change ready to make.
-- **Friction:** Reddit's and TikTok's pages were marked "needs a browser" for two shifts; a plain download reads them. Only Meta's refuse.
+- **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
 
 ### Blocked
 - **For you:** whether to ask Reddit for an agreement (#60, new); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
