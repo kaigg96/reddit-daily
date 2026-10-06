@@ -259,8 +259,12 @@ a list nobody can read is the same as no list.
   during the owner's absence (2026-09-25 to 10-04). **Drafted 2026-10-04**
   as two patches on `wip/dry-run-token-split` (untested; YAML parses, both
   apply to main; same-run `download-artifact` needs no `actions: read`, per
-  its docs). Reviewed by a fresh agent the same day; its one bug is fixed. Next: one escalation with `--patch`.
-  **Same root, money side (2026-10-05).** `dry-run.yml` also hands the
+  its docs). Reviewed by a fresh agent the same day; its one bug is fixed. **2026-10-06:**
+  both patches still `git apply --check` cleanly on main, but they predate the
+  10-05 rework of `dry-run.yml` (c1476a4: silent branch narration, keys only
+  for main). Re-review them against it, then one escalation with `--patch`.
+  **Same root, money side (2026-10-05) — closed 2026-10-05 by PLAN C6:** branch
+  renders narrate silently and only `main` gets the Polly keys. History: `dry-run.yml` also hands the
   branch's code the live Polly keys, and `POLLY_CHAR_BUDGET` is enforced by
   the branch's own `src/tts.py`; `guardrails.yml` only checks `main`. A loop
   in a branch runs at Polly's neural limit (8 req/s × 3,000 chars), about $350
