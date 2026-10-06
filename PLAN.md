@@ -49,6 +49,7 @@ places.
 | C8 | blocked: the platforms' own pages need a browser (bet 3 asks the owner) | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content, which YouTube's rules out for today's format (§4). TikTok's help pages and Meta's monetization policies render empty to a shift's fetch (2026-10-05); they need a browser. Priced from secondary sources in §1 (2026-10-05). Done when the owner's read confirms or corrects them. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
 | C12 | blocked: the owner's bet-1 choice (PRD #7, #12) | Editorial | **A public brand** | The company's working name is Show of Hands, and the channel's current name uses Reddit's. Once the kept originality step settles what the show is, check the trademark, domain and YouTube/TikTok/Instagram handles for the name (free), and propose whether and how to rename the channel. Renaming is the owner's. Done when the owner has decided. |
+| C14 | blocked: the owner's six checks (escalated 2026-10-06) | Security | **Quarterly account-security check** | The fatal risk's only response, never held. A shift checks what it can see (collaborators, secrets, the Polly key); the logins are the owner's. Done when the owner reports a date; the next is due a quarter later. |
 
 ## 4. Risks
 
@@ -58,7 +59,7 @@ places.
 | Reddit's terms forbid monetized use of API data | Legal | **Likely** / high: secondary sources agree (2026-10-05) that use "as part of a monetized product or service" needs Reddit's express written approval and a contract. We read Reddit through its authenticated API, so this applies before any payout. Reddit's own pages still refuse a shift's reads | C3; ask Reddit before any monetization application |
 | Shorts revenue is too small at any reachable scale | Strategy | High / high — the Partner Program threshold alone is 250–1,250× today's views, and no other route is nearer (§1) | Bets 2 and 3 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | C8 |
-| Loss of the YouTube channel or the Google account | Security | Low / fatal | Quarterly account-security check |
+| Loss of the YouTube channel or the Google account | Security | Low / fatal | C14, quarterly |
 | A runaway Polly bill | Security, Finance | Low / bounded by the budget action | `money_check.py` every shift; branch code never holds the Polly keys |
 
 ## 5. Reviews
