@@ -64,7 +64,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): data 30 · product 25 · gm 20 · engineering 10 · reliability 5 · security 5 · monetization 5
 
-**Summary:** Subreddit rotation is live, the supply step for more uploads a day. Two research questions about where our views come from are answered: no single upload or logged trait drives them, so the quarter's views target stands as drafted.
+**Summary:** Subreddit rotation is live, the supply step for more uploads a day. Two research questions about our views are answered: no single upload or logged trait drives them, so the quarter's views target stands.
 
 ### Toward revenue
 - Subreddit rotation is live from this evening. It is the supply step for bet 2's move to 3 to 4 uploads a day, doubling the pool of posts we draw from. Volume follows once the new subreddit's uploads hold up (15 of them, read in early November).
@@ -72,7 +72,7 @@ and more useful than a confident guess.
 
 ### Done
 - **Reliability:** this morning's upload landed with an AI-written "You…" title. Your subscriber-count change landed overnight; first reading 12 October.
-- **Product:** merged subreddit rotation. Uploads now alternate between AskReddit and NoStupidQuestions, each taking mornings and evenings in turn. Its sample run passed on the final code with a real NoStupidQuestions post. Before that, I fixed a gap the branch had left: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it unnoticed. A test now pins it.
+- **Product:** merged subreddit rotation. Uploads now alternate between AskReddit and NoStupidQuestions, each taking mornings and evenings in turn. Its sample run passed on the final code with a real NoStupidQuestions post. Before that, I fixed a gap: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it. A test pins it.
 - **Data:** asked whether a few hit videos earn most of our views. The best tenth earn 42%, and the single best 3%. By the rule set before looking, nothing changes. Of seven traits the hits might share (title style, voice, topic, time of day, length, background, title source), none stands out beyond chance.
 - **Product:** a decision rule had come due unrecorded: the 19 September release (safety-screen and AI-timeout fixes). Read as its rule is written, it is **kept**: watch time per view held (up 10%, inside normal drift). Views read 62% lower, but views never trigger a revert, because they swing that much with nothing changed.
 - **Data:** refreshed one research question's count (dark-morbid topic, 10 of the 12 uploads it needs). Re-read the background clips: one is at 3 buried uploads of 13, against 3 of 61 for the others. That is not significant yet, so I'm watching it, not acting.
@@ -89,7 +89,7 @@ and more useful than a confident guess.
 
 ### Next
 - Check that this evening's upload lands, and that the first NoStupidQuestions upload (7 October, evening) lands with a title.
-- On 12 October: judge "open on the question" under its rule, and read the narrator, engaged-view and subscriber questions. Re-read the background clip that is at 3 buried uploads of 13.
+- On 12 October: judge "open on the question" under its rule, and read the narrator, engaged-view and subscriber questions. Beside its rule, never as a trigger: 4 of its 13 uploads are buried (5 views or fewer), against 1 of 10 before. Re-read the watched clip.
 - Finish the process audit by pruning the product document. Its history of the first version mixes in live facts that code comments point to, so it needs splitting, not deleting. Also weigh proposing the fresh review as a standing step before any shift merges live code: it caught real issues on first use.
 
 ### Better?
