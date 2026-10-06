@@ -672,6 +672,22 @@ def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, to
     return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
 
 
+def hit_rates(videos, key, top=0.10):
+    """([(group, n, hits, p)], cut): how often each value of `key` makes the
+    top `top` share of `videos` by views, highest rate first, with Fisher's
+    two-sided p against every other upload (PRD §0 R5). Zero-view uploads
+    count in n; they can never be hits."""
+    cut = max(1, round(len(videos) * top))
+    hits = {id(v) for v in sorted(videos, key=lambda v: v.views, reverse=True)[:cut]}
+    rows = []
+    for label, vids in split_by(videos, key).items():
+        h = sum(id(v) in hits for v in vids)
+        rows.append((label, len(vids), h,
+                     buried_rate_p(h, len(vids), cut - h, len(videos) - len(vids))))
+    rows.sort(key=lambda r: (r[2] / r[1], r[1]), reverse=True)
+    return rows, cut
+
+
 def totals_change(series, weeks=4):
     """(prior total, recent total, ratio) over the last `weeks` against the
     `weeks` before, or None without enough complete weeks to compare."""

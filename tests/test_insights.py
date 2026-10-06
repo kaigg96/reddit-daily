@@ -1204,6 +1204,21 @@ def test_views_concentration_refuses_a_thin_cohort():
     assert insights.views_concentration(rows) is None
 
 
+def test_hit_rates_count_the_top_tenth_per_group_against_the_rest():
+    """R5: a hit is a top-10% upload by views; each group is tested against
+    every other upload, and zero-view uploads count in n but never hit."""
+    pub = datetime.datetime(2026, 9, 1, tzinfo=datetime.timezone.utc)
+    vids = [insights.Video(f"b{i}", pub, views=1000 + i, meta={"title_style": "B"})
+            for i in range(2)]
+    vids += [insights.Video(f"a{i}", pub, views=10, meta={"title_style": "A"})
+             for i in range(17)]
+    vids += [insights.Video("z", pub, views=0, meta={"title_style": "A"})]
+    rows, cut = insights.hit_rates(vids, "title_style")
+    assert cut == 2
+    assert [(label, n, hits) for label, n, hits, _ in rows] == [("B", 2, 2), ("A", 18, 0)]
+    assert rows[0][3] == rows[1][3] < 0.01
+
+
 def test_views_gained_counts_the_back_catalogue_and_new_uploads():
     """The Partner Program's bar counts every view in the window, so an old
     video's growth counts, and a video new since the last snapshot counts in
