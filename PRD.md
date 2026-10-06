@@ -266,7 +266,7 @@ be pre-written here.
 - **Acceptance:** header row + append logic; workflow commit step updated to add exactly `prev_post.txt upload_log.csv`; dry runs don't append.
 
 #### R0.3 — Notebook → module refactor — **P1 (recommended, not optional in practice)**
-Nearly every requirement below touches Cell 7's monolith; refactor first: `src/` package (suggested: `content.py` (Reddit), `llm.py` (Gemini), `tts.py` (Polly), `video.py` (assembly), `youtube.py` (upload/comment), `run.py` (orchestrator reading env)). Workflow runs `python -m src.run` instead of nbconvert (drop the nbconvert install). Keep or delete the notebook; if kept, it must not be the executed path.
+Nearly every requirement below touches Cell 7's monolith (the notebook's single video-assembly cell); refactor first: `src/` package (suggested: `content.py` (Reddit), `llm.py` (Gemini), `tts.py` (Polly), `video.py` (assembly), `youtube.py` (upload/comment), `run.py` (orchestrator reading env)). Workflow runs `python -m src.run` instead of nbconvert (drop the nbconvert install). Keep or delete the notebook; if kept, it must not be the executed path.
 - **Acceptance:** `DRY_RUN=1 python -m src.run` produces an equivalent video locally; a `workflow_dispatch` dry run passes in CI.
 
 #### R0.4 — Committed brand font — **P0** (prerequisite for R1.2)
