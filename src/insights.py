@@ -750,6 +750,9 @@ GUARDRAILS = {
     "avg_view_pct": 5.0,      # catches "we just made videos longer"
     "zero_rate": 3.0,         # suppression creeping up, in percentage points
 }
+# Guardrails where a rise is the bad direction. Without this a rising zero
+# rate could never breach, and a falling one would (found 2026-10-06).
+HIGHER_IS_WORSE = {"zero_rate"}
 DIAGNOSTICS = ("views", "duration_s", "likes_per_100", "comments_per_100")
 
 
@@ -779,7 +782,8 @@ def scorecard(then, now, guardrails=None):
             improved = change > 0
             read = "up" if change > 0 else ("down" if change < 0 else "level")
         elif kind == "guardrail":
-            if -change > margins[metric]:
+            worse_by = change if metric in HIGHER_IS_WORSE else -change
+            if worse_by > margins[metric]:
                 read = "BREACHED"
                 breached.append(metric)
             else:

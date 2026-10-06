@@ -1257,6 +1257,18 @@ def test_longer_videos_are_not_called_success():
     assert pct["read"] == "BREACHED"
 
 
+def test_a_rising_zero_rate_breaches_and_a_falling_one_does_not():
+    """zero_rate is suppression: up is worse. The check once read every
+    guardrail as lower-is-worse, so a 2.4 -> 5.6 rise passed as "ok"."""
+    then = {"watch_seconds": 12.0, "avg_view_pct": 61.5, "zero_rate": 2.4}
+    now = {"watch_seconds": 12.5, "avg_view_pct": 56.8, "zero_rate": 5.6}
+    verdict, rows, _ = insights.scorecard(then, now)
+    assert next(r for r in rows if r["metric"] == "zero_rate")["read"] == "BREACHED"
+    assert verdict == "MIXED"
+    verdict, rows, _ = insights.scorecard(now, {**now, "zero_rate": 1.0})
+    assert next(r for r in rows if r["metric"] == "zero_rate")["read"] == "ok"
+
+
 def test_a_genuine_improvement_still_reads_as_better():
     """The guard must not make every result mixed."""
     then = {"watch_seconds": 10.0, "avg_view_pct": 50.0, "views": 120.0, "zero_rate": 3.0}
