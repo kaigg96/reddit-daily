@@ -101,6 +101,13 @@ itself a finding about the channel).
 **Re-reviewed 2026-10-05:** assumption 3 changed with the shift. Shifts went
 from 25 to 60 minutes, three a day (D12, approved in #54), so the floor rose to 5.
 
+**Re-reviewed 2026-10-06:** assumption 1 holds only in part. Generation found
+two research questions above the bar (PRD R4, R5), but each was answered within
+the shift, so the ready count stayed at 0 against the floor of 5. Research
+refills a shift's time, not the floor. While the owner's planning session (#55)
+is pending, the floor measures that wait, not the shift. Not yet a trigger: one
+day.
+
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
 The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
@@ -124,6 +131,12 @@ research lanes are for.
 
 **Revisit when:** the channel earns money (1 false) — then spending proposals
 reopen, sized against revenue.
+
+**Re-reviewed 2026-10-06:** assumption 1 still holds (revenue $0). The drafted
+bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
+1–2 cents per extra upload. The packet asks for it explicitly, so the owner's
+answer there re-decides this ruling for those items. No shift may read it as
+lifted until then.
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
