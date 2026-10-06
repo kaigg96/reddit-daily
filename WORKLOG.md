@@ -62,9 +62,9 @@ and more useful than a confident guess.
 
 ## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
 
-    Worked (% of the shift): legal 35 · engineering 25 · editorial 15 · distribution 10 · gm 10 · security 5
+    Worked (% of the shift): legal 30 · engineering 20 · data 15 · editorial 15 · distribution 10 · gm 5 · security 5
 
-**Summary:** Nothing shipped. I read four sets of rules first-hand. They changed what bet 1 needs and found a breach of Reddit's terms that a few dollars a month would fix. Both are with you, with recommendations. The overdue Python upgrade turns out not to change the video, so it needs one approval and no test slot.
+**Summary:** Nothing in the video changed. I read four sets of rules first-hand. They changed what bet 1 needs and found a breach of Reddit's terms that a few dollars a month would fix. Both are with you, with recommendations. The overdue Python upgrade turns out not to change the video, so it needs one approval and no test slot.
 
 ### Toward revenue
 - **Bet 1, sharpened.** YouTube's policy page, read directly for the first time, does not ask for a human voice. It refuses AI-written content from "generic or unoriginal templates" that lacks "the creator's original, authentic insights or perspective". A quip from a fixed prompt may not pass. A house stance that you set, which the AI writes from, is the cheapest step that fits the wording. A newer rule also bars AI hosts from giving advice on health, law, money or politics, the topics of about a third of our uploads. So the commentary must judge, never advise. Both points are in the plan's specs and on the planning issue.
@@ -74,10 +74,11 @@ and more useful than a confident guess.
 ### Done
 - **Legal:** read the terms of Reddit, Stack Exchange, Google's Gemini and YouTube's monetization page directly, and sent the results to you (two new notes on existing issues, one new decision).
 - **Engineering:** rendered the fixed sample video on the old and new Python. The files are byte-for-byte identical, and every test passes on both. Python 3.10 lost security support on 4 October. The upgrade is ready for you as one patch. A fix.
+- **Data:** one background clip is watched for getting uploads buried (3 of 13). It had no written rule for when to drop it. I set one before its next read: the clip goes if its buried rate stands out from the other clips beyond chance, corrected for testing seven clips at once. The report tool now prints that test. It flags the clip we dropped in September, the one known case. Today the watched clip is under the bar, so it stays; it is re-read on 12 October. I refined the test once after seeing a first number. A dropped clip had been counting in the comparison, so I took it out. The decision is the same either way. A fix.
 - **Distribution:** a browser on our runner now opens Meta's pages, but their rule lists stay empty unless logged in. Facebook and Instagram stay with you.
 - **Security:** standing check clean: $0.19 spent this month, no secrets in the project, and the only workflow change today was your approved fix.
 - **General management:** the ready queue was empty. I ranked six new candidates and took the four that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
-- Fixing against improving: one fix (the runtime); the rest improved the map for bet 1 and the Reddit decision.
+- Fixing against improving: two fixes (the runtime, the clip rule); the rest improved the map for bet 1 and the Reddit decision.
 - **Friction:** answered research questions leave the table, so nothing stops a shift from regenerating one. Searching the findings first caught it this time.
 
 ### Blocked
@@ -87,7 +88,7 @@ and more useful than a confident guess.
 - Tomorrow morning: confirm the upload landed, then read the topic ranker's count at its 20th run, under its rule.
 - Tomorrow evening: the first NoStupidQuestions upload. Check it lands with a title.
 - If you apply the Python patch: one sample run of the live code before the next upload, then fix the setup line in the readme.
-- 12 October: judge "open on the question" under its rule, with the engaged-view, narrator and subscriber reads beside it.
+- 12 October: judge "open on the question" under its rule, with the engaged-view, narrator and subscriber reads beside it. Apply the new clip rule to the watched clip.
 - Considered and not taken: building the reaction beat now (it should wait for your stance), and re-reading engaged views by background clip. The dip from late August to mid-September shows on every clip, and the current releases are back up.
 
 ### Better?
