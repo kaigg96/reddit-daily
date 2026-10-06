@@ -60,6 +60,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
+| R5 | ready | **What do the hits share?** The top 10% of uploads earn 42% of 7-day views (§4, 2026-10-06), so a trait that makes hits likelier is a bet-2 lever beside titles | `report.py --offline --at-age 7 --concentration --by F` for F in title_style, voice, topic, slot, video_length, bg_clip, title_source. A value counts only at Fisher **p < 0.007** (0.05 over 7 fields) against the rest **and** the same direction `--within` each era with ≥8 uploads → a bet-2 candidate with its own rule. None → recorded. |
 | R3 | blocked: the 2026-10-12 snapshot (10-05: ≤7 per voice within `v6`/`v7`; refused) | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
 
 #### Owner tasks (anytime, no version bump)
