@@ -19,9 +19,10 @@ on:
         required: false
         default: 'integration/preview'
 
+# The job that runs the branch's code cannot push (TECH_DEBT, 2026-09-24);
+# only `record`, on a fresh runner running main's code, writes.
 permissions:
-  contents: write
-  issues: write
+  contents: read
 
 concurrency:
   group: validate-release
@@ -32,6 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET: ${{ inputs.ref || 'integration/preview' }}
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+      target: ${{ steps.out.outputs.target }}
+      commit: ${{ steps.out.outputs.commit }}
+      code: ${{ steps.gates.outputs.code }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,13 +112,67 @@ jobs:
           python scripts/validate_release.py
           echo "code=$?" >> "$GITHUB_OUTPUT"
 
+      # Artifacts are readable by anyone who can read the repo, so the key is
+      # stripped before upload, not only before the commit.
+      - name: Hand the result to the record job
+        id: out
+        if: always() && steps.check.outputs.proceed == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # only to strip it
+        run: |
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short "origin/$TARGET")" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/detail"
+          if [ -f .github/last-release-detail.md ]; then
+            python3 -c 'import os, sys; k = os.environ.get("GEMINI_API_KEY", ""); t = open(sys.argv[1]).read(); sys.stdout.write(t.replace(k, "***") if len(k) >= 6 else t)' \
+              .github/last-release-detail.md > "$RUNNER_TEMP/detail/last-release-detail.md"
+          fi
+
+      - name: Keep the detail
+        if: always() && steps.check.outputs.proceed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-detail
+          path: ${{ runner.temp }}/detail
+          if-no-files-found: ignore
+          retention-days: 3
+
+  # A fresh runner on main: nothing the branch's code did reaches this job.
+  # Not always(): tests and gates are continue-on-error, so a failed validate
+  # job is an infrastructure fault. Recording it would write a false FAIL with
+  # no escalation; skipping keeps the old verdict and shows a failed run, as
+  # the single job did.
+  record:
+    needs: validate
+    if: needs.validate.result == 'success' && needs.validate.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    env:
+      TARGET: ${{ needs.validate.outputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Branch code chose this artifact's files. Unpacked into .github they
+      # could overwrite tracked files, so take the one expected file only.
+      - name: Fetch the detail
+        uses: actions/download-artifact@v4
+        with:
+          name: release-detail
+          path: ${{ runner.temp }}/detail-in
+        continue-on-error: true
+
+      - name: Take only the detail file
+        run: |
+          mkdir -p .github
+          f="$RUNNER_TEMP/detail-in/last-release-detail.md"
+          if [ -f "$f" ] && [ ! -L "$f" ]; then cp "$f" .github/last-release-detail.md; fi
+
       - name: Record the verdict where a cold session can read it
-        if: steps.check.outputs.proceed == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # only to strip it, below
         run: |
-          RESULT="${{ steps.gates.outcome }}"
-          git checkout main
           mkdir -p .github
           {
             echo "# Last release validation"
@@ -121,9 +181,9 @@ jobs:
             echo "needing live Gemini quota to find out whether the gates pass."
             echo
             echo "- **Branch:** \`$TARGET\`"
-            echo "- **Commit:** \`$(git rev-parse --short "origin/$TARGET")\`"
+            echo "- **Commit:** \`${{ needs.validate.outputs.commit }}\`"
             echo "- **When:** $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            case "${{ steps.gates.outputs.code }}" in
+            case "${{ needs.validate.outputs.code }}" in
               0) V='✅ PASS — safe to merge' ;;
               2) V='⚠️ INCONCLUSIVE — gates could not be exercised; not a failure' ;;
               *) V='❌ FAIL — do not merge' ;;
@@ -159,7 +219,7 @@ jobs:
       # recorded and left for the next scheduled run -- it means the gates
       # could not be exercised, not that the release is bad.
       - name: Escalate a failure to the owner
-        if: steps.check.outputs.proceed == 'true' && steps.gates.outputs.code == '1'
+        if: needs.validate.outputs.code == '1'
         uses: actions/github-script@v7
         with:
           script: |
@@ -199,5 +259,5 @@ jobs:
             }
 
       - name: Fail the run if the gates failed
-        if: steps.check.outputs.proceed == 'true' && steps.gates.outputs.code == '1'
+        if: needs.validate.outputs.code == '1'
         run: exit 1

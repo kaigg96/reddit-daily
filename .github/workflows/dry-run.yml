@@ -22,8 +22,12 @@ on:
         description: 'Branch to render (a manual run skips the 12-hour limit)'
         required: true
 
+# The job that runs the branch's code gets no write access: a token that can
+# push, left beside unmerged code, could change main without starting the
+# guard workflows (TECH_DEBT, 2026-09-24). Only `record`, on a fresh runner
+# running main's code alone, can push.
 permissions:
-  contents: write   # record the verdict, clear the queue
+  contents: read
   actions: read     # render history, which the 12-hour limit reads
 
 concurrency:
@@ -34,7 +38,15 @@ jobs:
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    outputs:
+      branch: ${{ steps.req.outputs.branch }}
+      go: ${{ steps.req.outputs.go }}
+      why: ${{ steps.req.outputs.why }}
+      code: ${{ steps.render.outputs.code }}
+      commit: ${{ steps.render.outputs.commit }}
     steps:
+      # Read-only token, so persisting it is harmless, and the queue check's
+      # git ls-remote needs it on a private repository.
       - uses: actions/checkout@v4
 
       - name: What to render
@@ -174,15 +186,81 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # A fresh runner: nothing the branch's code did can reach this job's files.
+  # It re-checks the sample from main's code and redacts the log again, since
+  # the render job's copies of both ran beside the branch.
+  record:
+    needs: render
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # record the verdict, clear the queue
+    steps:
+      # The playability check below parses a video that branch code made, so
+      # no write token sits in .git/config while it runs; the push step alone
+      # gets it.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Fetch the sample and the log
+        if: needs.render.outputs.go == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dry-run-render
+          path: ${{ runner.temp }}/sample
+        continue-on-error: true
+
+      - name: Strip secrets from the log, from main's side
+        if: needs.render.outputs.go == 'true'
+        env:
+          S1: ${{ secrets.REDDIT_CLIENT_ID }}
+          S2: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          S3: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
+          S4: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
+          S5: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python3 - "$RUNNER_TEMP/sample/render.log" "$RUNNER_TEMP/render.log" <<'PY'
+          import os, sys
+          src, dst = sys.argv[1], sys.argv[2]
+          text = open(src, errors="replace").read() if os.path.exists(src) else ""
+          for k in ("S1", "S2", "S3", "S4", "S5"):
+              v = os.environ.get(k, "")
+              if len(v) >= 6:
+                  text = text.replace(v, "***")
+          open(dst, "w").write(text)
+          PY
+
+      # The check needs moviepy and imageio-ffmpeg: main's pins, not the branch's.
+      - uses: actions/setup-python@v5
+        if: needs.render.outputs.go == 'true'
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install main's dependencies
+        if: needs.render.outputs.go == 'true'
+        run: pip install -r requirements.txt
+
+      - name: Is it a playable video?
+        if: needs.render.outputs.go == 'true'
+        run: |
+          python3 scripts/dry_run.py check "$RUNNER_TEMP/sample/final_askreddit_video.mp4" \
+            > "$RUNNER_TEMP/check.txt" 2>&1 || true
+          cat "$RUNNER_TEMP/check.txt"
+
       - name: Record the verdict where a shift can read it
         if: always()
         env:
-          BRANCH: ${{ steps.req.outputs.branch }}
-          GO: ${{ steps.req.outputs.go }}
-          WHY: ${{ steps.req.outputs.why }}
-          CODE: ${{ steps.render.outputs.code }}
-          COMMIT: ${{ steps.render.outputs.commit }}
+          BRANCH: ${{ needs.render.outputs.branch }}
+          GO: ${{ needs.render.outputs.go }}
+          WHY: ${{ needs.render.outputs.why }}
+          CODE: ${{ needs.render.outputs.code }}
+          COMMIT: ${{ needs.render.outputs.commit }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
           if [ "$GO" = "true" ]; then
             python3 scripts/dry_run.py record --branch "$BRANCH" --commit "$COMMIT" \
@@ -197,6 +275,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add -A .github/last-dry-run.md .dry-run-requests
           git commit -m "Record dry-run verdict" || echo "unchanged"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}"
           for attempt in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
             echo "push attempt $attempt failed; retrying"; sleep 5
