@@ -55,6 +55,8 @@ class Metric:
     COMMENTS = "comments"
     TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
     ENGAGED = "implied_engaged"  # NOT the engaged share: refuted 2026-10-05 (engaged_check)
+    ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
+    ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
 
 
 @dataclass
@@ -67,6 +69,7 @@ class Video:
     likes: float = 0.0
     comments: float = 0.0
     est_minutes: float = 0.0
+    engaged_views: float = None   # None where the snapshot predates the column (2026-10-05)
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
@@ -83,6 +86,14 @@ class Video:
         engagedViews / views. Refuted 2026-10-05: `engaged_check` reads it 26% high."""
         denom = self.views * self.watch_seconds
         return self.est_minutes * 60 / denom if denom else 0.0
+
+    @property
+    def engaged_share(self):
+        """engagedViews / views, the share of play starts the Partner Program
+        counts (PLAN §1). None when unreported, so cohorts skip it, not zero it."""
+        if self.engaged_views is None:
+            return None
+        return self.engaged_views / self.views if self.views else 0.0
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
@@ -134,11 +145,12 @@ class Comparison:
         return (self.a.median - self.b.median) / self.b.median
 
     def render(self):
+        d = decimals(self.metric)
         lines = [f"{self.metric}: {self.a.label} vs {self.b.label} -> {self.verdict}"]
         for c in (self.a, self.b):
             flag = "" if c.sufficient else f"  (below MIN_COHORT={MIN_COHORT})"
             zeros = f", {c.zero_view_count} zero-view excluded" if c.zero_view_count else ""
-            lines.append(f"    {c.label:24} n={c.n:<4} median={c.median:<8.1f} "
+            lines.append(f"    {c.label:24} n={c.n:<4} median={c.median:<8.{d}f} "
                          f"med_age={c.median_age:.0f}d{zeros}{flag}")
         if not self.age_matched:
             lines.append("    WARNING: cohort ages differ enough to confound this comparison.")
@@ -148,12 +160,20 @@ class Comparison:
 # ---------------------------------------------------------------- pure logic
 
 
+def decimals(metric):
+    """Places to print: a share lives between 0 and 1, where .1f hides 0.33 vs 0.38."""
+    return 2 if metric == Metric.ENGAGED_SHARE else 1
+
+
 def median(values):
     return statistics.median(values) if values else float("nan")
 
 
 def summarize(videos, label, metric, now):
     """Cohort summary. Zero-view videos are counted, not averaged in (rule 4)."""
+    # A metric the snapshot never reported (engaged views before 2026-10-05)
+    # leaves the cohort entirely: neither a zero-view video nor a zero.
+    videos = [v for v in videos if v.get(metric) is not None]
     live = [v for v in videos if v.views > 0]
     zeros = len(videos) - len(live)
     return Cohort(
@@ -883,6 +903,10 @@ def age_adjusted_residuals(videos, now):
 # ---------------------------------------------------------------- I/O
 
 
+def _optional_float(value):
+    return float(value) if value not in (None, "") else None
+
+
 def _parse_ts(value):
     return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
 
@@ -1102,6 +1126,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
             views=float(s.get("views") or 0),
             watch_seconds=float(s.get("avg_view_duration_s") or 0),
             est_minutes=float(s.get("est_minutes_watched") or 0),
+            engaged_views=_optional_float(s.get("engaged_views")),
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0), comments=float(s.get("comments") or 0),
             meta=r,
@@ -1215,6 +1240,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             views=float(s.get("views") or 0),
             watch_seconds=float(s.get("avg_view_duration_s") or 0),
             est_minutes=float(s.get("est_minutes_watched") or 0),
+            engaged_views=_optional_float(s.get("engaged_views")),
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0),
             comments=float(s.get("comments") or 0),
@@ -1422,3 +1448,30 @@ def engaged_check(snapshot_rows, min_views=20, tolerance=0.10):
         return 0, None, None
     within = sum(1 for x in ratios if abs(x - 1) <= tolerance) / len(ratios)
     return len(ratios), statistics.median(ratios), within
+
+
+ENGAGED_SHARE_MIN_VIDEOS = 20
+
+
+def engaged_share(snapshot_rows, published_since=None):
+    """What share of our views does the Partner Program count? Since
+    2025-03-31 `views` counts every play start, while the bar's "qualified
+    Shorts views" are the older, stricter engaged count (PLAN §1). Summed over
+    rows carrying both, optionally only videos published on or after
+    `published_since` (an aware datetime).
+
+    Returns (n videos, views, engaged views, share), or (n, views, engaged,
+    None) under ENGAGED_SHARE_MIN_VIDEOS — too few to restate a gap with.
+    """
+    n, views, engaged = 0, 0, 0
+    for r in snapshot_rows:
+        try:
+            v, e = int(float(r["views"])), int(float(r["engaged_views"]))
+        except (KeyError, TypeError, ValueError):
+            continue        # blank engaged_views: the API did not report it
+        if published_since and _parse_ts(r["published_at"]) < published_since:
+            continue
+        n, views, engaged = n + 1, views + v, engaged + e
+    if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
+        return n, views, engaged, None
+    return n, views, engaged, engaged / views

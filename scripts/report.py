@@ -58,7 +58,7 @@ def by_dimension(videos, key, metric, now):
     for c in rows:
         mark = "" if c.sufficient else "  (thin)"
         total = c.n + c.zero_view_count
-        print(f"  {c.label:24} {c.n:>4} {c.median:>9.1f} {c.median_age:>7.0f}d "
+        print(f"  {c.label:24} {c.n:>4} {c.median:>9.{insights.decimals(metric)}f} {c.median_age:>7.0f}d "
               f"{c.zero_view_count:>5} {c.buried_count:>4}/{total:<4}  {mark}")
 
     pair = [c for c in rows if c.label != "(unset)"]
@@ -406,6 +406,9 @@ def main():
                         "replays can cause (backlog #9's first test)")
     p.add_argument("--engaged-check", action="store_true",
                    help="R2: does the minutes column encode engaged views? latest snapshot only")
+    p.add_argument("--engaged-share", action="store_true",
+                   help="share of views the Partner Program counts (engaged / all play "
+                        "starts), all videos and the last 90 days; latest snapshot only")
     p.add_argument("--placebo", action="store_true",
                    help="noise with nothing changed: consecutive batches (how a release "
                         "is judged) vs alternate days in the same weeks (PLAN C9)")
@@ -417,7 +420,8 @@ def main():
                         "are views a hit-rate problem? (PRD R4)")
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
-                            Metric.TOTAL, Metric.ENGAGED])
+                            Metric.TOTAL, Metric.ENGAGED, Metric.ENGAGED_SHARE,
+                            Metric.ENGAGED_VIEWS])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -452,6 +456,25 @@ def main():
         else:
             print(f"{latest}: implied/actual engaged share, n={n} videos with >=20 views: "
                   f"median {med:.2f}, {within:.0%} within 10% of 1")
+        return
+
+    if args.engaged_share:  # lifetime totals in one snapshot: a ratio, not a comparison
+        import csv as _csv
+        from src import config
+        with open(config.ANALYTICS_SNAPSHOTS) as f:
+            rows = list(_csv.DictReader(f))
+        latest = max(r["snapshot_date"] for r in rows if r.get("engaged_views"))
+        rows = [r for r in rows if r["snapshot_date"] == latest]
+        cut = (datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+               - datetime.timedelta(days=90))
+        print(f"Engaged share of views, snapshot {latest} (lifetime totals per video)")
+        for label, since in (("all videos", None), ("published in the last 90 days", cut)):
+            n, views, engaged, share = insights.engaged_share(rows, since)
+            verdict = (f"{share:.0%}" if share is not None else
+                       f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)")
+            print(f"  {label:32} n={n:<5} views {views:>8,}  engaged {engaged:>8,}  share {verdict}")
+        print("\n  The Partner Program's 10M bar counts qualified (engaged) views, so a"
+              "\n  gap stated in views understates it by 1/share.")
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
