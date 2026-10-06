@@ -1457,3 +1457,32 @@ def test_engaged_check_reads_the_minutes_column_against_engaged_views():
     assert abs(med - 1.0) < 1e-9
     assert abs(within - 2 / 3) < 1e-9
     assert _ins.engaged_check([blank]) == (0, None, None)
+
+
+def test_engaged_share_sums_both_counts_and_refuses_a_thin_cohort():
+    import datetime as _dt
+    from src import insights as _ins
+    old = {"views": "100", "engaged_views": "50", "published_at": "2026-06-01T12:00:00Z"}
+    new = dict(old, views="300", engaged_views="60", published_at="2026-09-01T12:00:00Z")
+    blank = dict(new, engaged_views="")
+    rows = [old] * 10 + [new] * 20 + [blank] * 5
+    n, views, engaged, share = _ins.engaged_share(rows)
+    assert (n, views, engaged) == (30, 7000, 1700)
+    assert abs(share - 1700 / 7000) < 1e-9     # summed, not a mean of ratios
+    since = _dt.datetime(2026, 7, 1, tzinfo=_dt.timezone.utc)
+    assert _ins.engaged_share(rows, since)[1:] == (6000, 1200, 0.2)
+    assert _ins.engaged_share([new] * 19) == (19, 5700, 1140, None)
+
+
+def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
+    import datetime as _dt
+    from src import insights as _ins
+    t = _dt.datetime(2026, 10, 1, tzinfo=_dt.timezone.utc)
+    vids = [_ins.Video("a", t, views=100, engaged_views=30),
+            _ins.Video("b", t, views=100, engaged_views=50),
+            _ins.Video("c", t, views=100),                   # pre-2026-10-05 snapshot
+            _ins.Video("d", t, views=0, engaged_views=0)]    # zero-view, still counted
+    c = _ins.summarize(vids, "all", _ins.Metric.ENGAGED_SHARE, t)
+    assert (c.n, c.zero_view_count) == (2, 1)
+    assert abs(c.median - 0.4) < 1e-9
+    assert _ins.summarize(vids, "all", _ins.Metric.VIEWS, t).n == 3
