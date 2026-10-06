@@ -60,7 +60,6 @@ The source of ready work that never waits on a sample video or costs money. When
 | # | Status | Question | Test |
 |---|---|---|---|
 | R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
-| R4 | ready | **Are the channel's views earned by a few hits?** About 89% of channel views arrive in an upload's first week (`--trajectory --metric views`, 2026-10-06: ~27k at 7 days of ~31k gained), so the bar is uploads × first-week views. Whether a few uploads earn most of those decides bet 2's lever (PLAN §2) | Share of 7-day views earned by the top 10% of uploads (`report.py --concentration`). **≥50%** → views are a hit-rate problem: propose to the owner a hit count beside bet 2's total, since a 4-week total then swings with single hits. **≤30%** → broad-based; median-moving levers (titles, #10) are the right ones. Between → recorded, nothing changes. |
 | R3 | blocked: the 2026-10-12 snapshot (10-05: ≤7 per voice within `v6`/`v7`; refused) | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
 
 #### Owner tasks (anytime, no version bump)
@@ -137,6 +136,8 @@ All metrics via YouTube Studio / Analytics API. The **≥ 14 days / ≥ 20 uploa
 Directional, not contractual — the algorithm is stochastic, and the strongest measured predictor of views explains only part of the variance (`r ≈ +0.34`). The system's job is to make every upload *worthy* of distribution and measurable (R0.2), so format versions can be compared honestly.
 
 ### Findings — data reviews
+
+**Views are neither hit-driven nor flat; R4 lands between its thresholds (2026-10-06).** `report.py --concentration`, n=169 at 7 days: the top 10% of uploads earned **42%** of 31,494 views, and the biggest single upload **3%** (1,050). The rule's band was ≤30% broad / ≥50% hit-driven, so it is recorded and bet 2 keeps its total-views measure. The premise held: roughly 90% of channel-wide views arrive in an upload's first week (`--trajectory --metric views`: ~27,400 first-week views in W30–W39 of 30,889 gained over the same 76 days), so the back catalogue does not compound and the bar is uploads × first-week views. At 4 uploads a day, that is ~28,000 first-week views per upload against a mean of 186.
 
 **Alternating a test by day would not sharpen it; the noise is sample size, not the calendar (2026-10-05).** `report.py --placebo`, nothing switched, n=150 at 7 days: watch-seconds halves split by alternate days within the same 16 uploads differ by a median **12%**, against **13%** between consecutive batches of 8. So the 6–15% batch swing (above) is mostly the noise of 8-upload medians, and only more uploads per arm narrows it. This refuted the same shift's proposal to run tests on alternate days (PLAN C9). The lever for learning speed is volume (§0 #4).
 

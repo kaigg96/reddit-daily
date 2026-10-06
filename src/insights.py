@@ -654,6 +654,24 @@ def views_gained(snapshot_rows):
     return out
 
 
+def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
+    """How much of the views the best uploads earn, each read at the same age.
+
+    The Partner Program's bar is a total, and a total over a lottery is set by
+    its few winners: if a tenth of uploads earn most of the views, the views
+    half of the bar is a hit-rate problem, and a change that moves the median
+    upload is the smaller lever (PRD §0 R4). Zero-view uploads count, since
+    they are part of the total. Returns (n, total, top_n, top_total, biggest),
+    or None below a cohort's worth of reads.
+    """
+    values = sorted((v for v, _ in _read_at_age(snapshot_rows, at_age, tolerance,
+                                                 keep_zero=True)), reverse=True)
+    if len(values) < MIN_COHORT:
+        return None
+    top_n = max(1, round(len(values) * top))
+    return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
+
+
 def totals_change(series, weeks=4):
     """(prior total, recent total, ratio) over the last `weeks` against the
     `weeks` before, or None without enough complete weeks to compare."""

@@ -1189,6 +1189,21 @@ def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
     assert insights.weekly_totals(rows) == []
 
 
+def test_views_concentration_reads_each_upload_once_at_the_same_age():
+    """The top tenth's share of the views, zeros included, from the 7-day
+    reading only: a later lifetime count would credit the oldest uploads."""
+    rows = _week_of_uploads(5, 16, [0, 10, 10, 10, 10, 10, 10], vid="a")
+    rows += _week_of_uploads(12, 23, [10, 10, 900], vid="b")
+    rows += _week_of_uploads(5, 60, [5000] * 7, vid="a")    # long after 7 days
+    n, total, top_n, top_total, biggest = insights.views_concentration(rows)
+    assert (n, total, top_n, top_total, biggest) == (10, 980, 1, 900, 900)
+
+
+def test_views_concentration_refuses_a_thin_cohort():
+    rows = _week_of_uploads(5, 16, [10] * 7)
+    assert insights.views_concentration(rows) is None
+
+
 def test_views_gained_counts_the_back_catalogue_and_new_uploads():
     """The Partner Program's bar counts every view in the window, so an old
     video's growth counts, and a video new since the last snapshot counts in
