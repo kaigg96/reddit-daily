@@ -62,7 +62,7 @@ and more useful than a confident guess.
 
 ## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
 
-    Worked (% of the shift): legal 30 · engineering 20 · data 15 · editorial 15 · distribution 10 · gm 5 · security 5
+    Worked (% of the shift): legal 30 · engineering 25 · data 15 · editorial 10 · distribution 10 · gm 5 · security 5
 
 **Summary:** Nothing in the video changed. I read four sets of rules first-hand. They changed what bet 1 needs and found a breach of Reddit's terms that a few dollars a month would fix. Both are with you, with recommendations. The overdue Python upgrade turns out not to change the video, so it needs one approval and no test slot.
 
@@ -73,8 +73,9 @@ and more useful than a confident guess.
 
 ### Done
 - **Legal:** read the terms of Reddit, Stack Exchange, Google's Gemini and YouTube's monetization page directly, and sent the results to you (two new notes on existing issues, one new decision).
+- **Legal:** built crediting each Reddit user by name in the description, as Reddit's terms ask beside the link we already give; deleted and offensive names are left out. It awaits its sample run (requested 23:32) and changes the description only.
 - **Engineering:** rendered the fixed sample video on the old and new Python. The files are byte-for-byte identical, and every test passes on both. Python 3.10 lost security support on 4 October. The upgrade is ready for you as one patch. A fix.
-- **Data:** one background clip is watched for getting uploads buried (3 of 13). It had no written rule for when to drop it. I set one before its next read: the clip goes if its buried rate stands out from the other clips beyond chance, corrected for testing seven clips at once. The report tool now prints that test. It flags the clip we dropped in September, the one known case. Today the watched clip is under the bar, so it stays; it is re-read on 12 October. I refined the test once after seeing a first number. A dropped clip had been counting in the comparison, so I took it out. The decision is the same either way. A fix.
+- **Data:** one background clip is watched for burying uploads (3 of 13), with no written rule for dropping it. I set one before its next read: drop it if its rate stands out from the other clips beyond chance, corrected for testing seven at once. The report now prints that test; it flags the clip dropped in September. The watched clip stays; re-read 12 October. I refined the test once after seeing a first number (a dropped clip still counted in the comparison); the decision is the same either way. A fix.
 - **Distribution:** a browser on our runner now opens Meta's pages, but their rule lists stay empty unless logged in. Facebook and Instagram stay with you.
 - **Security:** standing check clean: $0.19 spent this month, no secrets in the project, and the only workflow change today was your approved fix.
 - **General management:** the ready queue was empty. I ranked six new candidates and took the four that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
@@ -85,6 +86,7 @@ and more useful than a confident guess.
 - **For you:** turning on Gemini billing (#62, new); the Python upgrade patch (#63, new); asking Reddit (#60); the planning session (#55), where the question is now whose perspective the commentary carries; the account checks (#59); the review-step proposal (#61); re-running the comments change (#53); the auto-apply patch (#50). Also the old music task: every upload uses one track, and YouTube's template rule now gives that a reason. Two or three Audio Library tracks would do.
 
 ### Next
+- First: if the name-credit branch is still unmerged, merge it on a sample-run pass that names its latest commit, then check the next upload's description.
 - Tomorrow morning: confirm the upload landed, then read the topic ranker's count at its 20th run, under its rule.
 - Tomorrow evening: the first NoStupidQuestions upload. Check it lands with a title.
 - If you apply the Python patch: one sample run of the live code before the next upload, then fix the setup line in the readme.
