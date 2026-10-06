@@ -318,31 +318,7 @@ cap is then producing dishonesty rather than hygiene).
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
-**Re-reviewed 2026-10-06:** no longer in force. Since D12 (2026-10-05) a shift
-ranks one queue across the functions and slices are gone (`/shift` §3). Reviews
-replace the starvation floor. Kept for its reasoning, which D12's ranking still
-leans on: filling capacity, not running out of it, caused the real failures.
-
-Every shift allocates across all lanes rather than spending itself on one.
-
-**Alternatives:** one lane per shift (cheapest, but starves lanes); parallel
-subagents (avoids the context-switch cost, far more machinery).
-
-**Why:** at this size no lane has a shift's worth of high-value work — of six
-experiment-backlog items only one is actionable, and seven decision rules are
-gated on uploads accumulating rather than on effort. A large uninterrupted
-allocation to one stream invites filling it, and this project's real failures
-(R1.8/R1.9, the b-roll retention claim, a taxonomy fitted to n=1) were all
-capacity being filled, never capacity running out.
-
-**Assumptions:**
-1. No single lane holds a shift's worth of genuinely valuable work.
-2. The ~1.3–1.6x context-switching cost is acceptable at this scale.
-3. Slices behave as ceilings, not quotas — shifts end early rather than pad.
-
-**Revisit when:** a lane repeatedly cannot fit its valuable work in its slice
-(1 false); or usage becomes the binding constraint on progress (2 false); or
-`WORKLOG` shows slices being filled rather than finished (3 false).
+Per-lane time slices each shift; replaced by one ranked queue (re-reviewed 2026-10-06). Full text in git history.
 
 ## D2 · 2026-09-19 · Autonomy bounded by guardrails, not by review
 
