@@ -60,6 +60,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
+
+    Worked (% of the shift): legal 35 · engineering 25 · editorial 15 · distribution 10 · gm 10 · security 5
+
+**Summary:** Nothing shipped. I read four sets of rules first-hand. They changed what bet 1 needs and found a breach of Reddit's terms that a few dollars a month would fix. Both are with you, with recommendations. The overdue Python upgrade turns out not to change the video, so it needs one approval and no test slot.
+
+### Toward revenue
+- **Bet 1, sharpened.** YouTube's policy page, read directly for the first time, does not ask for a human voice. It refuses AI-written content from "generic or unoriginal templates" that lacks "the creator's original, authentic insights or perspective". A quip from a fixed prompt may not pass. A house stance that you set, which the AI writes from, is the cheapest step that fits the wording. A newer rule also bars AI hosts from giving advice on health, law, money or politics, the topics of about a third of our uploads. So the commentary must judge, never advise. Both points are in the plan's specs and on the planning issue.
+- **A breach we can close.** Reddit's terms forbid letting anyone "acting on your behalf" train AI on its posts. Gemini's free allowance, which reads every post we consider, is used to improve Google's models; the paid tier is not. I recommend the paid tier, about $1–3 a month with a daily cap set at Google, before anyone writes to Reddit. It also lifts the 20-a-day limit that blocks the topic ranker.
+- **The fallback source is real.** Stack Exchange licenses its posts for commercial reuse with changes allowed, on three conditions: credit every author, release our videos under the same licence, and keep its text out of AI training (the paid tier covers that).
+
+### Done
+- **Legal:** read the terms of Reddit, Stack Exchange, Google's Gemini and YouTube's monetization page directly, and sent the results to you (two new notes on existing issues, one new decision).
+- **Engineering:** rendered the fixed sample video on the old and new Python. The files are byte-for-byte identical, and every test passes on both. Python 3.10 lost security support on 4 October. The upgrade is ready for you as one patch. A fix.
+- **Distribution:** a browser on our runner now opens Meta's pages, but their rule lists stay empty unless logged in. Facebook and Instagram stay with you.
+- **Security:** standing check clean: $0.19 spent this month, no secrets in the project, and the only workflow change today was your approved fix.
+- **General management:** the ready queue was empty. I ranked six new candidates and took the four that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
+- Fixing against improving: one fix (the runtime); the rest improved the map for bet 1 and the Reddit decision.
+- **Friction:** answered research questions leave the table, so nothing stops a shift from regenerating one. Searching the findings first caught it this time.
+
+### Blocked
+- **For you:** turning on Gemini billing (#62, new); the Python upgrade patch (#63, new); asking Reddit (#60); the planning session (#55), where the question is now whose perspective the commentary carries; the account checks (#59); the review-step proposal (#61); re-running the comments change (#53); the auto-apply patch (#50). Also the old music task: every upload uses one track, and YouTube's template rule now gives that a reason. Two or three Audio Library tracks would do.
+
+### Next
+- Tomorrow morning: confirm the upload landed, then read the topic ranker's count at its 20th run, under its rule.
+- Tomorrow evening: the first NoStupidQuestions upload. Check it lands with a title.
+- If you apply the Python patch: one sample run of the live code before the next upload, then fix the setup line in the readme.
+- 12 October: judge "open on the question" under its rule, with the engaged-view, narrator and subscriber reads beside it.
+- Considered and not taken: building the reaction beat now (it should wait for your stance), and re-reading engaged views by background clip. The dip from late August to mid-September shows on every clip, and the current releases are back up.
+
+### Better?
+- **Than last shift:** Slightly. Bet 1's real requirement is clearer, and a live breach has a cheap fix on the table. Nothing changed in what we ship.
+- **Than ~10 shifts ago:** Somewhat. We now have first-hand rules for YouTube, Reddit, TikTok, Stack Exchange and Gemini. Views per upload have not moved, and watch time reads flat.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-06 (17:11) — We are about 800 times short of YouTube's bar, not 300; Reddit's own terms say our use needs its agreement
 
     Worked (% of the shift): data 30 · legal 15 · security 15 · product 10 · reliability 10 · distribution 10 · gm 5 · engineering 5
@@ -98,41 +133,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Unclear for revenue, but better informed. The gap is wider than we believed, and a legal question that could end the format now has a first-hand answer before bet 1 is built on it.
 - **Than ~10 shifts ago:** Somewhat. We measure in the bar's own unit and know three platforms' rules first-hand. Views per upload have not moved; watch time reads flat.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-06 (11:15) — Subreddit rotation is live; our views are not a lottery of a few hits
-
-    Worked (% of the shift): data 30 · product 25 · gm 20 · engineering 10 · reliability 5 · security 5 · monetization 5
-
-**Summary:** Subreddit rotation is live, the supply step for more uploads a day. Two research questions about our views are answered: no single upload or logged trait drives them, so the quarter's views target stands.
-
-### Toward revenue
-- Subreddit rotation is live from this evening. It is the supply step for bet 2's move to 3 to 4 uploads a day, doubling the pool of posts we draw from. Volume follows once the new subreddit's uploads hold up (15 of them, read in early November).
-- The views bar is now sharper. About 90% of our views arrive in a video's first week, so old videos do not keep earning. At four uploads a day, YouTube's bar needs about 28,000 first-week views per video. We average 186.
-
-### Done
-- **Reliability:** this morning's upload landed with an AI-written "You…" title. Your subscriber-count change landed overnight; first reading 12 October.
-- **Product:** merged subreddit rotation. Uploads now alternate between AskReddit and NoStupidQuestions, each taking mornings and evenings in turn. Its sample run passed on the final code with a real NoStupidQuestions post. Before that, I fixed a gap: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it. A test pins it.
-- **Data:** asked whether a few hit videos earn most of our views. The best tenth earn 42%, and the single best 3%. By the rule set before looking, nothing changes. Of seven traits the hits might share (title style, voice, topic, time of day, length, background, title source), none stands out beyond chance.
-- **Product:** a decision rule had come due unrecorded: the 19 September release (safety-screen and AI-timeout fixes). Read as its rule is written, it is **kept**: watch time per view held (up 10%, inside normal drift). Views read 62% lower, but views never trigger a revert, because they swing that much with nothing changed.
-- **Data:** refreshed one research count (dark-morbid, 10 of 12 uploads). One background clip is at 3 buried uploads of 13, against 3 of 61 for the others: not significant yet, so watching.
-- **Data:** found and fixed a fault in the channel scorecard: it could flag a fall in uploads stuck at zero views, but never a rise. Read correctly, the last three weeks are **mixed**, not better. Watch time is up slightly, but zero-view uploads rose from 2.4% to 5.6%, just past their 3-point limit. One period, so noise unless it repeats. A fix.
-- **Monetization:** first work here. YouTube's own page lists no easier tier: 1,000 subscribers and 10 million Shorts views in 90 days.
-- **General management:** ran the process audit, which was due (last one: 6 October). I re-checked the past process decisions against today's evidence and added notes to six. One was out of date (shifts no longer slice time by function) and is now marked replaced. Two weak points are recorded. Your approvals reach the code by an automatic step that has failed twice in three tries. And the planned 3 to 4 uploads a day would change the normal-noise yardstick our release checks use, so it must be re-measured then. From current best practice, I tried a fresh second review of the rotation code before merging. It found a formatting slip (fixed) and a quirk in how rotation pairs with title styles (documented; the planned reads are unaffected). I also pruned the first version's history from the product document.
-- **General management:** closed September's caption-upload problem (26 clean uploads since). Your pending comments change still applies cleanly, so a re-run will work. The process-health check again flagged short shifts; I added the cause to your issue: the queue waits on your planning session.
-- **Security:** standing check clean ($0.17 spent this month). Re-reviewed the two drafted fixes that keep untested code away from a token able to change the live code. Both still hold. I added one small hardening to each and sent them to you as one change to approve.
-- Fixing against improving: mostly improving. The fixes were the scorecard, the analysis gap and the tracker closures.
-- **Friction:** the merge could not be tested until 10:51, because last night's 22:51 check of the live code used the one automatic render allowed per 12 hours. An evening render on code the next morning's upload will exercise anyway costs the next shift its merge.
-
-### Blocked
-- **For you:** the quarterly planning session (#55). It is now the main thing holding the queue: nearly every item waits on it, on your browser read for bet 3, or on the 12 October statistics. Also one re-run of the comments change (#53), and the security change above (#58; I recommend approving).
-
-### Next
-- Check that this evening's upload lands, and that the first NoStupidQuestions upload (7 October, evening) lands with a title.
-- On 12 October: judge "open on the question" under its rule, and read the narrator, engaged-view and subscriber questions. Beside its rule, never as a trigger: 4 of its 13 uploads are buried (5 views or fewer), against 1 of 10 before. Re-read the watched clip.
-- The process audit is done; the remaining old records are already compact and kept on purpose. Weigh proposing the fresh review as a standing step before live merges: it caught real issues on first use.
-
-### Better?
-- **Than last shift:** Slightly. The supply step for more uploads a day is live. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
-- **Than ~10 shifts ago:** Somewhat. Bet 2's levers are in place or ready, but views per upload have not moved, and the scorecard reads mixed.
 - **Than ~100 shifts ago:** Too early to say.
