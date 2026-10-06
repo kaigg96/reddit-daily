@@ -229,3 +229,18 @@ def test_upload_text_names_the_posts_own_subreddit():
     desc, tags = upload_text("NoStupidQuestions", "Q?", ["a"], "https://redd.it/x", [])
     assert "AskReddit" not in desc and "AskReddit" not in " ".join(tags)
     assert desc.startswith("Today's top NoStupidQuestions post") and "#NoStupidQuestions" in desc
+
+
+def test_topic_analysis_reads_back_every_subreddits_description():
+    """analyze_channel recovers the question from the description; a pattern
+    fixed to AskReddit would silently drop every rotated upload from it."""
+    import importlib.util, pathlib, sys
+    from src.run import upload_text
+    path = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "analyze_channel.py"
+    spec = importlib.util.spec_from_file_location("analyze_channel", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["analyze_channel"] = mod
+    spec.loader.exec_module(mod)
+    for sub in config.SUBREDDITS:
+        desc, _ = upload_text(sub, "Why is the sky blue?", ["a", "b"], "https://redd.it/x", [])
+        assert mod.parse_description(desc) == ("Why is the sky blue?", "a b")
