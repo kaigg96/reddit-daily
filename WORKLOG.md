@@ -60,19 +60,19 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-06 (11:15) — Subreddit rotation's final sample run is under way; our views are not a lottery of a few hits
+## 2026-10-06 (11:15) — Subreddit rotation is live; our views are not a lottery of a few hits
 
     Worked (% of the shift): data 30 · product 25 · gm 20 · engineering 10 · reliability 5 · security 5 · monetization 5
 
-**Summary:** Subreddit rotation, the supply step for more uploads a day, is up to date and its final sample run was requested at 10:51. It merges on a pass. Two research questions about where our views come from are answered: no single upload or logged trait drives them, so the quarter's views target stands as drafted.
+**Summary:** Subreddit rotation is live, the supply step for more uploads a day. Two research questions about where our views come from are answered: no single upload or logged trait drives them, so the quarter's views target stands as drafted.
 
 ### Toward revenue
-- Subreddit rotation, the supply step for bet 2's move to 3 to 4 uploads a day, is ready to merge on its sample run. It doubles the pool of posts we can draw from.
+- Subreddit rotation is live from this evening. It is the supply step for bet 2's move to 3 to 4 uploads a day, doubling the pool of posts we draw from. Volume follows once the new subreddit's uploads hold up (15 of them, read in early November).
 - The views bar is now sharper. About 90% of our views arrive in a video's first week, so old videos do not keep earning. At four uploads a day, YouTube's bar needs about 28,000 first-week views per video. We average 186.
 
 ### Done
 - **Reliability:** this morning's upload landed with an AI-written title, in the newly favoured "You…" style. The subscriber-count change you approved landed overnight. Its first reading comes on 12 October.
-- **Product:** brought subreddit rotation up to date with the live code and requested its sample run. Only one automatic run is allowed per 12 hours, so it could not start before 10:51. Before that, I fixed a gap the branch had left: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it unnoticed. A test now pins it.
+- **Product:** merged subreddit rotation. Uploads now alternate between AskReddit and NoStupidQuestions, each taking mornings and evenings in turn. Its sample run passed on the final code with a real NoStupidQuestions post. Before that, I fixed a gap the branch had left: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it unnoticed. A test now pins it.
 - **Data:** asked whether a few hit videos earn most of our views. The best tenth earn 42%, and the single best 3%. By the rule set before looking, nothing changes. Of seven traits the hits might share (title style, voice, topic, time of day, length, background, title source), none stands out beyond chance.
 - **Product:** a decision rule had come due unrecorded: the 19 September release (safety-screen and AI-timeout fixes). Read as its rule is written, it is **kept**: watch time per view held (up 10%, inside normal drift). Views read 62% lower, but views never trigger a revert, because they swing that much with nothing changed.
 - **Data:** refreshed one research question's count (dark-morbid topic, 10 of the 12 uploads it needs). Re-read the background clips: one is at 3 buried uploads of 13, against 3 of 61 for the others. That is not significant yet, so I'm watching it, not acting.
@@ -87,12 +87,12 @@ and more useful than a confident guess.
 - **For you:** the quarterly planning session (#55). It is now the main thing holding the queue: nearly every item waits on it, on your browser read for bet 3, or on the 12 October statistics. Also one re-run of the comments change (#53).
 
 ### Next
-- If this shift did not merge subreddit rotation, merge it on a sample-run pass that names the branch's current commit. Then check that the first NoStupidQuestions upload (7 October, evening) lands with a title.
+- Check that this evening's upload lands, and that the first NoStupidQuestions upload (7 October, evening) lands with a title.
 - On 12 October: judge "open on the question" under its rule, and read the narrator, engaged-view and subscriber questions. Re-read the background clip that is at 3 buried uploads of 13.
 - Finish the process audit by pruning the product document. Its history of the first version mixes in live facts that code comments point to, so it needs splitting, not deleting. Also weigh proposing the fresh review as a standing step before any shift merges live code: it caught real issues on first use.
 
 ### Better?
-- **Than last shift:** Slightly. The supply step for more uploads a day is ready. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
+- **Than last shift:** Slightly. The supply step for more uploads a day is live. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
 - **Than ~10 shifts ago:** Somewhat. The levers for bet 2 are now in place or ready, but views per upload have not moved yet.
 - **Than ~100 shifts ago:** Too early to say.
 
