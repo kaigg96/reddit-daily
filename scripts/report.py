@@ -165,8 +165,9 @@ def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):
                         (r.get("published_at") or "").replace("Z", "+00:00"))
                     snap = _dt.datetime.fromisoformat(
                         (r.get("snapshot_date") or "") + "T00:00:00+00:00")
-                    if metric_col == Metric.ENGAGED_VIEWS and not r.get(metric_col):
-                        continue
+                    if (metric_col == Metric.ENGAGED_VIEWS and not r.get(metric_col)
+                            and float(r.get("views") or 0) > 0):
+                        continue    # unreported; a blank on a zero-view row is a zero
                     val = float(r.get(metric_col) or 0)
                 except (ValueError, TypeError):
                     continue
@@ -522,6 +523,11 @@ def main():
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
                 args.min_uploads)
         return
+
+    if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)
+            and args.at_age is None and not args.offline):
+        sys.exit(f"--metric {args.metric} comes from the weekly snapshot, which the "
+                 f"live path does not read: add --offline or --at-age.")
 
     if args.at_age is not None:
         # A field that alternates between uploads (topic, voice) is not a flag
