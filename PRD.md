@@ -84,18 +84,7 @@ A secondary motivation: YPP review rejects "repetitious/duplicative" content. A 
 
 ## 2. Starting system — the v1 baseline this PRD replaced *(historical; superseded at v2)*
 
-At the time this PRD was written, everything lived in one notebook, `create_video.ipynb` (deleted in the 2026-08-23 cleanup; recoverable from git history), executed headlessly by [.github/workflows/run-reddit-video.yml](.github/workflows/run-reddit-video.yml) via `jupyter nbconvert --to notebook --execute` on `ubuntu-latest`, Python 3.10.
-
-Pipeline (cell by cell):
-
-1. **Cell 0–1 — setup.** PRAW (r/AskReddit), boto3 Polly client (`us-west-2`). `MAX_COMMENT_LENGTH = 150`.
-2. **Cell 2 — content selection.** Top post of the day (`time_filter='day'`, limit 10) filtered for: NSFW, profanity (`better_profanity`), title > 90 chars, emoji, and equality with `prev_post.txt` (last posted title). Top 3 comments ≤ 150 chars, not deleted, no emoji/profanity. Raises if < 3 valid comments (run fails, nothing posts).
-3. **Cell 3 — Gemini keywords.** `gemini-2.5-flash` REST call → 10 SEO keywords. Fails soft (empty list).
-4. **Cell 4 — Gemini title.** CTR-optimized rephrasing of the question. Fails soft (falls back to Reddit title).
-5. **Cell 5–6 — Polly TTS.** Neural engine, voice randomly `Danielle` or `Stephen` for title + 3 comments. Fixed outro "Like, subscribe, and comment your answer below!" — **bug: always voiced by Danielle even when Stephen narrates**.
-6. **Cell 7 — video assembly (MoviePy 2.1.2).** Sequence: `gap(0.5s) → title → gap → "Reddit's top responses..." (audio only, blank screen) → gap → comment1 → gap → comment2 → gap → comment3 → gap → outro`. Every segment is a **static** 1080×1920 `assets/bg.png` (white with orange Reddit logos in bottom third) with the full text as one orange (`#ff5d01`) static block (font `Lato-Bold` in CI, `Arial` locally, via try/except). Background music `assets/funk_bg_lower.mp3` (unknown provenance/license) under the whole video. Output: 1080×1920@30fps H.264, ~28s. Thumbnail = frame 0 of title clip.
-7. **Cell 8 — upload.** YouTube Data API v3, refresh-token auth. Title = Gemini title + `" #shorts #foryou"`. Description = question + 3 comments + link + hashtags. Category 22. Then `thumbnails().set()` (PNG sent with `image/jpeg` mimetype). 
-8. **Cell 9 — dedupe.** Writes posted title to `prev_post.txt`; workflow commits it back.
+At the time this PRD was written, everything lived in one notebook, `create_video.ipynb`: the top AskReddit post and 3 comments, Gemini keywords and title, Polly narration (Danielle or Stephen), a static MoviePy render with silent gaps and audio-only announcer segments, and an upload with a `#shorts #foryou` suffix. §3 lists what was wrong with it. The cell-by-cell description was compressed on 2026-10-06 (audit prune); it is in git history before that date.
 
 **Environment (kept current — this block describes the system as it is today, not the v1 baseline above):**
 - **Gemini model/endpoint:** `gemini-2.5-flash` on **`v1beta`** with `thinkingConfig.thinkingBudget = 0`. Thinking is disabled deliberately (2026-09-19): it added 30s+ of latency on prompts needing ~8 output tokens and was timing out, silently degrading ~25% of uploads. `v1` cannot express this — it rejects `thinkingConfig` with HTTP 400.
