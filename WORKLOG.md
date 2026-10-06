@@ -78,7 +78,7 @@ and more useful than a confident guess.
 - **Data:** one background clip is watched for burying uploads (3 of 13), with no written rule for dropping it. I set one before its next read: drop it if its rate stands out from the other clips beyond chance, corrected for testing seven at once. The report now prints that test; it flags the clip dropped in September. The watched clip stays; re-read 12 October. I refined the test once after seeing a first number (a dropped clip still counted in the comparison); the decision is the same either way. A fix.
 - **Distribution:** a browser on our runner now opens Meta's pages, but their rule lists stay empty unless logged in. Facebook and Instagram stay with you.
 - **Security:** standing check clean: $0.19 spent this month, no secrets in the project, and the only workflow change today was your approved fix.
-- **General management:** the ready queue was empty. I ranked six new candidates and took the four that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
+- **General management:** the ready queue was empty. Two rounds of candidates; I took the six that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
 - Fixing against improving: three fixes (the runtime, the clip rule, crediting users); the rest improved the map for bet 1 and the Reddit decision.
 - **Friction:** answered research questions leave the table, so nothing stops a shift from regenerating one. Searching the findings first caught it this time.
 
@@ -94,7 +94,7 @@ and more useful than a confident guess.
 - Considered and not taken: building the reaction beat now (it should wait for your stance), and re-reading engaged views by background clip. The dip from late August to mid-September shows on every clip, and the current releases are back up.
 
 ### Better?
-- **Than last shift:** Slightly. Bet 1's real requirement is clearer, and a live breach has a cheap fix on the table. Nothing changed in what we ship.
+- **Than last shift:** Slightly. Bet 1's real requirement is clearer, and a live breach has a cheap fix on the table. Only descriptions changed in what we ship.
 - **Than ~10 shifts ago:** Somewhat. We now have first-hand rules for YouTube, Reddit, TikTok, Stack Exchange and Gemini. Views per upload have not moved, and watch time reads flat.
 - **Than ~100 shifts ago:** Too early to say.
 
