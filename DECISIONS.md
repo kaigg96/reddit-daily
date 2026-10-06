@@ -163,6 +163,11 @@ lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
 watch-seconds *or* views, and views is 5× noisier — escalated as
 `release-rule-metric-conflict`, owner's call.
 
+**Re-reviewed 2026-10-06:** still holds at 2 uploads a day. Bet 2's volume step
+(PRD #4, 3–4 a day) would break (b): batches of 8 would span two days, not
+four. Any release judged during it needs its floor re-measured on uploads at
+the new cadence, not borrowed from the 2-a-day era.
+
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
 One success metric (watch-seconds) that must improve, guardrails that must not
@@ -255,6 +260,12 @@ waits on rationed sample videos — and D10 makes such constraints PM and
 research problems. The first response -- seeding the sample-video ration as PM's top item -- the
 owner called a bandaid the same evening: it refills the queue once. The
 durable response is D11.
+
+**Re-reviewed 2026-10-06:** the trigger's shape for 2 appeared: about a third
+of a shift went on research while the ready count stayed at 0. It was not
+padding. Both questions (PRD R4, R5) had decision rules fixed before the data
+and tied to bet 2, and both were answered. If the next shifts' research again
+changes no rule, 2 is false.
 
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
