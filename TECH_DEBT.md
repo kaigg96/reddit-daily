@@ -279,8 +279,14 @@ a list nobody can read is the same as no list.
   3.12.14 resolves `requirements.txt` unchanged, and the suite passes (273/273
   on `main`) once `requirements-dev.txt`'s PyYAML is installed too, and a
   `SAMPLE=1` render is playable (1080x1920, 30 fps, 24.5 s, audio). So the bump
-  is the six `python-version: '3.10'` pins in the workflows (a workflow change,
-  so it may need `escalate.py --patch`), plus a real sample, as its own release.
+  is the seven `python-version: '3.10'` pins in six workflows, via
+  `escalate.py --patch`. **Not a video change (2026-10-06):** a `SAMPLE=1`
+  render with `random.Random` seeded to 7 is **byte-identical** on 3.12 and
+  3.10 (735 frames, 1,056 audio packets, thumbnail, captions; 346/346 tests on
+  both), so no `FORMAT_VERSION` and no experiment slot. Escalated with the
+  patch (`python-312-runtime`). Once applied: one `dry_run.py request main`
+  before the next upload (the sample path calls no Reddit/Gemini/Polly), and
+  README's `python3.10 -m venv` line.
   **The moviepy upgrade buys no security (2026-09-30):** moviepy 2.2.1 +
   pillow 11.3.0 resolves and passes 273/273, but `pip-audit` finds **35**
   Pillow advisories on 11.3.0 (33 on 10.4.0). Every fix is ≥12.1.1, above
