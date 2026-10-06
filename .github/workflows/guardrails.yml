@@ -32,6 +32,13 @@ on:
 permissions:
   contents: read
 
+# A shift pushes 15-20 times, and these are checks on the current state, so the
+# newest push's run covers every earlier one. At most one runs and one waits;
+# a newer push replaces the waiting run instead of queueing another.
+concurrency:
+  group: guardrails-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   invariants:
     runs-on: ubuntu-latest
@@ -48,6 +55,25 @@ jobs:
             || { echo "::error::tts.py no longer charges the budget before calling Polly"; exit 1; }
           grep -q 'Engine="neural"' src/tts.py \
             || { echo "::error::the neural engine was changed (CLAUDE.md §1: owner's call)"; exit 1; }
+
+      - name: Money check intact
+        # The owner's line, checked at AWS every shift by money_check.py.
+        # Raising these numbers would let real drift pass as fine, which is
+        # weakening a cost control (CLAUDE.md section 4).
+        run: |
+          f=scripts/money_check.py
+          [ -f "$f" ] || { echo "::error::the money check is gone"; exit 1; }
+          max=$(grep -oE '^BUDGET_MAX_USD *= *[0-9.]+' $f | grep -oE '[0-9.]+$')
+          alarm=$(grep -oE '^ALARM_MAX_CHARS_PER_HOUR *= *[0-9]+' $f | grep -oE '[0-9]+$')
+          python3 -c "import sys; sys.exit(0 if float('${max:-99}') <= 3.0 else 1)" \
+            || { echo "::error::money_check accepts a budget over \$3 (${max:-missing})"; exit 1; }
+          [ -n "$alarm" ] && [ "$alarm" -le 10000 ] \
+            || { echo "::error::money_check accepts an alarm over 10000 chars/hour (${alarm:-missing})"; exit 1; }
+          grep -q 'READONLY_USER = "claude-readonly"' $f && grep -q "identity_ok(me\[\"Arn\"\])" $f \
+            || { echo "::error::money_check no longer refuses identities other than the read-only user"; exit 1; }
+          grep -q "money_check.py" .claude/skills/shift/SKILL.md \
+            || { echo "::error::shifts no longer run the money check"; exit 1; }
+          echo "budget <= \$$max, alarm <= $alarm chars/hour, read-only identity enforced"
 
       - name: Safety screen intact
         run: |
@@ -123,7 +149,7 @@ jobs:
               || { echo "::error::backlog lost a documented bias mitigation ($m)"; exit 1; }
           done
           grep -q "/backlog" .claude/skills/shift/SKILL.md \
-            || { echo "::error::the PM lane no longer points at its methods"; exit 1; }
+            || { echo "::error::the shift no longer points at its ranking methods"; exit 1; }
           echo "generation, ranking and constraint methods intact"
 
       - name: Context budget

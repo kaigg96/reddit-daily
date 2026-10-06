@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""How much work in the tracker can actually be done right now.
+"""How much work in the trackers can actually be done right now.
 
 A shift ended when its lanes looked empty, and a lane never looked empty while
 it held blocked items. On 2026-09-24 and 09-25 two shifts ended with most of
@@ -9,7 +9,9 @@ video. Supply is work whose next step can be taken now; this counts it.
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
 
-Every row of a PRD §0 table with a Status column carries one of:
+Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
+other function of the company, ORG.md). Every row of a table with a Status
+column, in either, carries one of:
     ready             the next step can be taken now, and is worth taking
     blocked: <what>   the next step waits on something outside this shift
     baking            live; waiting for its decision rule's data
@@ -22,7 +24,9 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRD = os.path.join(ROOT, "PRD.md")
-FLOOR = 3
+PLAN = os.path.join(ROOT, "PLAN.md")
+# 3 until 2026-10-05, when shifts grew from 25 to 60 minutes (D11).
+FLOOR = 5
 STATUSES = ("ready", "blocked", "baking", "parked", "done")
 
 
@@ -31,14 +35,20 @@ def section0(text):
     return m.group(0) if m else ""
 
 
+def queue_section(text):
+    """PLAN.md §3, the company's work queue."""
+    m = re.search(r"^## 3\..*?(?=^## 4\.|\Z)", text, re.S | re.M)
+    return m.group(0) if m else ""
+
+
 def _cells(line):
     return [c.strip() for c in line.strip().strip("|").split("|")]
 
 
-def items(text):
-    """(status, detail, name) for each row of each §0 table with a Status column."""
+def items(text, section=section0):
+    """(status, detail, name) for each row of each table with a Status column."""
     out, header = [], None
-    for line in section0(text).splitlines():
+    for line in section(text).splitlines():
         if not line.startswith("|"):
             header = None
             continue
@@ -57,12 +67,12 @@ def items(text):
     return out
 
 
-def malformed(text):
+def malformed(text, section=section0):
     """Lines that start a table but are not followed by its |---| row. A row
     separated from its table by a blank line reads as a one-line table of its
     own: invisible to the count, and rendered as a stray line of pipes. That
     happened to a §0 row on 2026-09-25."""
-    lines, bad = section0(text).splitlines(), []
+    lines, bad = section(text).splitlines(), []
     for i, line in enumerate(lines):
         starts = line.startswith("|") and (i == 0 or not lines[i - 1].startswith("|"))
         nxt = lines[i + 1] if i + 1 < len(lines) else ""
@@ -71,30 +81,49 @@ def malformed(text):
     return bad
 
 
-def ready(text):
-    return [name for status, _, name in items(text) if status == "ready"]
+def ready(text, section=section0):
+    return [name for status, _, name in items(text, section) if status == "ready"]
+
+
+def _read(path):
+    try:
+        return open(path, encoding="utf-8").read()
+    except OSError:
+        return ""
+
+
+def sources():
+    """(label, text, section) for each tracker that feeds the queue."""
+    return [("product", _read(PRD), section0), ("company", _read(PLAN), queue_section)]
+
+
+def ready_all():
+    """Ready work across both trackers -- the one queue a shift ranks."""
+    return [f"[{label}] {name}" for label, text, section in sources()
+            for name in ready(text, section)]
 
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    text = open(PRD).read()
-    found = ready(text)
+    found = ready_all()
     if "--count" in argv:
         print(len(found))
         return 0
     counts = {s: 0 for s in STATUSES}
-    for status, _, _ in items(text):
-        counts[status] = counts.get(status, 0) + 1
+    for label, text, section in sources():
+        for status, _, _ in items(text, section):
+            counts[status] = counts.get(status, 0) + 1
+        for line in malformed(text, section):
+            print(f"WARNING: a {label} row cut off from its table is not counted: {line}")
     print("  ".join(f"{s}: {n}" for s, n in counts.items()))
-    for line in malformed(text):
-        print(f"WARNING: a row cut off from its table is not counted: {line}")
     print(f"\nREADY {len(found)} (floor {FLOOR})")
     for name in found:
         print(f"  - {name}")
     if len(found) < FLOOR:
-        print("\nBelow the floor: generating and ranking more ready work is the "
-              "project-management lane's first job (/backlog §1-2). Research "
-              "questions tested against existing data are always available.")
+        print("\nBelow the floor: generating and ranking more ready work comes "
+              "first (/backlog §1-2). Research questions tested against existing "
+              "data are always available, and the risk register (PLAN.md §4) "
+              "names what no function is yet answering.")
     return 0
 
 

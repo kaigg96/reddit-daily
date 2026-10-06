@@ -196,7 +196,26 @@ def actions_minutes(repo, token, days=30):
     return total
 
 
+def is_public(repo, token):
+    """True when the repo is public: standard runners cost no minutes there."""
+    import urllib.request
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}",
+                                 headers={"Authorization": f"Bearer {token}",
+                                          "Accept": "application/vnd.github+json"})
+    try:
+        return json.load(urllib.request.urlopen(req)).get("private") is False
+    except Exception:
+        return False                  # unknown: keep guarding
+
+
 def check_actions(repo, token, allowance, reserve_share):
+    # Public since the owner's decision of 2026-10-05: GitHub does not meter
+    # standard runners on a public repo, so there is no allowance to protect.
+    # Private again, and the guard is back in force on its own.
+    if is_public(repo, token):
+        print("Public repository: standard runners cost no Actions minutes; "
+              "the minutes guard stands down.")
+        return 0
     used = actions_minutes(repo, token)
     if used is None:
         return 0                      # unreadable must not block the shift

@@ -37,6 +37,11 @@ SAMPLE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 "no longer availab
 # requests' timeout is per-read, not a total deadline, so this does not bound
 # total call duration; it only stops a stalled socket hanging the run.
 _TIMEOUT = 60
+# How long a 503 ("model overloaded") waits before its one retry. 4s did not
+# clear the 503 on the 2026-10-02 14:46 release check or the 2026-10-04 06:04
+# upload, which lost its title. The run has no deadline to protect, and the
+# wait costs no requests, so wait long enough for an overload to pass.
+_OVERLOAD_WAIT = 30
 
 
 def _generate(prompt, thinking_budget=0, model=None):
@@ -77,7 +82,8 @@ def generate_retrying(prompt, tries=2, **kw):
     make 8 useful calls.
 
     Timeouts and 503s are genuinely transient and are retried once. The budget
-    is tight enough that `tries` is deliberately 2, not 3."""
+    is tight enough that `tries` is deliberately 2, not 3; a 503 waits
+    `_OVERLOAD_WAIT` first, since a 4s wait twice failed to outlast one."""
     for attempt in range(tries):
         last = attempt == tries - 1
         try:
@@ -85,7 +91,7 @@ def generate_retrying(prompt, tries=2, **kw):
         except requests.HTTPError as e:
             code = e.response.status_code if e.response is not None else 0
             if code == 503 and not last:
-                time.sleep(4 * (attempt + 1))
+                time.sleep(_OVERLOAD_WAIT * (attempt + 1))
                 continue
             raise
         except (requests.Timeout, requests.ConnectionError):
@@ -221,6 +227,16 @@ def _clean_keywords(value):
     if not isinstance(value, list):
         return None
     return [k for k in (_clean_str(v) for v in value) if k]
+
+
+# R2.2, weighted by PRD §0 #10: B ("You...") 4 : A 1 : C 1, with A and C kept as
+# the control. One style per calendar day, so both daily uploads share it; with
+# two rotating subreddits each day also splits them, keeping both reads balanced.
+TITLE_STYLE_CYCLE = "BABBCB"
+
+
+def title_style_for(day):
+    return TITLE_STYLE_CYCLE[day.toordinal() % len(TITLE_STYLE_CYCLE)]
 
 
 TitleResult = collections.namedtuple("TitleResult", "title style ok")

@@ -294,6 +294,18 @@ def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
 
 
+def test_title_styles_run_four_b_to_one_a_to_one_c():
+    """§0 #10: any six consecutive days carry B:A:C = 4:1:1, A and C the control.
+    Keyed on the date, so both daily uploads share a style and each day splits
+    the rotation's two subreddits under one style (PRD §0 #3)."""
+    import collections
+    import datetime
+    start = datetime.date(2026, 10, 6)
+    for offset in range(12):
+        days = [start + datetime.timedelta(d) for d in range(offset, offset + 6)]
+        counts = collections.Counter(llm.title_style_for(d) for d in days)
+        assert counts == {"B": 4, "A": 1, "C": 1}
+
 def test_metadata_retries_a_503_once(monkeypatch):
     """One 503 cost the 2026-10-01 18:29 upload its title, keywords and CTA:
     the screen retried transient failures, the metadata call did not."""
@@ -310,6 +322,23 @@ def test_metadata_retries_a_503_once(monkeypatch):
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
     meta = llm.get_metadata("q", ["a", "b", "c"])
     assert len(calls) == 2
+    assert meta.title == "A Great Title"
+
+
+def test_a_503_waits_out_an_overload_before_retrying(monkeypatch):
+    """A 4s wait did not outlast the 503s on the 2026-10-02 release check or
+    the 2026-10-04 06:04 upload, which lost its title."""
+    waits = []
+
+    def overloaded(*a, **k):
+        if not waits:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert waits == [llm._OVERLOAD_WAIT] and llm._OVERLOAD_WAIT >= 30
     assert meta.title == "A Great Title"
 
 

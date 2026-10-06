@@ -754,6 +754,17 @@ def test_question_length_splits_at_the_logged_median():
     assert length("") == ""
 
 
+def test_question_person_marks_questions_that_address_the_viewer():
+    """Does a narrated opening that says "you" hold viewers longer?"""
+    person = lambda q: insights._with_derived_dimensions({"post_title": q})["question_person"]
+    assert person("What's something you can't prove?") == "you"
+    assert person("What's your best one-liner?") == "you"
+    assert person("You're a billionaire. Now what?") == "you"
+    assert person("Which famous person died in the dumbest way?") == "other"
+    assert person("What happened to young people's hobbies?") == "other"
+    assert person("") == ""
+
+
 def test_title_source_marks_uploads_that_shipped_the_raw_question():
     """Research row R2: does a failed title cost watch-seconds?"""
     source = lambda q, t: insights._with_derived_dimensions(
@@ -761,6 +772,14 @@ def test_title_source_marks_uploads_that_shipped_the_raw_question():
     assert source("What is it?", " What is it? ") == "raw"
     assert source("What is it?", "You Won't Believe It!") == "generated"
     assert source("What is it?", "") == ""
+
+
+def test_title_length_splits_at_the_generated_median():
+    """Is title length, not title source, behind raw titles' views gap?"""
+    length = lambda t: insights._with_derived_dimensions({"video_title": t})["title_length"]
+    assert length("x" * 41) == "short"
+    assert length(" " + "x" * 42) == "long"
+    assert length("") == ""
 
 
 def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
@@ -1031,6 +1050,19 @@ def test_drift_floor_is_unmeasurable_rather_than_zero_on_thin_history():
         [v(f"a{i}", 10, views=100) for i in range(9)], Metric.VIEWS) is None
 
 
+def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
+    """The design it measures: halves split by alternate days share the
+    calendar. A steady trend moves both halves together, so it reads as no
+    noise; a gap between odd and even days is exactly what it reports."""
+    # Two uploads a day for 16 days. Even age offsets get 12s, odd get 10s.
+    parity = [v(f"p{d}{k}", 30 - d, watch=12.0 if d % 2 else 10.0)
+              for d in range(16) for k in range(2)]
+    assert 0.16 < insights.alternation_floor(parity, Metric.WATCH) <= 0.2   # 2s on 10 or 12
+    trend = [v(f"t{d}{k}", 30 - d, watch=10.0 + d) for d in range(16) for k in range(2)]
+    assert insights.alternation_floor(trend, Metric.WATCH) < insights.drift_floor(trend, Metric.WATCH)
+    assert insights.alternation_floor(parity[:15], Metric.WATCH) is None
+
+
 def test_the_detection_limit_is_printed_with_every_release_answer(tmp_path, monkeypatch):
     """A verdict without its detection limit invites reading "KEEP" as "proven
     safe" — on views, this channel cannot prove anything under ~50%."""
@@ -1124,6 +1156,55 @@ def test_too_little_history_says_unknown_rather_than_guessing():
     series = [(f"w{i}", 10, 10.0) for i in range(3)]
     verdict, _ = insights.trajectory_verdict(series, floor=1.0)
     assert verdict == "unknown"
+
+
+def _week_of_uploads(start_day, snapshot_day, views, vid="v"):
+    """One upload a day for a week, all read by one snapshot."""
+    return [_snap(f"{vid}{i}", start_day + i, snapshot_day, v)
+            for i, v in enumerate(views)]
+
+
+def test_weekly_totals_sum_every_upload_including_zero_views():
+    """Bet 2 is a total: a zero-view upload is still part of the week, and a
+    median would hide both a lost upload and an added one."""
+    # 2026-07-06 is a Monday (day 5); a snapshot on day 16 reads the week's
+    # uploads at 5-11 days old, all within 4 of 7.
+    rows = _week_of_uploads(5, 16, [10, 0, 20, 30, 40, 50, 60])
+    rows += _week_of_uploads(5, 24, [99] * 7)          # later readings ignored
+    series = insights.weekly_totals(rows)
+    assert series == [("2026-W28", 7, 210)]
+
+
+def test_weekly_totals_leave_out_a_week_still_filling_in():
+    """A week whose Sunday upload is too young to read would report low."""
+    rows = _week_of_uploads(5, 13, [10] * 7)    # Sunday's upload is 2 days old
+    assert insights.weekly_totals(rows) == []
+
+
+def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
+    """Uploads from before the first snapshot appear only at 30+ days old;
+    the week is known but unread, so it is left out rather than summed low."""
+    rows = _week_of_uploads(5, 45, [10] * 7)
+    rows += [_snap("late", 11, 18, 5)]           # its Sunday upload, read at 7 days
+    assert insights.weekly_totals(rows) == []
+
+
+def test_views_gained_counts_the_back_catalogue_and_new_uploads():
+    """The Partner Program's bar counts every view in the window, so an old
+    video's growth counts, and a video new since the last snapshot counts in
+    full. A dip in a lifetime count (YouTube revises them) subtracts nothing."""
+    rows = [_snap("old", 0, 10, 100), _snap("dip", 0, 10, 50),
+            _snap("old", 0, 17, 130), _snap("dip", 0, 17, 45),
+            _snap("new", 12, 17, 20)]
+    gained = insights.views_gained(rows)
+    assert [(g, d) for _, g, d in gained] == [(50, 7)]
+
+
+def test_totals_change_compares_the_last_four_weeks_with_the_four_before():
+    series = [(f"w{i}", 14, t) for i, t in enumerate([100] * 4 + [250] * 4)]
+    prior, recent, ratio = insights.totals_change(series)
+    assert (prior, recent, ratio) == (400, 1000, 2.5)
+    assert insights.totals_change(series[:7]) is None
 
 
 # ------------------------------------------------------------- scorecard
@@ -1276,3 +1357,61 @@ def test_implied_engaged_is_minutes_over_views_times_watch_seconds():
     x = Video("a", NOW, views=100, watch_seconds=12.0, est_minutes=4.0)
     assert x.implied_engaged == pytest.approx(0.2)
     assert Video("b", NOW).implied_engaged == 0.0          # no views: no share
+
+
+def test_buried_rate_p_matches_fishers_exact_test():
+    """Fisher's tea-tasting table [[3,1],[1,3]] is p=0.4857 two-sided."""
+    assert insights.buried_rate_p(3, 4, 1, 4) == pytest.approx(0.4857, abs=1e-4)
+    assert insights.buried_rate_p(3, 4, 1, 4) == insights.buried_rate_p(1, 4, 3, 4)
+
+
+def test_buried_rate_p_is_one_when_nothing_can_differ():
+    assert insights.buried_rate_p(0, 10, 0, 12) == 1.0
+    assert insights.buried_rate_p(2, 2, 3, 3) == 1.0
+    assert insights.buried_rate_p(0, 0, 1, 5) == 1.0
+
+
+def test_buried_rate_p_pooled_tests_within_strata_only():
+    # One stratum with no difference contributes nothing; the gap is in the other.
+    gap = insights.buried_rate_p_pooled([(8, 27, 2, 26)])
+    assert insights.buried_rate_p_pooled([(8, 27, 2, 26), (0, 10, 0, 10)]) == gap
+    assert insights.buried_rate_p_pooled([(3, 22, 0, 37), (8, 27, 2, 26)]) < gap
+    # Opposite gaps in two strata cancel rather than add.
+    assert insights.buried_rate_p_pooled([(5, 20, 0, 20), (0, 20, 5, 20)]) == 1.0
+    assert insights.buried_rate_p_pooled([]) == 1.0
+
+
+def test_buried_strata_pairs_only_shared_values():
+    def v(fmt, views):
+        return Video("x", datetime.datetime(2026, 9, 1), views=views,
+                     meta={"format_version": fmt})
+    a = [v("v4", 0), v("v4", 50), v("v5", 3), v("v6", 1)]
+    b = [v("v4", 90), v("v5", 80), v("v5", 2)]
+    assert insights.buried_strata(a, b) == [(1, 2, 0, 1), (1, 1, 1, 2)]
+
+
+def test_clip_use_counts_each_broll_clip_in_log_order():
+    rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
+            for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
+                         (3, "a.mp4"), (4, "a.mp4"), (6, "b.mp4"), (7, "")]]
+    out = {r["timestamp_utc"][8:10]: r["clip_use"] for r in insights.with_clip_use(rows)}
+    assert insights.CLIP_EARLY_USES == 4
+    assert out == {"01": "early", "03": "early", "04": "early", "05": "early",
+                   "06": "early", "02": "", "07": ""}
+    late = insights.with_clip_use(rows + [{"timestamp_utc": "2026-09-08", "bg_clip": "a.mp4"}])
+    assert late[-1]["clip_use"] == "late"
+
+
+def test_engaged_check_reads_the_minutes_column_against_engaged_views():
+    from src import insights as _ins
+    # 100 views, 40 engaged, 10 s per engaged view -> 400 s = 6.667 minutes
+    match = {"views": "100", "avg_view_duration_s": "10", "engaged_views": "40",
+             "est_minutes_watched": str(400 / 60)}
+    off = dict(match, engaged_views="80")      # implied 0.4 vs actual 0.8
+    blank = dict(match, engaged_views="")
+    small = dict(match, views="5")
+    n, med, within = _ins.engaged_check([match, match, off, blank, small])
+    assert n == 3
+    assert abs(med - 1.0) < 1e-9
+    assert abs(within - 2 / 3) < 1e-9
+    assert _ins.engaged_check([blank]) == (0, None, None)

@@ -14,6 +14,7 @@ on:
     branches: [main]
     paths:
       - 'CLAUDE.md'
+      - 'ORG.md'
       - '.claude/skills/**'
       - '.github/workflows/**'
 
@@ -45,7 +46,11 @@ jobs:
             // Workflows are protected because CI *is* the gate that replaced
             // owner review -- a shift able to edit it could disable its own
             // supervision, which matters more now shifts can run inside CI.
-            const isProtected = f => f === 'CLAUDE.md' || f.startsWith('.claude/skills/')
+            // ORG.md since 2026-10-05: it sets which decisions a shift may take
+            // alone (Act) and which go to the owner (Propose / Owner), so a
+            // shift able to edit it could promote its own authority.
+            const isProtected = f => f === 'CLAUDE.md' || f === 'ORG.md'
+                                  || f.startsWith('.claude/skills/')
                                   || f.startsWith('.github/workflows/');
 
             // Judge every commit the push brought in. Until 2026-09-24 this read

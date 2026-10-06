@@ -223,6 +223,17 @@ a list nobody can read is the same as no list.
   that is ~0.1% of runs — act only if the backstop rate rises. (A reply with
   no JSON used to pass as `gemini`, skipping even the backstop; 0 of 22 rows
   showed it. Since 2026-10-01 it falls to the backstop as `no_json`.)
+  **2026-10-01 18:29: the title call failed with `http_503`**, the first
+  reason recorded since the column began; title, keywords and CTA all fell
+  back. The screen retried a 503 once, the metadata call never did. **Merged
+  2026-10-02:** both go through `llm.generate_retrying` (503 or timeout once,
+  never a 429). The 10-02 14:46 release check hit a 503 the retry did not
+  clear, so a 503 that outlasts ~4s still falls back.
+  **2026-10-04 06:04: `http_503` again, not `http_429`** — the shared window
+  fitted; a second 503 outlasted the 4s retry and the upload lost its title.
+  **Merged 2026-10-04:** a 503 now waits 30s (`_OVERLOAD_WAIT`) before its
+  one retry. Another `http_503` row means 30s is not enough either; then
+  consider the retry going to a model with its own allowance.
 - **Two workflows run unmerged branch code holding a token that can push to
   `main` without triggering the guard.** `dry-run.yml` (any requested branch)
   and `validate-release.yml` (`integration/preview`) check out the branch under
@@ -239,7 +250,33 @@ a list nobody can read is the same as no list.
   on a fresh runner and running only `main`'s code, judges the artifact,
   strips secrets and pushes. It is an untestable rework of the route `v7`
   depends on, so it is deliberately not proposed for approval from a phone
-  during the owner's absence (2026-09-25 to 10-04). Draft the patch after.
+  during the owner's absence (2026-09-25 to 10-04). **Drafted 2026-10-04**
+  as two patches on `wip/dry-run-token-split` (untested; YAML parses, both
+  apply to main; same-run `download-artifact` needs no `actions: read`, per
+  its docs). Reviewed by a fresh agent the same day; its one bug is fixed. Next: one escalation with `--patch`.
+  **Same root, money side (2026-10-05).** `dry-run.yml` also hands the
+  branch's code the live Polly keys, and `POLLY_CHAR_BUDGET` is enforced by
+  the branch's own `src/tts.py`; `guardrails.yml` only checks `main`. A loop
+  in a branch runs at Polly's neural limit (8 req/s × 3,000 chars), about $350
+  per 15-minute render. A key copied out at that rate is about $33K/day. The
+  token split does not close this, because the branch job still holds the
+  keys. **Fix:** branch code never holds them. Either `main`'s code
+  synthesizes the narration in its own job and hands over the files, or
+  branch renders use only the free sample mode. **Provider-side backstops,
+  set up by the owner and read back 2026-10-05:**
+  - The `polly` IAM user holds only inline `PollySynthesizeOnly`
+    (`polly:SynthesizeSpeech`, us-west-2). `AmazonPollyFullAccess` is
+    removed; it allowed 100K-char async tasks.
+  - A $3/month all-services cost budget automatically attaches `DenyPolicy`
+    (deny `polly:*`) to `polly` at 100% of actual spend.
+  - CloudWatch alarm `Polly-Usage-Exceeding-10k` (us-west-2) emails the owner
+    when `RequestCharacters` sums past 10,000 in an hour.
+
+  Budget data lags up to a day, so the alarm is the fast signal and the
+  budget is the stop. Google (billing disabled on both projects), GitHub (no
+  payment method) and Claude (usage credits off) cannot bill. Re-check from a
+  local session with AWS profile `reddit-digest-readonly`; its policy denies
+  every billable read.
 
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
@@ -262,8 +299,9 @@ a list nobody can read is the same as no list.
   (n=21, 07-18..07-31).
   Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
   every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
-  **Test:** when backlog #8 first collects `engaged_views`, compare the two on
-  the same rows; a match backfills #8 from every snapshot since July.
+  **Tested 2026-10-05 (`report.py --engaged-check`): no match.** Implied/actual
+  median 1.26, 13% of 830 rows within 10%, so this is not the engaged count and
+  #8 has no backfill. The column is decorative again: fix or drop.
 - **The SRT track fails to upload about one time in four.** First read
   2026-09-09 as 2 of 5; on 2026-09-23 it was **7 of 31** (23%) while
   `comment_ok` was 31/31, so it is real but not the half it first looked. The
@@ -334,15 +372,6 @@ a list nobody can read is the same as no list.
   Opus 5.5, which units cannot show: compare the console's weekly % after a
   shift with a pre-5.5 one. If a shift still costs a similar share, lower the
   ceiling to ~60. One data point so far — confirm over a few shifts.
-
-- **`engaged_views` has never been collected, and nothing said so.** The
-  2026-09-28 snapshot, its first, is blank on all 1,027 rows: in
-  `weekly_analytics.fetch_stats_with_engaged` the query with `engagedViews`
-  raised, and the fallback's `::warning::` went to the Actions log only (the
-  workflow commits the CSVs, nothing else). The column now records the refusal
-  (`refused: <error>`, 2026-09-29): read it at the 10-05 snapshot, then try
-  the likely causes (`sort=-views` with the extra metric; the metric needing
-  its own query). Blocks PRD §0 #8. Found 2026-09-29.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is

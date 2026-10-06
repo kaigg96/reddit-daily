@@ -120,3 +120,22 @@ def test_a_refusal_keeps_the_last_real_verdict(tmp_path, monkeypatch):
     last_render, last_request = out.split("## Last request")
     assert "`abc1234`" in last_render and "✅ PASS" in last_render
     assert "feature/v8" in last_request and "not rendered" in last_request
+
+
+def test_branch_code_never_receives_the_polly_keys():
+    """PLAN.md C6. The logs are public since 2026-10-05, so a key that reached
+    branch code could be printed where anyone can read it. Only main -- what
+    production already runs -- renders with real narration."""
+    import yaml
+    wf = yaml.safe_load(open(os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), ".github", "workflows", "dry-run.yml")))
+    steps = wf["jobs"][next(iter(wf["jobs"]))]["steps"]
+    for step in steps:
+        for name, value in (step.get("env") or {}).items():
+            value = str(value)
+            if "AWS_POLLY" in value:
+                assert value.startswith("${{ steps.req.outputs.branch == 'main' && secrets."), \
+                    f"{step.get('name')}: {name} reaches branch code"
+    render = next(s for s in steps if s.get("id") == "render")
+    assert render["env"]["SILENT_NARRATION"] == "${{ steps.req.outputs.branch != 'main' && '1' || '' }}"
+    assert "CHANNEL_NAME" not in render["env"]

@@ -61,8 +61,9 @@ def test_old_rows_read_back_blank_for_the_new_column(tmp_path):
 class _FakeAnalytics:
     """Stands in for the Analytics client; refuses engagedViews if told to."""
 
-    def __init__(self, refuse_engaged):
+    def __init__(self, refuse_engaged, only_beside_all=False):
         self.refuse_engaged = refuse_engaged
+        self.only_beside_all = only_beside_all
         self.calls = []
 
     def reports(self):
@@ -75,7 +76,8 @@ class _FakeAnalytics:
         return self
 
     def execute(self):
-        if self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics:
+        if (self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics
+                and not (self.only_beside_all and len(self._metrics) == 2)):
             raise RuntimeError("HttpError 400: Unknown identifier (engagedViews)")
         headers = [{"name": "video"}] + [{"name": m} for m in self._metrics]
         rows = [[v] + [3 if m == wa.ENGAGED_METRIC else 9 for m in self._metrics]
@@ -95,4 +97,76 @@ def test_a_refused_metric_costs_the_column_not_the_snapshot():
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert set(stats) == {"a", "b"} and stats["a"]["views"] == 9
     assert stats["a"][wa.ENGAGED_METRIC].startswith("refused: RuntimeError: HttpError 400")
-    assert ya.calls[-1] == wa.METRICS
+    assert "; alone: RuntimeError" in stats["a"][wa.ENGAGED_METRIC]
+    assert wa.METRICS in ya.calls
+
+
+def test_engaged_views_refused_beside_every_metric_are_asked_for_alone():
+    ya = _FakeAnalytics(refuse_engaged=True, only_beside_all=True)
+    stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
+    assert stats["a"][wa.ENGAGED_METRIC] == 3 and stats["a"]["views"] == 9
+    assert ya.calls[-1] == f"views,{wa.ENGAGED_METRIC}"
+
+
+class _FakeYT:
+    """channels().list(...).execute() -> one channel's statistics."""
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    def channels(self):
+        return self
+
+    def list(self, **kwargs):
+        assert kwargs == {"mine": True, "part": "statistics"}
+        return self
+
+    def execute(self):
+        return {"items": [{"statistics": self.stats}]}
+
+
+def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):
+    p = tmp_path / "channel.csv"
+    yt = _FakeYT({"subscriberCount": "142", "hiddenSubscriberCount": False,
+                  "viewCount": "91000", "videoCount": "180"})
+    wa.snapshot_channel(yt, "2026-10-12", p)
+    wa.snapshot_channel(yt, "2026-10-19", p)
+    lines = p.read_text().splitlines()
+    assert lines == [",".join(wa.CHANNEL_FIELDS),
+                     "2026-10-12,142,0,91000,180",
+                     "2026-10-19,142,0,91000,180"]
+
+
+def test_hidden_subscriber_count_is_flagged_not_guessed(tmp_path):
+    p = tmp_path / "channel.csv"
+    wa.snapshot_channel(_FakeYT({"hiddenSubscriberCount": True, "viewCount": "1"}), "2026-10-12", p)
+    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,"
+
+
+class _FakeComments:
+    def __init__(self, items):
+        self.items = items
+
+    def commentThreads(self):
+        return self
+
+    def list(self, **kwargs):
+        return self
+
+    def execute(self):
+        return {"items": self.items}
+
+
+def _thread(cid, when, text):
+    return {"snippet": {"topLevelComment": {"id": cid, "snippet": {
+        "publishedAt": when, "likeCount": 2, "textDisplay": text, "authorDisplayName": "x"}}}}
+
+
+def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
+    p = tmp_path / "comments.csv"
+    yt = _FakeComments([_thread("new", "2026-10-10T01:00:00Z", "great\nvideo"),
+                        _thread("old", "2026-09-01T01:00:00Z", "stale")])
+    assert wa.snapshot_comments(yt, "2026-10-12", ["v1"], p) == 1
+    lines = p.read_text().splitlines()
+    assert lines == [",".join(wa.COMMENTS_FIELDS),
+                     "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]

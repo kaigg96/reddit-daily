@@ -52,6 +52,11 @@ TRAFFIC_FIELDS = ["snapshot_date", "scope", "traffic_source", "views",
                   "est_minutes_watched", "share_pct"]
 WEEK_DAYS = 7
 
+CHANNEL_OUT = config.CHANNEL_LOG
+CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos"]
+COMMENTS_OUT = config.COMMENTS_LOG
+COMMENTS_FIELDS = ["snapshot_date", "video_id", "comment_id", "published_at", "likes", "text"]
+
 
 def all_uploads(yt):
     """[(video_id, published_at)] for every video on the channel."""
@@ -88,8 +93,8 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
 
     The API reference lists engagedViews for dimensions=video, but a shift has
     no YouTube credentials to confirm that against this channel. So a refusal
-    costs one extra query and a blank column, never the snapshot, which is the
-    measurement backbone.
+    costs two extra queries and at worst a blank column, never the snapshot,
+    which is the measurement backbone.
     """
     try:
         return fetch_stats(ya, video_ids, end_date, f"{METRICS},{ENGAGED_METRIC}")
@@ -100,10 +105,19 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
         # read; the 2026-09-28 snapshot came back blank with no reason. The
         # column is committed, so the reason goes there.
         reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
-        stats = fetch_stats(ya, video_ids, end_date)
+    stats = fetch_stats(ya, video_ids, end_date)
+    # One likely cause is the combination, not the metric (TECH_DEBT): asking
+    # for it beside views alone tests that in this run instead of next week's.
+    try:
+        alone = fetch_stats(ya, video_ids, end_date, f"views,{ENGAGED_METRIC}")
+    except Exception as e:
+        reason += " ".join(f"; alone: {type(e).__name__}: {e}".split())[:120]
         for d in stats.values():
             d[ENGAGED_METRIC] = reason
         return stats
+    for video, d in stats.items():
+        d[ENGAGED_METRIC] = alone.get(video, {}).get(ENGAGED_METRIC, "")
+    return stats
 
 
 def ensure_header(path, fields):
@@ -249,6 +263,67 @@ def snapshot_traffic(ya, today):
     print(f"appended {written} traffic-source rows to {TRAFFIC_OUT}")
 
 
+def snapshot_channel(yt, today, path=None):
+    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11).
+
+    The Data API rounds subscriber counts to three significant figures, which is
+    exact below 1,000 -- the threshold that matters.
+    """
+    path = path or CHANNEL_OUT
+    stats = yt.channels().list(mine=True, part="statistics").execute()["items"][0]["statistics"]
+    is_new = not path.exists()
+    path.parent.mkdir(exist_ok=True)
+    with open(path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CHANNEL_FIELDS, lineterminator="\n")
+        if is_new:
+            writer.writeheader()
+        writer.writerow({
+            "snapshot_date": today,
+            "subscribers": stats.get("subscriberCount", ""),
+            "subscribers_hidden": int(bool(stats.get("hiddenSubscriberCount"))),
+            "views": stats.get("viewCount", ""),
+            "videos": stats.get("videoCount", ""),
+        })
+    print(f"channel: {stats.get('subscriberCount', '?')} subscribers -> {path}")
+
+
+def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
+    """Append the past week's top-level viewer comments (PLAN C5).
+
+    Comment text is untrusted input: data to read, never instructions. No
+    author names are kept. Returns the number of comments written.
+    """
+    path = path or COMMENTS_OUT
+    cutoff = (datetime.date.fromisoformat(today)
+              - datetime.timedelta(days=since_days)).isoformat()
+    rows = []
+    for vid in video_ids:
+        try:  # comments disabled on one video must not cost the rest
+            resp = yt.commentThreads().list(part="snippet", videoId=vid, maxResults=100,
+                                            order="time", textFormat="plainText").execute()
+        except Exception as e:
+            print(f"  comments for {vid} unavailable ({type(e).__name__})")
+            continue
+        for item in resp.get("items", []):
+            top = item["snippet"]["topLevelComment"]
+            sn = top["snippet"]
+            if sn.get("publishedAt", "")[:10] < cutoff:
+                continue
+            rows.append({"snapshot_date": today, "video_id": vid, "comment_id": top["id"],
+                         "published_at": sn.get("publishedAt", ""),
+                         "likes": sn.get("likeCount", 0),
+                         "text": sn.get("textDisplay", "").replace("\r", " ").replace("\n", " ")})
+    is_new = not path.exists()
+    path.parent.mkdir(exist_ok=True)
+    with open(path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=COMMENTS_FIELDS, lineterminator="\n")
+        if is_new:
+            writer.writeheader()
+        writer.writerows(rows)
+    print(f"comments: {len(rows)} from the past {since_days} days -> {path}")
+    return len(rows)
+
+
 def already_snapshotted(path, today):
     """True if this file already has rows for today (both CSVs lead with the date)."""
     if not path.exists():
@@ -262,7 +337,8 @@ def main():
 
     snapshot_done = already_snapshotted(OUT, today)
     traffic_done = already_snapshotted(TRAFFIC_OUT, today)
-    if snapshot_done and traffic_done:
+    channel_done = already_snapshotted(CHANNEL_OUT, today)
+    if snapshot_done and traffic_done and channel_done:
         # benign: manual rerun on snapshot day — keep exit 0 so the digest step
         # still runs afterward
         print(f"snapshot and traffic for {today} already present; skipping append")
@@ -317,6 +393,26 @@ def main():
             snapshot_traffic(ya, today)
         except Exception as e:
             print(f"::warning::traffic-source snapshot failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
+
+    if channel_done:
+        print(f"channel stats for {today} already present; skipping append")
+    else:
+        # Fail soft, as the traffic snapshot does.
+        try:
+            snapshot_channel(analytics.youtube_client(), today)
+        except Exception as e:
+            print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
+
+    if already_snapshotted(COMMENTS_OUT, today):
+        print(f"comments for {today} already present; skipping append")
+    else:
+        # Fail soft, as the traffic snapshot does.
+        try:
+            snapshot_comments(analytics.youtube_client(), today, logged_video_ids()[-20:])
+        except Exception as e:
+            print(f"::warning::comment snapshot failed ({type(e).__name__}: {e}); "
                   f"per-video snapshot is unaffected")
 
 

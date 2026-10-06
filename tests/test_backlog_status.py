@@ -81,3 +81,14 @@ def test_answered_research_questions_leave_the_tracker():
     lingering = [r[:70] for r in rows
                  if b._cells(r)[1].strip("` ").split(":")[0].lower() not in ("ready", "blocked")]
     assert not lingering, f"answered research rows still in §0: {lingering}"
+
+
+def test_the_company_queue_is_well_formed_and_counted():
+    """PLAN.md §3 feeds the same queue as PRD §0, under the same statuses."""
+    text = open(b.PLAN).read()
+    rows = b.items(text, b.queue_section)
+    assert rows, "no PLAN.md §3 table with a Status column"
+    bad = [(status, name) for status, _, name in rows if status not in b.STATUSES]
+    assert not bad, f"unknown statuses: {bad}"
+    assert not b.malformed(text, b.queue_section)
+    assert all(name.startswith(("[product] ", "[company] ")) for name in b.ready_all())

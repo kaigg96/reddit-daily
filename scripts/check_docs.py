@@ -95,6 +95,15 @@ def describes_as_open(text, n):
     return False
 
 
+def latest_worklog_entry(text):
+    """The newest WORKLOG entry: the only one that makes current claims.
+    Older entries are history, and reading them flagged a true past "waiting
+    on #44" as stale on two shifts running (2026-10-03, 10-04)."""
+    body = text.split("\n---\n", 1)[-1]
+    entries = re.split(r"(?m)^(?=## \d{4}-\d\d-\d\d)", body)
+    return next((e for e in entries if e.startswith("## ")), "")
+
+
 def check_open_escalations():
     """A doc pointing at an issue that has since been closed."""
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -103,7 +112,8 @@ def check_open_escalations():
     import json
     import urllib.request
     repo = os.environ.get("GITHUB_REPOSITORY", "kaigg96/reddit-daily")
-    text = _read("PRD.md") + _read("WORKLOG.md") + _read("TECH_DEBT.md")
+    text = (_read("PRD.md") + latest_worklog_entry(_read("WORKLOG.md"))
+            + _read("TECH_DEBT.md"))
     refs = {int(n) for n in re.findall(r"(?:issue|#)\s?#?(\d{1,4})\b", text)}
     refs = {n for n in refs if n < 500}
     stale = []

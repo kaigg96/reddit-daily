@@ -23,6 +23,7 @@ that hit the YouTube API are not.
 import csv
 import datetime
 import math
+import re
 import statistics
 from dataclasses import dataclass, field
 
@@ -35,6 +36,7 @@ MATERIAL = 0.05
 # At or below this many views an upload was barely shown at all — the
 # retired-clip signal (PRD §0 #11), which a median of the rest cannot see.
 BURIED_VIEWS = 5
+CLIP_EARLY_USES = 4   # R4: retired clip #11 was buried only after its 4th use
 # Two cohorts whose share of one release differs by more than this compare
 # eras as much as the field (`era_imbalance`).
 ERA_MIX_TOLERANCE = 0.15
@@ -52,7 +54,7 @@ class Metric:
     LIKES = "likes"
     COMMENTS = "comments"
     TOTAL = "total_watch_s"      # views x watch-seconds: does length trade one for the other?
-    ENGAGED = "implied_engaged"  # UNCONFIRMED share of plays past the opening (PRD §0 R2)
+    ENGAGED = "implied_engaged"  # NOT the engaged share: refuted 2026-10-05 (engaged_check)
 
 
 @dataclass
@@ -78,7 +80,7 @@ class Video:
     def implied_engaged(self):
         """est_minutes x 60 / (views x watch-seconds): ~0.18 before v2 and ~0.4
         after. Hypothesis (R2): watch-seconds is per engaged view, so this is
-        engagedViews / views. Unconfirmed until checked against engaged_views."""
+        engagedViews / views. Refuted 2026-10-05: `engaged_check` reads it 26% high."""
         denom = self.views * self.watch_seconds
         return self.est_minutes * 60 / denom if denom else 0.0
 
@@ -162,6 +164,54 @@ def summarize(videos, label, metric, now):
         median_age=median([v.age_days(now) for v in live]) if live else float("nan"),
         buried_count=sum(1 for v in videos if v.views <= BURIED_VIEWS),
     )
+
+
+def buried_rate_p(hit_a, n_a, hit_b, n_b):
+    """Two-sided Fisher exact p that two cohorts are buried (<= BURIED_VIEWS)
+    at the same rate. Medians exclude zero-view videos, so a cohort YouTube
+    distributes less can tie on watch-seconds and differ only here (R3)."""
+    k, n = hit_a + hit_b, n_a + n_b
+    if not (n_a and n_b and 0 < k < n):
+        return 1.0
+
+    def pmf(x):
+        return math.comb(n_a, x) * math.comb(n_b, k - x) / math.comb(n, k)
+
+    observed = pmf(hit_a)
+    tables = range(max(0, k - n_b), min(k, n_a) + 1)
+    return min(1.0, sum(p for p in map(pmf, tables) if p <= observed * (1 + 1e-9)))
+
+
+def buried_strata(videos_a, videos_b, key="format_version"):
+    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share."""
+    def value(v):
+        return str(v.meta.get(key, "")).strip()
+
+    out = []
+    for val in sorted({value(v) for v in videos_a} & {value(v) for v in videos_b}):
+        a = [v for v in videos_a if value(v) == val]
+        b = [v for v in videos_b if value(v) == val]
+        out.append((sum(v.views <= BURIED_VIEWS for v in a), len(a),
+                    sum(v.views <= BURIED_VIEWS for v in b), len(b)))
+    return out
+
+
+def buried_rate_p_pooled(strata):
+    """Mantel-Haenszel p (continuity-corrected) that two cohorts are buried at
+    the same rate, pooling strata such as formats without comparing across
+    them. Per-format reads are thin (~10 per voice per format), so R3 needs
+    the pooled one to reach a verdict."""
+    diff = var = 0.0
+    for hit_a, n_a, hit_b, n_b in strata:
+        n, k = n_a + n_b, hit_a + hit_b
+        if n < 2 or k in (0, n):
+            continue
+        diff += hit_a - n_a * k / n
+        var += n_a * n_b * k * (n - k) / (n * n * (n - 1))
+    if not var:
+        return 1.0
+    stat = max(0.0, abs(diff) - 0.5) ** 2 / var
+    return math.erfc(math.sqrt(stat / 2))
 
 
 def ages_comparable(a, b, tolerance=0.5):
@@ -297,6 +347,35 @@ def drift_floor(videos, metric, block=MIN_COHORT):
     deltas = []
     for x, y in zip(blocks, blocks[1:]):
         mx, my = median([v.get(metric) for v in x]), median([v.get(metric) for v in y])
+        if mx:
+            deltas.append(abs(my - mx) / mx)
+    return median(deltas) if deltas else None
+
+
+def alternation_floor(videos, metric, block=MIN_COHORT):
+    """`drift_floor`'s counterpart for a test that alternates by day.
+
+    A release is judged against the batch before it, so it carries the
+    calendar's swing. A change switched on and off on alternate days is
+    judged against uploads from the same weeks. This measures that design's
+    noise with nothing switched: take `2 * block` consecutive uploads, split
+    them by the parity of their publish day, and record how far apart the two
+    halves' medians sit. Returns the median of that across the history, or
+    None without enough of it. Compare with `drift_floor` at the same
+    `block`: the gap is what alternating would buy (PLAN C9, 2026-10-05).
+    """
+    live = sorted([v for v in videos if v.views > 0],
+                  key=lambda v: v.true_published or v.published)
+    size = block * 2
+    deltas = []
+    for i in range(0, len(live) - size + 1, size):
+        chunk = live[i:i + size]
+        day = lambda v: (v.true_published or v.published).toordinal() % 2
+        on = [v.get(metric) for v in chunk if day(v)]
+        off = [v.get(metric) for v in chunk if not day(v)]
+        if len(on) < block // 2 or len(off) < block // 2:
+            continue
+        mx, my = median(off), median(on)
         if mx:
             deltas.append(abs(my - mx) / mx)
     return median(deltas) if deltas else None
@@ -487,11 +566,23 @@ def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     holds ~10 readings per video, so a July upload can be read at seven days
     old alongside a September one. Returns [(period, n, median)] oldest first.
     """
+    buckets = {}
+    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance):
+        buckets.setdefault(pub.strftime("%G-W%V"), []).append(value)
+    return [(period, len(v), median(v))
+            for period, v in sorted(buckets.items())
+            if len(v) >= TRAJECTORY_MIN_N]
+
+
+def _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=False):
+    """[(value, published)] — each video's reading nearest `at_age` days old."""
     best = {}
     for row in snapshot_rows:
         pub, snap = row.get("published"), row.get("snapshot")
         value = row.get("value")
-        if not pub or not snap or not value or value <= 0:
+        if not pub or not snap or value is None or value < 0:
+            continue
+        if not value and not keep_zero:
             continue
         age = (snap - pub).days
         if abs(age - at_age) > tolerance:
@@ -500,13 +591,77 @@ def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
         prev = best.get(key)
         if prev is None or abs(age - at_age) < abs(prev[0] - at_age):
             best[key] = (age, value, pub)
+    return [(value, pub) for _, value, pub in best.values()]
 
-    buckets = {}
-    for _, value, pub in best.values():
-        buckets.setdefault(pub.strftime("%Y-W%V"), []).append(value)
-    return [(period, len(v), median(v))
-            for period, v in sorted(buckets.items())
-            if len(v) >= TRAJECTORY_MIN_N]
+
+def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+    """Total views per publish-week, every upload read at the same age.
+
+    Bet 2 (PLAN §2) is judged on total weekly views, because the Partner
+    Program's bar is a total: more uploads count, and so does a lost one.
+    A median would hide both. Zero-view uploads count, since they are part
+    of the total.
+
+    A sum is only honest over a week whose every upload was read, so a week
+    is reported only when each of its uploads that any snapshot knows of has
+    a reading at the age, and its Sunday upload is old enough to have one.
+    That leaves out the newest weeks, still filling in, and the weeks before
+    the snapshots began or across a missed one, rather than reporting them
+    low. Returns [(period, n, total)] oldest first.
+    """
+    stamps = [r["snapshot"] for r in snapshot_rows if r.get("snapshot")]
+    if not stamps:
+        return []
+    newest = (max(stamps) - datetime.timedelta(days=at_age - tolerance)).date()
+    week = lambda pub: pub.strftime("%G-W%V")
+    known = {}
+    for r in snapshot_rows:
+        if r.get("published") and r.get("video_id"):
+            known.setdefault(week(r["published"]), set()).add(r["video_id"])
+    read = {}
+    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=True):
+        read.setdefault(week(pub), []).append((value, pub))
+    out = []
+    for period, values in sorted(read.items()):
+        pub = values[0][1]
+        sunday = (pub - datetime.timedelta(days=pub.weekday() - 6)).date()
+        if len(values) < len(known.get(period, ())) or sunday > newest:
+            continue
+        out.append((period, len(values), sum(v for v, _ in values)))
+    return out
+
+
+def views_gained(snapshot_rows):
+    """[(snapshot date, views gained since the previous snapshot, days)].
+
+    The Partner Program counts every Shorts view in 90 days, the back
+    catalogue's included, while `weekly_totals` counts only new uploads'
+    first week. This is the channel-wide figure the bar is read against:
+    the rise in the summed views of every video between consecutive
+    snapshots. A video first seen in a snapshot counts in full, since it
+    was published after the one before.
+    """
+    by_snap = {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+    out = []
+    dates = sorted(by_snap)
+    for prev, cur in zip(dates, dates[1:]):
+        before, after = by_snap[prev], by_snap[cur]
+        gained = sum(max(v - before.get(vid, 0), 0) for vid, v in after.items())
+        out.append((cur, gained, (cur - prev).days))
+    return out
+
+
+def totals_change(series, weeks=4):
+    """(prior total, recent total, ratio) over the last `weeks` against the
+    `weeks` before, or None without enough complete weeks to compare."""
+    if len(series) < weeks * 2:
+        return None
+    recent = sum(t for _, _, t in series[-weeks:])
+    prior = sum(t for _, _, t in series[-weeks * 2:-weeks])
+    return prior, recent, (recent / prior if prior else None)
 
 
 def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):
@@ -694,6 +849,27 @@ def _parse_ts(value):
     return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
+def _read_upload_log():
+    with open(config.UPLOAD_LOG) as f:
+        return with_clip_use([r for r in csv.DictReader(f) if r.get("video_id")])
+
+
+def with_clip_use(rows):
+    """Add `clip_use`: "early" for a b-roll clip's first CLIP_EARLY_USES
+    uploads, "late" after (R4). It counts across the whole log, so it cannot
+    live in _with_derived_dimensions, which sees one row. The threshold came
+    from retired clip #11 itself, so read R4 on the other clips."""
+    seen = {}
+    for r in sorted(rows, key=lambda r: r.get("timestamp_utc") or ""):
+        bg = (r.get("bg_clip") or "").strip()
+        if not bg or bg.startswith("procedural"):
+            r["clip_use"] = ""
+            continue
+        seen[bg] = seen.get(bg, 0) + 1
+        r["clip_use"] = "early" if seen[bg] <= CLIP_EARLY_USES else "late"
+    return rows
+
+
 def _with_derived_dimensions(row):
     """Group-able dimensions computed from an upload_log row.
 
@@ -712,10 +888,17 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # The question is the narrated opening: does addressing the viewer hold
+    # them? 90 of 154 logged questions say "you" (2026-10-03).
+    r["question_person"] = "" if not q else (
+        "you" if re.search(r"\byou(?:r|rs|'re|'ve|'d|'ll)?\b", q, re.I) else "other")
     # A failed title call ships the Reddit question verbatim. title_ok only
     # exists from 2026-09-19; comparing the two titles covers the older rows.
     t = (r.get("video_title") or "").strip()
     r["title_source"] = "" if not (q and t) else "raw" if t == q else "generated"
+    # Raw titles run ~64 characters, generated ~41 (the generated median,
+    # 2026-10-04): is length, not source, behind raw titles' views gap?
+    r["title_length"] = "" if not t else "short" if len(t) <= 41 else "long"
     # ~20 s: the logged median duration is 20.2 s (2026-09-25).
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
@@ -730,8 +913,7 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
     now = now or datetime.datetime.now(datetime.timezone.utc)
     if not config.UPLOAD_LOG.exists():
         return []
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     ya = analytics.youtube_analytics_client()
     stats, ids = {}, [r["video_id"] for r in rows]
@@ -867,8 +1049,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
     asof = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
     stats = {r["video_id"]: r for r in snapshot_rows if r["snapshot_date"] == latest}
 
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     videos, too_new, absent = [], [], []
     for r in rows:
@@ -968,8 +1149,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
     latest = max(r["snapshot_date"] for rows in by_video.values() for r in rows)
     anchor = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
 
-    with open(config.UPLOAD_LOG) as f:
-        rows = [r for r in csv.DictReader(f) if r.get("video_id")]
+    rows = _read_upload_log()
 
     videos, not_yet, no_coverage = [], [], []
     for row in rows:
@@ -1177,3 +1357,30 @@ def format_traffic_mix(rows, top_n=3, min_share=1.0):
     if rest >= 0.05:
         parts.append(f"other {rest:.1f}%")
     return " · ".join(parts)
+
+
+def engaged_check(snapshot_rows, min_views=20, tolerance=0.10):
+    """PRD §0 R2: does est_minutes x 60 / (views x avg_view_duration_s) equal
+    engaged_views / views? Read on rows where the API returned both.
+
+    Returns (n, median implied/actual ratio, share of rows within `tolerance`
+    of 1), or (0, None, None). A median near 1 with most rows inside the band
+    means the minutes column encodes engaged views, so history can be read.
+    """
+    ratios = []
+    for r in snapshot_rows:
+        try:
+            views = float(r["views"])
+            dur = float(r["avg_view_duration_s"])
+            engaged = float(r["engaged_views"])
+            minutes = float(r["est_minutes_watched"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if views < min_views or dur <= 0 or engaged <= 0:
+            continue
+        implied = minutes * 60 / (views * dur)
+        ratios.append(implied / (engaged / views))
+    if not ratios:
+        return 0, None, None
+    within = sum(1 for x in ratios if abs(x - 1) <= tolerance) / len(ratios)
+    return len(ratios), statistics.median(ratios), within

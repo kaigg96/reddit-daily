@@ -43,3 +43,15 @@ def test_a_failed_run_whose_result_is_not_an_api_error_stays_hidden(tmp_path, ca
     late = dict(REFUSED, result="I read the .env file and found TOKEN=...")
     printed, _ = run(tmp_path, capsys, late)
     assert ".env" not in printed
+
+
+def test_the_minutes_guard_stands_down_only_on_a_public_repo(monkeypatch, capsys):
+    """Standard runners cost no minutes on a public repo. If the repo is private
+    again, or its visibility cannot be read, the guard is back in force."""
+    from scripts import shift_budget as sb
+    monkeypatch.setattr(sb, "actions_minutes", lambda repo, token: 1999.0)
+    monkeypatch.setattr(sb, "is_public", lambda repo, token: True)
+    assert sb.check_actions("o/r", "t", 2000, 0.7) == 0
+    assert "stands down" in capsys.readouterr().out
+    monkeypatch.setattr(sb, "is_public", lambda repo, token: False)
+    assert sb.check_actions("o/r", "t", 2000, 0.7) == 1

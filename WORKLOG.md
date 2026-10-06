@@ -1,7 +1,8 @@
 # Work log
 
 One entry per shift, newest first. **This is not a status tracker** — status
-lives in [PRD.md](PRD.md) §0 and code health in [TECH_DEBT.md](TECH_DEBT.md).
+lives in [PLAN.md](PLAN.md) (the company), [PRD.md](PRD.md) §0 (the product) and
+[TECH_DEBT.md](TECH_DEBT.md) (code health).
 This file records *what happened, what's queued next, and what's blocked on
 what*, so a cold session can resume without re-deriving anything.
 
@@ -14,24 +15,20 @@ next shift looks. Follow this template exactly — the report is generated from
 its structure:
 
 ```
-## 2026-09-21 — one line on what actually mattered
+## 2026-10-06 — one line on what actually mattered
 
-    Allocation (planned→actual %): rounds 10→8 · maintenance 15→25 · security 10→5 · pm 15→12 · research 10→0 · feature 30→40 · close 10→10
+    Worked (% of the shift): reliability 10 · product 30 · engineering 30 · strategy 20 · gm 10
 
-**Summary:** Two sentences. What the shift achieved, and why it matters to the
-channel. No detail — this is the part read on a phone.
+**Summary:** Two sentences. What moved, and whether it brought the company
+closer to revenue. No detail — this is the part read on a phone.
 
-### Maintenance
-- One bullet per thing done, in plain words.
+### Toward revenue
+- What this shift did that moves the company toward revenue, or "nothing
+  directly, because …". Say it plainly either way.
 
-### Security
-- Nothing this shift — the standing checks were clean.
-
-### Project management
-- Nothing this shift — no decisions came due.
-
-### Research
-- Nothing this shift, because maintenance took the time.
+### Done
+- **Engineering:** one bullet per thing done, in plain words, led by its
+  function. Say whether it fixed something or was a bet, when that isn't obvious.
 
 ### Blocked
 - What is stuck, and what it is waiting on.
@@ -40,136 +37,111 @@ channel. No detail — this is the part read on a phone.
 - What the following shift should pick up.
 
 ### Better?
-- **Than last shift:** yes/no/unclear, and the specific thing that is better.
+- **Than last shift:** is the company closer to revenue — yes/no/unclear, and the specific thing.
 - **Than ~10 shifts ago:** same, naming evidence rather than impression.
 - **Than ~100 shifts ago:** same, or "too early to say".
 ```
 
-**On the "Better?" section.** Numbers lag and no single one judges this channel
-(`report.py --scorecard`), so a subjective read is part of the record — but a
-shift grading its own work is exactly the bias the research warns about. Two
-rules make it worth having: answer **comparatively** against a named horizon
-rather than rating out of ten, and **name the evidence**, not the feeling.
-"Unclear" is a real answer and more useful than a confident guess.
-
-**Every workstream gets a heading, including ones that did nothing** — with a
-one-line "nothing this shift, because …". Silence and inactivity must not look
-alike, and the report flags a missing reason rather than hiding it. Routine
-checks and wrap-up are overhead and need no section. **The planned and actual
-columns must each total 100%**; the report shows the sum and flags it if not.
-Read the allocation series with
+**`Worked`** uses the short names of the functions in `ORG.md` (strategy, gm,
+market, audience, distribution, monetization, product, editorial, engineering,
+reliability, data, finance, legal, security), and it must total 100%. Since
+2026-10-05 a shift works one ranked queue, so there is no planned column and no
+heading per function: a function the shift did not touch is simply absent.
+Reviews (`/review`) use the same shape, and the monthly one adds the sections
+its skill lists. Read the series with
 `venv/bin/python scripts/context_budget.py --allocation`.
+
+**On the "Better?" section.** Numbers lag and no single one judges the
+company, so a subjective read is part of the record — but a shift grading its
+own work is exactly the bias the research warns about. Two rules make it worth
+having: answer **comparatively** against a named horizon rather than rating out
+of ten, and **name the evidence**, not the feeling. "Unclear" is a real answer
+and more useful than a confident guess.
 
 ---
 
-## 2026-10-01 (16:30) — the log now records why the content check falls back; a timing rule that delayed the new-subreddit sample is raised with you
+## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
 
-    Allocation (planned→actual %): rounds 10→15 · maintenance 25→30 · security 5→5 · pm 30→20 · research 20→10 · feature 0→5 · close 10→15
+    Worked (% of the shift): strategy 25 · data 20 · market 10 · editorial 10 · engineering 10 · reliability 10 · product 5 · legal 5 · gm 5
 
-**Summary:** A short evening shift. It shipped the record the morning shift asked for: each upload now notes why the content check fell back to keywords, so the next fallback explains itself. The new-subreddit sample video could not be requested today, and the rule that prevented it no longer protects anything, so I have asked you to retire it.
+**Summary:** The first quarterly packet is with you: three bets for October to December, each with a first step and a rule for judging it. Pricing the other platforms found none within reach either. The nearest, TikTok, is about 8 times short and pays only for videos over a minute, so making the format our own (bet 1) comes before any route.
 
-### Maintenance
-- **Shipped:** every upload's record now says *why* the content check fell back to its keyword-only version: the daily limit, a timeout, a garbled reply, and so on. This morning's fallback left no reason anywhere we can read. It was built now rather than after a second fallback, because waiting would have lost that one's reason too. It changes no video. All tests pass, and the change was checked against a copy of the real upload record.
-- **Closed a quieter gap in the same check.** If the content service replied with something unreadable, the post was treated as checked and approved, skipping even the keyword fallback, and the record said the full check had run. It has not happened in 22 uploads. It now goes to the keyword fallback and the reason is recorded. Tests pass; the video is unchanged.
-- This morning's upload landed and the saved last-post record is intact. Tonight's upload was not due yet when this shift ran.
+### Toward revenue
+- The company now has a drafted plan for the quarter instead of a ranked list: make the format ours, raise weekly views, and price and pilot another platform. It waits on your planning session.
+- The gap is measured properly for the first time, counting every view as YouTube does. It is 32,000 to 37,000 views per 90 days against a bar of 10 million, about 300 times short. We have 21 subscribers against the 1,000 needed, 48 times short, so views are the half that binds.
+- The "You…" title style, which earned 47% more views, is merged and starts with tomorrow morning's upload.
 
-### Security
-- Standing check clean: no credentials in the project, and the secret files are still excluded.
-
-### Project management
-- **New request for you (dry-run-timing-rule):** the sample video for the new-subreddit build was due this afternoon, but no shift ran in the window the rules allow. Today's shift started with the evening upload already due, so it held back. That rule dates from when sample videos used the same daily allowance as real uploads. Since 25 September they use a separate one, and the only thing a real upload uses from it is a piece of tracking data. I recommend letting shifts request a sample at any time; the request has the exact wording. Until you decide, the 09:17 shift tomorrow can request it, and the 6 October plan still holds.
-- The channel is still flat on watch time (11→12 seconds over six weeks, within its normal swing). The two changes aimed at views are already queued for 6 October, so nothing new was added.
-- Ready work is still one item, the new subreddit, and today's rule kept even that from moving. Besides the two research questions below, I considered making the release check test the content check on a question worded differently from its built-in examples. A miss would block releases before 6 October, so it waits until after.
-- **Friction:** the rules say to propose process changes on a branch, but this shift could not edit the process file even there, so the wording went into the request. This shift also wrote its plan after starting.
-
-### Research
-- **Do videos titled with the raw Reddit question do worse?** Only 2 such uploads are recorded, against a minimum of 8; months away, so not queued.
-- **Do shorter videos get more views?** About 28% more, but each view is ~3 seconds shorter, so total watch time is the same. Already known since 25 September; discarded.
-
-### Feature work
-- The sample video was held back by the timing rule above. Instead, both queued changes (the new subreddit and the title weighting) now include today's code. Together they combine cleanly and every test passes, so tomorrow's sample tests what will actually ship. A sample taken tomorrow morning was confirmed to draw the new subreddit.
-
-### Blocked
-- The new-subreddit sample is waiting on tomorrow morning's shift, or on your decision on the timing rule.
-
-### Next
-- **Tomorrow before 12:00 UTC only:** request the new-subreddit sample. On 2 October a sample taken after noon draws AskReddit and proves nothing, and shifts have been starting hours late, so check which subreddit it would draw first. This is the second missed sample window (30 September was the first). Both queued changes include everything up to tonight's handover; if anything else lands first, bring them up to date before requesting, or the sample tests the wrong code. Check that tonight's upload carries the new "why it fell back" field, blank if the check worked. **5 October:** read the new data. **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment.
-
-### Better?
-- **Than last shift:** slightly. A fallback that left no trace will now explain itself, but nothing aimed at the channel's numbers moved.
-- **Than ~10 shifts ago:** unclear. The channel is still flat, and the first change aimed at views ships on 6 October.
-- **Than ~100 shifts ago:** too early to say.
-
-## 2026-10-01 (06:46) — two queued changes can start on 6 October instead of after the 12 October read; the title change is built
-
-    Allocation (planned→actual %): rounds 10→10 · maintenance 10→15 · security 5→10 · pm 35→30 · research 15→10 · feature 15→15 · close 10→10
-
-**Summary:** The next two changes no longer have to wait for the current experiment's result on 12 October. The data shows they cannot disturb it, so both can start on 6 October, six days sooner. The first, more "You…" titles in the rotation, is built and tested and can be merged that day.
-
-### Maintenance
-- Last night's and this morning's uploads landed, and the saved last-post record is intact.
-- **This morning's content check ran on its keyword-only fallback**, the first time since we started recording which check ran (9 September). The question itself was harmless ("something you can't prove but believe"). The title service answered in the same run, so the daily limit had not run out. Nothing we can read records why it failed. If it happens again, the next step is to start recording the reason.
-- **The keyword fallback is close to no protection.** It would have caught none of the four questions the full check has ever turned away. Because the fallback ran once in about 44 uploads, the risk is about one upload in a thousand. Worth watching, not yet worth fixing.
-
-### Security
-- Standing check clean: no credentials in the project, and the secret files are still excluded.
-- **The image-library fix changes the video.** Rendered the same sample on the old and new versions: the thumbnail and sound match, but about a quarter of the video frames differ. Two renders on the same version match exactly, so the difference is real. The fix therefore ships as its own release, with a sample video, after 12 October.
-
-### Project management
-- **Your decision on shifts ending early (issue #43) is done and closed.** The three short shifts each stopped because only one piece of work was ready. There were two causes. Most queued work was dated to the 12 October read, but that read only measures uploads up to 5 October. And research questions get answered in the shift that raises them, so a supply never builds up. This shift fixed the first cause and used its full time.
-- Ready work is still one item against a floor of three, but two blocked items now unblock on 6 October rather than 12.
-- **Friction, fixed:** the list of your approved decisions showed only titles, so I had to open the issue itself to read what it asked for. It now shows the recommendation you approved.
-
-### Research
-- **"You…" titles do not change watch time.** It is 10 seconds either way across 129 videos: a little higher in one period, a little lower in the next. So using more of them cannot move the current experiment's measure, which is watch time.
-- **The title change and the new subreddit can run side by side.** Each day's two uploads share a title style and go to different subreddits, so neither comparison skews the other. This holds for two subreddits only; a third would need the schedule changed.
-
-### Feature work
-- **Built the title-weighting change:** four "You…" days in every six, with the other two styles kept for comparison. The tests and a free sample run passed. Merge it on or after 6 October.
+### Done
+- **Strategy:** drafted the three bets and sent them to you as one issue, asking you to hold the planning session. Bet 1: add commentary or a storyline of our own, without which YouTube will not pay. Bet 2: double weekly views. Bet 3: price the other platforms and pilot the best one.
+- **Strategy:** priced the other routes from creator guides, because the platforms' own pages refuse automated reads. TikTok needs 10,000 followers and 100,000 views a month (about 8 times short), and pays only for original videos over one minute. Facebook is invite-only and about 160 times short. Instagram pays no reliable rate.
+- **Market:** scanned eight comparable channels; this function's first work. Every large one has a human voice or face and gives a verdict. The text-to-speech ones stay small even when they post 9 times a day. That suggests AI commentary may not be enough for bet 1, and I have asked you whether a human voice is ever part of the show.
+- **Editorial:** drafted the second format candidate, a host storyline: a setup line before the answers and a verdict line after them, with the length held. Curation is folded into it, because picking other people's text is still a reading. You can now choose between the candidates.
+- **Data:** the report tool now gives total weekly views and the channel-wide views the bar counts. Both are needed to judge bet 2. I fixed bet 2's starting point now, before new data arrives: 8,300 views over September's last four weeks, so doubling means 16,600.
+- **Data:** found that watch time rises with length up to about 31 seconds, and nothing longer has ever been measured. So any TikTok route needs a one-minute test on YouTube first.
+- **Data:** tested my own proposal to run tests on alternating days, and it failed. Split by alternate days, uploads differ as much as consecutive batches do (12% against 13%), so it would not sharpen our tests. I withdrew it on your issue before you spent time on it.
+- **Engineering:** checked whether 3 to 4 uploads a day fits the AI service's free daily cap, which bet 2 needs. It fits: 80 of 84 runs used 2 requests, so 4 a day comes to about 16 of the 20. A free setting covers the rare worst case, to be applied when volume ships.
+- **Legal:** Reddit's own pages still refuse automated reads, but the guides agree that using its content in a monetized product needs Reddit's written approval. I raised that risk from unknown to likely. Asking Reddit comes before any application for payment.
+- **Product:** merged the title-style weighting. Its sample run passed, and no upload runs between now and midnight, so the effect is the same as merging on the 6th. A sample run of the live code after the merge also passed, with a real post, an AI-written title and narration, so tomorrow's upload path is checked.
+- **Reliability:** your approval of the viewer-comments change never landed. The job that applies it was cancelled in GitHub's outage before it ran. I have asked you to re-run it. The tool that lists your decisions now flags any approval that never landed. This was a fix.
+- **Security:** standing check clean. No credentials are in the project, the secret files are still excluded, no workflow changed this shift, and the Amazon spending controls are intact ($0.15 this month).
+- **General management:** brought both trackers back under their reading budgets and retired five finished items. The process-health check raised "shifts end with most of their time unspent" again. I filed it with context: the last three short shifts include the monthly and weekly reviews.
+- Fixing against improving: mostly improving. The fixes were the lost approval, the gap figure and the tracker trims.
+- **Friction:** I re-ran a check that the newer Python version works, which the code-health log already recorded on 30 September, because I read only part of that entry. It cost about six minutes and taught nothing new. It was my mistake, not a process gap.
 
 ### Blocked
-- Nothing is waiting on you.
+- **For you:** the quarterly planning session, one re-run of the comments job, landing the auto-apply extension by hand (a shift cannot), and the browser read of TikTok's, Meta's and Reddit's terms (bet 3's first step).
+- The first format test cannot start before you approve bet 1. The format and narrator reads wait on the 12 October snapshot.
 
 ### Next
-- **Today after 12:00 UTC:** request the new-subreddit sample, but not within an hour of the evening upload. **5 October:** read the new data (engaged-share estimate, clips, voice). **6 October:** merge the title change; the new subreddit follows once its sample passes. **12 October:** read the current experiment. After that, the Python upgrade and the library fixes, one release each.
+- Check that tomorrow's morning upload landed with a title. Then merge subreddit rotation, which passed its sample run.
+- No work is ready: everything waits on your session or on 12 October. Generating more considered a single-story format test and a one-minute test (both wait on your bet choices), a faster testing method (refuted tonight), and the Python upgrade (scheduled after the 12 October read). Until your session, the next shift's best use is the rotation merge above, then the 12 October reads.
+- On 12 October: judge the "open on the question" change under its rule, and read the narrator and topic questions.
 
 ### Better?
-- **Than last shift:** yes. A change is built and ready to ship, and two changes move six days earlier, based on data.
-- **Than ~10 shifts ago:** unclear. The channel is still flat; the first change aimed at views ships on 6 October.
-- **Than ~100 shifts ago:** too early to say.
+- **Than last shift:** Yes. The quarter has a drafted plan, the gap is measured correctly, and one change aimed at views is live from tomorrow.
+- **Than ~10 shifts ago:** Somewhat. We now know what blocks revenue: the format and the scale. We did not know that two weeks ago. Watch time per view is flat, and views per upload fell by about 40% over September, which is still within normal swings.
+- **Than ~100 shifts ago:** Too early to say.
 
-## 2026-09-30 (15:58) — the new-subreddit build is ready for tomorrow afternoon's sample; background clips do not differ on watch time
+## 2026-10-05 (21:15) — the evening upload was lost to a GitHub outage, not a fault
 
-    Allocation (planned→actual %): rounds 10→15 · maintenance 10→10 · security 20→25 · pm 20→10 · research 20→15 · feature 10→10 · close 10→15
+**Summary:** This evening's scheduled upload was created eight hours late and then cancelled before it started, during GitHub's "Incident with Actions" (runner assignment failing, from 19:11 UTC). No code ran and nothing was uploaded, so there is nothing to diagnose and no sample run is needed.
 
-**Summary:** A short shift (24 minutes) that got the subreddit-rotation build ready for tomorrow's sample video, and showed that the Python upgrade due after 12 October needs no other changes. The only new question worth testing had a clear answer: once the weak clip retired on 28 September is set aside, the background clip makes no difference to watch time.
+### Done
+- **Reliability:** traced the failed run. It never got a machine, billed 0 minutes, and was cancelled after 15 minutes in the queue. The saved record of the last post is untouched. The Polly permission was already proven by the 18:17 dry run.
 
-### Maintenance
-- This morning's upload landed and the saved last-post record is intact; today's release check passed. Tonight's upload is not due yet.
-- Subtitle uploads: 16 in a row have now succeeded since the last failure on 22 September. The item closes if none fail by 6 October.
+### Next
+- If the morning upload lands, the missing evening one needs no follow-up. A sample run of the live code is worth requesting only if a run fails *after starting*, with steps in its log.
 
-### Security
-- **The Python upgrade looks straightforward.** The version the pipeline runs on stops getting security fixes on 4 October. On the newer version every test passes and a free test video renders correctly, with no library changes needed. The upgrade still waits until after the 12 October read and ships as its own release, because it could change how videos render.
-- **Upgrading the video library would not fix the image library's weaknesses**, contrary to last shift's plan: every fix is above the version it allows. The fix is overriding that cap, which a test render already survived.
-- A new published weakness in the sign-in library does not affect us: it is a server-side flaw, and we only sign in as a client, from a one-off setup script. The fixed version passes every test and joins the next dependency release.
-- Standing check clean: no credentials in the project; secret files still excluded.
+## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
 
-### Project management
-- Nothing you approved is waiting. Ready work is still one item against a floor of three. The one new question considered is answered below; nothing else cleared the bar.
+    Worked (% of the shift): data 25 · engineering 15 · audience 10 · reliability 10 · product 10 · editorial 15 · distribution 5 · gm 10
 
-### Research
-- **Background clips do not differ on watch time.** At 7 days the six clips still in use sit between 11 and 13 seconds, within the channel's normal swing. The clip retired on 28 September was also the lowest on watch time (10 seconds), which supports retiring it.
+**Summary:** This is the first weekly review. We now measure how many plays get past the opening and, once you approve one line, the subscriber count, which is half of YouTube's bar. The format work aimed at revenue has started. Today's late upload looks like a GitHub delay, not a failure.
 
-### Feature work
-- **The rotation build is ready for its sample.** It had fallen 27 changes behind what is live; it now includes them and every test passes. Only a sample requested **after 12:00 UTC on 1 October** draws the new subreddit (checked against the code), and it must not be requested within an hour of the evening upload.
+### Toward revenue
+- A first step. The first candidate for a format YouTube would pay for is drafted, and the subscriber count, half of the payment bar, will be kept once you approve one line. The views gap is unchanged.
+
+### Done
+- **Reliability:** This afternoon's upload had not landed by 18:43, but that is not unprecedented: 28 September's landed at 19:46. GitHub also started every scheduled job seven to nine hours late today, so it should land around 21:00. I did not request a sample run, because it would use the AI quota the late upload still needs.
+- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month. The security check was clean: no credentials in the project, the secret files are still excluded, and no automated job changed.
+- **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). That answered one research question (below) and closes an old code-health item. The experiment that reads it needs a week more: the two releases it compares share no common age until the 12 October snapshot.
+- **Data:** Answered: older statistics do not hold the "past the opening" figure, so it can only be read from now on.
+- **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
+- **Editorial:** Started the top-ranked item, making the format our own. The idea of a second voice reacting to a comment, shelved in July, is now the first candidate: YouTube pays for videos where the channel comments, not for read-outs. It is judged on whether it costs watch time, and it needs your approval for about 6 cents a month of extra narration before it is built. Still to draft: a storyline candidate and a curation candidate.
+- **Product:** No decision rule is due. Whether one narrator is distributed less still has too few uploads per voice to answer, so I moved it to 12 October. Watch time per view is slightly up and views slightly down. The channel is still flat.
+- **Distribution:** The Shorts feed is still 96% of views.
+- **Audience:** There were no comments to read, because none were collected. The weekly job now saves the past week's comments on the 20 newest videos, without names, failing soft like the subscriber count. It also needs one line from you.
+- **General management:** The trackers check clean. Six items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those. The upload check and the tracker corrections were fixes. The format candidate, the subscriber count and the comments were improvements.
+- **Friction:** the tool that files issues for you waited silently for input when not given a description, and cost a few minutes. Recorded so the next shift passes one; not worth a change on one occurrence.
 
 ### Blocked
-- Nothing is waiting on you.
+- **For you:** two one-line changes so the weekly job keeps the subscriber count and the viewer comments, filed as two issues with patches that apply in either order. Recommend approving both: without them, the data is collected and thrown away.
+- Reddit's terms still need a browser read. Whether the narrator question has an answer waits on the 12 October snapshot.
 
 ### Next
-- **1 October after 12:00 UTC:** request the rotation sample, which is the build's first check of the content filter on the new subreddit. On 5 October, read the new data (engaged-share estimate, clips, voice). Read the current experiment at the 12 October data. After that, two separate releases: the Python upgrade, then the image-library override bundled with the sign-in library fix. Any shift can first test for free whether that override changes a single pixel (today's attempt used two different background clips); if it doesn't, it can ship sooner.
+- First check that today's afternoon upload landed. If it is still missing tomorrow morning, request a sample run of the live code after the 07:00 reset and away from the upload times. Merge the title-style change (due 6 October). Then the quarterly prep, which is still due, and after that the top of the queue: making the format our own.
 
 ### Better?
-- **Than last shift:** marginally. Nothing shipped, but the next build is ready for its sample, and one more doubt (background clips) was settled with evidence.
-- **Than ~10 shifts ago:** unclear. The channel is still flat, and the current experiment is not read until 12 October.
-- **Than ~100 shifts ago:** too early to say.
+- **Than last shift:** Slightly. A first format candidate now targets YouTube's payment rule, and half of its bar is measured. Views have not moved.
+- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4% and views are flat.
+- **Than ~100 shifts ago:** Too early to say.

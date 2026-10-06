@@ -27,12 +27,21 @@ _load_dotenv()
 # SAMPLE=1 renders a fixed post over silent narration (src/sample.py): no
 # Reddit, Gemini or Polly call. Always a dry run -- nothing it makes is real.
 SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
-DRY_RUN = SAMPLE or os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# SILENT_NARRATION=1 keeps the real post and metadata but narrates silently, so
+# the code under test never needs Polly. dry-run.yml sets it for every branch
+# but main: unmerged code never holds the Polly keys (PLAN.md C6). Also a dry run.
+SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
+DRY_RUN = SAMPLE or SILENT_NARRATION or \
+    os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
 BRAND_ORANGE = "#ff5d01"
-CHANNEL_NAME = "AskReddit Shorts"
+# Drawn as the watermark and on the thumbnail. It comes from the CHANNEL_NAME
+# secret so the public repo does not name the channel. A real upload refuses to
+# start without it (src/run.py) rather than publish the placeholder.
+CHANNEL_NAME_SET = bool(os.environ.get("CHANNEL_NAME", "").strip())
+CHANNEL_NAME = os.environ.get("CHANNEL_NAME", "").strip() or "Channel Name"
 FONT = str(ROOT / "assets" / "fonts" / "Anton-Regular.ttf")
 
 # --- audio mix (voice RMS is ~-25 dBFS; keep music ~9 dB and SFX ~10 dB below) ---
@@ -100,5 +109,7 @@ UPLOAD_LOG = ROOT / "upload_log.csv"
 SCREEN_LOG = ROOT / "analysis" / "screen_log.csv"  # R4.6 audit trail
 ANALYTICS_SNAPSHOTS = ROOT / "analysis" / "analytics_snapshots.csv"  # R4.2 weekly series
 TRAFFIC_LOG = ROOT / "analysis" / "traffic_sources.csv"  # R4.7 traffic-source series
+CHANNEL_LOG = ROOT / "analysis" / "channel_stats.csv"  # PLAN C11: subscribers, weekly
+COMMENTS_LOG = ROOT / "analysis" / "viewer_comments.csv"  # PLAN C5: last week's comments
 
 GEN.mkdir(parents=True, exist_ok=True)

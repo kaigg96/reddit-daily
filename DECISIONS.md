@@ -31,6 +31,44 @@ revisit trigger.
 
 ---
 
+## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
+
+The owner's reframe: the company is the unit being improved, and the channel
+is its first product. The goal is monetization, and the YouTube Partner
+Program is only one route. Pivots are allowed when justified. `ORG.md` maps
+fourteen functions. Each states what it answers for, plus responsibilities
+tagged with a cadence and a decision level (Act / Propose / Owner). The six
+lanes become seats feeding one ranked queue. Owner decisions on the same day:
+outside evidence may justify a proposal; agents may publish beyond the upload,
+under a policy; the owner will create platform accounts; PRD §7 exclusions are
+challengeable; shifts get read-only AWS access.
+
+**Alternatives:**
+- **Add lanes to the time-sliced shift.** Fourteen slices of a 25-minute
+  session is about two minutes each, plus a "nothing this shift" heading for
+  most of them.
+- **An agent "CEO" over agent workers.** Project Vend found a same-model
+  manager shared the worker's blind spots, while procedures helped most.
+
+**Why:** across 27 shifts, revenue, other platforms, competitors, viewer
+comments, monetization policy and data-source terms each came up zero times.
+Every lane faced the pipeline. Three risks to monetization itself went
+unowned:
+- the current format matches an example in YouTube's reused-content policy;
+- Reddit's free API may not cover monetized use;
+- Shorts revenue at the Partner Program threshold is about $30–$330 a month.
+
+**Assumptions:**
+1. One agent session can hold several seats if the queue ranks across them.
+2. Written procedures per function deliver the depth that hierarchy would not.
+3. Weekly, monthly and quarterly sessions fit the owner's usage reserve and the
+   Actions minutes.
+4. Outside evidence improves proposals more than it adds noise.
+
+**Revisit when:** a function stays at "none" after its first monthly cycle
+(1 or 2 false); proposals from outside evidence are mostly declined or pile up
+unanswered (4 false); or the cadences push shifts past the reserve (3 false).
+
 ## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
 
 A shift's supply is backlog items whose next step can be taken **now**
@@ -59,6 +97,9 @@ state, not the exception.
 false, or shifts stop with work available); ready items pile up undone (1 is
 producing padding); generation keeps reporting nothing above the bar (1 false —
 itself a finding about the channel).
+
+**Re-reviewed 2026-10-05:** assumption 3 changed with the shift. Shifts went
+from 25 to 60 minutes, three a day (D12, approved in #54), so the floor rose to 5.
 
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 

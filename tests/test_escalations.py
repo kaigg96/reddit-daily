@@ -90,3 +90,35 @@ def test_an_approval_without_a_reply_shows_what_was_approved(monkeypatch, capsys
     out = capsys.readouterr().out
     assert "approved: Read why each shift stopped and fix that reason." in out
     assert "Raised automatically" not in out
+
+
+PATCH_BODY = "The change.\n\n<!-- apply-patch -->\n```diff\n...\n```\n"
+
+
+def test_an_approved_patch_whose_job_never_ran_is_flagged(monkeypatch, capsys):
+    """#53: the apply job was cancelled in an outage before any step, so the
+    approval looked done and nothing had landed."""
+    fake_github(monkeypatch,
+                [issue(53, "Save viewer comments", ["needs-owner", "approved"], [], PATCH_BODY)],
+                {})
+    escalations.show(True)
+    assert "NOT APPLIED: the apply job never reported" in capsys.readouterr().out
+
+
+def test_a_refused_patch_shows_why(monkeypatch, capsys):
+    fake_github(monkeypatch,
+                [issue(50, "Extend auto-apply", ["needs-owner", "approved"], [1], PATCH_BODY)],
+                {50: [{"author_association": "NONE", "body":
+                       "<!-- apply-result -->\n**Not applied:** the change in this issue could not be read."}]})
+    escalations.show(True)
+    assert "NOT APPLIED: **Not applied:** the change in this issue could not be read." in capsys.readouterr().out
+
+
+def test_an_applied_patch_and_a_plain_approval_are_not_flagged(monkeypatch, capsys):
+    fake_github(monkeypatch,
+                [issue(36, "Raise a timeout", ["needs-owner", "approved"], [1], PATCH_BODY),
+                 issue(43, "Shifts end early", ["needs-owner", "approved"], [])],
+                {36: [{"author_association": "NONE",
+                       "body": "<!-- apply-result -->\n**Applied** in abc1234. Closing."}]})
+    escalations.show(True)
+    assert "NOT APPLIED" not in capsys.readouterr().out

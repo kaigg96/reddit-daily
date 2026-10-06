@@ -14,6 +14,7 @@ Usage:
   venv/bin/python scripts/report.py --zeros            # suppression candidates
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
+  venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -59,6 +60,18 @@ def by_dimension(videos, key, metric, now):
         total = c.n + c.zero_view_count
         print(f"  {c.label:24} {c.n:>4} {c.median:>9.1f} {c.median_age:>7.0f}d "
               f"{c.zero_view_count:>5} {c.buried_count:>4}/{total:<4}  {mark}")
+
+    pair = [c for c in rows if c.label != "(unset)"]
+    if len(pair) == 2:
+        a, b = pair
+        p = insights.buried_rate_p(a.buried_count, a.n + a.zero_view_count,
+                                   b.buried_count, b.n + b.zero_view_count)
+        print(f"\n  <={insights.BURIED_VIEWS} views, {a.label} vs {b.label}: "
+              f"Fisher p={p:.3f} (two-sided; not age-matched, so read --within an era)")
+        strata = insights.buried_strata(groups[a.label], groups[b.label])
+        if len(strata) > 1:
+            print(f"  pooled within each of {len(strata)} formats (Mantel-Haenszel): "
+                  f"p={insights.buried_rate_p_pooled(strata):.3f}")
 
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]
@@ -276,6 +289,11 @@ def show_scorecard(args):
 
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
+    if args.metric == Metric.VIEWS:
+        return show_weekly_views(args)
+    if args.metric != Metric.WATCH:
+        print(f"--trajectory reads watch-seconds or views, not {args.metric}")
+        return
     rows = _snapshot_metric_rows()
     series = insights.trajectory(rows, at_age=args.at_age or 7)
     if not series:
@@ -295,6 +313,36 @@ def show_trajectory(args):
     if verdict == "flat":
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
+
+
+def show_weekly_views(args):
+    """`--trajectory --metric views`: total weekly views, bet 2's measure."""
+    age = args.at_age or 7
+    series = insights.weekly_totals(_snapshot_metric_rows("views"), at_age=age)
+    if not series:
+        print("no publish week is fully read yet")
+        return
+    print(f"Total views per publish week, every upload read at ~{age} days old")
+    print("(complete weeks only: the newest are still filling in)\n")
+    print(f"  {'week':10} {'n':>4} {'total':>8} {'per upload':>11}")
+    for period, n, total in series:
+        print(f"  {period:10} {n:>4} {total:>8.0f} {total / n:>11.0f}")
+    gained = insights.views_gained(_snapshot_metric_rows("views"))[-13:]
+    if gained:
+        days = sum(d for _, _, d in gained)
+        total = sum(g for _, g, _ in gained)
+        print(f"\n  Channel-wide, every video counted (the Partner Program's measure):"
+              f"\n  {total:.0f} views gained over the last {days} days between snapshots"
+              f" (~{total * 90 / days:.0f} per 90 days)")
+    change = insights.totals_change(series)
+    if change is None:
+        print(f"\n  only {len(series)} complete weeks: 8 are needed to compare 4 with 4")
+        return
+    prior, recent, ratio = change
+    print(f"\n  last 4 weeks {recent:.0f} vs the 4 before {prior:.0f}"
+          + (f" (x{ratio:.2f})" if ratio else ""))
+    print("  Views swing 27-50% at a fixed age with nothing changed, so read"
+          "\n  only a doubling or a halving as a change. Never a revert trigger.")
 
 
 def main():
@@ -329,6 +377,11 @@ def main():
     p.add_argument("--replays", action="store_true",
                    help="how many videos average over 100%% viewed, which only "
                         "replays can cause (backlog #9's first test)")
+    p.add_argument("--engaged-check", action="store_true",
+                   help="R2: does the minutes column encode engaged views? latest snapshot only")
+    p.add_argument("--placebo", action="store_true",
+                   help="noise with nothing changed: consecutive batches (how a release "
+                        "is judged) vs alternate days in the same weeks (PLAN C9)")
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
@@ -355,6 +408,35 @@ def main():
 
     if args.trajectory:     # the only surface that answers "are we improving?"
         show_trajectory(args)
+        return
+
+    if args.engaged_check:  # one snapshot, per video: no ages to match
+        import csv as _csv
+        from src import config
+        with open(config.ANALYTICS_SNAPSHOTS) as f:
+            rows = list(_csv.DictReader(f))
+        latest = max(r["snapshot_date"] for r in rows)
+        n, med, within = insights.engaged_check(r for r in rows if r["snapshot_date"] == latest)
+        if not n:
+            print(f"{latest}: no rows carry engaged_views")
+        else:
+            print(f"{latest}: implied/actual engaged share, n={n} videos with >=20 views: "
+                  f"median {med:.2f}, {within:.0%} within 10% of 1")
+        return
+
+    if args.placebo:        # nothing switched: what each test design reads as noise
+        load = insights.load_videos_at_age(args.at_age or 7)
+        print(f"Noise with nothing changed, uploads read at ~{args.at_age or 7} days old "
+              f"(n={len(load.videos)})\n")
+        print(f"  {'metric':15} {'release-style':>14} {'alternate days':>15}")
+        for m in (Metric.WATCH, Metric.VIEWS):
+            r = insights.drift_floor(load.videos, m)
+            a = insights.alternation_floor(load.videos, m)
+            fmt = lambda x: f"{x:.0%}" if x is not None else "-"
+            print(f"  {m:15} {fmt(r):>14} {fmt(a):>15}")
+        print("\n  release-style: median swing between consecutive batches of 8"
+              "\n  alternate days: median gap between odd- and even-day uploads"
+              "\n  within the same 16. Smaller is a finer detection limit.")
         return
 
     if args.slate:          # reads only the upload log: no analytics involved

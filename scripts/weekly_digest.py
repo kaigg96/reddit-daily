@@ -238,8 +238,8 @@ def main():
     lines.append("")
     if measurable:
         top = max(measurable, key=lambda v: views(v["id"]))
-        lines.append(f"**🏆 Video of the week** — [{top['title']}]"
-                     f"(https://youtube.com/shorts/{top['id']}) — "
+        # No link: the repo is public, and a link names the channel (2026-10-05).
+        lines.append(f"**🏆 Video of the week** — {top['title']} — "
                      f"{views(top['id'])} views, {pct(top['id']):.0f}% avg viewed")
         lines.append("")
 

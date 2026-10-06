@@ -73,6 +73,31 @@ def _recommendation(issue):
     return " ".join(m.group(1).split()) if m else ""
 
 
+APPLY_MARKER = "<!-- apply-patch -->"      # escalate.py --patch
+RESULT_MARKER = "<!-- apply-result -->"    # apply-approved.yml's report
+
+
+def _not_applied(issue):
+    """Why an approved patch is not on main, or None if it landed or has none.
+
+    On 2026-10-05 the owner approved #53, and the job that applies it was
+    cancelled in a GitHub outage before it ran a step. The issue still read
+    as approved, the label is all this listing showed, and nothing on main
+    had changed, so the approval was silently lost. The job reports on the
+    issue whatever it does; no report means it never ran."""
+    if APPLY_MARKER not in (issue.get("body") or ""):
+        return None
+    results = [c["body"] for c in
+               (_api(f"/repos/{REPO}/issues/{issue['number']}/comments")
+                if issue.get("comments") else [])
+               if c.get("body", "").startswith(RESULT_MARKER)]
+    if not results:
+        return ("the apply job never reported, so it did not run. Only the "
+                "owner's label starts it: ask them to re-run it or re-label")
+    last = " ".join(results[-1][len(RESULT_MARKER):].split())
+    return None if last.startswith("**Applied**") else last
+
+
 def _approved_by_owner(issue):
     """Only the owner's own label is a decision. A shift's token can add
     labels -- it closes and comments with the same permission -- and the guard
@@ -105,6 +130,9 @@ def show(want_approved):
         print(f"  #{i['number']}  {i['title']}")
         if want_approved and _recommendation(i):
             print("      approved: " + _recommendation(i))
+        unapplied = want_approved and _not_applied(i)
+        if unapplied:
+            print("      NOT APPLIED: " + unapplied)
         for reply in _owner_replies(i):
             print("      owner: " + reply.replace("\n", "\n             "))
     return 0
