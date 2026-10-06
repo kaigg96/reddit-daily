@@ -59,7 +59,7 @@ The source of ready work that never waits on a sample video or costs money. When
 
 | # | Status | Question | Test |
 |---|---|---|---|
-| R1 | blocked: 3 more dark-morbid uploads aged 7 days (still n=9 at the 2026-09-28 snapshot) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
+| R1 | blocked: 2 more dark-morbid uploads aged 7 days (n=10 at the 2026-10-05 snapshot, lead +12%) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds → seeds R4.4's topic prior; fades → R4.4's topic half has no evidence. |
 | R3 | blocked: the 2026-10-12 snapshot (10-05: ≤7 per voice within `v6`/`v7`; refused) | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
 
 #### Owner tasks (anytime, no version bump)
