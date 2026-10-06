@@ -130,7 +130,12 @@ def main():
     ]
 
     QUEUE.mkdir(exist_ok=True)
-    path = QUEUE / f"{now:%Y%m%d}-{key}.md"
+    # One file per message, even for the same key on the same day: a day-only
+    # name let a second comment overwrite an unfiled first one, and collide
+    # with the filer's deletion of a filed one (a modify/delete rebase conflict
+    # whose wrong resolution drops the message, 2026-10-06). The filer reads
+    # the key from the front matter, so the name carries no meaning.
+    path = QUEUE / f"{now:%Y%m%d-%H%M%S%f}-{key}.md"
     path.write_text("\n".join(parts))
     print(f"queued {path.relative_to(ROOT)}")
     print("commit and push it — the escalations workflow files the issue")

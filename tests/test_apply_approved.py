@@ -169,3 +169,19 @@ def test_escalate_refuses_what_auto_apply_would(repo, env, path):
     patch = diff_of(repo, env, path, "changed\n")
     with pytest.raises(SystemExit):
         escalate.validate_patch(patch, repo=repo)
+
+
+def test_two_messages_on_one_key_queue_as_two_files(tmp_path, monkeypatch):
+    """A second same-day comment must not overwrite the first, nor reuse the
+    name the filer deletes once the first is filed (2026-10-06)."""
+    import io
+    monkeypatch.setattr(escalate, "QUEUE", tmp_path / ".escalations")
+    monkeypatch.setattr(escalate, "ROOT", tmp_path)
+    for body in ("first", "second"):
+        monkeypatch.setattr(sys, "argv", ["escalate.py", "--title", "T", "--key", "same-key"])
+        monkeypatch.setattr(sys, "stdin", io.StringIO(body))
+        escalate.main()
+    files = sorted((tmp_path / ".escalations").glob("*.md"))
+    assert len(files) == 2
+    assert ["first" in files[0].read_text(), "second" in files[1].read_text()] == [True, True]
+    assert all("key: same-key" in f.read_text() for f in files)
