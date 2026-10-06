@@ -262,7 +262,13 @@ a list nobody can read is the same as no list.
   its docs). Reviewed by a fresh agent the same day; its one bug is fixed. **2026-10-06:**
   both patches still `git apply --check` cleanly on main, but they predate the
   10-05 rework of `dry-run.yml` (c1476a4: silent branch narration, keys only
-  for main). Re-review them against it, then one escalation with `--patch`.
+  for main). Re-reviewed the `dry-run` patch the same day: consistent with
+  that rework (keys stay main-only, the verdict step moves cleanly, the
+  12-hour count still sees the artifact). One residual: `record` runs
+  ffmpeg on the branch-made MP4 while `actions/checkout` persists its write
+  token, so give that checkout `persist-credentials: false` and the token to
+  the push alone. The `validate-release` patch is not yet re-reviewed. Then
+  one escalation with `--patch`.
   **Same root, money side (2026-10-05) — closed 2026-10-05 by PLAN C6:** branch
   renders narrate silently and only `main` gets the Polly keys. History: `dry-run.yml` also hands the
   branch's code the live Polly keys, and `POLLY_CHAR_BUDGET` is enforced by
