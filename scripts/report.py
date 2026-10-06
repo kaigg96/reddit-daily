@@ -331,7 +331,8 @@ def show_weekly_views(args):
     if gained:
         days = sum(d for _, _, d in gained)
         total = sum(g for _, g, _ in gained)
-        print(f"\n  Channel-wide, every video counted (the Partner Program's measure):"
+        print(f"\n  Channel-wide, every video counted, in play starts (the Partner Program"
+              f"\n  counts only the engaged share of these: --engaged-share):"
               f"\n  {total:.0f} views gained over the last {days} days between snapshots"
               f" (~{total * 90 / days:.0f} per 90 days)")
     change = insights.totals_change(series)
