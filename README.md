@@ -2,7 +2,8 @@
 
 Automated YouTube Shorts channel: twice a day, a GitHub Action turns the top
 post of a question subreddit (`config.SUBREDDITS`, rotated per run; PRD R4.1)
-+ its top 3 comments into a captioned vertical video and uploads it. See [PRD.md](PRD.md) for the quality roadmap and requirement IDs,
+and its top 3 comments into a captioned vertical video and uploads it. See
+[PRD.md](PRD.md) for the quality roadmap and requirement IDs,
 and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
 ## Picking this up (new session / new contributor)

@@ -69,7 +69,14 @@ def subreddit_for_run(now, subreddits=None):
     Morning and evening take consecutive entries and the start moves on a day
     each day, so every subreddit gets both slots over a rotation; indexing on
     runs alone would pin each of two subreddits to one slot, confounding the
-    comparison with upload time."""
+    comparison with upload time.
+
+    Both this and llm.title_style_for key on the day number, and the style
+    cycle's length is even, so with two subreddits each style position keeps
+    one subreddit-to-slot pairing (style A days: NoStupidQuestions in the
+    morning; C days: AskReddit). Subreddit-vs-subreddit and style-vs-style
+    reads stay balanced; a style comparison *within* one subreddit is
+    confounded with slot."""
     subs = subreddits or config.SUBREDDITS
     return subs[(now.toordinal() + (now.hour >= 12)) % len(subs)]
 
