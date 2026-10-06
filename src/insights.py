@@ -172,8 +172,9 @@ def median(values):
 def summarize(videos, label, metric, now):
     """Cohort summary. Zero-view videos are counted, not averaged in (rule 4)."""
     # A metric the snapshot never reported (engaged views before 2026-10-05)
-    # leaves the cohort entirely: neither a zero-view video nor a zero.
-    videos = [v for v in videos if v.get(metric) is not None]
+    # leaves the cohort, but only for a video with views: the API leaves
+    # engaged views blank on zero-view rows, and those are still zero-view.
+    videos = [v for v in videos if not v.views or v.get(metric) is not None]
     live = [v for v in videos if v.views > 0]
     zeros = len(videos) - len(live)
     return Cohort(
@@ -1582,7 +1583,8 @@ def engaged_share(snapshot_rows, published_since=None):
             v, e = int(float(r["views"])), int(float(r["engaged_views"]))
         except (KeyError, TypeError, ValueError):
             continue        # blank engaged_views: the API did not report it
-        if published_since and _parse_ts(r["published_at"]) < published_since:
+        if published_since and (not r.get("published_at")
+                                or _parse_ts(r["published_at"]) < published_since):
             continue
         n, views, engaged = n + 1, views + v, engaged + e
     if n < ENGAGED_SHARE_MIN_VIDEOS or not views:

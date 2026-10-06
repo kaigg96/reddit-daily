@@ -1500,11 +1500,13 @@ def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path
         "snapshot_date,video_id,published_at,views,engaged_views\n"
         "2026-09-28,a,2026-09-21T12:00:00Z,100,\n"      # before the column
         "2026-10-05,a,2026-09-21T12:00:00Z,120,40\n"
-        "2026-10-05,b,2026-09-29T12:00:00Z,0,0\n")      # a real zero stays
+        "2026-10-05,b,2026-09-29T12:00:00Z,0,0\n"       # a real zero stays
+        "2026-10-05,c,2026-09-30T12:00:00Z,0,\n")       # API blank on zero views
     engaged = report._snapshot_metric_rows("engaged_views", path=str(csv_path))
-    assert [(r["video_id"], r["value"]) for r in engaged] == [("a", 40.0), ("b", 0.0)]
+    assert [(r["video_id"], r["value"]) for r in engaged] == [
+        ("a", 40.0), ("b", 0.0), ("c", 0.0)]
     views = report._snapshot_metric_rows("views", path=str(csv_path))
-    assert len(views) == 3
+    assert len(views) == 4
 
 
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():
@@ -1546,3 +1548,16 @@ def test_slate_firing_counts_a_weak_top_with_a_strong_candidate_in_the_top_three
             {"slate_topics": "?|nostalgia"},                        # unlabelled top: no
             {"slate_topics": "!timeout"}, {"slate_topics": ""}]     # not read
     assert insights.slate_firing(rows) == (1, 4)
+
+
+def test_a_zero_view_upload_stays_zero_view_under_the_engaged_metrics():
+    """The API leaves engaged views blank on zero-view rows; dropping those
+    moved the zero and buried counts with --metric (review, 2026-10-06)."""
+    import datetime as _dt
+    from src import insights as _ins
+    t = _dt.datetime(2026, 10, 1, tzinfo=_dt.timezone.utc)
+    vids = [_ins.Video("a", t, views=100, engaged_views=30),
+            _ins.Video("z", t, views=0)]                     # blank engaged, zero views
+    for metric in (_ins.Metric.ENGAGED_SHARE, _ins.Metric.ENGAGED_VIEWS, _ins.Metric.VIEWS):
+        c = _ins.summarize(vids, "all", metric, t)
+        assert (c.n, c.zero_view_count, c.buried_count) == (1, 1, 1)
