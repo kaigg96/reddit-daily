@@ -1537,3 +1537,12 @@ def test_the_digest_line_reads_each_release_at_its_committed_size(tmp_path, monk
     monkeypatch.setitem(insights.RELEASE_MIN_UPLOADS, "v5", 20)
     assert "`v5`: NO VERDICT — 10 measurable release uploads, the rule commits to 20" in (
         insights.release_digest_line(rows))
+
+
+def test_slate_firing_counts_a_weak_top_with_a_strong_candidate_in_the_top_three():
+    rows = [{"slate_topics": "money-work|other|nostalgia|x"},       # fires
+            {"slate_topics": "money-work|other|other|nostalgia"},   # strong at 4th: no
+            {"slate_topics": "nostalgia|money-work|dark-morbid"},   # top is strong: no
+            {"slate_topics": "?|nostalgia"},                        # unlabelled top: no
+            {"slate_topics": "!timeout"}, {"slate_topics": ""}]     # not read
+    assert insights.slate_firing(rows) == (1, 4)

@@ -968,6 +968,31 @@ def slate_agreement(rows):
     return agree, agree + len(pairs), pairs
 
 
+# R4.4's tiers, measured on current-format content (PRD §4, R4.3 re-run,
+# 2026-09-11: Spearman +0.79 against the pre-overhaul ordering).
+STRONG_TOPICS = ("nostalgia", "humor-absurd", "dark-morbid")
+WEAK_TOPICS = ("life-advice", "money-work", "fame-celebrity")
+SLATE_FIRING_MIN_RUNS = 20   # PRD §0 #2 / §6 Step 0.5: "after >=20 uploads"
+
+
+def slate_firing(rows, depth=3):
+    """(fired, read) over upload_log rows: R4.4's pre-committed firing-rate
+    read. A run fires when the slate's rank-1 candidate is weak-tier and a
+    strong-tier one sits within the top `depth`. Slates are read as logged:
+    every eligible candidate in Reddit rank order. Rows with no slate or a
+    failed call ("!...") are not read; an unlabelled entry ("?") never fires."""
+    fired = read = 0
+    for r in rows:
+        slate = (r.get("slate_topics") or "").strip()
+        if not slate or slate.startswith("!"):
+            continue
+        labels = slate.split("|")
+        read += 1
+        if labels[0] in WEAK_TOPICS and any(t in STRONG_TOPICS for t in labels[1:depth]):
+            fired += 1
+    return fired, read
+
+
 def age_adjusted_residuals(videos, now):
     """Residual of log-views against the channel's own log-age trend.
 

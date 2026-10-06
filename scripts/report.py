@@ -592,6 +592,17 @@ def show_slate_agreement():
     for (screen, slate), n in Counter(pairs).most_common():
         print(f"  screen {screen:<20} slate {slate:<20} x{n}")
 
+    with open(config.UPLOAD_LOG) as f:
+        fired, read = insights.slate_firing(csv.DictReader(f))
+    print("\nR4.4 FIRING RATE — rank 1 weak-tier and a strong-tier candidate in the top 3")
+    if read < insights.SLATE_FIRING_MIN_RUNS:
+        print(f"  insufficient data: {read} runs with a slate, the rule reads at "
+              f"{insights.SLATE_FIRING_MIN_RUNS} ({fired} fired so far)")
+    else:
+        print(f"  fired on {fired} of {read} runs ({100 * fired / read:.0f}%)")
+        if fired:
+            print(f"  at 2 uploads a day, 20 firings take ~{20 * read / fired / 2:.0f} days")
+
 
 if __name__ == "__main__":
     main()
