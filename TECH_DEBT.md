@@ -162,7 +162,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   its slope.) **Bit on 2026-10-06:** `v6`'s read came due ~10-05 and sat
   unrecorded until a shift stumbled on it (KEEP). Cheapest fix: the Monday
   digest prints `--release` for the live and previous `FORMAT_VERSION`, so a
-  due verdict reaches the owner's email whether or not a shift remembers.
+  due verdict reaches the owner's email whether or not a shift remembers. It
+  must pass each release's pre-committed size (`v7`: 20 via `--min-uploads`),
+  or it answers at 8 and pre-empts the rule.
   (b) `--offline` reads the weekly snapshot, which records no
   `privacy_status`, so an owner-privatised upload reads as zero-view there.
   Bounded — medians exclude zeros, so only the zero count moves — and printed on
