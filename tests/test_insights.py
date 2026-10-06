@@ -1505,3 +1505,15 @@ def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path
     assert [(r["video_id"], r["value"]) for r in engaged] == [("a", 40.0), ("b", 0.0)]
     views = report._snapshot_metric_rows("views", path=str(csv_path))
     assert len(views) == 3
+
+
+def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():
+    from src import insights as _ins
+    full = [{"views": "100", "engaged_views": "30"}, {"views": "50", "engaged_views": "30"},
+            {"views": "0", "engaged_views": ""}]            # zero-view rows come back blank
+    assert abs(_ins.engaged_per_100(full) - 40.0) < 1e-9
+    assert _ins.engaged_per_100(full + [{"views": "10", "engaged_views": ""}]) is None
+    assert _ins.engaged_per_100([{"views": "0", "engaged_views": ""}]) is None
+    then, now = {"watch_seconds": 12, "engaged_per_100": 30.0}, {"watch_seconds": 12}
+    _, rows, _ = _ins.scorecard(then, now)
+    assert "engaged_per_100" not in [r["metric"] for r in rows]   # one side unread: no row

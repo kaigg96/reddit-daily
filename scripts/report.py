@@ -264,6 +264,9 @@ def _period_metrics(at_age=7, tolerance=4, half=3):
             tv = sum(views) or 1
             m["likes_per_100"] = 100.0 * sum(nums("likes")) / tv
             m["comments_per_100"] = 100.0 * sum(nums("comments")) / tv
+        engaged = insights.engaged_per_100([r for _, r in rows])
+        if engaged is not None:
+            m["engaged_per_100"] = engaged
         return m
 
     prior, recent = weeks[-half * 2:-half], weeks[-half:]
