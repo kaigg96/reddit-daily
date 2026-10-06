@@ -60,6 +60,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-06 (11:15) — Subreddit rotation's final sample run is under way; our views are not a lottery of a few hits
+
+    Worked (% of the shift): data 30 · product 25 · gm 20 · engineering 10 · reliability 5 · security 5 · monetization 5
+
+**Summary:** Subreddit rotation, the supply step for more uploads a day, is up to date and its final sample run was requested at 10:51. It merges on a pass. Two research questions about where our views come from are answered: no single upload or logged trait drives them, so the quarter's views target stands as drafted.
+
+### Toward revenue
+- Subreddit rotation, the supply step for bet 2's move to 3 to 4 uploads a day, is ready to merge on its sample run. It doubles the pool of posts we can draw from.
+- The views bar is now sharper. About 90% of our views arrive in a video's first week, so old videos do not keep earning. At four uploads a day, YouTube's bar needs about 28,000 first-week views per video. We average 186.
+
+### Done
+- **Reliability:** this morning's upload landed with an AI-written title, in the newly favoured "You…" style. The subscriber-count change you approved landed overnight. Its first reading comes on 12 October.
+- **Product:** brought subreddit rotation up to date with the live code and requested its sample run. Only one automatic run is allowed per 12 hours, so it could not start before 10:51. Before that, I fixed a gap the branch had left: the topic-analysis script only recognised AskReddit posts, so rotated uploads would have vanished from it unnoticed. A test now pins it.
+- **Data:** asked whether a few hit videos earn most of our views. The best tenth earn 42%, and the single best 3%. By the rule set before looking, nothing changes. Of seven traits the hits might share (title style, voice, topic, time of day, length, background, title source), none stands out beyond chance.
+- **Product:** a decision rule had come due unrecorded: the 19 September release (safety-screen and AI-timeout fixes). Read as its rule is written, it is **kept**: watch time per view held (up 10%, inside normal drift). Views read 62% lower, but views never trigger a revert, because they swing that much with nothing changed.
+- **Data:** refreshed one research question's count (dark-morbid topic, 10 of the 12 uploads it needs). Re-read the background clips: one is at 3 buried uploads of 13, against 3 of 61 for the others. That is not significant yet, so I'm watching it, not acting.
+- **Monetization:** this function's first work. YouTube's own eligibility page lists no lower tier with an easier bar: still 1,000 subscribers and 10 million Shorts views in 90 days. The route tracker stands as it was.
+- **General management:** started the process audit, which looks due. I re-checked the past process decisions against today's evidence and added notes to six. One was out of date (shifts no longer slice time by function) and is now marked replaced. Two weak points are recorded. Your approvals reach the code by an automatic step that has failed twice in three tries. And the planned 3 to 4 uploads a day would change the normal-noise yardstick our release checks use, so it must be re-measured then. From current best practice, I tried a fresh second review of the rotation code before merging. It found a formatting slip (fixed) and a quirk in how rotation pairs with title styles (documented; the planned reads are unaffected). Still to do: pruning old text from the product document.
+- **General management:** closed September's caption-upload problem (26 clean uploads since). Your pending comments change still applies cleanly, so a re-run will work. The process-health check again flagged short shifts; I added the cause to your issue: the queue waits on your planning session.
+- **Security:** standing check clean. No credentials in the project, the secret files still excluded, the only workflow changes are your own approved ones, and the Amazon controls are intact ($0.17 this month).
+- Fixing against improving: mostly improving (the merge and the research). The fixes were the analysis gap and the tracker closures.
+- **Friction:** the merge could not be tested until 10:51, because last night's 22:51 check of the live code used the one automatic render allowed per 12 hours. An evening render on code the next morning's upload will exercise anyway costs the next shift its merge.
+
+### Blocked
+- **For you:** the quarterly planning session (#55). It is now the main thing holding the queue: nearly every item waits on it, on your browser read for bet 3, or on the 12 October statistics. Also one re-run of the comments change (#53).
+
+### Next
+- If this shift did not merge subreddit rotation, merge it on a sample-run pass that names the branch's current commit. Then check that the first NoStupidQuestions upload (7 October, evening) lands with a title.
+- On 12 October: judge "open on the question" under its rule, and read the narrator, engaged-view and subscriber questions. Re-read the background clip that is at 3 buried uploads of 13.
+- Finish the process audit by pruning the product document. Its history of the first version mixes in live facts that code comments point to, so it needs splitting, not deleting. Also weigh proposing the fresh review as a standing step before any shift merges live code: it caught real issues on first use.
+
+### Better?
+- **Than last shift:** Slightly. The supply step for more uploads a day is ready. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
+- **Than ~10 shifts ago:** Somewhat. The levers for bet 2 are now in place or ready, but views per upload have not moved yet.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
 
     Worked (% of the shift): strategy 25 · data 20 · market 10 · editorial 10 · engineering 10 · reliability 10 · product 5 · legal 5 · gm 5
@@ -100,48 +136,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. The quarter has a drafted plan, the gap is measured correctly, and one change aimed at views is live from tomorrow.
 - **Than ~10 shifts ago:** Somewhat. We now know what blocks revenue: the format and the scale. We did not know that two weeks ago. Watch time per view is flat, and views per upload fell by about 40% over September, which is still within normal swings.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-05 (21:15) — the evening upload was lost to a GitHub outage, not a fault
-
-**Summary:** This evening's scheduled upload was created eight hours late and then cancelled before it started, during GitHub's "Incident with Actions" (runner assignment failing, from 19:11 UTC). No code ran and nothing was uploaded, so there is nothing to diagnose and no sample run is needed.
-
-### Done
-- **Reliability:** traced the failed run. It never got a machine, billed 0 minutes, and was cancelled after 15 minutes in the queue. The saved record of the last post is untouched. The Polly permission was already proven by the 18:17 dry run.
-
-### Next
-- If the morning upload lands, the missing evening one needs no follow-up. A sample run of the live code is worth requesting only if a run fails *after starting*, with steps in its log.
-
-## 2026-10-05 (18:45) — Weekly review: the "plays past the opening" figure is finally collected; the late upload looks like GitHub delay, not a failure
-
-    Worked (% of the shift): data 25 · engineering 15 · audience 10 · reliability 10 · product 10 · editorial 15 · distribution 5 · gm 10
-
-**Summary:** This is the first weekly review. We now measure how many plays get past the opening and, once you approve one line, the subscriber count, which is half of YouTube's bar. The format work aimed at revenue has started. Today's late upload looks like a GitHub delay, not a failure.
-
-### Toward revenue
-- A first step. The first candidate for a format YouTube would pay for is drafted, and the subscriber count, half of the payment bar, will be kept once you approve one line. The views gap is unchanged.
-
-### Done
-- **Reliability:** This afternoon's upload had not landed by 18:43, but that is not unprecedented: 28 September's landed at 19:46. GitHub also started every scheduled job seven to nine hours late today, so it should land around 21:00. I did not request a sample run, because it would use the AI quota the late upload still needs.
-- **Reliability:** The week's other 15 uploads all landed. Two lost their AI-written title to an outage at the AI service, and there has been none since the longer retry went in on 4 October. The spending controls at Amazon are intact: $0.14 spent this month. The security check was clean: no credentials in the project, the secret files are still excluded, and no automated job changed.
-- **Data:** The statistics run collected the share of plays that get past the opening for the first time (1,000 of 1,041 videos). That answered one research question (below) and closes an old code-health item. The experiment that reads it needs a week more: the two releases it compares share no common age until the 12 October snapshot.
-- **Data:** Answered: older statistics do not hold the "past the opening" figure, so it can only be read from now on.
-- **Data:** The weekly job now also records the subscriber count, half of YouTube's bar, which nothing recorded before. It cannot cost the other statistics if it fails. Keeping it needs one line from you (below).
-- **Editorial:** Started the top-ranked item, making the format our own. The idea of a second voice reacting to a comment, shelved in July, is now the first candidate: YouTube pays for videos where the channel comments, not for read-outs. It is judged on whether it costs watch time, and it needs your approval for about 6 cents a month of extra narration before it is built. Still to draft: a storyline candidate and a curation candidate.
-- **Product:** No decision rule is due. Whether one narrator is distributed less still has too few uploads per voice to answer, so I moved it to 12 October. Watch time per view is slightly up and views slightly down. The channel is still flat.
-- **Distribution:** The Shorts feed is still 96% of views.
-- **Audience:** There were no comments to read, because none were collected. The weekly job now saves the past week's comments on the 20 newest videos, without names, failing soft like the subscriber count. It also needs one line from you.
-- **General management:** The trackers check clean. Six items are ready. Ranked by path to revenue: make the format our own, price the revenue routes, then the other platforms' terms and comparable channels. The measurement items rank below those. The upload check and the tracker corrections were fixes. The format candidate, the subscriber count and the comments were improvements.
-- **Friction:** the tool that files issues for you waited silently for input when not given a description, and cost a few minutes. Recorded so the next shift passes one; not worth a change on one occurrence.
-
-### Blocked
-- **For you:** two one-line changes so the weekly job keeps the subscriber count and the viewer comments, filed as two issues with patches that apply in either order. Recommend approving both: without them, the data is collected and thrown away.
-- Reddit's terms still need a browser read. Whether the narrator question has an answer waits on the 12 October snapshot.
-
-### Next
-- First check that today's afternoon upload landed. If it is still missing tomorrow morning, request a sample run of the live code after the 07:00 reset and away from the upload times. Merge the title-style change (due 6 October). Then the quarterly prep, which is still due, and after that the top of the queue: making the format our own.
-
-### Better?
-- **Than last shift:** Slightly. A first format candidate now targets YouTube's payment rule, and half of its bar is measured. Views have not moved.
-- **Than ~10 shifts ago:** Unclear: watch time per view is up about 4% and views are flat.
 - **Than ~100 shifts ago:** Too early to say.
