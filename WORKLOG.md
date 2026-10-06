@@ -62,7 +62,7 @@ and more useful than a confident guess.
 
 ## 2026-10-06 (17:11) — We are about 800 times short of YouTube's bar, not 300; Reddit's own terms say our use needs its agreement
 
-    Worked (% of the shift): data 35 · legal 15 · security 15 · distribution 10 · reliability 10 · gm 10 · engineering 5
+    Worked (% of the shift): data 30 · legal 15 · security 15 · product 10 · reliability 10 · distribution 10 · gm 5 · engineering 5
 
 **Summary:** Two facts changed the company's picture; both are with you, with recommendations. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
 
