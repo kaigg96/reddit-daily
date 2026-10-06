@@ -32,7 +32,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 None yet. Three are drafted for the owner's first planning session
 (#55, 2026-10-05): make the format ours
 (PRD #7, #12); double weekly views (PRD #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, 56 uploads, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four complete weeks; in play starts; #55 now asks to read it in engaged views too); price the other routes
-and pilot the best (C8, C3). Until the owner sets them, the queue is
+and pilot the best (C8; Reddit's terms, §4). Until the owner sets them, the queue is
 ranked on its effect on the path to revenue.
 
 ## 3. Work queue
@@ -44,7 +44,6 @@ places.
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
 | C11 | baking: commit line applied 2026-10-05 (#52); first snapshot 2026-10-12 | Data | **Collect the subscriber count** | Half of the Partner Program's bar, and no snapshot records it. Add it to the weekly statistics job's output, failing soft like the traffic snapshot so it can never cost the per-video one. The job already calls YouTube's channel endpoint, so it is one more field. Its workflow commits named files only, so a new file also needs a `git add` line: Propose that with `--patch`, or the data is silently dropped. Done when a snapshot carries it. |
-| C3 | blocked: Reddit's pages refuse a shift's reads (terms, help centre and archive copy all failed 2026-10-05); needs a browser | Legal | **Reddit's terms for monetized use** | Secondary sources say the free API tier is non-commercial and that commercial use needs Reddit's written approval. Confirm from Reddit's own pages. Done when the risk is stated, with a proposed response if one is needed. |
 | C5 | blocked: owner applies its commit patch (escalated 2026-10-05) | Audience | **Collect viewer comments into the repo** | The weekly analytics job already holds the YouTube keys, so it saves recent comments. That is a workflow change, so Propose. Done when a shift can read last week's comments. |
 | C8 | blocked: the platforms' own pages need a browser (bet 3 asks the owner) | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content, which YouTube's rules out for today's format (§4). TikTok's help pages and Meta's monetization policies render empty to a shift's fetch (2026-10-05); they need a browser. Priced from secondary sources in §1 (2026-10-05). Done when the owner's read confirms or corrects them. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
@@ -56,7 +55,7 @@ places.
 | Risk | Function | Likelihood / impact | Response |
 |---|---|---|---|
 | The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | **Confirmed** from YouTube's page (2026-10-05): "Content exclusively features readings of other materials you did not originally create, like text from websites" is not monetizable, and "applies to your channel as a whole". Today's format is exactly that. A second rule, generic or repetitive content, refuses content "that looks like it's made with a template" and "AI-generated content made with generic or unoriginal templates" / ends the Partner Program route | Bet 1 (PRD #7, #12) |
-| Reddit's terms forbid monetized use of API data | Legal | **Likely** / high: secondary sources agree (2026-10-05) that use "as part of a monetized product or service" needs Reddit's express written approval and a contract. We read Reddit through its authenticated API, so this applies before any payout. Reddit's own pages still refuse a shift's reads | C3; ask Reddit before any monetization application |
+| Reddit's terms forbid monetized use of API data | Legal | **Confirmed** from Reddit's Data API Terms (effective 2023-06-19; read 2026-10-06 by a plain download, which works where the fetch tool is refused): no one may "derive revenues from the use or provision of the Data APIs … unless there is express written approval from Reddit", and commercial use needs "a separate agreement". Wider than monetization: §2.4 licenses posts and comments only "to copy and display … solely as necessary to … run your App to your App Users", and "You may not modify the User Content except to format it for such display", so even today's unpaid videos sit outside a plain reading | Owner (escalated 2026-10-06): ask Reddit now, before more is built on the format |
 | Shorts revenue is too small at any reachable scale | Strategy | High / high — the Partner Program threshold alone is 250–1,250× today's views, and no other route is nearer (§1) | Bets 2 and 3 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | C8 |
 | Loss of the YouTube channel or the Google account | Security | Low / fatal | C14, quarterly |
