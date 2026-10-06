@@ -60,6 +60,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-06 (17:11) — We are about 800 times short of YouTube's bar, not 300; Reddit's own terms say our use needs its agreement
+
+    Worked (% of the shift): data 35 · legal 15 · security 15 · distribution 10 · reliability 10 · gm 10 · engineering 5
+
+**Summary:** Two facts changed the company's picture, and both are with you with a recommendation. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
+
+### Toward revenue
+- Nothing moved revenue directly. This shift corrected the map the quarter's bets will be set on.
+- **The gap is wider than we thought.** Since March 2025 YouTube counts a view whenever a Short starts playing, but the 10-million bar counts only "engaged" views. Only 36% of our plays are engaged, so we earn about 11,000 to 13,000 of the views that count per 90 days, roughly 800 times short. I recommended on the planning issue that bet 2 ("double weekly views") be measured in engaged views, so a change that wins only swipe-past plays cannot pass it.
+- **Reddit's terms are now first-hand.** Earning from Reddit content needs "express written approval from Reddit" and "a separate agreement". The licence to posts covers showing them inside our own app, unmodified. Republishing them as YouTube videos sits outside a plain reading, paid or not. I recommend asking Reddit now, before the quarter is committed to this format; the answer decides whether any of the three bets has a future. Nothing changes in production meanwhile.
+- **TikTok's own page adds a rule:** the account must be based in one of eight countries (US, UK, Germany, Japan, South Korea, France, Mexico, Brazil). If you are not, bet 3's TikTok pilot is closed.
+
+### Done
+- **Reliability:** last night's evening upload never happened. GitHub could not give the job a machine during its outage, so the run failed before any of our code ran, and neither of today's earlier shifts noticed it. Nothing of ours to fix; Monday's digest will list the missed day. GitHub's default machine moves to a newer Ubuntu on 19 October. I checked that our video job is unaffected: it installs no system packages, and our Python version is already built for the new system.
+- **Data:** built the measure of engaged views and checked it with tests. Our "You…" titles keep their lead in engaged views (+60%), so that change counts toward the bar. No trait we log moves the engaged share: title style, voice, length and time of day all sit between 0.29 and 0.32. Only what the video itself does can move it, which is what the opening-seconds test and bet 1 target. The weekly totals for bet 2 can now be read in engaged views from the 12 and 19 October data. I also fixed a report line that called total plays "the Partner Program's measure".
+- **Legal:** read Reddit's terms first-hand and sent them to you (#60). Our pipeline only reformats Reddit text: it strips formatting, and it skips posts with profanity rather than editing them. So the exposure is the licence's scope and the money clause, not editing. The channel's name also uses Reddit's, which its terms restrict for apps; that supports the renaming item.
+- **Distribution:** confirmed TikTok's terms from its own page: 10,000 followers and 100,000 views in 30 days, videos over one minute, and the country rule above. Meta's pages still refuse even a plain download.
+- **Security:** standing check clean: $0.19 spent this month, you are the only collaborator, no secrets in the project, and the only workflow change was your approved security fix. The quarterly account-security check, the plan's only answer to losing the channel, had never run. I sent you six checks, about 15 minutes, all needing your logins (#59).
+- **General management:** both trackers updated and within their reading budgets; two finished items left the plan.
+- Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video, and with every product item waiting on 12 October or your session, the shift found no product change ready to make.
+- **Friction:** Reddit's and TikTok's pages were marked "needs a browser" for two shifts, but a plain download from the job's machine reads them. Only Meta's still refuse.
+
+### Blocked
+- **For you:** whether to ask Reddit for an agreement (#60, new); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
+
+### Next
+- Check that tonight's upload landed (it had not started by 17:30, normal for the evening slot), and that tomorrow evening's first NoStupidQuestions upload lands with a title.
+- On 12 October: judge "open on the question" under its rule. Read the engaged-view question beside it with the new measure, at 14 days old. Then the narrator and dark-morbid questions, and the first subscriber count.
+- If you accept bet 2 in engaged views, fix its baseline once four complete weeks exist (early November).
+- Considered and not taken: making the fresh second review a standing step before live merges (one use so far; wait for a second), a catch-up run after a missed slot (one miss in about 80 runs, and GitHub already emails you a failed run), and pinning the Ubuntu version (checked unaffected).
+
+### Better?
+- **Than last shift:** Unclear for revenue, but better informed. The gap is wider than we believed, and a legal question that could end the format now has a first-hand answer before bet 1 is built on it.
+- **Than ~10 shifts ago:** Somewhat. We now measure in the bar's own unit and know YouTube's, Reddit's and TikTok's rules from their own pages. Views per upload have not moved, and watch time reads flat.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-06 (11:15) — Subreddit rotation is live; our views are not a lottery of a few hits
 
     Worked (% of the shift): data 30 · product 25 · gm 20 · engineering 10 · reliability 5 · security 5 · monetization 5
@@ -95,46 +131,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. The supply step for more uploads a day is live. We also know views are not hit-driven, so no hunt for a viral formula is warranted.
 - **Than ~10 shifts ago:** Somewhat. Bet 2's levers are in place or ready, but views per upload have not moved, and the scorecard reads mixed.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-05 (22:12) — Quarterly prep: three bets drafted for you; no revenue route is in reach on today's path
-
-    Worked (% of the shift): strategy 25 · data 20 · market 10 · editorial 10 · engineering 10 · reliability 10 · product 5 · legal 5 · gm 5
-
-**Summary:** The first quarterly packet is with you: three bets for October to December, each with a first step and a rule for judging it. Pricing the other platforms found none within reach either. The nearest, TikTok, is about 8 times short and pays only for videos over a minute, so making the format our own (bet 1) comes before any route.
-
-### Toward revenue
-- The company now has a drafted plan for the quarter instead of a ranked list: make the format ours, raise weekly views, and price and pilot another platform. It waits on your planning session.
-- The gap is measured properly for the first time, counting every view as YouTube does. It is 32,000 to 37,000 views per 90 days against a bar of 10 million, about 300 times short. We have 21 subscribers against the 1,000 needed, 48 times short, so views are the half that binds.
-- The "You…" title style, which earned 47% more views, is merged and starts with tomorrow morning's upload.
-
-### Done
-- **Strategy:** drafted the three bets and sent them to you as one issue, asking you to hold the planning session. Bet 1: add commentary or a storyline of our own, without which YouTube will not pay. Bet 2: double weekly views. Bet 3: price the other platforms and pilot the best one.
-- **Strategy:** priced the other routes from creator guides, because the platforms' own pages refuse automated reads. TikTok needs 10,000 followers and 100,000 views a month (about 8 times short), and pays only for original videos over one minute. Facebook is invite-only and about 160 times short. Instagram pays no reliable rate.
-- **Market:** scanned eight comparable channels; this function's first work. Every large one has a human voice or face and gives a verdict. The text-to-speech ones stay small even when they post 9 times a day. That suggests AI commentary may not be enough for bet 1, and I have asked you whether a human voice is ever part of the show.
-- **Editorial:** drafted the second format candidate, a host storyline: a setup line before the answers and a verdict line after them, with the length held. Curation is folded into it, because picking other people's text is still a reading. You can now choose between the candidates.
-- **Data:** the report tool now gives total weekly views and the channel-wide views the bar counts. Both are needed to judge bet 2. I fixed bet 2's starting point now, before new data arrives: 8,300 views over September's last four weeks, so doubling means 16,600.
-- **Data:** found that watch time rises with length up to about 31 seconds, and nothing longer has ever been measured. So any TikTok route needs a one-minute test on YouTube first.
-- **Data:** tested my own proposal to run tests on alternating days, and it failed. Split by alternate days, uploads differ as much as consecutive batches do (12% against 13%), so it would not sharpen our tests. I withdrew it on your issue before you spent time on it.
-- **Engineering:** checked whether 3 to 4 uploads a day fits the AI service's free daily cap, which bet 2 needs. It fits: 80 of 84 runs used 2 requests, so 4 a day comes to about 16 of the 20. A free setting covers the rare worst case, to be applied when volume ships.
-- **Legal:** Reddit's own pages still refuse automated reads, but the guides agree that using its content in a monetized product needs Reddit's written approval. I raised that risk from unknown to likely. Asking Reddit comes before any application for payment.
-- **Product:** merged the title-style weighting. Its sample run passed, and no upload runs between now and midnight, so the effect is the same as merging on the 6th. A sample run of the live code after the merge also passed, with a real post, an AI-written title and narration, so tomorrow's upload path is checked.
-- **Reliability:** your approval of the viewer-comments change never landed. The job that applies it was cancelled in GitHub's outage before it ran. I have asked you to re-run it. The tool that lists your decisions now flags any approval that never landed. This was a fix.
-- **Security:** standing check clean. No credentials are in the project, the secret files are still excluded, no workflow changed this shift, and the Amazon spending controls are intact ($0.15 this month).
-- **General management:** brought both trackers back under their reading budgets and retired five finished items. The process-health check raised "shifts end with most of their time unspent" again. I filed it with context: the last three short shifts include the monthly and weekly reviews.
-- Fixing against improving: mostly improving. The fixes were the lost approval, the gap figure and the tracker trims.
-- **Friction:** I re-ran a check that the newer Python version works, which the code-health log already recorded on 30 September, because I read only part of that entry. It cost about six minutes and taught nothing new. It was my mistake, not a process gap.
-
-### Blocked
-- **For you:** the quarterly planning session, one re-run of the comments job, landing the auto-apply extension by hand (a shift cannot), and the browser read of TikTok's, Meta's and Reddit's terms (bet 3's first step).
-- The first format test cannot start before you approve bet 1. The format and narrator reads wait on the 12 October snapshot.
-
-### Next
-- Check that tomorrow's morning upload landed with a title. Then merge subreddit rotation, which passed its sample run.
-- No work is ready: everything waits on your session or on 12 October. Generating more considered a single-story format test and a one-minute test (both wait on your bet choices), a faster testing method (refuted tonight), and the Python upgrade (scheduled after the 12 October read). Until your session, the next shift's best use is the rotation merge above, then the 12 October reads.
-- On 12 October: judge the "open on the question" change under its rule, and read the narrator and topic questions.
-
-### Better?
-- **Than last shift:** Yes. The quarter has a drafted plan, the gap is measured correctly, and one change aimed at views is live from tomorrow.
-- **Than ~10 shifts ago:** Somewhat. We now know what blocks revenue: the format and the scale. We did not know that two weeks ago. Watch time per view is flat, and views per upload fell by about 40% over September, which is still within normal swings.
 - **Than ~100 shifts ago:** Too early to say.
