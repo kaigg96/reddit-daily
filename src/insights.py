@@ -774,7 +774,25 @@ GUARDRAILS = {
 # Guardrails where a rise is the bad direction. Without this a rising zero
 # rate could never breach, and a falling one would (found 2026-10-06).
 HIGHER_IS_WORSE = {"zero_rate"}
-DIAGNOSTICS = ("views", "duration_s", "likes_per_100", "comments_per_100")
+DIAGNOSTICS = ("views", "duration_s", "likes_per_100", "comments_per_100",
+               "engaged_per_100")
+
+
+def engaged_per_100(snapshot_rows):
+    """Engaged views per 100 play starts over a period: the share the Partner
+    Program counts (PLAN §1). None unless every row with views carries the
+    count, so a period read before the column (2026-10-05) shows nothing
+    rather than a share of whichever rows happened to have it. The API leaves
+    it blank on zero-view rows (all 41 blanks on 2026-10-05), which is no gap."""
+    views = engaged = 0.0
+    for r in snapshot_rows:
+        v = float(r.get("views") or 0)
+        if not v:
+            continue
+        if not r.get("engaged_views"):
+            return None
+        views, engaged = views + v, engaged + float(r["engaged_views"])
+    return 100.0 * engaged / views if views else None
 
 
 def scorecard(then, now, guardrails=None):
