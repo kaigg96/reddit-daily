@@ -348,12 +348,12 @@ def _require_value(metas, spec):
 
 def within(videos, spec):
     """Keep only videos whose upload_log field equals a value ("key=value"),
-    or all but one value ("key!=value"). Raises ValueError for a value no
-    video has.
+    or all but one value ("key!=value"). An empty result is an answer here
+    (a release may hold no short videos), so a typo is caught where the user
+    types it: `ids_within`, which report.py runs on every --within first.
 
     Lets one comparison be read inside another's halves, e.g. question length
     within similar-length videos, so a mechanical cause can be ruled out."""
-    _require_value([v.meta for v in videos], spec)
     return [v for v in videos if matches(v.meta, spec)]
 
 
@@ -361,7 +361,8 @@ def ids_within(spec, log_rows=None):
     """Video ids of the logged uploads matching `spec`, for the readers that
     work on snapshot rows (the trajectory), which carry no upload_log fields.
     An unlogged video (the back catalogue) matches nothing, so a filtered
-    trajectory covers logged uploads only. Raises ValueError as `within`."""
+    trajectory covers logged uploads only. Raises ValueError for a value no
+    logged upload has: with "!=", a typo would otherwise keep everything."""
     rows = _read_upload_log() if log_rows is None else log_rows
     metas = [_with_derived_dimensions(r) for r in rows]
     _require_value(metas, spec)

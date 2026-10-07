@@ -587,12 +587,9 @@ def main():
         return
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
-        try:
-            release(args.release, args.release_key,
-                    insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
-                    args.min_uploads, args.within)
-        except ValueError as e:
-            sys.exit(f"--within {args.within}: no measured upload has it yet ({e})")
+        release(args.release, args.release_key,
+                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
+                args.min_uploads, args.within)
         return
 
     if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)
@@ -626,10 +623,7 @@ def main():
                      f"weekly snapshot instead.")
 
     if args.within:
-        try:
-            videos = insights.within(videos, args.within)
-        except ValueError:
-            videos = []    # logged, but no upload with it has been measured yet
+        videos = insights.within(videos, args.within)
         print(f"(within {args.within}: {len(videos)} upload(s))")
     if not videos:
         sys.exit("No analyzable uploads found.")

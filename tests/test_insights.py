@@ -794,9 +794,8 @@ def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
     # "!=" excludes one group, e.g. a retired clip; unset rows predate the
     # field, so they are in neither side
     assert [v.video_id for v in insights.within(videos, "video_length!=short")] == ["2"]
-    # A value nobody has is a typo, not a filter: "!=" would keep everything
-    with pytest.raises(ValueError):
-        insights.within(videos, "video_length!=shrot")
+    # An empty side is an answer, not an error (a release with no short video)
+    assert insights.within(videos[2:3], "video_length=short") == []
 
 
 def test_ids_within_filters_the_trajectory_on_logged_fields():
@@ -806,6 +805,9 @@ def test_ids_within_filters_the_trajectory_on_logged_fields():
            {"video_id": "c", "bg_clip": "procedural:7"}]
     assert insights.ids_within("bg_clip!=pexels_1.mp4", log) == {"b", "c"}
     assert insights.ids_within("background_type=broll", log) == {"a", "b"}
+    # A value nobody has is a typo, not a filter: "!=" would keep everything
+    with pytest.raises(ValueError):
+        insights.ids_within("bg_clip!=pexels_1", log)
 
 
 def test_a_release_that_shifts_video_length_says_so():
