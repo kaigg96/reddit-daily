@@ -86,7 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - Tonight: check the first NoStupidQuestions upload lands with a title.
-- After 11:36: request the sample run for the switched-off vote; merge on a pass and a fresh review of its last change.
+- After 11:36: request the sample run for the switched-off vote, and merge it on a pass. Both its fresh reviews are done and clean.
 - 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
 - Also on 12 October: last week's snapshot shows more uploads stuck at zero views (5.6% against 2.4%). One week is weather by the tool's own rule; read it with the clip rule and act only if it repeats.
 - Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
