@@ -82,6 +82,12 @@ SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
 
+# Bet 1 (PRD R3.2, #55): one sentence, the owner's, saying what earns the
+# show's vote. Set, the closing line becomes the host's vote on the answers
+# instead of "comment your answer". None keeps the prompt unchanged. Turning it
+# on changes the video: bump FORMAT_VERSION and take a real sample.
+HOUSE_VOTE_RULE = None
+
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
 # marks), so characters bill double. A real run spends ~910 billed chars; the
