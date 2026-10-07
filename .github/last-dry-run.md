@@ -6,26 +6,24 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
+- **Branch:** `product/house-vote-dormant`
+- **Commit:** `1db94a3`
+- **When:** 2026-10-07T23:40:26Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 30.8 s, audio, no dead air
 
-- **Branch:** `legal/credit-reddit-users`
-- **Commit:** `4e2d547`
-- **When:** 2026-10-06T23:36:44Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 30.1 s, audio, no dead air
-
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/37547106464)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/37703273999)
 
 What it picked:
 
 ```
-Screen: dropped 1 comment(s) (unsafe_comments)
-Selected post: How did that kid at your high school die?
-Slate topics (rank order): dark-morbid|relationships-dating|other|dark-morbid|humor-absurd
-Title style B: Do you remember how that kid from your high school died?
-Today's top AskReddit post, asked by u/IM_HODLING: How did that kid at your high school die?
+Selected post: How do so many people do early mornings?
+Slate topics (rank order): health-body|relationships-dating|other|money-work|politics-news
+Title style B: How do you actually survive early mornings?
+Today's top NoStupidQuestions post, asked by u/TrueSkonger: How do so many people do early mornings?
 ```
 
 ## Last request
 
 - **Branch:** `product/house-vote-dormant`
-- **When:** 2026-10-07T10:41:16Z
-- **Outcome:** not rendered -- one automated render per 12 hours; the last was 2026-10-06T23:36:01Z
+- **When:** 2026-10-07T23:40:26Z
+- **Outcome:** rendered -- see above
