@@ -159,8 +159,9 @@ def _cta_instruction(vote_rule):
    answer it raises its hand for and, in a few words, why, then ask which one
    gets the viewer's vote. What earns the host's vote: {vote_rule}
    Name something specific from these answers, never a stock phrase. Judge,
-   never advise: no advice on health, law, money or politics. Plain spoken
-   words. No hashtags, no emoji, no profanity."""
+   never advise: no advice on health, law, money or politics. Vote on the
+   answer, never on the person: no claims about health conditions, identities
+   or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
 
 
 def get_metadata(reddit_title, comments, style="A"):

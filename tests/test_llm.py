@@ -382,4 +382,7 @@ def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
     prompt = _metadata_prompt(monkeypatch, rule)
     assert rule in prompt
     assert "never advise" in prompt and "never a stock phrase" in prompt
+    # Its first real run voted "because autism affects socialization most"
+    # (2026-10-07): a claim about a condition, not a judgement of an answer.
+    assert "never on the person" in prompt
     assert "asking viewers to comment" not in prompt
