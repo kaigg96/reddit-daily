@@ -16,7 +16,7 @@ import json
 
 import pytest
 
-from src import llm
+from src import config, llm
 
 
 class FakeResponse:
@@ -370,8 +370,23 @@ def test_the_closing_line_is_unchanged_until_the_owner_sets_a_vote_rule(monkeypa
     """Bet 1 ships dormant (PRD R3.2): with no rule the prompt is today's,
     byte for byte, so merging it changes no video."""
     prompt = _metadata_prompt(monkeypatch, None)
-    assert llm._CTA_ASK in prompt
+    # Main's closing-line instruction as it stood before bet 1, copied rather
+    # than read from llm, so an edit to llm._CTA_ASK fails here too.
+    assert """
+3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
+   their own answer to this specific question. Direct, punchy, conversational.
+   No hashtags, no emoji, no profanity.
+
+Return ONLY a JSON object""" in prompt
     assert "vote" not in prompt
+
+
+def test_a_vote_rule_cannot_ship_under_the_current_format_version():
+    """Switching the vote on changes every video, so its uploads must log under
+    a new FORMAT_VERSION or bet 1's read cannot tell them from v7's. Bet 1 is
+    the next release, so v7 is the version it must not share."""
+    if config.HOUSE_VOTE_RULE:
+        assert config.FORMAT_VERSION != "v7"
 
 
 def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
@@ -386,3 +401,6 @@ def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
     # (2026-10-07): a claim about a condition, not a judgement of an answer.
     assert "never on the person" in prompt
     assert "asking viewers to comment" not in prompt
+    # The line it replaces is capped at 12 words. Held equal, so bet 1's read
+    # is not confounded by length the way v7's was (PRD §4, 2026-10-07).
+    assert "AT MOST 12 words" in prompt

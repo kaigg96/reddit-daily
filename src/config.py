@@ -81,6 +81,8 @@ SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since 
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
+# Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
+# forbids the vote to share, or the vote could ship unlabelled.
 
 # Bet 1 (PRD R3.2, #55): one sentence, the owner's, saying what earns the
 # show's vote. Set, the closing line becomes the host's vote on the answers

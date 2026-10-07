@@ -155,7 +155,7 @@ def _cta_instruction(vote_rule):
     until it is set, the prompt is unchanged byte for byte."""
     if not vote_rule:
         return _CTA_ASK
-    return f"""3. CTA — the show's host casts its vote, spoken in AT MOST 14 words: which
+    return f"""3. CTA — the show's host casts its vote, spoken in AT MOST 12 words: which
    answer it raises its hand for and, in a few words, why, then ask which one
    gets the viewer's vote. What earns the host's vote: {vote_rule}
    Name something specific from these answers, never a stock phrase. Judge,
