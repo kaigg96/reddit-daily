@@ -59,8 +59,9 @@ It deploys; the video workflow runs from it twice daily.
 - ⚙ **Never upload, comment, or mutate `prev_post.txt` / `upload_log.csv` during
   development.** Use `DRY_RUN=1 venv/bin/python -m src.run`. Losing
   `prev_post.txt` risks a duplicate upload on the next scheduled run.
-- Merge once the gates pass: tests green, a dry run producing a playable MP4
-  for anything touching the video, `FORMAT_VERSION` bumped if the video
+- Merge once the gates pass: tests green, a fresh-context agent's review of
+  the diff with its findings fixed or recorded, a dry run producing a playable
+  MP4 for anything touching the video, `FORMAT_VERSION` bumped if the video
   changed, one variable per release.
 
 ## 4. Work autonomously — but not on the guardrails
