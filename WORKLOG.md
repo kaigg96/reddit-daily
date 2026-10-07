@@ -89,6 +89,7 @@ and more useful than a confident guess.
 - Tonight: check the first NoStupidQuestions upload lands with a title.
 - After 11:36: request the sample run for the switched-off vote, and merge it on a pass with its review.
 - 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
+- Also on 12 October: last week's snapshot shows more uploads stuck at zero views (5.6% against 2.4% before), a guardrail on the product's scorecard. One week is weather by the tool's own rule; read it with the background-clip rule that day, and act only if it repeats.
 - Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
 - If you choose the vote: switch it on as the next version after v7's read, with a real sample. If you choose another voice: build the reaction beat to its spec, now current.
 - Considered and not taken: tracing why v7's posts run longer (it would not change the 12 October reading), and preparing Gemini's paid tier (nothing to prepare until you decide).
