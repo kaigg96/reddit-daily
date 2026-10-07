@@ -150,6 +150,9 @@ def release(version, key, target_age, min_uploads=None):
               f"with what it replaced rather than with its own successors)")
     print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
     print(insights.render_duration(read.release, read.before))
+    within_length = insights.render_within_length(read)
+    if within_length:
+        print(within_length)
 
 
 def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):

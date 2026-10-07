@@ -532,6 +532,27 @@ def render_duration(release, before, threshold=1.0):
     return line
 
 
+def render_within_length(read, threshold=1.0):
+    """When a release shifted length, its watch-seconds within each length half.
+
+    Attribution, never a trigger: a gain that is only longer videos is not the
+    release's to claim. `v7`'s posts ran 3s longer for reasons outside its code
+    and read +25%, but +8% within long videos (PRD §0 #1, pre-committed
+    2026-10-07 before its read). The verdict stands as the owner set it (#18,
+    #39). Empty when length did not shift."""
+    a, b = median_duration(read.release), median_duration(read.before)
+    if a is None or b is None or abs(a - b) < threshold:
+        return ""
+    label = read.comparisons[0].a.label if read.comparisons else "release"
+    lines = ["WITHIN LENGTH — the gain the release may claim; attribution only, never a trigger"]
+    for half in ("short", "long"):
+        spec = f"video_length={half}"
+        lines.append(compare(within(read.release, spec), within(read.before, spec),
+                             f"{label}, {half}", f"before, {half}",
+                             read.load.anchor, Metric.WATCH).render())
+    return "\n".join(lines)
+
+
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
 # that committed to more (#1: `v7` commits to 20).

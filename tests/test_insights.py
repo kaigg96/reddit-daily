@@ -803,6 +803,49 @@ def test_a_release_that_shifts_video_length_says_so():
     assert "not measurable" in insights.render_duration([mk("")], [mk("20.3")])
 
 
+def _write_series_with_length(tmp_path, monkeypatch, eras):
+    """eras: [(prefix, start_day, fv, [(duration_s, watch), ...])], each upload
+    snapshotted at 7 days old."""
+    from src import config
+    log, snap = tmp_path / "upload_log.csv", tmp_path / "analytics_snapshots.csv"
+    with open(log, "w", newline="") as lf, open(snap, "w", newline="") as sf:
+        lf.write("timestamp_utc,video_id,post_title,video_title,bg_clip,format_version,duration_s\n")
+        sf.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                 "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
+        for prefix, start_day, fv, uploads in eras:
+            for i, (dur, watch) in enumerate(uploads):
+                published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
+                    + datetime.timedelta(days=start_day + i)
+                lf.write(f"{published.isoformat()},{prefix}{i},q,t,pexels_1.mp4,{fv},{dur}\n")
+                seen = (published + datetime.timedelta(days=7)).date().isoformat()
+                sf.write(f"{seen},{prefix}{i},,200,0,0,0,0,{watch},50\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+
+def test_a_length_shifted_release_is_credited_only_within_each_length_half(tmp_path, monkeypatch):
+    """v7 (2026-10-07): its posts ran 3s longer and it read +25%, +8% within
+    long videos. Longer videos hold more seconds, so a release made only of
+    longer videos looks better overall while matching the era in each half."""
+    old = [("15.0", 9.0)] * 10 + [("25.0", 12.0)] * 10
+    new = [("15.0", 9.0)] * 2 + [("25.0", 12.0)] * 18
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", old), ("new", 60, "v5", new)])
+    read = insights.release_read("v5")
+    assert read.comparisons[0].delta > 0.1          # the headline credits length
+    out = insights.render_within_length(read)
+    assert "attribution only, never a trigger" in out
+    assert "insufficient data" in out               # short half: 2 uploads
+    assert "long vs before, long -> no material difference" in out
+
+
+def test_no_within_length_read_when_length_held(tmp_path, monkeypatch):
+    same = [("15.0", 9.0)] * 10 + [("25.0", 12.0)] * 10
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", same), ("new", 60, "v5", same)])
+    assert insights.render_within_length(insights.release_read("v5")) == ""
+
+
 def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
     """The owner on #39: longer videos gain watch-seconds and lose views, so a
     release that only lengthens them would read "keep" on watch-seconds alone."""

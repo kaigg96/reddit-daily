@@ -170,3 +170,39 @@ def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
     lines = p.read_text().splitlines()
     assert lines == [",".join(wa.COMMENTS_FIELDS),
                      "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]
+
+
+class _FakeSubsAnalytics(_FakeAnalytics):
+    """Serves subscribersGained (as 2) unless told to refuse it."""
+
+    def __init__(self, refuse_subs):
+        super().__init__(refuse_engaged=False)
+        self.refuse_subs = refuse_subs
+
+    def execute(self):
+        if self.refuse_subs and wa.SUBS_METRIC in self._metrics:
+            raise RuntimeError("HttpError 400: Unknown identifier (subscribersGained)")
+        resp = super().execute()
+        if wa.SUBS_METRIC in self._metrics:
+            i = self._metrics.index(wa.SUBS_METRIC) + 1
+            for row in resp["rows"]:
+                row[i] = 2
+        return resp
+
+
+def test_subscribers_gained_are_added_per_upload():
+    """Subscribers are half the Partner Program's bar; C11's channel count
+    cannot say which uploads earn them (2026-10-07)."""
+    ya = _FakeSubsAnalytics(refuse_subs=False)
+    stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-10-12")
+    wa.add_subscribers_gained(ya, stats, ["a", "b"], "2026-10-12")
+    assert stats["a"][wa.SUBS_METRIC] == 2 and stats["a"]["views"] == 9
+    assert ya.calls[-1] == f"views,{wa.SUBS_METRIC}"
+
+
+def test_a_refused_subscribers_query_costs_the_column_not_the_snapshot():
+    ya = _FakeSubsAnalytics(refuse_subs=True)
+    stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-10-12")
+    wa.add_subscribers_gained(ya, stats, ["a", "b"], "2026-10-12")
+    assert stats["a"]["views"] == 9 and stats["a"][wa.ENGAGED_METRIC] == 3
+    assert stats["b"][wa.SUBS_METRIC].startswith("refused: RuntimeError: HttpError 400")
