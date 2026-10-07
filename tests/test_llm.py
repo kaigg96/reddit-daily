@@ -355,3 +355,34 @@ def test_metadata_never_retries_a_429(monkeypatch):
     meta = llm.get_metadata("q", ["a", "b", "c"])
     assert len(calls) == 1
     assert meta.failure == "http_429"
+
+
+def _metadata_prompt(monkeypatch, vote_rule):
+    seen = []
+    monkeypatch.setattr(llm.config, "HOUSE_VOTE_RULE", vote_rule)
+    monkeypatch.setattr(llm, "generate_retrying",
+                        lambda prompt, *a, **k: seen.append(prompt) or '{"cta": "c"}')
+    llm.get_metadata("What is the scariest story?", ["one", "two", "three"])
+    return seen[0]
+
+
+def test_the_closing_line_is_unchanged_until_the_owner_sets_a_vote_rule(monkeypatch):
+    """Bet 1 ships dormant (PRD R3.2): with no rule the prompt is today's,
+    byte for byte, so merging it changes no video."""
+    prompt = _metadata_prompt(monkeypatch, None)
+    assert llm._CTA_ASK in prompt
+    assert "vote" not in prompt
+
+
+def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
+    """YouTube pays for the creator's own perspective and refuses AI advice on
+    health, law, money or politics (PRD R3.6), so the vote judges and never
+    advises, and it is written from the owner's rule, not a generic tone."""
+    rule = "the answer that's true for the most people, not the funniest"
+    prompt = _metadata_prompt(monkeypatch, rule)
+    assert rule in prompt
+    assert "never advise" in prompt and "never a stock phrase" in prompt
+    # Its first real run voted "because autism affects socialization most"
+    # (2026-10-07): a claim about a condition, not a judgement of an answer.
+    assert "never on the person" in prompt
+    assert "asking viewers to comment" not in prompt

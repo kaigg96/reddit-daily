@@ -8,7 +8,7 @@ import time
 
 import requests
 
-from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
+from . import config  # also ensures .env is loaded for direct imports
 
 
 # gemini-2.5-flash "thinks" by default, and on these prompts that is pure
@@ -141,6 +141,29 @@ def _failure_kind(exc):
     return type(exc).__name__
 
 
+_CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
+   their own answer to this specific question. Direct, punchy, conversational.
+   No hashtags, no emoji, no profanity."""
+
+
+def _cta_instruction(vote_rule):
+    """The closing line: today's ask for the viewer's answer, or the host's vote.
+
+    Bet 1 (PRD R3.2): YouTube pays for the creator's own perspective, and every
+    video already ends on this line, so the host's vote can replace it at no
+    added length or request. The rule that earns the vote is the owner's (#55);
+    until it is set, the prompt is unchanged byte for byte."""
+    if not vote_rule:
+        return _CTA_ASK
+    return f"""3. CTA — the show's host casts its vote, spoken in AT MOST 14 words: which
+   answer it raises its hand for and, in a few words, why, then ask which one
+   gets the viewer's vote. What earns the host's vote: {vote_rule}
+   Name something specific from these answers, never a stock phrase. Judge,
+   never advise: no advice on health, law, money or politics. Vote on the
+   answer, never on the person: no claims about health conditions, identities
+   or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
+
+
 def get_metadata(reddit_title, comments, style="A"):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
@@ -174,9 +197,7 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
-   their own answer to this specific question. Direct, punchy, conversational.
-   No hashtags, no emoji, no profanity.
+{_cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
