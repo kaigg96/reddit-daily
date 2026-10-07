@@ -153,6 +153,17 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The public repo distributes a YouTube Audio Library track (found
+  2026-10-07).** `assets/funk_bg_lower.mp3`, the only music in every upload,
+  has been downloadable from the repo since it went public on 2026-10-05. The
+  Audio Library terms (behind YouTube Studio's login; quoted by secondary
+  sources) say "You may not make available, distribute or perform the music
+  files from this library separately from videos". The Pexels clips are fine:
+  its licence bars only stock and wallpaper platforms and selling unaltered
+  copies. The fix needs a secret and a workflow line (escalated, see
+  `WORKLOG.md`). Until then, **do not add tracks to `assets/music/` in plain
+  form**: the PRD owner task to add Audio Library tracks would widen it.
+
 - **A residual from the 2026-09-21 reporting work.** ((a), the release check
   wired into no automation, fixed 2026-10-06: the Monday digest prints the
   verdict for the live and previous release at each one's committed size,
