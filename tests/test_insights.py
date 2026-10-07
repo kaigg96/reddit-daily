@@ -791,6 +791,17 @@ def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
               for i, r in enumerate(rows)]
     assert [v.video_id for v in insights.within(videos, "video_length=short")] == ["0", "1"]
     assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
+    # "!=" excludes one group, e.g. a retired clip, and keeps the unset rows
+    assert [v.video_id for v in insights.within(videos, "video_length!=short")] == ["2", "3"]
+
+
+def test_ids_within_filters_the_trajectory_on_logged_fields():
+    """Snapshot rows carry no upload_log fields, so the trajectory filters by id."""
+    log = [{"video_id": "a", "bg_clip": "pexels_1.mp4"},
+           {"video_id": "b", "bg_clip": "pexels_2.mp4"},
+           {"video_id": "c", "bg_clip": "procedural:7"}]
+    assert insights.ids_within("bg_clip!=pexels_1.mp4", log) == {"b", "c"}
+    assert insights.ids_within("background_type=broll", log) == {"a", "b"}
 
 
 def test_a_release_that_shifts_video_length_says_so():
@@ -1501,6 +1512,27 @@ def test_buried_vs_rest_tests_each_group_against_the_others_pooled():
            "b": [v(1, "v4")] * 2 + [v(90, "v5")] * 14}
     assert insights.buried_rate_p(10, 16, 2, 16) < 0.05   # pooled naively, it would flag
     assert all(p > 0.05 for *_, p in insights.buried_vs_rest(era))
+
+
+def test_top_share_hits_cuts_within_each_release():
+    """A hit is the top 10% of its own release, so a high-view era cannot
+    lend its hits to whatever field leans toward it."""
+    def v(views, fmt):
+        return Video("x", datetime.datetime(2026, 9, 1), views=views,
+                     meta={"format_version": fmt})
+    v4 = [v(100 + i * 10, "v4") for i in range(10)]      # cut: 190
+    v5 = [v(10 + i, "v5") for i in range(20)]            # cut: 28, two hits
+    hit = insights.top_share_hits(v4 + v5)
+    assert [x.views for x in v4 + v5 if hit(x)] == [190, 28, 29]
+    # A group that is only the high-view era makes no more hits than the rest.
+    groups = {"a": v4, "b": v5}
+    assert all(p > 0.05 for *_, p in insights.buried_vs_rest(groups, hit=hit))
+    # One that holds a release's hits does.
+    many = {"hot": [v(500, "v5")] * 8 + [v(10, "v5")] * 8,
+            "cold": [v(10, "v5")] * 30, "cool": [v(10, "v5")] * 30}
+    rows = insights.buried_vs_rest(many, hit=insights.top_share_hits(
+        [x for vs in many.values() for x in vs]))
+    assert rows[0][:3] == ("hot", 8, 16) and rows[0][3] < 0.05 / 3
 
 
 def test_clip_use_counts_each_broll_clip_in_log_order():

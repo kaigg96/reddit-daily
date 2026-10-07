@@ -203,8 +203,13 @@ def buried_rate_p(hit_a, n_a, hit_b, n_b):
     return min(1.0, sum(p for p in map(pmf, tables) if p <= observed * (1 + 1e-9)))
 
 
-def buried_strata(videos_a, videos_b, key="format_version"):
-    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share."""
+def is_buried(v):
+    return v.views <= BURIED_VIEWS
+
+
+def buried_strata(videos_a, videos_b, key="format_version", hit=is_buried):
+    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share.
+    `hit` defaults to buried; `top_share_hits` gives the other tail."""
     def value(v):
         return str(v.meta.get(key, "")).strip()
 
@@ -212,9 +217,24 @@ def buried_strata(videos_a, videos_b, key="format_version"):
     for val in sorted({value(v) for v in videos_a} & {value(v) for v in videos_b}):
         a = [v for v in videos_a if value(v) == val]
         b = [v for v in videos_b if value(v) == val]
-        out.append((sum(v.views <= BURIED_VIEWS for v in a), len(a),
-                    sum(v.views <= BURIED_VIEWS for v in b), len(b)))
+        out.append((sum(map(hit, a)), len(a), sum(map(hit, b)), len(b)))
     return out
+
+
+def top_share_hits(videos, top=0.10, key="format_version"):
+    """A predicate for `buried_strata`: is this upload in the top `top` share
+    of views **within its own release**? Ranked channel-wide, July's v4 (median
+    160 views at 7 days, twice later releases) would hold most of the hits, and
+    any field that merely leans toward v4 would pass for a hit-maker. Ties at
+    the cut count as hits."""
+    by_era = {}
+    for v in videos:
+        by_era.setdefault(str(v.meta.get(key, "")).strip(), []).append(v.views)
+    cut = {}
+    for era, views in by_era.items():
+        views = sorted(views, reverse=True)
+        cut[era] = views[max(0, math.ceil(len(views) * top) - 1)]
+    return lambda v: v.views >= cut[str(v.meta.get(key, "")).strip()]
 
 
 def buried_rate_p_pooled(strata):
@@ -303,13 +323,31 @@ def era_imbalance(videos_a, videos_b, key="format_version", tolerance=ERA_MIX_TO
     return sorted(gaps, key=lambda g: -abs(g[1] - g[2]))
 
 
+def matches(meta, spec):
+    """Does an upload_log row match "key=value", or "key!=value"?"""
+    key, _, value = spec.partition("=")
+    negate = key.endswith("!")
+    key = key.rstrip("!")
+    return (str(meta.get(key, "")).strip() == value) != negate
+
+
 def within(videos, spec):
-    """Keep only videos whose upload_log field equals a value ("key=value").
+    """Keep only videos whose upload_log field equals a value ("key=value"),
+    or all but one value ("key!=value").
 
     Lets one comparison be read inside another's halves, e.g. question length
     within similar-length videos, so a mechanical cause can be ruled out."""
-    key, _, value = spec.partition("=")
-    return [v for v in videos if str(v.meta.get(key, "")).strip() == value]
+    return [v for v in videos if matches(v.meta, spec)]
+
+
+def ids_within(spec, log_rows=None):
+    """Video ids of the logged uploads matching `spec`, for the readers that
+    work on snapshot rows (the trajectory), which carry no upload_log fields.
+    An unlogged video (the back catalogue) matches nothing, so a filtered
+    trajectory covers logged uploads only."""
+    rows = _read_upload_log() if log_rows is None else log_rows
+    return {r["video_id"] for r in rows
+            if matches(_with_derived_dimensions(r), spec)}
 
 
 def split_by(videos, key):
@@ -803,7 +841,7 @@ def hit_rates(videos, key, top=0.10):
     return rows, cut
 
 
-def buried_vs_rest(groups, min_n=MIN_COHORT):
+def buried_vs_rest(groups, min_n=MIN_COHORT, hit=is_buried):
     """[(label, hits, n, p)]: each group's buried rate (<= BURIED_VIEWS)
     against every other group pooled, Mantel-Haenszel within formats so an
     era mix cannot pass for an effect (#11's clip read uneven across releases).
@@ -811,7 +849,8 @@ def buried_vs_rest(groups, min_n=MIN_COHORT):
     reader of k rows compares it with 0.05 / k (PRD §0 #11). A group that
     clears that bar is left out of every other group's "rest" on a second
     pass: the retired clip's 9 buried of 18 would otherwise raise the baseline
-    and hide a second bad clip behind it."""
+    and hide a second bad clip behind it. `hit` swaps the tail tested, e.g.
+    `top_share_hits` for which groups make the hits."""
     def tests(exclude):
         rows = []
         for label, vids in groups.items():
@@ -821,8 +860,9 @@ def buried_vs_rest(groups, min_n=MIN_COHORT):
                     if other not in (label, "(unset)") and other not in exclude for v in vs]
             if not rest:
                 continue
-            hits = sum(v.views <= BURIED_VIEWS for v in vids)
-            rows.append((label, hits, len(vids), buried_rate_p_pooled(buried_strata(vids, rest))))
+            hits = sum(map(hit, vids))
+            rows.append((label, hits, len(vids),
+                         buried_rate_p_pooled(buried_strata(vids, rest, hit=hit))))
         return sorted(rows, key=lambda r: r[3])
 
     first = tests(exclude=())
