@@ -60,6 +60,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-07 (23:50) — Bet 1's vote is in the live code, switched off: one sentence from you starts it
+
+    Worked (% of the shift): product 35 · data 30 · reliability 10 · engineering 10 · gm 10 · security 5
+
+**Summary:** The host's vote, bet 1's first step, passed its sample video and is now in the live code, switched off; your one sentence on the planning issue is all it waits for. No video changed tonight, so the company is no nearer revenue yet, but bet 1 no longer waits on any build.
+
+### Toward revenue
+- **Bet 1 now waits only on you.** I added a note to the planning issue (#55): reply with one sentence saying what earns the show's vote, and a shift switches it on as a new version with a sample video, the day after v7's read on 12 October. Its first read lands about four weeks later.
+- **The volume test can now give an answer.** More uploads per day is our evidenced views lever, but its rule judged each video's views within about 30%, inside their normal swing, so it could never tell dilution from luck. It now runs at four a day and is judged on the four-week total of views that bet 2 targets. Three a day was dropped: at best it adds half again, and our tools can only see a doubling. Four a day was already shown to fit the daily AI allowance.
+
+### Done
+- **Product:** brought the vote up to date with the live code, got its sample video (passed: playable, 31 seconds, no silence) and merged it. A fresh review found nothing blocking and three small gaps, fixed and merged after a second review: the vote line is held to the same 12 words as today's closing line, so its read is not muddied by length the way v7's was; a test fails if anyone switches it on without labelling the videos as a new version; and a test checks the unchanged wording exactly. A bet, shipped dormant.
+- **Data:** video length does not predict views. Within one release longer videos got 28% more views, across releases shorter ones looked 10% better, both inside the usual swing, and hits are as likely either way. So trimming videos would not buy views, and a host line that adds a few seconds has no measured views cost. A finding.
+- **Data:** two questions the tool rightly refused: whether lower-ranked Reddit posts do worse (only 4 such uploads), and whether extra uploads split views (we have posted two a day throughout, so there is no history to read). The second shaped the volume test's new rule.
+- **Reliability:** tonight's first NoStupidQuestions upload landed with a generated title. This afternoon's quota refusal in the release check was a one-off: the 13 checks before it all completed. Nothing to fix.
+- **Editorial:** tonight's upload asked about an ethnic group ("why are there almost no Asian homeless people?"). The safety screen passes it by design, since it skips only kinds of question that have actually been buried. If this one is buried at a week old, that is the evidence for a new skip rule.
+- **Security:** standing check clean: $0.21 spent this month, money controls in place, no secrets in the project, no unapproved workflow change.
+- Fixing against improving: one fix (the review's three gaps); the rest shipped a bet and sharpened how the next one is judged.
+
+### Blocked
+- **For you, in order of what they unblock:** the vote's one sentence and the planning session (#55); asking Reddit (#60, a draft message is on the issue); running the music script (#66, about two minutes); Gemini's paid tier (#62); the account checks (#59); the sample-video rule (#65); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Last week's rise in uploads stuck at zero views (5.6% against 2.4%) is read with the clip rule, acting only if it repeats; tonight's NoStupidQuestions upload is one to watch.
+- If you send the vote's sentence: switch it on as the next version the day after v7's read, with a sample video, and read it on AskReddit uploads only.
+- Considered and not taken: rewording the safety screen's test case so it checks judgement rather than memory (testing it would spend the AI allowance the morning upload needs); upgrading a login library with a known flaw (the flaw is server-side and does not touch us); the zero-view list (it needs YouTube access a shift lacks).
+
+### Better?
+- **Than last shift:** Yes, slightly. Bet 1's first step went from built to in the live code, and the volume test can now give an answer.
+- **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it. Views per upload are still below August's.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-07 (17:50) — Nothing we track predicts a hit, so more uploads is the one views lever with evidence
 
     Worked (% of the shift): data 50 · gm 20 · engineering 15 · reliability 5 · legal 5 · security 5
@@ -92,42 +124,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Unclear. We know more (hits look like luck, and September's drop has no cause we could undo), but nothing we ship changed.
 - **Than ~10 shifts ago:** Somewhat. The views lever is now evidenced, not assumed, and the tests admit what they cannot see. Views per upload are lower than in August.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-07 (10:15) — Bet 1's first step is built, switched off, and can start in mid-October; our project shares a music file it shouldn't
-
-    Worked (% of the shift): product 35 · legal 25 · data 15 · editorial 10 · gm 10 · security 5
-
-**Summary:** No video changed, but bet 1 got closer. I drafted three house voices for you to choose from and built the cheapest first step, switched off until you do: the host's vote replaces the closing line, adding no length or AI request, and it can start in mid-October rather than November. I also found our public project shares a music file YouTube's terms forbid sharing, and readied a two-minute fix for you.
-
-### Toward revenue
-- **Bet 1 can start three weeks sooner.** Its first step (the reaction beat) was queued behind the subreddit test, which reads around 2 November. Both running tests split each day's uploads between their sides, so a change to every video biases neither. Once you set the stance, bet 1 can follow v7's read on 12 October, judged on AskReddit uploads only.
-- **Three house voices, tried on this week's real answers** (on the planning issue): a "show of hands" host who votes for one answer and asks the viewer to vote, a skeptic, and a warm "noticer". I recommend the show of hands, with its rule in one sentence of yours. It can replace the closing line every video already speaks ("comment your answer"), so bet 1's first step would add no length, no AI request and almost no narration cost. YouTube asks for the creator's own perspective, so the stance has to be yours.
-- **The fallback source does not fit as is.** If Reddit says no, Stack Exchange is the fallback. None of its 95 popular questions across six sites had three answers short enough for our format; the typical answer is seven times too long. It could only feed a show where we condense answers in our own words. That is a rebuild, one more reason to ask Reddit early.
-
-### Done
-- **Legal:** since the project went public on 5 October, anyone can download the one YouTube Audio Library track in every upload. Its terms, as quoted by several guides, forbid offering the files apart from videos. I wrote the fix: the music is stored encrypted and unlocked only while rendering. It is yours to apply: a label, then one script on your machine. A fresh review caught two bugs first. A fix.
-- **Product:** the topic ranker's go/no-go count came due: it would change 5 uploads in 20. A ranker that touches one upload in four cannot show up in our test unless each change gains about 50%, and the best topic edge we have measured is 12%. Parked, with the condition that reopens it. The safety screen's weekly check is clean: no post skipped this week, four answers dropped.
-- **Product:** built bet 1's first step, switched off: one setting, empty until you choose, turns the closing line into the host's vote, written from your rule. While empty, what the AI is asked is unchanged to the letter, so no video changes. I tried it on this week's five posts on the test model's own allowance (examples on the planning issue): four good votes, and one claim about autism, which a new instruction fixed. It waits for its sample run (the next opens at 11:36). Switching it on is a release. A bet.
-- **Data:** v7's videos run 3 seconds longer than any earlier version's, though v7 changed only on-screen text. Longer videos earn more watch time, so most of v7's +25% early lead is length; within long videos it is +8%, inside normal swings. Before the 12 October read I recorded that v7 gets credit only for gains that hold among same-length videos, and the release check now prints that comparison itself whenever a release changes video length. It can also read a release inside AskReddit alone, as bet 1's read requires. The keep-or-revert rule itself stands, with your total-watch-time check (#39).
-- **Data:** from Monday, the weekly statistics also record how many subscribers each upload won. Subscribers are half of YouTube's bar, and until now no test could say which videos earn them. A refusal costs only that column. Checking that, I fixed a hidden fault: one refused figure would have stopped every age-matched report. A fix. Your Monday email will also flag any upload that went out without music.
-- **General management:** landed the fresh-review merge step you approved (#61) and closed it. This morning's upload ran on the new Python and credited every Reddit user by name, so both of yesterday's changes are confirmed live; trackers updated.
-- **Security:** standing check clean: $0.20 spent this month, no secrets in the project, no unapproved workflow change.
-- Fixing against improving: three fixes (the music licence, the length reading, the hidden fault); the rest improved bet 1's path and the plan's evidence.
-
-### Blocked
-- **For you, in order of what they unblock:** the planning session (#55; it gates bet 1, and now has three voices to pick from); asking Reddit (#60); the music fix (#64, new; a label and a two-minute script); Gemini's paid tier (#62); the account checks (#59, about 15 minutes); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- Tonight: check the first NoStupidQuestions upload lands with a title.
-- After 11:36: request the sample run for the switched-off vote, and merge it on a pass. Both its fresh reviews are done and clean.
-- 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
-- Also on 12 October: last week's snapshot shows more uploads stuck at zero views (5.6% against 2.4%). One week is weather by the tool's own rule; read it with the clip rule and act only if it repeats.
-- Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
-- If you choose the vote: switch it on as the next version after v7's read, with a real sample. If you choose another voice: build the reaction beat to its spec, now current.
-- Considered and not taken: tracing why v7's posts run longer (it would not change the 12 October reading), and preparing Gemini's paid tier (nothing to prepare until you decide).
-
-### Better?
-- **Than last shift:** Slightly. Bet 1's start moved from November to mid-October, pending your stance, and a licence breach has a ready fix. Nothing we ship changed.
-- **Than ~10 shifts ago:** Somewhat. The legal ground and the fallback are known first-hand, and our tests now admit what they cannot detect. Views and watch time are flat.
 - **Than ~100 shifts ago:** Too early to say.
