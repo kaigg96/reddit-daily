@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - **Friction:** a shift cannot read YouTube's data from here, so checking a description meant reading the public page.
 
 ### Blocked
-- **For you:** the music fix (#64, new, with the patch); the planning session (#55), now with three voices to pick from; asking Reddit (#60); Gemini's paid tier (#62); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
+- **For you, in order of what they unblock:** the planning session (#55; it gates bet 1, and now has three voices to pick from); asking Reddit (#60); the music fix (#64, new; a label and a two-minute script); Gemini's paid tier (#62); the account checks (#59, about 15 minutes); re-running the comments change (#53); the auto-apply patch (#50).
 
 ### Next
 - Tonight: check the first NoStupidQuestions upload lands with a title.
