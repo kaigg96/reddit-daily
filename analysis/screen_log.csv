@@ -15,3 +15,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-09-30T05:40:56+00:00,AskReddit,What's an obsure item you own that you're sure 99.99% of the population does not have?,drop_comments,unsafe_comments,Question is a general curiosity prompt.,gemini,1
 2026-10-02T17:54:29+00:00,AskReddit,What happened to the friend you thought you'd have for the rest of your life?,drop_comments,unsafe_comments,"Question is about lost friendships, not forbidden topics.",gemini,1
 2026-10-06T18:28:08+00:00,AskReddit,"Educators of Reddit, what happened to your smartest student?",drop_comments,unsafe_comments,"Question is neutral, not inviting suppression categories.",gemini,1
+2026-10-07T06:09:22+00:00,AskReddit,What is the scariest story you know is 100% true?,drop_comments,unsafe_comments,"Question is broad, inviting general scary stories",gemini,1
