@@ -135,7 +135,7 @@ This applies to every version release (`v4`, `v5`, …), not just the first one.
 ## Local setup
 
 ```sh
-python3.10 -m venv venv && venv/bin/pip install -r requirements.txt
+python3.12 -m venv venv && venv/bin/pip install -r requirements.txt
 ```
 
 Secrets go in `.env` (gitignored): `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`,
