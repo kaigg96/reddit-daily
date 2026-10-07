@@ -415,6 +415,9 @@ def show_catalogue(args):
         print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f}")
     old = sum(o for _, o, _, _ in rows)
     total = old + sum(r for _, _, r, _ in rows)
+    if not total:
+        print("\n  No views gained between these snapshots: nothing to split.")
+        return
     print(f"\n  The old catalogue earned {old / total:.1%} of these views. It gets no new"
           "\n  uploads, so a step in its column at the same snapshot as one in the"
           "\n  recent column is the channel's distribution; a column in single digits"
