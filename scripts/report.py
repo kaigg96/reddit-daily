@@ -127,7 +127,7 @@ def compare(videos, spec, metric, now):
                   f"check with --within format_version={era}")
 
 
-def release(version, key, target_age, min_uploads=None):
+def release(version, key, target_age, min_uploads=None, within_spec=None):
     """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
 
     Reads every upload at a *common age* from the weekly snapshot series, which
@@ -137,9 +137,11 @@ def release(version, key, target_age, min_uploads=None):
     defaults to the release's pre-committed size (`RELEASE_MIN_UPLOADS`)."""
     if min_uploads is None:
         min_uploads = insights.RELEASE_MIN_UPLOADS.get(version, insights.MIN_COHORT)
-    read = insights.release_read(version, key, target_age)
+    read = insights.release_read(version, key, target_age, within_spec)
     if read is None:
         sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
+    if within_spec:
+        print(f"(within {within_spec}: both sides of the release read inside it)")
     for line in read.load.caveats():
         print(f"AGE-MATCHED: {line}")
     print()
@@ -394,7 +396,7 @@ def main():
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
     p.add_argument("--within", metavar="KEY=VALUE",
-                   help="restrict --compare/--by to one group, e.g. video_length=short")
+                   help="restrict --compare/--by/--release to one group, e.g. video_length=short")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -531,7 +533,7 @@ def main():
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
         release(args.release, args.release_key,
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
-                args.min_uploads)
+                args.min_uploads, args.within)
         return
 
     if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)

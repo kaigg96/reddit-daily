@@ -571,7 +571,7 @@ class ReleaseRead:
     floors: dict
 
 
-def release_read(version, key="format_version", target_age=None):
+def release_read(version, key="format_version", target_age=None, within_spec=None):
     """The auto-revert check's inputs (`report.py --release`, the Monday
     digest), computed in one place so the two cannot drift. Every upload read
     at a common age; the drift floor comes from the era BEFORE the change, so
@@ -581,7 +581,10 @@ def release_read(version, key="format_version", target_age=None):
     load = load_videos_at_age(target_age)
     if not load.videos:
         return None
-    a, b, unset, later = release_cohorts(load.videos, key, version)
+    # `within_spec` reads the release inside one group, both sides alike, e.g.
+    # bet 1 within subreddit=AskReddit while subreddit rotation runs (PRD §0 #7).
+    videos = within(load.videos, within_spec) if within_spec else load.videos
+    a, b, unset, later = release_cohorts(videos, key, version)
     triggers = release_triggers(a, b)
     metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
         t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))

@@ -1632,3 +1632,30 @@ def test_a_zero_view_upload_stays_zero_view_under_the_engaged_metrics():
     for metric in (_ins.Metric.ENGAGED_SHARE, _ins.Metric.ENGAGED_VIEWS, _ins.Metric.VIEWS):
         c = _ins.summarize(vids, "all", metric, t)
         assert (c.n, c.zero_view_count, c.buried_count) == (1, 1, 1)
+
+
+def test_a_release_can_be_read_inside_one_group(tmp_path, monkeypatch):
+    """PRD §0 #7: bet 1 is read within AskReddit while subreddit rotation runs,
+    so a new subreddit's uploads cannot move the release's own verdict."""
+    from src import config
+    log, snap = tmp_path / "upload_log.csv", tmp_path / "analytics_snapshots.csv"
+    with open(log, "w", newline="") as lf, open(snap, "w", newline="") as sf:
+        lf.write("timestamp_utc,video_id,post_title,video_title,bg_clip,format_version,subreddit\n")
+        sf.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                 "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
+        eras = [("old", 0, "v4", [("AskReddit", 10.0)] * 10),
+                ("new", 60, "v5", [("AskReddit", 10.0), ("NoStupidQuestions", 5.0)] * 10)]
+        for prefix, start_day, fv, uploads in eras:
+            for i, (sub, watch) in enumerate(uploads):
+                published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
+                    + datetime.timedelta(days=start_day + i)
+                lf.write(f"{published.isoformat()},{prefix}{i},q,t,pexels_1.mp4,{fv},{sub}\n")
+                seen = (published + datetime.timedelta(days=7)).date().isoformat()
+                sf.write(f"{seen},{prefix}{i},,200,0,0,0,0,{watch},50\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+    pooled = insights.release_read("v5").comparisons[0]
+    inside = insights.release_read("v5", within_spec="subreddit=AskReddit").comparisons[0]
+    assert pooled.delta < 0                         # the new subreddit drags it
+    assert inside.a.n == 10 and inside.delta == 0   # the release itself held
