@@ -60,11 +60,11 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-07 (10:15) — Our project shares a music file YouTube's terms say not to share; three voices for bet 1 drafted; bet 1 need not wait for November
+## 2026-10-07 (10:15) — Bet 1's first step is built, switched off, and can start in mid-October; our project shares a music file it shouldn't
 
-    Worked (% of the shift): legal 35 · product 25 · editorial 15 · data 10 · gm 10 · security 5
+    Worked (% of the shift): product 35 · legal 25 · data 15 · editorial 10 · gm 10 · security 5
 
-**Summary:** Nothing in the video changed. I found a breach in our music licence, opened since the project went public, and readied a two-minute fix for you. I drafted three house voices for bet 1 to choose from, and found bet 1's first step can start in mid-October rather than November. Two pieces of evidence changed the plan: the topic ranker is parked, and v7's early lead is mostly its videos being longer.
+**Summary:** Nothing in the video changed, but bet 1 got closer. I drafted three house voices for you to choose from and built the cheapest first step, switched off until you do: the host's vote replaces the closing line, adding no length or AI request, and it can start in mid-October rather than November. I also found our public project shares a music file YouTube's terms forbid sharing, and readied a two-minute fix for you.
 
 ### Toward revenue
 - **Bet 1 can start three weeks sooner.** Its first step (the reaction beat) was queued behind the subreddit test, which reads around 2 November. That test, and the title test, split each day's uploads between their two sides. A change to every video hits both sides equally, so it biases neither test. Once you set the stance, bet 1 can follow v7's read on 12 October, judged on AskReddit uploads only.
