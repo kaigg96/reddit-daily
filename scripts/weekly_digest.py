@@ -161,6 +161,10 @@ def main():
     non_public = [r for r in log_rows
                   if r["timestamp_utc"] >= iso(7)
                   and privacy.get(r["video_id"], "public") != "public"]
+    # Sealed music that fails to unseal renders the video without it rather
+    # than failing the upload (scripts/seal_assets.sh); this column is the trace.
+    no_music = [r for r in log_rows
+                if r["timestamp_utc"] >= iso(7) and r.get("music_track") == "none"]
     skips = screen_skips()
     drift = median_publish_drift(channel_videos)
 
@@ -178,6 +182,8 @@ def main():
         soft.append(f"{len(zero_views)} upload(s) at 0 views (isolated — suppression candidates)")
     if non_public:
         soft.append(f"{len(non_public)} upload(s) not public")
+    if no_music:
+        soft.append(f"{len(no_music)} upload(s) rendered without music")
 
     date_label = f"{now:%b} {now.day}"
     if hard:

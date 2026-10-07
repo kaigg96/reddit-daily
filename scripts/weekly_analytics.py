@@ -39,10 +39,13 @@ from src import analytics, config, insights  # noqa: E402
 OUT = config.ANALYTICS_SNAPSHOTS
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
-          "engaged_views"]
+          "engaged_views", "subs_gained"]
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
 ENGAGED_METRIC = "engagedViews"
+# Subscribers are half of the Partner Program's bar, and the channel count
+# (C11) cannot say which uploads earn them (added 2026-10-07).
+SUBS_METRIC = "subscribersGained"
 CHUNK = 200  # Analytics API filter-list limit is 500; stay well under
 
 START_DATE = "2024-01-01"  # predates the channel; effectively "all time"
@@ -117,6 +120,25 @@ def fetch_stats_with_engaged(ya, video_ids, end_date):
         return stats
     for video, d in stats.items():
         d[ENGAGED_METRIC] = alone.get(video, {}).get(ENGAGED_METRIC, "")
+    return stats
+
+
+def add_subscribers_gained(ya, stats, video_ids, end_date):
+    """Each upload's subscribers gained, from its own query.
+
+    Separate from the main query so a refusal costs this column, never the
+    snapshot. As with engaged views, a shift cannot read the Actions log, so
+    the reason for a refusal goes into the column itself."""
+    try:
+        subs = fetch_stats(ya, video_ids, end_date, f"views,{SUBS_METRIC}")
+    except Exception as e:
+        reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+        print(f"::warning::{SUBS_METRIC} {reason}; snapshotting without it")
+        for d in stats.values():
+            d[SUBS_METRIC] = reason
+        return stats
+    for video, d in stats.items():
+        d[SUBS_METRIC] = subs.get(video, {}).get(SUBS_METRIC, "")
     return stats
 
 
@@ -353,6 +375,7 @@ def main():
         videos = all_uploads(yt)
         print(f"channel has {len(videos)} videos")
         stats = fetch_stats_with_engaged(ya, [v for v, _ in videos], today)
+        add_subscribers_gained(ya, stats, [v for v, _ in videos], today)
         print(f"analytics rows returned for {len(stats)} videos")
 
         is_new = not OUT.exists()
@@ -380,6 +403,7 @@ def main():
                     "avg_view_duration_s": s.get("averageViewDuration", 0),
                     "avg_view_pct": s.get("averageViewPercentage", 0),
                     "engaged_views": s.get(ENGAGED_METRIC, ""),
+                    "subs_gained": s.get(SUBS_METRIC, ""),
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)
