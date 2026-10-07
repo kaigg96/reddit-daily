@@ -97,6 +97,20 @@ jobs:
           ref: ${{ steps.req.outputs.branch }}
           path: under-test
 
+      # As in the video job: the music is sealed because the repo is public.
+      # Its own step, before the branch's dependencies are installed and with the
+      # system openssl, so nothing the branch brings can see the key.
+      - name: Unseal licensed music
+        if: steps.req.outputs.go == 'true'
+        working-directory: under-test
+        env:
+          ASSET_KEY: ${{ secrets.ASSET_KEY }}
+        run: |
+          git ls-files -z 'assets/*.enc' | while IFS= read -r -d '' f; do
+            /usr/bin/openssl enc -d -aes-256-cbc -pbkdf2 -in "$f" -out "${f%.enc}" -pass env:ASSET_KEY \
+              || { rm -f "${f%.enc}"; echo "::warning::could not unseal $f; the sample renders without it"; }
+          done
+
       - uses: actions/setup-python@v5
         if: steps.req.outputs.go == 'true'
         with:

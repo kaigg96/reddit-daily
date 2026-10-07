@@ -38,6 +38,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    # YouTube Audio Library terms bar making the music files available apart
+    # from videos, and this repo is public, so it carries them encrypted
+    # (scripts/seal_assets.sh). A track that fails to unseal is removed rather
+    # than left as noise; the video then renders without it, and upload_log's
+    # music_track column records "none".
+    - name: Unseal licensed music
+      env:
+        ASSET_KEY: ${{ secrets.ASSET_KEY }}
+      run: |
+        git ls-files -z 'assets/*.enc' | while IFS= read -r -d '' f; do
+          /usr/bin/openssl enc -d -aes-256-cbc -pbkdf2 -in "$f" -out "${f%.enc}" -pass env:ASSET_KEY \
+            || { rm -f "${f%.enc}"; echo "::warning::could not unseal $f; the video renders without it"; }
+        done
+
     - name: Generate video (and upload unless dry run)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
