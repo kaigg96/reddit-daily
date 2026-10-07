@@ -462,11 +462,12 @@ Retained as a cautionary record: the failure mode was targeting a ratio whose de
 #### R3.1b — CTA placement — **⬜ unscheduled (2026-08-23)**
 - Was folded into R1.8; that experiment is cancelled, so this is standalone again and currently unscheduled. The open question — does moving the ask earlier (overlay strip during the final answer) help or annoy? — is untested. Low priority: it's a small change against an unmeasured effect, and §4 now says judge it on watch-seconds. Revive only with a specific reason.
 
-#### R3.2 — Two-voice reaction beat — **Experiment — demoted to bottom of backlog (2026-07-27)**
-- The *unused* voice of {Danielle, Stephen} delivers one Gemini-written quip (≤ 10 words, reacting to one comment — prompt for "surprised/amused friend" tone, no profanity) placed after comment 2 as a mid-video pattern interrupt. Distinct caption color for the second voice. **Fails soft:** any Gemini/Polly error → omit the beat entirely, video still valid.
-- Adds mid-video length + an interruption — genuinely could raise or lower retention. Also the start of an actual channel persona (and helps the "meaningfully transformed content" bar for YPP review).
-- **Demotion rationale (2026-07-27):** the watch-budget finding (§4) makes anything that *adds* length the weakest prior on the board. Persona value stands, but not at the cost of seconds.
-- **Decision rule:** superseded 2026-10-05 by §0 #7's (watch-seconds, not avg-%); it is now originality candidate 1 (bet 1), since YouTube will not pay for the format without commentary of our own.
+#### R3.2 — Two-voice reaction beat — **Experiment, originality candidate 1 (bet 1, §0 #7)**
+- The *unused* voice of {Danielle, Stephen} delivers one line (≤ 12 words) written from the **house stance the owner sets** (#55; three drafted 2026-10-07: a "show of hands" vote, a skeptic, a "noticer"), inside the existing metadata call (0 extra Gemini requests). Distinct caption colour for the second voice. It must name something in *this* post's answers, never a stock phrase (template rule), and judge, never advise (R3.6's policy notes apply).
+- **Placement follows the stance:** a vote comes after the last answer and ends on asking the viewer's vote, which makes it R3.6's verdict line, so if the owner picks the vote, build the two as one step. A reaction to one answer sits straight after that answer.
+- **Fails soft and is counted:** any Gemini/Polly error → the video ships without the line, logged per upload (a `reaction_ok`-style column), so a silent fallback is visible.
+- **Length is not held:** the line adds ~3 s, and dropping a comment to offset it would change the content too. The release check covers it: total watch time must also hold (#39), and the gain is credited only within each length half (2026-10-07).
+- **Read** within AskReddit while #3 runs (§0 #7). **Decision rule:** §0 #7's.
 
 #### R3.6 — Host storyline — **Experiment, originality candidate 2 (drafted 2026-10-05)**
 - YouTube pays for "edited content with a storyline and commentary" (PLAN §4). The host voice adds a one-line setup before the answers and a one-line verdict after them: what the answers have in common, or which one wins, ending on the show's own question to the viewer (fits *Show of Hands*). Comments stay verbatim and in vote order (owner, 2026-08-23).
