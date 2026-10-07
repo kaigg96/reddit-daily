@@ -60,6 +60,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-07 (17:50) — Nothing we track predicts a hit, so more uploads is the one views lever with evidence
+
+    Worked (% of the shift): data 50 · gm 20 · engineering 15 · reliability 5 · legal 5 · security 5
+
+**Summary:** Nothing was ready, so I tested three questions our own numbers could answer. None of the things we track (title style, topic, voice, background, time of day, question length) predicts which uploads become the hits that earn most views, and September's fall in views isn't explained by anything we track. No video changed. The company is no nearer revenue, but it now has evidence that more uploads per day is the lever for views.
+
+### Toward revenue
+- **Nothing directly.** Every step that would change what we ship waits on you (the planning session, #55) or on data arriving 12 October.
+- **More uploads per day now has evidence behind it.** The top tenth of uploads earn 42% of views. None of the six things we track predicts which uploads land there, so every upload is a similar lottery ticket and more tickets is the lever. That item stays behind the subreddit test, as planned. The title style we now favour lifts the typical upload's views but does not make more hits.
+- **Views per upload fell by about a third in September** (about 250 down to about 150 at a week old). It happened in both daily slots and with both voices. The retired background clip and that month's failed titles each explain only a sliver, and nothing else we track explains the rest, so I am not proposing a fix. Bet 2's starting point of 8,300 views a week stands: no fix already made will lift it for free. The week to 5 October gained the most views of any week on record, so the dip may already be passing; the 12 October figures will say.
+- **Nearly every view toward YouTube's bar comes from new uploads.** The 800-odd older videos earn under 1% of views, about 3 a day. So the bar rises or falls with what we publish now, another point for more uploads per day.
+
+### Done
+- **Data:** the three reads above, plus one more: the share of plays that get past the opening (the views YouTube's payout bar counts) does not vary with anything we track either. So the favoured title style's lead carries over in full to the views that count. A finding.
+- **Engineering:** the reporting tool can now read the weekly trend inside one group or with one group left out, test which groups produce hits, and split views between old and new videos. Fresh reviews caught a real bug before merging (a misspelt filter silently kept everything) and two smaller ones. One also caught a misleading reading I had already written down: "the drop is all one voice" was an artefact of how many videos each voice read. Both fixed. The tool also explains itself now instead of crashing when asked for a report that needs YouTube access a shift doesn't have.
+- **General management:** the shift rules forbid a sample video within an hour of an upload because its AI requests used to share the upload's allowance. They no longer do (since 25 September a sample uses a separate test model). This evening the rule stopped the finished vote feature getting its sample, so I asked you to drop it (#65, one sentence). Shifts cannot edit their own rules.
+- **Legal:** the music fix you approved (#64) closed when its workflow half landed, but the plain music file is still public: your two-minute script has not run. Nothing breaks meanwhile. I raised a reminder (#66) so the closed issue doesn't read as done.
+- **Reliability and security:** yesterday's two uploads and this morning's landed; money controls are clean ($0.21 this month); no secrets in the project; the only workflow changes are the two you approved (#63, #64).
+- Fixing against improving: two fixes (the filter bug, the crash); the rest was research.
+
+### Blocked
+- **For you, in order of what they unblock:** the planning session (#55); asking Reddit (#60); running the music script (#66, about two minutes); Gemini's paid tier (#62); the account checks (#59); the sample-video rule (#65, new); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- Ask for the vote feature's sample video, and merge it on a pass. Under today's rule that means a shift after 07:00 UTC and not within an hour of an upload, so tomorrow late morning. If you approve #65, any shift can ask. For planning: if the vote starts 13 October, its first read lands about 9 November (it is judged on AskReddit uploads alone, which now come one a day, and needs 20 of them a week old).
+- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count.
+- After you run the music script (#66): check the next upload's log names the track, not "none".
+- Tonight's upload, the first from NoStupidQuestions, had not run by hand-over: check it landed with a generated title. If its log shows a quota refusal, the daily allowance is tighter than we think: this afternoon's release check also hit one, with little spent since the reset.
+
+### Better?
+- **Than last shift:** Unclear. We know more (hits look like luck, and September's drop has no cause we could undo), but nothing we ship changed.
+- **Than ~10 shifts ago:** Somewhat. The views lever is now evidenced, not assumed, and the tests admit what they cannot see. Views per upload are lower than in August.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-07 (10:15) — Bet 1's first step is built, switched off, and can start in mid-October; our project shares a music file it shouldn't
 
     Worked (% of the shift): product 35 · legal 25 · data 15 · editorial 10 · gm 10 · security 5
@@ -96,42 +130,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. Bet 1's start moved from November to mid-October, pending your stance, and a licence breach has a ready fix. Nothing we ship changed.
 - **Than ~10 shifts ago:** Somewhat. The legal ground and the fallback are known first-hand, and our tests now admit what they cannot detect. Views and watch time are flat.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
-
-    Worked (% of the shift): legal 30 · engineering 25 · data 15 · editorial 10 · distribution 10 · gm 5 · security 5
-
-**Summary:** Nothing in the video changed; descriptions now credit Reddit's users. I read four sets of rules first-hand. They changed what bet 1 needs and found a breach of Reddit's terms that a few dollars a month would fix. Both are with you, with recommendations. The overdue Python upgrade turns out not to change the video, so it needs one approval and no test slot.
-
-### Toward revenue
-- **Bet 1, sharpened.** YouTube's policy page, read directly for the first time, does not ask for a human voice. It refuses AI-written content from "generic or unoriginal templates" that lacks "the creator's original, authentic insights or perspective". A quip from a fixed prompt may not pass. A house stance that you set, which the AI writes from, is the cheapest step that fits the wording. A newer rule also bars AI hosts from giving advice on health, law, money or politics, the topics of about a third of our uploads. So the commentary must judge, never advise. Both points are in the plan's specs and on the planning issue.
-- **A breach we can close.** Reddit's terms forbid letting anyone "acting on your behalf" train AI on its posts. Gemini's free allowance, which reads every post we consider, is used to improve Google's models; the paid tier is not. I recommend the paid tier, about $1–3 a month with a daily cap set at Google, before anyone writes to Reddit. It also lifts the 20-a-day limit that blocks the topic ranker.
-- **The fallback source is real.** Stack Exchange licenses its posts for commercial reuse with changes allowed, on three conditions: credit every author, release our videos under the same licence, and keep its text out of AI training (the paid tier covers that).
-
-### Done
-- **Legal:** read the terms of Reddit, Stack Exchange, Google's Gemini and YouTube's monetization page directly, and sent the results to you (two new notes on existing issues, one new decision).
-- **Legal:** merged crediting each Reddit user by name in the description, as Reddit's terms ask beside the link we already give; deleted and offensive names are left out. Its sample run passed, crediting a real asker. A fresh second review caught that it would have broken our topic analysis; fixed before merging. Description only.
-- **Engineering:** rendered the fixed sample video on the old and new Python. The files are byte-for-byte identical, and every test passes on both. Python 3.10 lost security support on 4 October. The upgrade is ready for you as one patch. A fix.
-- **Data:** one background clip is watched for burying uploads (3 of 13), with no written rule for dropping it. I set one before its next read: drop it if its rate stands out from the other clips beyond chance, corrected for testing seven at once. The report now prints that test; it flags the clip dropped in September. The watched clip stays; re-read 12 October. I refined the test once after seeing a first number (a dropped clip still counted in the comparison); the decision is the same either way. A fix.
-- **Distribution:** a browser on our runner now opens Meta's pages, but their rule lists stay empty unless logged in. Facebook and Instagram stay with you.
-- **Security:** standing check clean: $0.19 spent this month, no secrets in the project, and the only workflow change today was your approved fix.
-- **General management:** the ready queue was empty. Two rounds of candidates; I took the six that could move now. One had been answered in September (question length); I caught it before re-running it. Trackers updated, including a stale "250 to 1,250 times short" figure.
-- Fixing against improving: three fixes (the runtime, the clip rule, crediting users); the rest improved the map for bet 1 and the Reddit decision.
-- **Friction:** answered research questions leave the table, so nothing stops a shift from regenerating one. Searching the findings first caught it this time.
-
-### Blocked
-- **For you:** turning on Gemini billing (#62, new); the Python upgrade patch (#63, new); asking Reddit (#60); the planning session (#55), where the question is now whose perspective the commentary carries; the account checks (#59); the review-step proposal (#61); re-running the comments change (#53); the auto-apply patch (#50). Also the old music task: every upload uses one track, and YouTube's template rule now gives that a reason. Two or three Audio Library tracks would do.
-
-### Next
-- Check tomorrow morning's description credits its authors.
-- Tomorrow morning: confirm the upload landed, then read the topic ranker's count at its 20th run, under its rule.
-- Tomorrow evening: the first NoStupidQuestions upload. Check it lands with a title.
-- If you apply the Python patch: one sample run of the live code before the next upload, then fix the setup line in the readme.
-- 12 October: judge "open on the question" under its rule, with the engaged-view, narrator and subscriber reads beside it. Apply the new clip rule to the watched clip.
-- Considered and not taken: building the reaction beat now (it should wait for your stance), and re-reading engaged views by background clip. The dip from late August to mid-September shows on every clip, and the current releases are back up.
-
-### Better?
-- **Than last shift:** Slightly. Bet 1's real requirement is clearer, and a live breach has a cheap fix on the table. Only descriptions changed in what we ship.
-- **Than ~10 shifts ago:** Somewhat. We now have first-hand rules for YouTube, Reddit, TikTok, Stack Exchange and Gemini. Views per upload have not moved, and watch time reads flat.
 - **Than ~100 shifts ago:** Too early to say.
