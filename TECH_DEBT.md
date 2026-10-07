@@ -160,8 +160,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   sources) say "You may not make available, distribute or perform the music
   files from this library separately from videos". The Pexels clips are fine:
   its licence bars only stock and wallpaper platforms and selling unaltered
-  copies. The fix needs a secret and a workflow line (escalated, see
-  `WORKLOG.md`). Until then, **do not add tracks to `assets/music/` in plain
+  copies. The fix needs a secret and a workflow line: `scripts/seal_assets.sh`
+  plus the patch on #64. Until then, **do not add tracks to `assets/music/` in plain
   form**: the PRD owner task to add Audio Library tracks would widen it.
 
 - **A residual from the 2026-09-21 reporting work.** ((a), the release check
@@ -275,37 +275,17 @@ a list nobody can read is the same as no list.
   **Tested 2026-10-05 (`report.py --engaged-check`): no match.** Implied/actual
   median 1.26, 13% of 830 rows within 10%, so this is not the engaged count and
   #8 has no backfill. The column is decorative again: fix or drop.
-- **The runtime and two dependencies are ageing out.** Every workflow pins
-  Python 3.10, which reaches end of life **2026-10-04** — `google.api_core`
-  already warns it will stop shipping updates for it. And an OSV check of
-  `requirements.txt` (2026-09-23) finds published advisories against
-  **Pillow 10.4.0** (30+) and **requests 2.32.3** (4). Exposure is low: Pillow
-  only ever decodes our own fonts, b-roll and generated frames, never an
-  untrusted image, and requests only posts to fixed Google endpoints. Nothing
-  breaks on the EOL date, so this is not urgent — but bumping either
-  dependency, or Python, can change how frames render, so it is a video change:
-  it needs a real sample (`dry_run.py request`, one per shift) and its own
-  release, not a ride-along in an experiment. Re-checked 2026-09-27 with
-  `pip-audit`: 37 advisories, the same two packages. requests 2.33.1 merged
-  2026-09-30 on a PASS sample, clearing its four; Pillow and Python remain.
+- **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
+  next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
+  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+).
+  Exposure is low: Pillow only ever decodes our own fonts, b-roll and
+  generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
   flags 12.3.0 incompatible; found 2026-09-30). A seeded `SAMPLE=1` render on
   12.3.0 completed, but the pin means `pip install -r` would not resolve, so
   the fix is a moviepy upgrade first — a render change, after `v7`'s read.
   Even the latest moviepy (2.2.1) caps `pillow<12.0`, so 11.3.0 is the
   reachable ceiling; re-run `pip-audit` on it before assuming it clears all.
-  **Python 3.12 pre-check (2026-09-30):** a scratch venv on the runner's
-  3.12.14 resolves `requirements.txt` unchanged, and the suite passes (273/273
-  on `main`) once `requirements-dev.txt`'s PyYAML is installed too, and a
-  `SAMPLE=1` render is playable (1080x1920, 30 fps, 24.5 s, audio). So the bump
-  is the seven `python-version: '3.10'` pins in six workflows, via
-  `escalate.py --patch`. **Not a video change (2026-10-06):** a `SAMPLE=1`
-  render with `random.Random` seeded to 7 is **byte-identical** on 3.12 and
-  3.10 (735 frames, 1,056 audio packets, thumbnail, captions; 346/346 tests on
-  both), so no `FORMAT_VERSION` and no experiment slot. Escalated with the
-  patch (`python-312-runtime`). Once applied: one `dry_run.py request main`
-  before the next upload (the sample path calls no Reddit/Gemini/Polly), and
-  README's `python3.10 -m venv` line.
   **The moviepy upgrade buys no security (2026-09-30):** moviepy 2.2.1 +
   pillow 11.3.0 resolves and passes 273/273, but `pip-audit` finds **35**
   Pillow advisories on 11.3.0 (33 on 10.4.0). Every fix is ≥12.1.1, above

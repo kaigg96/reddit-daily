@@ -60,6 +60,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-07 (10:15) — Our project shares a music file YouTube's terms say not to share; three voices for bet 1 drafted; bet 1 need not wait for November
+
+    Worked (% of the shift): legal 35 · product 25 · editorial 15 · data 10 · gm 10 · security 5
+
+**Summary:** Nothing in the video changed. I found a breach in our music licence, opened since the project went public, and readied a two-minute fix for you. I drafted three house voices for bet 1 to choose from, and found bet 1's first step can start in mid-October rather than November. Two pieces of evidence changed the plan: the topic ranker is parked, and v7's early lead is mostly its videos being longer.
+
+### Toward revenue
+- **Bet 1 can start three weeks sooner.** Its first step (the reaction beat) was queued behind the subreddit test, which reads around 2 November. That test, and the title test, split each day's uploads between their two sides. A change to every video hits both sides equally, so it biases neither test. Once you set the stance, bet 1 can follow v7's read on 12 October, judged on AskReddit uploads only.
+- **Three house voices, tried on this week's real answers** (on the planning issue): a "show of hands" host who votes for one answer and asks the viewer to vote, a skeptic, and a warm "noticer". I recommend the show of hands, with its rule in one sentence of yours. YouTube asks for the creator's own perspective, so the stance has to be yours.
+- **The fallback source does not fit as is.** If Reddit says no, Stack Exchange is the fallback. None of its 95 popular questions across six sites had three answers short enough for our format; the typical answer is seven times too long. It could only feed a show where we condense answers in our own words. That is a rebuild, one more reason to ask Reddit early.
+
+### Done
+- **Legal:** since the project went public on 5 October, anyone can download the one YouTube Audio Library track in every upload. Its terms, as quoted by several guides, forbid offering the files apart from videos. I wrote the fix: the music is stored encrypted and unlocked only while rendering. It is yours to apply: a label, then one script on your machine. A fresh review checked it first. The stock clips' licence allows our use. A fix.
+- **Product:** the topic ranker's go/no-go count came due: it would change 5 uploads in 20. A ranker that touches one upload in four cannot show up in our test unless each change gains about 50%, and the best topic edge we have measured is 12%. Parked, with the condition that reopens it. The safety screen's weekly check is clean: no post skipped this week, four answers dropped.
+- **Data:** v7's videos run 3 seconds longer than any earlier version's (beyond chance), though v7 changed only on-screen text. Longer videos earn more watch time, so most of v7's +25% early lead is length; within long videos it is +8%, inside normal swings. Before the 12 October read I recorded that v7 gets credit only for gains that hold among same-length videos, and the release check now prints that comparison itself whenever a release changes video length. The keep-or-revert rule itself stands, with your total-watch-time check (#39).
+- **Data:** from Monday, the weekly statistics also record how many subscribers each upload won. Subscribers are half of YouTube's bar, and until now we had only the channel's total, so no test could say which videos earn them. Bet 1's host is the change most likely to move that. If YouTube refuses the figure, only that column is lost. Your Monday email will also flag any upload that went out without music. A bet.
+- **General management:** landed the fresh-review merge step you approved (#61) and closed it. This morning's upload ran on the new Python and credited every Reddit user by name, so both of yesterday's changes are confirmed live; trackers updated.
+- **Security:** standing check clean. $0.20 spent this month, no secrets in the project, and the only workflow change was your Python patch.
+- Fixing against improving: two fixes (the music licence, the length reading); the rest improved bet 1's path and the plan's evidence.
+- **Friction:** a shift cannot read YouTube's data from here, so checking a description meant reading the public page.
+
+### Blocked
+- **For you:** the music fix (#64, new, with the patch); the planning session (#55), now with three voices to pick from; asking Reddit (#60); Gemini's paid tier (#62); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- Tonight: check the first NoStupidQuestions upload lands with a title.
+- 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
+- Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
+- If you set the stance: build the reaction beat to follow v7's read.
+- Considered and not taken: tracing why v7's posts run longer (it would not change the 12 October reading), and preparing Gemini's paid tier (nothing to prepare until you decide).
+
+### Better?
+- **Than last shift:** Slightly. Bet 1's start moved from November to mid-October, pending your stance, and a licence breach has a ready fix. Nothing we ship changed.
+- **Than ~10 shifts ago:** Somewhat. We know the legal ground for the format and its fallback first-hand, and the experiments are honest about what they can detect. Views per upload have not moved, and watch time reads flat.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
 
     Worked (% of the shift): legal 30 · engineering 25 · data 15 · editorial 10 · distribution 10 · gm 5 · security 5
@@ -96,44 +132,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. Bet 1's real requirement is clearer, and a live breach has a cheap fix on the table. Only descriptions changed in what we ship.
 - **Than ~10 shifts ago:** Somewhat. We now have first-hand rules for YouTube, Reddit, TikTok, Stack Exchange and Gemini. Views per upload have not moved, and watch time reads flat.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-06 (17:11) — We are about 800 times short of YouTube's bar, not 300; Reddit's own terms say our use needs its agreement
-
-    Worked (% of the shift): data 30 · legal 15 · security 15 · product 10 · reliability 10 · distribution 10 · gm 5 · engineering 5
-
-**Summary:** Two facts changed the company's picture; both are with you, with recommendations. YouTube's bar counts only "engaged" views, about a third of our plays, so we are about 800 times short, not 300. Reddit's own terms, read first-hand for the first time, say making money from its posts needs Reddit's written agreement. Read plainly, they leave even today's unpaid videos outside the licence.
-
-### Toward revenue
-- Nothing moved revenue directly; this shift corrected the map the bets rest on.
-- **The gap is wider than we thought.** YouTube counts a view whenever a Short starts playing, but the 10-million bar counts only "engaged" views, and only 36% of ours are, so we earn about 11,000 to 13,000 of the views that count per 90 days, roughly 800 times short. I recommended on the planning issue that bet 2 ("double weekly views") be measured in engaged views, so a change that wins only swipe-past plays cannot pass it.
-- **Reddit's terms are now first-hand.** Earning from Reddit content needs "express written approval from Reddit" and "a separate agreement". Its newer terms (September 2024) go further: any use "by or on behalf of a business" needs written approval, paid or not. The licence covers showing posts inside our own app, unmodified. Republishing them as YouTube videos sits outside a plain reading. I recommend asking Reddit now, before the quarter is committed to this format; the answer decides whether any of the three bets has a future. Nothing changes in production meanwhile. If Reddit says no, Stack Exchange is a fallback: its users' posts are licensed for reuse, commercial use included, with credit and the same licence passed on (its terms, updated November 2025).
-- **TikTok's own page adds a rule:** the account must be based in one of eight countries (US, UK, Germany, Japan, South Korea, France, Mexico, Brazil). If you are not, bet 3's TikTok pilot is closed.
-
-### Done
-- **Reliability:** last night's evening upload never happened. GitHub could not give the job a machine during its outage, so the run failed before any of our code ran, and neither of today's earlier shifts noticed it. Nothing of ours to fix; Monday's digest will list the missed day. GitHub's machines move to a newer Ubuntu on 19 October; I checked our video job is unaffected. Separately, your Monday digest now carries the keep-or-revert verdict for the current and previous release, each at the size its rule committed to. So the opening test's verdict reaches your email from 12 October even if no shift remembers. A fix.
-- **Data:** built the engaged-view measure, with tests. Our "You…" titles keep their lead in engaged views (+60%), so that change counts toward the bar. No trait we log moves the engaged share: title style, voice, length and time of day all sit between 0.29 and 0.32. Only the video itself can move it. Bet 2's weekly totals and the scorecard read engaged views too, from mid-October and mid-November. I also fixed a report line that mislabelled total plays.
-- **Product:** built the topic ranker's go/no-go count, set in September: how often Reddit's top post is a weak topic with a strong one close behind. Due with tomorrow's uploads (18 of 20 runs; 5 fired), it sets the ranker's test length.
-- **Legal:** read Reddit's terms first-hand and sent them to you (#60). Our pipeline only reformats Reddit text: it strips formatting, and it skips posts with profanity rather than editing them. So the exposure is the licence's scope and the money clause, not editing. The channel's name also uses Reddit's, which its terms restrict.
-- **Distribution:** confirmed TikTok's terms from its own page, including the country rule above. Meta's pages still refuse.
-- **Security:** standing check clean: $0.19 spent this month, you are the only collaborator, no secrets in the project, and the only workflow change was your approved security fix. The quarterly account-security check, the plan's only answer to losing the channel, had never run. I sent you six checks, about 15 minutes, all needing your logins (#59). Your security fix from this afternoon works: the 15:08 release check ran on the new split and recorded its result, so I closed it in the code-health list.
-- **General management:** trackers updated; three finished items closed. Two same-day messages to you on one issue can no longer overwrite each other (a fix).
-- Fixing against improving: mostly fixing the record (the gap, two risk ratings, a misleading label). Nothing shipped changes the video; every product change waits on 12 October or your session.
-- **Friction:** a plain download reads Reddit's and TikTok's pages, marked "needs a browser" for two shifts. And this log's word budget now holds two entries, not the ten its header asks for.
-
-### Blocked
-- **For you:** whether to ask Reddit for an agreement (#60, new; a ready-to-send draft is on it); the six account checks (#59, new); the quarterly planning session (#55, now with two notes: bet 2 in engaged views, and TikTok's country rule); the review-step proposal (#61, new; I recommend approving); one re-run of the comments change (#53); landing the auto-apply patch by hand (#50).
-
-### Next
-- Check that tonight's upload landed (not started by 17:50, normal for the evening slot) and tomorrow evening's first NoStupidQuestions one.
-- Tomorrow, once the morning upload lands: read the topic ranker's count under its rule.
-- On 12 October: judge "open on the question" under its rule. Read the engaged-view question beside it with the new measure, at 14 days old. Then the narrator and dark-morbid questions, and the first subscriber count.
-- If you accept bet 2 in engaged views, fix its baseline once four complete weeks exist (early November).
-- The next sample-run request is the first on the new security split: confirm its verdict lands.
-- A fresh second review of today's code caught a real counting error (fixed; no reported number changed). Two uses, two catches, so I proposed it as a standing merge step (#61).
-- Considered and not taken: a catch-up run after a missed slot (one miss in about 80 runs), and pinning the Ubuntu version (unaffected).
-
-### Better?
-- **Than last shift:** Unclear for revenue, but better informed. The gap is wider than we believed, and a legal question that could end the format now has a first-hand answer before bet 1 is built on it.
-- **Than ~10 shifts ago:** Somewhat. We measure in the bar's own unit and know three platforms' rules first-hand. Views per upload have not moved; watch time reads flat.
 - **Than ~100 shifts ago:** Too early to say.

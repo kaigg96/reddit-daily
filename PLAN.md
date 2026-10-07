@@ -43,7 +43,7 @@ places.
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C11 | baking: commit line applied 2026-10-05 (#52); first snapshot 2026-10-12 | Data | **Collect the subscriber count** | Half of the Partner Program's bar. The weekly statistics job saves it, failing soft so it can never cost the per-video snapshot. Done when a snapshot carries it. |
+| C11 | baking: commit line applied 2026-10-05 (#52); first snapshot 2026-10-12 | Data | **Collect the subscriber count** | Half of the Partner Program's bar. The weekly statistics job saves it, failing soft so it can never cost the per-video snapshot. Done when a snapshot carries it, and each upload's subscribers gained (added 2026-10-07, fail-soft). |
 | C5 | blocked: owner applies its commit patch (escalated 2026-10-05) | Audience | **Collect viewer comments into the repo** | The weekly analytics job saves recent comments (a workflow change, #53). Done when a shift can read last week's comments. |
 | C8 | blocked: the owner's logged-in read of Meta's rules (TikTok's confirmed 2026-10-06) | Distribution | **What other short-video platforms require and pay** | TikTok, Instagram Reels, Facebook Reels: eligibility, payouts, and each one's rule on reused content, which YouTube's rules out for today's format (§4). Logged out, Meta's pages withhold their rule lists even from a browser (2026-10-06). Done when the owner's read confirms or corrects them. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
