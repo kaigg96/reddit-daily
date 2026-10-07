@@ -403,6 +403,28 @@ def show_weekly_views(args):
           "\n  only a doubling or a halving as a change. Never a revert trigger.")
 
 
+def show_catalogue(args):
+    """`--catalogue`: is a fall in new uploads' views the channel's, or theirs?"""
+    rows = insights.views_gained_by_age(_snapshot_metric_rows("views"))
+    if not rows:
+        print("fewer than two snapshots: no answer")
+        return
+    print("Views gained per day between snapshots, by each video's age at the earlier one\n")
+    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8}")
+    for snap, old, recent, days in rows:
+        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f}")
+    old = sum(o for _, o, _, _ in rows)
+    total = old + sum(r for _, _, r, _ in rows)
+    if not total:
+        print("\n  No views gained between these snapshots: nothing to split.")
+        return
+    print(f"\n  The old catalogue earned {old / total:.1%} of these views. It gets no new"
+          "\n  uploads, so a step in its column at the same snapshot as one in the"
+          "\n  recent column is the channel's distribution; a column in single digits"
+          "\n  is too small to show one. Neither column is age-matched: judge uploads"
+          "\n  with --trajectory.")
+
+
 def show_concentration(args):
     """`--concentration`: are the views earned by a few hits? (PRD §0 R4)"""
     age = args.at_age or 7
@@ -476,6 +498,9 @@ def main():
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
+    p.add_argument("--catalogue", action="store_true",
+                   help="views gained between snapshots, back catalogue (60+ days "
+                        "old) vs recent uploads: did a drop hit the whole channel?")
     p.add_argument("--concentration", action="store_true",
                    help="share of 7-day views the top 10%% of uploads earn: "
                         "are views a hit-rate problem? (PRD R4)")
@@ -556,6 +581,10 @@ def main():
         print("\n  release-style: median swing between consecutive batches of 8"
               "\n  alternate days: median gap between odd- and even-day uploads"
               "\n  within the same 16. Smaller is a finer detection limit.")
+        return
+
+    if args.catalogue:      # the snapshot series, channel-wide
+        show_catalogue(args)
         return
 
     if args.concentration and not args.by:  # the snapshot series, like --trajectory

@@ -826,6 +826,34 @@ def views_gained(snapshot_rows):
     return out
 
 
+def views_gained_by_age(snapshot_rows, old_days=60):
+    """[(snapshot date, old gained, recent gained, days)]: `views_gained`
+    split by each video's age at the earlier snapshot. A drop in new uploads'
+    views that the back catalogue shares at the same moment is the channel's
+    distribution, not anything about the new uploads (the September 2026 drop
+    held across every field we log, PRD §4)."""
+    by_snap, published = {}, {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+            if r.get("published"):
+                published[r["video_id"]] = r["published"]
+    out = []
+    dates = sorted(by_snap)
+    for prev, cur in zip(dates, dates[1:]):
+        before, after = by_snap[prev], by_snap[cur]
+        old = recent = 0
+        for vid, v in after.items():
+            gained = max(v - before.get(vid, 0), 0)
+            pub = published.get(vid)
+            if pub is not None and (prev - pub).days >= old_days:
+                old += gained
+            else:
+                recent += gained
+        out.append((cur, old, recent, (cur - prev).days))
+    return out
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 

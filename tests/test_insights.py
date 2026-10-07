@@ -1541,6 +1541,20 @@ def test_top_share_hits_cuts_within_each_release():
     assert rows[0][:3] == ("hot", 8, 16) and rows[0][3] < 0.05 / 3
 
 
+def test_views_gained_by_age_splits_the_catalogue_from_recent_uploads():
+    utc = datetime.timezone.utc
+    d = lambda m, day: datetime.datetime(2026, m, day, tzinfo=utc)
+    rows = [{"video_id": "old", "published": d(1, 1), "snapshot": d(9, 1), "value": 100},
+            {"video_id": "old", "published": d(1, 1), "snapshot": d(9, 8), "value": 104},
+            {"video_id": "new", "published": d(8, 30), "snapshot": d(9, 1), "value": 10},
+            {"video_id": "new", "published": d(8, 30), "snapshot": d(9, 8), "value": 60},
+            # first seen in the later snapshot: counts in full, as recent
+            {"video_id": "newer", "published": d(9, 5), "snapshot": d(9, 8), "value": 7}]
+    assert insights.views_gained_by_age(rows) == [(d(9, 8), 4, 57, 7)]
+    # the split adds up to the channel-wide figure
+    assert insights.views_gained(rows) == [(d(9, 8), 61, 7)]
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
