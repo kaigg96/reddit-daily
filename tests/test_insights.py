@@ -1659,3 +1659,17 @@ def test_a_release_can_be_read_inside_one_group(tmp_path, monkeypatch):
     inside = insights.release_read("v5", within_spec="subreddit=AskReddit").comparisons[0]
     assert pooled.delta < 0                         # the new subreddit drags it
     assert inside.a.n == 10 and inside.delta == 0   # the release itself held
+
+
+def test_a_refused_metric_reads_as_not_collected_never_a_crash():
+    """weekly_analytics writes "refused: ..." into a metric's column when the
+    API refuses it, so a shift can read why. Every reader must take that as
+    "not collected": one refused week must not take down every age-matched
+    read (found 2026-10-07, before any refusal had landed)."""
+    reason = "refused: RuntimeError: HttpError 400: Unknown identifier"
+    assert insights._optional_float(reason) is None
+    assert insights._optional_float("") is None and insights._optional_float(None) is None
+    assert insights._optional_float("12") == 12.0
+    rows = [{"views": "100", "engaged_views": "40"}, {"views": "50", "engaged_views": reason}]
+    assert insights.engaged_per_100(rows) is None
+    assert insights.engaged_per_100(rows[:1]) == 40.0
