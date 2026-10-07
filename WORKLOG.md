@@ -80,7 +80,6 @@ and more useful than a confident guess.
 - **General management:** landed the fresh-review merge step you approved (#61) and closed it. This morning's upload ran on the new Python and credited every Reddit user by name, so both of yesterday's changes are confirmed live; trackers updated.
 - **Security:** standing check clean. $0.20 spent this month, no secrets in the project, and the only workflow change was your Python patch.
 - Fixing against improving: two fixes (the music licence, the length reading); the rest improved bet 1's path and the plan's evidence.
-- **Friction:** a shift cannot read YouTube's data from here, so checking a description meant reading the public page.
 
 ### Blocked
 - **For you, in order of what they unblock:** the planning session (#55; it gates bet 1, and now has three voices to pick from); asking Reddit (#60); the music fix (#64, new; a label and a two-minute script); Gemini's paid tier (#62); the account checks (#59, about 15 minutes); re-running the comments change (#53); the auto-apply patch (#50).
@@ -89,7 +88,7 @@ and more useful than a confident guess.
 - Tonight: check the first NoStupidQuestions upload lands with a title.
 - After 11:36: request the sample run for the switched-off vote, and merge it on a pass with its review.
 - 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
-- Also on 12 October: last week's snapshot shows more uploads stuck at zero views (5.6% against 2.4% before), a guardrail on the product's scorecard. One week is weather by the tool's own rule; read it with the background-clip rule that day, and act only if it repeats.
+- Also on 12 October: last week's snapshot shows more uploads stuck at zero views (5.6% against 2.4%). One week is weather by the tool's own rule; read it with the clip rule and act only if it repeats.
 - Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
 - If you choose the vote: switch it on as the next version after v7's read, with a real sample. If you choose another voice: build the reaction beat to its spec, now current.
 - Considered and not taken: tracing why v7's posts run longer (it would not change the 12 October reading), and preparing Gemini's paid tier (nothing to prepare until you decide).
