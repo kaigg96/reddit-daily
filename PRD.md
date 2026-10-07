@@ -467,7 +467,7 @@ Retained as a cautionary record: the failure mode was targeting a ratio whose de
 - **Placement follows the stance:** a vote comes after the last answer and ends on asking the viewer's vote. Every video already ends on a spoken CTA from the same call (`llm.get_metadata`, ≤ 12 words asking for the viewer's answer), so **the vote can replace the CTA**: no added length, no extra request, about the same narration. That is the cheapest first step of bet 1, and it is R3.6's verdict line, so build the two as one. A reaction to one answer sits straight after that answer.
 - **Fails soft and is counted:** any Gemini/Polly error → the video ships without the line, logged per upload (a `reaction_ok`-style column), so a silent fallback is visible.
 - **Length is not held:** the line adds ~3 s, and dropping a comment to offset it would change the content too. The release check covers it: total watch time must also hold (#39), and the gain is credited only within each length half (2026-10-07).
-- **Read** within AskReddit while #3 runs (§0 #7). **Decision rule:** §0 #7's.
+- **Read** within AskReddit while #3 runs (§0 #7). **Decision rule:** §0 #7's. Beside it, never as triggers (pre-committed 2026-10-07): comments and subscribers gained per upload (`subs_gained`, from 2026-10-12), the two things a vote is for.
 
 #### R3.6 — Host storyline — **Experiment, originality candidate 2 (drafted 2026-10-05)**
 - YouTube pays for "edited content with a storyline and commentary" (PLAN §4). The host voice adds a one-line setup before the answers and a one-line verdict after them: what the answers have in common, or which one wins, ending on the show's own question to the viewer (fits *Show of Hands*). Comments stay verbatim and in vote order (owner, 2026-08-23).
