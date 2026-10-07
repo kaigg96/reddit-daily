@@ -80,6 +80,24 @@ def by_dimension(videos, key, metric, now):
             for label, hits, n, p in tests:
                 print(f"    {label:24} {hits:>3}/{n:<4} p={p:.3f}")
 
+    if metric == Metric.VIEWS and len(pair) >= 2 and key != "format_version":
+        # The other tail: the top 10% earn ~42% of views (--concentration), so
+        # a field that makes hits would matter more than one that avoids zeros.
+        hit = insights.top_share_hits(videos)
+        if len(pair) == 2:
+            a, b = (groups[c.label] for c in pair)
+            print(f"\n  top 10% of views within its release, {pair[0].label} "
+                  f"{sum(map(hit, a))}/{len(a)} vs {pair[1].label} {sum(map(hit, b))}/{len(b)}, "
+                  f"pooled within formats: p="
+                  f"{insights.buried_rate_p_pooled(insights.buried_strata(a, b, hit=hit)):.3f}")
+        tests = [] if len(pair) == 2 else insights.buried_vs_rest(groups, hit=hit)
+        if tests:
+            print(f"\n  top 10% of views within its release, each group (n>={insights.MIN_COHORT}) "
+                  f"vs the rest, pooled within formats: {len(tests)} tests, "
+                  f"so only p < {0.05 / len(tests):.4f} counts")
+            for label, hits, n, p in tests:
+                print(f"    {label:24} {hits:>3}/{n:<4} p={p:.3f}")
+
     # Age spread warning — comparing these groups may be measuring age.
     ages = [c.median_age for c in rows if c.sufficient and c.median_age == c.median_age]
     if len(ages) >= 2 and max(ages) > 1.5 * min(ages):
@@ -127,7 +145,7 @@ def compare(videos, spec, metric, now):
                   f"check with --within format_version={era}")
 
 
-def release(version, key, target_age, min_uploads=None):
+def release(version, key, target_age, min_uploads=None, within_spec=None):
     """The auto-revert check for a flag-day change (`/shift` §5, issue #16).
 
     Reads every upload at a *common age* from the weekly snapshot series, which
@@ -137,9 +155,11 @@ def release(version, key, target_age, min_uploads=None):
     defaults to the release's pre-committed size (`RELEASE_MIN_UPLOADS`)."""
     if min_uploads is None:
         min_uploads = insights.RELEASE_MIN_UPLOADS.get(version, insights.MIN_COHORT)
-    read = insights.release_read(version, key, target_age)
+    read = insights.release_read(version, key, target_age, within_spec)
     if read is None:
         sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
+    if within_spec:
+        print(f"(within {within_spec}: both sides of the release read inside it)")
     for line in read.load.caveats():
         print(f"AGE-MATCHED: {line}")
     print()
@@ -186,6 +206,17 @@ def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):
     except OSError:
         pass
     return out
+
+
+def _within_rows(rows, spec):
+    """Snapshot rows of the logged uploads matching `--within`, all if unset.
+    The channel-wide figure (views gained) is left out under a filter: it
+    counts the back catalogue, which has no upload_log fields to filter on."""
+    if not spec:
+        return rows
+    ids = insights.ids_within(spec)
+    print(f"(within {spec}: {len(ids)} logged upload(s))")
+    return [r for r in rows if r.get("video_id") in ids]
 
 
 def _period_metrics(at_age=7, tolerance=4, half=3):
@@ -306,7 +337,7 @@ def show_trajectory(args):
     if args.metric != Metric.WATCH:
         print(f"--trajectory reads watch-seconds, views or engaged_views, not {args.metric}")
         return
-    rows = _snapshot_metric_rows()
+    rows = _within_rows(_snapshot_metric_rows(), args.within)
     series = insights.trajectory(rows, at_age=args.at_age or 7)
     if not series:
         print("not enough comparable history yet")
@@ -332,7 +363,8 @@ def show_weekly_views(args):
     `--metric engaged_views` reads the same totals in the bar's own unit."""
     age = args.at_age or 7
     col = args.metric
-    series = insights.weekly_totals(_snapshot_metric_rows(col), at_age=age)
+    series = insights.weekly_totals(_within_rows(_snapshot_metric_rows(col), args.within),
+                                    at_age=age)
     if not series:
         print("no publish week is fully read yet")
         return
@@ -341,7 +373,7 @@ def show_weekly_views(args):
     print(f"  {'week':10} {'n':>4} {'total':>8} {'per upload':>11}")
     for period, n, total in series:
         print(f"  {period:10} {n:>4} {total:>8.0f} {total / n:>11.0f}")
-    gained = insights.views_gained(_snapshot_metric_rows(col))[-13:]
+    gained = [] if args.within else insights.views_gained(_snapshot_metric_rows(col))[-13:]
     if gained:
         days = sum(d for _, _, d in gained)
         total = sum(g for _, g, _ in gained)
@@ -358,8 +390,39 @@ def show_weekly_views(args):
     prior, recent, ratio = change
     print(f"\n  last 4 weeks {recent:.0f} vs the 4 before {prior:.0f}"
           + (f" (x{ratio:.2f})" if ratio else ""))
+    if args.within:
+        # A filter moves how many uploads each week holds, so the totals'
+        # ratio mixes count with performance; per upload separates them.
+        n_prior = sum(n for _, n, _ in series[-8:-4])
+        n_recent = sum(n for _, n, _ in series[-4:])
+        if n_prior and n_recent and prior:
+            print(f"  per upload {recent / n_recent:.0f} vs {prior / n_prior:.0f} "
+                  f"(x{(recent / n_recent) / (prior / n_prior):.2f}; "
+                  f"{n_recent} vs {n_prior} uploads)")
     print("  Views swing 27-50% at a fixed age with nothing changed, so read"
           "\n  only a doubling or a halving as a change. Never a revert trigger.")
+
+
+def show_catalogue(args):
+    """`--catalogue`: is a fall in new uploads' views the channel's, or theirs?"""
+    rows = insights.views_gained_by_age(_snapshot_metric_rows("views"))
+    if not rows:
+        print("fewer than two snapshots: no answer")
+        return
+    print("Views gained per day between snapshots, by each video's age at the earlier one\n")
+    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8}")
+    for snap, old, recent, days in rows:
+        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f}")
+    old = sum(o for _, o, _, _ in rows)
+    total = old + sum(r for _, _, r, _ in rows)
+    if not total:
+        print("\n  No views gained between these snapshots: nothing to split.")
+        return
+    print(f"\n  The old catalogue earned {old / total:.1%} of these views. It gets no new"
+          "\n  uploads, so a step in its column at the same snapshot as one in the"
+          "\n  recent column is the channel's distribution; a column in single digits"
+          "\n  is too small to show one. Neither column is age-matched: judge uploads"
+          "\n  with --trajectory.")
 
 
 def show_concentration(args):
@@ -394,7 +457,9 @@ def main():
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
     p.add_argument("--within", metavar="KEY=VALUE",
-                   help="restrict --compare/--by to one group, e.g. video_length=short")
+                   help="restrict --compare/--by/--release/--trajectory to one group, "
+                        "e.g. video_length=short, or exclude one with KEY!=VALUE "
+                        "(uploads with the field unset are in neither)")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -433,6 +498,9 @@ def main():
     p.add_argument("--slate", action="store_true",
                    help="how often the slate's topic for the selected post matches "
                         "the screen's (read before R4.4's firing rate)")
+    p.add_argument("--catalogue", action="store_true",
+                   help="views gained between snapshots, back catalogue (60+ days "
+                        "old) vs recent uploads: did a drop hit the whole channel?")
     p.add_argument("--concentration", action="store_true",
                    help="share of 7-day views the top 10%% of uploads earn: "
                         "are views a hit-rate problem? (PRD R4)")
@@ -444,6 +512,11 @@ def main():
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
     args = p.parse_args()
+    if args.within:
+        try:
+            insights.ids_within(args.within)
+        except ValueError as e:
+            sys.exit(f"--within {args.within}: {e}")
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -510,6 +583,10 @@ def main():
               "\n  within the same 16. Smaller is a finer detection limit.")
         return
 
+    if args.catalogue:      # the snapshot series, channel-wide
+        show_catalogue(args)
+        return
+
     if args.concentration and not args.by:  # the snapshot series, like --trajectory
         show_concentration(args)
         return
@@ -525,13 +602,23 @@ def main():
             # wrong conclusion classify_zero_views exists to prevent.
             sys.exit("--zeros needs live privacy status, which the snapshot does not "
                      "record; it cannot be answered offline.")
-        zeros(now)
+        try:
+            zeros(now)
+        except KeyError as e:
+            # A shift holds no YouTube secrets; say so rather than die on a
+            # bare KeyError, and name what it can read instead. Any other
+            # KeyError is a real fault and stays loud.
+            if not str(e.args[0] if e.args else "").startswith("YOUTUBE_"):
+                raise
+            sys.exit(f"No YouTube credentials ({e} is unset), so --zeros cannot run "
+                     f"here.\nThe weekly digest runs it with credentials; offline, "
+                     f"`--at-age 7 --by bg_clip --metric views` reads the buried rate.")
         return
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
         release(args.release, args.release_key,
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
-                args.min_uploads)
+                args.min_uploads, args.within)
         return
 
     if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)

@@ -791,6 +791,23 @@ def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
               for i, r in enumerate(rows)]
     assert [v.video_id for v in insights.within(videos, "video_length=short")] == ["0", "1"]
     assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
+    # "!=" excludes one group, e.g. a retired clip; unset rows predate the
+    # field, so they are in neither side
+    assert [v.video_id for v in insights.within(videos, "video_length!=short")] == ["2"]
+    # An empty side is an answer, not an error (a release with no short video)
+    assert insights.within(videos[2:3], "video_length=short") == []
+
+
+def test_ids_within_filters_the_trajectory_on_logged_fields():
+    """Snapshot rows carry no upload_log fields, so the trajectory filters by id."""
+    log = [{"video_id": "a", "bg_clip": "pexels_1.mp4"},
+           {"video_id": "b", "bg_clip": "pexels_2.mp4"},
+           {"video_id": "c", "bg_clip": "procedural:7"}]
+    assert insights.ids_within("bg_clip!=pexels_1.mp4", log) == {"b", "c"}
+    assert insights.ids_within("background_type=broll", log) == {"a", "b"}
+    # A value nobody has is a typo, not a filter: "!=" would keep everything
+    with pytest.raises(ValueError):
+        insights.ids_within("bg_clip!=pexels_1", log)
 
 
 def test_a_release_that_shifts_video_length_says_so():
@@ -1503,6 +1520,41 @@ def test_buried_vs_rest_tests_each_group_against_the_others_pooled():
     assert all(p > 0.05 for *_, p in insights.buried_vs_rest(era))
 
 
+def test_top_share_hits_cuts_within_each_release():
+    """A hit is the top 10% of its own release, so a high-view era cannot
+    lend its hits to whatever field leans toward it."""
+    def v(views, fmt):
+        return Video("x", datetime.datetime(2026, 9, 1), views=views,
+                     meta={"format_version": fmt})
+    v4 = [v(100 + i * 10, "v4") for i in range(10)]      # cut: 190
+    v5 = [v(10 + i, "v5") for i in range(20)]            # cut: 28, two hits
+    hit = insights.top_share_hits(v4 + v5)
+    assert [x.views for x in v4 + v5 if hit(x)] == [190, 28, 29]
+    # A group that is only the high-view era makes no more hits than the rest.
+    groups = {"a": v4, "b": v5}
+    assert all(p > 0.05 for *_, p in insights.buried_vs_rest(groups, hit=hit))
+    # One that holds a release's hits does.
+    many = {"hot": [v(500, "v5")] * 8 + [v(10, "v5")] * 8,
+            "cold": [v(10, "v5")] * 30, "cool": [v(10, "v5")] * 30}
+    rows = insights.buried_vs_rest(many, hit=insights.top_share_hits(
+        [x for vs in many.values() for x in vs]))
+    assert rows[0][:3] == ("hot", 8, 16) and rows[0][3] < 0.05 / 3
+
+
+def test_views_gained_by_age_splits_the_catalogue_from_recent_uploads():
+    utc = datetime.timezone.utc
+    d = lambda m, day: datetime.datetime(2026, m, day, tzinfo=utc)
+    rows = [{"video_id": "old", "published": d(1, 1), "snapshot": d(9, 1), "value": 100},
+            {"video_id": "old", "published": d(1, 1), "snapshot": d(9, 8), "value": 104},
+            {"video_id": "new", "published": d(8, 30), "snapshot": d(9, 1), "value": 10},
+            {"video_id": "new", "published": d(8, 30), "snapshot": d(9, 8), "value": 60},
+            # first seen in the later snapshot: counts in full, as recent
+            {"video_id": "newer", "published": d(9, 5), "snapshot": d(9, 8), "value": 7}]
+    assert insights.views_gained_by_age(rows) == [(d(9, 8), 4, 57, 7)]
+    # the split adds up to the channel-wide figure
+    assert insights.views_gained(rows) == [(d(9, 8), 61, 7)]
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
@@ -1632,3 +1684,44 @@ def test_a_zero_view_upload_stays_zero_view_under_the_engaged_metrics():
     for metric in (_ins.Metric.ENGAGED_SHARE, _ins.Metric.ENGAGED_VIEWS, _ins.Metric.VIEWS):
         c = _ins.summarize(vids, "all", metric, t)
         assert (c.n, c.zero_view_count, c.buried_count) == (1, 1, 1)
+
+
+def test_a_release_can_be_read_inside_one_group(tmp_path, monkeypatch):
+    """PRD §0 #7: bet 1 is read within AskReddit while subreddit rotation runs,
+    so a new subreddit's uploads cannot move the release's own verdict."""
+    from src import config
+    log, snap = tmp_path / "upload_log.csv", tmp_path / "analytics_snapshots.csv"
+    with open(log, "w", newline="") as lf, open(snap, "w", newline="") as sf:
+        lf.write("timestamp_utc,video_id,post_title,video_title,bg_clip,format_version,subreddit\n")
+        sf.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                 "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
+        eras = [("old", 0, "v4", [("AskReddit", 10.0)] * 10),
+                ("new", 60, "v5", [("AskReddit", 10.0), ("NoStupidQuestions", 5.0)] * 10)]
+        for prefix, start_day, fv, uploads in eras:
+            for i, (sub, watch) in enumerate(uploads):
+                published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
+                    + datetime.timedelta(days=start_day + i)
+                lf.write(f"{published.isoformat()},{prefix}{i},q,t,pexels_1.mp4,{fv},{sub}\n")
+                seen = (published + datetime.timedelta(days=7)).date().isoformat()
+                sf.write(f"{seen},{prefix}{i},,200,0,0,0,0,{watch},50\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+    pooled = insights.release_read("v5").comparisons[0]
+    inside = insights.release_read("v5", within_spec="subreddit=AskReddit").comparisons[0]
+    assert pooled.delta < 0                         # the new subreddit drags it
+    assert inside.a.n == 10 and inside.delta == 0   # the release itself held
+
+
+def test_a_refused_metric_reads_as_not_collected_never_a_crash():
+    """weekly_analytics writes "refused: ..." into a metric's column when the
+    API refuses it, so a shift can read why. Every reader must take that as
+    "not collected": one refused week must not take down every age-matched
+    read (found 2026-10-07, before any refusal had landed)."""
+    reason = "refused: RuntimeError: HttpError 400: Unknown identifier"
+    assert insights._optional_float(reason) is None
+    assert insights._optional_float("") is None and insights._optional_float(None) is None
+    assert insights._optional_float("12") == 12.0
+    rows = [{"views": "100", "engaged_views": "40"}, {"views": "50", "engaged_views": reason}]
+    assert insights.engaged_per_100(rows) is None
+    assert insights.engaged_per_100(rows[:1]) == 40.0

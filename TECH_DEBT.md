@@ -160,8 +160,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   sources) say "You may not make available, distribute or perform the music
   files from this library separately from videos". The Pexels clips are fine:
   its licence bars only stock and wallpaper platforms and selling unaltered
-  copies. The fix needs a secret and a workflow line: `scripts/seal_assets.sh`
-  plus the patch on #64. Until then, **do not add tracks to `assets/music/` in plain
+  copies. The fix needs a secret and a workflow line: the patch on #64
+  (applied 2026-10-07) and `scripts/seal_assets.sh`, the owner's to run (#66,
+  pending). Until then, **do not add tracks to `assets/music/` in plain
   form**: the PRD owner task to add Audio Library tracks would widen it.
 
 - **A residual from the 2026-09-21 reporting work.** ((a), the release check

@@ -203,8 +203,13 @@ def buried_rate_p(hit_a, n_a, hit_b, n_b):
     return min(1.0, sum(p for p in map(pmf, tables) if p <= observed * (1 + 1e-9)))
 
 
-def buried_strata(videos_a, videos_b, key="format_version"):
-    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share."""
+def is_buried(v):
+    return v.views <= BURIED_VIEWS
+
+
+def buried_strata(videos_a, videos_b, key="format_version", hit=is_buried):
+    """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share.
+    `hit` defaults to buried; `top_share_hits` gives the other tail."""
     def value(v):
         return str(v.meta.get(key, "")).strip()
 
@@ -212,9 +217,24 @@ def buried_strata(videos_a, videos_b, key="format_version"):
     for val in sorted({value(v) for v in videos_a} & {value(v) for v in videos_b}):
         a = [v for v in videos_a if value(v) == val]
         b = [v for v in videos_b if value(v) == val]
-        out.append((sum(v.views <= BURIED_VIEWS for v in a), len(a),
-                    sum(v.views <= BURIED_VIEWS for v in b), len(b)))
+        out.append((sum(map(hit, a)), len(a), sum(map(hit, b)), len(b)))
     return out
+
+
+def top_share_hits(videos, top=0.10, key="format_version"):
+    """A predicate for `buried_strata`: is this upload in the top `top` share
+    of views **within its own release**? Ranked channel-wide, July's v4 (median
+    160 views at 7 days, twice later releases) would hold most of the hits, and
+    any field that merely leans toward v4 would pass for a hit-maker. Ties at
+    the cut count as hits."""
+    by_era = {}
+    for v in videos:
+        by_era.setdefault(str(v.meta.get(key, "")).strip(), []).append(v.views)
+    cut = {}
+    for era, views in by_era.items():
+        views = sorted(views, reverse=True)
+        cut[era] = views[max(0, math.ceil(len(views) * top) - 1)]
+    return lambda v: v.views >= cut[str(v.meta.get(key, "")).strip()]
 
 
 def buried_rate_p_pooled(strata):
@@ -303,13 +323,50 @@ def era_imbalance(videos_a, videos_b, key="format_version", tolerance=ERA_MIX_TO
     return sorted(gaps, key=lambda g: -abs(g[1] - g[2]))
 
 
+def _parse_spec(spec):
+    key, _, value = spec.partition("=")
+    negate = key.endswith("!")
+    return key.rstrip("!").strip(), value.strip(), negate
+
+
+def matches(meta, spec):
+    """Does an upload_log row match "key=value", or "key!=value"? A row with
+    the field unset matches neither: it predates the field, so counting it as
+    "not X" would mix history in (the trap `split_cohorts` names)."""
+    key, value, negate = _parse_spec(spec)
+    got = str(meta.get(key, "")).strip()
+    return bool(got) and (got == value) != negate
+
+
+def _require_value(metas, spec):
+    """Refuse a filter whose value no upload has. "!=" with a typo would
+    otherwise keep every upload and print as if it had filtered."""
+    key, value, _ = _parse_spec(spec)
+    if not any(str(m.get(key, "")).strip() == value for m in metas):
+        raise ValueError(f"no logged upload has {key}={value}: check the spelling")
+
+
 def within(videos, spec):
-    """Keep only videos whose upload_log field equals a value ("key=value").
+    """Keep only videos whose upload_log field equals a value ("key=value"),
+    or all but one value ("key!=value"). An empty result is an answer here
+    (a release may hold no short videos), so a typo is caught where the user
+    types it: `ids_within`, which report.py runs on every --within first.
 
     Lets one comparison be read inside another's halves, e.g. question length
     within similar-length videos, so a mechanical cause can be ruled out."""
-    key, _, value = spec.partition("=")
-    return [v for v in videos if str(v.meta.get(key, "")).strip() == value]
+    return [v for v in videos if matches(v.meta, spec)]
+
+
+def ids_within(spec, log_rows=None):
+    """Video ids of the logged uploads matching `spec`, for the readers that
+    work on snapshot rows (the trajectory), which carry no upload_log fields.
+    An unlogged video (the back catalogue) matches nothing, so a filtered
+    trajectory covers logged uploads only. Raises ValueError for a value no
+    logged upload has: with "!=", a typo would otherwise keep everything."""
+    rows = _read_upload_log() if log_rows is None else log_rows
+    metas = [_with_derived_dimensions(r) for r in rows]
+    _require_value(metas, spec)
+    return {m["video_id"] for m in metas if matches(m, spec)}
 
 
 def split_by(videos, key):
@@ -571,7 +628,7 @@ class ReleaseRead:
     floors: dict
 
 
-def release_read(version, key="format_version", target_age=None):
+def release_read(version, key="format_version", target_age=None, within_spec=None):
     """The auto-revert check's inputs (`report.py --release`, the Monday
     digest), computed in one place so the two cannot drift. Every upload read
     at a common age; the drift floor comes from the era BEFORE the change, so
@@ -581,7 +638,10 @@ def release_read(version, key="format_version", target_age=None):
     load = load_videos_at_age(target_age)
     if not load.videos:
         return None
-    a, b, unset, later = release_cohorts(load.videos, key, version)
+    # `within_spec` reads the release inside one group, both sides alike, e.g.
+    # bet 1 within subreddit=AskReddit while subreddit rotation runs (PRD §0 #7).
+    videos = within(load.videos, within_spec) if within_spec else load.videos
+    a, b, unset, later = release_cohorts(videos, key, version)
     triggers = release_triggers(a, b)
     metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
         t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
@@ -766,6 +826,34 @@ def views_gained(snapshot_rows):
     return out
 
 
+def views_gained_by_age(snapshot_rows, old_days=60):
+    """[(snapshot date, old gained, recent gained, days)]: `views_gained`
+    split by each video's age at the earlier snapshot. A drop in new uploads'
+    views that the back catalogue shares at the same moment is the channel's
+    distribution, not anything about the new uploads (the September 2026 drop
+    held across every field we log, PRD §4)."""
+    by_snap, published = {}, {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+            if r.get("published"):
+                published[r["video_id"]] = r["published"]
+    out = []
+    dates = sorted(by_snap)
+    for prev, cur in zip(dates, dates[1:]):
+        before, after = by_snap[prev], by_snap[cur]
+        old = recent = 0
+        for vid, v in after.items():
+            gained = max(v - before.get(vid, 0), 0)
+            pub = published.get(vid)
+            if pub is not None and (prev - pub).days >= old_days:
+                old += gained
+            else:
+                recent += gained
+        out.append((cur, old, recent, (cur - prev).days))
+    return out
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 
@@ -800,7 +888,7 @@ def hit_rates(videos, key, top=0.10):
     return rows, cut
 
 
-def buried_vs_rest(groups, min_n=MIN_COHORT):
+def buried_vs_rest(groups, min_n=MIN_COHORT, hit=is_buried):
     """[(label, hits, n, p)]: each group's buried rate (<= BURIED_VIEWS)
     against every other group pooled, Mantel-Haenszel within formats so an
     era mix cannot pass for an effect (#11's clip read uneven across releases).
@@ -808,7 +896,8 @@ def buried_vs_rest(groups, min_n=MIN_COHORT):
     reader of k rows compares it with 0.05 / k (PRD §0 #11). A group that
     clears that bar is left out of every other group's "rest" on a second
     pass: the retired clip's 9 buried of 18 would otherwise raise the baseline
-    and hide a second bad clip behind it."""
+    and hide a second bad clip behind it. `hit` swaps the tail tested, e.g.
+    `top_share_hits` for which groups make the hits."""
     def tests(exclude):
         rows = []
         for label, vids in groups.items():
@@ -818,8 +907,9 @@ def buried_vs_rest(groups, min_n=MIN_COHORT):
                     if other not in (label, "(unset)") and other not in exclude for v in vs]
             if not rest:
                 continue
-            hits = sum(v.views <= BURIED_VIEWS for v in vids)
-            rows.append((label, hits, len(vids), buried_rate_p_pooled(buried_strata(vids, rest))))
+            hits = sum(map(hit, vids))
+            rows.append((label, hits, len(vids),
+                         buried_rate_p_pooled(buried_strata(vids, rest, hit=hit))))
         return sorted(rows, key=lambda r: r[3])
 
     first = tests(exclude=())
@@ -907,9 +997,10 @@ def engaged_per_100(snapshot_rows):
         v = float(r.get("views") or 0)
         if not v:
             continue
-        if not r.get("engaged_views"):
+        e = _optional_float(r.get("engaged_views"))
+        if e is None:
             return None
-        views, engaged = views + v, engaged + float(r["engaged_views"])
+        views, engaged = views + v, engaged + e
     return 100.0 * engaged / views if views else None
 
 
@@ -1066,7 +1157,14 @@ def age_adjusted_residuals(videos, now):
 
 
 def _optional_float(value):
-    return float(value) if value not in (None, "") else None
+    """A number, or None where the column was not collected: blank, or the
+    reason a refused metric leaves in its place (weekly_analytics writes
+    "refused: ..." so a shift can read why). Raising here would take every
+    age-matched read down with one refused week."""
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _parse_ts(value):
