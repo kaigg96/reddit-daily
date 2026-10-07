@@ -6,6 +6,7 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
+
 - **Branch:** `legal/credit-reddit-users`
 - **Commit:** `4e2d547`
 - **When:** 2026-10-06T23:36:44Z
@@ -25,6 +26,6 @@ Today's top AskReddit post, asked by u/IM_HODLING: How did that kid at your high
 
 ## Last request
 
-- **Branch:** `legal/credit-reddit-users`
-- **When:** 2026-10-06T23:36:44Z
-- **Outcome:** rendered -- see above
+- **Branch:** `product/house-vote-dormant`
+- **When:** 2026-10-07T10:41:16Z
+- **Outcome:** not rendered -- one automated render per 12 hours; the last was 2026-10-06T23:36:01Z
