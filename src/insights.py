@@ -323,20 +323,37 @@ def era_imbalance(videos_a, videos_b, key="format_version", tolerance=ERA_MIX_TO
     return sorted(gaps, key=lambda g: -abs(g[1] - g[2]))
 
 
-def matches(meta, spec):
-    """Does an upload_log row match "key=value", or "key!=value"?"""
+def _parse_spec(spec):
     key, _, value = spec.partition("=")
     negate = key.endswith("!")
-    key = key.rstrip("!")
-    return (str(meta.get(key, "")).strip() == value) != negate
+    return key.rstrip("!").strip(), value.strip(), negate
+
+
+def matches(meta, spec):
+    """Does an upload_log row match "key=value", or "key!=value"? A row with
+    the field unset matches neither: it predates the field, so counting it as
+    "not X" would mix history in (the trap `split_cohorts` names)."""
+    key, value, negate = _parse_spec(spec)
+    got = str(meta.get(key, "")).strip()
+    return bool(got) and (got == value) != negate
+
+
+def _require_value(metas, spec):
+    """Refuse a filter whose value no upload has. "!=" with a typo would
+    otherwise keep every upload and print as if it had filtered."""
+    key, value, _ = _parse_spec(spec)
+    if not any(str(m.get(key, "")).strip() == value for m in metas):
+        raise ValueError(f"no logged upload has {key}={value}: check the spelling")
 
 
 def within(videos, spec):
     """Keep only videos whose upload_log field equals a value ("key=value"),
-    or all but one value ("key!=value").
+    or all but one value ("key!=value"). Raises ValueError for a value no
+    video has.
 
     Lets one comparison be read inside another's halves, e.g. question length
     within similar-length videos, so a mechanical cause can be ruled out."""
+    _require_value([v.meta for v in videos], spec)
     return [v for v in videos if matches(v.meta, spec)]
 
 
@@ -344,10 +361,11 @@ def ids_within(spec, log_rows=None):
     """Video ids of the logged uploads matching `spec`, for the readers that
     work on snapshot rows (the trajectory), which carry no upload_log fields.
     An unlogged video (the back catalogue) matches nothing, so a filtered
-    trajectory covers logged uploads only."""
+    trajectory covers logged uploads only. Raises ValueError as `within`."""
     rows = _read_upload_log() if log_rows is None else log_rows
-    return {r["video_id"] for r in rows
-            if matches(_with_derived_dimensions(r), spec)}
+    metas = [_with_derived_dimensions(r) for r in rows]
+    _require_value(metas, spec)
+    return {m["video_id"] for m in metas if matches(m, spec)}
 
 
 def split_by(videos, key):

@@ -80,7 +80,7 @@ def by_dimension(videos, key, metric, now):
             for label, hits, n, p in tests:
                 print(f"    {label:24} {hits:>3}/{n:<4} p={p:.3f}")
 
-    if metric == Metric.VIEWS and len(pair) >= 2:
+    if metric == Metric.VIEWS and len(pair) >= 2 and key != "format_version":
         # The other tail: the top 10% earn ~42% of views (--concentration), so
         # a field that makes hits would matter more than one that avoids zeros.
         hit = insights.top_share_hits(videos)
@@ -215,7 +215,7 @@ def _within_rows(rows, spec):
     if not spec:
         return rows
     ids = insights.ids_within(spec)
-    print(f"(within {spec}: {len(ids)} logged upload(s); weeks total those only)")
+    print(f"(within {spec}: {len(ids)} logged upload(s))")
     return [r for r in rows if r.get("video_id") in ids]
 
 
@@ -390,6 +390,15 @@ def show_weekly_views(args):
     prior, recent, ratio = change
     print(f"\n  last 4 weeks {recent:.0f} vs the 4 before {prior:.0f}"
           + (f" (x{ratio:.2f})" if ratio else ""))
+    if args.within:
+        # A filter moves how many uploads each week holds, so the totals'
+        # ratio mixes count with performance; per upload separates them.
+        n_prior = sum(n for _, n, _ in series[-8:-4])
+        n_recent = sum(n for _, n, _ in series[-4:])
+        if n_prior and n_recent and prior:
+            print(f"  per upload {recent / n_recent:.0f} vs {prior / n_prior:.0f} "
+                  f"(x{(recent / n_recent) / (prior / n_prior):.2f}; "
+                  f"{n_recent} vs {n_prior} uploads)")
     print("  Views swing 27-50% at a fixed age with nothing changed, so read"
           "\n  only a doubling or a halving as a change. Never a revert trigger.")
 
@@ -427,7 +436,8 @@ def main():
     p.add_argument("--compare", help="age-matched two-way test, e.g. candidate_rank=1")
     p.add_argument("--within", metavar="KEY=VALUE",
                    help="restrict --compare/--by/--release/--trajectory to one group, "
-                        "e.g. video_length=short, or exclude one with KEY!=VALUE")
+                        "e.g. video_length=short, or exclude one with KEY!=VALUE "
+                        "(uploads with the field unset are in neither)")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -477,6 +487,11 @@ def main():
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
     args = p.parse_args()
+    if args.within:
+        try:
+            insights.ids_within(args.within)
+        except ValueError as e:
+            sys.exit(f"--within {args.within}: {e}")
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -562,16 +577,22 @@ def main():
             zeros(now)
         except KeyError as e:
             # A shift holds no YouTube secrets; say so rather than die on a
-            # bare KeyError, and name what it can read instead.
+            # bare KeyError, and name what it can read instead. Any other
+            # KeyError is a real fault and stays loud.
+            if not str(e.args[0] if e.args else "").startswith("YOUTUBE_"):
+                raise
             sys.exit(f"No YouTube credentials ({e} is unset), so --zeros cannot run "
                      f"here.\nThe weekly digest runs it with credentials; offline, "
                      f"`--at-age 7 --by bg_clip --metric views` reads the buried rate.")
         return
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
-        release(args.release, args.release_key,
-                insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
-                args.min_uploads, args.within)
+        try:
+            release(args.release, args.release_key,
+                    insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
+                    args.min_uploads, args.within)
+        except ValueError as e:
+            sys.exit(f"--within {args.within}: no measured upload has it yet ({e})")
         return
 
     if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)
@@ -605,7 +626,10 @@ def main():
                      f"weekly snapshot instead.")
 
     if args.within:
-        videos = insights.within(videos, args.within)
+        try:
+            videos = insights.within(videos, args.within)
+        except ValueError:
+            videos = []    # logged, but no upload with it has been measured yet
         print(f"(within {args.within}: {len(videos)} upload(s))")
     if not videos:
         sys.exit("No analyzable uploads found.")

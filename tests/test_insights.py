@@ -791,8 +791,12 @@ def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
               for i, r in enumerate(rows)]
     assert [v.video_id for v in insights.within(videos, "video_length=short")] == ["0", "1"]
     assert [v.video_id for v in insights.within(videos, "video_length=long")] == ["2"]
-    # "!=" excludes one group, e.g. a retired clip, and keeps the unset rows
-    assert [v.video_id for v in insights.within(videos, "video_length!=short")] == ["2", "3"]
+    # "!=" excludes one group, e.g. a retired clip; unset rows predate the
+    # field, so they are in neither side
+    assert [v.video_id for v in insights.within(videos, "video_length!=short")] == ["2"]
+    # A value nobody has is a typo, not a filter: "!=" would keep everything
+    with pytest.raises(ValueError):
+        insights.within(videos, "video_length!=shrot")
 
 
 def test_ids_within_filters_the_trajectory_on_logged_fields():
