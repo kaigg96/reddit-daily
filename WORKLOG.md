@@ -76,10 +76,10 @@ and more useful than a confident guess.
 - **Product:** the topic ranker's go/no-go count came due: it would change 5 uploads in 20. A ranker that touches one upload in four cannot show up in our test unless each change gains about 50%, and the best topic edge we have measured is 12%. Parked, with the condition that reopens it. The safety screen's weekly check is clean: no post skipped this week, four answers dropped.
 - **Product:** built bet 1's first step, switched off: one setting, empty until you choose, turns the closing line into the host's vote, written from your rule. While empty, what the AI is asked is unchanged to the letter, so no video changes. I tried it on this week's five posts on the test model's own allowance (examples on the planning issue): four good votes, and one claim about autism, which a new instruction fixed. It waits for its sample run (the next opens at 11:36). Switching it on is a release. A bet.
 - **Data:** v7's videos run 3 seconds longer than any earlier version's, though v7 changed only on-screen text. Longer videos earn more watch time, so most of v7's +25% early lead is length; within long videos it is +8%, inside normal swings. Before the 12 October read I recorded that v7 gets credit only for gains that hold among same-length videos, and the release check now prints that comparison itself whenever a release changes video length. It can also read a release inside AskReddit alone, as bet 1's read requires. The keep-or-revert rule itself stands, with your total-watch-time check (#39).
-- **Data:** from Monday, the weekly statistics also record how many subscribers each upload won. Subscribers are half of YouTube's bar, and until now we had only the channel's total, so no test could say which videos earn them. If YouTube refuses the figure, only that column is lost. Your Monday email will also flag any upload that went out without music. A bet.
+- **Data:** from Monday, the weekly statistics also record how many subscribers each upload won. Subscribers are half of YouTube's bar, and until now no test could say which videos earn them. A refusal costs only that column. Checking that, I fixed a hidden fault: one refused figure would have stopped every age-matched report. A fix. Your Monday email will also flag any upload that went out without music.
 - **General management:** landed the fresh-review merge step you approved (#61) and closed it. This morning's upload ran on the new Python and credited every Reddit user by name, so both of yesterday's changes are confirmed live; trackers updated.
-- **Security:** standing check clean. $0.20 spent this month, no secrets in the project, and the only workflow change was your Python patch.
-- Fixing against improving: two fixes (the music licence, the length reading); the rest improved bet 1's path and the plan's evidence.
+- **Security:** standing check clean: $0.20 spent this month, no secrets in the project, no unapproved workflow change.
+- Fixing against improving: three fixes (the music licence, the length reading, the hidden fault); the rest improved bet 1's path and the plan's evidence.
 
 ### Blocked
 - **For you, in order of what they unblock:** the planning session (#55; it gates bet 1, and now has three voices to pick from); asking Reddit (#60); the music fix (#64, new; a label and a two-minute script); Gemini's paid tier (#62); the account checks (#59, about 15 minutes); re-running the comments change (#53); the auto-apply patch (#50).
@@ -95,7 +95,7 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly. Bet 1's start moved from November to mid-October, pending your stance, and a licence breach has a ready fix. Nothing we ship changed.
-- **Than ~10 shifts ago:** Somewhat. We know the legal ground for the format and its fallback first-hand, and the experiments are honest about what they can detect. Views per upload have not moved, and watch time reads flat.
+- **Than ~10 shifts ago:** Somewhat. The legal ground and the fallback are known first-hand, and our tests now admit what they cannot detect. Views and watch time are flat.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-06 (23:04) — Bet 1 needs your point of view more than a voice; the AI service we use for free breaks Reddit's terms
