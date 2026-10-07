@@ -68,7 +68,7 @@ and more useful than a confident guess.
 
 ### Toward revenue
 - **Bet 1 can start three weeks sooner.** Its first step (the reaction beat) was queued behind the subreddit test, which reads around 2 November. That test, and the title test, split each day's uploads between their two sides. A change to every video hits both sides equally, so it biases neither test. Once you set the stance, bet 1 can follow v7's read on 12 October, judged on AskReddit uploads only.
-- **Three house voices, tried on this week's real answers** (on the planning issue): a "show of hands" host who votes for one answer and asks the viewer to vote, a skeptic, and a warm "noticer". I recommend the show of hands, with its rule in one sentence of yours. YouTube asks for the creator's own perspective, so the stance has to be yours.
+- **Three house voices, tried on this week's real answers** (on the planning issue): a "show of hands" host who votes for one answer and asks the viewer to vote, a skeptic, and a warm "noticer". I recommend the show of hands, with its rule in one sentence of yours. It can replace the closing line every video already speaks ("comment your answer"), so bet 1's first step would add no length, no AI request and almost no narration cost. YouTube asks for the creator's own perspective, so the stance has to be yours.
 - **The fallback source does not fit as is.** If Reddit says no, Stack Exchange is the fallback. None of its 95 popular questions across six sites had three answers short enough for our format; the typical answer is seven times too long. It could only feed a show where we condense answers in our own words. That is a rebuild, one more reason to ask Reddit early.
 
 ### Done
@@ -88,7 +88,7 @@ and more useful than a confident guess.
 - Tonight: check the first NoStupidQuestions upload lands with a title.
 - 12 October: read v7 under its rule, with the same-length read beside it; then the engaged-view, narrator and dark-morbid questions and the first subscriber count.
 - Once you apply the music fix and run the script: confirm the next upload's log shows the track, not "none".
-- If you set the stance: build the reaction beat to follow v7's read.
+- If you set the stance: build the reaction beat to follow v7's read. Its spec is now current.
 - Considered and not taken: tracing why v7's posts run longer (it would not change the 12 October reading), and preparing Gemini's paid tier (nothing to prepare until you decide).
 
 ### Better?
