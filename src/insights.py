@@ -910,9 +910,10 @@ def engaged_per_100(snapshot_rows):
         v = float(r.get("views") or 0)
         if not v:
             continue
-        if not r.get("engaged_views"):
+        e = _optional_float(r.get("engaged_views"))
+        if e is None:
             return None
-        views, engaged = views + v, engaged + float(r["engaged_views"])
+        views, engaged = views + v, engaged + e
     return 100.0 * engaged / views if views else None
 
 
@@ -1069,7 +1070,14 @@ def age_adjusted_residuals(videos, now):
 
 
 def _optional_float(value):
-    return float(value) if value not in (None, "") else None
+    """A number, or None where the column was not collected: blank, or the
+    reason a refused metric leaves in its place (weekly_analytics writes
+    "refused: ..." so a shift can read why). Raising here would take every
+    age-matched read down with one refused week."""
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _parse_ts(value):
