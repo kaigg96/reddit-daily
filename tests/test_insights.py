@@ -1404,6 +1404,38 @@ def test_a_big_diagnostic_move_is_never_silent():
     assert any("views" in n and "watch if they repeat" in n for n in notes)
 
 
+def test_scorecard_zero_rate_drops_a_privatised_zero_as_the_offline_loaders_do(tmp_path):
+    """Owner-privatised zero-view uploads are not suppression; a public zero is."""
+    import datetime as dt, importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    (tmp_path / "analysis").mkdir()
+    (tmp_path / "upload_log.csv").write_text("video_id,duration_s\n")
+    rows = ["snapshot_date,video_id,published_at,views,avg_view_duration_s,"
+            "avg_view_pct,privacy_status"]
+    monday = dt.date(2026, 8, 3)
+    for week in range(6):
+        for i in range(6):
+            pub = monday + dt.timedelta(weeks=week, days=i)
+            vid, views, status = f"w{week}v{i}", 100, "public"
+            if (week, i) == (5, 0):
+                views, status = 0, "private"      # the owner hid it: excluded
+            if (week, i) == (5, 1):
+                views = 0                         # a public zero still counts
+            # its 7-day reading, then the newest snapshot (too old to be read)
+            for snap in (pub + dt.timedelta(days=7), dt.date(2026, 9, 28)):
+                rows.append(f"{snap},{vid},{pub}T12:00:00Z,"
+                            f"{views},{10 if views else 0},50,{status}")
+    (tmp_path / "analysis" / "analytics_snapshots.csv").write_text("\n".join(rows) + "\n")
+    then, now, n_then, n_now = report._period_metrics(root=str(tmp_path))
+    assert (n_then, n_now) == (18, 17)
+    assert then["zero_rate"] == 0.0
+    assert abs(now["zero_rate"] - 100.0 / 17) < 1e-9
+
+
 def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
     videos = [
         v("a", 10, views=50, pct=120.0),   # replaying
