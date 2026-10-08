@@ -50,6 +50,8 @@ def _generate(prompt, thinking_budget=0, model=None):
     task where reasoning demonstrably helps. `model` exists because the free
     tier is counted per model: a caller on another model draws on its own
     daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
+    if config.AI_PROVIDER == "groq":
+        return _generate_groq(prompt, reasoning=thinking_budget > 0)
     model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
     body = {"contents": [{"parts": [{"text": prompt}]}]}
     # Gemini 3.x answers thinkingBudget with HTTP 400 (measured 2026-09-26),
@@ -67,6 +69,27 @@ def _generate(prompt, thinking_budget=0, model=None):
     )
     resp.raise_for_status()
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+
+_GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
+
+
+def _generate_groq(prompt, reasoning=False):
+    """The same call on Groq (config.AI_PROVIDER). Its model always reasons;
+    the effort follows the caller's choice, so only the screen pays for depth.
+    Errors raise as Gemini's do, so generate_retrying's policy is unchanged:
+    note that a Groq 429 may be the per-minute cap, which a wait would clear."""
+    resp = requests.post(
+        _GROQ_ENDPOINT,
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"},
+        json={"model": config.GROQ_MODEL,
+              "messages": [{"role": "user", "content": prompt}],
+              "reasoning_effort": "medium" if reasoning else "low"},
+        timeout=_TIMEOUT,
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
 
 
 def generate_retrying(prompt, tries=2, **kw):

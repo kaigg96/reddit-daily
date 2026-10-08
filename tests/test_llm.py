@@ -404,3 +404,59 @@ def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
     # The line it replaces is capped at 12 words. Held equal, so bet 1's read
     # is not confounded by length the way v7's was (PRD §4, 2026-10-07).
     assert "AT MOST 12 words" in prompt
+
+
+# ------------------------------------------------ Groq route (#62's follow-up)
+
+
+class FakeGroqResponse(FakeResponse):
+    def json(self):
+        return {"choices": [{"message": {"content": self._text}}]}
+
+
+@pytest.fixture
+def groq(monkeypatch):
+    calls = []
+
+    def fake_post(url, **kw):
+        calls.append({"url": url, **kw})
+        return FakeGroqResponse()
+
+    monkeypatch.setattr(llm.requests, "post", fake_post)
+    monkeypatch.setattr(config, "AI_PROVIDER", "groq")
+    monkeypatch.setenv("GROQ_API_KEY", "groq-test-key")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    return calls
+
+
+def test_gemini_answers_unless_the_route_is_switched(monkeypatch):
+    """A key alone must change nothing: the switch is flipped only after the
+    screen replay and a sample pass on the new route."""
+    import importlib
+    monkeypatch.delenv("AI_PROVIDER", raising=False)
+    monkeypatch.setenv("GROQ_API_KEY", "present")
+    assert importlib.reload(config).AI_PROVIDER == "gemini"
+
+
+def test_groq_route_sends_every_call_there_with_the_key_in_a_header(groq):
+    assert llm._generate("hello") == "a title"
+    assert llm._generate("slate", model=config.SLATE_MODEL) == "a title"
+    assert all(c["url"].startswith("https://api.groq.com/") for c in groq)
+    body = groq[0]["json"]
+    assert body["model"] == config.GROQ_MODEL
+    assert body["messages"] == [{"role": "user", "content": "hello"}]
+    assert "groq-test-key" not in json.dumps(body)
+    assert groq[0]["headers"]["Authorization"] == "Bearer groq-test-key"
+
+
+def test_groq_reasons_harder_only_where_the_caller_asked(groq):
+    llm._generate("title")
+    llm._generate("screen", thinking_budget=512)
+    assert [c["json"]["reasoning_effort"] for c in groq] == ["low", "medium"]
+
+
+def test_metadata_parses_on_the_groq_route(groq, monkeypatch):
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: FakeGroqResponse(GOOD_JSON))
+    m = llm.get_metadata("What is it?", ["a", "b", "c"])
+    assert m.title == "A Great Title" and m.cta and m.keywords == ["one", "two"]
