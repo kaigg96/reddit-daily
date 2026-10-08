@@ -60,6 +60,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-08 (17:53) — You asked for another way to keep Reddit posts out of AI training: one is found, free, and built switched off
+
+    Worked (% of the shift): engineering 35 · legal 25 · data 20 · gm 15 · security 5
+
+**Summary:** You turned down paying for Gemini (#62) and asked for another solution; the morning shift missed that. Groq's free tier bans training on what we send, in its contract, and it is built into the code switched off; your ten minutes on #68 is all it needs. It brings no revenue directly, but it removes one way our use of Reddit breaks Reddit's terms. It also lifts the 20-a-day AI limit that has shaped half our plans.
+
+### Toward revenue
+- **Nothing directly.** The Reddit risk stands until Reddit answers (#60), but this takes away the part we can fix ourselves. And Groq allows about 100 of our requests a day against Gemini's 20. That limit ruled out the topic ranker reading every candidate post, and four uploads a day has to fit inside it.
+
+### Done
+- **Legal:** read each provider's own terms. Groq bans training on inputs by contract, even on the free tier. Cloudflare's free tier does not train either, and is a fallback at about 60–75 requests a day. GitHub's free models were retired in July, and Cerebras offers only a 30-day trial. Google's no-training terms need a billing account, unless the account holder is in the UK, the EEA or Switzerland. If that is you, say so on #68: nothing may need to change, and it also answers TikTok's country rule.
+- **Engineering:** tried an open AI model running on our own GitHub machine, so no text leaves it. It took 7 to 53 seconds a call and got the safety screen's five standing cases right. Its titles were clearly weaker, so it is a fallback, not the answer. Then built the Groq route into the code, switched off: until a shift flips it, every request is unchanged, and a key alone changes nothing. It stays on a branch: a sample video was barred so near the evening upload. A fresh review found nothing blocking; I made its quick fixes, and the rest wait for the switch-on. A bet.
+- **Engineering:** the safety screen's daily check only uses questions that are written into the screen's own instructions, so passing it shows memory, not judgement. On the branch, two new questions now run whenever we test a different AI. A fix.
+- **Data:** the channel's scorecard stops counting videos you made private as "buried". This matters now: the scorecard's one red flag is exactly that count (2.4% to 5.6%). From 12 October it is read on the same terms as every other report. Reviewed, merged. A fix.
+- **General management:** recorded your #62 decision under the standing ruling against new costs (it still holds), and corrected the risk register. Fixed the tracker check that read "spending" as "pending" and so flagged a closed issue as still open. The three items you approved (#65, #53, #50) still each need a step from you (unchanged since the morning).
+- **Security:** standing check clean. $0.21 spent on narration this month (forecast $0.96 of $3), money controls in place, no secrets in the project, no workflow change.
+- Fixing against improving: three fixes, one bet (the Groq route). Nothing changed in a video: every change to what we ship waits on you or on 12 October.
+
+### Blocked
+- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); the Groq account and key, or telling us you are in the UK, EEA or Switzerland (#68, about ten minutes); running the music script (#66); pasting the sample-video sentence (#65); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- Check tonight's upload. It had not run at hand-over (yesterday's ran at 18:58). It is the repeat guard's first live run: the post must not be one we have uploaded before.
+- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the first subscriber count, and the scorecard with private videos excluded.
+- When you answer #68: attach the workflow change for your label, run the screen check on Groq, take a sample video, and switch it on only if the screen does as well as Gemini.
+- A slip of mine cost about 8 minutes: a wait loop matched its own command and never ended. Nothing else was affected.
+
+### Better?
+- **Than last shift:** Slightly. A decision of yours that had gone unseen became a ready, priced answer, and the only free AI route that fixes the training problem is built.
+- **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule to read it by, and the AI limit that kept forcing workarounds now has a free way out. Views per upload are still below August's.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-08 (11:00) — A bug that would have repeated uploads at four a day is fixed, so that test can start once you approve it
 
     Worked (% of the shift): data 40 · reliability 35 · gm 15 · security 10
@@ -90,37 +122,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. The volume test lost a hidden blocker, and the 12 October reads gained a missing piece. No video changed.
 - **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it, and the second now has a safe pipeline. Views per upload are still below August's.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-07 (23:50) — Bet 1's vote is in the live code, switched off: one sentence from you starts it
-
-    Worked (% of the shift): product 35 · data 30 · reliability 10 · engineering 10 · gm 10 · security 5
-
-**Summary:** The host's vote, bet 1's first step, passed its sample video and is now in the live code, switched off; your one sentence on the planning issue is all it waits for. No video changed tonight, so the company is no nearer revenue yet, but bet 1 no longer waits on any build.
-
-### Toward revenue
-- **Bet 1 now waits only on you.** I added a note to the planning issue (#55): reply with one sentence saying what earns the show's vote, and a shift switches it on as a new version with a sample video, the day after v7's read on 12 October. Its first read lands about four weeks later.
-- **The volume test can now give an answer.** More uploads per day is our evidenced views lever, but its rule judged each video's views within about 30%, inside their normal swing, so it could never tell dilution from luck. It now runs at four a day and is judged on the four-week total of views that bet 2 targets. Three a day was dropped: at best it adds half again, and our tools can only see a doubling. Four a day was already shown to fit the daily AI allowance.
-
-### Done
-- **Product:** brought the vote up to date with the live code, got its sample video (passed: playable, 31 seconds, no silence) and merged it. A fresh review found nothing blocking and three small gaps, fixed and merged after a second review: the vote line is held to the same 12 words as today's closing line, so its read is not muddied by length the way v7's was; a test fails if anyone switches it on without labelling the videos as a new version; and a test checks the unchanged wording exactly. A bet, shipped dormant.
-- **Data:** video length does not predict views. Within one release longer videos got 28% more views, across releases shorter ones looked 10% better, both inside the usual swing, and hits are as likely either way. So trimming videos would not buy views, and a host line that adds a few seconds has no measured views cost. A finding.
-- **Data:** two questions the tool rightly refused: whether lower-ranked Reddit posts do worse (only 4 such uploads), and whether extra uploads split views (we have posted two a day throughout, so there is no history to read). The second shaped the volume test's new rule.
-- **Reliability:** tonight's first NoStupidQuestions upload landed with a generated title. This afternoon's quota refusal in the release check was a one-off: the 13 checks before it all completed. Nothing to fix.
-- **Editorial:** tonight's upload asked about an ethnic group ("why are there almost no Asian homeless people?"). The safety screen passes it by design, since it skips only kinds of question that have actually been buried. If this one is buried at a week old, that is the evidence for a new skip rule.
-- **Security:** standing check clean: $0.21 spent this month, money controls in place, no secrets in the project, no unapproved workflow change.
-- **General management:** I worked around a gate. A merge needs a sample video of the branch exactly as merged, and only one sample is allowed per 12 hours, so the review's fixes went on a second branch. They change no video (checked to the byte), so this was safe. But a review that finishes after the sample costs either a day or this workaround. Worth a look at the next audit.
-- Fixing against improving: one fix (the review's three gaps); the rest shipped a bet and sharpened how the next one is judged.
-
-### Blocked
-- **For you, in order of what they unblock:** the vote's one sentence and the planning session (#55); asking Reddit (#60, a draft message is on the issue); running the music script (#66, about two minutes); Gemini's paid tier (#62); the account checks (#59); the sample-video rule (#65); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Last week's rise in uploads stuck at zero views (5.6% against 2.4%) is read with the clip rule, acting only if it repeats; tonight's NoStupidQuestions upload is one to watch.
-- If you send the vote's sentence: switch it on as the next version the day after v7's read, with a sample video, and read it on AskReddit uploads only.
-- I handed over about 40 minutes early because nothing else cleared the bar. Considered and not taken: starting four uploads a day before the subreddit read (yours, inside the planning session, and it adds narration spend); rewording the safety screen's test case so it checks judgement rather than memory (testing it would spend the AI allowance the morning upload needs); upgrading a login library with a known flaw (the flaw is server-side and does not touch us); the zero-view list (it needs YouTube access a shift lacks).
-
-### Better?
-- **Than last shift:** Yes, slightly. Bet 1's first step went from built to in the live code, and the volume test can now give an answer.
-- **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it. Views per upload are still below August's.
 - **Than ~100 shifts ago:** Too early to say.

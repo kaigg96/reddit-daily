@@ -58,8 +58,8 @@ def check_merged_branches():
         if merged or not exists:
             near = " ".join(
                 l for l in prd.splitlines() if branch in l)[:160].lower()
-            if any(w in near for w in ("pending", "awaiting", "do not start",
-                                       "not yet", "blocked on")):
+            if any(re.search(rf"\b{w}\b", near) for w in (
+                    "pending", "awaiting", "do not start", "not yet", "blocked on")):
                 stale.append(branch)
     if stale:
         return False, ("described as pending but already merged or gone: "
@@ -80,7 +80,7 @@ def check_upload_counts():
     return True, f"no current-cohort claim lags the log's {actual} rows"
 
 
-OPEN_WORDS = ("awaiting", "waiting on", "open", "pending")
+OPEN_WORDS = ("awaiting", "waiting on", "open", "reopened", "pending")
 NEAR = 80   # characters either side of a citation
 
 
@@ -90,7 +90,8 @@ def describes_as_open(text, n):
     and titled "Open on the hook" read as describing #18 as open (2026-09-29)."""
     for m in re.finditer(rf"#{n}\b", text):
         near = text[max(0, m.start() - NEAR):m.end() + NEAR].lower()
-        if any(w in near for w in OPEN_WORDS):
+        # Whole words: "spending" is not "pending" (2026-10-08).
+        if any(re.search(rf"\b{w}\b", near) for w in OPEN_WORDS):
             return True
     return False
 
