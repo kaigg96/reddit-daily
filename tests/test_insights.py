@@ -1835,3 +1835,10 @@ def test_once_privacy_is_known_a_missing_or_blank_one_is_not_public(tmp_path, mo
     load = insights.load_videos_at_age()
     assert [v.video_id for v in load.videos] == ["pub"]
     assert sorted(load.non_public) == ["blank", "gone"]
+
+
+def test_offline_counts_non_public_only_among_uploads_old_enough_to_report(tmp_path, monkeypatch):
+    published = datetime.datetime(2026, 10, 11, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [("2026-10-12", "young", 0, "private")])
+    load = insights.load_videos_offline(min_age_days=5)
+    assert load.videos == [] and load.non_public == []
