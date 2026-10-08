@@ -273,7 +273,8 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
     privacy = insights._snapshot_privacy(every)
     buckets = {}
     for vid, (_, r, pub) in best.items():
-        if insights._privatised_zero(vid, float(r.get("views") or 0), privacy):
+        views = insights._optional_float(r.get("views")) or 0.0
+        if insights._privatised_zero(vid, views, privacy):
             continue
         buckets.setdefault(pub.strftime("%Y-W%V"), []).append((vid, r))
     weeks = sorted(w for w, v in buckets.items() if len(v) >= 5)
