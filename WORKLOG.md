@@ -83,9 +83,9 @@ and more useful than a confident guess.
 
 ### Next
 - 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Check that snapshot carries the new privacy column; the zero-view question can then be read offline.
-- Check tonight's upload ran without an "upload log unreadable" line (the repeat fix's fallback).
+- Check tonight's upload landed and is not a question we have uploaded before (the repeat fix's first live run).
 - When four a day is approved: widen the list each run reads, and bring you the one-line overlap fix as a ready-made patch.
-- I handed over about 30 minutes early because nothing else cleared the bar. Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (it would most likely confirm Stack Exchange again, already on record; worth redoing once Reddit answers you); getting four a day's workflow change ready now (it waits on the subreddit read until about 2 November, and a ready-made change could go stale by then); the topic ranker's rule (it rests on the dark-morbid read due 12 October); a trademark check on the working name (waits on bet 1, as planned).
+- I handed over about 35 minutes early because nothing else cleared the bar. Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (it would most likely confirm Stack Exchange again, already on record; worth redoing once Reddit answers you); getting four a day's workflow change ready now (it waits on the subreddit read until about 2 November, and a ready-made change could go stale by then); the topic ranker's rule (it rests on the dark-morbid read due 12 October); a trademark check on the working name (waits on bet 1, as planned).
 
 ### Better?
 - **Than last shift:** Slightly. The volume test lost a hidden blocker, and the 12 October reads gained a missing piece. No video changed.
