@@ -173,6 +173,22 @@ def test_a_reachable_gemini_still_runs_both_gates(monkeypatch):
     assert vr.main() == 0
 
 
+def test_testing_the_groq_route_needs_its_own_key(monkeypatch):
+    """Without it the calls fall back to Gemini, and Gemini's pass would be
+    reported as Groq's."""
+    from src import config
+    monkeypatch.setattr(config, "AI_PROVIDER", "groq")
+    monkeypatch.setenv("GEMINI_API_KEY", "set")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    monkeypatch.setattr(sys, "argv", ["validate_release.py"])
+
+    def never():
+        raise AssertionError("ran a gate on the wrong route")
+
+    monkeypatch.setattr(vr, "check_metadata", never)
+    assert vr.main() == 1
+
+
 def test_the_detail_keeps_the_end_of_a_long_transcript(tmp_path):
     """Truncation must keep the verdict, which the gates print last -- keeping
     the head would preserve the preamble and lose the answer."""

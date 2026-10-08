@@ -89,9 +89,10 @@ fails = skipped = 0
 for want, q, comments in CASES:
     r = screen.screen(q, comments)
     got = "SKIP" if r.verdict == "skip_post" else "PASS"
-    if r.source != "gemini":
-        # Gemini was unreachable, so this case exercised the keyword backstop,
-        # not the prompt. Not a verdict either way.
+    if r.source != config.AI_PROVIDER:
+        # The route under test was unreachable, so this case exercised the
+        # keyword backstop (or Gemini, for groq with no key), not the prompt
+        # on that route. Not a verdict either way.
         ok, skipped = "??  ", skipped + 1
     elif got == want:
         ok = "ok  "

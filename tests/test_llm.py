@@ -474,3 +474,68 @@ def test_metadata_parses_on_the_groq_route(groq, monkeypatch):
                         lambda url, **kw: FakeGroqResponse(GOOD_JSON))
     m = llm.get_metadata("What is it?", ["a", "b", "c"])
     assert m.title == "A Great Title" and m.cta and m.keywords == ["one", "two"]
+
+
+def _groq_429(retry_after=None):
+    resp = FakeGroqResponse(status=429)
+    resp.headers = {} if retry_after is None else {"retry-after": retry_after}
+    return llm.requests.HTTPError("429", response=resp)
+
+
+def test_groq_waits_out_its_per_minute_cap_once(groq, monkeypatch):
+    """Groq's free tier caps tokens per minute (8K), so the screen and the
+    metadata call back to back can hit a 429 a few seconds' wait clears.
+    Gemini's 429 is the daily cap and stays unretried."""
+    calls, waits = [], []
+
+    def limited(*a, **k):
+        calls.append(1)
+        if len(calls) == 1:
+            raise _groq_429("7")
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", limited)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    assert llm.get_metadata("q", ["a", "b", "c"]).title == "A Great Title"
+    assert waits == [7.0]
+
+
+@pytest.mark.parametrize("retry_after", [None, "3600", "soon"])
+def test_groq_does_not_retry_its_daily_cap_or_an_unreadable_wait(groq, monkeypatch, retry_after):
+    calls = []
+
+    def capped(*a, **k):
+        calls.append(1)
+        raise _groq_429(retry_after)
+
+    monkeypatch.setattr(llm, "_generate", capped)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429"
+    assert len(calls) == 1
+
+
+def test_a_switched_on_route_with_no_key_falls_back_to_gemini(groq, monkeypatch):
+    """A missing key used to raise KeyError inside every call, so uploads
+    would ship raw titles with nothing in the log saying why."""
+    monkeypatch.delenv("GROQ_API_KEY")
+    monkeypatch.setenv("GEMINI_API_KEY", "gemini-test-key")
+    sent = []
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: sent.append(url) or FakeResponse(GOOD_JSON))
+    m = llm.get_metadata("What is it?", ["a", "b", "c"])
+    assert m.title == "A Great Title" and m.source == "gemini"
+    assert "generativelanguage.googleapis.com" in sent[0]
+
+
+def test_the_log_records_which_route_answered(groq, monkeypatch):
+    """screen_source and the metadata source said "gemini" whatever answered,
+    so the log could not show the switch, or a fallback from it."""
+    from src import screen
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: FakeGroqResponse(GOOD_JSON))
+    assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "groq"
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: FakeGroqResponse(
+        '{"post_risk": "none", "topic": "other", "unsafe_comments": []}'))
+    assert screen.screen("What is it?", ["a", "b"]).source == "groq"
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: FakeGroqResponse("no json"))
+    assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "groq"
