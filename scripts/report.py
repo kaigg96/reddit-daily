@@ -222,7 +222,7 @@ def _within_rows(rows, spec):
     return [r for r in rows if r.get("video_id") in ids]
 
 
-def _period_metrics(at_age=7, tolerance=4, half=3):
+def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
     """Metrics for the recent `half` publish-weeks vs the `half` before them.
 
     Every upload read at the same age, so the two periods are comparable.
@@ -231,7 +231,7 @@ def _period_metrics(at_age=7, tolerance=4, half=3):
     import csv as _csv
     import datetime as _dt
     import os as _os
-    root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    root = root or _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 
     durations = {}
     try:
@@ -245,11 +245,12 @@ def _period_metrics(at_age=7, tolerance=4, half=3):
     except OSError:
         pass
 
-    best = {}
+    best, every = {}, []
     try:
         with open(_os.path.join(root, "analysis", "analytics_snapshots.csv"),
                   encoding="utf-8", errors="ignore") as f:
             for r in _csv.DictReader(f):
+                every.append(r)
                 try:
                     pub = _dt.datetime.fromisoformat(
                         (r.get("published_at") or "").replace("Z", "+00:00"))
@@ -267,8 +268,13 @@ def _period_metrics(at_age=7, tolerance=4, half=3):
     except OSError:
         return None, None, 0, 0
 
+    # A zero-view upload the owner made private is not suppression: drop it as
+    # the offline loaders do, or zero_rate disagrees with every other read.
+    privacy = insights._snapshot_privacy(every)
     buckets = {}
     for vid, (_, r, pub) in best.items():
+        if insights._privatised_zero(vid, float(r.get("views") or 0), privacy):
+            continue
         buckets.setdefault(pub.strftime("%Y-W%V"), []).append((vid, r))
     weeks = sorted(w for w, v in buckets.items() if len(v) >= 5)
     if len(weeks) < half * 2:

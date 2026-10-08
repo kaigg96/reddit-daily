@@ -153,13 +153,6 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The scorecard's zero rate still counts privatised uploads (2026-10-08).**
-  From the 2026-10-12 snapshot, the offline loaders drop a zero-view upload
-  that is non-public, as the live read does; `report.py --scorecard`'s
-  `zero_rate` reads snapshot rows itself and does not, so the two can
-  disagree by the number of privatised zeros. Bounded (the owner rarely
-  privatises); fix by reading privacy there too if a scorecard read turns on it.
-
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one
   checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
