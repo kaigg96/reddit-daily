@@ -153,6 +153,13 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The scorecard's zero rate still counts privatised uploads (2026-10-08).**
+  From the 2026-10-12 snapshot, the offline loaders drop a zero-view upload
+  that is non-public, as the live read does; `report.py --scorecard`'s
+  `zero_rate` reads snapshot rows itself and does not, so the two can
+  disagree by the number of privatised zeros. Bounded (the owner rarely
+  privatises); fix by reading privacy there too if a scorecard read turns on it.
+
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one
   checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
@@ -172,17 +179,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (applied 2026-10-07) and `scripts/seal_assets.sh`, the owner's to run (#66,
   pending). Until then, **do not add tracks to `assets/music/` in plain
   form**: the PRD owner task to add Audio Library tracks would widen it.
-
-- **A residual from the 2026-09-21 reporting work.** ((a), the release check
-  wired into no automation, fixed 2026-10-06: the Monday digest prints the
-  verdict for the live and previous release at each one's committed size,
-  `insights.RELEASE_MIN_UPLOADS`, and `--release` defaults to it.)
-  (b) `--offline` reads the weekly snapshot, which records no
-  `privacy_status`, so an owner-privatised upload reads as zero-view there.
-  Bounded — medians exclude zeros, so only the zero count moves — and printed on
-  every offline run. The column exists from the 2026-10-12 snapshot (it rode
-  on the listing call, so it cost no request) and `--zeros --offline` reads it;
-  `load_videos_offline` does not yet, so its caveat stands until it does.
 
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the

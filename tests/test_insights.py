@@ -1760,3 +1760,85 @@ def test_offline_zeros_read_the_newest_snapshot_and_keep_privatised_out(tmp_path
     assert by["pub"]["views"] == 12 and by["blank"]["privacy"] == "unknown"
     groups = insights.classify_zero_views(vids, asof)
     assert {v["id"] for v in groups["non_public"]} == {"priv", "blank"}
+
+
+# ------------------------------- offline loaders drop privatised zeros (2026-10-08)
+
+def _write_with_privacy(tmp_path, monkeypatch, published, snapshots):
+    """snapshots: [(date, video_id, views, privacy)]; every upload published together."""
+    from src import config
+    log = tmp_path / "upload_log.csv"
+    ids = sorted({vid for _, vid, _, _ in snapshots})
+    with open(log, "w", newline="") as f:
+        f.write("timestamp_utc,video_id,post_title,video_title,bg_clip\n")
+        for vid in ids:
+            f.write(f"{published.isoformat()},{vid},q,t,pexels_1.mp4\n")
+    snap = tmp_path / "analytics_snapshots.csv"
+    with open(snap, "w", newline="") as f:
+        f.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+                "est_minutes_watched,avg_view_duration_s,avg_view_pct,privacy_status\n")
+        for date, vid, views, privacy in snapshots:
+            f.write(f"{date},{vid},,{views},0,0,0,0,10,50,{privacy}\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+
+
+def test_offline_drops_a_privatised_zero_but_keeps_one_that_earned_views(tmp_path, monkeypatch):
+    """As load_videos: privacy only explains a zero. A video made private after
+    it earned views still earned them."""
+    published = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-12", "priv0", 0, "private"), ("2026-10-12", "priv9", 9, "private"),
+        ("2026-10-12", "pub0", 0, "public"), ("2026-10-12", "pub5", 5, "public")])
+    load = insights.load_videos_offline(min_age_days=0)
+    assert {v.video_id for v in load.videos} == {"priv9", "pub0", "pub5"}
+    assert load.non_public == ["priv0"]
+    assert any("1 zero-view upload(s) are non-public" in c for c in load.caveats())
+
+
+def test_age_matched_reads_use_the_newest_privacy_for_older_snapshots(tmp_path, monkeypatch):
+    """The 7-day snapshot predates the column; the newest one says private."""
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-05", "priv0", 0, ""), ("2026-10-05", "pub0", 0, ""),
+        ("2026-10-12", "priv0", 0, "private"), ("2026-10-12", "pub0", 0, "public")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["pub0"] and load.non_public == ["priv0"]
+
+
+def test_without_any_privacy_the_blind_spot_is_still_stated(tmp_path, monkeypatch):
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [("2026-10-05", "a", 0, "")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["a"]
+    assert any("privacy is not recorded" in c for c in load.caveats())
+
+
+def test_a_zero_at_seven_days_that_earned_views_later_is_kept_when_privatised(tmp_path, monkeypatch):
+    """Review, 2026-10-08: g4A-WOlXPIg read 0 at 7 days and has 3 now. Made
+    private, live load_videos would still count it, so this must too."""
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-05", "late", 0, ""), ("2026-10-12", "late", 3, "private")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["late"] and load.non_public == []
+
+
+def test_once_privacy_is_known_a_missing_or_blank_one_is_not_public(tmp_path, monkeypatch):
+    """As live: a video gone from the newest snapshot, or with no privacy in
+    it, cannot be shown public, so a zero reading is excluded."""
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-05", "gone", 0, ""), ("2026-10-05", "blank", 0, ""),
+        ("2026-10-05", "pub", 0, ""),
+        ("2026-10-12", "blank", 0, ""), ("2026-10-12", "pub", 0, "public")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["pub"]
+    assert sorted(load.non_public) == ["blank", "gone"]
+
+
+def test_offline_counts_non_public_only_among_uploads_old_enough_to_report(tmp_path, monkeypatch):
+    published = datetime.datetime(2026, 10, 11, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [("2026-10-12", "young", 0, "private")])
+    load = insights.load_videos_offline(min_age_days=5)
+    assert load.videos == [] and load.non_public == []
