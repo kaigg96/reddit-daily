@@ -267,8 +267,10 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         raw = generate_retrying(prompt)
     except Exception as e:
         # never echo the exception body: HTTPError messages embed the keyed URL
-        print(f"Gemini metadata failed with {type(e).__name__} "
-              f"(title, keywords and CTA all fall back)")
+        # The reason, not just the type: a dry run writes no upload log, so
+        # its "HTTPError" could not be told apart as a 429 or a 503 (2026-10-08).
+        print(f"{provider().title()} metadata failed with {type(e).__name__} "
+              f"({_failure_kind(e)}; title, keywords and CTA all fall back)")
         # The request never landed -- a 429 on the shared daily cap, a timeout,
         # a transport error. Nothing was learned about the prompt's quality.
         return MetadataResult(None, None, None, "error", _failure_kind(e))
