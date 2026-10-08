@@ -271,8 +271,12 @@ def main():
     if args.should_run:
         return should_run_cli(args)
 
-    if not os.environ.get("GEMINI_API_KEY"):
-        print("GEMINI_API_KEY not set", file=sys.stderr)
+    from src import config
+    # Testing the Groq route without its key would test Gemini and report it
+    # as Groq's pass (llm.provider falls back), so each route needs its own.
+    key = "GROQ_API_KEY" if config.AI_PROVIDER == "groq" else "GEMINI_API_KEY"
+    if not os.environ.get(key):
+        print(f"{key} not set", file=sys.stderr)
         return 1
 
     note(f"## Release validation\n\nBudget: at most {MAX_REQUESTS} Gemini "

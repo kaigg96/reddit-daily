@@ -79,6 +79,14 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # allowance, never the one titles and the screen share. $0 either way (#22).
 SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since at least 2026-09-25
 
+# Who answers every AI call. Gemini's free tier may train on what we send,
+# and Reddit's terms forbid that for anyone acting for us; the owner declined
+# its paid tier (#62). Groq's free tier bans training on inputs by contract.
+# "groq" needs GROQ_API_KEY (the owner's account) and is switched on only
+# after the screen replay and a sample pass on it: a key alone changes nothing.
+AI_PROVIDER = os.environ.get("AI_PROVIDER", "gemini")
+GROQ_MODEL = "openai/gpt-oss-120b"
+
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py

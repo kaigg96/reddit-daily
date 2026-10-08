@@ -42,6 +42,28 @@ _TIMEOUT = 60
 # upload, which lost its title. The run has no deadline to protect, and the
 # wait costs no requests, so wait long enough for an overload to pass.
 _OVERLOAD_WAIT = 30
+# A Groq 429 is usually its per-minute token cap (8K a minute free), which
+# clears in seconds, unlike Gemini's daily one. Retried once when Groq's own
+# retry-after is at most this; a longer wait is its daily cap, and is not.
+_GROQ_RATE_WAIT_MAX = 60
+
+_warned_no_key = False
+
+
+def provider():
+    """Who answers this run's AI calls: "groq" when switched on and its key is
+    set, else "gemini". A switched-on route with no key falls back to Gemini,
+    as today, rather than costing the upload its title. The log's source
+    columns record which one answered, so the fallback shows there."""
+    global _warned_no_key
+    if config.AI_PROVIDER != "groq":
+        return "gemini"
+    if os.environ.get("GROQ_API_KEY"):
+        return "groq"
+    if not _warned_no_key:
+        print("AI_PROVIDER=groq but GROQ_API_KEY is not set: using Gemini")
+        _warned_no_key = True
+    return "gemini"
 
 
 def _generate(prompt, thinking_budget=0, model=None):
@@ -50,6 +72,8 @@ def _generate(prompt, thinking_budget=0, model=None):
     task where reasoning demonstrably helps. `model` exists because the free
     tier is counted per model: a caller on another model draws on its own
     daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
+    if provider() == "groq":
+        return _generate_groq(prompt, reasoning=thinking_budget > 0)
     model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
     body = {"contents": [{"parts": [{"text": prompt}]}]}
     # Gemini 3.x answers thinkingBudget with HTTP 400 (measured 2026-09-26),
@@ -69,6 +93,26 @@ def _generate(prompt, thinking_budget=0, model=None):
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
+_GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
+
+
+def _generate_groq(prompt, reasoning=False):
+    """The same call on Groq (config.AI_PROVIDER). Its model always reasons;
+    the effort follows the caller's choice, so only the screen pays for depth.
+    Errors raise as Gemini's do; generate_retrying waits out a per-minute 429."""
+    resp = requests.post(
+        _GROQ_ENDPOINT,
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"},
+        json={"model": config.GROQ_MODEL,
+              "messages": [{"role": "user", "content": prompt}],
+              "reasoning_effort": "medium" if reasoning else "low"},
+        timeout=_TIMEOUT,
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"] or ""
+
+
 def generate_retrying(prompt, tries=2, **kw):
     """`_generate`, retrying a transient failure once. Shared by the screen and
     the metadata call so the two cannot drift: the metadata call had no retry,
@@ -79,7 +123,8 @@ def generate_retrying(prompt, tries=2, **kw):
     at midnight PT. Retrying it cannot succeed, and every wasted request comes
     out of the same budget the rest of the run still needs. Measured
     2026-09-11: a verification pass retried 429s and burned ~40 requests to
-    make 8 useful calls.
+    make 8 useful calls. The exception is Groq's per-minute cap, which its
+    retry-after header tells apart from its daily one (`_groq_rate_wait`).
 
     Timeouts and 503s are genuinely transient and are retried once. The budget
     is tight enough that `tries` is deliberately 2, not 3; a 503 waits
@@ -93,11 +138,27 @@ def generate_retrying(prompt, tries=2, **kw):
             if code == 503 and not last:
                 time.sleep(_OVERLOAD_WAIT * (attempt + 1))
                 continue
+            wait = _groq_rate_wait(e) if code == 429 and not last else None
+            if wait is not None:
+                time.sleep(wait)
+                continue
             raise
         except (requests.Timeout, requests.ConnectionError):
             if last:
                 raise
             time.sleep(4 * (attempt + 1))
+
+
+def _groq_rate_wait(exc):
+    """Seconds a Groq 429 asks us to wait, if short enough to be its
+    per-minute cap; None for Gemini, a missing header, or a longer wait."""
+    if provider() != "groq" or exc.response is None:
+        return None
+    try:
+        wait = float(exc.response.headers.get("retry-after", ""))
+    except ValueError:
+        return None
+    return wait if 0 <= wait <= _GROQ_RATE_WAIT_MAX else None
 
 
 # PRD R2.2: three title-style experiments, rotated deterministically per day
@@ -215,17 +276,18 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         print("Gemini metadata returned no JSON object (all fields fall back)")
-        return MetadataResult(None, None, None, failure="no_json")
+        return MetadataResult(None, None, None, provider(), "no_json")
     try:
         data = json.loads(match.group(0))
     except ValueError:
         print("Gemini metadata returned unparseable JSON (all fields fall back)")
-        return MetadataResult(None, None, None, failure="bad_json")
+        return MetadataResult(None, None, None, provider(), "bad_json")
 
     return MetadataResult(
         title=_clean_str(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
         cta=_clean_str(data.get("cta")),
+        source=provider(),
     )
 
 

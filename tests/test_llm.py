@@ -404,3 +404,138 @@ def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
     # The line it replaces is capped at 12 words. Held equal, so bet 1's read
     # is not confounded by length the way v7's was (PRD §4, 2026-10-07).
     assert "AT MOST 12 words" in prompt
+
+
+# ------------------------------------------------ Groq route (#62's follow-up)
+
+
+class FakeGroqResponse(FakeResponse):
+    def json(self):
+        return {"choices": [{"message": {"content": self._text}}]}
+
+
+@pytest.fixture
+def groq(monkeypatch):
+    calls = []
+
+    def fake_post(url, **kw):
+        calls.append({"url": url, **kw})
+        return FakeGroqResponse()
+
+    monkeypatch.setattr(llm.requests, "post", fake_post)
+    monkeypatch.setattr(config, "AI_PROVIDER", "groq")
+    monkeypatch.setenv("GROQ_API_KEY", "groq-test-key")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    return calls
+
+
+def test_gemini_answers_unless_the_route_is_switched():
+    """A key alone must change nothing: the switch is flipped only after the
+    screen replay and a sample pass on the new route. A fresh process, so
+    reloading config cannot leak into other tests."""
+    import os, subprocess, sys
+    env = {k: v for k, v in os.environ.items() if k != "AI_PROVIDER"}
+    env["GROQ_API_KEY"] = "present"
+    out = subprocess.run([sys.executable, "-c", "from src import config; print(config.AI_PROVIDER)"],
+                         env=env, capture_output=True, text=True, check=True,
+                         cwd=str(config.ROOT))
+    assert out.stdout.strip() == "gemini"
+
+
+def test_a_groq_reply_with_no_content_reads_as_empty_text(groq, monkeypatch):
+    """Callers regex the reply outside their try block, so None would crash
+    post selection rather than fall back."""
+    class Empty(FakeGroqResponse):
+        def json(self):
+            return {"choices": [{"message": {"content": None}}]}
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: Empty())
+    assert llm._generate("hello") == ""
+
+
+def test_groq_route_sends_every_call_there_with_the_key_in_a_header(groq):
+    assert llm._generate("hello") == "a title"
+    assert llm._generate("slate", model=config.SLATE_MODEL) == "a title"
+    assert all(c["url"].startswith("https://api.groq.com/") for c in groq)
+    body = groq[0]["json"]
+    assert body["model"] == config.GROQ_MODEL
+    assert body["messages"] == [{"role": "user", "content": "hello"}]
+    assert "groq-test-key" not in json.dumps(body)
+    assert groq[0]["headers"]["Authorization"] == "Bearer groq-test-key"
+
+
+def test_groq_reasons_harder_only_where_the_caller_asked(groq):
+    llm._generate("title")
+    llm._generate("screen", thinking_budget=512)
+    assert [c["json"]["reasoning_effort"] for c in groq] == ["low", "medium"]
+
+
+def test_metadata_parses_on_the_groq_route(groq, monkeypatch):
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: FakeGroqResponse(GOOD_JSON))
+    m = llm.get_metadata("What is it?", ["a", "b", "c"])
+    assert m.title == "A Great Title" and m.cta and m.keywords == ["one", "two"]
+
+
+def _groq_429(retry_after=None):
+    resp = FakeGroqResponse(status=429)
+    resp.headers = {} if retry_after is None else {"retry-after": retry_after}
+    return llm.requests.HTTPError("429", response=resp)
+
+
+def test_groq_waits_out_its_per_minute_cap_once(groq, monkeypatch):
+    """Groq's free tier caps tokens per minute (8K), so the screen and the
+    metadata call back to back can hit a 429 a few seconds' wait clears.
+    Gemini's 429 is the daily cap and stays unretried."""
+    calls, waits = [], []
+
+    def limited(*a, **k):
+        calls.append(1)
+        if len(calls) == 1:
+            raise _groq_429("7")
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", limited)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    assert llm.get_metadata("q", ["a", "b", "c"]).title == "A Great Title"
+    assert waits == [7.0]
+
+
+@pytest.mark.parametrize("retry_after", [None, "3600", "soon"])
+def test_groq_does_not_retry_its_daily_cap_or_an_unreadable_wait(groq, monkeypatch, retry_after):
+    calls = []
+
+    def capped(*a, **k):
+        calls.append(1)
+        raise _groq_429(retry_after)
+
+    monkeypatch.setattr(llm, "_generate", capped)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429"
+    assert len(calls) == 1
+
+
+def test_a_switched_on_route_with_no_key_falls_back_to_gemini(groq, monkeypatch):
+    """A missing key used to raise KeyError inside every call, so uploads
+    would ship raw titles with nothing in the log saying why."""
+    monkeypatch.delenv("GROQ_API_KEY")
+    monkeypatch.setenv("GEMINI_API_KEY", "gemini-test-key")
+    sent = []
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: sent.append(url) or FakeResponse(GOOD_JSON))
+    m = llm.get_metadata("What is it?", ["a", "b", "c"])
+    assert m.title == "A Great Title" and m.source == "gemini"
+    assert "generativelanguage.googleapis.com" in sent[0]
+
+
+def test_the_log_records_which_route_answered(groq, monkeypatch):
+    """screen_source and the metadata source said "gemini" whatever answered,
+    so the log could not show the switch, or a fallback from it."""
+    from src import screen
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: FakeGroqResponse(GOOD_JSON))
+    assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "groq"
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: FakeGroqResponse(
+        '{"post_risk": "none", "topic": "other", "unsafe_comments": []}'))
+    assert screen.screen("What is it?", ["a", "b"]).source == "groq"
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: FakeGroqResponse("no json"))
+    assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "groq"

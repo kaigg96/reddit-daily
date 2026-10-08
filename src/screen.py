@@ -124,13 +124,13 @@ TOPICS = (
 
 
 class ScreenResult:
-    def __init__(self, verdict, unsafe=(), category="", reason="", source="gemini",
+    def __init__(self, verdict, unsafe=(), category="", reason="", source=None,
                  topic="", demoted="", failure=""):
         self.verdict = verdict          # "pass" | "skip_post"
         self.unsafe = set(unsafe)       # 0-based indices into the comment pool
         self.category = category
         self.reason = reason
-        self.source = source            # gemini | backstop | error
+        self.source = source or llm.provider()  # gemini | groq | backstop
         self.topic = topic              # R4.3 taxonomy, logged for performance tracking
         self.demoted = demoted          # a DROP_ONLY category the model raised on the post
         self.failure = failure          # why Gemini never answered, when source=backstop
