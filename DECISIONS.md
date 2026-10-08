@@ -138,6 +138,10 @@ bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
 answer there re-decides this ruling for those items. No shift may read it as
 lifted until then.
 
+**Re-reviewed 2026-10-08:** still holds. The owner declined Gemini's paid tier,
+asked for so Reddit posts stop reaching a free tier that trains on them (#62):
+*"Not approved to spend money on this, find another solution."*
+
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
 `report.py --release` reads every upload at the same age from the weekly
