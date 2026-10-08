@@ -153,6 +153,14 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
+  has no `concurrency:` group, so a manual run during a late scheduled one
+  checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
+  guard (the 2026-10-08 upload-log one included) sees the other's pick, and
+  the second push's rebase likely conflicts on the log. Rare at two a day;
+  likelier at four (PRD #4, whose build should carry the one-line fix as an
+  owner-applied workflow patch).
+
 - **The public repo distributes a YouTube Audio Library track (found
   2026-10-07).** `assets/funk_bg_lower.mp3`, the only music in every upload,
   has been downloadable from the repo since it went public on 2026-10-05. The

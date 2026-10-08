@@ -115,24 +115,30 @@ def subreddit_for_run(now, subreddits=None):
 
 
 def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, on_verdict=None,
-                slate_classifier=None):
+                slate_classifier=None, uploaded=frozenset()):
     """Pick the first candidate that passes the basic filters and the optional
     suppression screen. `screener(question, comments) -> ScreenResult`;
     `on_verdict(post_title, result, action)` records non-pass outcomes.
     `slate_classifier(titles) -> [topic] | None` labels the eligible slate for
-    telemetry only; its answer never influences which post is picked."""
+    telemetry only; its answer never influences which post is picked.
+    `uploaded` is every title already shipped (log.uploaded_titles): prev_title
+    alone stops only a repeat of the last upload. Matching is on the title, so
+    a question re-asked weeks later is refused too (one was, 2026-08-20): to a
+    viewer it is the same video."""
     subreddit = reddit.subreddit(subreddit_name)
-    candidates = [
-        post
-        for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT)
+    candidates = []
+    for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT):
+        if post.title in uploaded and post.title != prev_title:
+            print(f"Already uploaded, not a candidate: {post.title[:60]}")
         if (
             not post.over_18
             and not profanity.contains_profanity(post.title)
             and len(post.title) <= config.MAX_TITLE_LENGTH
             and not _has_emoji(post.title)
             and post.title != prev_title
-        )
-    ]
+            and post.title not in uploaded
+        ):
+            candidates.append(post)
 
     # R4.4 Step 0.5. Rank here is position in `candidates`, the same basis as
     # candidate_rank, so slate[candidate_rank - 1] is the selected post and its

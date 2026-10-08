@@ -89,6 +89,7 @@ def main():
             subreddit_name=subreddit_name,
             screener=screen.screen, on_verdict=record_verdict,
             slate_classifier=screen.classify_slate,
+            uploaded=log.uploaded_titles(),
         )
     print(f"Selected post: {post.title}")
     print(f"Slate topics (rank order): {post.slate_topics or '(not collected)'}")
