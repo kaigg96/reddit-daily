@@ -160,8 +160,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   each secret-stripping list (S1–S5 today); `generate_retrying` never retries
   a 429, right for Gemini's daily cap but not Groq's per-minute one (8K
   tokens/min), which a short wait clears; `screen_source` and the metadata
-  source still say `gemini` whatever answered; the replay's two unseen
-  wordings run only off Gemini, so their expected verdicts are untested.
+  source still say `gemini` whatever answered; `validate_release.py`
+  refuses to run without `GEMINI_API_KEY`; a missing `GROQ_API_KEY` is
+  caught, so uploads would silently ship raw titles on the keyword backstop
+  (check the key before the call). The replay's two unseen wordings run only
+  on groq, so their expected verdicts are untested. Reviewed 2026-10-08:
+  nothing blocking; its quick fixes are on the branch.
 
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one

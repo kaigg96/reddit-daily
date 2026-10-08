@@ -71,7 +71,7 @@ and more useful than a confident guess.
 
 ### Done
 - **Legal:** read each provider's own terms. Groq bans training on inputs by contract, even on the free tier. Cloudflare's free tier does not train either, and is a fallback at about 60–75 requests a day. GitHub's free models were retired in July, and Cerebras offers only a 30-day trial. Google's no-training terms need a billing account, unless the account holder is in the UK, the EEA or Switzerland. If that is you, say so on #68: nothing may need to change, and it also answers TikTok's country rule.
-- **Engineering:** tried an open AI model running on our own GitHub machine, so no text leaves it. It took 7 to 53 seconds a call and got the safety screen's five standing cases right. Its titles were clearly weaker, so it is a fallback, not the answer. Then built the Groq route into the code, switched off: until a shift flips it, every request is unchanged, and a key alone changes nothing. It stays on a branch: a sample video was barred so near the evening upload. A fresh review is running; its findings go to the next shift. A bet.
+- **Engineering:** tried an open AI model running on our own GitHub machine, so no text leaves it. It took 7 to 53 seconds a call and got the safety screen's five standing cases right. Its titles were clearly weaker, so it is a fallback, not the answer. Then built the Groq route into the code, switched off: until a shift flips it, every request is unchanged, and a key alone changes nothing. It stays on a branch: a sample video was barred so near the evening upload. A fresh review found nothing blocking; I made its quick fixes, and the rest wait for the switch-on. A bet.
 - **Engineering:** the safety screen's daily check only uses questions that are written into the screen's own instructions, so passing it shows memory, not judgement. On the branch, two new questions now run whenever we test a different AI. A fix.
 - **Data:** the channel's scorecard stops counting videos you made private as "buried". This matters now: the scorecard's one red flag is exactly that count (2.4% to 5.6%). From 12 October it is read on the same terms as every other report. Reviewed, merged. A fix.
 - **General management:** recorded your #62 decision under the standing ruling against new costs (it still holds), and corrected the risk register. The three items you approved (#65, #53, #50) still each need a step from you (unchanged since the morning).
@@ -84,7 +84,7 @@ and more useful than a confident guess.
 ### Next
 - Check tonight's upload. It had not run at hand-over (yesterday's ran at 18:58). It is the repeat guard's first live run: the post must not be one we have uploaded before.
 - 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the first subscriber count, and the scorecard with private videos excluded.
-- When you answer #68: act on the review's findings, attach the workflow change for your label, run the screen check on Groq, take a sample video, and switch it on only if the screen does as well as Gemini.
+- When you answer #68: attach the workflow change for your label, run the screen check on Groq, take a sample video, and switch it on only if the screen does as well as Gemini.
 - A slip of mine cost about 8 minutes: a wait loop matched its own command and never ended. Nothing else was affected.
 
 ### Better?
