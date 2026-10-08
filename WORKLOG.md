@@ -60,6 +60,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-08 (11:25) — A bug that would have repeated uploads at four a day is fixed, so that test can start once you approve it
+
+    Worked (% of the shift): data 40 · reliability 35 · gm 15 · security 10
+
+**Summary:** The four-a-day test is our one views lever with evidence. It would have uploaded the same Reddit post twice most days, and that is now fixed in the live code. From 12 October shifts can also tell buried uploads from private ones without YouTube access. Neither changes a video, so the company is no nearer revenue today, but the step toward it has one obstacle fewer.
+
+### Toward revenue
+- **Four a day no longer needs a fix first.** The pipeline remembered only the last upload. At four a day one subreddit is drawn four times in a row, so a post still at the top of Reddit's daily list would have gone out again two runs later. This already happened once, on 20 July, when an extra run came between two scheduled ones. Every run now skips any question we have ever uploaded. Starting four a day still waits on you, in the planning session (#55), because it adds narration spend.
+- **Supply does not hold four a day back.** AskReddit alone leaves 4 to 8 usable posts in its daily top ten (6 typically), so one subreddit can feed four uploads a day. On its thinnest days the fourth run would have one post left, so the four-a-day change should also widen the list each run reads. That costs nothing.
+
+### Done
+- **Reliability:** the repeat fix above, now in the live code. A fresh review found nothing blocking, and I fixed its two small gaps. It also found that two video runs can still overlap if a manual run lands during a late scheduled one, which this guard cannot see. That is rare at two a day. The fix is one line in a workflow file only you can apply, so it goes with the four-a-day change rather than as a separate ask now. A fix.
+- **Data:** the weekly statistics now record whether each video is public or private. This costs no extra request: it comes back with a call the job already makes. From 12 October the zero-view report runs without access to YouTube, and the release reads stop counting your private videos as buried. So last week's rise in uploads stuck at zero views (5.6% against 2.4%) can be read properly then. Two fixes, each reviewed.
+- **Data:** the safety screen's weekly check passes. It skipped 4 of roughly 90 posts since late August (4%, well under the 15% at which we would loosen it), the last on 12 September. None looks wrong: two medical-horror questions, one about bar violence, one flirt question.
+- **General management:** you approved letting a sample video run near an upload (#65), but shifts cannot edit their own rules file, and automatic apply only covers workflow files. I left a note on the issue: it needs you to paste the one sentence. Separately, the health check raised an issue (shifts using about half their time). I added why: all three stopped because nearly everything that would change what we ship waits on you or on the 12 October numbers. The fix is the planning session, not longer shifts.
+- **Security:** standing check clean: $0.21 spent on narration this month (forecast $0.96 of the $3 budget), money controls in place, no secrets in the project, no workflow change since the music fix you approved.
+- Fixing against improving: all fixes this shift. They clear the way for a bet (four a day) and for the 12 October reads. Nothing new was tried on the channel, because every change to what we ship waits on you.
+
+### Blocked
+- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); running the music script (#66, about two minutes); pasting the sample-video sentence you approved (#65); Gemini's paid tier (#62); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Check that snapshot carries the new privacy column; the zero-view question can then be read offline.
+- Check tonight's upload ran without an "upload log unreadable" line (the repeat fix's fallback).
+- When four a day is approved: widen the list each run reads, and bring you the one-line overlap fix as a ready-made patch.
+- Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (worth it once you have asked them); a trademark check on the working name (waits on bet 1, as planned).
+
+### Better?
+- **Than last shift:** Slightly. The volume test lost a hidden blocker, and the 12 October reads gained a missing piece. No video changed.
+- **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it, and the second now has a safe pipeline. Views per upload are still below August's.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-07 (23:50) — Bet 1's vote is in the live code, switched off: one sentence from you starts it
 
     Worked (% of the shift): product 35 · data 30 · reliability 10 · engineering 10 · gm 10 · security 5
@@ -91,38 +123,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, slightly. Bet 1's first step went from built to in the live code, and the volume test can now give an answer.
 - **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it. Views per upload are still below August's.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-07 (17:50) — Nothing we track predicts a hit, so more uploads is the one views lever with evidence
-
-    Worked (% of the shift): data 50 · gm 20 · engineering 15 · reliability 5 · legal 5 · security 5
-
-**Summary:** Nothing was ready, so I tested three questions our own numbers could answer. None of the things we track (title style, topic, voice, background, time of day, question length) predicts which uploads become the hits that earn most views, and September's fall in views isn't explained by anything we track. No video changed. The company is no nearer revenue, but it now has evidence that more uploads per day is the lever for views.
-
-### Toward revenue
-- **Nothing directly.** Every step that would change what we ship waits on you (the planning session, #55) or on data arriving 12 October.
-- **More uploads per day now has evidence behind it.** The top tenth of uploads earn 42% of views. None of the six things we track predicts which uploads land there, so every upload is a similar lottery ticket and more tickets is the lever. That item stays behind the subreddit test, as planned. The title style we now favour lifts the typical upload's views but does not make more hits.
-- **Views per upload fell by about a third in September** (about 250 down to about 150 at a week old). It happened in both daily slots and with both voices. The retired background clip and that month's failed titles each explain only a sliver, and nothing else we track explains the rest, so I am not proposing a fix. Bet 2's starting point of 8,300 views a week stands: no fix already made will lift it for free. The week to 5 October gained the most views of any week on record, so the dip may already be passing; the 12 October figures will say.
-- **Nearly every view toward YouTube's bar comes from new uploads.** The 800-odd older videos earn under 1% of views, about 3 a day. So the bar rises or falls with what we publish now, another point for more uploads per day.
-
-### Done
-- **Data:** the three reads above, plus one more: the share of plays that get past the opening (the views YouTube's payout bar counts) does not vary with anything we track either. So the favoured title style's lead carries over in full to the views that count. A finding.
-- **Engineering:** the reporting tool can now read the weekly trend inside one group or with one group left out, test which groups produce hits, and split views between old and new videos. Fresh reviews caught a real bug before merging (a misspelt filter silently kept everything) and two smaller ones. One also caught a misleading reading I had already written down: "the drop is all one voice" was an artefact of how many videos each voice read. Both fixed. The tool also explains itself now instead of crashing when asked for a report that needs YouTube access a shift doesn't have.
-- **General management:** the shift rules forbid a sample video within an hour of an upload because its AI requests used to share the upload's allowance. They no longer do (since 25 September a sample uses a separate test model). This evening the rule stopped the finished vote feature getting its sample, so I asked you to drop it (#65, one sentence). Shifts cannot edit their own rules.
-- **Legal:** the music fix you approved (#64) closed when its workflow half landed, but the plain music file is still public: your two-minute script has not run. Nothing breaks meanwhile. I raised a reminder (#66) so the closed issue doesn't read as done.
-- **Reliability and security:** yesterday's two uploads and this morning's landed; money controls are clean ($0.21 this month); no secrets in the project; the only workflow changes are the two you approved (#63, #64).
-- Fixing against improving: two fixes (the filter bug, the crash); the rest was research.
-
-### Blocked
-- **For you, in order of what they unblock:** the planning session (#55); asking Reddit (#60); running the music script (#66, about two minutes); Gemini's paid tier (#62); the account checks (#59); the sample-video rule (#65, new); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- Ask for the vote feature's sample video, and merge it on a pass. Under today's rule that means a shift after 07:00 UTC and not within an hour of an upload, so tomorrow late morning. If you approve #65, any shift can ask. For planning: if the vote starts 13 October, its first read lands about 9 November (it is judged on AskReddit uploads alone, which now come one a day, and needs 20 of them a week old).
-- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count.
-- After you run the music script (#66): check the next upload's log names the track, not "none".
-- Tonight's upload, the first from NoStupidQuestions, had not run by hand-over: check it landed with a generated title. If its log shows a quota refusal, the daily allowance is tighter than we think: this afternoon's release check also hit one, with little spent since the reset.
-
-### Better?
-- **Than last shift:** Unclear. We know more (hits look like luck, and September's drop has no cause we could undo), but nothing we ship changed.
-- **Than ~10 shifts ago:** Somewhat. The views lever is now evidenced, not assumed, and the tests admit what they cannot see. Views per upload are lower than in August.
 - **Than ~100 shifts ago:** Too early to say.
