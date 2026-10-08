@@ -153,19 +153,16 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The Groq route is built off; four things precede switching it on
-  (2026-10-08, #68).** `engineering/groq-route` sends every AI call to Groq
-  when `config.AI_PROVIDER == "groq"`. Before flipping: a workflow patch giving
-  `GROQ_API_KEY` to the video, dry-run, release and shift jobs, including
-  each secret-stripping list (S1–S5 today); `generate_retrying` never retries
-  a 429, right for Gemini's daily cap but not Groq's per-minute one (8K
-  tokens/min), which a short wait clears; `screen_source` and the metadata
-  source still say `gemini` whatever answered; `validate_release.py`
-  refuses to run without `GEMINI_API_KEY`; a missing `GROQ_API_KEY` is
-  caught, so uploads would silently ship raw titles on the keyword backstop
-  (check the key before the call). The replay's two unseen wordings run only
-  on groq, so their expected verdicts are untested. Reviewed 2026-10-08:
-  nothing blocking; its quick fixes are on the branch.
+- **The Groq route is built off; what remains before switching it on
+  (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends every
+  AI call to Groq. Done on the branch the same night: `llm.provider()` falls back to Gemini
+  when the key is missing, the log's sources name the route that answered, a
+  Groq 429 with retry-after ≤60s waits once, and the release check needs the
+  key of the route it tests. Left: the workflow patch (#69, the owner's
+  label); the replay's two unseen wordings run only on groq, so their
+  expected verdicts are untested; and `MAX_SCREENED_CANDIDATES` screens back
+  to back, so at 8K tokens a minute a second 429 inside one call's retry
+  falls to the backstop. Watch `screen_failure=http_429` after the switch.
 
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one
