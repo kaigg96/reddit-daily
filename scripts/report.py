@@ -606,8 +606,8 @@ def main():
                 # privacy status, and calling privatised videos suppression is
                 # the specific wrong conclusion classify_zero_views exists to prevent.
                 sys.exit("--zeros needs privacy status, which the newest snapshot does "
-                         "not record (snapshots carry it from 2026-10-12); it cannot "
-                         "be answered offline.")
+                         "not record (snapshots carry it from the first weekly run after "
+                         "2026-10-08); it cannot be answered offline.")
             print(f"(offline: the {asof:%Y-%m-%d} snapshot; ages and views as of then)\n")
             zeros(asof, vids)
             return

@@ -1599,7 +1599,7 @@ def load_channel_videos(now=None):
 def load_channel_videos_offline():
     """load_channel_videos read from the newest weekly snapshot, for a shift
     with no YouTube access. Returns (videos, asof); videos is None when that
-    snapshot predates `privacy_status` (first carried 2026-10-12), because
+    snapshot predates `privacy_status` (added 2026-10-08), because
     calling a privatised video buried is the wrong conclusion
     classify_zero_views exists to prevent. A row with the column blank reads
     as non-public: excluded, the safe direction. Views are Analytics lifetime
