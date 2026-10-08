@@ -1304,6 +1304,31 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
 # ------------------------------------------------- offline I/O (weekly snapshot)
 
 
+def _snapshot_privacy(rows):
+    """{video_id: privacy} from the newest snapshot that recorded it; {} before
+    `privacy_status` began (2026-10-12). Used the way load_videos uses live
+    privacy: only to drop a ZERO-view upload that is non-public, never to drop
+    one with views, which earned them before it was made private."""
+    dated = [r for r in rows if r.get("privacy_status")]
+    if not dated:
+        return {}
+    latest = max(r["snapshot_date"] for r in dated)
+    return {r["video_id"]: r["privacy_status"] for r in dated if r["snapshot_date"] == latest}
+
+
+def _privatised_zero(video_id, views, privacy):
+    return views == 0 and privacy.get(video_id, "public") != "public"
+
+
+def _privacy_caveat(non_public, privacy_known):
+    if not privacy_known:
+        return ("privacy is not recorded in the snapshots read, so an owner-privatised "
+                "upload reads as zero-view; medians are unaffected (zeros are excluded "
+                "from them) but the zero count may overstate suppression")
+    return (f"{len(non_public)} zero-view upload(s) are non-public (owner-privatised) "
+            f"and excluded, not counted as zero-view")
+
+
 @dataclass
 class OfflineLoad:
     """What the snapshot could and could not measure — returned together so a
@@ -1312,6 +1337,8 @@ class OfflineLoad:
     asof: datetime.datetime = None
     too_new: list = field(default_factory=list)   # published after the snapshot
     absent: list = field(default_factory=list)    # older, yet missing from it
+    non_public: list = field(default_factory=list)  # zero-view and privatised: excluded
+    privacy_known: bool = False                     # a snapshot recorded privacy
 
     def caveats(self):
         if self.asof is None:
@@ -1325,9 +1352,7 @@ class OfflineLoad:
             out.append(f"WARNING: {len(self.absent)} upload(s) older than the snapshot "
                        f"are missing from it (deleted from the channel?): "
                        f"{', '.join(self.absent[:5])}")
-        out.append("privacy is not recorded in the snapshot, so an owner-privatised "
-                   "upload reads here as zero-view; medians are unaffected (zeros are "
-                   "excluded from them) but the zero count may overstate suppression")
+        out.append(_privacy_caveat(self.non_public, self.privacy_known))
         return out
 
 
@@ -1353,9 +1378,9 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
        0, so `load_videos`' hard-won "missing row means zero" is already baked
        into the file.
 
-    The one thing it cannot do: the snapshot records no privacy status, so
-    owner-privatised uploads — which `load_videos` excludes — read as
-    zero-view. Bounded, not silent: see `OfflineLoad.caveats()`.
+    Privacy: from 2026-10-12 the snapshot records it, and a zero-view upload
+    that is non-public is excluded, as `load_videos` does. Before that, such an
+    upload reads as zero-view. Bounded, not silent: see `OfflineLoad.caveats()`.
     """
     if not (config.ANALYTICS_SNAPSHOTS.exists() and config.UPLOAD_LOG.exists()):
         return OfflineLoad([])
@@ -1370,15 +1395,19 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
     # drops a borderline-young video rather than admitting one.
     asof = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
     stats = {r["video_id"]: r for r in snapshot_rows if r["snapshot_date"] == latest}
+    privacy = _snapshot_privacy(snapshot_rows)
 
     rows = _read_upload_log()
 
-    videos, too_new, absent = [], [], []
+    videos, too_new, absent, non_public = [], [], [], []
     for r in rows:
         published = _parse_ts(r["timestamp_utc"])
         s = stats.get(r["video_id"])
         if s is None:
             (too_new if published > asof else absent).append(r["video_id"])
+            continue
+        if _privatised_zero(r["video_id"], float(s.get("views") or 0), privacy):
+            non_public.append(r["video_id"])
             continue
         r = _with_derived_dimensions(r)
         v = Video(
@@ -1393,7 +1422,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
         )
         if v.age_days(asof) >= min_age_days:
             videos.append(v)
-    return OfflineLoad(videos, asof, too_new, absent)
+    return OfflineLoad(videos, asof, too_new, absent, non_public, bool(privacy))
 
 
 # --------------------------------------------- age-matched reads (snapshot series)
@@ -1414,6 +1443,8 @@ class AgeMatchedLoad:
     target_age: float = AGE_MATCH_TARGET_DAYS
     not_yet: list = field(default_factory=list)      # too young to have reached it
     no_coverage: list = field(default_factory=list)  # old, but no snapshot at that age
+    non_public: list = field(default_factory=list)   # zero-view and privatised: excluded
+    privacy_known: bool = False                      # a snapshot recorded privacy
 
     def caveats(self):
         if not self.videos:
@@ -1427,9 +1458,7 @@ class AgeMatchedLoad:
         if self.no_coverage:
             out.append(f"{len(self.no_coverage)} older upload(s) have no snapshot at that "
                        f"age (they predate the weekly series) — excluded")
-        out.append("privacy is not recorded in the snapshots, so an owner-privatised "
-                   "upload reads as zero-view; medians are unaffected (zeros are excluded "
-                   "from them) but the zero count may overstate suppression")
+        out.append(_privacy_caveat(self.non_public, self.privacy_known))
         return out
 
 
@@ -1471,10 +1500,11 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
 
     latest = max(r["snapshot_date"] for rows in by_video.values() for r in rows)
     anchor = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+    privacy = _snapshot_privacy([r for rows in by_video.values() for r in rows])
 
     rows = _read_upload_log()
 
-    videos, not_yet, no_coverage = [], [], []
+    videos, not_yet, no_coverage, non_public = [], [], [], []
     for row in rows:
         published = _parse_ts(row["timestamp_utc"])
         best = None
@@ -1492,6 +1522,9 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
              else no_coverage).append(row["video_id"])
             continue
         age, s = best
+        if _privatised_zero(row["video_id"], float(s.get("views") or 0), privacy):
+            non_public.append(row["video_id"])
+            continue
         meta = _with_derived_dimensions(row)
         videos.append(Video(
             video_id=row["video_id"],
@@ -1506,7 +1539,8 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             comments=float(s.get("comments") or 0),
             meta=meta,
         ))
-    return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage)
+    return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
+                          non_public, bool(privacy))
 
 
 # ---------------------------------------------------------------- zero-view analysis
