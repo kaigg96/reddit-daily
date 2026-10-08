@@ -13,7 +13,13 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 import weekly_analytics as wa  # noqa: E402
 
-OLD = wa.FIELDS[:-1]
+# Pinned, not derived from FIELDS: a derived OLD drifts with every new column
+# and stops testing the header the file actually has. OLD matches the
+# 10-value rows below; LIVE is the header on disk on 2026-10-08, which the next
+# weekly run extends by two columns at once (subs_gained, privacy_status).
+OLD = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
+       "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct"]
+LIVE = OLD + ["engaged_views"]
 
 
 def test_header_is_extended_and_every_other_byte_is_kept(tmp_path):
@@ -55,7 +61,8 @@ def test_old_rows_read_back_blank_for_the_new_column(tmp_path):
     p.write_bytes(",".join(OLD).encode() + b"\n2026-09-21,b,2026-09-01,7,0,0,0,1,12,60\n")
     wa.ensure_header(p, wa.FIELDS)
     (row,) = csv.DictReader(open(p, newline=""))
-    assert row["views"] == "7" and row["engaged_views"] is None
+    assert row["views"] == "7"
+    assert all(row[c] is None for c in wa.FIELDS[len(OLD):])
 
 
 class _FakeAnalytics:
@@ -206,3 +213,31 @@ def test_a_refused_subscribers_query_costs_the_column_not_the_snapshot():
     wa.add_subscribers_gained(ya, stats, ["a", "b"], "2026-10-12")
     assert stats["a"]["views"] == 9 and stats["a"][wa.ENGAGED_METRIC] == 3
     assert stats["b"][wa.SUBS_METRIC].startswith("refused: RuntimeError: HttpError 400")
+
+
+# ------------------------------------------- privacy_status (2026-10-08)
+
+def test_privacy_rides_on_the_listing_call_it_already_makes(monkeypatch):
+    """No extra request: the uploads listing is asked for `status` too."""
+    asked = []
+
+    def listing(yt, part):
+        asked.append(part)
+        return [{"contentDetails": {"videoId": "a", "videoPublishedAt": "2026-10-01T06:00:00Z"},
+                 "status": {"privacyStatus": "private"}},
+                {"contentDetails": {"videoId": "b"}}]
+
+    monkeypatch.setattr(wa.analytics, "list_uploaded_videos", listing)
+    assert wa.all_uploads(object()) == [("a", "2026-10-01T06:00:00Z", "private"), ("b", "", "")]
+    assert asked == ["contentDetails,status"]
+
+
+def test_the_live_header_extends_by_two_columns_in_one_run(tmp_path):
+    """The weekly job has not run since subs_gained was added, so its next run
+    appends subs_gained and privacy_status together, to an LF header."""
+    p = tmp_path / "snap.csv"
+    body = b"2026-10-05,b,2026-09-01T06:00:00Z,7,0,0,0,1,12,60,3\r\n"
+    p.write_bytes(",".join(LIVE).encode() + b"\n" + body)
+    wa.ensure_header(p, wa.FIELDS)
+    assert p.read_bytes() == ",".join(wa.FIELDS).encode() + b"\n" + body
+    assert wa.FIELDS[len(LIVE):] == ["subs_gained", "privacy_status"]

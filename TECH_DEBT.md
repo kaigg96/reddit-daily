@@ -180,8 +180,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (b) `--offline` reads the weekly snapshot, which records no
   `privacy_status`, so an owner-privatised upload reads as zero-view there.
   Bounded — medians exclude zeros, so only the zero count moves — and printed on
-  every offline run. Fix is a column in `weekly_analytics.py`; not worth one
-  extra Data API call per snapshot until a question turns on it.
+  every offline run. The column exists from the 2026-10-12 snapshot (it rode
+  on the listing call, so it cost no request) and `--zeros --offline` reads it;
+  `load_videos_offline` does not yet, so its caveat stands until it does.
 
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the

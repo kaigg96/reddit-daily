@@ -1596,6 +1596,36 @@ def load_channel_videos(now=None):
     return out
 
 
+def load_channel_videos_offline():
+    """load_channel_videos read from the newest weekly snapshot, for a shift
+    with no YouTube access. Returns (videos, asof); videos is None when that
+    snapshot predates `privacy_status` (added 2026-10-08), because
+    calling a privatised video buried is the wrong conclusion
+    classify_zero_views exists to prevent. A row with the column blank reads
+    as non-public: excluded, the safe direction. Views are Analytics lifetime
+    views at the snapshot (1-2 days' lag), so judge ages at `asof`."""
+    if not config.ANALYTICS_SNAPSHOTS.exists():
+        return None, None
+    with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
+        rows = [r for r in csv.DictReader(f) if r.get("snapshot_date")]
+    if not rows:
+        return None, None
+    latest = max(r["snapshot_date"] for r in rows)
+    asof = datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+    rows = [r for r in rows if r["snapshot_date"] == latest]
+    if not any(r.get("privacy_status") for r in rows):
+        return None, asof
+    titles = ({r["video_id"]: r.get("video_title", "") for r in _read_upload_log()}
+              if config.UPLOAD_LOG.exists() else {})
+    return [{
+        "id": r["video_id"],
+        "published": r["published_at"],
+        "title": titles.get(r["video_id"], ""),
+        "views": int(float(r["views"] or 0)),
+        "privacy": r.get("privacy_status") or "unknown",
+    } for r in rows], asof
+
+
 # ---------------------------------------------------------------- traffic sources (R4.7)
 
 # The Analytics API does NOT support dimensions="video,insightTrafficSourceType"

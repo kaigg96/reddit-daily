@@ -106,11 +106,14 @@ def by_dimension(videos, key, metric, now):
               f"  Use --compare for an age-matched two-way test.")
 
 
-def zeros(now):
+def zeros(now, videos=None):
     """List 0-view videos, separating the two things that masquerade as
     suppression: owner-privatised videos, and zeroes inside channel-wide cold
-    spells. Only the isolated ones are real per-video suppression candidates."""
-    groups = insights.classify_zero_views(insights.load_channel_videos(now), now)
+    spells. Only the isolated ones are real per-video suppression candidates.
+    `videos` defaults to the live Data API read."""
+    if videos is None:
+        videos = insights.load_channel_videos(now)
+    groups = insights.classify_zero_views(videos, now)
     print(f"{len(groups['isolated'])} isolated zero(s) — genuine suppression candidates:")
     for v in sorted(groups["isolated"], key=lambda x: x["published"], reverse=True):
         print(f"  {v['published'][:10]}  {v['id']}  neighbour median={v['neighbour_median']:.0f}"
@@ -595,13 +598,19 @@ def main():
         show_slate_agreement()
         return
 
-    if args.zeros:          # uses the Data API (near-real-time), not the weekly snapshot
+    if args.zeros:          # the Data API (near-real-time), or offline the weekly snapshot
         if args.offline:
-            # Refusing is the honest answer: the classification turns on privacy
-            # status, and calling privatised videos suppression is the specific
-            # wrong conclusion classify_zero_views exists to prevent.
-            sys.exit("--zeros needs live privacy status, which the snapshot does not "
-                     "record; it cannot be answered offline.")
+            vids, asof = insights.load_channel_videos_offline()
+            if vids is None:
+                # Refusing is the honest answer: the classification turns on
+                # privacy status, and calling privatised videos suppression is
+                # the specific wrong conclusion classify_zero_views exists to prevent.
+                sys.exit("--zeros needs privacy status, which the newest snapshot does "
+                         "not record (snapshots carry it from the first weekly run after "
+                         "2026-10-08); it cannot be answered offline.")
+            print(f"(offline: the {asof:%Y-%m-%d} snapshot; ages and views as of then)\n")
+            zeros(asof, vids)
+            return
         try:
             zeros(now)
         except KeyError as e:
