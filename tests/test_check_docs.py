@@ -18,6 +18,12 @@ def test_an_unrelated_open_elsewhere_on_a_long_row_is_not():
     assert not c.describes_as_open(row, 18)
 
 
+def test_an_open_word_inside_another_word_is_not_one():
+    assert not c.describes_as_open('your #62 decision on "no new spending"', 62)
+    assert c.describes_as_open("#62, still pending", 62)
+    assert c.describes_as_open("the owner reopened #62", 62)
+
+
 def test_a_longer_number_is_not_the_cited_issue():
     assert not c.describes_as_open("#180 is still open", 18)
 
