@@ -122,12 +122,14 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
     `slate_classifier(titles) -> [topic] | None` labels the eligible slate for
     telemetry only; its answer never influences which post is picked.
     `uploaded` is every title already shipped (log.uploaded_titles): prev_title
-    alone stops only a repeat of the last upload."""
+    alone stops only a repeat of the last upload. Matching is on the title, so
+    a question re-asked weeks later is refused too (one was, 2026-08-20): to a
+    viewer it is the same video."""
     subreddit = reddit.subreddit(subreddit_name)
     candidates = []
     for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT):
         if post.title in uploaded and post.title != prev_title:
-            print(f"Already uploaded, skipping: {post.title[:60]}")
+            print(f"Already uploaded, not a candidate: {post.title[:60]}")
         if (
             not post.over_18
             and not profanity.contains_profanity(post.title)

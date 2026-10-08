@@ -95,11 +95,15 @@ def uploaded_titles():
     prev_post guard, and says so: a silent fallback looks like working."""
     try:
         with open(config.UPLOAD_LOG, newline="") as f:
-            return {r["post_title"] for r in csv.DictReader(f) if r.get("post_title")}
+            titles = {r["post_title"] for r in csv.DictReader(f) if r.get("post_title")}
     except Exception as e:
-        print(f"Upload log unreadable ({type(e).__name__}): "
+        titles, why = set(), type(e).__name__
+    else:
+        why = "no post titles in it"
+    if not titles:
+        print(f"Upload log unreadable ({why}): "
               "only the last upload is excluded from selection")
-        return set()
+    return titles
 
 
 def append_screen_log(row):

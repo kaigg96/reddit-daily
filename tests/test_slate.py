@@ -194,8 +194,14 @@ def test_a_skipped_repeat_does_not_shift_slate_ranks(selection, tmp_path, monkey
     assert seen == [TITLES[1:]] and post.candidate_rank == 1
 
 
-def test_an_unreadable_upload_log_fails_soft_and_says_so(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(config, "UPLOAD_LOG", tmp_path / "missing.csv")
+@pytest.mark.parametrize("content", [None, "", "timestamp_utc,video_id\n2026-07-20,x\n"])
+def test_an_unreadable_upload_log_fails_soft_and_says_so(tmp_path, monkeypatch, capsys, content):
+    """Missing, empty, or without the column: each falls back to prev_post
+    alone, and none of them silently."""
+    path = tmp_path / "upload_log.csv"
+    if content is not None:
+        path.write_text(content)
+    monkeypatch.setattr(config, "UPLOAD_LOG", path)
     assert log.uploaded_titles() == set()
     assert "only the last upload is excluded" in capsys.readouterr().out
 
