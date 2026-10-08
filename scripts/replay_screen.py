@@ -18,7 +18,7 @@ backstop until the quota resets.
 """
 import sys, time
 sys.path.insert(0, ".")
-from src import screen
+from src import config, screen
 
 MED = ["Sudden severe headache that came out of nowhere - that's a red flag.",
        "Unexplained weight loss. People shrug it off and it's often serious.",
@@ -53,6 +53,17 @@ DUMB = ["Died trying to prove a window was unbreakable.",
         "Ate a poisonous fish on a dare.",
         "Tried to outrun a train for a bet."]
 
+# Worded unlike anything in `_PROMPT`, so they test judgement, not memory:
+# every case above is also one of its examples. One per side of the line.
+SEXY = ["Rolling up their sleeves before fixing something.",
+        "A low voice when they're tired.",
+        "Being really good with their hands.",
+        "Watching someone be calmly competent."]
+ANAES = ["He proposed to me, then asked where his wife was.",
+         "She was convinced she was a pirate captain.",
+         "He apologised to the ceiling for ten minutes.",
+         "Told me the secret to perfect pancakes, then fell asleep."]
+
 # The FLIRT case ("...dangerously flirty?") is now also a calibration example
 # in `_PROMPT` (src/screen.py, added 2026-09-20 after this exact case missed
 # live with reasoning already restored). That makes it a memorization check, not a
@@ -66,6 +77,13 @@ CASES = [
     ("PASS", "What was one name mentioned in The Epstein Files which shocked you?", EPS),
     ("PASS", "Which famous person died in the dumbest way possible?", DUMB),
 ]
+# Added only when the route under test is not the one the prompt was tuned on:
+# two more requests would put the daily release gate at its 8-request cap.
+if config.AI_PROVIDER != "gemini":
+    CASES += [
+        ("SKIP", "What's a completely non-sexual thing that is secretly really sexy?", SEXY),
+        ("PASS", "Nurses, what's the weirdest thing a patient said coming out of anaesthesia?", ANAES),
+    ]
 
 fails = skipped = 0
 for want, q, comments in CASES:
