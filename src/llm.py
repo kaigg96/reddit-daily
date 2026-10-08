@@ -89,7 +89,7 @@ def _generate_groq(prompt, reasoning=False):
         timeout=_TIMEOUT,
     )
     resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"]
+    return resp.json()["choices"][0]["message"]["content"] or ""
 
 
 def generate_retrying(prompt, tries=2, **kw):

@@ -429,13 +429,27 @@ def groq(monkeypatch):
     return calls
 
 
-def test_gemini_answers_unless_the_route_is_switched(monkeypatch):
+def test_gemini_answers_unless_the_route_is_switched():
     """A key alone must change nothing: the switch is flipped only after the
-    screen replay and a sample pass on the new route."""
-    import importlib
-    monkeypatch.delenv("AI_PROVIDER", raising=False)
-    monkeypatch.setenv("GROQ_API_KEY", "present")
-    assert importlib.reload(config).AI_PROVIDER == "gemini"
+    screen replay and a sample pass on the new route. A fresh process, so
+    reloading config cannot leak into other tests."""
+    import os, subprocess, sys
+    env = {k: v for k, v in os.environ.items() if k != "AI_PROVIDER"}
+    env["GROQ_API_KEY"] = "present"
+    out = subprocess.run([sys.executable, "-c", "from src import config; print(config.AI_PROVIDER)"],
+                         env=env, capture_output=True, text=True, check=True,
+                         cwd=str(config.ROOT))
+    assert out.stdout.strip() == "gemini"
+
+
+def test_a_groq_reply_with_no_content_reads_as_empty_text(groq, monkeypatch):
+    """Callers regex the reply outside their try block, so None would crash
+    post selection rather than fall back."""
+    class Empty(FakeGroqResponse):
+        def json(self):
+            return {"choices": [{"message": {"content": None}}]}
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: Empty())
+    assert llm._generate("hello") == ""
 
 
 def test_groq_route_sends_every_call_there_with_the_key_in_a_header(groq):
