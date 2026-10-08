@@ -60,7 +60,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-08 (11:25) — A bug that would have repeated uploads at four a day is fixed, so that test can start once you approve it
+## 2026-10-08 (11:00) — A bug that would have repeated uploads at four a day is fixed, so that test can start once you approve it
 
     Worked (% of the shift): data 40 · reliability 35 · gm 15 · security 10
 
@@ -74,7 +74,7 @@ and more useful than a confident guess.
 - **Reliability:** the repeat fix above, now in the live code. A fresh review found nothing blocking, and I fixed its two small gaps. It also found that two video runs can still overlap if a manual run lands during a late scheduled one, which this guard cannot see. That is rare at two a day. The fix is one line in a workflow file only you can apply, so it goes with the four-a-day change rather than as a separate ask now. A fix.
 - **Data:** the weekly statistics now record whether each video is public or private. This costs no extra request: it comes back with a call the job already makes. From 12 October the zero-view report runs without access to YouTube, and the release reads stop counting your private videos as buried. So last week's rise in uploads stuck at zero views (5.6% against 2.4%) can be read properly then. Two fixes, each reviewed.
 - **Data:** the safety screen's weekly check passes. It skipped 4 of roughly 90 posts since late August (4%, well under the 15% at which we would loosen it), the last on 12 September. None looks wrong: two medical-horror questions, one about bar violence, one flirt question.
-- **General management:** you approved letting a sample video run near an upload (#65), but shifts cannot edit their own rules file, and automatic apply only covers workflow files. I left a note on the issue: it needs you to paste the one sentence. Separately, the health check raised an issue (shifts using about half their time). I added why: all three stopped because nearly everything that would change what we ship waits on you or on the 12 October numbers. The fix is the planning session, not longer shifts.
+- **General management:** you approved letting a sample video run near an upload (#65), but shifts cannot edit their own rules file, and automatic apply only covers workflow files. I left a note on the issue: it needs you to paste the one sentence. Separately, the health check raised an issue (#67: shifts using about half their time). I added why: all three stopped because nearly everything that would change what we ship waits on you or on the 12 October numbers. The fix is the planning session, not longer shifts. I also deleted a leftover work branch whose changes you applied on 6 October, so it no longer looks like unfinished work.
 - **Security:** standing check clean: $0.21 spent on narration this month (forecast $0.96 of the $3 budget), money controls in place, no secrets in the project, no workflow change since the music fix you approved.
 - Fixing against improving: all fixes this shift. They clear the way for a bet (four a day) and for the 12 October reads. Nothing new was tried on the channel, because every change to what we ship waits on you.
 
@@ -85,7 +85,7 @@ and more useful than a confident guess.
 - 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Check that snapshot carries the new privacy column; the zero-view question can then be read offline.
 - Check tonight's upload ran without an "upload log unreadable" line (the repeat fix's fallback).
 - When four a day is approved: widen the list each run reads, and bring you the one-line overlap fix as a ready-made patch.
-- Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (worth it once you have asked them); a trademark check on the working name (waits on bet 1, as planned).
+- I handed over about 30 minutes early because nothing else cleared the bar. Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (it would most likely confirm Stack Exchange again, already on record; worth redoing once Reddit answers you); getting four a day's workflow change ready now (it waits on the subreddit read until about 2 November, and a ready-made change could go stale by then); the topic ranker's rule (it rests on the dark-morbid read due 12 October); a trademark check on the working name (waits on bet 1, as planned).
 
 ### Better?
 - **Than last shift:** Slightly. The volume test lost a hidden blocker, and the 12 October reads gained a missing piece. No video changed.
