@@ -157,8 +157,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
   every AI call to Groq; with no key it falls back to Gemini, and the log's
   sources name the route that answered. Left: the workflow patch (#69, the
-  owner's label); the replay's two unseen wordings run only on groq, so their
-  expected verdicts are untested; up to four screens run back to back, so at
+  owner's label); up to four screens run back to back, so at
   8K tokens a minute a second 429 inside one retry falls to the backstop
   (watch `screen_failure=http_429`). **Switch on by changing the default in
   `src/config.py`, never a workflow or repo variable:** the release check's
@@ -201,7 +200,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   catch a shape the taxonomy has zero examples of. `scripts/replay_screen.py`'s
   FLIRT case is now a memorization check, not a generalization check, since its
   question is also in the prompt — swap in a fresh paraphrase before trusting
-  a pass on it as proof the category holds.
+  a pass on it as proof the category holds. **First unseen check, 2026-10-08:** on
+  Gemini, the replay's groq-only paraphrase ("...non-sexual thing that is
+  secretly really sexy?") was skipped as `sexual_suggestive`, and its control
+  passed: one data point that the two-example fix generalizes, and the
+  labels a Groq run is judged against are right.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
