@@ -173,17 +173,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   pending). Until then, **do not add tracks to `assets/music/` in plain
   form**: the PRD owner task to add Audio Library tracks would widen it.
 
-- **A residual from the 2026-09-21 reporting work.** ((a), the release check
-  wired into no automation, fixed 2026-10-06: the Monday digest prints the
-  verdict for the live and previous release at each one's committed size,
-  `insights.RELEASE_MIN_UPLOADS`, and `--release` defaults to it.)
-  (b) `--offline` reads the weekly snapshot, which records no
-  `privacy_status`, so an owner-privatised upload reads as zero-view there.
-  Bounded — medians exclude zeros, so only the zero count moves — and printed on
-  every offline run. The column exists from the 2026-10-12 snapshot (it rode
-  on the listing call, so it cost no request) and `--zeros --offline` reads it;
-  `load_videos_offline` does not yet, so its caveat stands until it does.
-
 - **One in-prompt example does not generalize the R4.6 screen's judgment
   categories.** The 2026-09-20 morning fix restored reasoning tokens for the
   screen after they were caught passing a `sexual_suggestive` question with
