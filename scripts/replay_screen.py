@@ -18,7 +18,7 @@ backstop until the quota resets.
 """
 import sys, time
 sys.path.insert(0, ".")
-from src import config, screen
+from src import config, llm, screen
 
 MED = ["Sudden severe headache that came out of nowhere - that's a red flag.",
        "Unexplained weight loss. People shrug it off and it's often serious.",
@@ -84,6 +84,13 @@ if config.AI_PROVIDER == "groq":
         ("SKIP", "What's a completely non-sexual thing that is secretly really sexy?", SEXY),
         ("PASS", "Nurses, what's the weirdest thing a patient said coming out of anaesthesia?", ANAES),
     ]
+
+# Groq switched on without its key would answer every case from Gemini: seven
+# requests of Gemini's 20 a day, all inconclusive. Stop before spending them.
+if llm.provider() != config.AI_PROVIDER:
+    print(f"inconclusive: AI_PROVIDER={config.AI_PROVIDER} but its key is not set; "
+          "nothing was sent")
+    sys.exit(1)
 
 fails = skipped = 0
 for want, q, comments in CASES:

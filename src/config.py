@@ -84,7 +84,8 @@ SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since 
 # its paid tier (#62). Groq's free tier bans training on inputs by contract.
 # "groq" needs GROQ_API_KEY (the owner's account) and is switched on only
 # after the screen replay and a sample pass on it: a key alone changes nothing.
-AI_PROVIDER = os.environ.get("AI_PROVIDER", "gemini")
+# Normalised: an unset Actions variable arrives as "", which must mean Gemini.
+AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 # --- pipeline metadata (R0.2) ---

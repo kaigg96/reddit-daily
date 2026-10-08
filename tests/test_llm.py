@@ -434,8 +434,10 @@ def test_gemini_answers_unless_the_route_is_switched():
     screen replay and a sample pass on the new route. A fresh process, so
     reloading config cannot leak into other tests."""
     import os, subprocess, sys
-    env = {k: v for k, v in os.environ.items() if k != "AI_PROVIDER"}
-    env["GROQ_API_KEY"] = "present"
+    env = dict(os.environ, GROQ_API_KEY="present")
+    # Empty, as an unset Actions variable arrives. It also keeps a local .env's
+    # AI_PROVIDER out, since config only fills variables that are not set.
+    env["AI_PROVIDER"] = ""
     out = subprocess.run([sys.executable, "-c", "from src import config; print(config.AI_PROVIDER)"],
                          env=env, capture_output=True, text=True, check=True,
                          cwd=str(config.ROOT))
@@ -539,3 +541,30 @@ def test_the_log_records_which_route_answered(groq, monkeypatch):
     assert screen.screen("What is it?", ["a", "b"]).source == "groq"
     monkeypatch.setattr(llm.requests, "post", lambda url, **kw: FakeGroqResponse("no json"))
     assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "groq"
+
+
+def test_a_gemini_429_is_not_retried_even_when_it_names_a_short_wait(monkeypatch):
+    """Gemini's 429 is the daily cap whatever its header says; only Groq's
+    per-minute cap earns the wait."""
+    calls = []
+
+    def capped(*a, **k):
+        calls.append(1)
+        resp = FakeResponse(status=429)
+        resp.headers = {"retry-after": "7"}
+        raise llm.requests.HTTPError("429", response=resp)
+
+    monkeypatch.setattr(llm, "_generate", capped)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: pytest.fail("slept on a Gemini 429"))
+    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429"
+    assert len(calls) == 1
+
+
+def test_a_groq_key_alone_leaves_every_call_on_gemini(monkeypatch):
+    monkeypatch.setenv("GROQ_API_KEY", "groq-test-key")
+    monkeypatch.setenv("GEMINI_API_KEY", "gemini-test-key")
+    sent = []
+    monkeypatch.setattr(llm.requests, "post",
+                        lambda url, **kw: sent.append(url) or FakeResponse(GOOD_JSON))
+    assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "gemini"
+    assert sent and all("generativelanguage.googleapis.com" in u for u in sent)
