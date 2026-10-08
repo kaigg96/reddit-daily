@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from src import config, content, llm, screen
+from src import config, content, llm, log, screen
 
 TITLES = ["What job looks easy but is brutal?",
           "What did every 90s kid own?",
@@ -165,6 +165,47 @@ def test_slate_ranks_match_candidate_rank_after_filters(selection):
 
 def test_no_classifier_means_no_column(selection):
     assert content.select_post(FakeReddit(TITLES), "").slate_topics == ""
+
+
+# --- never the same post twice ------------------------------------------------
+
+def _upload_log(tmp_path, monkeypatch, titles):
+    path = tmp_path / "upload_log.csv"
+    monkeypatch.setattr(config, "UPLOAD_LOG", path)
+    for t in titles:
+        log.append_upload_log({"timestamp_utc": "2026-07-20T01:23:21+00:00", "post_title": t})
+    return path
+
+
+def test_a_post_uploaded_before_the_last_one_is_not_picked_again(selection, tmp_path, monkeypatch):
+    """2026-07-20: an extra run came between, prev_post.txt named only that
+    one, and the 13:46 upload repeated the 01:23 one."""
+    _upload_log(tmp_path, monkeypatch, [TITLES[0], "the run in between"])
+    post = content.select_post(FakeReddit(TITLES), "the run in between",
+                               uploaded=log.uploaded_titles())
+    assert post.title == TITLES[1]
+
+
+def test_a_skipped_repeat_does_not_shift_slate_ranks(selection, tmp_path, monkeypatch):
+    _upload_log(tmp_path, monkeypatch, [TITLES[0]])
+    seen = []
+    post = content.select_post(FakeReddit(TITLES), "", uploaded=log.uploaded_titles(),
+                               slate_classifier=lambda t: seen.append(t) or ["x"] * len(t))
+    assert seen == [TITLES[1:]] and post.candidate_rank == 1
+
+
+def test_an_unreadable_upload_log_fails_soft_and_says_so(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(config, "UPLOAD_LOG", tmp_path / "missing.csv")
+    assert log.uploaded_titles() == set()
+    assert "only the last upload is excluded" in capsys.readouterr().out
+
+
+def test_the_live_log_is_readable_and_holds_the_last_upload():
+    """The guard reads the committed log; if its shape drifts, the guard would
+    silently fall back to prev_post.txt alone."""
+    titles = log.uploaded_titles()
+    assert len(titles) > 100
+    assert config.PREV_POST_FILE.read_text().strip() in titles
 
 
 def test_thinking_budget_goes_only_to_models_that_accept_it(monkeypatch):

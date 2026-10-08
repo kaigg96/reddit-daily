@@ -84,6 +84,24 @@ def append_upload_log(row):
     _append(config.UPLOAD_LOG, FIELDS, row)
 
 
+def uploaded_titles():
+    """Every post title already uploaded, so a run never ships one twice.
+
+    prev_post.txt holds only the last upload. On 2026-07-20 an extra run came
+    between, so the 13:46 upload repeated the 01:23 one; and under subreddit
+    rotation (content.subreddit_for_run) at four runs a day one
+    subreddit is drawn four runs in a row, so a post still on top of the day
+    would ship again two runs later. Fails soft to an empty set, leaving the
+    prev_post guard, and says so: a silent fallback looks like working."""
+    try:
+        with open(config.UPLOAD_LOG, newline="") as f:
+            return {r["post_title"] for r in csv.DictReader(f) if r.get("post_title")}
+    except Exception as e:
+        print(f"Upload log unreadable ({type(e).__name__}): "
+              "only the last upload is excluded from selection")
+        return set()
+
+
 def append_screen_log(row):
     """R4.6 audit trail — one row per non-pass screen verdict, for weekly
     false-positive review."""
