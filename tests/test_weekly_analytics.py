@@ -206,3 +206,24 @@ def test_a_refused_subscribers_query_costs_the_column_not_the_snapshot():
     wa.add_subscribers_gained(ya, stats, ["a", "b"], "2026-10-12")
     assert stats["a"]["views"] == 9 and stats["a"][wa.ENGAGED_METRIC] == 3
     assert stats["b"][wa.SUBS_METRIC].startswith("refused: RuntimeError: HttpError 400")
+
+
+# ------------------------------------------- privacy_status (2026-10-08)
+
+def test_privacy_rides_on_the_listing_call_it_already_makes(monkeypatch):
+    """No extra request: the uploads listing is asked for `status` too."""
+    asked = []
+
+    def listing(yt, part):
+        asked.append(part)
+        return [{"contentDetails": {"videoId": "a", "videoPublishedAt": "2026-10-01T06:00:00Z"},
+                 "status": {"privacyStatus": "private"}},
+                {"contentDetails": {"videoId": "b"}}]
+
+    monkeypatch.setattr(wa.analytics, "list_uploaded_videos", listing)
+    assert wa.all_uploads(object()) == [("a", "2026-10-01T06:00:00Z", "private"), ("b", "", "")]
+    assert asked == ["contentDetails,status"]
+
+
+def test_privacy_is_appended_last_so_old_rows_stay_aligned():
+    assert wa.FIELDS[-1] == "privacy_status"

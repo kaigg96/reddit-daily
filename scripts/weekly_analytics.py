@@ -39,7 +39,7 @@ from src import analytics, config, insights  # noqa: E402
 OUT = config.ANALYTICS_SNAPSHOTS
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
-          "engaged_views", "subs_gained"]
+          "engaged_views", "subs_gained", "privacy_status"]
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
 ENGAGED_METRIC = "engagedViews"
@@ -62,10 +62,16 @@ COMMENTS_FIELDS = ["snapshot_date", "video_id", "comment_id", "published_at", "l
 
 
 def all_uploads(yt):
-    """[(video_id, published_at)] for every video on the channel."""
-    items = analytics.list_uploaded_videos(yt, part="contentDetails")
+    """[(video_id, published_at, privacy)] for every video on the channel.
+
+    Privacy rides on the same listing call (the weekly digest reads it the same
+    way), so recording it costs no request. Without it the snapshot cannot tell
+    an owner-privatised upload from a buried one, and `report.py --zeros`
+    refused offline (added 2026-10-08)."""
+    items = analytics.list_uploaded_videos(yt, part="contentDetails,status")
     return [
-        (it["contentDetails"]["videoId"], it["contentDetails"].get("videoPublishedAt", ""))
+        (it["contentDetails"]["videoId"], it["contentDetails"].get("videoPublishedAt", ""),
+         it.get("status", {}).get("privacyStatus", ""))
         for it in items
     ]
 
@@ -374,8 +380,8 @@ def main():
         yt = analytics.youtube_client()
         videos = all_uploads(yt)
         print(f"channel has {len(videos)} videos")
-        stats = fetch_stats_with_engaged(ya, [v for v, _ in videos], today)
-        add_subscribers_gained(ya, stats, [v for v, _ in videos], today)
+        stats = fetch_stats_with_engaged(ya, [v for v, *_ in videos], today)
+        add_subscribers_gained(ya, stats, [v for v, *_ in videos], today)
         print(f"analytics rows returned for {len(stats)} videos")
 
         is_new = not OUT.exists()
@@ -389,7 +395,7 @@ def main():
             writer = csv.DictWriter(f, fieldnames=FIELDS, lineterminator="\n")
             if is_new:
                 writer.writeheader()
-            for video_id, published_at in videos:
+            for video_id, published_at, privacy in videos:
                 s = stats.get(video_id, {})
                 writer.writerow({
                     "snapshot_date": today,
@@ -404,6 +410,7 @@ def main():
                     "avg_view_pct": s.get("averageViewPercentage", 0),
                     "engaged_views": s.get(ENGAGED_METRIC, ""),
                     "subs_gained": s.get(SUBS_METRIC, ""),
+                    "privacy_status": privacy,
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)

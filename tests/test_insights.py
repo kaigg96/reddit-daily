@@ -1725,3 +1725,38 @@ def test_a_refused_metric_reads_as_not_collected_never_a_crash():
     rows = [{"views": "100", "engaged_views": "40"}, {"views": "50", "engaged_views": reason}]
     assert insights.engaged_per_100(rows) is None
     assert insights.engaged_per_100(rows[:1]) == 40.0
+
+
+# ------------------------------------- load_channel_videos_offline (2026-10-08)
+
+def _write_privacy_snapshot(tmp_path, monkeypatch, rows, with_column=True):
+    from src import config
+    snap = tmp_path / "analytics_snapshots.csv"
+    head = "snapshot_date,video_id,published_at,views" + (",privacy_status" if with_column else "")
+    with open(snap, "w", newline="") as f:
+        f.write(head + "\n")
+        for r in rows:
+            f.write(",".join(r[:4 + with_column]) + "\n")
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+    monkeypatch.setattr(config, "UPLOAD_LOG", tmp_path / "no_log.csv")
+
+
+def test_offline_zeros_refuse_a_snapshot_without_privacy(tmp_path, monkeypatch):
+    _write_privacy_snapshot(tmp_path, monkeypatch,
+                            [("2026-10-05", "a", "2026-09-01T06:00:00Z", "0")], with_column=False)
+    vids, asof = insights.load_channel_videos_offline()
+    assert vids is None and asof.date().isoformat() == "2026-10-05"
+
+
+def test_offline_zeros_read_the_newest_snapshot_and_keep_privatised_out(tmp_path, monkeypatch):
+    rows = [("2026-10-05", "old", "2026-09-01T06:00:00Z", "9", ""),
+            ("2026-10-12", "priv", "2026-09-01T06:00:00Z", "0", "private"),
+            ("2026-10-12", "blank", "2026-09-01T18:00:00Z", "0", ""),
+            ("2026-10-12", "pub", "2026-09-02T06:00:00Z", "12.0", "public")]
+    _write_privacy_snapshot(tmp_path, monkeypatch, rows)
+    vids, asof = insights.load_channel_videos_offline()
+    assert {v["id"] for v in vids} == {"priv", "blank", "pub"}
+    by = {v["id"]: v for v in vids}
+    assert by["pub"]["views"] == 12 and by["blank"]["privacy"] == "unknown"
+    groups = insights.classify_zero_views(vids, asof)
+    assert {v["id"] for v in groups["non_public"]} == {"priv", "blank"}
