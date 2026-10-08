@@ -1812,3 +1812,26 @@ def test_without_any_privacy_the_blind_spot_is_still_stated(tmp_path, monkeypatc
     load = insights.load_videos_at_age()
     assert [v.video_id for v in load.videos] == ["a"]
     assert any("privacy is not recorded" in c for c in load.caveats())
+
+
+def test_a_zero_at_seven_days_that_earned_views_later_is_kept_when_privatised(tmp_path, monkeypatch):
+    """Review, 2026-10-08: g4A-WOlXPIg read 0 at 7 days and has 3 now. Made
+    private, live load_videos would still count it, so this must too."""
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-05", "late", 0, ""), ("2026-10-12", "late", 3, "private")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["late"] and load.non_public == []
+
+
+def test_once_privacy_is_known_a_missing_or_blank_one_is_not_public(tmp_path, monkeypatch):
+    """As live: a video gone from the newest snapshot, or with no privacy in
+    it, cannot be shown public, so a zero reading is excluded."""
+    published = datetime.datetime(2026, 9, 28, tzinfo=datetime.timezone.utc)
+    _write_with_privacy(tmp_path, monkeypatch, published, [
+        ("2026-10-05", "gone", 0, ""), ("2026-10-05", "blank", 0, ""),
+        ("2026-10-05", "pub", 0, ""),
+        ("2026-10-12", "blank", 0, ""), ("2026-10-12", "pub", 0, "public")])
+    load = insights.load_videos_at_age()
+    assert [v.video_id for v in load.videos] == ["pub"]
+    assert sorted(load.non_public) == ["blank", "gone"]

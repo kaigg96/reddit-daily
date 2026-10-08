@@ -1305,19 +1305,26 @@ def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
 
 
 def _snapshot_privacy(rows):
-    """{video_id: privacy} from the newest snapshot that recorded it; {} before
-    `privacy_status` began (2026-10-12). Used the way load_videos uses live
-    privacy: only to drop a ZERO-view upload that is non-public, never to drop
-    one with views, which earned them before it was made private."""
-    dated = [r for r in rows if r.get("privacy_status")]
+    """{video_id: (privacy, lifetime views)} from the newest snapshot that
+    recorded privacy; {} before `privacy_status` began (2026-10-12). A blank
+    cell in that snapshot reads "unknown"."""
+    dated = [r["snapshot_date"] for r in rows if r.get("privacy_status")]
     if not dated:
         return {}
-    latest = max(r["snapshot_date"] for r in dated)
-    return {r["video_id"]: r["privacy_status"] for r in dated if r["snapshot_date"] == latest}
+    latest = max(dated)
+    return {r["video_id"]: (r.get("privacy_status") or "unknown", float(r.get("views") or 0))
+            for r in rows if r["snapshot_date"] == latest}
 
 
 def _privatised_zero(video_id, views, privacy):
-    return views == 0 and privacy.get(video_id, "public") != "public"
+    """The rule load_videos applies with live privacy: drop an upload whose
+    reading is zero only if it is not public and has no views to date (or is
+    gone from the newest snapshot). One that earned views and was made private
+    later keeps its reading, zero at 7 days or not."""
+    if views != 0 or not privacy:
+        return False
+    status, lifetime = privacy.get(video_id, ("unknown", 0.0))
+    return status != "public" and lifetime == 0
 
 
 def _privacy_caveat(non_public, privacy_known):
@@ -1406,7 +1413,8 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
         if s is None:
             (too_new if published > asof else absent).append(r["video_id"])
             continue
-        if _privatised_zero(r["video_id"], float(s.get("views") or 0), privacy):
+        if (published <= asof - datetime.timedelta(days=min_age_days)
+                and _privatised_zero(r["video_id"], float(s.get("views") or 0), privacy)):
             non_public.append(r["video_id"])
             continue
         r = _with_derived_dimensions(r)
