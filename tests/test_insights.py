@@ -1137,6 +1137,10 @@ def test_coin_floor_shrinks_with_arm_size_and_needs_one_full_window():
     assert insights.coin_floor(noisy[:59], Metric.VIEWS, arm=30) is None
     flat = [v(f"f{i}", 10, views=100) for i in range(40)]
     assert insights.coin_floor(flat, Metric.VIEWS, arm=15) == 0
+    # Anchored at the newest: 59 uploads at arm 15 leave the oldest out, not the newest.
+    windows = insights.coin_windows(noisy[:59], Metric.VIEWS, arm=15)
+    newest = sorted(noisy[:59], key=lambda x: x.published)[-30:]
+    assert len(windows) == 2 and windows[0] == [x.views for x in newest]
 
 
 def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
