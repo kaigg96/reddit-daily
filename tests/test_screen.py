@@ -229,16 +229,44 @@ def test_a_fallback_reply_without_json_reaches_the_backstop(monkeypatch):
     assert r.failure == "http_503;fallback_no_json"
 
 
-@pytest.mark.parametrize("unsafe", [None, 2, "2", ["²", 2.0, True, "x"]])
-def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe):
+@pytest.mark.parametrize("unsafe,dropped", [
+    (None, set()), (["²", 2.0, True, "x"], set()), ({"1": 1}, set()),
+    (2, {1}), ("2", {1}), ("1, 3", {0, 2}),
+])
+def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe, dropped):
     """`"unsafe_comments": null` raised TypeError out of screen(), which costs
-    the slot its upload. Junk entries are ignored; the verdict still stands."""
+    the slot its upload. A bare number or string still flags answers, since
+    dropping one is nearly free; junk flags none. The verdict still stands."""
     gemini(monkeypatch, {"post_risk": "none", "reason": "", "unsafe_comments": unsafe,
                          "topic": "other"})
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.verdict == "pass"
-    assert r.unsafe == set()
+    assert r.unsafe == dropped
     assert r.topic == "other"
+
+
+@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3])
+def test_a_verdict_that_is_not_a_string_is_a_failure_not_a_pass(monkeypatch, risk):
+    gemini(monkeypatch, {"post_risk": risk, "unsafe_comments": [], "topic": "other"})
+    r = screen.screen("What's a sign someone is amazing in bed?", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "bad_shape"
+    assert r.verdict == "skip_post"   # the backstop still gets its say
+
+
+def test_anything_unparseable_reaches_the_backstop_rather_than_raising(monkeypatch):
+    """Python refuses int() on a 4300+ digit string: contrived, but screen()
+    must never raise, so the parse stage as a whole is guarded."""
+    gemini(monkeypatch, {"post_risk": "none", "unsafe_comments": ["1" * 5000]})
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "bad_json"
+
+
+def test_the_fallback_is_the_slates_model():
+    """`insights.slate_agreement` skips fallback-answered rows because the two
+    are one model; if either changes, revisit that skip."""
+    assert screen.FALLBACK_MODEL == screen.config.SLATE_MODEL
 
 
 def test_the_fallback_request_sends_no_thinking_budget(monkeypatch):

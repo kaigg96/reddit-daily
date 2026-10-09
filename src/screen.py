@@ -213,6 +213,30 @@ def _fall_back(question, comments, failure):
     return _backstop(question, comments, failure=failure)
 
 
+class _BadShape(Exception):
+    """Valid JSON whose verdict is not a string: passing it as screened would
+    skip even the backstop, the hole `no_json` closed."""
+
+
+def _parse(data, n_comments):
+    """(risk, topic, reason, unsafe) from the reply's JSON object."""
+    risk = data.get("post_risk", "none")
+    if not isinstance(risk, str):
+        raise _BadShape()
+    risk = risk.strip().lower()
+    topic = str(data.get("topic", "")).strip().lower()
+    topic = topic if topic in TOPICS else ""
+    reason = str(data.get("reason", ""))[:120]
+    # A bare number or a "1, 3" string is still the model flagging answers, and
+    # dropping one is nearly free, so honour it; null or junk drops none.
+    items = data.get("unsafe_comments")
+    if isinstance(items, (int, str)) and not isinstance(items, bool):
+        items = re.findall(r"[0-9]+", str(items))
+    unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
+              if str(n).isdecimal() and 0 < int(n) <= n_comments}
+    return risk, topic, reason, unsafe
+
+
 def screen(question, comments):
     """Screen one candidate. Never raises — worst case returns a permissive result."""
     numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(comments))
@@ -237,20 +261,15 @@ def screen(question, comments):
         # Parsing this as {} would pass the post as screened by Gemini while
         # skipping even the backstop. Labels match llm.get_metadata's.
         return _fall_back(question, comments, _after(prior, "no_json"))
+    # screen() must never raise: a null unsafe list once could, and a raise
+    # costs the slot its upload. Anything unparseable is a failure, not a pass.
     try:
         data = json.loads(match.group(0))
-    except ValueError:
+        risk, topic, reason, unsafe = _parse(data, len(comments))
+    except _BadShape:
+        return _fall_back(question, comments, _after(prior, "bad_shape"))
+    except Exception:
         return _fall_back(question, comments, _after(prior, "bad_json"))
-
-    risk = str(data.get("post_risk", "none")).strip().lower()
-    topic = str(data.get("topic", "")).strip().lower()
-    topic = topic if topic in TOPICS else ""
-    reason = str(data.get("reason", ""))[:120]
-    # A null or a bare number here used to raise TypeError out of screen() and
-    # cost the slot its upload; isdecimal, unlike isdigit, refuses "²".
-    items = data.get("unsafe_comments")
-    unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
-              if str(n).isdecimal() and 0 < int(n) <= len(comments)}
 
     if risk in SKIP_CATEGORIES:
         return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason,
