@@ -189,8 +189,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   blank on rows the fallback answered (read it with `screen_source`), and the
   fallback shares `SAMPLE_MODEL`'s allowance with the slate call and every
   sample, up to 4 requests a run. Left as it was: a reply with no `post_risk`
-  passes as none. **Closes when** the branch merges on a PASS (the next
-  render slot opens 2026-10-10 05:38 UTC).
+  passes as none. **Closes when** the branch merges on a PASS, alone or
+  inside `release/caps-and-screen-fix` with PRD §0 #14 (427 tests green; the
+  next render slot opens 2026-10-10 05:38 UTC).
 
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends

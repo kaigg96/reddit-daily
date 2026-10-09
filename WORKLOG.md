@@ -83,7 +83,7 @@ and more useful than a confident guess.
 - **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50 (#65 waits on it); the Groq key and label on #69; the planning session (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53.
 
 ### Next
-- Morning, after 07:00: one sample video is allowed per shift, and two reviewed branches wait for one: the safety check's crash fix and the capitals test. Combine them on one branch and sample once. The crash fix changes nothing viewers see, so this still tests one thing, and the test starts a day sooner. If the combined sample fails, take the crash fix alone first.
+- Morning, after 07:00: one sample video is allowed per shift, and two reviewed branches wait for one: the safety check's crash fix and the capitals test. I have combined them on one branch, with all tests passing, so one sample clears both. The crash fix changes nothing viewers see, so this still tests one thing, and the test starts a day sooner. If the combined sample fails, take the crash fix alone first.
 - 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
 - If #70 is approved, build it on a branch. The capitals test is a coin per upload, so it runs alongside bet 1 without spoiling either read.
 
