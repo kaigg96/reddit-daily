@@ -124,11 +124,15 @@ def test_an_applied_patch_and_a_plain_approval_are_not_flagged(monkeypatch, caps
     assert "NOT APPLIED" not in capsys.readouterr().out
 
 
-def closed_github(monkeypatch, closed, comments):
+def closed_github(monkeypatch, closed, comments, closed_by=None):
     """Open list empty; the closed list is what the refusal check reads."""
+    closed_by = closed_by or {}
     def api(path, data=None, method=None):
         if path.endswith("/comments"):
             return comments[int(path.split("/")[-2])]
+        if "/events" in path:
+            n = int(path.split("/")[-2])
+            return [{"event": "closed", "actor": {"login": closed_by.get(n, "kaigg96")}}]
         return closed if "state=closed" in path else []
     monkeypatch.setattr(escalations, "_api", api)
     monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
@@ -153,7 +157,8 @@ def test_a_refusal_is_shown_with_what_the_owner_asked_instead(monkeypatch, capsy
                   {62: [{"author_association": "OWNER", "body": NO}]})
     escalations.show(True)
     out = capsys.readouterr().out
-    assert "CLOSED WITHOUT APPROVAL" in out and "#62" in out and "owner: " + NO in out
+    assert "CLOSED BY THE OWNER WITHOUT APPROVAL" in out and "#62" in out
+    assert "approves nothing" in out and "owner: " + NO in out
     assert "approved and waiting to be done: none" in out
 
 
@@ -168,4 +173,17 @@ def test_old_bare_or_approved_closes_are_not_refusals(monkeypatch):
                    64: [{"author_association": "OWNER", "body": "yes"}],
                    66: [{"author_association": "OWNER", "body": NO}],
                    67: [{"author_association": "NONE", "body": "Raised again"}]})
+    assert escalations._declined(now=NOW) == []
+
+
+def test_a_close_by_a_shift_is_not_the_owners_answer(monkeypatch):
+    """A shift closed an escalation the owner had only asked a question on;
+    the question must not read as their decision (review, 2026-10-09)."""
+    closed_github(monkeypatch,
+                  [closed_issue(70, "Bet 1", ["needs-owner"], [1], "2026-10-09T09:00:00Z"),
+                   {**closed_issue(71, "A pull request", ["needs-owner"], [1],
+                                   "2026-10-09T09:00:00Z"), "pull_request": {}}],
+                  {70: [{"author_association": "OWNER", "body": "What would it cost?"}],
+                   71: [{"author_association": "OWNER", "body": NO}]},
+                  closed_by={70: "claude[bot]"})
     assert escalations._declined(now=NOW) == []

@@ -122,17 +122,25 @@ def _declined(days=DECLINED_DAYS, now=None):
     find another solution") and that morning's shift, reading only the open
     list, missed both the refusal and the request in it. Only closes carrying
     an owner reply are shown: the reply is the decision, and a bare close is
-    usually a duplicate or a notice acknowledged."""
+    usually a duplicate or a notice acknowledged. Only the owner's own close
+    counts: a shift can close an escalation too (superseded, split), and the
+    owner's question on it is not their answer."""
     now = now or datetime.now(timezone.utc)
     cutoff = (now - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    owner = REPO.split("/")[0]
     out = []
-    for i in _api(f"/repos/{REPO}/issues?state=closed&since={cutoff}&per_page=100"):
-        labels = {l["name"] for l in i["labels"]}
+    for i in _api(f"/repos/{REPO}/issues?state=closed&labels=needs-owner"
+                  f"&since={cutoff}&per_page=100"):
+        labels = {l["name"].strip().lower() for l in i["labels"]}
         if ("pull_request" in i or "needs-owner" not in labels or "approved" in labels
                 or (i.get("closed_at") or "") < cutoff):
             continue
         replies = _owner_replies(i)
-        if replies:
+        if not replies:
+            continue
+        closes = [e for e in _api(f"/repos/{REPO}/issues/{i['number']}/events?per_page=100")
+                  if e.get("event") == "closed"]
+        if closes and (closes[-1].get("actor") or {}).get("login") == owner:
             out.append((i, replies))
     return out
 
@@ -142,8 +150,9 @@ def show(want_approved):
     if want_approved:
         declined = _declined()
         if declined:
-            print(f"CLOSED WITHOUT APPROVAL in the last {DECLINED_DAYS} days — the owner's "
-                  "reply is the decision. Do not re-ask; follow what it says:")
+            print(f"CLOSED BY THE OWNER WITHOUT APPROVAL in the last {DECLINED_DAYS} days. "
+                  "Their reply says why. It approves nothing, so do not re-ask what it "
+                  "refused:")
             for i, replies in declined:
                 print(f"  #{i['number']}  {i['title']}  (closed {i['closed_at'][:10]})")
                 for reply in replies:
