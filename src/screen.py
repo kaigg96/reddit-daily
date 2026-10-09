@@ -229,11 +229,15 @@ def _parse(data, n_comments):
     reason = str(data.get("reason", ""))[:120]
     # A bare number or a "1, 3" string is still the model flagging answers, and
     # dropping one is nearly free, so honour it; null or junk drops none.
+    # A junk list must not cost a valid verdict, so it drops none instead.
     items = data.get("unsafe_comments")
     if isinstance(items, (int, str)) and not isinstance(items, bool):
-        items = re.findall(r"[0-9]+", str(items))
-    unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
-              if str(n).isdecimal() and 0 < int(n) <= n_comments}
+        items = re.findall(r"-?[0-9]+", str(items))   # "-1" ("none") then fails isdecimal
+    try:
+        unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
+                  if str(n).isdecimal() and 0 < int(n) <= n_comments}
+    except Exception:
+        unsafe = set()
     return risk, topic, reason, unsafe
 
 

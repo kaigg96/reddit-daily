@@ -231,7 +231,7 @@ def test_a_fallback_reply_without_json_reaches_the_backstop(monkeypatch):
 
 @pytest.mark.parametrize("unsafe,dropped", [
     (None, set()), (["²", 2.0, True, "x"], set()), ({"1": 1}, set()),
-    (2, {1}), ("2", {1}), ("1, 3", {0, 2}),
+    (2, {1}), ("2", {1}), ("1, 3", {0, 2}), (-1, set()), ("-1", set()),
 ])
 def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe, dropped):
     """`"unsafe_comments": null` raised TypeError out of screen(), which costs
@@ -254,10 +254,21 @@ def test_a_verdict_that_is_not_a_string_is_a_failure_not_a_pass(monkeypatch, ris
     assert r.verdict == "skip_post"   # the backstop still gets its say
 
 
+def test_a_junk_unsafe_list_keeps_a_valid_verdict(monkeypatch):
+    """Python refuses int() on a 4300+ digit string: contrived, but it must
+    neither raise nor throw away the skip the model did give."""
+    gemini(monkeypatch, {"post_risk": "sexual_suggestive", "unsafe_comments": ["1" * 5000]})
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.verdict == "skip_post"
+    assert r.source == "gemini"
+    assert r.unsafe == set()
+
+
 def test_anything_unparseable_reaches_the_backstop_rather_than_raising(monkeypatch):
-    """Python refuses int() on a 4300+ digit string: contrived, but screen()
-    must never raise, so the parse stage as a whole is guarded."""
-    gemini(monkeypatch, {"post_risk": "none", "unsafe_comments": ["1" * 5000]})
+    """Deep nesting makes json.loads raise RecursionError, not ValueError:
+    screen() must never raise, so the parse stage as a whole is guarded."""
+    deep = '{"a": ' + "[" * 100000 + "]" * 100000 + "}"
+    monkeypatch.setattr(screen, "_generate_screened", lambda prompt: deep)
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.source == "backstop"
     assert r.failure == "bad_json"
