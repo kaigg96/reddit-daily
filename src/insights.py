@@ -1192,6 +1192,14 @@ def with_clip_use(rows):
     return rows
 
 
+# title_hype: shock phrases and capitalised emphasis ("The SHOCKING Truth",
+# "Who's YOUR Hero?"); capitals that are real acronyms don't count.
+_HYPE_WORD = re.compile(r"shock|won.?t believe|insane|exposed|jaw.?drop|mind.?blow", re.I)
+_ACRONYMS = {"AI", "AITA", "ADHD", "ATM", "CEO", "CIA", "DIY", "DNA", "ER", "FBI",
+             "GPS", "HR", "ID", "IQ", "LA", "NBA", "NFL", "NYC", "OK", "PC", "TV",
+             "UK", "US", "USA"}
+
+
 def _with_derived_dimensions(row):
     """Group-able dimensions computed from an upload_log row.
 
@@ -1221,6 +1229,13 @@ def _with_derived_dimensions(row):
     # Raw titles run ~64 characters, generated ~41 (the generated median,
     # 2026-10-04): is length, not source, behind raw titles' views gap?
     r["title_length"] = "" if not t else "short" if len(t) <= 41 else "long"
+    # YouTube's monetization review reads titles, and since July 2026 refuses
+    # content "designed to shock or surprise viewers for the sole purpose of
+    # getting views". Do our capitals-and-shock titles earn the views that
+    # would justify them? Generated titles only: a raw one is Reddit's wording.
+    r["title_hype"] = "" if not t or r["title_source"] == "raw" else (
+        "hype" if _HYPE_WORD.search(t) or any(
+            w not in _ACRONYMS for w in re.findall(r"\b[A-Z]{2,}\b", t)) else "plain")
     # ~20 s: the logged median duration is 20.2 s (2026-09-25).
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"

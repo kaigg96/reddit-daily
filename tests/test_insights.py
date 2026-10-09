@@ -782,6 +782,20 @@ def test_title_length_splits_at_the_generated_median():
     assert length("") == ""
 
 
+def test_title_hype_marks_shock_phrases_and_capitalised_emphasis():
+    """Do the titles YouTube's review could read as shock-bait earn more views?"""
+    hype = lambda t, q="What is it?": insights._with_derived_dimensions(
+        {"post_title": q, "video_title": t})["title_hype"]
+    assert hype("Early Risers: The SHOCKING Truth Behind Waking Up Early") == "hype"
+    assert hype("Who's YOUR Positive Masculinity Hero?") == "hype"
+    assert hype("You Won't Believe Why Asia Has Almost No Homeless") == "hype"
+    assert hype("Hobbies That Break The Bank") == "plain"
+    assert hype("What Your ER Nurse Won't Tell You About AITA") == "plain"
+    assert hype("The #1 Sign of Future Success in Young People?") == "plain"
+    assert hype("AITA for SCREAMING?", q="AITA for SCREAMING?") == ""   # raw: Reddit's words
+    assert hype("") == ""
+
+
 def test_within_keeps_one_group_so_a_comparison_can_be_read_inside_it():
     """Research row R2: question length within similar-length videos."""
     rows = [{"post_title": "q", "duration_s": d} for d in ("18.0", "20.0", "24.5", "")]
