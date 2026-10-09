@@ -1477,6 +1477,15 @@ def test_slate_agreement_reads_the_selected_posts_label():
     assert insights.slate_agreement(rows) == (1, 2, [("other", "nostalgia")])
 
 
+def test_slate_agreement_skips_rows_the_screens_fallback_answered():
+    """The fallback is the slate's own model, so it would agree with itself."""
+    rows = [{"topic": "nostalgia", "candidate_rank": "1", "slate_topics": "nostalgia",
+             "screen_source": "gemini_fallback"},
+            {"topic": "other", "candidate_rank": "1", "slate_topics": "nostalgia",
+             "screen_source": "gemini"}]
+    assert insights.slate_agreement(rows) == (0, 1, [("other", "nostalgia")])
+
+
 
 def test_report_refuses_an_age_read_inside_the_reporting_lag():
     """At 3-4 days a third of uploads still read zero from Analytics lag, so a

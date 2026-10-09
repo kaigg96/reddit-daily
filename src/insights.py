@@ -1089,9 +1089,13 @@ def slate_agreement(rows):
     the screen's `topic`. R4.4's firing rate is counted on slate labels, so
     read this first — disagreement means the two classifiers bucket the same
     post differently. `disagreements` is a list of (screen, slate) pairs.
-    Rows with no slate, a failed call ("!…") or an unlabelled entry are skipped."""
+    Rows with no slate, a failed call ("!…") or an unlabelled entry are skipped,
+    and so are rows the screen's fallback answered: that is the slate's own
+    model, so the two would agree with themselves."""
     agree, pairs = 0, []
     for r in rows:
+        if (r.get("screen_source") or "").strip() == "gemini_fallback":
+            continue
         slate = (r.get("slate_topics") or "").strip()
         topic = (r.get("topic") or "").strip()
         rank = (r.get("candidate_rank") or "").strip()

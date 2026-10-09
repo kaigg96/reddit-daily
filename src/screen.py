@@ -187,8 +187,10 @@ def _generate_screened(prompt, tries=2, model=None):
 
 
 # When the main model fails twice (a 503 overload, its daily 429, a timeout),
-# one request to this model before the keyword backstop. The free tier is
-# counted per model, so an overload or spent cap on one rarely means the other.
+# one request to this model per screened candidate (up to 4 a run) before the
+# keyword backstop. The free tier is counted per model, so an overload or spent
+# cap on one rarely means the other. Its allowance is shared with the slate call
+# and every sample render; spent, the screen still lands on the backstop.
 # The 2026-10-09 06:21 upload went to the backstop on two 503s; titles have not
 # lost to one since the 30s wait (0 of 10), so only the screen falls back. The
 # replay passed 5/5 on this model (2026-10-09). Gemini only, never in a dry run
@@ -209,6 +211,34 @@ def _after(prior, failure):
 def _fall_back(question, comments, failure):
     print(f"Screen: Gemini failed ({failure}) — using keyword backstop")
     return _backstop(question, comments, failure=failure)
+
+
+class _BadShape(Exception):
+    """Valid JSON whose verdict is not a string: passing it as screened would
+    skip even the backstop, the hole `no_json` closed."""
+
+
+def _parse(data, n_comments):
+    """(risk, topic, reason, unsafe) from the reply's JSON object."""
+    risk = data.get("post_risk", "none")
+    if not isinstance(risk, str):
+        raise _BadShape()
+    risk = risk.strip().lower()
+    topic = str(data.get("topic", "")).strip().lower()
+    topic = topic if topic in TOPICS else ""
+    reason = str(data.get("reason", ""))[:120]
+    # A bare number or a "1, 3" string is still the model flagging answers, and
+    # dropping one is nearly free, so honour it; null or junk drops none.
+    # A junk list must not cost a valid verdict, so it drops none instead.
+    items = data.get("unsafe_comments")
+    if isinstance(items, (int, str)) and not isinstance(items, bool):
+        items = re.findall(r"-?[0-9]+", str(items))   # "-1" ("none") then fails isdecimal
+    try:
+        unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
+                  if str(n).isdecimal() and 0 < int(n) <= n_comments}
+    except Exception:
+        unsafe = set()
+    return risk, topic, reason, unsafe
 
 
 def screen(question, comments):
@@ -235,17 +265,15 @@ def screen(question, comments):
         # Parsing this as {} would pass the post as screened by Gemini while
         # skipping even the backstop. Labels match llm.get_metadata's.
         return _fall_back(question, comments, _after(prior, "no_json"))
+    # screen() must never raise: a null unsafe list once could, and a raise
+    # costs the slot its upload. Anything unparseable is a failure, not a pass.
     try:
         data = json.loads(match.group(0))
-    except ValueError:
+        risk, topic, reason, unsafe = _parse(data, len(comments))
+    except _BadShape:
+        return _fall_back(question, comments, _after(prior, "bad_shape"))
+    except Exception:
         return _fall_back(question, comments, _after(prior, "bad_json"))
-
-    risk = str(data.get("post_risk", "none")).strip().lower()
-    topic = str(data.get("topic", "")).strip().lower()
-    topic = topic if topic in TOPICS else ""
-    reason = str(data.get("reason", ""))[:120]
-    unsafe = {int(n) - 1 for n in data.get("unsafe_comments", [])
-              if str(n).isdigit() and 0 < int(n) <= len(comments)}
 
     if risk in SKIP_CATEGORIES:
         return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason,

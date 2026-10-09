@@ -36,10 +36,11 @@ FIELDS = [
     # a topic ranker would override Reddit's order -- and therefore how long
     # its own bake would take -- could not be estimated.
     "slate_topics",
-    # Added 2026-10-01: why the screen fell back to the keyword backstop, blank
-    # when Gemini answered. The 2026-10-01 morning upload shipped on the
-    # backstop while its metadata call succeeded, so it was not the daily cap --
-    # and nothing recorded what it was.
+    # Added 2026-10-01: why the screen's main model missed, blank when it
+    # answered. Since 2026-10-09 it is also set when the fallback model
+    # answered (screen_source=gemini_fallback), so read the two together. The
+    # 2026-10-01 morning upload shipped on the backstop while its metadata call
+    # succeeded, so it was not the daily cap -- and nothing recorded what it was.
     "screen_failure",
 ]
 

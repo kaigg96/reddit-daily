@@ -95,7 +95,7 @@ def test_backstop_still_skips_sexual_questions():
 
 
 def test_gemini_failure_falls_through_to_backstop(monkeypatch):
-    def boom(prompt):
+    def boom(prompt, **kw):   # both models, so the fallback misses too
         raise RuntimeError("API down")
     monkeypatch.setattr(screen, "_generate_screened", boom)
     r = screen.screen("a perfectly ordinary question", ["a", "b", "c"])
@@ -156,6 +156,7 @@ def test_persistent_timeout_still_fails_open(monkeypatch):
     def always_slow(prompt, thinking_budget=0, model=None):
         raise requests.Timeout("slow")
 
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
     monkeypatch.setattr(screen.llm, "_generate", always_slow)
     monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
     r = screen.screen("an ordinary question", ["a", "b", "c"])
@@ -226,6 +227,92 @@ def test_a_fallback_reply_without_json_reaches_the_backstop(monkeypatch):
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.source == "backstop"
     assert r.failure == "http_503;fallback_no_json"
+
+
+@pytest.mark.parametrize("unsafe,dropped", [
+    (None, set()), (["²", 2.0, True, "x"], set()), ({"1": 1}, set()),
+    (2, {1}), ("2", {1}), ("1, 3", {0, 2}), (-1, set()), ("-1", set()),
+])
+def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe, dropped):
+    """`"unsafe_comments": null` raised TypeError out of screen(), which costs
+    the slot its upload. A bare number or string still flags answers, since
+    dropping one is nearly free; junk flags none. The verdict still stands."""
+    gemini(monkeypatch, {"post_risk": "none", "reason": "", "unsafe_comments": unsafe,
+                         "topic": "other"})
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.verdict == "pass"
+    assert r.unsafe == dropped
+    assert r.topic == "other"
+
+
+@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3])
+def test_a_verdict_that_is_not_a_string_is_a_failure_not_a_pass(monkeypatch, risk):
+    gemini(monkeypatch, {"post_risk": risk, "unsafe_comments": [], "topic": "other"})
+    r = screen.screen("What's a sign someone is amazing in bed?", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "bad_shape"
+    assert r.verdict == "skip_post"   # the backstop still gets its say
+
+
+def test_a_junk_unsafe_list_keeps_a_valid_verdict(monkeypatch):
+    """Python refuses int() on a 4300+ digit string: contrived, but it must
+    neither raise nor throw away the skip the model did give."""
+    gemini(monkeypatch, {"post_risk": "sexual_suggestive", "unsafe_comments": ["1" * 5000]})
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.verdict == "skip_post"
+    assert r.source == "gemini"
+    assert r.unsafe == set()
+
+
+def test_anything_unparseable_reaches_the_backstop_rather_than_raising(monkeypatch):
+    """Deep nesting makes json.loads raise RecursionError, not ValueError:
+    screen() must never raise, so the parse stage as a whole is guarded."""
+    deep = '{"a": ' + "[" * 100000 + "]" * 100000 + "}"
+    monkeypatch.setattr(screen, "_generate_screened", lambda prompt: deep)
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "bad_json"
+
+
+def test_the_fallback_is_the_slates_model():
+    """`insights.slate_agreement` skips fallback-answered rows because the two
+    are one model; if either changes, revisit that skip."""
+    assert screen.FALLBACK_MODEL == screen.config.SLATE_MODEL
+
+
+def test_the_fallback_request_sends_no_thinking_budget(monkeypatch):
+    """Gemini 3.x answers thinkingBudget with HTTP 400 (2026-09-26), so the
+    fallback, unlike the main model, must go out without one."""
+    sent = []
+
+    class Resp:
+        def __init__(self, status, payload=None):
+            self.status_code, self._payload = status, payload
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise screen.llm.requests.HTTPError(response=self)
+
+        def json(self):
+            return self._payload
+
+    def post(url, headers, json, timeout):
+        sent.append((url, json))
+        if screen.llm.MODEL in url:
+            return Resp(503)
+        text = '{"post_risk": "none", "reason": "", "unsafe_comments": [], "topic": "other"}'
+        return Resp(200, {"candidates": [{"content": {"parts": [{"text": text}]}}]})
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test")
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
+    monkeypatch.setattr(screen.llm.requests, "post", post)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "gemini_fallback"
+    main, fallback = sent[0][1], sent[-1][1]
+    assert screen.FALLBACK_MODEL in sent[-1][0]
+    assert "thinkingConfig" in main["generationConfig"]   # the main model still reasons
+    assert "generationConfig" not in fallback
 
 
 @pytest.mark.parametrize("setting", ["dry_run", "groq", "disabled"])
