@@ -173,6 +173,18 @@ def test_a_reachable_gemini_still_runs_both_gates(monkeypatch):
     assert vr.main() == 0
 
 
+def test_the_verdict_names_the_route_it_tested(monkeypatch):
+    """A PASS is reused while the code is unchanged, so it must say which AI
+    passed, or a Gemini PASS could be read as clearing the Groq switch."""
+    monkeypatch.setenv("GEMINI_API_KEY", "set")
+    monkeypatch.setattr(sys, "argv", ["validate_release.py"])
+    monkeypatch.setattr(vr, "check_metadata", lambda: True)
+    monkeypatch.setattr(vr, "check_screen", lambda: True)
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    vr.main()
+    assert "Route: **gemini**" in vr.SUMMARY[0]
+
+
 def test_testing_the_groq_route_needs_its_own_key(monkeypatch):
     """Without it the calls fall back to Gemini, and Gemini's pass would be
     reported as Groq's."""

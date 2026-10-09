@@ -279,8 +279,11 @@ def main():
         print(f"{key} not set", file=sys.stderr)
         return 1
 
-    note(f"## Release validation\n\nBudget: at most {MAX_REQUESTS} Gemini "
-         f"requests of the 20/day cap shared with production.\n")
+    # The route is named because a PASS is reused for days while the code is
+    # unchanged: a verdict that did not say which AI it tested could be read
+    # as clearing a switch it never saw (review, 2026-10-08).
+    note(f"## Release validation\n\nRoute: **{config.AI_PROVIDER}**. Budget: at most "
+         f"{MAX_REQUESTS} requests (Gemini's 20/day cap is shared with production).\n")
 
     # Gate 1 costs one request, gate 2 costs five. If the cheap one proves
     # Gemini is not answering, the expensive one can only fail the same way, so
