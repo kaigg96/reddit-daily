@@ -322,16 +322,6 @@ a list nobody can read is the same as no list.
   on a production data file, and worth doing on its own rather than buried in a
   feature commit. Owner's call.
 
-- **The weekly shift breaker is ~2x looser on Opus 5.5, not the ~20% first
-  estimated.** First Opus 5.5 shift (2026-09-23): 0.044 quota units per turn,
-  against 0.059–0.098 on the three Opus 5 shifts. List prices fell 20%, but
-  cache reads — most of a long session's cost — fell 60% ($0.50 → $0.20/MTok).
-  So `SHIFT_WEEKLY_QUOTA_BUDGET=120` now permits roughly twice the real work it
-  did when set. Whether that matters depends on how the subscription meters
-  Opus 5.5, which units cannot show: compare the console's weekly % after a
-  shift with a pre-5.5 one. If a shift still costs a similar share, lower the
-  ceiling to ~60. One data point so far — confirm over a few shifts.
-
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
   the change that issue described — so any commit can cite any approved issue,
