@@ -60,6 +60,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-09 (00:00) — The free AI route that keeps Reddit posts out of training is now in the live code, switched off: your key and one label turn it on
+
+    Worked (% of the shift): engineering 45 · market 15 · product 15 · gm 10 · security 10 · reliability 5
+
+**Summary:** The free AI route that keeps Reddit posts out of training (#68) is now in the live code, switched off and checked, so your ten minutes on #68 and #69 leave no building to do. Outside evidence also says one host line per video is unlikely to be enough originality for YouTube, which matters for bet 1; neither brings revenue directly.
+
+### Toward revenue
+- **Nothing directly.** Two things moved. Once you add the key, Groq takes away the AI-training part of the Reddit-terms problem and lifts the 20-a-day AI limit. And bet 1 now has YouTube's own wording on what originality earns money, which bears on how big that bet has to be.
+
+### Done
+- **Engineering:** finished the steps that had to come before switching to Groq, then merged it into the live code, switched off. If it is switched on without its key, calls fall back to Gemini rather than costing the upload its title. The upload log now records which AI answered. Groq's per-minute limit gets one short wait. A sample video passed. A fresh review found nothing blocking, and its fixes went in. The sample's title call failed on Gemini's side, a model overload like one that hit tonight's upload, so the error message now says why. A bet, built ahead of your answer.
+- **Engineering:** the workflow change that gives the Groq key to the four jobs that make AI calls, and strips it from their saved logs, is #69, waiting on your label. #68 now points to it.
+- **Product:** set the rule for switching to Groq before anyone can flip it. It changes the spoken closing line and which post runs, so it ships as its own version. Revert if watch time falls beyond the usual limit, or if titles fail on 4 or more of its first 20 uploads (Gemini: 3 of the last 30).
+- **Market intelligence (this function's first work):** YouTube's policy page, read first-hand, allows "reaction videos where you comment". It refuses videos that "feel interchangeable", and "templated storylines … with minimal or no … commentary". It says nothing against synthetic voices. One Reddit-stories channel that used human voice actors was still demonetized in May 2026. So one quip per video, or a fixed opening and closing around the readings, is unlikely to pass alone; commentary would need to fill most of each video. My recommendation is on #55, and the host-storyline plan now carries the caveat.
+- **Security:** the safety screen's two new test questions, which it had never seen, both got the right answer on Gemini (2 requests). That is the first sign the screen generalizes. Standing check clean: $0.21 spent on narration this month (forecast $0.96 of $3), money controls in place, no secrets in the project, no workflow change. The dependency warnings are unchanged, and they sit in the image library, which only reads our own files.
+- **General management:** the product tracker had grown past its size limit; it is now shorter than at the start of the shift.
+- Fixing against improving: mostly improving (the Groq route, its switch rule, the market read). Three small fixes rode along.
+
+### Blocked
+- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); the Groq key and the label on #69, about ten minutes together, or telling us you are in the UK, EEA or Switzerland (#68); the music script (#66); the sample-video sentence (#65); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
+
+### Next
+- Check this morning's upload landed and is not a repeat.
+- When the Groq key and #69 land: run the screen check on Groq and take a sample. Then switch on as its own version, by changing the code's default, never a workflow setting, under the rule above.
+- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the first subscriber count, and the scorecard with private videos excluded.
+- The workflow audit comes due in a shift or two (eight shifts since the last one).
+- I handed over about 35 minutes early because nothing else cleared the bar. Considered and dropped: posting-time research (answered 30 September); title failures (none since the 4 October fix); a safety check in the upload step that practically cannot fire and would need its own sample; a draft to Reddit (one is on #60 already); closing old digest issues (your email channel); pre-building the Groq switch (two lines, and it cannot be checked without the key).
+- Process: a background reviewer reads the shared working copy, so switching branches while it runs can show it the wrong code. It coped this time; next time, give it its own copy.
+
+### Better?
+- **Than last shift:** Yes, slightly. The Groq route went from a branch to the live code, so switching it on needs only your ten minutes, and bet 1 has outside evidence on how big it must be.
+- **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule, and the AI-limit and AI-training problems have a free fix merged and waiting on a key. Views per upload are still below August's.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-08 (17:53) — You asked for another way to keep Reddit posts out of AI training: one is found, free, and built switched off
 
     Worked (% of the shift): engineering 35 · legal 25 · data 20 · gm 15 · security 5
@@ -90,36 +124,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. A decision of yours that had gone unseen became a ready, priced answer, and the only free AI route that fixes the training problem is built.
 - **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule to read it by, and the AI limit that kept forcing workarounds now has a free way out. Views per upload are still below August's.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-08 (11:00) — A bug that would have repeated uploads at four a day is fixed, so that test can start once you approve it
-
-    Worked (% of the shift): data 40 · reliability 35 · gm 15 · security 10
-
-**Summary:** The four-a-day test is our one views lever with evidence. It would have uploaded the same Reddit post twice most days, and that is now fixed in the live code. From 12 October shifts can also tell buried uploads from private ones without YouTube access. Neither changes a video, so the company is no nearer revenue today, but the step toward it has one obstacle fewer.
-
-### Toward revenue
-- **Four a day no longer needs a fix first.** The pipeline remembered only the last upload. At four a day one subreddit is drawn four times in a row, so a post still at the top of Reddit's daily list would have gone out again two runs later. This already happened once, on 20 July, when an extra run came between two scheduled ones. Every run now skips any question we have ever uploaded. Starting four a day still waits on you, in the planning session (#55), because it adds narration spend.
-- **Supply does not hold four a day back.** AskReddit alone leaves 4 to 8 usable posts in its daily top ten (6 typically), so one subreddit can feed four uploads a day. On its thinnest days the fourth run would have one post left, so the four-a-day change should also widen the list each run reads. That costs nothing.
-
-### Done
-- **Reliability:** the repeat fix above, now in the live code. A fresh review found nothing blocking, and I fixed its two small gaps. It also found that two video runs can still overlap if a manual run lands during a late scheduled one, which this guard cannot see. That is rare at two a day. The fix is one line in a workflow file only you can apply, so it goes with the four-a-day change rather than as a separate ask now. A fix.
-- **Data:** the weekly statistics now record whether each video is public or private. This costs no extra request: it comes back with a call the job already makes. From 12 October the zero-view report runs without access to YouTube, and the release reads stop counting your private videos as buried. So last week's rise in uploads stuck at zero views (5.6% against 2.4%) can be read properly then. Two fixes, each reviewed.
-- **Data:** the safety screen's weekly check passes. It skipped 4 of roughly 90 posts since late August (4%, well under the 15% at which we would loosen it), the last on 12 September. None looks wrong: two medical-horror questions, one about bar violence, one flirt question.
-- **General management:** you approved letting a sample video run near an upload (#65), but shifts cannot edit their own rules file, and automatic apply only covers workflow files. I left a note on the issue: it needs you to paste the one sentence. Separately, the health check raised an issue (#67: shifts using about half their time). I added why: all three stopped because nearly everything that would change what we ship waits on you or on the 12 October numbers. The fix is the planning session, not longer shifts. I also deleted a leftover work branch whose changes you applied on 6 October, so it no longer looks like unfinished work.
-- **Security:** standing check clean: $0.21 spent on narration this month (forecast $0.96 of the $3 budget), money controls in place, no secrets in the project, no workflow change since the music fix you approved.
-- Fixing against improving: all fixes this shift. They clear the way for a bet (four a day) and for the 12 October reads. Nothing new was tried on the channel, because every change to what we ship waits on you.
-
-### Blocked
-- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); running the music script (#66, about two minutes); pasting the sample-video sentence you approved (#65); Gemini's paid tier (#62); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count. Check that snapshot carries the new privacy column; the zero-view question can then be read offline.
-- Check tonight's upload landed and is not a question we have uploaded before (the repeat fix's first live run).
-- When four a day is approved: widen the list each run reads, and bring you the one-line overlap fix as a ready-made patch.
-- I handed over about 35 minutes early because nothing else cleared the bar. Considered and not taken: a search for a properly licensed source of short crowd answers in case Reddit says no (it would most likely confirm Stack Exchange again, already on record; worth redoing once Reddit answers you); getting four a day's workflow change ready now (it waits on the subreddit read until about 2 November, and a ready-made change could go stale by then); the topic ranker's rule (it rests on the dark-morbid read due 12 October); a trademark check on the working name (waits on bet 1, as planned).
-
-### Better?
-- **Than last shift:** Slightly. The volume test lost a hidden blocker, and the 12 October reads gained a missing piece. No video changed.
-- **Than ~10 shifts ago:** Somewhat. Both views bets have a ready first step and a rule that can read it, and the second now has a safe pipeline. Views per upload are still below August's.
 - **Than ~100 shifts ago:** Too early to say.
