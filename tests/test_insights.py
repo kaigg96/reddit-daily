@@ -792,6 +792,9 @@ def test_title_hype_marks_shock_phrases_and_capitalised_emphasis():
     assert hype("Hobbies That Break The Bank") == "plain"
     assert hype("What Your ER Nurse Won't Tell You About AITA") == "plain"
     assert hype("The #1 Sign of Future Success in Young People?") == "plain"
+    assert hype("RIP: Gaming Genres We Lost?") == "plain"
+    assert hype("The 6 AM to 9 AM Struggle") == "plain"
+    assert hype("You'll Never Guess These Degrees") == "hype"
     assert hype("AITA for SCREAMING?", q="AITA for SCREAMING?") == ""   # raw: Reddit's words
     assert hype("") == ""
 

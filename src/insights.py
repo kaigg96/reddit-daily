@@ -1194,10 +1194,12 @@ def with_clip_use(rows):
 
 # title_hype: shock phrases and capitalised emphasis ("The SHOCKING Truth",
 # "Who's YOUR Hero?"); capitals that are real acronyms don't count.
-_HYPE_WORD = re.compile(r"shock|won.?t believe|insane|exposed|jaw.?drop|mind.?blow", re.I)
-_ACRONYMS = {"AI", "AITA", "ADHD", "ATM", "CEO", "CIA", "DIY", "DNA", "ER", "FBI",
-             "GPS", "HR", "ID", "IQ", "LA", "NBA", "NFL", "NYC", "OK", "PC", "TV",
-             "UK", "US", "USA"}
+_HYPE_WORD = re.compile(
+    r"shock|won.?t believe|never guess|insane|exposed|jaw.?drop|mind.?blow", re.I)
+_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BF", "CEO", "CIA", "COVID", "DIY",
+             "DM", "DMV", "DNA", "ER", "EU", "FBI", "GF", "GPS", "HOA", "HR", "ID",
+             "IQ", "IRS", "LA", "MLB", "NASA", "NBA", "NFL", "NHL", "NYC", "OCD", "OK",
+             "PC", "PM", "PTSD", "RIP", "TSA", "TV", "UFC", "UFO", "UK", "US", "USA", "WC"}
 
 
 def _with_derived_dimensions(row):
