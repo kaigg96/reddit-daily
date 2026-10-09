@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-09 (17:27) — When our main AI model is overloaded, the safety check now asks a second model instead of falling back to a keyword list
+
+    Worked (% of the shift): reliability 45 · engineering 20 · market 10 · security 10 · gm 10 · product 5
+
+**Summary:** The safety check that keeps risky posts out of our videos used to drop to a crude keyword list whenever Google's main model was overloaded. That happened to this morning's upload. It now asks a second model first, which has its own daily allowance. This is a fix, not a step toward revenue: it protects uploads from being buried, and it does not grow views.
+
+### Toward revenue
+- **Nothing directly.** Videos YouTube quietly buries earn nothing, and this check is our only defence against that, so keeping it working protects what we have. The steps that would move revenue still wait on you, #70 first.
+
+### Done
+- **Reliability (a fix):** before changing anything, I tested the second model on the safety check's five known cases. All five were right (5 AI requests, on that model's own allowance, so the upload's was untouched). The upload log shows the problem is real but rare: 2 of the last 38 uploads lost the full check. Both times the second model was answering in that same run. And on the two occasions the second model was overloaded, the main one was fine. The two don't fail together, so either of those uploads would have had a proper check. A sample video passed and a fresh review checked the change before it went live. The log records whenever the second model stands in, so we will see it working.
+- **Market intelligence:** our main AI model's sibling was closed to new users last month, and one Google page lists our model for retirement on 20 October. Google's own page for the service we use says it is "not deprecated and will continue to be served until further notice"; the 20 October date is for a different Google service. So nothing is closing, and today's change covers the safety check if that changes without notice.
+- **Product:** the safety check's weekly audit found nothing to fix. Its last skipped post was on 12 September, far under the level where it would need narrowing.
+- **Security:** standing check clean. $0.25 spent on narration this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- **Engineering:** the fresh review found nothing blocking, plus a few small things. The one that matters was there before today: an oddly shaped answer from the AI could crash a run, and that slot would get no upload. It has never happened, but the second model now sends its answers through the same code. The fix and the rest are built and checked on a separate branch. They wait for tomorrow morning's sample-video slot, because a change after the sample would have voided it.
+- **General management:** closed a long-standing code-health item about the AI's daily limit running out before the morning upload. Since we began recording why AI calls fail, 28 uploads in, it has not happened once. Every failure was an overload, which the earlier fix and today's change now cover. The comments change you approved (#53) never applied because GitHub's job died before running a single step. That looks like a GitHub glitch, not a fault in the change, so a re-run should do it.
+- Fixing against improving: all fixing. Everything that would improve the video or the business waits on you or on Monday's data.
+
+### Blocked
+- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50, which let every approved rule change land by label (#65 waits on it); the Groq key and the label on #69 (#68); the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53.
+
+### Next
+- 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
+- If #70 is approved: build it on a branch as the last entry describes.
+- Tomorrow morning: ask for a sample video of the review's follow-up branch, which was already reviewed this shift, and merge it on a pass.
+- Watch the upload log for the second model standing in, and for any upload where both models failed.
+- Process: I asked for the sample video before the fresh review, so the review's fixes could not use it, and only one sample is allowed per 12 hours. Review first, then ask for the sample: it costs about six minutes and lets fixes ship the same shift.
+- I handed over about 25 minutes early because nothing else cleared the bar. Considered and dropped: testing the second model on two more cases (2 requests; whatever the result, it beats the keyword list, so no decision rides on it); a title fallback for the main model being retired (Google says it is served "until further notice"); stopping two runs from overlapping (still belongs with four uploads a day); reading engaged views by topic (one week of data, wait for Monday's); whether long questions lose viewers now that videos open on them (answered on 25 September: it was video length, not the question); building bet 1 ahead of your label (the audit's lesson).
+
+### Better?
+- **Than last shift:** Slightly, on reliability only. An overload no longer leaves an upload with only the keyword list. Nothing in the video or the business changed.
+- **Than ~10 shifts ago:** No, on the audit's evidence: no video change, watch time flat (12.0 seconds a week ago and now), and the decisions that would change it wait on you.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-09 (10:33) — Bet 1 now has a tested first step you can approve with one label: a host's commentary makes up half of each video, at today's length and cost
 
     Worked (% of the shift): gm 30 · product 20 · editorial 15 · strategy 10 · engineering 10 · data 5 · reliability 5 · security 5
@@ -93,38 +127,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, slightly. Bet 1 has evidence it fits today's length and cost, in the shape you answer fastest. Nothing in the video changed.
 - **Than ~10 shifts ago:** No, on the audit's evidence. None of those shifts changed a video. Median watch time is flat (12.0 to 12.5 seconds, inside the usual swing), views per upload went from 75 to 65, and two built features wait on you.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-09 (00:00) — The free AI route that keeps Reddit posts out of training is now in the live code, switched off: your key and one label turn it on
-
-    Worked (% of the shift): engineering 45 · market 15 · product 15 · gm 10 · security 10 · reliability 5
-
-**Summary:** The free AI route that keeps Reddit posts out of training (#68) is now in the live code, switched off and checked, so your ten minutes on #68 and #69 leave no building to do. Outside evidence also says one host line per video is unlikely to be enough originality for YouTube, which matters for bet 1; neither brings revenue directly.
-
-### Toward revenue
-- **Nothing directly.** Two things moved. Once you add the key, Groq takes away the AI-training part of the Reddit-terms problem and lifts the 20-a-day AI limit. And bet 1 now has YouTube's own wording on what originality earns money, which bears on how big that bet has to be.
-
-### Done
-- **Engineering:** finished the steps that had to come before switching to Groq, then merged it into the live code, switched off. If it is switched on without its key, calls fall back to Gemini rather than costing the upload its title. The upload log now records which AI answered. Groq's per-minute limit gets one short wait. A sample video passed. A fresh review found nothing blocking, and its fixes went in. The sample's title call failed on Gemini's side, a model overload like one that hit tonight's upload, so the error message now says why. A bet, built ahead of your answer.
-- **Engineering:** the workflow change that gives the Groq key to the four jobs that make AI calls, and strips it from their saved logs, is #69, waiting on your label. #68 now points to it.
-- **Product:** set the rule for switching to Groq before anyone can flip it. It changes the spoken closing line and which post runs, so it ships as its own version. Revert if watch time falls beyond the usual limit, or if titles fail on 4 or more of its first 20 uploads (Gemini: 3 of the last 30).
-- **Market intelligence (this function's first work):** YouTube's policy page, read first-hand, allows "reaction videos where you comment". It refuses videos that "feel interchangeable", and "templated storylines … with minimal or no … commentary". It says nothing against synthetic voices. One Reddit-stories channel that used human voice actors was still demonetized in May 2026. So one quip per video, or a fixed opening and closing around the readings, is unlikely to pass alone; commentary would need to fill most of each video. My recommendation is on #55, and the host-storyline plan now carries the caveat.
-- **Security:** the safety screen's two new test questions, which it had never seen, both got the right answer on Gemini (2 requests). That is the first sign the screen generalizes. Standing check clean: $0.21 spent on narration this month (forecast $0.96 of $3), money controls in place, no secrets in the project, no workflow change. The dependency warnings are unchanged, and they sit in the image library, which only reads our own files.
-- **General management:** the product tracker had grown past its size limit; it is now shorter than at the start of the shift.
-- Fixing against improving: mostly improving (the Groq route, its switch rule, the market read). Three small fixes rode along.
-
-### Blocked
-- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); the Groq key and the label on #69, about ten minutes together, or telling us you are in the UK, EEA or Switzerland (#68); the music script (#66); the sample-video sentence (#65); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- Check this morning's upload landed and is not a repeat.
-- When the Groq key and #69 land: run the screen check on Groq and take a sample. Then switch on as its own version, by changing the code's default, never a workflow setting, under the rule above.
-- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the first subscriber count, and the scorecard with private videos excluded.
-- The workflow audit comes due in a shift or two (eight shifts since the last one).
-- I handed over about 35 minutes early because nothing else cleared the bar. Considered and dropped: posting-time research (answered 30 September); title failures (none since the 4 October fix); a safety check in the upload step that practically cannot fire and would need its own sample; a draft to Reddit (one is on #60 already); closing old digest issues (your email channel); pre-building the Groq switch (two lines, and it cannot be checked without the key).
-- Process: a background reviewer reads the shared working copy, so switching branches while it runs can show it the wrong code. It coped this time; next time, give it its own copy.
-
-### Better?
-- **Than last shift:** Yes, slightly. The Groq route went from a branch to the live code, so switching it on needs only your ten minutes, and bet 1 has outside evidence on how big it must be.
-- **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule, and the AI-limit and AI-training problems have a free fix merged and waiting on a key. Views per upload are still below August's.
 - **Than ~100 shifts ago:** Too early to say.
