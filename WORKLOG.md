@@ -68,7 +68,7 @@ and more useful than a confident guess.
 **Summary:** Our videos whose titles put a word in capitals ("Who's YOUR Hero?") got about twice the views of the rest. That held in every split with enough uploads to read, and viewers watched them about as long. I built a fair test that flips a coin for each upload, and it needs only tomorrow's sample video to go live. Views are the half of YouTube's payment bar we are furthest from, so this is the first step in days aimed at it.
 
 ### Toward revenue
-- **Yes, a bet on views.** The pattern is a correlation: the AI may capitalise when a post is livelier anyway. The coin-flip test settles it at no cost, with no extra AI or narration calls. Its rule is set in advance: keep capitals if they lead on views by at least 30% after 15 uploads in each group, and watch time holds.
+- **Yes, a bet on views.** The pattern is a correlation: the AI may capitalise when a post is livelier anyway. The coin-flip test settles it at no cost, with no extra AI or narration calls. Its rule is set in advance. After 30 uploads in each group, keep capitals if their views lead is bigger than chance alone produces one time in ten at that size (81% today), and watch time holds. A smaller lead gets one extension, to 45 uploads per group. I first wrote a 30% bar, then measured that chance alone moves views far more than that, and reset it before anything shipped.
 
 ### Done
 - **Data (a bet):** taught the reporting tool to tell titles with emphasis capitals apart from plain ones. Read at 7 days old: +120% views overall (65 against 68 uploads), and ahead in each of the two earlier releases with enough uploads, each title style, short and long titles, and morning and evening. Watch time 10 against 11 seconds, inside the normal swing. The extra plays are the kind YouTube's payment bar counts: the same share are engaged views (31% against 30%). It also explains most of the lead behind the 5 October decision to favour "You…" titles. Those titles nearly always capitalise "YOU", and among capitalised titles they lead the others by only 7%. That decision stands, since its rule is on watch time, but the new test now measures what actually moved views. A lead, on small weekly numbers: the fall in views since mid-September is almost all in titles without capitals. A fresh review caught four titles misfiled by abbreviations; fixed before the numbers were recorded. Live, measurement only.
@@ -90,7 +90,7 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Yes. For the first time in several shifts, something that changes what we ship is ready, aimed at views, and costs nothing to run.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals result is the largest views difference any logged title trait has shown, but it is a correlation until the test reads, around early November.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals result is the largest views difference any logged title trait has shown, but it is a correlation until the test reads, in mid-November at the earliest.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-09 (17:27) — When our main AI model is overloaded, the safety check now asks a second model instead of falling back to a keyword list
