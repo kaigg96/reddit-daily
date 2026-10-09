@@ -459,6 +459,40 @@ def alternation_floor(videos, metric, block=MIN_COHORT):
     return median(deltas) if deltas else None
 
 
+def coin_windows(videos, metric, arm):
+    """The upload windows `coin_floor` splits: every `2 * arm` consecutive
+    uploads with a value, anchored at the newest so the latest weeks count."""
+    live = sorted([v for v in videos if v.views > 0 and v.get(metric) is not None],
+                  key=lambda v: v.true_published or v.published)
+    starts = range(len(live) - 2 * arm, -1, -arm)
+    return [[v.get(metric) for v in live[i:i + 2 * arm]] for i in starts]
+
+
+def coin_floor(videos, metric, arm, quantile=0.9, splits=200, seed=0):
+    """The gap a coin-flip test (PRD §0 #14) reads with nothing switched.
+
+    Each run's arm is random, so the arms share the calendar and the noise is
+    a random split of the same weeks' uploads. Split each of `coin_windows` at
+    random `splits` times and return the `quantile` of how far the two
+    halves' medians sit apart. Two-sided: one arm leads by more than it about
+    half that often. The 90th percentile, not the median, because a rule set
+    at the median gap fires on chance about one read in four, one-sided.
+    None without one full window.
+    """
+    import random
+    rng, deltas = random.Random(seed), []
+    for values in coin_windows(videos, metric, arm):
+        for _ in range(splits):
+            rng.shuffle(values)
+            mx, my = median(values[:arm]), median(values[arm:])
+            if mx:
+                deltas.append(abs(my - mx) / mx)
+    if not deltas:
+        return None
+    deltas.sort()
+    return deltas[min(len(deltas) - 1, int(quantile * len(deltas)))]
+
+
 # What may fire a revert. The owner settled it on #18 (2026-09-22): "the rule
 # now triggers on watch-seconds only, with views reported but never firing it".
 # Views at a fixed age move 27-52% between batches with nothing changed, five
