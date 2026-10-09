@@ -1874,3 +1874,25 @@ def test_offline_counts_non_public_only_among_uploads_old_enough_to_report(tmp_p
     _write_with_privacy(tmp_path, monkeypatch, published, [("2026-10-12", "young", 0, "private")])
     load = insights.load_videos_offline(min_age_days=5)
     assert load.videos == [] and load.non_public == []
+
+
+def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
+    """`--release v7 --metric engaged_share` printed watch-seconds as if it were
+    the share (2026-10-09), days before #8's pre-committed engaged-share read."""
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    called = []
+    monkeypatch.setattr(report, "release", lambda *a, **k: called.append(a))
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline",
+                                      "--metric", "engaged_share"])
+    with pytest.raises(SystemExit) as exc:
+        report.main()
+    assert "--compare format_version=v7 --metric engaged_share" in str(exc.value)
+    assert not called
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"])
+    report.main()
+    assert called
