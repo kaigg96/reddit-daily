@@ -633,14 +633,16 @@ def main():
 
     if args.release:    # reads the snapshot series at a fixed age, not one point in time
         # The rule judges watch-seconds, with total watch time and views beside
-        # it. A --metric used to be dropped silently, so `--release v7 --metric
-        # engaged_share` printed watch-seconds as if it were the share
+        # it. Any other --metric used to be dropped silently, so `--release v7
+        # --metric engaged_share` printed watch-seconds as if it were the share
         # (2026-10-09, before #8's read).
-        if args.metric != Metric.WATCH:
-            sys.exit(f"--release judges watch-seconds by its rule and does not read "
-                     f"--metric {args.metric}. For that metric, compare the cohorts: "
-                     f"--compare {args.release_key}={args.release} --metric "
-                     f"{args.metric} --at-age N.")
+        if args.metric not in (Metric.WATCH, Metric.VIEWS, Metric.TOTAL):
+            age = insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age
+            within = f" --within {args.within}" if args.within else ""
+            sys.exit(f"--release judges watch-seconds by its rule (views and total "
+                     f"watch time beside it) and does not read --metric {args.metric}. "
+                     f"Read it per release instead: --by {args.release_key} --metric "
+                     f"{args.metric} --at-age {age:g}{within}")
         release(args.release, args.release_key,
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
                 args.min_uploads, args.within)

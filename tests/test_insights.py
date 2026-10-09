@@ -1891,8 +1891,9 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
                                       "--metric", "engaged_share"])
     with pytest.raises(SystemExit) as exc:
         report.main()
-    assert "--compare format_version=v7 --metric engaged_share" in str(exc.value)
+    assert "--by format_version --metric engaged_share --at-age 7" in str(exc.value)
     assert not called
-    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"])
-    report.main()
-    assert called
+    for extra in ([], ["--metric", "views"]):   # views is printed beside the rule
+        monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"] + extra)
+        report.main()
+    assert len(called) == 2
