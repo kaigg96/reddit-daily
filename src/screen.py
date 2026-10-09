@@ -187,8 +187,10 @@ def _generate_screened(prompt, tries=2, model=None):
 
 
 # When the main model fails twice (a 503 overload, its daily 429, a timeout),
-# one request to this model before the keyword backstop. The free tier is
-# counted per model, so an overload or spent cap on one rarely means the other.
+# one request to this model per screened candidate (up to 4 a run) before the
+# keyword backstop. The free tier is counted per model, so an overload or spent
+# cap on one rarely means the other. Its allowance is shared with the slate call
+# and every sample render; spent, the screen still lands on the backstop.
 # The 2026-10-09 06:21 upload went to the backstop on two 503s; titles have not
 # lost to one since the 30s wait (0 of 10), so only the screen falls back. The
 # replay passed 5/5 on this model (2026-10-09). Gemini only, never in a dry run
@@ -244,8 +246,11 @@ def screen(question, comments):
     topic = str(data.get("topic", "")).strip().lower()
     topic = topic if topic in TOPICS else ""
     reason = str(data.get("reason", ""))[:120]
-    unsafe = {int(n) - 1 for n in data.get("unsafe_comments", [])
-              if str(n).isdigit() and 0 < int(n) <= len(comments)}
+    # A null or a bare number here used to raise TypeError out of screen() and
+    # cost the slot its upload; isdecimal, unlike isdigit, refuses "²".
+    items = data.get("unsafe_comments")
+    unsafe = {int(n) - 1 for n in (items if isinstance(items, list) else [])
+              if str(n).isdecimal() and 0 < int(n) <= len(comments)}
 
     if risk in SKIP_CATEGORIES:
         return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason,
