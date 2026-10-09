@@ -103,11 +103,14 @@ def main():
     # title back to the Reddit question (PRD §2, TECH_DEBT 2026-09-19).
     # R2.2: one title style per day so both daily uploads share it; logged per upload
     title_style = llm.title_style_for(datetime.date.today())
+    # PRD §0 #14: a coin per run, independent of the day's style.
+    title_caps = llm.title_caps_arm(rng)
 
     # One request for all three fields. Each fails soft independently, so a
     # missing CTA doesn't cost us the title -- see llm.get_metadata.
     meta = (sample.METADATA if config.SAMPLE
-            else llm.get_metadata(post.title, post.comments, style=title_style))
+            else llm.get_metadata(post.title, post.comments, style=title_style,
+                                  caps=title_caps))
 
     keywords_ok = meta.keywords is not None
     keywords = meta.keywords or []
@@ -117,7 +120,10 @@ def main():
     if not title_ok:
         print("Title generation failed — shipping the Reddit question and "
               "logging no style (it was never applied)")
-    print(f"Title style {title_style or '-'}: {video_title}")
+    # Blank when the arm never applied, as the style is: a raw Reddit question
+    # is not evidence about either arm.
+    title_caps_logged = "" if not title_ok or config.SAMPLE else int(title_caps)
+    print(f"Title style {title_style or '-'}, caps arm {title_caps_logged}: {video_title}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta_ok = meta.cta is not None
@@ -216,6 +222,7 @@ def main():
         "cta_ok": int(cta_ok),
         "meta_failure": meta.failure,
         "screen_failure": post.screen_failure,
+        "title_caps": title_caps_logged,
     })
 
 
