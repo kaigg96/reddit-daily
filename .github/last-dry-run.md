@@ -6,31 +6,24 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `engineering/groq-route`
-- **Commit:** `fe2f3eb`
-- **When:** 2026-10-08T23:54:55Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 28.0 s, audio, no dead air
+- **Branch:** `reliability/screen-fallback-model`
+- **Commit:** `d9c1e3e`
+- **When:** 2026-10-09T17:38:14Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 30.4 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/37861643212)
-
-Failed soft (the video still passed):
-
-```
-Gemini metadata failed with HTTPError (title, keywords and CTA all fall back)
-Title generation failed — shipping the Reddit question and logging no style (it was never applied)
-```
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/37967266997)
 
 What it picked:
 
 ```
-Selected post: Who is your favorite example of positive masculinity?
-Slate topics (rank order): life-advice|money-work|money-work|nostalgia|dark-morbid|humor-absurd|relationships-dating
-Title style -: Who is your favorite example of positive masculinity?
-Today's top AskReddit post, asked by u/make_me_already: Who is your favorite example of positive masculinity?
+Selected post: Arab and Middle Eastern dudes in the U.S. - who are you talking to all the time?
+Slate topics (rank order): humor-absurd|hypotheticals|politics-news|sex-adjacent
+Title style B: Who are you talking to on the phone all day?
+Today's top NoStupidQuestions post, asked by u/GrizzleTusk: Arab and Middle Eastern dudes in the U.S. - who are you talking to all the time?
 ```
 
 ## Last request
 
-- **Branch:** `engineering/groq-route`
-- **When:** 2026-10-08T23:54:55Z
+- **Branch:** `reliability/screen-fallback-model`
+- **When:** 2026-10-09T17:38:14Z
 - **Outcome:** rendered -- see above
