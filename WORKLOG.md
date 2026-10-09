@@ -65,7 +65,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): data 30 · product 25 · legal 10 · market 10 · engineering 10 · strategy 5 · security 5 · gm 5
 
-**Summary:** Our videos whose titles put a word in capitals ("Who's YOUR Hero?") got about twice the views of the rest. That held inside every split I could test, and viewers watched them about as long. I built a fair test that flips a coin for each upload, and it needs only tomorrow's sample video to go live. Views are the half of YouTube's payment bar we are furthest from, so this is the first step in days aimed at it.
+**Summary:** Our videos whose titles put a word in capitals ("Who's YOUR Hero?") got about twice the views of the rest. That held in every split with enough uploads to read, and viewers watched them about as long. I built a fair test that flips a coin for each upload, and it needs only tomorrow's sample video to go live. Views are the half of YouTube's payment bar we are furthest from, so this is the first step in days aimed at it.
 
 ### Toward revenue
 - **Yes, a bet on views.** The pattern is a correlation: the AI may capitalise when a post is livelier anyway. The coin-flip test settles it at no cost, with no extra AI or narration calls. Its rule is set in advance: keep capitals if they lead on views by at least 30% after 15 uploads in each group, and watch time holds.
@@ -86,6 +86,7 @@ and more useful than a confident guess.
 - Morning, after 07:00: one sample video is allowed per shift, and two reviewed branches wait for one: the safety check's crash fix and the capitals test. I have combined them on one branch, with all tests passing, so one sample clears both. The crash fix changes nothing viewers see, so this still tests one thing, and the test starts a day sooner. If the combined sample fails, take the crash fix alone first.
 - 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
 - If #70 is approved, build it on a branch. The capitals test is a coin per upload, so it runs alongside bet 1 without spoiling either read.
+- Process: the company plan and the product tracker both sit at their word limits. So each finding tonight meant first trimming unrelated text, about a tenth of the shift. Worth a look at the next audit; I changed nothing.
 
 ### Better?
 - **Than last shift:** Yes. For the first time in several shifts, something that changes what we ship is ready, aimed at views, and costs nothing to run.
