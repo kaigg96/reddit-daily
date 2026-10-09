@@ -122,3 +122,50 @@ def test_an_applied_patch_and_a_plain_approval_are_not_flagged(monkeypatch, caps
                        "body": "<!-- apply-result -->\n**Applied** in abc1234. Closing."}]})
     escalations.show(True)
     assert "NOT APPLIED" not in capsys.readouterr().out
+
+
+def closed_github(monkeypatch, closed, comments):
+    """Open list empty; the closed list is what the refusal check reads."""
+    def api(path, data=None, method=None):
+        if path.endswith("/comments"):
+            return comments[int(path.split("/")[-2])]
+        return closed if "state=closed" in path else []
+    monkeypatch.setattr(escalations, "_api", api)
+    monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
+
+
+def closed_issue(n, title, labels, comments, closed_at):
+    return {**issue(n, title, labels, comments), "closed_at": closed_at}
+
+
+NOW = escalations.datetime(2026, 10, 9, 10, 0, tzinfo=escalations.timezone.utc)
+NO = "Not approved to spend money on this, find another solution"
+
+
+def test_a_refusal_is_shown_with_what_the_owner_asked_instead(monkeypatch, capsys):
+    """#62: the owner closed it with a no and a request, and a shift reading
+    only the open list missed both."""
+    real = escalations._declined
+    monkeypatch.setattr(escalations, "_declined", lambda: real(now=NOW))
+    closed_github(monkeypatch,
+                  [closed_issue(62, "Move Gemini to the paid tier", ["needs-owner", "guardrail"],
+                                [1], "2026-10-08T02:25:30Z")],
+                  {62: [{"author_association": "OWNER", "body": NO}]})
+    escalations.show(True)
+    out = capsys.readouterr().out
+    assert "CLOSED WITHOUT APPROVAL" in out and "#62" in out and "owner: " + NO in out
+    assert "approved and waiting to be done: none" in out
+
+
+def test_old_bare_or_approved_closes_are_not_refusals(monkeypatch):
+    closed_github(monkeypatch,
+                  [closed_issue(41, "Old refusal", ["needs-owner"], [1], "2026-09-27T16:42:00Z"),
+                   closed_issue(57, "Duplicate notice", ["needs-owner"], [], "2026-10-06T14:35:00Z"),
+                   closed_issue(64, "Done", ["needs-owner", "approved"], [1], "2026-10-07T13:38:00Z"),
+                   closed_issue(66, "Not an escalation", [], [1], "2026-10-07T13:38:00Z"),
+                   closed_issue(67, "A shift's note", ["needs-owner"], [1], "2026-10-08T10:00:00Z")],
+                  {41: [{"author_association": "OWNER", "body": NO}],
+                   64: [{"author_association": "OWNER", "body": "yes"}],
+                   66: [{"author_association": "OWNER", "body": NO}],
+                   67: [{"author_association": "NONE", "body": "Raised again"}]})
+    assert escalations._declined(now=NOW) == []

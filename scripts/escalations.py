@@ -7,7 +7,8 @@ questions sat open at once and every one of them kept notifying them. An
 approved escalation is a **work item**, not a question.
 
     escalations.py open              # anything still awaiting a decision
-    escalations.py approved          # decided — do these, then close them
+    escalations.py approved          # decided — do these, then close them;
+                                     # also lists recent refusals
     escalations.py close <n> "what was done"
 
 Needs GH_TOKEN (locally, from .env) or GITHUB_TOKEN (in CI).
@@ -18,6 +19,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 REPO = os.environ.get("GITHUB_REPOSITORY", "kaigg96/reddit-daily")
 
@@ -109,9 +111,43 @@ def _approved_by_owner(issue):
     return bool(marks) and (marks[-1].get("actor") or {}).get("login") == owner
 
 
+DECLINED_DAYS = 7
+
+
+def _declined(days=DECLINED_DAYS, now=None):
+    """Escalations the owner closed without approving, with what they said.
+
+    A "no" is a decision too, and this script listed open issues only. On
+    2026-10-08 the owner closed #62 ("Not approved to spend money on this,
+    find another solution") and that morning's shift, reading only the open
+    list, missed both the refusal and the request in it. Only closes carrying
+    an owner reply are shown: the reply is the decision, and a bare close is
+    usually a duplicate or a notice acknowledged."""
+    now = now or datetime.now(timezone.utc)
+    cutoff = (now - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = []
+    for i in _api(f"/repos/{REPO}/issues?state=closed&since={cutoff}&per_page=100"):
+        labels = {l["name"] for l in i["labels"]}
+        if ("pull_request" in i or "needs-owner" not in labels or "approved" in labels
+                or (i.get("closed_at") or "") < cutoff):
+            continue
+        replies = _owner_replies(i)
+        if replies:
+            out.append((i, replies))
+    return out
+
+
 def show(want_approved):
     rows = [(i, l) for i, l in _issues() if ("approved" in l) == want_approved]
     if want_approved:
+        declined = _declined()
+        if declined:
+            print(f"CLOSED WITHOUT APPROVAL in the last {DECLINED_DAYS} days — the owner's "
+                  "reply is the decision. Do not re-ask; follow what it says:")
+            for i, replies in declined:
+                print(f"  #{i['number']}  {i['title']}  (closed {i['closed_at'][:10]})")
+                for reply in replies:
+                    print("      owner: " + reply.replace("\n", "\n             "))
         forged = [(i, l) for i, l in rows if not _approved_by_owner(i)]
         rows = [r for r in rows if r not in forged]
         if forged:
