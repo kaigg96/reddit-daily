@@ -18,8 +18,8 @@ earns post-skip authority if a real zeroed upload supports it; everything else
 is answer-level, where being wrong is nearly free. See PRD R4.6 for the
 2026-08-30 evidence correction that forced this split.
 
-Fails open: any Gemini error leaves a keyword backstop as the only check, and
-if that also passes, the post ships.
+Fails open: a Gemini error tries `FALLBACK_MODEL` once, and if that fails too a
+keyword backstop is the only check; if that also passes, the post ships.
 """
 
 import json
@@ -136,10 +136,10 @@ class ScreenResult:
         self.unsafe = set(unsafe)       # 0-based indices into the comment pool
         self.category = category
         self.reason = reason
-        self.source = source or llm.provider()  # gemini | groq | backstop
+        self.source = source or llm.provider()  # gemini | groq | gemini_fallback | backstop
         self.topic = topic              # R4.3 taxonomy, logged for performance tracking
         self.demoted = demoted          # a DROP_ONLY category the model raised on the post
-        self.failure = failure          # why Gemini never answered, when source=backstop
+        self.failure = failure          # why the main model never answered (backstop, gemini_fallback)
 
     def __repr__(self):
         return (f"ScreenResult({self.verdict}, unsafe={sorted(self.unsafe)}, "
@@ -178,11 +178,32 @@ def _backstop(question, comments, failure=""):
 SCREEN_THINKING_BUDGET = 512
 
 
-def _generate_screened(prompt, tries=2):
+def _generate_screened(prompt, tries=2, model=None):
     """Retry a transient failure once — falling back to the keyword backstop is
     a real downgrade in protection, so it is worth a few seconds to avoid.
     The policy (never a 429) lives in `llm.generate_retrying`."""
-    return llm.generate_retrying(prompt, tries, thinking_budget=SCREEN_THINKING_BUDGET)
+    kw = {"model": model} if model else {}
+    return llm.generate_retrying(prompt, tries, thinking_budget=SCREEN_THINKING_BUDGET, **kw)
+
+
+# When the main model fails twice (a 503 overload, its daily 429, a timeout),
+# one request to this model before the keyword backstop. The free tier is
+# counted per model, so an overload or spent cap on one rarely means the other.
+# The 2026-10-09 06:21 upload went to the backstop on two 503s; titles have not
+# lost to one since the 30s wait (0 of 10), so only the screen falls back. The
+# replay passed 5/5 on this model (2026-10-09). Gemini only, never in a dry run
+# (already on it) and never under Groq (whose point is keeping posts off
+# Gemini). `replay_screen.py` sets it to None: a fallback answer tests the
+# wrong model, so there it would only spend requests on an inconclusive case.
+FALLBACK_MODEL = llm.SAMPLE_MODEL
+FALLBACK_SOURCE = "gemini_fallback"
+
+
+def _after(prior, failure):
+    """The failure label once the fallback model has also missed: the main
+    model's stays first, so the column still counts overloads and caps as
+    before, and the fallback's says why it missed too."""
+    return f"{prior};fallback_{failure}" if prior else failure
 
 
 def _fall_back(question, comments, failure):
@@ -193,20 +214,31 @@ def _fall_back(question, comments, failure):
 def screen(question, comments):
     """Screen one candidate. Never raises — worst case returns a permissive result."""
     numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(comments))
+    prompt = _PROMPT.format(question=question, numbered=numbered, topics=", ".join(TOPICS))
+    source, prior = None, ""
     try:
-        raw = _generate_screened(_PROMPT.format(
-            question=question, numbered=numbered, topics=", ".join(TOPICS)))
+        raw = _generate_screened(prompt)
     except Exception as e:
-        return _fall_back(question, comments, llm._failure_kind(e))
+        failure = llm._failure_kind(e)
+        if not FALLBACK_MODEL or config.DRY_RUN or llm.provider() != "gemini":
+            return _fall_back(question, comments, failure)
+        print(f"Screen: Gemini failed ({failure}) — trying {FALLBACK_MODEL}")
+        try:
+            raw = _generate_screened(prompt, tries=1, model=FALLBACK_MODEL)
+        except Exception as e2:
+            return _fall_back(question, comments, _after(failure, llm._failure_kind(e2)))
+        # The main model's failure is kept on an answered fallback, so the log
+        # shows why it ran.
+        source, prior = FALLBACK_SOURCE, failure
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         # Parsing this as {} would pass the post as screened by Gemini while
         # skipping even the backstop. Labels match llm.get_metadata's.
-        return _fall_back(question, comments, "no_json")
+        return _fall_back(question, comments, _after(prior, "no_json"))
     try:
         data = json.loads(match.group(0))
     except ValueError:
-        return _fall_back(question, comments, "bad_json")
+        return _fall_back(question, comments, _after(prior, "bad_json"))
 
     risk = str(data.get("post_risk", "none")).strip().lower()
     topic = str(data.get("topic", "")).strip().lower()
@@ -216,7 +248,8 @@ def screen(question, comments):
               if str(n).isdigit() and 0 < int(n) <= len(comments)}
 
     if risk in SKIP_CATEGORIES:
-        return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason, topic=topic)
+        return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason,
+                            source=source, topic=topic, failure=prior)
 
     # The prompt already tells the model these are answer-level, but a prompt is
     # not an enforcement mechanism — never let them cost a slot. Logged as
@@ -225,7 +258,7 @@ def screen(question, comments):
     return ScreenResult("pass", unsafe=unsafe,
                         category="unsafe_comments" if unsafe else "",
                         reason=reason if (unsafe or demoted) else "",
-                        topic=topic, demoted=demoted)
+                        source=source, topic=topic, demoted=demoted, failure=prior)
 
 
 # --- R4.4 Step 0.5: slate telemetry ---------------------------------------
