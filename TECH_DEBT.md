@@ -236,51 +236,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 reasoning** if it stopped mattering. Past the cap, close before adding —
 a list nobody can read is the same as no list.
 
-- **Nothing enforces the Gemini daily total — only the per-consumer caps, and
-  they sum to more than the cap.** The free tier is 20 requests/day, measured
-  2026-09-19 from the 429 body
-  (`quotaId=GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue=20`).
-  Since the three metadata calls merged into `get_metadata`, production spends
-  **2–5 per run, 4–10 per day**. But the release gate allows itself 8, a shift
-  allows itself 8, and production takes up to 10 — **26 against a cap of 20,
-  with no shared ledger**, so each consumer can stay inside its own limit and
-  still starve the next one. Reset is midnight Pacific ≈ 07:00 UTC, which falls
-  **between** the two scheduled runs (~05:00 and ~16:15 UTC), and the early run
-  is last in that window, so it is always the one that starves — as it did on
-  2026-09-20 (`title_ok=0 keywords_ok=0 cta_ok=0`, raw Reddit question shipped
-  as the title). The dead skip in `validate-release.yml` that made this bite
-  daily is fixed (2026-09-20); the unbounded total is not. **It recurred
-  2026-09-24 05:03** (same all-three-zero shape, screen still `gemini`): 2 of
-  the 9 `v6` uploads so far, both morning runs. The fix this item named for a
-  recurrence is now due: have the gate and the dry run read the window's
-  spend from a committed counter before starting, rather than trusting three
-  independent caps. First, confirm the cause: the ok-flags cannot tell a 429
-  from a timeout, so this diagnosis rests on timing. **Merged 2026-09-25:** the
-  upload log's `meta_failure` column now records the reason (`http_429`,
-  `timeout`, ...); the next all-three-zero morning row confirms or kills it.
-  Also retroactively supports v6's "never retry a 429" — at 20/day a retry is
-  a meaningful fraction of the budget. **2026-10-01 06:09: the screen fell to
-  the keyword backstop** (`screen_source=backstop`, first since that column
-  began 09-09) while the title call succeeded, so not a whole-window 429.
-  **Merged 2026-10-01 (evening):** the upload log's `screen_failure` column now
-  records why (`http_503`, `timeout`, `no_json`, ...) — built before a
-  second occurrence, since waiting would lose that one's reason. The backstop's regex matches
-  **0 of the 4** questions Gemini has skipped (`analysis/screen_log.csv`), so
-  a backstop run is unscreened at post level. At ~1 in 44 runs × ~6% skips
-  that is ~0.1% of runs — act only if the backstop rate rises. (A reply with
-  no JSON used to pass as `gemini`, skipping even the backstop; 0 of 22 rows
-  showed it. Since 2026-10-01 it falls to the backstop as `no_json`.)
-  **2026-10-01 18:29: the title call failed with `http_503`**, the first
-  reason recorded since the column began; title, keywords and CTA all fell
-  back. The screen retried a 503 once, the metadata call never did. **Merged
-  2026-10-02:** both go through `llm.generate_retrying` (503 or timeout once,
-  never a 429). The 10-02 14:46 release check hit a 503 the retry did not
-  clear, so a 503 that outlasts ~4s still falls back.
-  **2026-10-04 06:04: `http_503` again, not `http_429`** — the shared window
-  fitted; a second 503 outlasted the 4s retry and the upload lost its title.
-  **Merged 2026-10-04:** a 503 now waits 30s (`_OVERLOAD_WAIT`) before its
-  one retry. Another `http_503` row means 30s is not enough either; then
-  consider the retry going to a model with its own allowance.
 - **`est_minutes_watched` contradicts `avg_view_duration_s` in
   `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
   reported 30s average view duration is ~27 minutes watched, but the row logs
