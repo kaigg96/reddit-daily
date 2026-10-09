@@ -160,9 +160,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   owner's label); up to four screens run back to back, so at
   8K tokens a minute a second 429 inside one retry falls to the backstop
   (watch `screen_failure=http_429`). **Switch on by changing the default in
-  `src/config.py`, never a workflow or repo variable:** the release check's
-  verdict does not record the route, and it re-runs only when code changes,
-  so a variable flip would ride on Gemini's PASS. Some log lines still say
+  `src/config.py`, never a workflow or repo variable:** the release check
+  re-runs only when code changes, so a variable flip would ride on Gemini's
+  PASS (its verdict now names the route it tested). Some log lines still say
   "Gemini" whichever route answered (`screen.py`, `validate_release.py`).
 
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
