@@ -31,9 +31,11 @@ from . import config, llm
 # so the bar is high: either a confirmed zeroed upload of that shape, or a
 # severity that makes a false positive cheap because it never fires here anyway.
 # A new category ships with TWO differently-worded examples in `_PROMPT`, and
-# `scripts/replay_screen.py` tests it on a third it has never seen: with one
-# example the model caught that example and missed a paraphrase (2026-09-20);
-# with two, an unseen paraphrase was caught (2026-10-08).
+# is checked once on a third the prompt has never seen. `replay_screen.py`'s
+# unseen cases run only on the Groq route, so on Gemini run one by hand. With
+# one example the model caught that example and missed a paraphrase
+# (2026-09-20); with two, an unseen paraphrase was caught (2026-10-08, one data
+# point). `named_wrongdoing` predates the rule and still has one.
 SKIP_CATEGORIES = (
     "sexual_suggestive",   # confirmed zeroed: sexual acts/performance framing as the premise
     "named_wrongdoing",    # confirmed zeroed: solicits unproven misconduct claims about named real people
