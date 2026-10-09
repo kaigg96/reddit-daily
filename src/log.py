@@ -41,6 +41,9 @@ FIELDS = [
     # backstop while its metadata call succeeded, so it was not the daily cap --
     # and nothing recorded what it was.
     "screen_failure",
+    # Added 2026-10-09 (PRD §0 #14): the title's capitals arm, 1 or 0, blank
+    # when the title fell back to the Reddit question and no arm applied.
+    "title_caps",
 ]
 
 

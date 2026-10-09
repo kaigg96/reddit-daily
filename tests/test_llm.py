@@ -568,3 +568,33 @@ def test_a_groq_key_alone_leaves_every_call_on_gemini(monkeypatch):
                         lambda url, **kw: sent.append(url) or FakeResponse(GOOD_JSON))
     assert llm.get_metadata("What is it?", ["a", "b", "c"]).source == "gemini"
     assert sent and all("generativelanguage.googleapis.com" in u for u in sent)
+
+
+def _caps_prompt(monkeypatch, caps):
+    seen = []
+    monkeypatch.setattr(llm, "generate_retrying",
+                        lambda prompt, *a, **k: seen.append(prompt) or '{"title": "t"}')
+    llm.get_metadata("What is the scariest story?", ["one", "two", "three"],
+                     style="B", caps=caps)
+    return seen[0]
+
+
+def test_each_capitals_arm_asks_for_its_own_title_and_both_ban_shock_phrases(monkeypatch):
+    """PRD §0 #14: the arms differ only in the capitals line."""
+    on, off = _caps_prompt(monkeypatch, True), _caps_prompt(monkeypatch, False)
+    assert "exactly ONE word in capitals" in on and "Do not write any word in capitals" not in on
+    assert "Do not write any word in capitals" in off and "exactly ONE word" not in off
+    assert "Never use shock phrases" in on and "Never use shock phrases" in off
+    assert on.replace(llm._CAPS_GUIDANCE[True], "") == off.replace(llm._CAPS_GUIDANCE[False], "")
+
+
+def test_no_arm_leaves_the_title_prompt_as_it_was(monkeypatch):
+    """Callers that pass no arm (the release gate's old call, tests) see no new line."""
+    prompt = _caps_prompt(monkeypatch, None)
+    assert "capitals" not in prompt and "shock phrases" not in prompt
+
+
+def test_the_capitals_coin_lands_both_ways():
+    import random
+    arms = {llm.title_caps_arm(random.Random(seed)) for seed in range(20)}
+    assert arms == {True, False}

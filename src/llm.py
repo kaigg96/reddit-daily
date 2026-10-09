@@ -225,7 +225,27 @@ def _cta_instruction(vote_rule):
    or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
 
 
-def get_metadata(reddit_title, comments, style="A"):
+# PRD §0 #14: titles with a capitalised word earned ~2x the views at 7 days,
+# observationally (PRD §4, 2026-10-09). Each run's coin assigns an arm, so the
+# read is causal. Both arms ban shock phrases: YouTube's monetization review
+# reads titles and refuses content "designed to shock or surprise viewers for
+# the sole purpose of getting views" (PLAN §4). None leaves the prompt as it was.
+_CAPS_GUIDANCE = {
+    True: """
+   - Write exactly ONE word in capitals for emphasis (e.g. "Who's YOUR Hero?"); no other word in capitals.""",
+    False: """
+   - Do not write any word in capitals for emphasis; only real acronyms may be in capitals.""",
+}
+_NO_SHOCK = """
+   - Never use shock phrases such as "shocking", "you won't believe" or "insane"."""
+
+
+def title_caps_arm(rng):
+    """PRD §0 #14's coin: True asks the title for one capitalised word."""
+    return rng.random() < 0.5
+
+
+def get_metadata(reddit_title, comments, style="A", caps=None):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
     These were three separate calls until 2026-09-19. The free-tier cap is 20
@@ -241,6 +261,8 @@ def get_metadata(reddit_title, comments, style="A"):
     a dead API.
     """
     guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
+    if caps is not None:
+        guidance += _CAPS_GUIDANCE[bool(caps)] + _NO_SHOCK
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
