@@ -6,7 +6,8 @@ lives in [PLAN.md](PLAN.md) (the company), [PRD.md](PRD.md) §0 (the product) an
 This file records *what happened, what's queued next, and what's blocked on
 what*, so a cold session can resume without re-deriving anything.
 
-Keep it to ~10 entries; delete older ones (git history keeps them).
+Keep it within its word budget (`scripts/context_budget.py`) by deleting the
+oldest entries; git history keeps them, and the audit reads them there.
 
 **Entries are emailed to the owner verbatim as the shift report.** Write for a
 manager, not an engineer: plain language, no filenames, no jargon. Technical

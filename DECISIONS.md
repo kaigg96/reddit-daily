@@ -108,6 +108,16 @@ refills a shift's time, not the floor. While the owner's planning session (#55)
 is pending, the floor measures that wait, not the shift. Not yet a trigger: one
 day.
 
+**Re-reviewed 2026-10-09 (audit) — trigger fired.** Assumption 1 is false while
+the owner's queue is this long. Three shifts in a row handed over 30–40 minutes
+early with 0 ready against 5, and #67 has been raised three times. The binding
+limit is the owner's hands, not generation. Every escalation since 09-25 that a
+label could answer was answered, most within a day (12 of 12). All 8 still open
+ask for a session, a login, a script, a key or a hand edit. D11 stands, because
+the floor makes that wait visible, which is its job. The response is to shape
+asks as labels (#70 splits bet 1 out of #55). Revisit if shifts still end early
+once #70 is answered.
+
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
 The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
@@ -163,9 +173,8 @@ and the floor keeps meaning "a week's weather"; (c) the weekly snapshot keeps
 running — without it there is no age-matched read at all.
 
 **Revisit when:** cadence changes materially (assumption b), or any release
-lands a verdict a human disagrees with. **Not yet settled:** §5 reverts on
-watch-seconds *or* views, and views is 5× noisier — escalated as
-`release-rule-metric-conflict`, owner's call.
+lands a verdict a human disagrees with. **Settled 2026-09-24:** the owner chose
+watch-seconds only (#18, `b303b37`); views never trigger a revert.
 
 **Re-reviewed 2026-10-06:** still holds at 2 uploads a day. Bet 2's volume step
 (PRD #4, 3–4 a day) would break (b): batches of 8 would span two days, not
@@ -199,6 +208,13 @@ when videos merely get longer.
 scorecard and the subjective series disagree persistently (2 or 3 false); or a
 new guardrail blocks work on noise — each costs power, and ten at 80% leaves
 about 11% combined.
+
+**Re-reviewed 2026-10-09 (audit):** 2 is under strain, not false. `v7`'s lead
+was mostly length (PRD §4, 10-07), patched by the total-watch-time check (#39),
+and the revenue bar counts engaged views (PLAN §1). The 12 October engaged-share
+read (§0 #8) is the evidence; re-review then. The 3-point `zero_rate` margin
+breaches today on 2.4% → 5.6% (n=42 vs 36), which the scorecard itself calls
+weather at this size.
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
@@ -271,6 +287,10 @@ padding. Both questions (PRD R4, R5) had decision rules fixed before the data
 and tied to bet 2, and both were answered. If the next shifts' research again
 changes no rule, 2 is false.
 
+**Re-reviewed 2026-10-09 (audit):** 1 is false for now, for the reason under D11:
+the work above the bar waits on the owner's hands. 2 holds. This shift's research
+(commentary drafts, PRD §4) changed a proposal (#70) rather than padding.
+
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
 `CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
@@ -319,6 +339,14 @@ or word budgets like the loaded docs (wrong unit — the problem is too many ope
 doc becomes unmaintainable while still under cap (1 too high, or 3 false); or
 items get closed by deletion-without-reasoning to stay under (2 false — the
 cap is then producing dishonesty rather than hygiene).
+
+**Re-reviewed 2026-10-09 (audit):** assumption 1 is false for `WORKLOG.md`. Its
+word budget (2,600) binds at **2** entries, so the 10-entry cap never binds, and
+the audit reads older entries from git. The budget also costs churn: about ten
+trim commits across 8 shifts, and 15 log commits in one. The header now says
+the word budget decides. 3 is strained for `TECH_DEBT.md`: 24 of 25, and its
+largest item runs past 500 words, so items grow rather than count. Shorter
+entries would come from the template, which is what the owner reads. Left as is.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 

@@ -153,6 +153,22 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
+  work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
+  none changed a video, and every "Better?" answer hedged (6 "slightly", 2
+  "unclear"). Shifts used 58% of their minutes. Every label-only escalation
+  since 09-25 closed, most within a day (12 of 12); all 8 open ones need hands
+  or a session. The vote (#7) took two shifts to build ahead of an answer, and
+  the 10-09 market read now undercuts it. Groq (#13) waits on a key. Changed:
+  bet 1 was split out of #55 as a label (#70); declines now show in
+  `escalations.py approved` (#62 was missed on 10-08); decision re-reviews went
+  into D4, D6, D7, D9 and D11; the WORKLOG header now matches its budget.
+  Proposed nothing to the skills, because #50, the patch that would let
+  approved skill changes land by label, is itself waiting on the owner's
+  hands. Left alone: the template's length, which is the owner's report.
+  **Closes when** #70 is answered and shifts stop ending early, or the next
+  audit finds a different binding limit.
+
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
   every AI call to Groq; with no key it falls back to Gemini, and the log's
