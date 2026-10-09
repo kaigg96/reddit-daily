@@ -201,27 +201,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   pending). Until then, **do not add tracks to `assets/music/` in plain
   form**: the PRD owner task to add Audio Library tracks would widen it.
 
-- **One in-prompt example does not generalize the R4.6 screen's judgment
-  categories.** The 2026-09-20 morning fix restored reasoning tokens for the
-  screen after they were caught passing a `sexual_suggestive` question with
-  thinking off. A same-day replay, with reasoning already restored, still
-  missed a live paraphrase of the identical shape ("...dangerously flirty?")
-  while correctly catching the literal in-prompt example ("...excellent in
-  bed?"). Fixed by adding the paraphrase as a second calibration example
-  (`src/screen.py`), pinned by a deterministic test. The generalisable part:
-  reasoning tokens buy consistency on cases the model has already seen the
-  shape of; they don't buy category generalization. Any future screen category
-  should ship with **two** differently-worded examples, not one, and the
-  standing audit (`analysis/screen_log.csv`) is the only thing that would
-  catch a shape the taxonomy has zero examples of. `scripts/replay_screen.py`'s
-  FLIRT case is now a memorization check, not a generalization check, since its
-  question is also in the prompt — swap in a fresh paraphrase before trusting
-  a pass on it as proof the category holds. **First unseen check, 2026-10-08:** on
-  Gemini, the replay's groq-only paraphrase ("...non-sexual thing that is
-  secretly really sexy?") was skipped as `sexual_suggestive`, and its control
-  passed: one data point that the two-example fix generalizes, and the
-  labels a Groq run is judged against are right.
-
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
