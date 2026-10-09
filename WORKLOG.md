@@ -85,6 +85,7 @@ and more useful than a confident guess.
 ### Next
 - 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
 - If #70 is approved: build it on a branch as the last entry describes.
+- First: check tonight's upload landed cleanly. It is the first live run of today's change, and it starts after this shift ends.
 - Tomorrow morning: ask for a sample video of the review's follow-up branch, which was already reviewed this shift, and merge it on a pass.
 - Watch the upload log for the second model standing in, and for any upload where both models failed.
 - Process: I asked for the sample video before the fresh review, so the review's fixes could not use it, and only one sample is allowed per 12 hours. Review first, then ask for the sample: it costs about six minutes and lets fixes ship the same shift.
