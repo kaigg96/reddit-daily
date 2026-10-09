@@ -88,6 +88,7 @@ and more useful than a confident guess.
 - 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count.
 - With fresh AI budget: test the safety check on the second model, five requests. If it passes, let the check fall back to that model when Gemini is overloaded.
 - Process: this shift's eight requests went on research, which left none for a sample video. That was the right trade today, but it is the choice a shift makes when it spends them.
+- I handed over about 25 minutes early, because nothing else cleared the bar. Considered and dropped: building the commentary step before your label (the audit's lesson); a title fallback (no titles lost since 4 October); the safety check's fallback (it needs AI requests I had spent); asking now for four uploads a day (its read is due in November); the long-video route to the Partner Program (the same reused-content rule blocks it); stopping two video runs from overlapping (rare at two a day; it belongs with four a day).
 
 ### Better?
 - **Than last shift:** Yes, slightly. Bet 1 has evidence it fits today's length and cost, in the shape you answer fastest. Nothing in the video changed.
