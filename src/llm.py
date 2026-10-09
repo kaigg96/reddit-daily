@@ -232,7 +232,7 @@ def _cta_instruction(vote_rule):
 # the sole purpose of getting views" (PLAN §4). None leaves the prompt as it was.
 _CAPS_GUIDANCE = {
     True: """
-   - Write exactly ONE word in capitals for emphasis (e.g. "Who's YOUR Hero?"); no other word in capitals.""",
+   - Write exactly ONE word in capitals for emphasis (such as "YOU" or "REALLY"); no other word in capitals.""",
     False: """
    - Do not write any word in capitals for emphasis; only real acronyms may be in capitals.""",
 }
