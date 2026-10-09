@@ -153,7 +153,7 @@ def test_timeout_is_retried_once(monkeypatch):
 def test_persistent_timeout_still_fails_open(monkeypatch):
     import requests
 
-    def always_slow(prompt, thinking_budget=0):
+    def always_slow(prompt, thinking_budget=0, model=None):
         raise requests.Timeout("slow")
 
     monkeypatch.setattr(screen.llm, "_generate", always_slow)
@@ -161,7 +161,88 @@ def test_persistent_timeout_still_fails_open(monkeypatch):
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.verdict == "pass"
     assert r.source == "backstop"
-    assert r.failure == "timeout"
+    assert r.failure == "timeout;fallback_timeout"
+
+
+def _http_error(code):
+    import requests
+    resp = requests.Response()
+    resp.status_code = code
+    return requests.HTTPError(response=resp)
+
+
+def _main_model_fails(monkeypatch, code=503, fallback_reply=None, fallback_code=None):
+    """The main model always raises `code`; the fallback model answers
+    `fallback_reply`, or raises `fallback_code`. Returns the models called."""
+    calls = []
+
+    def fake(prompt, thinking_budget=0, model=None):
+        calls.append(model)
+        if model is None:
+            raise _http_error(code)
+        if fallback_code:
+            raise _http_error(fallback_code)
+        return fallback_reply
+
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
+    monkeypatch.setattr(screen.llm, "_generate", fake)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
+    return calls
+
+
+def test_an_overload_falls_back_to_the_other_model(monkeypatch):
+    """The 2026-10-09 06:21 upload went to the keyword backstop on two 503s.
+    The free tier is counted per model, so the other one usually answers."""
+    calls = _main_model_fails(monkeypatch, 503, fallback_reply=json.dumps(
+        {"post_risk": "none", "reason": "", "unsafe_comments": [2], "topic": "other"}))
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert calls == [None, None, screen.FALLBACK_MODEL]   # one retry, then one fallback
+    assert r.source == "gemini_fallback"   # the log tells it from a main-model answer
+    assert r.failure == "http_503"         # and says why it ran
+    assert r.unsafe == {1}
+    assert r.topic == "other"
+
+
+def test_the_fallback_model_can_still_skip_a_post(monkeypatch):
+    _main_model_fails(monkeypatch, 429, fallback_reply=json.dumps(
+        {"post_risk": "sexual_suggestive", "reason": "r", "unsafe_comments": [],
+         "topic": "sex-adjacent"}))
+    r = screen.screen("q", ["a", "b", "c"])
+    assert r.verdict == "skip_post"
+    assert r.source == "gemini_fallback"
+    assert r.failure == "http_429"
+
+
+def test_both_models_failing_reaches_the_backstop_once(monkeypatch):
+    calls = _main_model_fails(monkeypatch, 503, fallback_code=429)
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert calls == [None, None, screen.FALLBACK_MODEL]   # the fallback is never retried
+    assert r.source == "backstop"
+    assert r.failure == "http_503;fallback_http_429"   # the main model's reason first
+
+
+def test_a_fallback_reply_without_json_reaches_the_backstop(monkeypatch):
+    _main_model_fails(monkeypatch, 503, fallback_reply="Looks fine to me.")
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop"
+    assert r.failure == "http_503;fallback_no_json"
+
+
+@pytest.mark.parametrize("setting", ["dry_run", "groq", "disabled"])
+def test_no_fallback_where_it_would_test_or_send_the_wrong_thing(monkeypatch, setting):
+    """A dry run is already on the fallback model; Groq exists to keep posts
+    off Gemini; the replay switches it off because it tests the main model."""
+    calls = _main_model_fails(monkeypatch, 503, fallback_reply="{}")
+    if setting == "dry_run":
+        monkeypatch.setattr(screen.config, "DRY_RUN", True)
+    elif setting == "groq":
+        monkeypatch.setattr(screen.llm, "provider", lambda: "groq")
+    else:
+        monkeypatch.setattr(screen, "FALLBACK_MODEL", None)
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert calls == [None, None]   # the main model and its retry, nothing else
+    assert r.source == "backstop"
+    assert r.failure == "http_503"
 
 
 def test_screen_source_reaches_the_upload_log(monkeypatch):
@@ -208,18 +289,19 @@ def test_429_is_not_retried(monkeypatch):
     import requests
     calls = []
 
-    def limited(prompt, thinking_budget=0):
-        calls.append(1)
+    def limited(prompt, thinking_budget=0, model=None):
+        calls.append(model)
         resp = requests.Response()
         resp.status_code = 429
         raise requests.HTTPError(response=resp)
 
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
     monkeypatch.setattr(screen.llm, "_generate", limited)
     monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
     r = screen.screen("q", ["a", "b", "c"])
-    assert len(calls) == 1          # one attempt, no retry
+    assert calls.count(None) == 1   # one attempt on the main model, no retry
     assert r.source == "backstop"   # still fails open
-    assert r.failure == "http_429"  # the daily cap, distinguishable from a timeout
+    assert r.failure.startswith("http_429")  # the daily cap, distinguishable from a timeout
 
 
 def test_the_screen_asks_for_reasoning(monkeypatch):

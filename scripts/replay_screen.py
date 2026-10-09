@@ -85,6 +85,10 @@ if config.AI_PROVIDER == "groq":
         ("PASS", "Nurses, what's the weirdest thing a patient said coming out of anaesthesia?", ANAES),
     ]
 
+# An answer from the screen's fallback model tests the wrong model: inconclusive
+# below, so on a main-model overload it would only spend that model's requests.
+screen.FALLBACK_MODEL = None
+
 # Groq switched on without its key would answer every case from Gemini: seven
 # requests of Gemini's 20 a day, all inconclusive. Stop before spending them.
 if llm.provider() != config.AI_PROVIDER:
