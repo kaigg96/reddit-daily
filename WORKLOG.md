@@ -61,6 +61,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-09 (10:33) — Bet 1 now has a tested first step you can approve with one label: a host's commentary makes up half of each video, at today's length and cost
+
+    Worked (% of the shift): gm 35 · product 20 · editorial 15 · strategy 10 · engineering 10 · reliability 5 · security 5
+
+**Summary:** I tested whether our AI can write commentary that fills half of each video. It can, at today's length and narration cost, so bet 1 (making the format ours) is now one label for you on #70. This shift's audit found the company's limit is the tasks that need your own hands, not your decisions. No revenue yet, but this is the step YouTube's rules make the precondition for any.
+
+### Toward revenue
+- **One step closer, not yet shipped.** YouTube will not pay for videos that only read other people's words. One host line per video is unlikely to change that. Commentary making up the bulk of each video might. Five drafts put our own words at 51–67% of each script, with no phrasing repeated between them, at today's length and cost. Approving #70 starts the build.
+
+### Done
+- **Editorial / product:** five commentary drafts, then three reruns under tighter rules: eight AI requests in all, on the separate test model, so the upload's allowance was untouched. Results, the best draft, and what went wrong are on #55. The failures were facts stated in our voice, jokes on grim threads, and answers referred to by number. Tighter rules fixed the last two kinds but not the first: on medical threads it still slipped in facts and advice. So the proposal leaves host lines off medical threads. Two corrections on #70 keep your rule that answers are read in vote order, and adopt the "show of hands" stance unless you name another.
+- **Strategy / gm:** split bet 1 out of the planning session as #70, a single label. Since 25 September, all 12 of your label-only decisions were answered, most within a day. All 8 open items need your hands or a session.
+- **General management (audit, due):** none of the eight shifts since the last audit changed a video, and every self-assessment hedged. Two of the decisions behind how shifts work rest on an assumption that is false while your hands-on queue is this long: that there is always work above the bar. That is recorded, with dated notes on five decisions. The vote built two shifts ago, ahead of your answer, is now undercut by the market read. So the lesson is to build after a label, not before.
+- **Engineering (a fix):** a shift missed your "no" on #62 because the decision list showed only open issues. It now also shows issues you closed without approving, with your reply. A fresh review caught that a shift's own close could pass as yours, and that is fixed.
+- **Reliability:** checked why this morning's upload lost its AI safety check. Gemini was overloaded twice. Titles have not been lost to that since the 4 October fix (0 of 10), so I dropped a title fallback I had started; it had nothing to fix. The safety check's fallback needs a test first, which is next shift's work.
+- **Security:** standing check clean. $0.24 spent on narration this month (forecast $0.88 of $3), money controls in place, no secrets in the project, no workflow change.
+- Fixing against improving: half and half. The commentary test and #70 improve; the decision-list fix, three closed or re-recorded code-health items and the audit notes fix.
+
+### Blocked
+- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50, which make every approved rule change land by label from then on (#65 is waiting on it); the Groq key and the label on #69 (#68); the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments change (#53).
+
+### Next
+- If #70 is approved: build it on a branch, with the top two answers in vote order, the show-of-hands verdict, no host lines on medical threads, and the share of our own words logged per upload. Then ask for a sample, and you listen to one with real narration. It ships as its own version after `v7`'s read.
+- 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count.
+- With fresh AI budget: test the safety check on the second model, five requests. If it passes, let the check fall back to that model when Gemini is overloaded.
+- Process: this shift's eight requests went on research, which left none for a sample video. That was the right trade today, but it is the choice a shift makes when it spends them.
+
+### Better?
+- **Than last shift:** Yes, slightly. Bet 1 has evidence it fits today's length and cost, in the shape you answer fastest. Nothing in the video changed.
+- **Than ~10 shifts ago:** No, on the audit's evidence. None of those shifts changed a video. Median watch time is flat (12.0 to 12.5 seconds, inside the usual swing), views per upload went from 75 to 65, and two built features wait on you.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-09 (00:00) — The free AI route that keeps Reddit posts out of training is now in the live code, switched off: your key and one label turn it on
 
     Worked (% of the shift): engineering 45 · market 15 · product 15 · gm 10 · security 10 · reliability 5
@@ -93,36 +125,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, slightly. The Groq route went from a branch to the live code, so switching it on needs only your ten minutes, and bet 1 has outside evidence on how big it must be.
 - **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule, and the AI-limit and AI-training problems have a free fix merged and waiting on a key. Views per upload are still below August's.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-08 (17:53) — You asked for another way to keep Reddit posts out of AI training: one is found, free, and built switched off
-
-    Worked (% of the shift): engineering 35 · legal 25 · data 20 · gm 15 · security 5
-
-**Summary:** You turned down paying for Gemini (#62) and asked for another solution; the morning shift missed that. Groq's free tier bans training on what we send, in its contract, and it is built into the code switched off; your ten minutes on #68 is all it needs. It brings no revenue directly, but it removes one way our use of Reddit breaks Reddit's terms. It also lifts the 20-a-day AI limit that has shaped half our plans.
-
-### Toward revenue
-- **Nothing directly.** The Reddit risk stands until Reddit answers (#60), but this takes away the part we can fix ourselves. And Groq allows about 100 of our requests a day against Gemini's 20. That limit ruled out the topic ranker reading every candidate post, and four uploads a day has to fit inside it.
-
-### Done
-- **Legal:** read each provider's own terms. Groq bans training on inputs by contract, even on the free tier. Cloudflare's free tier does not train either, and is a fallback at about 60–75 requests a day. GitHub's free models were retired in July, and Cerebras offers only a 30-day trial. Google's no-training terms need a billing account, unless the account holder is in the UK, the EEA or Switzerland. If that is you, say so on #68: nothing may need to change, and it also answers TikTok's country rule.
-- **Engineering:** tried an open AI model running on our own GitHub machine, so no text leaves it. It took 7 to 53 seconds a call and got the safety screen's five standing cases right. Its titles were clearly weaker, so it is a fallback, not the answer. Then built the Groq route into the code, switched off: until a shift flips it, every request is unchanged, and a key alone changes nothing. It stays on a branch: a sample video was barred so near the evening upload. A fresh review found nothing blocking; I made its quick fixes, and the rest wait for the switch-on. A bet.
-- **Engineering:** the safety screen's daily check only uses questions that are written into the screen's own instructions, so passing it shows memory, not judgement. On the branch, two new questions now run whenever we test a different AI. A fix.
-- **Data:** the channel's scorecard stops counting videos you made private as "buried". This matters now: the scorecard's one red flag is exactly that count (2.4% to 5.6%). From 12 October it is read on the same terms as every other report. Reviewed, merged. A fix.
-- **General management:** recorded your #62 decision under the standing ruling against new costs (it still holds), and corrected the risk register. Fixed the tracker check that read "spending" as "pending" and so flagged a closed issue as still open. The three items you approved (#65, #53, #50) still each need a step from you (unchanged since the morning).
-- **Security:** standing check clean. $0.21 spent on narration this month (forecast $0.96 of $3), money controls in place, no secrets in the project, no workflow change.
-- Fixing against improving: three fixes, one bet (the Groq route). Nothing changed in a video: every change to what we ship waits on you or on 12 October.
-
-### Blocked
-- **For you, in order of what they unblock:** the planning session and the vote's one sentence (#55); asking Reddit (#60); the Groq account and key, or telling us you are in the UK, EEA or Switzerland (#68, about ten minutes); running the music script (#66); pasting the sample-video sentence (#65); the account checks (#59); re-running the comments change (#53); the auto-apply patch (#50).
-
-### Next
-- Check tonight's upload. It had not run at hand-over (yesterday's ran at 18:58). It is the repeat guard's first live run: the post must not be one we have uploaded before.
-- 12 October: read v7 under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the first subscriber count, and the scorecard with private videos excluded.
-- When you answer #68: attach the workflow change for your label, run the screen check on Groq, take a sample video, and switch it on only if the screen does as well as Gemini.
-- A slip of mine cost about 8 minutes: a wait loop matched its own command and never ended. Nothing else was affected.
-
-### Better?
-- **Than last shift:** Slightly. A decision of yours that had gone unseen became a ready, priced answer, and the only free AI route that fixes the training problem is built.
-- **Than ~10 shifts ago:** Somewhat. Both views bets have a first step and a rule to read it by, and the AI limit that kept forcing workarounds now has a free way out. Views per upload are still below August's.
 - **Than ~100 shifts ago:** Too early to say.
