@@ -591,6 +591,13 @@ def main():
         print("\n  release-style: median swing between consecutive batches of 8"
               "\n  alternate days: median gap between odd- and even-day uploads"
               "\n  within the same 16. Smaller is a finer detection limit.")
+        # A coin per run (PRD §0 #14): the gap random halves of the same weeks
+        # reach 1 time in 10, by arm size. A keep threshold must clear it.
+        print("\n  coin per run, 90th-percentile gap between random arms:")
+        for arm in (15, 30, 45):
+            row = "  ".join(f"{m} {insights.coin_floor(load.videos, m, arm) or 0:.0%}"
+                            for m in (Metric.WATCH, Metric.VIEWS))
+            print(f"    {arm} per arm: {row}")
         return
 
     if args.catalogue:      # the snapshot series, channel-wide

@@ -1127,6 +1127,18 @@ def test_drift_floor_is_unmeasurable_rather_than_zero_on_thin_history():
         [v(f"a{i}", 10, views=100) for i in range(9)], Metric.VIEWS) is None
 
 
+def test_coin_floor_shrinks_with_arm_size_and_needs_one_full_window():
+    """A random split of the same weeks: bigger arms, smaller chance gaps."""
+    noisy = [v(f"n{i}", 30 - i % 20, views=50 + (i * 37) % 400) for i in range(120)]
+    small = insights.coin_floor(noisy, Metric.VIEWS, arm=8)
+    large = insights.coin_floor(noisy, Metric.VIEWS, arm=30)
+    assert small > large > 0
+    assert insights.coin_floor(noisy, Metric.VIEWS, arm=8) == small        # seeded
+    assert insights.coin_floor(noisy[:59], Metric.VIEWS, arm=30) is None
+    flat = [v(f"f{i}", 10, views=100) for i in range(40)]
+    assert insights.coin_floor(flat, Metric.VIEWS, arm=15) == 0
+
+
 def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
     """The design it measures: halves split by alternate days share the
     calendar. A steady trend moves both halves together, so it reads as no
