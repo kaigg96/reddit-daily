@@ -178,15 +178,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Closes when** #70 is answered and shifts stop ending early, or the next
   audit finds a different binding limit.
 
-- **The safety screen still falls to its keyword backstop on Gemini overloads
-  (2026-10-09).** Since the 30s retry wait (`6476f18`, 10-04), titles lost 0 of
-  10 uploads to a 503, but the screen lost 1 (10-09 06:21, both tries 503). A
-  title fallback to `SAMPLE_MODEL` was built and dropped unmerged: it had nothing
-  to fix. Making the screen fall back would need it validated on that model
-  first: `DRY_RUN=1 venv/bin/python scripts/replay_screen.py` (5 requests on
-  `SAMPLE_MODEL`'s own allowance; Gemini 3.x takes no thinking budget, so it
-  runs on the model's default reasoning). Fall back only on a clean replay.
-  Moot if Groq is switched on first.
+- **The screen fallback's review follow-up waits for a render (2026-10-09,
+  branch `reliability/screen-parse-hardening`).** Merged without it because a
+  fix would void the PASS. Pre-existing and now slightly more exposed: a reply
+  whose `unsafe_comments` is null or a number raises TypeError out of
+  `screen()` and costs the slot its upload. `slate_agreement` counts
+  `gemini_fallback` rows, where screen and slate are one model, and
+  `screen_failure` is no longer blank on rows the fallback answered: read it
+  with `screen_source`. The fallback shares `SAMPLE_MODEL`'s allowance with the
+  slate call and every sample, up to 4 requests a run. **Closes when** the
+  branch merges on a PASS (the next render slot opens 2026-10-10 05:38 UTC).
 
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends

@@ -239,9 +239,9 @@ venv/bin/python scripts/replay_screen.py
 ```
 
 It costs one Gemini call per case against the same free-tier quota production
-uses, so run it once rather than in a loop. The screen fails open, so an
-exhausted quota degrades live runs to the keyword backstop until it resets
-rather than breaking them.
+uses, so run it once rather than in a loop. The screen fails open: when the
+main model fails it asks `SAMPLE_MODEL` once, and only if that fails too does
+the run fall to the keyword backstop, never breaking.
 
 ## Versioning & experiments
 
