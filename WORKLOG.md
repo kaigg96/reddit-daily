@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-09 (23:15) — Titles with one word in capitals get about twice the views; a fair test of it is built and needs only its sample video
+
+    Worked (% of the shift): data 30 · product 25 · legal 10 · market 10 · engineering 10 · strategy 5 · security 5 · gm 5
+
+**Summary:** Our videos whose titles put a word in capitals ("Who's YOUR Hero?") got about twice the views of the rest. That held inside every split I could test, and viewers watched them about as long. I built a fair test that flips a coin for each upload, and it needs only tomorrow's sample video to go live. Views are the half of YouTube's payment bar we are furthest from, so this is the first step in days aimed at it.
+
+### Toward revenue
+- **Yes, a bet on views.** The pattern is a correlation: the AI may capitalise when a post is livelier anyway. The coin-flip test settles it at no cost, with no extra AI or narration calls. Its rule is set in advance: keep capitals if they lead on views by at least 30% after 15 uploads in each group, and watch time holds.
+
+### Done
+- **Data (a bet):** taught the reporting tool to tell titles with emphasis capitals apart from plain ones. Read at 7 days old: +120% views overall (65 against 68 uploads), and ahead in each of the two earlier releases with enough uploads, each title style, short and long titles, and morning and evening. Watch time 10 against 11 seconds, inside the normal swing. A fresh review caught four titles misfiled by abbreviations; fixed before the numbers were recorded. Live, measurement only.
+- **Product (a bet):** built the coin-flip test on a branch. One group is asked for exactly one capitalised word, the other for none. Both are banned from shock phrases. A free sample on this machine rendered a playable video. A fresh review is checking it; the next shift merges on a passing sample.
+- **Legal / market intelligence:** read first-hand that since July 2026, YouTube will not pay for content "designed to shock or surprise viewers for the sole purpose of getting views", and its reviewers read titles. 9 of our 166 titles use phrases like "SHOCKING" or "You Won't Believe", so both test groups now forbid them. Capitals for emphasis are not what that rule names.
+- **Strategy:** the channel holds 1,041 videos, and 883 come from before July's pipeline, including 30 duplicate copies. All are readings of Reddit. YouTube's reviewers check a channel's "main theme", so at two uploads a day the new show stays a minority for over a year. Those old videos earn under 1% of today's views. Added to the brand decision: when you settle the name, also decide whether to make them private or start the new show fresh. Not urgent; nothing to do now.
+- **Market intelligence:** secondary sources say Reddit's commercial access is a negotiated deal from about $12,000 a year, with no self-serve tier. I could not confirm it on Reddit's own pages (they refuse automated reads). If true, the answer to #60 may decide the content source more than the format does.
+- **Security:** standing check clean. Narration spend $0.25 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change. Tonight's upload landed normally.
+- Fixing against improving: almost all improving; the last shift was all fixing.
+
+### Blocked
+- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50 (#65 waits on it); the Groq key and label on #69; the planning session (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53.
+
+### Next
+- Morning, after 07:00: one sample video is allowed per shift. Two branches wait for one: the safety check's crash fix (reviewed three times) and the capitals test. I would take the crash fix first, since it protects uploads, and the capitals test the shift after.
+- 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
+- If #70 is approved, build it on a branch. The capitals test is a coin per upload, so it runs alongside bet 1 without spoiling either read.
+
+### Better?
+- **Than last shift:** Yes. For the first time in several shifts, something that changes what we ship is ready, aimed at views, and costs nothing to run.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals result is the largest views difference any logged title trait has shown, but it is a correlation until the test reads, around early November.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-09 (17:27) — When our main AI model is overloaded, the safety check now asks a second model instead of falling back to a keyword list
 
     Worked (% of the shift): reliability 45 · engineering 20 · market 10 · security 10 · gm 10 · product 5
@@ -94,38 +125,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly, on reliability only. An overload no longer leaves an upload with only the keyword list. Nothing in the video or the business changed.
 - **Than ~10 shifts ago:** No, on the audit's evidence: no video change, watch time flat (12.0 seconds a week ago and now), and the decisions that would change it wait on you.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-09 (10:33) — Bet 1 now has a tested first step you can approve with one label: a host's commentary makes up half of each video, at today's length and cost
-
-    Worked (% of the shift): gm 30 · product 20 · editorial 15 · strategy 10 · engineering 10 · data 5 · reliability 5 · security 5
-
-**Summary:** I tested whether our AI can write commentary that fills half of each video. It can, at today's length and narration cost, so bet 1 (making the format ours) is now one label for you on #70. This shift's audit found the company's limit is the tasks that need your own hands, not your decisions. No revenue yet, but this is the step YouTube's rules make the precondition for any.
-
-### Toward revenue
-- **One step closer, not yet shipped.** YouTube will not pay for videos that only read other people's words. One host line per video is unlikely to change that. Commentary making up the bulk of each video might. Five drafts put our own words at 51–67% of each script, with no phrasing repeated between them, at today's length and cost. Approving #70 starts the build.
-
-### Done
-- **Editorial / product:** five commentary drafts, then three reruns under tighter rules: eight AI requests in all, on the separate test model, so the upload's allowance was untouched. Results, the best draft, and what went wrong are on #55. The failures were facts stated in our voice, jokes on grim threads, and answers referred to by number. Tighter rules fixed the last two kinds but not the first: on medical threads it still slipped in facts and advice. So the proposal skips medical threads when picking the post. They are 2 of our 165 uploads, and the next post runs instead, so every upload keeps its commentary. Two corrections on #70 keep your rule that answers are read in vote order, and adopt the "show of hands" stance unless you name another.
-- **Strategy / gm:** split bet 1 out of the planning session as #70, a single label. Since 25 September, all 12 of your label-only decisions were answered, most within a day. All 8 open items need your hands or a session.
-- **General management (audit, due):** none of the eight shifts since the last audit changed a video, and every self-assessment hedged. Two of the decisions behind how shifts work rest on an assumption that is false while your hands-on queue is this long: that there is always work above the bar. That is recorded, with dated notes on five decisions. The vote built two shifts ago, ahead of your answer, is now undercut by the market read. So the lesson is to build after a label, not before.
-- **Engineering (a fix):** a shift missed your "no" on #62: the decision list skipped every issue you had closed. It now shows the ones you closed without approving, with your reply. A fresh review caught that a shift's own close could pass as yours, and that is fixed.
-- **Data:** checked that Monday's two pre-committed reads run on today's data. The `v7` read correctly says not yet (13 of its 20 uploads). The engaged-view read works, but the release command had silently ignored the measure it was asked for and printed watch time instead. It now refuses and names the right command, so Monday's read cannot be misread that way.
-- **Reliability:** checked why this morning's upload lost its AI safety check. Gemini was overloaded twice. Titles have not been lost to that since the 4 October fix (0 of 10), so I dropped a title fallback I had started; it had nothing to fix. The safety check's fallback needs a test first, which is next shift's work.
-- **Security:** standing check clean. $0.24 spent on narration this month (forecast $0.88 of $3), money controls in place, no secrets in the project, no workflow change.
-- Fixing against improving: half and half. The commentary test and #70 improve; the decision-list fix, the release-read guard, two closed code-health items and the audit notes fix.
-
-### Blocked
-- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50, which make every approved rule change land by label from then on (#65 is waiting on it); the Groq key and the label on #69 (#68); the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments change (#53).
-
-### Next
-- If #70 is approved: build it on a branch, with the top two answers in vote order, the show-of-hands verdict, medical threads skipped at selection, and the share of our own words logged per upload. Then ask for a sample, and you listen to one with real narration. It ships as its own version after `v7`'s read.
-- 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, and the first subscriber count.
-- With fresh AI budget: test the safety check on the second model, five requests. If it passes, let the check fall back to that model when Gemini is overloaded.
-- Process: this shift's eight requests went on research, which left none for a sample video. That was the right trade today, but it is the choice a shift makes when it spends them.
-- I handed over about 30 minutes early, because nothing else cleared the bar. Considered and dropped: building the commentary step before your label (the audit's lesson); a title fallback (no titles lost since 4 October); the safety check's fallback (it needs AI requests I had spent); asking now for four uploads a day (its read is due in November); the long-video route to the Partner Program (the same reused-content rule blocks it); stopping two video runs from overlapping (rare at two a day; it belongs with four a day).
-
-### Better?
-- **Than last shift:** Yes, slightly. Bet 1 has evidence it fits today's length and cost, in the shape you answer fastest. Nothing in the video changed.
-- **Than ~10 shifts ago:** No, on the audit's evidence. None of those shifts changed a video. Median watch time is flat (12.0 to 12.5 seconds, inside the usual swing), views per upload went from 75 to 65, and two built features wait on you.
 - **Than ~100 shifts ago:** Too early to say.
