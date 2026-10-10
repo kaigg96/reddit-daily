@@ -473,13 +473,14 @@ def alternation_floor(videos, metric, block=MIN_COHORT):
 CHANCE_SPAN = 90
 
 
-def coin_windows(videos, metric, arm, other=None, span=None):
+def coin_windows(videos, metric, arm, other=None, span=None, min_views=1):
     """The upload windows `coin_floor` splits: every `arm + other` consecutive
     uploads with a value (`other` defaults to `arm`), anchored at the newest
     so the latest weeks count, each overlapping the next by half. `span`
     keeps only the newest that many uploads (never fewer than one window)."""
     size = arm + (arm if other is None else other)
-    live = sorted([v for v in videos if v.views > 0 and v.get(metric) is not None],
+    live = sorted([v for v in videos if v.views >= max(1, min_views)
+                   and v.get(metric) is not None],
                   key=lambda v: v.true_published or v.published)
     if span:
         live = live[-max(span, size):]
@@ -488,7 +489,7 @@ def coin_windows(videos, metric, arm, other=None, span=None):
 
 
 def coin_floor(videos, metric, arm, quantile=0.9, splits=200, seed=0, other=None,
-               span=None):
+               span=None, min_views=1):
     """The gap a coin-flip test (PRD §0 #14) reads with nothing switched.
 
     Each run's arm is random, so the arms share the calendar and the noise is
@@ -503,11 +504,12 @@ def coin_floor(videos, metric, arm, quantile=0.9, splits=200, seed=0, other=None
     sets the noise. `span` reads only the newest uploads: at 15 a side the gap
     was 11-12% in July's windows and 33-36% from late August (2026-10-10
     review), so all history understates the noise a read meets today.
-    None without one full window.
+    `min_views` leaves out uploads with fewer plays, whose average is noisy
+    (PRD §0 R4). None without one full window.
     """
     import random
     rng, deltas = random.Random(seed), []
-    for values in coin_windows(videos, metric, arm, other, span):
+    for values in coin_windows(videos, metric, arm, other, span, min_views):
         for _ in range(splits):
             rng.shuffle(values)
             mx, my = median(values[:arm]), median(values[arm:])

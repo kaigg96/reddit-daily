@@ -185,6 +185,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   an omitted `post_risk` on a post that should skip, or the screen is next
   changed.
 
+- **A viewed upload can log 0 watch-seconds (found 2026-10-10, R4).** 6 of
+  144 viewed uploads at 7 days read `avg_view_duration_s` 0.0 on 1–6 views,
+  with 0 minutes and 0%: likely YouTube reporting no figure, stored as 0.
+  Each pulls its cohort's watch-seconds median down, and in the newest 90
+  they are most of why the chance gap grew (PRD §4). One is `v7`'s, so read
+  12 October's `v7` result knowing that. Fix: count a 0 on a viewed upload as
+  missing in `insights` (one rule for every reader), or read with
+  `--min-views` (PRD §0 "Steadier watch-time reads"). **Closes when** one is
+  chosen before #3 reads.
+
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
   every AI call to Groq; with no key it falls back to Gemini, and the log's

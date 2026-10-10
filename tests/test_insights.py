@@ -1154,6 +1154,19 @@ def test_coin_floor_reads_unequal_arms_where_the_small_arm_sets_the_noise():
     assert insights.coin_floor(noisy, Metric.VIEWS, 30, other=30) == even
 
 
+def test_coin_floor_can_leave_out_uploads_with_few_plays():
+    """PRD §0 R4: an average over a handful of plays swings wildly, and such
+    uploads grew from 1 in 45 to 11 in 90 at 7 days. Leaving them out of a
+    random split leaves only the steadier averages."""
+    steady = [v(f"s{i}", 100 - i, views=200, watch=10 + i % 3) for i in range(60)]
+    wild = [v(f"w{i}", 100 - 3 * i - 1, views=3, watch=2 + 9 * (i % 4)) for i in range(20)]
+    every = insights.coin_floor(steady + wild, Metric.WATCH, 15, span=90)
+    played = insights.coin_floor(steady + wild, Metric.WATCH, 15, span=90, min_views=10)
+    assert played < every
+    assert insights.coin_floor(steady, Metric.WATCH, 15, span=90, min_views=10) == \
+        insights.coin_floor(steady, Metric.WATCH, 15, span=90)
+
+
 def test_since_keeps_only_the_weeks_a_test_ran():
     """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
     uploads are not its control. An --at-age read carries synthetic
