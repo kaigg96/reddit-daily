@@ -73,10 +73,15 @@ def by_dimension(videos, key, metric, now):
             print(f"  pooled within each of {len(strata)} formats (Mantel-Haenszel): "
                   f"p={insights.buried_rate_p_pooled(strata):.3f}")
     elif len(pair) > 2:
-        tests = insights.buried_vs_rest(groups)
+        # A release shares no format with the rest, so pooling within formats
+        # would print p=1.000 for every release.
+        by_release = key == "format_version"
+        tests = insights.buried_vs_rest(groups, pooled=not by_release)
+        how = ("Fisher, not pooled (each release is its own era: calendar drift is inside it)"
+               if by_release else "pooled within formats")
         if tests:
             print(f"\n  <={insights.BURIED_VIEWS} views, each group (n>={insights.MIN_COHORT}) vs the rest, "
-                  f"pooled within formats: {len(tests)} tests, so only p < {0.05 / len(tests):.4f} counts")
+                  f"{how}: {len(tests)} tests, so only p < {0.05 / len(tests):.4f} counts")
             for label, hits, n, p in tests:
                 print(f"    {label:24} {hits:>3}/{n:<4} p={p:.3f}")
 

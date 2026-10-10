@@ -187,7 +187,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 
 - **A viewed upload can log 0 watch-seconds (found 2026-10-10, R4).** 6 of
   144 viewed uploads at 7 days read `avg_view_duration_s` 0.0 on 1–6 views,
-  with 0 minutes and 0%: likely YouTube reporting no figure, stored as 0.
+  with 0 minutes and 0%. The 0 is YouTube's, not ours (2026-10-10): the
+  weekly job fills 0 only for a video with no Analytics row, and those
+  views come from the same row, so there is nothing to fix in storage. It
+  comes in whole seconds, so it may be a real average under 1s.
   Each pulls its cohort's watch-seconds median down, and in the newest 90
   they are most of why the chance gap grew (PRD §4). One is `v7`'s, so read
   12 October's `v7` result knowing that. #3 and #10 now read with
