@@ -124,6 +124,24 @@ def _metadata(monkeypatch, meta):
     return vr.check_metadata()
 
 
+def test_with_commentary_on_missing_host_lines_fail_the_gate(monkeypatch):
+    """Bet 1 falls back to a plain reading, which would otherwise pass (#70)."""
+    from src import config
+    from src.llm import Commentary
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    assert _metadata(monkeypatch, fine) is False
+    host = Commentary("An angle.", ["One.", "Two."], "My hand goes up.")
+    assert _metadata(monkeypatch, fine._replace(commentary=host)) is True
+
+
+def test_with_commentary_off_host_lines_are_not_asked_for(monkeypatch):
+    from src import config
+    monkeypatch.setattr(config, "COMMENTARY", False)
+    fine = MetadataResult("A title", ["a", "b", "c"], "Comment yours!", "gemini")
+    assert _metadata(monkeypatch, fine) is True
+
+
 def test_a_dead_api_is_inconclusive_not_a_failed_release(monkeypatch):
     assert _metadata(monkeypatch, MetadataResult(None, None, None, "error")) is None
 
