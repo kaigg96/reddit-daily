@@ -190,10 +190,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   with 0 minutes and 0%: likely YouTube reporting no figure, stored as 0.
   Each pulls its cohort's watch-seconds median down, and in the newest 90
   they are most of why the chance gap grew (PRD §4). One is `v7`'s, so read
-  12 October's `v7` result knowing that. Fix: count a 0 on a viewed upload as
-  missing in `insights` (one rule for every reader), or read with
-  `--min-views` (PRD §0 "Steadier watch-time reads"). **Closes when** one is
-  chosen before #3 reads.
+  12 October's `v7` result knowing that. #3 and #10 now read with
+  `--min-views 10` (2026-10-10): a 0 on 1–6 plays may be real (each viewer
+  swiping at once), so the uploads leave the read rather than being declared
+  missing, and the buried rate prints beside it. **Still open** for every
+  other watch-seconds reader, `--release` included. **Closes when** a
+  release read is shown to move on them, or the next audit drops it.
 
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
