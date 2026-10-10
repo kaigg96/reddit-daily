@@ -31,6 +31,7 @@
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
 | ~~Traffic-source telemetry~~ ✅ shipped | done | R4.7 | Search earns ~1.3% of views, so search-oriented work stays parked (§4). |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run` renders a fixed post over silent narration: no Reddit, Gemini or Polly call, always a dry run. It proves a **render** change is playable; a change to the Reddit, screen, Gemini or Polly path still needs a real sample (`dry_run.py request`), whose Gemini calls go to `SAMPLE_MODEL`'s separate free tier. |
+| Release reads at their own size | ready: build now, merge after `v7`'s 10-12 read | — | `--release`'s 13% limit is near the usual swing at 20 uploads (10%), not a one-in-ten chance, and counts zero-watch uploads (§4). **Done when** it prints the one-in-ten drop for batches of the release's size, reads with `--min-views`, and the next release's rule cites it. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
