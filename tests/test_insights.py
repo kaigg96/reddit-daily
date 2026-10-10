@@ -1182,12 +1182,24 @@ def test_compare_prints_the_chance_gap_for_its_arm_sizes(capsys):
 
 def test_compare_prices_no_chance_for_arms_from_different_weeks(capsys):
     """A flag-day field carries drift a random split of the same weeks
-    cannot see, so its gap would pass drift off as a finding."""
+    cannot see, so its gap would pass drift off as a finding. Read at a
+    common age, as `--at-age` does: only `true_published` differs."""
     from scripts import report
-    early = [v(f"e{i}", 40 + i, arm="x") for i in range(10)]
-    late = [v(f"l{i}", 7 + i, arm="y") for i in range(10)]
+
+    def at(prefix, days_ago, arm):
+        x = v(f"{prefix}{days_ago}", 7, arm=arm)
+        x.true_published = NOW - datetime.timedelta(days=days_ago)
+        return x
+    early = [at("e", 40 + i, "x") for i in range(10)]
+    late = [at("l", 7 + i, "y") for i in range(10)]
     report.compare(early + late, "arm=y", Metric.WATCH, NOW)
     assert "arms come from different weeks" in capsys.readouterr().out
+    # One arm reaching back further (AskReddit since July against
+    # NoStupidQuestions since October) is told to read the shared weeks.
+    late_x = [at("m", 7 + i, "x") for i in range(10)]
+    report.compare(early + late_x + late, "arm=y", Metric.WATCH, NOW)
+    out = capsys.readouterr().out
+    assert "chance: random arms" in out and "read the weeks both ran with --since" in out
 
 
 def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():

@@ -147,21 +147,27 @@ def compare(videos, spec, metric, now, pool=None):
     result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
     print(result.render())
     when = lambda vs: [v.true_published or v.published for v in vs]
-    shared = a and b and min(when(a)) <= max(when(b)) and min(when(b)) <= max(when(a))
-    if key == "format_version" or not shared:
-        # Arms from different weeks carry drift a random split cannot see.
-        print("    chance: the arms come from different weeks, so no random split "
-              "prices this; a flag-day change reads with --release")
-    elif result.a.sufficient and result.b.sufficient and result.age_matched:
-        pool = pool or videos
-        span = insights.CHANCE_SPAN
-        gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span)
-        windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span))
-        print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
-              f"{span} uploads "
-              + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
-                 f"rough); only a gap beyond that is a finding"
-                 if gap is not None else "- too few uploads to say (see --placebo)"))
+    if result.a.sufficient and result.b.sufficient and result.age_matched:
+        (a0, a1), (b0, b1) = ((min(when(c)), max(when(c))) for c in (a, b))
+        if key == "format_version" or a0 > b1 or b0 > a1:
+            # Arms from different weeks carry drift a random split cannot see.
+            print("    chance: the arms come from different weeks, so no random split "
+                  "prices this; a flag-day change reads with --release")
+        else:
+            pool = pool or videos
+            span = insights.CHANCE_SPAN
+            gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span)
+            windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span))
+            print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
+                  f"{max(span, result.a.n + result.b.n)} uploads "
+                  + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
+                     f"rough); only a gap beyond that is a finding"
+                     if gap is not None else "- too few uploads to say (see --placebo)"))
+            # One arm reaching weeks further back compares eras, not arms (PRD §0 #3).
+            start = max(a0, b0)
+            if abs(a0 - b0).days > 14:
+                print(f"    WARNING: one arm starts {abs(a0 - b0).days} days before the other; "
+                      f"read the weeks both ran with --since {start.date()}")
     if key != "format_version":
         for era, sa, sb in insights.era_imbalance(a, b):
             print(f"    WARNING: uneven across releases ({era}: {sa:.0%} vs {sb:.0%}) — "
