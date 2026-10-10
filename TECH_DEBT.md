@@ -161,6 +161,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `own_words_share` after ~10 uploads before changing caps, since raising them
   lengthens the video. (2) The duration guard's own path (setup dropped, vote
   swapped) has unit tests only: no real post has been long enough to fire it.
+  (3) The vote may fall back on length: on the sample model, once the vote
+  had to name its answer by what it says, it ran 23 words, past its 22-word
+  limit (15 × 1.5), so that upload would be a plain reading. One try on a
+  model uploads do not use. If `commentary_ok` shows fallbacks, raise the
+  vote's cap to 18 words (about one second) before anything else.
 
 - **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
   work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
