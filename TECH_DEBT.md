@@ -153,6 +153,16 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **Bet 1's commentary (2026-10-10, branch `product/commentary-led`): two
+  gaps left for its release.** (1) The own-words done-when (≥0.50 every
+  upload) cannot be met on long answers: the host's caps total 54 words (~300
+  characters), so two 150-character answers and a 60-character question top
+  out near 0.45. The first real sample read 0.63 on short answers. Read
+  `own_words_share` after ~10 uploads before changing caps, since raising them
+  lengthens the video. (2) `scripts/validate_release.py` never checks the host
+  lines, so a prompt that always falls back would pass the release gate;
+  `commentary_ok` in the log is the only signal. Add a gate when it ships.
+
 - **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
   work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
   none changed a video, and every "Better?" answer hedged (6 "slightly", 2
