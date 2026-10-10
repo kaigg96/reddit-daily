@@ -236,6 +236,8 @@ def _cta_instruction(vote_rule):
 # restated the question as "Reddit weighs in on ...", a frame that would repeat
 # across uploads, and a reaction took a side ("skips right over the diplomatic
 # fallout"). Politics is 5 of 86 topic-tagged uploads: too many to skip.
+# Re-tried on the sample model: both fixed, but its vote said "the second one",
+# so the vote's own instruction repeats the never-by-number rule.
 # Word caps keep narration near today's ~455 characters (drafts: 410-546) with
 # our own words at half or more, which is the done-when.
 _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. Its stance is a show
@@ -246,7 +248,8 @@ _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. I
    - "reactions": exactly {n} lines of AT MOST 12 words each, in order; each is
      heard straight after its answer and reacts to that answer only.
    - "cta": the host's vote, AT MOST 15 words: which answer it raises its hand
-     for and, in a few words, why, then ask which one gets the viewer's vote.
+     for, named by what it says (never "the first" or "the second one"), and
+     in a few words why, then ask which one gets the viewer's vote.
    Rules for every line:
    - Name something specific from this thread, never a stock phrase.
    - React with opinion, humour or a question. Never state a fact, statistic or

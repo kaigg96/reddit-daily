@@ -72,7 +72,8 @@ def test_the_prompt_carries_each_rule_the_drafts_needed(monkeypatch, commentary_
                  "make sense heard once",                 # one nonsense line
                  "show\n   of hands",                     # the owner's stance (#70)
                  "Never restate the\n     question",        # "Reddit weighs in on ..."
-                 "take no side on the issue"):            # a side taken on Israel
+                 "take no side on the issue",             # a side taken on Israel
+                 'never "the first" or "the second one"'):  # its vote, re-tried
         assert rule in prompt, rule
 
 
