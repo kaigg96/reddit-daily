@@ -65,7 +65,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): product 40 · engineering 25 · editorial 10 · gm 10 · reliability 5 · legal 5 · security 5
 
-**Summary:** You approved bet 1 on #70, so this shift built it. A host now sets up each question, reacts to the top two answers and casts the show's vote, from the AI request we already make. It is the first change aimed squarely at getting the channel paid, since YouTube does not pay for readings. It is switched off until Monday's read of the current version, and I have asked you to listen to one sample first (a new issue, about five minutes).
+**Summary:** You approved bet 1 on #70, so this shift built it. A host now sets up each question, reacts to the top two answers and casts the show's vote, from the AI request we already make. It is the first change aimed squarely at getting the channel paid, since YouTube does not pay for readings. It is switched off until Monday's read of the current version, and I have asked you to listen to one sample first (#71, about five minutes).
 
 ### Toward revenue
 - **Yes, the most direct step yet.** YouTube refuses to pay for "readings of other materials". On tonight's sample, with real AI lines on a real post, our own words were 63% of the narration, against none today. Whether that is enough for YouTube's review is unknown until we apply. Without it, the answer is no.
@@ -73,15 +73,15 @@ and more useful than a confident guess.
 ### Done
 - **Product (a bet):** built the commentary-led video as you approved it. The host speaks in the voice the narrator is not using, with yellow captions. The answers are still read word for word, the top two in vote order. The host's vote replaces the closing line and is posted as the channel's comment. If any host line is missing or far too long, that upload ships as today's reading, and the log records it. The log also records our own words' share for every upload. Medical threads are skipped when picking the post: that would have skipped 3 of our 168 uploads.
 - **Product:** tonight's sample with commentary on passed: a playable video of 29.5 seconds on a real politics thread, a little longer than today's usual 15 to 28. Reading its captions showed two faults. The setup only restated the question ("Reddit weighs in on …"), and one reaction took a side on the issue. The prompt now forbids both. No real post has been tried since that change; your listen will be the first.
-- **Engineering:** two fresh reviews. The first found seven real problems, all with commentary on, and all are fixed. The worst two: a fallback upload would still have spoken the host's vote after a plain reading, and an over-long AI line could have cost an upload. With commentary off, the review confirmed nothing changes.
-- **Engineering:** the daily release check now fails if the host's lines are missing, and prints them, so a shift can read real host lines every day without a render. Sample verdicts will show them too.
+- **Engineering:** two fresh reviews. The first found seven real problems, all with commentary on, and all are fixed. The worst two: a fallback upload would still have spoken the host's vote after a plain reading, and an over-long AI line could have cost an upload. The second found three small ones, also fixed. Both confirmed that with commentary off, nothing changes.
+- **Engineering:** the daily release check, once this ships, fails if the host's lines are missing and prints them, so a shift can read real host lines every day without a render. Sample verdicts now show them too: that part is merged and live for the next sample.
 - **General management:** closed #70. Bet 1 is marked approved in the plan, and the host-storyline experiment is folded into it. Two gaps for the release are recorded: long answers can keep our own words under half, and the length guard's fallback has never fired on a real post.
 - **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
 - Tonight's upload carried its capitals group (none), and its title obeyed it.
 - Fixing against improving: an improvement, the first change to what we ship since the capitals test.
 
 ### Blocked
-- **For you, newest first:** the new issue asking you to listen to one sample of bet 1 (run two commands, about 2 cents of narration); the four commands on #50; the Groq key and label on #69; the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
+- **For you, newest first:** #71, listening to one sample of bet 1 (two commands, about 2 cents of narration); the four commands on #50; the Groq key and label on #69; the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
 
 ### Next
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it. If it keeps (or reverts), merge the commentary build and release `v8` once you have listened. The release needs its own sample of the branch's current commit and a release-check pass showing the host lines.
