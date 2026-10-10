@@ -45,6 +45,10 @@ FIELDS = [
     # Added 2026-10-09 (PRD §0 #14): the title's capitals arm, 1 or 0, blank
     # when the title fell back to the Reddit question and no arm applied.
     "title_caps",
+    # Added 2026-10-10 (bet 1, #70): whether the host's lines shipped, 1 or 0,
+    # blank while commentary is off; and our own words' share of the
+    # narration's characters, its done-when (at least 0.50 on every upload).
+    "commentary_ok", "own_words_share",
 ]
 
 

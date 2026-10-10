@@ -187,8 +187,13 @@ _STYLE_GUIDANCE = {
 # Gemini answered with JSON. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
-MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure")
-MetadataResult.__new__.__defaults__ = ("gemini", "")
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure commentary")
+MetadataResult.__new__.__defaults__ = ("gemini", "", None)
+
+# Bet 1's host lines (config.COMMENTARY): a setup, one reaction per answer read,
+# and the verdict, which is also the CTA. All or nothing: a partial set would
+# leave answers unreacted to, so it falls back to today's video instead.
+Commentary = collections.namedtuple("Commentary", "setup reactions verdict")
 
 
 def _failure_kind(exc):
@@ -225,6 +230,44 @@ def _cta_instruction(vote_rule):
    or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
 
 
+# Bet 1 (#70, PRD R3.2's commentary-led variant). The rules are the ones the
+# 2026-10-09 drafts needed (PRD §4): each failure they showed has a line here.
+# Word caps keep narration near today's ~455 characters (drafts: 410-546) with
+# our own words at half or more, which is the done-when.
+_COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. Its stance is a show
+   of hands: it hears the answers, then raises its hand for one. Spoken lines:
+   - "setup": AT MOST 15 words, after the question and before the first answer:
+     what makes this question worth hearing out.
+   - "reactions": exactly {n} lines of AT MOST 12 words each, in order; each is
+     heard straight after its answer and reacts to that answer only.
+   - "cta": the host's vote, AT MOST 15 words: which answer it raises its hand
+     for and, in a few words, why, then ask which one gets the viewer's vote.
+   Rules for every line:
+   - Name something specific from this thread, never a stock phrase.
+   - React with opinion, humour or a question. Never state a fact, statistic or
+     diagnosis in your own voice. Judge, never advise: no advice on health,
+     law, money or politics.
+   - Refer to an answer by what it says, never by its number.
+   - Vote on the answer, never on the person: no claims about health
+     conditions, identities or groups of people.
+   - On threads about illness, injury, death or crime, be warm or wry about the
+     people, never about the harm.
+   - Every line must make sense heard once. Plain spoken words. No hashtags, no
+     emoji, no profanity."""
+
+
+def _clean_commentary(data, n):
+    """The host's lines, or None unless every one is usable (see Commentary)."""
+    setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
+    reactions = data.get("reactions")
+    if not isinstance(reactions, list) or len(reactions) != n:
+        return None
+    reactions = [_clean_str(r) for r in reactions]
+    if not (setup and verdict and all(reactions)):
+        return None
+    return Commentary(setup, reactions, verdict)
+
+
 # PRD §0 #14: titles with a capitalised word earned ~2x the views at 7 days,
 # observationally (PRD §4, 2026-10-09). Each run's coin assigns an arm, so the
 # read is causal. Both arms ban shock phrases: YouTube's monetization review
@@ -245,6 +288,11 @@ def title_caps_arm(rng):
     return rng.random() < 0.5
 
 
+_PLAIN_SHAPE = '{"title": "...", "keywords": ["...", "..."], "cta": "..."}'
+_COMMENTARY_SHAPE = ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
+                     '"reactions": ["...", "..."], "cta": "..."}')
+
+
 def get_metadata(reddit_title, comments, style="A", caps=None):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
@@ -263,6 +311,9 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
     if caps is not None:
         guidance += _CAPS_GUIDANCE[bool(caps)] + _NO_SHOCK
+    commentary = config.COMMENTARY
+    if commentary:
+        comments = comments[:config.COMMENTARY_ANSWERS]
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
@@ -280,10 +331,11 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-{_cta_instruction(config.HOUSE_VOTE_RULE)}
+{_COMMENTARY_ASK.format(n=len(comments)) if commentary
+ else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
-{{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
+{_COMMENTARY_SHAPE if commentary else _PLAIN_SHAPE}
 """
     try:
         raw = generate_retrying(prompt)
@@ -312,6 +364,7 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         keywords=_clean_keywords(data.get("keywords")),
         cta=_clean_str(data.get("cta")),
         source=provider(),
+        commentary=_clean_commentary(data, len(comments)) if commentary else None,
     )
 
 

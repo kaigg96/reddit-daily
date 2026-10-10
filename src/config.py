@@ -99,6 +99,16 @@ FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + form
 # on changes the video: bump FORMAT_VERSION and take a real sample.
 HOUSE_VOTE_RULE = None
 
+# Bet 1's first step as the owner approved it (#70, 2026-10-10; PRD R3.2's
+# commentary-led variant): the host speaks a setup, a reaction after each of
+# the top two answers, and its vote in place of the CTA, all from the same
+# metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
+# threads at selection (content.is_medical). Turning it on changes the video:
+# bump FORMAT_VERSION, take a sample, and the owner listens to one first.
+COMMENTARY = False
+COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
+HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
+
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
 # marks), so characters bill double. A real run spends ~910 billed chars; the

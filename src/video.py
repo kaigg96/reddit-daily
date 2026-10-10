@@ -21,7 +21,7 @@ from .background import build_background
 
 @dataclass
 class Segment:
-    kind: str  # 'title' | 'comment' | 'outro'
+    kind: str  # 'title' | 'comment' | 'host' | 'outro'
     text: str
     audio_path: str
     marks: list  # from tts.synthesize_with_marks
@@ -87,11 +87,11 @@ def _text_clip(text, font_size, color="white", stroke_frac=0.075, width=config.C
     )
 
 
-def caption_clips(groups, seg_start, font_size, y):
+def caption_clips(groups, seg_start, font_size, y, color="white"):
     clips = []
     for g in groups:
         clip = (
-            _text_clip(g.text.upper(), font_size)
+            _text_clip(g.text.upper(), font_size, color=color)
             .with_start(seg_start + g.start)
             .with_duration(max(0.15, g.end - g.start))
             .with_position(("center", y))
@@ -192,6 +192,9 @@ def assemble(question, segments, rng):
                 overlay_text(f"ANSWER {answer_i}/{n_answers}", t, display_dur, 56, 330, color=config.BRAND_ORANGE)
             )
             overlays += caption_clips(groups, t, font_size=112, y=700)
+        elif seg.kind == "host":  # bet 1 (#70): the host's own words
+            overlays += caption_clips(groups, t, font_size=100, y=700,
+                                      color=config.HOST_CAPTION_COLOR)
         else:  # outro
             overlays += caption_clips(groups, t, font_size=100, y=700)
 
