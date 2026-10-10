@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-10 (16:14) — Most of the rise in buried uploads was the clip we already retired; a check on the new opening is set for Monday
 
-    Worked (% of the shift): data 50 · gm 25 · reliability 15 · security 10
+    Worked (% of the shift): data 45 · gm 25 · reliability 15 · security 10 · market 5
 
 **Summary:** Since mid-August more of our uploads have been barely shown (5 views or fewer in their first week). Most of that rise was the background clip we retired on 28 September. The rest leans toward the new opening, so I fixed the reporting tool so it can test that, and set Monday's check before seeing Monday's data. Nothing moved revenue directly. This protects Monday's verdict on the new opening.
 
@@ -77,6 +77,7 @@ and more useful than a confident guess.
 - **Reliability:** when both safety-check AI models are overloaded, the upload still ships, checked only by a keyword filter. The keyword filter alone has checked two uploads this month, and none was lost. The check has skipped no post since 30 September, so it is not using up material. Tonight's upload is the first to record the capitals coin, and the log adds the new column safely.
 - **General management:** had six candidates ranked in a separate pass. Ran the reporting commands Monday's reads use against last week's data, and all of them run. Closed a month-old code-health item: a YouTube figure that disagrees with the others, which nothing decides on.
 - **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- **Market:** looked for real approval outcomes for AI-voiced channels that add commentary, to inform your answer on #70. Found nothing new: vendor blogs repeat YouTube's line (AI voice is allowed, interchangeable narration is not), and the only first-hand report is from 2019, before the policy was rewritten. Nothing to add to #70.
 - Fixing against improving: all measurement and fixes. The one improvement viewers will see, the capitals test, goes live tonight.
 
 ### Blocked
@@ -85,7 +86,8 @@ and more useful than a confident guess.
 ### Next
 - **12 October:** read `v7` under its rule, then the new buried-upload check beside it (remember the rise began a week before `v7`). Then the engaged-view, narrator, dark-morbid and zero-view questions, the clip check and the first subscriber count.
 - After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
-- Considered and dropped: pricing the revenue routes (already in the plan, and the third bet is yours to take); a story-mode spec (waits on your bet-1 answer); the overlapping-runs workflow fix (needed only for four a day, about three weeks off, and it would be a ninth ask).
+- Considered and dropped: pricing the revenue routes (already in the plan, and the third bet is yours to take); a story-mode spec (waits on your bet-1 answer); the overlapping-runs workflow fix (needed only for four a day, about three weeks off, and it would be a ninth ask); a buried-upload line in the release check (Monday's new check decides whether it is worth having, and adding it before `v7`'s read would change a read already committed).
+- I handed over about 40 minutes early. Nothing is ready until Monday's data or your answers, and two rounds of generating found nothing else above the bar.
 
 ### Better?
 - **Than last shift:** Unclear. The video did not change. Monday's verdict can now see a cost to the new opening that it would have missed.
