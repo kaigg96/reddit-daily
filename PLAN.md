@@ -27,8 +27,8 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 ## 2. This quarter's bets
 
-**Bet 1 approved** (#70, 2026-10-10): make the format ours with a host's
-commentary (PRD #7), released after `v7`'s read. Bet 2 is
+**Bet 1 approved** (#70): make the format ours. Its voiced host was
+rejected on listening (#71); the next step needs none (PRD #15). Bet 2 is
 one label (#72); planning (#55) holds bet 3. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, 56 uploads, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks; in play starts; #55 now asks to read it in engaged views too); price the other routes
 and pilot the best (priced 2026-10-11, §1; Reddit's terms, §4).
 

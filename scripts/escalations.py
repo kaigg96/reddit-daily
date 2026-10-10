@@ -54,6 +54,16 @@ def _issues():
     return out
 
 
+def _comments(issue):
+    """Every comment on an issue, oldest first. The API pages them 30 at a
+    time by default, so without paging the "latest" comment was the 30th:
+    #55 gathers about three re-raise notices a day."""
+    out = []
+    for page in range(1, (issue.get("comments") or 0) // 100 + 2):
+        out += _api(f"/repos/{REPO}/issues/{issue['number']}/comments?per_page=100&page={page}") or []
+    return out
+
+
 def _owner_replies(issue):
     """What the owner wrote on an escalation. The owner answers in comments --
     on 2026-09-24 one reply read "not approved to spend real money on this,
@@ -61,8 +71,7 @@ def _owner_replies(issue):
     so a shift could act on the label and never see the condition attached."""
     if not issue.get("comments"):
         return []
-    return [c["body"].strip() for c in
-            _api(f"/repos/{REPO}/issues/{issue['number']}/comments")
+    return [c["body"].strip() for c in _comments(issue)
             if c.get("author_association") == "OWNER" and c["body"].strip()]
 
 
@@ -90,8 +99,7 @@ def _not_applied(issue):
     if APPLY_MARKER not in (issue.get("body") or ""):
         return None
     results = [c["body"] for c in
-               (_api(f"/repos/{REPO}/issues/{issue['number']}/comments")
-                if issue.get("comments") else [])
+               (_comments(issue) if issue.get("comments") else [])
                if c.get("body", "").startswith(RESULT_MARKER)]
     if not results:
         return ("the apply job never reported, so it did not run. Only the "
@@ -157,7 +165,7 @@ def _answered_in_comment(issues):
     for i, labels in issues:
         if "approved" in labels or not i.get("comments"):
             continue
-        comments = _api(f"/repos/{REPO}/issues/{i['number']}/comments")
+        comments = _comments(i)
         last = comments[-1] if comments else {}
         if last.get("author_association") == "OWNER" and last.get("body", "").strip():
             out.append((i, last["body"].strip()))
@@ -171,9 +179,9 @@ def show(want_approved):
         answered = _answered_in_comment(issues)
         if answered:
             print("ANSWERED IN A COMMENT, NOT LABELLED: the owner's reply is the latest "
-                  "word on an open ask. Take it as their answer: record it, do what it "
-                  "allows, and close the issue saying what was done. It approves "
-                  "nothing it does not say:")
+                  "word on an open ask. If it decides, record it, do what it allows and "
+                  "close the issue saying what was done; if it asks, answer it. It "
+                  "approves nothing it does not say:")
             for i, reply in answered:
                 print(f"  #{i['number']}  {i['title']}")
                 print("      owner: " + reply.replace("\n", "\n             "))
