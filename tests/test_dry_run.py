@@ -111,11 +111,13 @@ def test_a_pass_shows_the_hosts_lines_vote_and_length(tmp_path, monkeypatch):
                                       "Commentary reaction 1: a reaction\n"
                                       "CTA: my hand goes up\n"
                                       "Commentary: our own words are 0.56 of the narration\n"
+                                      "Duration guard: dropped the host's setup\n"
                                       "Assembled: 33.6s, bg=x, music=y\n")
     out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
                  "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
                  "--run-url", "u")
-    for line in ("a setup", "a reaction", "my hand goes up", "0.56", "33.6s"):
+    for line in ("a setup", "a reaction", "my hand goes up", "0.56", "33.6s",
+                 "dropped the host's setup"):
         assert line in out, line
 
 
