@@ -172,8 +172,9 @@ def compare(videos, spec, metric, now, pool=None, min_views=1):
                                       min_views=min_views)
             windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span,
                                                 min_views))
+            seen = f" with >= {min_views} views" if min_views > 1 else ""
             print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
-                  f"{max(span, result.a.n + result.b.n)} uploads "
+                  f"{max(span, result.a.n + result.b.n)} uploads{seen} "
                   + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
                      f"rough); only a gap beyond that is a finding"
                      if gap is not None else "- too few uploads to say (see --placebo)"))
@@ -582,11 +583,12 @@ def main():
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or not args.compare):
         sys.exit("--min-views applies to --compare only")
-    if args.min_views > 1 and args.metric in (Metric.VIEWS, Metric.TOTAL,
-                                              Metric.ENGAGED_VIEWS):
-        # Leaving out uploads with few views would hide the very effect a
-        # views read measures, such as a change that gets fewer uploads seen.
-        sys.exit(f"--min-views reads watch time among seen uploads; --metric "
+    if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
+                                                  Metric.ENGAGED_SHARE):
+        # Per-play ratios only. A count (views, likes, total watch time) rises
+        # with views, so leaving out the uploads with few would hide the very
+        # effect it measures, such as a change that gets fewer uploads seen.
+        sys.exit(f"--min-views reads per-play averages among seen uploads; --metric "
                  f"{args.metric} must count every upload")
 
     now = datetime.datetime.now(datetime.timezone.utc)
