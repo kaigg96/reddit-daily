@@ -60,7 +60,7 @@ The source of ready work that never waits on a sample video or costs money. When
 | R3 | blocked: the 2026-10-12 snapshot (10-05: ≤7 per voice within `v6`/`v7`; refused) | **Does one narrator voice get fewer uploads distributed?** Buried (≤5 views): Danielle 11/67 vs Stephen 2/65 (pooled p=0.010); morning vs evening alike. 7 of the 9 Danielle-morning ones fall 09-06→09-19: likely a cluster (2026-10-04). Hits lean Stephen too (12/74 vs 5/75, p=0.07; 10-07) | Rerun `--by voice` and `--by slot` with `v6`/`v7`. Gap persists → propose a one-voice experiment; gone → recorded. |
 
 #### Owner tasks (anytime, no version bump)
-- **Music variety** (R1.6): 2–3 more Audio Library tracks in `assets/music/`, sealed by `scripts/seal_assets.sh` (public repo).
+- **Music variety** (R1.6): 2–3 more Audio Library tracks in `assets/music/`. The repo is public, so seal them: the script runs once per key, so `git rm` the `.enc` files with every plain track in place and re-run `scripts/seal_assets.sh`, which re-seals all under a new key.
 
 ---
 

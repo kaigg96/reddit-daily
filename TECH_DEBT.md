@@ -236,17 +236,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   likelier at four (PRD #4). The one-line fix is attached to #72 as a
   label-applied patch (2026-10-11).
 
-- **The public repo distributes a YouTube Audio Library track (found
-  2026-10-07).** `assets/funk_bg_lower.mp3`, the only music in every upload,
-  has been downloadable from the repo since it went public on 2026-10-05. The
-  Audio Library terms (behind YouTube Studio's login; quoted by secondary
-  sources) say "You may not make available, distribute or perform the music
-  files from this library separately from videos". The Pexels clips are fine:
-  its licence bars only stock and wallpaper platforms and selling unaltered
-  copies. The fix needs a secret and a workflow line: the patch on #64
-  (applied 2026-10-07) and `scripts/seal_assets.sh`, the owner's to run (#66,
-  pending). Until then, **do not add tracks to `assets/music/` in plain
-  form**: the PRD owner task to add Audio Library tracks would widen it.
+- **The Audio Library track was public from 2026-10-05 to 10-10.** The
+  owner sealed it on 2026-10-10 (a925f51; #66): the repo now carries it
+  encrypted and the video job unseals it. Left: (1) the plain file stays in
+  git history, and purging it means rewriting `main`'s history, the owner's
+  call; worth it only if the Audio Library terms are ever raised. (2) A failed
+  unseal renders without music and logs `music_track` as `none`. **Closes
+  when** the first upload after the seal logs `funk_bg_lower.mp3`.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
