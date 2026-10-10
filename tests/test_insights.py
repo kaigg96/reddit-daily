@@ -1677,6 +1677,15 @@ def test_buried_vs_rest_tests_each_group_against_the_others_pooled():
            "b": [v(1, "v4")] * 2 + [v(90, "v5")] * 14}
     assert insights.buried_rate_p(10, 16, 2, 16) < 0.05   # pooled naively, it would flag
     assert all(p > 0.05 for *_, p in insights.buried_vs_rest(era))
+    # Grouped by release, no group shares a format with its rest: pooled reads
+    # 1.0 whatever the rate, so releases are compared unpooled.
+    releases = {"v6": [v(1, "v6")] * 6 + [v(90, "v6")] * 10,
+                "v5": [v(1, "v5")] + [v(90, "v5")] * 29,
+                "v4": [v(90, "v4")] * 30}
+    assert all(p == 1.0 for *_, p in insights.buried_vs_rest(releases))
+    label, hits, n, p = insights.buried_vs_rest(releases, pooled=False)[0]
+    assert (label, hits, n) == ("v6", 6, 16) and p == insights.buried_rate_p(6, 16, 1, 60)
+    assert p < 0.05 / 3
 
 
 def test_top_share_hits_cuts_within_each_release():
