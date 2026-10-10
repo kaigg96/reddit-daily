@@ -22,7 +22,7 @@ class PostContent:
     candidate_rank: int = 1   # 1 = Reddit's own top-ranked eligible post
     topic: str = ""           # R4.3 taxonomy, from the screen call (free)
     screen_source: str = ""   # gemini | groq | gemini_fallback | backstop — which path actually screened this
-    screen_failure: str = ""  # why the screen fell back, blank when Gemini answered
+    screen_failure: str = ""  # why the main model missed, blank when it answered; read with screen_source
     slate_topics: str = ""    # R4.4 Step 0.5: every eligible candidate's topic, rank order, "|"-joined; "!<why>" if the call failed
     author: str = ""          # the question's author, for the description's credit ("" if not printable)
 
