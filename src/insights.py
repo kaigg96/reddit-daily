@@ -438,6 +438,30 @@ def drift_floor(videos, metric, block=MIN_COHORT):
     return median(deltas) if deltas else None
 
 
+def release_chance(videos, metric, size, quantile=0.9):
+    """The drop a batch of `size` uploads shows against the `size` before it,
+    nothing switched, exceeded one time in ten (`quantile` 0.9).
+
+    `drift_floor` is the *median* move between batches of 8; at 20 uploads the
+    median move is ~10% against its 13% (2026-10-10), so a neutral release
+    trips a 13% limit far more often than one read in ten. Batches start at
+    every upload, so they overlap and the tail is rough; against the release's
+    real predecessor, usually larger than `size`, it is conservative.
+    None without two batches."""
+    live = sorted([v for v in videos if v.views > 0 and v.get(metric) is not None],
+                  key=lambda v: v.true_published or v.published)
+    drops = []
+    for i in range(len(live) - 2 * size + 1):
+        mx = median([v.get(metric) for v in live[i:i + size]])
+        my = median([v.get(metric) for v in live[i + size:i + 2 * size]])
+        if mx:
+            drops.append((mx - my) / mx)
+    if not drops:
+        return None
+    drops.sort()
+    return max(0.0, drops[min(len(drops) - 1, int(quantile * len(drops)))])
+
+
 def alternation_floor(videos, metric, block=MIN_COHORT):
     """`drift_floor`'s counterpart for a test that alternates by day.
 

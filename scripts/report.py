@@ -213,6 +213,13 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
         print(f"({read.later} upload(s) postdate {version} — excluded, so this compares it "
               f"with what it replaced rather than with its own successors)")
     print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
+    # Beside the verdict, never in it: the revert rule is the owner's (#18).
+    n = len([v for v in read.release if v.views > 0])
+    tail = insights.release_chance(read.before, Metric.WATCH, n) if n >= insights.MIN_COHORT else None
+    if tail is not None:
+        print(f"chance at this size: a batch of {n} trails the {n} before it on "
+              f"watch_seconds by more than {tail:.0%} one time in ten, nothing switched "
+              f"(before {version}; overlapping batches, so rough)")
     print(insights.render_duration(read.release, read.before))
     within_length = insights.render_within_length(read)
     if within_length:

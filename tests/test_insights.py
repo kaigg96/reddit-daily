@@ -1180,6 +1180,17 @@ def test_compare_min_views_reads_seen_uploads_beside_every_uploads_burial(capsys
     assert "arm=y                    n=20" in out          # the 3-view uploads left the read
 
 
+def test_release_chance_reads_the_drop_tail_not_the_rise():
+    """A channel whose watch time rises only ever shows batches gaining, so
+    the drop a neutral release must clear is small; a flat noisy one is not."""
+    rising = [v(f"r{i}", 200 - i, watch=8 + i // 10) for i in range(80)]
+    assert insights.release_chance(rising, Metric.WATCH, 20) == 0.0
+    noisy = [v(f"n{i}", 200 - i, watch=(9, 15, 11, 13, 10)[i % 5] + (i * 7) % 3)
+             for i in range(80)]
+    assert insights.release_chance(noisy, Metric.WATCH, 8) > 0
+    assert insights.release_chance(noisy[:15], Metric.WATCH, 8) is None
+
+
 def test_since_keeps_only_the_weeks_a_test_ran():
     """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
     uploads are not its control. An --at-age read carries synthetic
