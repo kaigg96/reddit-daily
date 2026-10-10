@@ -746,6 +746,16 @@ def test_upload_slot_is_derived_from_the_log_timestamp():
     assert slot("") == ""
 
 
+def test_publish_week_is_the_iso_week_of_the_log_timestamp():
+    """Do buried uploads cluster in calendar weeks (R3's 09-06..09-19)?"""
+    week = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["publish_week"]
+    assert week("2026-09-24T05:03:08+00:00") == "2026-W39"
+    assert week("2026-09-27T23:59:00+00:00") == "2026-W39"   # Sunday closes it
+    assert week("2026-09-28T00:01:00+00:00") == "2026-W40"
+    assert week("2026-01-01T06:00:00Z") == "2026-W01"
+    assert week("") == ""
+
+
 def test_question_length_splits_at_the_logged_median():
     """Research row R2: do shorter questions hold viewers longer under v7?"""
     length = lambda q: insights._with_derived_dimensions({"post_title": q})["question_length"]
