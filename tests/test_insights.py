@@ -1167,6 +1167,19 @@ def test_coin_floor_can_leave_out_uploads_with_few_plays():
         insights.coin_floor(steady, Metric.WATCH, 15, span=90)
 
 
+def test_compare_min_views_reads_seen_uploads_beside_every_uploads_burial(capsys):
+    """PRD §0 #3 and #10 read watch time only where an average is steady,
+    so a cohort YouTube buries must still show, in the line before."""
+    from scripts import report
+    seen = [v(f"s{i}", 7, views=100, watch=10 + i % 3, arm="x" if i % 2 else "y")
+            for i in range(40)]
+    few = [v(f"f{i}", 7, views=3, watch=40, arm="y") for i in range(6)]
+    report.compare(seen + few, "arm=y", Metric.WATCH, NOW, min_views=10)
+    out = capsys.readouterr().out
+    assert "every upload: arm=y 6/26 vs arm!=y 0/20" in out
+    assert "arm=y                    n=20" in out          # the 3-view uploads left the read
+
+
 def test_since_keeps_only_the_weeks_a_test_ran():
     """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
     uploads are not its control. An --at-age read carries synthetic
