@@ -196,6 +196,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   missing, and the buried rate prints beside it. **Still open** for every
   other watch-seconds reader, `--release` included. **Closes when** a
   release read is shown to move on them, or the next audit drops it.
+  `--min-views` nits its review left: without `--at-age` the buried line
+  counts uploads too new to be reported; `--replays` ignores the flag; the
+  refusals in `main()` have no test.
 
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
