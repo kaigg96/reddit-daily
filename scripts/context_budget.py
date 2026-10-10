@@ -364,7 +364,7 @@ def shift_minutes(path=None):
             continue            # a failed run is a different problem
         try:
             out.append(float(r["duration_min"]))
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, TypeError):   # TypeError: a cut-off row
             continue
     return out
 

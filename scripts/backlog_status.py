@@ -124,8 +124,8 @@ def main(argv=None):
               "first (/backlog §1-2). Research questions tested against existing "
               "data are always available, and the risk register (PLAN.md §4) "
               "names what no function is yet answering.")
-        for line in short_shifts():
-            print(line)
+    for line in short_shifts():
+        print(line)
     return 0
 
 
