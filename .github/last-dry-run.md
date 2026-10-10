@@ -6,24 +6,24 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `release/caps-and-screen-fix`
-- **Commit:** `844f993`
-- **When:** 2026-10-10T09:56:11Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 38.2 s, audio, no dead air
+- **Branch:** `release/commentary-v8`
+- **Commit:** `8dd8577`
+- **When:** 2026-10-10T22:46:51Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 29.5 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38042915493)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38092495305)
 
 What it picked:
 
 ```
-Selected post: If my car dies in the middle of a busy highway, can I call 911?
-Slate topics (rank order): life-advice|sex-adjacent|relationships-dating
-Title style B, caps arm 0: What would you do if your car died on a busy highway?
-Today's top NoStupidQuestions post, asked by u/RaineRisin: If my car dies in the middle of a busy highway, can I call 911?
+Selected post: How would you feel if the next U.S. president withdrew all support for Israel?
+Slate topics (rank order): politics-news|humor-absurd|relationships-dating|money-work|other
+Title style B, caps arm 1: How would YOU feel about ending Israel support?
+Today's top AskReddit post, asked by u/romalis07: How would you feel if the next U.S. president withdrew all support for Israel?
 ```
 
 ## Last request
 
-- **Branch:** `release/caps-and-screen-fix`
-- **When:** 2026-10-10T09:56:11Z
+- **Branch:** `release/commentary-v8`
+- **When:** 2026-10-10T22:46:51Z
 - **Outcome:** rendered -- see above
