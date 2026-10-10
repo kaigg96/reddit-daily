@@ -2067,3 +2067,21 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
         with pytest.raises(SystemExit) as exc:
             report.main()
         assert why in str(exc.value), extra
+
+
+# --- bet 1's done-when (#70) ---------------------------------------------------
+
+def test_own_words_counts_every_upload_of_the_release_and_fallbacks_miss():
+    rows = [{"format_version": "v8", "own_words_share": s} for s in ("0.63", "0.51", "0.00", "0.44")]
+    rows += [{"format_version": "v7", "own_words_share": ""}, {"format_version": "v8"}]
+    line = insights.render_own_words(rows, "v8")
+    assert "2 of 4 uploads" in line and "1 fell back" in line and line.endswith("NOT YET")
+
+
+def test_own_words_is_done_only_when_every_upload_meets_it():
+    rows = [{"format_version": "v8", "own_words_share": s} for s in ("0.50", "0.70")]
+    assert insights.render_own_words(rows, "v8").endswith("DONE")
+
+
+def test_own_words_is_silent_for_a_release_without_commentary():
+    assert insights.render_own_words([{"format_version": "v7", "own_words_share": ""}], "v7") == ""

@@ -219,6 +219,12 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
               f"with what it replaced rather than with its own successors)")
     print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
     print(insights.render_duration(read.release, read.before))
+    import csv
+    from src import config
+    with open(config.UPLOAD_LOG) as f:
+        own_words = insights.render_own_words(list(csv.DictReader(f)), version, key)
+    if own_words:
+        print(own_words)
     within_length = insights.render_within_length(read)
     if within_length:
         print(within_length)
