@@ -330,14 +330,17 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     single all-or-nothing result would have made one bad field as expensive as
     a dead API.
     """
-    guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
+    template = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"])
+    if config.COMMENTARY:
+        # Style C's examples promise a count; two answers are read, not three.
+        # Replaced before the question goes in, so the question is never edited.
+        template = template.replace('"3 ', f'"{config.COMMENTARY_ANSWERS} ')
+    guidance = template.format(reddit_title=reddit_title)
     if caps is not None:
         guidance += _CAPS_GUIDANCE[bool(caps)] + _NO_SHOCK
     commentary = config.COMMENTARY
     if commentary:
         comments = comments[:config.COMMENTARY_ANSWERS]
-        # Style C's examples promise a count; two answers are read, not three.
-        guidance = guidance.replace('"3 ', f'"{len(comments)} ')
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".

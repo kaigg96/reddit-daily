@@ -119,7 +119,7 @@ def test_host_lines_follow_their_answers_in_the_hosts_voice():
     assert all(s.speaker is None for s in segs if s.kind != "host")
 
 
-def test_without_host_lines_the_narration_is_todays():
+def test_without_host_lines_the_narration_is_todays(commentary_off):
     segs = run.build_segments(_Post, "cta", None, _synth, "Stephen")
     assert [s.kind for s in segs] == ["title", "comment", "comment", "comment", "outro"]
     assert all(s.speaker is None for s in segs)
@@ -287,8 +287,20 @@ def test_dropping_an_answer_replaces_the_vote_that_may_name_it():
     assert outro == config.OUTRO_TEXT == segs[-1].text
 
 
-def test_off_the_guard_drops_only_the_last_answer():
+def test_off_the_guard_drops_only_the_last_answer(commentary_off):
     segs = run.build_segments(_Post, "cta", None, _synth, "Stephen")
     outro = run.fit_to_length(segs, _too_long_until(4), None, _synth)
     assert [s.text for s in segs][1:3] == POST_ANSWERS[:2] and len(segs) == 4
     assert outro == "cta"
+
+
+def test_style_c_never_edits_the_question(monkeypatch, commentary_on):
+    seen = []
+    monkeypatch.setattr(llm, "generate_retrying", lambda p, *a, **k: seen.append(p) or "{}")
+    llm.get_metadata("3 words that ruin a date?", POST_ANSWERS, style="C")
+    assert '"3 words that ruin a date?"' in seen[0]
+
+
+def test_a_fallback_reads_the_two_answers_its_title_saw(commentary_on):
+    segs = run.build_segments(_Post, config.OUTRO_TEXT, None, _synth, "Stephen")
+    assert [s.kind for s in segs] == ["title", "comment", "comment", "outro"]

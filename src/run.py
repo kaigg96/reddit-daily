@@ -45,7 +45,10 @@ def build_segments(post, outro_text, host, synth, host_voice):
     then each answer followed by its reaction, then the host's vote. Without
     them, today's: question, the answers, the CTA."""
     segments = [synth("title", post.title, kind="title")]
-    answers = post.comments[:len(host.reactions)] if host else post.comments
+    # With commentary on, a fallback reads the same two answers its title was
+    # written from, so a "2 Answers" title is never read over three.
+    two = host or config.COMMENTARY
+    answers = post.comments[:config.COMMENTARY_ANSWERS] if two else post.comments
     if host:
         segments.append(synth("setup", host.setup, kind="host", speaker=host_voice))
     for i, comment in enumerate(answers, 1):
@@ -208,7 +211,6 @@ def main():
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta = closing_line(meta, host)
-    cta_ok = cta is not None
     outro_text = cta or config.OUTRO_TEXT
     print(f"CTA: {outro_text}")
 
@@ -240,6 +242,8 @@ def main():
     outro_text = fit_to_length(segments, lambda segs: projected(segs) > config.MAX_TOTAL_SECONDS,
                                host, synth)
     assert projected(segments) <= 60, "video must never exceed 60s"
+    # Whether the AI's closing line is the one spoken: the guard can swap it.
+    cta_ok = cta is not None and outro_text == cta
     # 0.00 on a fallback, so the done-when's misses count, not vanish.
     own_words = own_words_share(segments) if config.COMMENTARY else ""
     if config.COMMENTARY:
