@@ -85,6 +85,7 @@ and more useful than a confident guess.
 - **For you, newest first:** #71, listening to one sample of bet 1 (two commands, about 2 cents of narration); the four commands on #50; the Groq key and label on #69; the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
 
 ### Next
+- **11 October, 08:17:** the daily release check now tests the commentary release with the AI that uploads use, and prints its host lines. **Its pass is not a go-ahead:** shipping also needs Monday's `v7` read, your listen on #71, and a fresh sample of the release's current commit.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it. If it keeps (or reverts), merge the commentary build and release `v8` once you have listened. The release needs its own sample of the branch's current commit and a release-check pass showing the host lines. If host lines fall back on length there, raise the vote's limit by three words first.
 - Then the engaged-view, narrator, dark-morbid and zero-view questions, the clip check and the first subscriber count.
 
