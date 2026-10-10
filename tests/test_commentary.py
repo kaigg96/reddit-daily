@@ -70,7 +70,9 @@ def test_the_prompt_carries_each_rule_the_drafts_needed(monkeypatch, commentary_
                  "never on the person",                   # the autism vote
                  "never about the harm",                  # off-tone on grim threads
                  "make sense heard once",                 # one nonsense line
-                 "show\n   of hands"):                    # the owner's stance (#70)
+                 "show\n   of hands",                     # the owner's stance (#70)
+                 "Never restate the\n     question",        # "Reddit weighs in on ..."
+                 "take no side on the issue"):            # a side taken on Israel
         assert rule in prompt, rule
 
 

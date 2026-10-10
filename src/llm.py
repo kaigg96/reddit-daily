@@ -232,12 +232,17 @@ def _cta_instruction(vote_rule):
 
 # Bet 1 (#70, PRD R3.2's commentary-led variant). The rules are the ones the
 # 2026-10-09 drafts needed (PRD §4): each failure they showed has a line here.
+# The first real sample (2026-10-10, a politics thread) added two: its setup
+# restated the question as "Reddit weighs in on ...", a frame that would repeat
+# across uploads, and a reaction took a side ("skips right over the diplomatic
+# fallout"). Politics is 5 of 86 topic-tagged uploads: too many to skip.
 # Word caps keep narration near today's ~455 characters (drafts: 410-546) with
 # our own words at half or more, which is the done-when.
 _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. Its stance is a show
    of hands: it hears the answers, then raises its hand for one. Spoken lines:
    - "setup": AT MOST 15 words, after the question and before the first answer:
-     what makes this question worth hearing out.
+     the host's own hunch or angle on this question. Never restate the
+     question, and never open on "Reddit" or a stock frame like "weighs in".
    - "reactions": exactly {n} lines of AT MOST 12 words each, in order; each is
      heard straight after its answer and reacts to that answer only.
    - "cta": the host's vote, AT MOST 15 words: which answer it raises its hand
@@ -252,6 +257,8 @@ _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. I
      conditions, identities or groups of people.
    - On threads about illness, injury, death or crime, be warm or wry about the
      people, never about the harm.
+   - On politics or news threads, take no side on the issue itself: react to
+     how an answer is put (its wit, its nerve), and vote on that.
    - Every line must make sense heard once. Plain spoken words. No hashtags, no
      emoji, no profanity."""
 
