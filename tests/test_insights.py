@@ -2085,3 +2085,8 @@ def test_own_words_is_done_only_when_every_upload_meets_it():
 
 def test_own_words_is_silent_for_a_release_without_commentary():
     assert insights.render_own_words([{"format_version": "v7", "own_words_share": ""}], "v7") == ""
+
+
+def test_own_words_skips_a_malformed_value_rather_than_crash_the_read():
+    rows = [{"format_version": "v8", "own_words_share": s} for s in ("abc", "nan", "0.60")]
+    assert "1 of 1 uploads" in insights.render_own_words(rows, "v8")

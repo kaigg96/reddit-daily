@@ -659,9 +659,19 @@ def render_own_words(log_rows, version, key="format_version"):
     release's uploads had our own words at OWN_WORDS_DONE or more of the
     narration. Read from the log, at any age: it is a property of what
     shipped, not of how it performed, so it never waits on snapshots. A
-    fallback logs 0.00 and counts as a miss. Empty when nothing logs a share."""
-    vals = sorted(float(r["own_words_share"]) for r in log_rows
-                  if r.get(key) == version and (r.get("own_words_share") or "").strip())
+    fallback logs 0.00 and counts as a miss. Counts every upload of the release,
+    whatever --within narrowed above it. Empty when nothing logs a share."""
+    vals = []
+    for r in log_rows:
+        if r.get(key) != version:
+            continue
+        try:
+            v = float((r.get("own_words_share") or "").strip())
+        except ValueError:  # blank (before the column) or malformed: not read
+            continue
+        if v == v:  # not NaN
+            vals.append(v)
+    vals.sort()
     if not vals:
         return ""
     met = sum(1 for v in vals if v >= OWN_WORDS_DONE)
