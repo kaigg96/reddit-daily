@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-10 (22:32) — You approved bet 1, and it is built: a host's commentary, ready to ship after Monday's read
+
+    Worked (% of the shift): product 40 · engineering 25 · editorial 10 · gm 10 · reliability 5 · legal 5 · security 5
+
+**Summary:** You approved bet 1 on #70, so this shift built it. A host now sets up each question, reacts to the top two answers and casts the show's vote, from the AI request we already make. It is the first change aimed squarely at getting the channel paid, since YouTube does not pay for readings. It is switched off until Monday's read of the current version, and I have asked you to listen to one sample first (a new issue, about five minutes).
+
+### Toward revenue
+- **Yes, the most direct step yet.** YouTube refuses to pay for "readings of other materials". On tonight's sample, with real AI lines on a real post, our own words were 63% of the narration, against none today. Whether that is enough for YouTube's review is unknown until we apply. Without it, the answer is no.
+
+### Done
+- **Product (a bet):** built the commentary-led video as you approved it. The host speaks in the voice the narrator is not using, with yellow captions. The answers are still read word for word, the top two in vote order. The host's vote replaces the closing line and is posted as the channel's comment. If any host line is missing or far too long, that upload ships as today's reading, and the log records it. The log also records our own words' share for every upload. Medical threads are skipped when picking the post: that would have skipped 3 of our 168 uploads.
+- **Product:** tonight's sample with commentary on passed: a playable video of 29.5 seconds on a real politics thread, a little longer than today's usual 15 to 28. Reading its captions showed two faults. The setup only restated the question ("Reddit weighs in on …"), and one reaction took a side on the issue. The prompt now forbids both. No real post has been tried since that change; your listen will be the first.
+- **Engineering:** two fresh reviews. The first found seven real problems, all with commentary on, and all are fixed. The worst two: a fallback upload would still have spoken the host's vote after a plain reading, and an over-long AI line could have cost an upload. With commentary off, the review confirmed nothing changes.
+- **Engineering:** the daily release check now fails if the host's lines are missing, and prints them, so a shift can read real host lines every day without a render. Sample verdicts will show them too.
+- **General management:** closed #70. Bet 1 is marked approved in the plan, and the host-storyline experiment is folded into it. Two gaps for the release are recorded: long answers can keep our own words under half, and the length guard's fallback has never fired on a real post.
+- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- Tonight's upload carried its capitals group (none), and its title obeyed it.
+- Fixing against improving: an improvement, the first change to what we ship since the capitals test.
+
+### Blocked
+- **For you, newest first:** the new issue asking you to listen to one sample of bet 1 (run two commands, about 2 cents of narration); the four commands on #50; the Groq key and label on #69; the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
+
+### Next
+- **12 October:** read `v7` under its rule, with the buried-upload check beside it. If it keeps (or reverts), merge the commentary build and release `v8` once you have listened. The release needs its own sample of the branch's current commit and a release-check pass showing the host lines.
+- Then the engaged-view, narrator, dark-morbid and zero-view questions, the clip check and the first subscriber count.
+
+### Better?
+- **Than last shift:** Yes. Bet 1, the change YouTube's own wording says the channel needs to be paid at all, went from a question to a built release.
+- **Than ~10 shifts ago:** Yes, though unproven. Then, bet 1 was a draft waiting on your choice of stance. Now it is approved, built and sampled. Watch time is still flat (12.0 seconds).
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-10 (16:14) — Most of the rise in buried uploads was the clip we already retired; a check on the new opening is set for Monday
 
     Worked (% of the shift): data 45 · gm 25 · reliability 15 · security 10 · market 5
@@ -92,38 +123,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Unclear. The video did not change. Monday's verdict can now see a cost to the new opening that it would have missed.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the capitals test, the first change aimed at views in two weeks, goes live tonight.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-10 (10:00) — The capitals test goes live tonight, and three tests are now judged against what chance actually produces
-
-    Worked (% of the shift): data 45 · product 20 · gm 15 · reliability 10 · strategy 5 · security 5
-
-**Summary:** The fair test of capital letters in titles passed its sample video. It goes live with tonight's upload, together with the safety check's crash fix. I also corrected how three of our tests will be judged. Their watch-time limits were small enough that chance alone would trip them about one read in five, which could wrongly drop the second subreddit and, with it, the case for more uploads a day.
-
-### Toward revenue
-- **Yes, a bet on views is live.** From tonight each upload flips a coin: one word in capitals in its title, or none. Titles with capitals got about twice the views, but that was an observation; this test shows whether the capitals cause it. It reads around 16 November.
-- **The judging fix protects the route to four uploads a day,** the one lever our data says grows views. The subreddit test decides whether we have enough material for it.
-
-### Done
-- **Product (a bet):** the sample passed, and its title obeyed its coin (a "none" draw, no capitals). Merged with the crash fix, which stops an oddly shaped AI reply from costing a slot its upload.
-- **Data (a fix):** beside every two-way comparison, the reporting tool now prints how far two random groups of the same sizes land apart one time in ten with nothing changed, measured over the last six weeks. It can also keep a comparison to the weeks a test ran. The subreddit, title-style and capitals tests now judge watch time against that: about 18%, 30% and 16%, in place of 12–13%. All three were set before any of their data was read. A fresh review found real problems in my first version, and the biggest changed the answer: random groups of our uploads now land about three times further apart than in July, so measuring chance over all history understated it. Fixed, and checked again before going live.
-- **Data (research):** found most of why chance has grown. More uploads now get only a handful of plays (11 of the newest 90, against 1 of the first 45), and six of those are recorded with no watch time at all, which may be YouTube reporting nothing. Leaving such uploads out cuts the noise at 15 a side from 31% to about 18–20%, roughly what two to three times the uploads would buy. We cannot tell a missing figure from a real zero, so the subreddit and title-style tests now leave out uploads under 10 plays, with the count of buried uploads printed beside them, rather than declaring the zeros missing. One of the zeros is in the opening-question release read on 12 October.
-- **Reliability:** this morning's upload was the first live need for the backup safety model. It answered, and the log recorded it. The main model was overloaded on 3 of the last 5 uploads, and all were covered.
-- **General management:** ranked the queue in a separate pass. Checked that the patch on #50 still applies cleanly to today's code, so your four commands work as written. Cut the product tracker's release history to one line per release, which two shifts running had spent about a tenth of their time working around.
-- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
-- Fixing against improving: one of each. The improvement is the one viewers will see.
-
-### Blocked
-- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50 (still current); the Groq key and label on #69; the planning session (#55); asking Reddit (#60, a draft is in the issue); the music script (#66); the account checks (#59); re-running the comments job on #53.
-
-### Next
-- After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
-- 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
-- Around 26 October, a week before the subreddit test reads: ask you by label for four-a-day's narration spend (about $0.90 a month more, inside the $3 budget), so volume can ship the day the test passes. Not now: it is three weeks from being needed, and you have eight open asks.
-- Checked and cleared: whole-release reads are not exposed the same way. A batch of 20 uploads drops 13% by chance far less than one time in ten (4–8%), so their limit is safe. They still count the zero-watch uploads; one is in Monday's opening-question read, which is read as written.
-- I handed over about 20 minutes early: nothing is ready until Monday's data, and the two edge cases left in the new reading option touch no rule's read. Considered and dropped: a backup model for titles (a failed title costs no watch time, per the 28 September finding, and none has failed since the longer overload wait of 4 October); a question-mark title test from existing data (views need about 30 uploads a side, so only an effect larger than the capitals one could show); cutting narration's second paid call per segment by timing words locally (it needs real narration files, which a shift never holds); building four-a-day ahead of your answer (the audit's lesson).
-
-### Better?
-- **Than last shift:** Yes. The first change in two weeks aimed at views is live, and the tests that gate more uploads a day can no longer be failed by chance so easily.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals test reads in mid-November.
 - **Than ~100 shifts ago:** Too early to say.

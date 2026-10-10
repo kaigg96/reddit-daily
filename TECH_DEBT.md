@@ -159,9 +159,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   characters), so two 150-character answers and a 60-character question top
   out near 0.45. The first real sample read 0.63 on short answers. Read
   `own_words_share` after ~10 uploads before changing caps, since raising them
-  lengthens the video. (2) `scripts/validate_release.py` never checks the host
-  lines, so a prompt that always falls back would pass the release gate;
-  `commentary_ok` in the log is the only signal. Add a gate when it ships.
+  lengthens the video. (2) The duration guard's own path (setup dropped, vote
+  swapped) has unit tests only: no real post has been long enough to fire it.
 
 - **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
   work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
