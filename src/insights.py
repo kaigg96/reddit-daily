@@ -357,6 +357,14 @@ def within(videos, spec):
     return [v for v in videos if matches(v.meta, spec)]
 
 
+def since(videos, day):
+    """Uploads published on or after `day`. A test that started mid-history
+    reads only the weeks it ran: `--compare subreddit=NoStupidQuestions`
+    across all history set NoStupidQuestions' first weeks against AskReddit's
+    since July, when watch-seconds ran 8-9s against today's 12-13s (PRD §0 #3)."""
+    return [v for v in videos if (v.true_published or v.published).date() >= day]
+
+
 def ids_within(spec, log_rows=None):
     """Video ids of the logged uploads matching `spec`, for the readers that
     work on snapshot rows (the trajectory), which carry no upload_log fields.
@@ -459,34 +467,52 @@ def alternation_floor(videos, metric, block=MIN_COHORT):
     return median(deltas) if deltas else None
 
 
-def coin_windows(videos, metric, arm):
-    """The upload windows `coin_floor` splits: every `2 * arm` consecutive
-    uploads with a value, anchored at the newest so the latest weeks count."""
+# The uploads `report.py --compare` prices chance from: about six weeks at two
+# a day. Noise grew from July to late August (`coin_floor`), and a read is
+# judged against the weeks it sits in, not the channel's whole history.
+CHANCE_SPAN = 90
+
+
+def coin_windows(videos, metric, arm, other=None, span=None):
+    """The upload windows `coin_floor` splits: every `arm + other` consecutive
+    uploads with a value (`other` defaults to `arm`), anchored at the newest
+    so the latest weeks count, each overlapping the next by half. `span`
+    keeps only the newest that many uploads (never fewer than one window)."""
+    size = arm + (arm if other is None else other)
     live = sorted([v for v in videos if v.views > 0 and v.get(metric) is not None],
                   key=lambda v: v.true_published or v.published)
-    starts = range(len(live) - 2 * arm, -1, -arm)
-    return [[v.get(metric) for v in live[i:i + 2 * arm]] for i in starts]
+    if span:
+        live = live[-max(span, size):]
+    starts = range(len(live) - size, -1, -max(1, size // 2))
+    return [[v.get(metric) for v in live[i:i + size]] for i in starts]
 
 
-def coin_floor(videos, metric, arm, quantile=0.9, splits=200, seed=0):
+def coin_floor(videos, metric, arm, quantile=0.9, splits=200, seed=0, other=None,
+               span=None):
     """The gap a coin-flip test (PRD §0 #14) reads with nothing switched.
 
     Each run's arm is random, so the arms share the calendar and the noise is
     a random split of the same weeks' uploads. Split each of `coin_windows` at
     random `splits` times and return the `quantile` of how far the two
-    halves' medians sit apart. Two-sided: one arm leads by more than it about
+    halves' medians sit apart, relative to the second arm's as
+    `Comparison.delta` is. Two-sided: one arm leads by more than it roughly
     half that often. The 90th percentile, not the median, because a rule set
     at the median gap fires on chance about one read in four, one-sided.
+    `other` sizes the second arm when the two differ: title style B runs
+    two uploads to the rest's one (PRD §0 #10), and the smaller arm is what
+    sets the noise. `span` reads only the newest uploads: at 15 a side the gap
+    was 11-12% in July's windows and 33-36% from late August (2026-10-10
+    review), so all history understates the noise a read meets today.
     None without one full window.
     """
     import random
     rng, deltas = random.Random(seed), []
-    for values in coin_windows(videos, metric, arm):
+    for values in coin_windows(videos, metric, arm, other, span):
         for _ in range(splits):
             rng.shuffle(values)
             mx, my = median(values[:arm]), median(values[arm:])
-            if mx:
-                deltas.append(abs(my - mx) / mx)
+            if my:
+                deltas.append(abs(mx - my) / my)
     if not deltas:
         return None
     deltas.sort()

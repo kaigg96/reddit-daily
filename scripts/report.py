@@ -132,16 +132,42 @@ def zeros(now, videos=None):
             print(f"  {v['published'][:10]}  {v['id']}  {v['title'][:44]}")
 
 
-def compare(videos, spec, metric, now):
+def compare(videos, spec, metric, now, pool=None):
     """Age-matched two-way test on one upload_log field.
 
     Videos where the field is unset are excluded from both cohorts — see
-    insights.split_cohorts for why that matters."""
+    insights.split_cohorts for why that matters. Beside the verdict, the gap
+    random arms of the same two sizes reach one time in ten with nothing
+    switched (`insights.coin_floor`, over `pool`). Tests read at ~15 per arm
+    had a 12-13% limit, the *median* chance gap (PRD §4, 2026-10-09)."""
     key, _, value = spec.partition("=")
     a, b, unset = insights.split_cohorts(videos, key, value)
     if unset:
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
-    print(insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric).render())
+    result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
+    print(result.render())
+    when = lambda vs: [v.true_published or v.published for v in vs]
+    if result.a.sufficient and result.b.sufficient and result.age_matched:
+        (a0, a1), (b0, b1) = ((min(when(c)), max(when(c))) for c in (a, b))
+        if key == "format_version" or a0 > b1 or b0 > a1:
+            # Arms from different weeks carry drift a random split cannot see.
+            print("    chance: the arms come from different weeks, so no random split "
+                  "prices this; a flag-day change reads with --release")
+        else:
+            pool = pool or videos
+            span = insights.CHANCE_SPAN
+            gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span)
+            windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span))
+            print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
+                  f"{max(span, result.a.n + result.b.n)} uploads "
+                  + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
+                     f"rough); only a gap beyond that is a finding"
+                     if gap is not None else "- too few uploads to say (see --placebo)"))
+            # One arm reaching weeks further back compares eras, not arms (PRD §0 #3).
+            start = max(a0, b0)
+            if abs(a0 - b0).days > 14:
+                print(f"    WARNING: one arm starts {abs(a0 - b0).days} days before the other; "
+                      f"read the weeks both ran with --since {start.date()}")
     if key != "format_version":
         for era, sa, sb in insights.era_imbalance(a, b):
             print(f"    WARNING: uneven across releases ({era}: {sa:.0%} vs {sb:.0%}) — "
@@ -470,6 +496,9 @@ def main():
                    help="restrict --compare/--by/--release/--trajectory to one group, "
                         "e.g. video_length=short, or exclude one with KEY!=VALUE "
                         "(uploads with the field unset are in neither)")
+    p.add_argument("--since", metavar="YYYY-MM-DD",
+                   help="restrict --compare/--by to uploads published on or after a "
+                        "date, so a test reads only the weeks it ran (PRD §0 #3, #10)")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -527,6 +556,13 @@ def main():
             insights.ids_within(args.within)
         except ValueError as e:
             sys.exit(f"--within {args.within}: {e}")
+
+    # Every other mode returns before the filter, so it would print unfiltered
+    # numbers under a --since the reader believes applied.
+    early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
+             args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+    if args.since and (any(early) or not (args.compare or args.by)):
+        sys.exit("--since restricts --compare and --by only")
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -686,16 +722,24 @@ def main():
                      f"unavailable.\nRe-run with --offline to use the committed "
                      f"weekly snapshot instead.")
 
+    pool = videos           # the chance gap reads every upload, not one filtered slice
     if args.within:
         videos = insights.within(videos, args.within)
         print(f"(within {args.within}: {len(videos)} upload(s))")
+    if args.since:
+        try:
+            since = datetime.date.fromisoformat(args.since)
+        except ValueError:
+            sys.exit(f"--since takes a date, YYYY-MM-DD, not {args.since!r}")
+        videos = insights.since(videos, since)
+        print(f"(since {since}: {len(videos)} upload(s))")
     if not videos:
         sys.exit("No analyzable uploads found.")
 
     if args.replays:
         show_replays(videos)
     elif args.compare:
-        compare(videos, args.compare, args.metric, now)
+        compare(videos, args.compare, args.metric, now, pool)
     elif args.by and args.concentration:
         show_hit_rates(videos, args.by)
     elif args.by:
