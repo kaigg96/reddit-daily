@@ -120,7 +120,9 @@ def _medical_skip(title, on_verdict, why):
     if on_verdict:
         on_verdict(title, types.SimpleNamespace(
             category="medical", reason=why, source="commentary", unsafe=(), demoted=""),
-            "skip_medical")
+            # Not "skip_*": the weekly digest reads those as the screen's
+            # verdicts to audit for false positives, and this is not one.
+            "medical_excluded")
 
 
 def subreddit_for_run(now, subreddits=None):
@@ -182,11 +184,16 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         if slate:
             slate_topics = "|".join(t or "?" for t in slate)
 
-    for rank, post in enumerate(candidates[: config.MAX_SCREENED_CANDIDATES], 1):
-        # Before the screen, so a skipped thread spends no request on it.
+    examined = 0
+    for rank, post in enumerate(candidates, 1):
+        # Before the screen, and outside its cap: a thread skipped on its title
+        # spends no request, so it must not cost the run a screened candidate.
         if config.COMMENTARY and is_medical(post.title):
             _medical_skip(post.title, on_verdict, "title")
             continue
+        examined += 1
+        if examined > config.MAX_SCREENED_CANDIDATES:
+            break
         pool = _comment_pool(post, config.COMMENT_POOL)
         if len(pool) < config.NUM_COMMENTS:
             continue

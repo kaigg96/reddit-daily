@@ -203,10 +203,90 @@ def test_with_commentary_on_medical_threads_are_skipped_and_logged(
     assert post.title == TITLES[2] and post.candidate_rank == 3
     # The title check runs before the screen, so it spends no request.
     assert TITLES[0] not in seen
-    assert verdicts == [(TITLES[0], "skip_medical", "medical"),
-                        (TITLES[1], "skip_medical", "medical")]
+    # Not "skip_*", which the weekly digest audits as the screen's verdicts.
+    assert verdicts == [(TITLES[0], "medical_excluded", "medical"),
+                        (TITLES[1], "medical_excluded", "medical")]
 
 
 def test_with_commentary_off_selection_is_unchanged(selection, commentary_off):
     post = content.select_post(_FakeReddit(TITLES), "", screener=_screener)
     assert post.title == TITLES[0]
+
+
+def test_title_skips_do_not_use_up_the_screened_candidates(
+        monkeypatch, selection, commentary_on):
+    """Four medical titles ahead of a fine one must not leave the run postless."""
+    titles = [f"Doctors, what is case {i}?" for i in range(config.MAX_SCREENED_CANDIDATES)]
+    titles.append("What job looks easy but is brutal?")
+    post = content.select_post(_FakeReddit(titles), "", screener=_screener)
+    assert post.title == titles[-1] and post.candidate_rank == len(titles)
+
+
+def test_off_the_screen_cap_is_unchanged(monkeypatch, selection, commentary_off):
+    titles = [f"What is case {i}?" for i in range(6)]
+    seen = []
+
+    def skip_all(q, c):
+        seen.append(q)
+        return screen.ScreenResult("skip_post", category="x", source="gemini")
+    with pytest.raises(ValueError):
+        content.select_post(_FakeReddit(titles), "", screener=skip_all)
+    assert len(seen) == config.MAX_SCREENED_CANDIDATES
+
+
+@pytest.mark.parametrize("field,words", [("setup", 23), ("cta", 23)])
+def test_a_line_far_past_its_cap_falls_back(monkeypatch, commentary_on, field, words):
+    """Prompt caps alone could push a video past 60s and cost the upload."""
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, field: "word " * words}))
+    assert meta.commentary is None
+
+
+def test_a_line_a_little_past_its_cap_still_ships(monkeypatch, commentary_on):
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, "reactions": ["w " * 17, "ok"]}))
+    assert meta.commentary is not None
+
+
+def test_style_c_promises_the_two_answers_read(monkeypatch, commentary_on):
+    seen = []
+    monkeypatch.setattr(llm, "generate_retrying", lambda p, *a, **k: seen.append(p) or "{}")
+    llm.get_metadata("q", POST_ANSWERS, style="C")
+    assert '"2 Answers That' in seen[0] and '"3 ' not in seen[0]
+
+
+def test_a_fallback_never_speaks_the_hosts_vote(commentary_on):
+    """With commentary on, the call's "cta" is the vote; after a plain reading
+    it is said by nobody about answers nobody argued, so the generic line closes."""
+    meta = llm.MetadataResult("t", ["k"], "My hand goes up for X.", "gemini", "", None)
+    assert run.closing_line(meta, None) is None
+
+
+def test_off_the_closing_line_is_the_calls_cta(commentary_off):
+    meta = llm.MetadataResult("t", ["k"], "Comment yours!", "gemini", "", None)
+    assert run.closing_line(meta, None) == "Comment yours!"
+
+
+def _too_long_until(n_segments):
+    return lambda segs: len(segs) > n_segments
+
+
+def test_the_guard_drops_the_setup_first():
+    host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    outro = run.fit_to_length(segs, _too_long_until(6), host, _synth)
+    assert HOST["setup"] not in [s.text for s in segs]
+    assert POST_ANSWERS[1] in [s.text for s in segs] and outro == HOST["cta"]
+
+
+def test_dropping_an_answer_replaces_the_vote_that_may_name_it():
+    host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    outro = run.fit_to_length(segs, _too_long_until(4), host, _synth)
+    assert [s.kind for s in segs] == ["title", "comment", "host", "outro"]
+    assert outro == config.OUTRO_TEXT == segs[-1].text
+
+
+def test_off_the_guard_drops_only_the_last_answer():
+    segs = run.build_segments(_Post, "cta", None, _synth, "Stephen")
+    outro = run.fit_to_length(segs, _too_long_until(4), None, _synth)
+    assert [s.text for s in segs][1:3] == POST_ANSWERS[:2] and len(segs) == 4
+    assert outro == "cta"

@@ -256,6 +256,17 @@ _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. I
      emoji, no profanity."""
 
 
+# The prompt's word caps, enforced with slack: a line well past its cap would
+# push the video toward the 60s limit and Polly's per-run budget, either of
+# which would cost the upload, so it falls back instead.
+_HOST_CAPS = {"setup": 15, "reaction": 12, "cta": 15}
+_CAP_SLACK = 1.5
+
+
+def _within_cap(line, kind):
+    return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
+
+
 def _clean_commentary(data, n):
     """The host's lines, or None unless every one is usable (see Commentary)."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
@@ -264,6 +275,10 @@ def _clean_commentary(data, n):
         return None
     reactions = [_clean_str(r) for r in reactions]
     if not (setup and verdict and all(reactions)):
+        return None
+    if not (_within_cap(setup, "setup") and _within_cap(verdict, "cta")
+            and all(_within_cap(r, "reaction") for r in reactions)):
+        print("Commentary: a host line ran past its length cap")
         return None
     return Commentary(setup, reactions, verdict)
 
@@ -314,6 +329,8 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     commentary = config.COMMENTARY
     if commentary:
         comments = comments[:config.COMMENTARY_ANSWERS]
+        # Style C's examples promise a count; two answers are read, not three.
+        guidance = guidance.replace('"3 ', f'"{len(comments)} ')
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
