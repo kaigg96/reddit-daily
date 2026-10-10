@@ -178,20 +178,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Closes when** #70 is answered and shifts stop ending early, or the next
   audit finds a different binding limit.
 
-- **The screen fallback's review follow-up waits for a render (2026-10-09,
-  branch `reliability/screen-parse-hardening`, reviewed twice, findings
-  fixed).** Merged without it because a fix would void the PASS. It closes a
-  pre-existing crash, slightly more exposed now: a reply whose
-  `unsafe_comments` is null or a number raised TypeError out of `screen()`
-  and cost the slot its upload; the whole parse stage now falls back instead.
-  It also skips `gemini_fallback` rows in `slate_agreement` (screen and slate
-  are one model there). On `main` meanwhile: `screen_failure` is no longer
-  blank on rows the fallback answered (read it with `screen_source`), and the
-  fallback shares `SAMPLE_MODEL`'s allowance with the slate call and every
-  sample, up to 4 requests a run. Left as it was: a reply with no `post_risk`
-  passes as none. **Closes when** the branch merges on a PASS, alone or
-  inside `release/caps-and-screen-fix` with PRD §0 #14 (427 tests green; the
-  next render slot opens 2026-10-10 05:38 UTC).
+- **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
+  left by two reviews; the crash fix around it merged 2026-10-10).** The
+  fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
+  every sample, up to 4 requests a run. **Closes when** a replay case shows
+  an omitted `post_risk` on a post that should skip, or the screen is next
+  changed.
 
 - **The Groq route is merged switched off; what remains before switching it
   on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
