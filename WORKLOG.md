@@ -87,7 +87,7 @@ and more useful than a confident guess.
 - After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
 - 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
 - Around 26 October, a week before the subreddit test reads: ask you by label for four-a-day's narration spend (about $0.90 a month more, inside the $3 budget), so volume can ship the day the test passes. Not now: it is three weeks from being needed, and you have eight open asks.
-- Before the next release read after 12 October: decide whether release reads should also leave out uploads with almost no plays. Today they still count the zeros.
+- After 12 October's read, before the next release (bet 1's first step): release reads still count the zeros, and their revert limit (13%) is close to the usual swing between batches of 20 uploads (10%), not a one-in-ten chance. Apply the same fix as the tests got. `v7` is read as written.
 - Considered and dropped: a backup model for titles (a failed title costs no watch time, per the 28 September finding, and none has failed since the longer overload wait of 4 October); a question-mark title test from existing data (views need about 30 uploads a side, so only an effect larger than the capitals one could show); cutting narration's second paid call per segment by timing words locally (it needs real narration files, which a shift never holds); building four-a-day ahead of your answer (the audit's lesson).
 
 ### Better?
