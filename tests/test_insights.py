@@ -2033,16 +2033,18 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
     import sys
     import pytest
     from scripts import report
+    since, only, count = ("--since restricts", "--min-views applies to --compare only",
+                          "must count every upload")
     refused = (
-        ["--since", "2026-10-07", "--trajectory"],
-        ["--since", "2026-10-07", "--release", "v7"],
-        ["--since", "2026-10-07"],
-        ["--min-views", "10", "--by", "topic"],
-        ["--min-views", "10", "--compare", "title_style=B", "--metric", "views"],
-        ["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"],
+        (["--since", "2026-10-07", "--trajectory"], since),
+        (["--since", "2026-10-07", "--release", "v7"], since),
+        (["--since", "2026-10-07"], since),
+        (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
+        (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
     )
-    for extra in refused:
+    for extra, why in refused:
         monkeypatch.setattr(sys, "argv", ["report.py", "--offline"] + extra)
         with pytest.raises(SystemExit) as exc:
             report.main()
-        assert "--since" in str(exc.value) or "--min-views" in str(exc.value), extra
+        assert why in str(exc.value), extra
