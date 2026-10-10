@@ -666,7 +666,8 @@ def main():
                             f"{fmt(insights.coin_floor(load.videos, m, arm, span=span))}"
                             for m in (Metric.WATCH, Metric.VIEWS))
             n = len(insights.coin_windows(load.videos, Metric.VIEWS, arm))
-            print(f"    {arm} per arm: {row}   ({n} window(s); few means rough)")
+            r = len(insights.coin_windows(load.videos, Metric.VIEWS, arm, span=span))
+            print(f"    {arm} per arm: {row}   ({n} / {r} window(s); few means rough)")
         return
 
     if args.catalogue:      # the snapshot series, channel-wide
