@@ -964,7 +964,9 @@ def buried_vs_rest(groups, min_n=MIN_COHORT, hit=is_buried, pooled=True):
     `pooled=False` is for groups that *are* the formats: a release shares no
     format with the rest, so pooling within formats returns 1.0 for every
     release whatever its rate. Plain Fisher then, with the calendar inside the
-    comparison, as in `--release` (2026-10-10)."""
+    comparison, and unlike `--release` later releases sit in each one's rest
+    (2026-10-10). Pooled, any group sharing no format with its rest reads 1.0
+    too: untestable, not null (no logged field does, 2026-10-10)."""
     def tests(exclude):
         rows = []
         for label, vids in groups.items():
