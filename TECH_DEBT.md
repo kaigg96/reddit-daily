@@ -167,31 +167,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   model uploads do not use. If `commentary_ok` shows fallbacks, raise the
   vote's cap to 18 words (about one second) before anything else.
 
-- **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
-  work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
-  none changed a video, and every "Better?" answer hedged (6 "slightly", 2
-  "unclear"). Shifts used 58% of their minutes. Every label-only escalation
-  since 09-25 closed, most within a day (12 of 12); all 8 open ones need hands
-  or a session. The vote (#7) took two shifts to build ahead of an answer, and
-  the 10-09 market read now undercuts it. Groq (#13) waits on a key. Changed:
-  bet 1 was split out of #55 as a label (#70); declines now show in
-  `escalations.py approved` (#62 was missed on 10-08); decision re-reviews went
-  into D4, D6, D7, D9 and D11; the WORKLOG header now matches its budget.
-  Proposed nothing to the skills, because #50, the patch that would let
-  approved skill changes land by label, is itself waiting on the owner's
-  hands. Left alone: the template's length, which is the owner's report.
-  Outward look (Claude Code best-practices page, read 10-09): subagents for
-  research and review are **adopted** (this shift used them to rank, gather
-  evidence and review twice). `/clear` and `/doctor` are interactive, so they do
-  not apply to a headless shift; `/doctor` suits an owner session if
-  `CLAUDE.md` grows. **Candidate, not adopted:** the page's deterministic gate
-  for unattended runs, a Stop hook that blocks a shift from ending until its
-  handover is on `main`, since the 70-minute cutoff loses an unpushed one. It
-  is a process proposal, best raised after #50 lands, and it must not be able
-  to loop a shift to its cutoff.
-  **Closes when** #70 is answered and shifts stop ending early, or the next
-  audit finds a different binding limit.
-
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
   fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
