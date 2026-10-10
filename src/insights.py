@@ -1291,6 +1291,10 @@ def _with_derived_dimensions(row):
     # rather than on a cron hour.
     ts = (r.get("timestamp_utc") or "").strip()
     r["slot"] = "" if not ts else "morning" if _parse_ts(ts).hour < 12 else "evening"
+    # Do buried uploads come in calendar runs? Then a clip, voice or release
+    # that was on air at the time takes the blame for a channel-wide spell
+    # (R3's 09-06..09-19 cluster). `--by publish_week --metric views`.
+    r["publish_week"] = "" if not ts else _parse_ts(ts).strftime("%G-W%V")
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
