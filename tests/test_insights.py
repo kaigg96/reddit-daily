@@ -1143,6 +1143,39 @@ def test_coin_floor_shrinks_with_arm_size_and_needs_one_full_window():
     assert len(windows) == 2 and windows[0] == [x.views for x in newest]
 
 
+def test_coin_floor_reads_unequal_arms_where_the_small_arm_sets_the_noise():
+    """PRD §0 #10 runs title style B four uploads to the rest's two, so its
+    read sets ~30 against ~15: chance reaches further than at 30 a side."""
+    noisy = [v(f"n{i}", 200 - i, views=50 + (i * 37) % 400) for i in range(120)]
+    windows = insights.coin_windows(noisy, Metric.VIEWS, 30, other=15)
+    assert len(windows) > 1 and all(len(w) == 45 for w in windows)
+    even = insights.coin_floor(noisy, Metric.VIEWS, 30)
+    assert insights.coin_floor(noisy, Metric.VIEWS, 30, other=15) > even
+    assert insights.coin_floor(noisy, Metric.VIEWS, 30, other=30) == even
+
+
+def test_since_keeps_only_the_weeks_a_test_ran():
+    """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
+    uploads are not its control."""
+    old, new = v("old", 30), v("new", 2)
+    cut = (NOW - datetime.timedelta(days=2)).date()
+    assert insights.since([old, new], cut) == [new]
+    assert insights.since([old, new], cut + datetime.timedelta(days=1)) == []
+
+
+def test_compare_prints_the_chance_gap_for_its_arm_sizes(capsys):
+    """A verdict beside the gap random arms of the same sizes reach, so a
+    12% limit set at the median chance gap cannot pass for a finding."""
+    from scripts import report
+    vids = [v(f"a{i}", 7, views=50 + (i * 37) % 400, watch=8 + i % 5, arm="x" if i % 3 else "y")
+            for i in range(60)]
+    report.compare(vids, "arm=y", Metric.WATCH, NOW)
+    out = capsys.readouterr().out
+    assert "chance: random arms of 20 and 40 from the same weeks differ by" in out
+    report.compare(vids[:20], "arm=y", Metric.WATCH, NOW)
+    assert "chance:" not in capsys.readouterr().out          # a cohort under 8 reads nothing
+
+
 def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
     """The design it measures: halves split by alternate days share the
     calendar. A steady trend moves both halves together, so it reads as no
