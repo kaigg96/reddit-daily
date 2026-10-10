@@ -132,18 +132,30 @@ def zeros(now, videos=None):
             print(f"  {v['published'][:10]}  {v['id']}  {v['title'][:44]}")
 
 
-def compare(videos, spec, metric, now, pool=None):
+def compare(videos, spec, metric, now, pool=None, min_views=1):
     """Age-matched two-way test on one upload_log field.
 
     Videos where the field is unset are excluded from both cohorts — see
     insights.split_cohorts for why that matters. Beside the verdict, the gap
     random arms of the same two sizes reach one time in ten with nothing
     switched (`insights.coin_floor`, over `pool`). Tests read at ~15 per arm
-    had a 12-13% limit, the *median* chance gap (PRD §4, 2026-10-09)."""
+    had a 12-13% limit, the *median* chance gap (PRD §4, 2026-10-09).
+    `min_views` reads only uploads with that many plays, whose averages are
+    steady (PRD §4, R4); since that hides a change that buries uploads, the
+    buried rate over every upload prints first."""
     key, _, value = spec.partition("=")
     a, b, unset = insights.split_cohorts(videos, key, value)
     if unset:
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
+    if min_views > 1:
+        buried = lambda vs: sum(1 for v in vs if v.views <= insights.BURIED_VIEWS)
+        p = insights.buried_rate_p(buried(a), len(a), buried(b), len(b))
+        print(f"buried (<={insights.BURIED_VIEWS} views), every upload: {key}={value} "
+              f"{buried(a)}/{len(a)} vs {key}!={value} {buried(b)}/{len(b)}, "
+              f"Fisher p={p:.3f} (two-sided)")
+        a = [v for v in a if v.views >= min_views]
+        b = [v for v in b if v.views >= min_views]
+        print(f"(read below: only uploads with >= {min_views} views)")
     result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
     print(result.render())
     when = lambda vs: [v.true_published or v.published for v in vs]
@@ -156,8 +168,10 @@ def compare(videos, spec, metric, now, pool=None):
         else:
             pool = pool or videos
             span = insights.CHANCE_SPAN
-            gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span)
-            windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span))
+            gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span,
+                                      min_views=min_views)
+            windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span,
+                                                min_views))
             print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
                   f"{max(span, result.a.n + result.b.n)} uploads "
                   + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
@@ -499,6 +513,9 @@ def main():
     p.add_argument("--since", metavar="YYYY-MM-DD",
                    help="restrict --compare/--by to uploads published on or after a "
                         "date, so a test reads only the weeks it ran (PRD §0 #3, #10)")
+    p.add_argument("--min-views", type=int, default=1, metavar="N",
+                   help="--compare reads watch time only over uploads with N or more "
+                        "views, the buried rate printed beside it (PRD §4, R4)")
     p.add_argument("--release", metavar="VERSION",
                    help="auto-revert check on a flag-day change, e.g. v6: its uploads "
                         "vs the era it replaced, both read at the same age")
@@ -563,6 +580,14 @@ def main():
              args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
+    if args.min_views > 1 and (any(early) or not args.compare):
+        sys.exit("--min-views applies to --compare only")
+    if args.min_views > 1 and args.metric in (Metric.VIEWS, Metric.TOTAL,
+                                              Metric.ENGAGED_VIEWS):
+        # Leaving out uploads with few views would hide the very effect a
+        # views read measures, such as a change that gets fewer uploads seen.
+        sys.exit(f"--min-views reads watch time among seen uploads; --metric "
+                 f"{args.metric} must count every upload")
 
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -739,7 +764,7 @@ def main():
     if args.replays:
         show_replays(videos)
     elif args.compare:
-        compare(videos, args.compare, args.metric, now, pool)
+        compare(videos, args.compare, args.metric, now, pool, args.min_views)
     elif args.by and args.concentration:
         show_hit_rates(videos, args.by)
     elif args.by:
