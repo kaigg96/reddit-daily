@@ -543,6 +543,13 @@ def main():
         except ValueError as e:
             sys.exit(f"--within {args.within}: {e}")
 
+    # Every other mode returns before the filter, so it would print unfiltered
+    # numbers under a --since the reader believes applied.
+    early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
+             args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+    if args.since and (any(early) or not (args.compare or args.by)):
+        sys.exit("--since restricts --compare and --by only")
+
     now = datetime.datetime.now(datetime.timezone.utc)
 
     if args.at_age is not None and args.at_age < insights.MIN_AGE_DAYS:
