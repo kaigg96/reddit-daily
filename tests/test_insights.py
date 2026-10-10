@@ -2024,3 +2024,27 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
         monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"] + extra)
         report.main()
     assert len(called) == 2
+
+
+def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch):
+    """A filter the reader believes applied must never be dropped silently:
+    --since outside --compare/--by, --min-views outside --compare, and
+    --min-views on a count, which leaving uploads out would bias."""
+    import sys
+    import pytest
+    from scripts import report
+    since, only, count = ("--since restricts", "--min-views applies to --compare only",
+                          "must count every upload")
+    refused = (
+        (["--since", "2026-10-07", "--trajectory"], since),
+        (["--since", "2026-10-07", "--release", "v7"], since),
+        (["--since", "2026-10-07"], since),
+        (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
+        (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
+    )
+    for extra, why in refused:
+        monkeypatch.setattr(sys, "argv", ["report.py", "--offline"] + extra)
+        with pytest.raises(SystemExit) as exc:
+            report.main()
+        assert why in str(exc.value), extra
