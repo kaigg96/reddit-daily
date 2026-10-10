@@ -168,6 +168,10 @@ def main():
     commentary_ok = int(host is not None) if config.COMMENTARY else ""
     if config.COMMENTARY and not host:
         print("Commentary: no usable host lines -- shipping today's reading")
+    if host:
+        print(f"Commentary setup: {host.setup}")
+        for i, line in enumerate(host.reactions, 1):
+            print(f"Commentary reaction {i}: {line}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta_ok = meta.cta is not None
