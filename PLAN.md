@@ -27,9 +27,9 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 ## 2. This quarter's bets
 
-None yet. Three are drafted for the owner's first planning session
-(#55, 2026-10-05; bet 1 also asked by label, #70): make the format ours
-(PRD #7, #12); double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, 56 uploads, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks; in play starts; #55 now asks to read it in engaged views too); price the other routes
+**Bet 1, make the format ours, is approved** (#70, 2026-10-10): a host's
+commentary is half of each video (PRD #7), built switched off and released
+after `v7`'s read. Bets 2 and 3 wait on the owner's planning session (#55): double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, 56 uploads, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks; in play starts; #55 now asks to read it in engaged views too); price the other routes
 and pilot the best (C8; Reddit's terms, §4).
 
 ## 3. Work queue
