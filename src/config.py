@@ -89,7 +89,7 @@ AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
+FORMAT_VERSION = "v8"  # v8 = bet 1: a host sets up, reacts to the top two answers, and votes (#70)
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
@@ -105,7 +105,7 @@ HOUSE_VOTE_RULE = None
 # metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
 # threads at selection (content.is_medical). Turning it on changes the video:
 # bump FORMAT_VERSION, take a sample, and the owner listens to one first.
-COMMENTARY = False
+COMMENTARY = True
 COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
 HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
 
