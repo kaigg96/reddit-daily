@@ -341,6 +341,11 @@ WASTE_SHIFTS = 3      # consecutive shifts using far less than their time
 WASTE_RATIO = 0.6     # ...where minutes actually run are below this share
 SHIFT_MINUTES = 60    # the hand-over deadline shift.yml gives a shift (killed at 70)
 LEDGER = os.path.join(ROOT, ".github", "shift-usage.csv")
+# Problems that are the shift's to fix and never the owner's. On #67
+# (2026-10-10), after this alarm had emailed them three times: "this is your
+# job ... not the type of issue you'd involve the board/founder of a startup
+# in". So it prints where a shift starts (backlog_status.py) instead.
+SHIFT_OWNED = {"process-capacity-underused"}
 
 
 def shift_minutes(path=None):
@@ -364,6 +369,16 @@ def shift_minutes(path=None):
     return out
 
 
+def capacity_shortfall(path=None):
+    """(minutes, share used) when the last WASTE_SHIFTS shifts used under
+    WASTE_RATIO of their time; None when they did, or too few have run."""
+    minutes = shift_minutes(path)[:WASTE_SHIFTS]
+    if len(minutes) < WASTE_SHIFTS:
+        return None
+    used = sum(minutes) / (WASTE_SHIFTS * SHIFT_MINUTES)
+    return (minutes, used) if used < WASTE_RATIO else None
+
+
 def health(raise_issues=False):
     """Detect process dysfunction and escalate it.
 
@@ -374,27 +389,26 @@ def health(raise_issues=False):
     """
     problems = []
 
-    minutes = shift_minutes()[:WASTE_SHIFTS]
-    if len(minutes) == WASTE_SHIFTS:
-        used = sum(minutes) / (WASTE_SHIFTS * SHIFT_MINUTES)
-        if used < WASTE_RATIO:
-            sys.path.insert(0, os.path.join(ROOT, "scripts"))
-            import backlog_status
-            ready = len(backlog_status.ready_all())
-            problems.append((
-                "process-capacity-underused",
-                "Shifts are ending with most of their time unspent",
-                f"The last {WASTE_SHIFTS} shifts ran "
-                f"{', '.join(f'{m:.0f}' for m in minutes)} of their {SHIFT_MINUTES} "
-                f"minutes ({used:.0%}, threshold {WASTE_RATIO:.0%}), from the usage "
-                f"ledger. Ready work in the tracker now: {ready} "
-                f"(floor {backlog_status.FLOOR}).\n\n"
-                "Ending early is right only when nothing is ready and generating "
-                "more found nothing above the bar. Below the floor, replenishing "
-                "was the shift's first job and was skipped; at or above it, "
-                "shifts are stopping with work available.",
-                "Read why each of the last three shifts stopped (WORKLOG) and fix "
-                "that reason, not the symptom."))
+    short = capacity_shortfall()
+    if short:
+        minutes, used = short
+        sys.path.insert(0, os.path.join(ROOT, "scripts"))
+        import backlog_status
+        ready = len(backlog_status.ready_all())
+        problems.append((
+            "process-capacity-underused",
+            "Shifts are ending with most of their time unspent",
+            f"The last {WASTE_SHIFTS} shifts ran "
+            f"{', '.join(f'{m:.0f}' for m in minutes)} of their {SHIFT_MINUTES} "
+            f"minutes ({used:.0%}, threshold {WASTE_RATIO:.0%}), from the usage "
+            f"ledger. Ready work in the tracker now: {ready} "
+            f"(floor {backlog_status.FLOOR}).\n\n"
+            "Ending early is right only when nothing is ready and generating "
+            "more found nothing above the bar. Below the floor, replenishing "
+            "was the shift's first job and was skipped; at or above it, "
+            "shifts are stopping with work available.",
+            "Read why each of the last three shifts stopped (WORKLOG) and fix "
+            "that reason, not the symptom."))
 
     # A review overdue by weeks means the slower functions (strategy, money,
     # policy, audience) have silently stopped getting their turn.
@@ -425,7 +439,10 @@ def health(raise_issues=False):
     print("\nPROCESS HEALTH: %d problem(s)" % len(problems))
     for key, title, body, rec in problems:
         print(f"  - {title}")
-        if raise_issues:
+        if key in SHIFT_OWNED:
+            print("    the shift's to fix, not the owner's (#67): "
+                  "scripts/backlog_status.py prints what to do")
+        elif raise_issues:
             r = subprocess.run(
                 [sys.executable, os.path.join(ROOT, "scripts", "escalate.py"),
                  "--title", title, "--key", key, "--recommend", rec],

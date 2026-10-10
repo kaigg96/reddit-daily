@@ -35,3 +35,32 @@ def test_shifts_that_use_their_time_are_not(tmp_path, monkeypatch):
 def test_a_failed_run_is_not_counted_as_a_short_shift(tmp_path, monkeypatch):
     # The Opus 5.5 failure recorded 0.0 minutes; it is not idleness.
     assert not flagged(tmp_path, monkeypatch, [(52.0, 0), (0.0, 1), (55.0, 0), (50.0, 0)])
+
+
+def test_short_shifts_are_never_escalated_to_the_owner(tmp_path, monkeypatch):
+    # The owner on #67: finding and fixing why shifts end early is the
+    # shift's job, not theirs. It prints for the shift instead.
+    monkeypatch.setattr(cb, "LEDGER", ledger(tmp_path, [(20.0, 0), (17.0, 0), (35.0, 0)]))
+    calls = []
+    monkeypatch.setattr(cb.subprocess, "run", lambda args, **kw: calls.append(args))
+    assert any(p[0] == "process-capacity-underused" for p in cb.health(raise_issues=True))
+    assert not any("process-capacity-underused" in a for a in calls)
+
+
+def test_the_shift_is_told_what_waits_on_the_owner(tmp_path, monkeypatch):
+    from scripts import backlog_status as b
+    monkeypatch.setattr(cb, "LEDGER", ledger(tmp_path, [(20.0, 0), (17.0, 0), (35.0, 0)]))
+    monkeypatch.setattr(b, "sources", lambda: [("company", (
+        "## 3. Work queue\n\n| # | Status | Item |\n|---|---|---|\n"
+        "| C1 | blocked: the owner's six checks (#59) | **Account check** |\n"
+        "| C2 | blocked: the 2026-10-12 snapshot | **A read** |\n"), b.queue_section)])
+    lines = "\n".join(b.short_shifts())
+    assert "ran 35, 17, 20 of their 60 minutes" in lines and "#67" in lines
+    assert "Account check: the owner's six checks (#59)" in lines
+    assert "A read" not in lines
+
+
+def test_nothing_is_printed_when_shifts_use_their_time(tmp_path, monkeypatch):
+    from scripts import backlog_status as b
+    monkeypatch.setattr(cb, "LEDGER", ledger(tmp_path, [(58.0, 0), (52.0, 0), (55.0, 0)]))
+    assert b.short_shifts() == []
