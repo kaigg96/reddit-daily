@@ -249,30 +249,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 reasoning** if it stopped mattering. Past the cap, close before adding —
 a list nobody can read is the same as no list.
 
-- **`est_minutes_watched` contradicts `avg_view_duration_s` in
-  `analysis/analytics_snapshots.csv`.** Example: `8pEemfuXl74` — 55 views at a
-  reported 30s average view duration is ~27 minutes watched, but the row logs
-  `1`. This holds broadly: of 727 videos with ≥10 views in the latest snapshot,
-  686 are off by more than 2× and the column clusters at 0–3 regardless of
-  views. **Not decision-affecting** — `report.py` and `insights.py` judge on
-  views and watch-seconds, and the traffic CSV's minutes come from a separate
-  query — so the column is effectively decorative today. Worth either fixing or
-  dropping before anything starts reading it. Noticed 2026-09-09 during the
-  R4.6 audit. **2026-09-29: do not drop it — it may be the engaged count.** On
-  the 2026-09-28 snapshot (555 videos ≥50 views), `est_minutes × 60 / (views ×
-  avg_view_duration_s)` has quartiles 0.14 / 0.18 / 0.24: a steady fraction,
-  not noise, never above 1 (max 0.94), median 0.176–0.180 on every snapshot
-  since 2026-08-24. By publish month: 0.60 for the two videos from 2025-03
-  (before YouTube's 2025-03-31 Shorts view change), 0.13–0.23 from 2025-04 to
-  2026-06, then **0.36–0.40 since the 2026-07 v2 overhaul**, as if v2
-  doubled the share of plays past the opening that watch-seconds called flat.
-  It splits on v2's release day: 0.17 (n=16, 2026-06-01..07-17) vs 0.43
-  (n=21, 07-18..07-31).
-  Ad hoc and not age-matched: a lead for #8, not a finding. If `averageViewDuration` is per engaged view while `views` counts
-  every play, `est_minutes × 60 / avg_view_duration_s` *is* `engagedViews`.
-  **Tested 2026-10-05 (`report.py --engaged-check`): no match.** Implied/actual
-  median 1.26, 13% of 830 rows within 10%, so this is not the engaged count and
-  #8 has no backfill. The column is decorative again: fix or drop.
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
   `pip-audit` finds published advisories against **Pillow 10.4.0** (33+).

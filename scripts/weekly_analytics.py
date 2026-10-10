@@ -37,6 +37,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import analytics, config, insights  # noqa: E402
 
 OUT = config.ANALYTICS_SNAPSHOTS
+# est_minutes_watched is YouTube's figure as returned. It disagrees with
+# views x avg_view_duration_s on most rows (by >2x on 686 of 727, 2026-09-09)
+# and is not the engaged count either (--engaged-check, 2026-10-05). Nothing
+# decides on it; kept rather than spend a schema change dropping it.
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
           "engaged_views", "subs_gained", "privacy_status"]
