@@ -110,7 +110,7 @@ def own_words_share(segments):
     as spoken. The question and the answers are Reddit's; the rest is ours."""
     ours = sum(len(s.text) for s in segments if s.kind == "host")
     total = sum(len(s.text) for s in segments)
-    return f"{ours / total:.2f}" if total else ""
+    return f"{ours / total:.3f}" if total else ""  # 3 places: 0.496 must not log as 0.50
 
 
 def check_channel_name():
@@ -244,7 +244,7 @@ def main():
     assert projected(segments) <= 60, "video must never exceed 60s"
     # Whether the AI's closing line is the one spoken: the guard can swap it.
     cta_ok = cta is not None and outro_text == cta
-    # 0.00 on a fallback, so the done-when's misses count, not vanish.
+    # Zero on a fallback, so the done-when's misses count, not vanish.
     own_words = own_words_share(segments) if config.COMMENTARY else ""
     if config.COMMENTARY:
         print(f"Commentary: our own words are {own_words} of the narration")

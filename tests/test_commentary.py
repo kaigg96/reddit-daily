@@ -137,7 +137,7 @@ def test_the_duration_guard_drops_a_reaction_with_its_answer():
 def test_own_words_share_counts_only_the_hosts_lines():
     segs = [Segment("title", "a" * 20, "", []), Segment("host", "b" * 30, "", []),
             Segment("comment", "c" * 20, "", []), Segment("host", "d" * 30, "", [])]
-    assert run.own_words_share(segs) == "0.60"
+    assert run.own_words_share(segs) == "0.600"
 
 
 def test_the_log_keeps_bet_1s_done_when():
