@@ -12,3 +12,5 @@ __pycache__/
 # scratch: validate_release.py writes it, the workflow appends it to the
 # verdict it commits. Never committed on its own.
 .github/last-release-detail.md
+/assets/funk_bg_lower.mp3
+/assets/music/*.mp3
