@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-10 (10:00) — The capitals test goes live tonight, and three tests are now judged against what chance actually produces
 
-    Worked (% of the shift): data 40 · product 25 · gm 15 · reliability 10 · strategy 5 · security 5
+    Worked (% of the shift): data 45 · product 20 · gm 15 · reliability 10 · strategy 5 · security 5
 
 **Summary:** The fair test of capital letters in titles passed its sample video. It goes live with tonight's upload, together with the safety check's crash fix. I also corrected how three of our tests will be judged. Their watch-time limits were small enough that chance alone would trip them about one read in five, which could wrongly drop the second subreddit and, with it, the case for more uploads a day.
 
@@ -74,6 +74,7 @@ and more useful than a confident guess.
 ### Done
 - **Product (a bet):** the sample passed, and its title obeyed its coin (a "none" draw, no capitals). Merged with the crash fix, which stops an oddly shaped AI reply from costing a slot its upload.
 - **Data (a fix):** beside every two-way comparison, the reporting tool now prints how far two random groups of the same sizes land apart one time in ten with nothing changed, measured over the last six weeks. It can also keep a comparison to the weeks a test ran. The subreddit, title-style and capitals tests now judge watch time against that: about 31%, 38% and 16%, in place of 12–13%. All three were set before any of their data was read. A fresh review found real problems in my first version, and the biggest changed the answer: random groups of our uploads now land about three times further apart than in July, so measuring chance over all history understated it. Fixed, and checked again before going live.
+- **Data (research):** found most of why chance has grown. More uploads now get only a handful of plays (11 of the newest 90, against 1 of the first 45), and six of those are recorded with no watch time at all, which looks like YouTube reporting nothing rather than a real zero. Leaving them out cuts the noise at 15 a side from 31% to about 18–20%, roughly what two to three times the uploads would buy. Not applied yet: a fresh review showed the zeros are the main cause, so the next shift should choose between ignoring them everywhere and the narrower option I built, before the subreddit test reads. One of the zeros is in the opening-question release read on 12 October.
 - **Reliability:** this morning's upload was the first live need for the backup safety model. It answered, and the log recorded it. The main model was overloaded on 3 of the last 5 uploads, and all were covered.
 - **General management:** ranked the queue in a separate pass. Checked that the patch on #50 still applies cleanly to today's code, so your four commands work as written. Cut the product tracker's release history to one line per release, which two shifts running had spent about a tenth of their time working around.
 - **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
@@ -86,7 +87,7 @@ and more useful than a confident guess.
 - After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
 - 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
 - Around 26 October, a week before the subreddit test reads: ask you by label for four-a-day's narration spend (about $0.90 a month more, inside the $3 budget), so volume can ship the day the test passes. Not now: it is three weeks from being needed, and you have eight open asks.
-- Worth a look at the next audit: noise that has tripled since July makes every test slower to read. Only more uploads per group narrows it.
+- Before about 2 November: let the reporting tool read tests among uploads with at least 10 plays, and restate the subreddit and title-style rules with it. It is ready in the product tracker.
 - Considered and dropped: a backup model for titles (a failed title costs no watch time, per the 28 September finding, and none has failed since the longer overload wait of 4 October); a question-mark title test from existing data (views need about 30 uploads a side, so only an effect larger than the capitals one could show); cutting narration's second paid call per segment by timing words locally (it needs real narration files, which a shift never holds); building four-a-day ahead of your answer (the audit's lesson).
 
 ### Better?
