@@ -145,9 +145,38 @@ def _declined(days=DECLINED_DAYS, now=None):
     return out
 
 
+def _answered_in_comment(issues):
+    """Open, unlabelled escalations where the owner's comment is the latest.
+
+    The owner also answers in a comment without labelling or closing. On
+    2026-10-10 they replied on #60 that asking Reddit could wait until before
+    monetization, and the next shift, reading only the `approved` listing,
+    reported #60 as still waiting on them. A reply that is the last word on
+    an open ask is their answer until they say otherwise."""
+    out = []
+    for i, labels in issues:
+        if "approved" in labels or not i.get("comments"):
+            continue
+        comments = _api(f"/repos/{REPO}/issues/{i['number']}/comments")
+        last = comments[-1] if comments else {}
+        if last.get("author_association") == "OWNER" and last.get("body", "").strip():
+            out.append((i, last["body"].strip()))
+    return out
+
+
 def show(want_approved):
-    rows = [(i, l) for i, l in _issues() if ("approved" in l) == want_approved]
+    issues = _issues()
+    rows = [(i, l) for i, l in issues if ("approved" in l) == want_approved]
     if want_approved:
+        answered = _answered_in_comment(issues)
+        if answered:
+            print("ANSWERED IN A COMMENT, NOT LABELLED: the owner's reply is the latest "
+                  "word on an open ask. Take it as their answer: record it, do what it "
+                  "allows, and close the issue saying what was done. It approves "
+                  "nothing it does not say:")
+            for i, reply in answered:
+                print(f"  #{i['number']}  {i['title']}")
+                print("      owner: " + reply.replace("\n", "\n             "))
         declined = _declined()
         if declined:
             print(f"CLOSED BY THE OWNER WITHOUT APPROVAL in the last {DECLINED_DAYS} days. "

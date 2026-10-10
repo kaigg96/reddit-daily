@@ -187,3 +187,35 @@ def test_a_close_by_a_shift_is_not_the_owners_answer(monkeypatch):
                    71: [{"author_association": "OWNER", "body": NO}]},
                   closed_by={70: "claude[bot]"})
     assert escalations._declined(now=NOW) == []
+
+
+LATER = "Better to ask for forgiveness than permission at this stage."
+
+
+def test_an_owner_reply_without_a_label_reaches_the_shift(monkeypatch, capsys):
+    # #60, 2026-10-10: the owner answered in a comment, neither labelling nor
+    # closing, and the next shift listed it as still waiting on them.
+    fake_github(monkeypatch,
+                [issue(60, "Ask Reddit?", ["needs-owner"], [1, 2])],
+                {60: [{"author_association": "NONE", "body": "Raised again by a /shift run"},
+                      {"author_association": "OWNER", "body": LATER}]})
+    escalations.show(True)
+    out = capsys.readouterr().out
+    assert "ANSWERED IN A COMMENT" in out and "#60" in out and "owner: " + LATER in out
+
+
+def test_a_reply_the_shift_already_followed_up_is_not_repeated(monkeypatch, capsys):
+    fake_github(monkeypatch,
+                [issue(60, "Ask Reddit?", ["needs-owner"], [1, 2])],
+                {60: [{"author_association": "OWNER", "body": LATER},
+                      {"author_association": "NONE", "body": "Raised again by a /shift run"}]})
+    escalations.show(True)
+    assert "ANSWERED IN A COMMENT" not in capsys.readouterr().out
+
+
+def test_an_approved_issue_is_not_also_listed_as_answered(monkeypatch, capsys):
+    fake_github(monkeypatch,
+                [issue(22, "Elevate the Gemini cap?", ["needs-owner", "approved"], [1])],
+                {22: [{"author_association": "OWNER", "body": REPLY}]})
+    escalations.show(True)
+    assert "ANSWERED IN A COMMENT" not in capsys.readouterr().out
