@@ -656,12 +656,18 @@ def main():
               "\n  within the same 16. Smaller is a finer detection limit.")
         # A coin per run (PRD §0 #14): the gap random halves of the same weeks
         # reach 1 time in 10, by arm size. A keep threshold must clear it.
-        print("\n  coin per run, 90th-percentile gap between random arms:")
+        # --compare prices chance over the newest CHANCE_SPAN uploads, where the
+        # noise is larger than over all history (PRD §4, 2026-10-10); both show.
+        span = insights.CHANCE_SPAN
+        print(f"\n  coin per run, 90th-percentile gap between random arms "
+              f"(all history / newest {span}, which --compare prints):")
         for arm in (15, 30, 45):
-            row = "  ".join(f"{m} {fmt(insights.coin_floor(load.videos, m, arm))}"
+            row = "  ".join(f"{m} {fmt(insights.coin_floor(load.videos, m, arm))} / "
+                            f"{fmt(insights.coin_floor(load.videos, m, arm, span=span))}"
                             for m in (Metric.WATCH, Metric.VIEWS))
             n = len(insights.coin_windows(load.videos, Metric.VIEWS, arm))
-            print(f"    {arm} per arm: {row}   ({n} window(s); few means rough)")
+            r = len(insights.coin_windows(load.videos, Metric.VIEWS, arm, span=span))
+            print(f"    {arm} per arm: {row}   ({n} / {r} window(s); few means rough)")
         return
 
     if args.catalogue:      # the snapshot series, channel-wide
