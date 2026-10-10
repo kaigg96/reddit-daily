@@ -85,9 +85,10 @@ Enforced by `protect-process.yml`, which reverts unapproved changes.
 
 **And when the process itself is failing** — not a permission question, but a
 signal the owner needs. `scripts/context_budget.py --health` detects these and
-queues the issue automatically: capacity consistently unused, a review
-overdue for weeks, a cap producing dishonesty rather than hygiene. If you notice
-one the tool doesn't measure, escalate it yourself.
+queues the issue automatically: a review overdue for weeks, a cap producing
+dishonesty rather than hygiene. Shifts ending early is the shift's to fix, never
+the owner's (#67); `backlog_status.py` prints it. If you notice one the tool
+doesn't measure, escalate it yourself.
 
 ## 5. No AI attribution, anywhere
 
