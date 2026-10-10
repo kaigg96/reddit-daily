@@ -84,7 +84,9 @@ Lesson for future passes: deleting the *files* is the easy half — the stale **
 - No tests over the rendering path — still correctly covered by the dry-run + frame-extraction ritual, which checks things assertions can't (legibility, timing feel).
 - `create_video.ipynb` remains in the repo as deprecated reference; harmless, owner's call.
 
-## Pass 3 — 2026-09-19 (proposed; at the pending `v6` bump) — **awaiting owner scoping**
+## Pass 3 — 2026-09-19 — scoped by Engineering 2026-10-11 (ORG.md: Act; it waited three weeks on the owner)
+
+Tier 1 item 1 lands with `v8`: the release branch extracts the guard as `run.fit_to_length`, with tests. Item 2 stays deferred until `analyze_channel.py` next needs a change (Pass 2's call; R4.4, the gate it fed, is parked).
 
 Read fresh, per the ritual. `src/` is ~2,000 lines and the Pass-1 module split is
 still holding; nothing has rotted structurally. Two findings are worth acting on,
@@ -146,7 +148,7 @@ test can reach, and two implementations of one question that quietly disagree.**
 
 ## Ritual
 
-Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, get owner scoping, execute, update this file.
+Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, scope them (Engineering's call, ORG.md; never the owner's), execute, update this file.
 
 ## Open items (logged between passes)
 
