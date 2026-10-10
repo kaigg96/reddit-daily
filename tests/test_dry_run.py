@@ -103,6 +103,22 @@ def test_a_pass_shows_what_the_screen_picked_and_skipped(tmp_path, monkeypatch):
     assert "NoStupidQuestions" in out and "an answer" not in out
 
 
+def test_a_pass_shows_the_hosts_lines_vote_and_length(tmp_path, monkeypatch):
+    """Bet 1's lines are judged from here: a branch's sample is silent (#70)."""
+    (tmp_path / "check.txt").write_text("PASS -- playable")
+    (tmp_path / "run.log").write_text("Selected post: q\n"
+                                      "Commentary setup: a setup\n"
+                                      "Commentary reaction 1: a reaction\n"
+                                      "CTA: my hand goes up\n"
+                                      "Commentary: our own words are 0.56 of the narration\n"
+                                      "Assembled: 33.6s, bg=x, music=y\n")
+    out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
+                 "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
+                 "--run-url", "u")
+    for line in ("a setup", "a reaction", "my hand goes up", "0.56", "33.6s"):
+        assert line in out, line
+
+
 def test_a_failure_carries_the_end_of_the_log(tmp_path, monkeypatch):
     (tmp_path / "run.log").write_text("\n".join(f"line {i}" for i in range(100)))
     out = record(tmp_path, monkeypatch, "--branch", "feature/v7", "--commit", "abc1234",

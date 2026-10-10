@@ -144,7 +144,10 @@ SOFT_FAILURE = re.compile(r"failed|not logged|not collected|fall(?:ing)? ?back",
 # What the run chose, and what the screen turned down on the way. A new
 # subreddit needs its screen replayed before it ships (PRD §6 R4.1), and the
 # log that shows the replay is otherwise readable only in Actions.
-PICKED = re.compile(r"^(Selected post:|Screen:|Slate topics|Title style|Today's top )")
+# Bet 1's host lines, its vote and the length are read here too (#70): a
+# branch's sample is silent, so the verdict is the only place a shift sees them.
+PICKED = re.compile(r"^(Selected post:|Screen:|Slate topics|Title style|Today's top |"
+                    r"Commentary|CTA:|Assembled:)")
 
 
 def record(args):
@@ -176,7 +179,7 @@ def record(args):
             if soft:
                 body += ["", "Failed soft (the video still passed):", "", "```", *soft, "```"]
             picked = [l for l in open(args.log, errors="replace").read().splitlines()
-                      if PICKED.match(l)][:12]
+                      if PICKED.match(l)][:16]
             if picked:
                 body += ["", "What it picked:", "", "```", *picked, "```"]
         if not passed and args.log and os.path.exists(args.log):
