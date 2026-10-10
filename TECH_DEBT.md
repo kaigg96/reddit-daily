@@ -233,8 +233,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
   guard (the 2026-10-08 upload-log one included) sees the other's pick, and
   the second push's rebase likely conflicts on the log. Rare at two a day;
-  likelier at four (PRD #4, whose build should carry the one-line fix as an
-  owner-applied workflow patch).
+  likelier at four (PRD #4). The one-line fix is attached to #72 as a
+  label-applied patch (2026-10-11).
 
 - **The public repo distributes a YouTube Audio Library track (found
   2026-10-07).** `assets/funk_bg_lower.mp3`, the only music in every upload,
