@@ -146,13 +146,21 @@ def compare(videos, spec, metric, now, pool=None):
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
     result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
     print(result.render())
-    if result.a.sufficient and result.b.sufficient:
+    when = lambda vs: [v.true_published or v.published for v in vs]
+    shared = a and b and min(when(a)) <= max(when(b)) and min(when(b)) <= max(when(a))
+    if key == "format_version" or not shared:
+        # Arms from different weeks carry drift a random split cannot see.
+        print("    chance: the arms come from different weeks, so no random split "
+              "prices this; a flag-day change reads with --release")
+    elif result.a.sufficient and result.b.sufficient and result.age_matched:
         pool = pool or videos
-        gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n)
-        windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n))
-        print(f"    chance: random arms of {result.a.n} and {result.b.n} from the same weeks "
-              + (f"differ by {gap:.0%} one time in ten ({windows} window(s); few means "
-                 f"rough); a gap inside that is not a finding"
+        span = insights.CHANCE_SPAN
+        gap = insights.coin_floor(pool, metric, result.a.n, other=result.b.n, span=span)
+        windows = len(insights.coin_windows(pool, metric, result.a.n, result.b.n, span))
+        print(f"    chance: random arms of {result.a.n} and {result.b.n} from the newest "
+              f"{span} uploads "
+              + (f"differ by {gap:.1%} one time in ten ({windows} window(s); few means "
+                 f"rough); only a gap beyond that is a finding"
                  if gap is not None else "- too few uploads to say (see --placebo)"))
     if key != "format_version":
         for era, sa, sb in insights.era_imbalance(a, b):

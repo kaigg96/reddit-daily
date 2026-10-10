@@ -1144,8 +1144,8 @@ def test_coin_floor_shrinks_with_arm_size_and_needs_one_full_window():
 
 
 def test_coin_floor_reads_unequal_arms_where_the_small_arm_sets_the_noise():
-    """PRD §0 #10 runs title style B four uploads to the rest's two, so its
-    read sets ~30 against ~15: chance reaches further than at 30 a side."""
+    """PRD §0 #10 runs title style B two uploads to the rest's one, so its
+    read sets ~15 against ~8: chance reaches further than at an even split."""
     noisy = [v(f"n{i}", 200 - i, views=50 + (i * 37) % 400) for i in range(120)]
     windows = insights.coin_windows(noisy, Metric.VIEWS, 30, other=15)
     assert len(windows) > 1 and all(len(w) == 45 for w in windows)
@@ -1156,11 +1156,15 @@ def test_coin_floor_reads_unequal_arms_where_the_small_arm_sets_the_noise():
 
 def test_since_keeps_only_the_weeks_a_test_ran():
     """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
-    uploads are not its control."""
+    uploads are not its control. An --at-age read carries synthetic
+    `published` dates, so the real upload date (`true_published`) decides."""
     old, new = v("old", 30), v("new", 2)
     cut = (NOW - datetime.timedelta(days=2)).date()
     assert insights.since([old, new], cut) == [new]
     assert insights.since([old, new], cut + datetime.timedelta(days=1)) == []
+    aged = v("aged", 30)
+    aged.true_published = NOW - datetime.timedelta(days=1)
+    assert insights.since([old, aged], cut) == [aged]
 
 
 def test_compare_prints_the_chance_gap_for_its_arm_sizes(capsys):
@@ -1171,9 +1175,19 @@ def test_compare_prints_the_chance_gap_for_its_arm_sizes(capsys):
             for i in range(60)]
     report.compare(vids, "arm=y", Metric.WATCH, NOW)
     out = capsys.readouterr().out
-    assert "chance: random arms of 20 and 40 from the same weeks differ by" in out
+    assert "chance: random arms of 20 and 40 from the newest 90 uploads differ by" in out
     report.compare(vids[:20], "arm=y", Metric.WATCH, NOW)
     assert "chance:" not in capsys.readouterr().out          # a cohort under 8 reads nothing
+
+
+def test_compare_prices_no_chance_for_arms_from_different_weeks(capsys):
+    """A flag-day field carries drift a random split of the same weeks
+    cannot see, so its gap would pass drift off as a finding."""
+    from scripts import report
+    early = [v(f"e{i}", 40 + i, arm="x") for i in range(10)]
+    late = [v(f"l{i}", 7 + i, arm="y") for i in range(10)]
+    report.compare(early + late, "arm=y", Metric.WATCH, NOW)
+    assert "arms come from different weeks" in capsys.readouterr().out
 
 
 def test_alternation_floor_sees_a_day_parity_gap_and_ignores_a_calendar_trend():
