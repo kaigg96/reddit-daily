@@ -360,6 +360,7 @@ def test_metadata_never_retries_a_429(monkeypatch):
 def _metadata_prompt(monkeypatch, vote_rule):
     seen = []
     monkeypatch.setattr(llm.config, "HOUSE_VOTE_RULE", vote_rule)
+    monkeypatch.setattr(llm.config, "COMMENTARY", False)  # bet 1's fuller step supersedes it
     monkeypatch.setattr(llm, "generate_retrying",
                         lambda prompt, *a, **k: seen.append(prompt) or '{"cta": "c"}')
     llm.get_metadata("What is the scariest story?", ["one", "two", "three"])

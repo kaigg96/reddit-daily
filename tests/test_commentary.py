@@ -29,6 +29,11 @@ def commentary_on(monkeypatch):
     monkeypatch.setattr(config, "COMMENTARY", True)
 
 
+@pytest.fixture
+def commentary_off(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY", False)
+
+
 def _metadata(monkeypatch, reply):
     seen = []
     monkeypatch.setattr(llm, "generate_retrying",
@@ -39,7 +44,7 @@ def _metadata(monkeypatch, reply):
 
 # --- the call -----------------------------------------------------------------
 
-def test_off_asks_for_nothing_new_and_returns_no_host(monkeypatch):
+def test_off_asks_for_nothing_new_and_returns_no_host(monkeypatch, commentary_off):
     meta, prompt = _metadata(monkeypatch, json.dumps(HOST))
     assert "COMMENTARY" not in prompt and "reactions" not in prompt
     assert '3. "Teaching kindergarten."' in prompt
@@ -202,6 +207,6 @@ def test_with_commentary_on_medical_threads_are_skipped_and_logged(
                         (TITLES[1], "skip_medical", "medical")]
 
 
-def test_with_commentary_off_selection_is_unchanged(selection):
+def test_with_commentary_off_selection_is_unchanged(selection, commentary_off):
     post = content.select_post(_FakeReddit(TITLES), "", screener=_screener)
     assert post.title == TITLES[0]
