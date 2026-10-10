@@ -20,12 +20,8 @@
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*
 
 **Shipped**
-- `v2` — retention overhaul (2026-07-18): R0.1–R0.5, R1.1–R1.7 · plus audio-mix calibration, channel-name branding, no-AI-attribution scrub, basic branded thumbnail card (R2.3 partial)
-- `v3` — packaging (2026-07-19): R2.1 title hygiene, R2.2 title-style A/B/C rotation
-- `v4` — Sprint 1 bar-raising batch (2026-07-22, via `feature/sprint-1`): R3.1a question CTA, R3.3 auto-comment, R3.4 watermark, R3.5 subtitle tracks, R4.5 cron de-jitter — caption + comment live paths **verified in production 2026-07-27**
-- Standalone (no version bump): R4.2 weekly analytics + digest (2026-07-20) · R1.3 b-roll library (2026-08-15, 7 clips) · offline reporting (2026-09-21) — `report.py --offline`, so a shift without YouTube secrets can still run the revert check · release check (2026-09-21, #16) — `report.py --release <version>` reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **keep** (2026-10-06, watch-seconds +10%, n=10)
-- `v5` — suppression-risk screen (2026-08-23): R4.6, validated pre-merge (§6).
-- **`v6` — merged to `main` 2026-09-19** (four branches: cost guardrails, Gemini thinking-timeout fix, R4.6 screen retiering, analytics zero-view fix).
+- `v2` retention overhaul (2026-07-18) · `v3` packaging (07-19) · `v4` bar-raising batch (07-22) · `v5` suppression-risk screen (08-23) · `v6` cost guardrails and screen retiering (09-19). What each carried: §6 and git.
+- Standalone (no version bump): weekly analytics + digest (R4.2), b-roll library (R1.3), offline reporting (`report.py --offline`) and the release check (`--release <version>`, #16), which reads every upload at the same age. Verdicts: `v5` **keep**; b-roll **keep** (watch-seconds +22%); `v6` **keep** (2026-10-06, watch-seconds +10%, n=10)
 - **`v7` — opens on the question (2026-09-25):** experiment #1 below, judged under its rule at the 2026-10-12 snapshot.
 
 #### Next keepers
