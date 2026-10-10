@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-10 (16:14) — Most of the rise in buried uploads was the clip we already retired; a check on the new opening is set for Monday
+
+    Worked (% of the shift): data 50 · gm 25 · reliability 15 · security 10
+
+**Summary:** Since mid-August more of our uploads have been barely shown (5 views or fewer in their first week). Most of that rise was the background clip we retired on 28 September. The rest leans toward the new opening, so I fixed the reporting tool so it can test that, and set Monday's check before seeing Monday's data. Nothing moved revenue directly. This protects Monday's verdict on the new opening.
+
+### Toward revenue
+- **Nothing directly.** Every change to what we ship is waiting on Monday's data or on you. If the new opening gets more videos buried, Monday's verdict will now show it, where before the tool would have missed it.
+
+### Done
+- **Data (research and a fix):** 15 uploads since mid-August got 5 views or fewer in a week, and 9 of them were on the retired clip. In the same week, that clip's uploads were buried 3 of 4 and the other clips' 0 of 10. So retiring it looks right, not a coincidence of timing, though the weekly groups are small. Of the rest, 3 of the new opening's 12 measured uploads were buried, against 5 of 119 before. That is suggestive but not yet beyond chance. The tool could not test a release this way at all: it compared each release only with itself and always reported no difference. Fixed, reviewed by a fresh agent (its corrections made) and merged. Monday's check is written down in advance, beside the release verdict and **never a trigger**.
+- **Data:** without the clip, burying began rising a week *before* the new opening went live, and Monday's reader needs that. A small option to group uploads by week shows it. Reviewed and merged.
+- **Data:** the "zero watch time" readings on a few viewed uploads are YouTube's own figures, in whole seconds, not something we store wrongly. Nothing to fix.
+- **Reliability:** when both safety-check AI models are overloaded, the upload still ships, checked only by a keyword filter. The keyword filter alone has checked two uploads this month, and none was lost. The check has skipped no post since 30 September, so it is not using up material. Tonight's upload is the first to record the capitals coin, and the log adds the new column safely.
+- **General management:** had six candidates ranked in a separate pass. Ran the reporting commands Monday's reads use against last week's data, and all of them run. Closed a month-old code-health item: a YouTube figure that disagrees with the others, which nothing decides on.
+- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- Fixing against improving: all measurement and fixes. The one improvement viewers will see, the capitals test, goes live tonight.
+
+### Blocked
+- **For you, unchanged since this morning:** the label on #70 (bet 1's first step); the four commands on #50; the Groq key and label on #69; the planning session (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
+
+### Next
+- **12 October:** read `v7` under its rule, then the new buried-upload check beside it (remember the rise began a week before `v7`). Then the engaged-view, narrator, dark-morbid and zero-view questions, the clip check and the first subscriber count.
+- After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
+- Considered and dropped: pricing the revenue routes (already in the plan, and the third bet is yours to take); a story-mode spec (waits on your bet-1 answer); the overlapping-runs workflow fix (needed only for four a day, about three weeks off, and it would be a ninth ask).
+
+### Better?
+- **Than last shift:** Unclear. The video did not change. Monday's verdict can now see a cost to the new opening that it would have missed.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the capitals test, the first change aimed at views in two weeks, goes live tonight.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-10 (10:00) — The capitals test goes live tonight, and three tests are now judged against what chance actually produces
 
     Worked (% of the shift): data 45 · product 20 · gm 15 · reliability 10 · strategy 5 · security 5
@@ -93,38 +124,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. The first change in two weeks aimed at views is live, and the tests that gate more uploads a day can no longer be failed by chance so easily.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals test reads in mid-November.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-09 (23:15) — Titles with one word in capitals get about twice the views; a fair test of it is built and needs only its sample video
-
-    Worked (% of the shift): data 35 · product 20 · legal 10 · market 10 · engineering 10 · strategy 5 · security 5 · gm 5
-
-**Summary:** Our videos whose titles put a word in capitals ("Who's YOUR Hero?") got about twice the views of the rest. That held in every split with enough uploads to read, and viewers watched them about as long. I built a fair test that flips a coin for each upload, and it needs only tomorrow's sample video to go live. Views are the half of YouTube's payment bar we are furthest from, so this is the first step in days aimed at it.
-
-### Toward revenue
-- **Yes, a bet on views.** The pattern is a correlation: the AI may capitalise when a post is livelier anyway. The coin-flip test settles it at no cost. Its rule is set in advance. After 30 uploads in each group, keep capitals if their views lead is bigger than chance alone produces one time in ten at that size (73% today), and watch time holds. A smaller lead gets one extension, to 45 uploads per group. My first bar (30%) sat inside chance; I reset it before anything shipped.
-
-### Done
-- **Data (a bet):** taught the reporting tool to tell titles with emphasis capitals apart from plain ones. Read at 7 days old: +120% views overall (65 against 68 uploads), and ahead within each earlier release, title style, title length and time of day, and still at 14 days old (+77%). Watch time 10 against 11 seconds, inside the normal swing. The extra plays are the kind YouTube's payment bar counts: the same share are engaged views (31% against 30%). It also explains most of the lead behind favouring "You…" titles (5 October). Those nearly always capitalise "YOU", and among capitalised titles they lead by only 7%. That decision's rule is on watch time, so it stands. A lead, on small weekly numbers: the fall in views since mid-September is almost all in titles without capitals. A fresh review's fixes came before the numbers were recorded. Live, measurement only.
-- **Product (a bet):** built the coin-flip test on a branch. One group is asked for exactly one capitalised word, the other for none. Both are banned from shock phrases. A free local sample rendered, and a fresh review found nothing blocking. It needs only a real sample.
-- **Legal / market intelligence:** read first-hand that since July 2026, YouTube will not pay for content "designed to shock or surprise viewers for the sole purpose of getting views", and its reviewers read titles. 9 of our 166 titles use phrases like "SHOCKING" or "You Won't Believe", so both test groups now forbid them. Capitals for emphasis are not what that rule names.
-- **Strategy:** 883 of the channel's 1,041 videos predate July's pipeline (30 are duplicates). All are readings, and they earn under 1% of today's views. YouTube's reviewers check a channel's "main theme", so I added to the brand decision: when you settle the name, also decide whether to make them private or start the new show fresh.
-- **Market intelligence:** secondary sources say Reddit's commercial access is a negotiated deal from about $12,000 a year. Reddit's own pages refuse automated reads, so this is unconfirmed. If true, it matters to #60 more than the format does.
-- **Security:** standing check clean. Narration spend $0.25 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change. Tonight's upload landed normally.
-- Fixing against improving: almost all improving; the last shift was all fixing.
-
-### Blocked
-- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50 (#65 waits on it); the Groq key and label on #69; the planning session (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53.
-
-### Next
-- Morning, after 07:00: one sample video is allowed per shift, and two reviewed branches wait for one: the safety check's crash fix and the capitals test. I have combined them on one branch, with all tests passing, so one sample clears both. The crash fix changes nothing viewers see, so this still tests one thing, and the test starts a day sooner. If the combined sample fails, take the crash fix alone first. The sample's report shows the title beside its group; check the title obeys it.
-- Before the subreddit and title-style tests read (about 2 November): their watch-time limit sits where chance lands half the time at their size, not one time in ten. Reset it against the new measure before their data is read, as I did for the capitals test.
-- 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
-- If #70 is approved, build it on a branch. The capitals test is a coin per upload, so it runs alongside bet 1 without spoiling either read.
-- Process: the company plan and the product tracker sit at their word limits, so each finding meant trimming unrelated text first, about a tenth of the shift. Worth a look at the next audit.
-- I handed over about 20 minutes early. Considered and dropped: resetting the two tests' limits tonight (two titles in three are style B, so the other group stays small; that needs a deliberate redesign before 2 November); a note to you on bet 1 about YouTube's AI-host rule (the plan already says the host never advises); a question-mark title test (it would queue behind the capitals test); the open code-health items (each needs you, a sample, or Monday's read).
-
-### Better?
-- **Than last shift:** Yes. For the first time in several shifts, something that changes what we ship is ready, aimed at views, and costs nothing to run.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals result is the largest views difference any logged title trait has shown, but it is a correlation until the test reads, in mid-November at the earliest.
 - **Than ~100 shifts ago:** Too early to say.
