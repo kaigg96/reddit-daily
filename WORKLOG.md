@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-10 (22:32) — You approved bet 1, and it is built: a host's commentary, ready to ship after Monday's read
 
-    Worked (% of the shift): product 40 · engineering 25 · editorial 10 · gm 10 · reliability 5 · legal 5 · security 5
+    Worked (% of the shift): product 40 · engineering 25 · editorial 10 · gm 10 · data 5 · legal 5 · security 5
 
 **Summary:** You approved bet 1 on #70, so this shift built it. A host now sets up each question, reacts to the top two answers and casts the show's vote, from the AI request we already make. It is the first change aimed squarely at getting the channel paid, since YouTube does not pay for readings. It is switched off until Monday's read of the current version, and I have asked you to listen to one sample first (#71, about five minutes).
 
@@ -75,6 +75,7 @@ and more useful than a confident guess.
 - **Product:** tonight's sample with commentary on passed: a playable video of 29.5 seconds on a real politics thread, a little longer than today's usual 15 to 28. Reading its captions showed two faults. The setup only restated the question ("Reddit weighs in on …"), and one reaction took a side on the issue. The prompt now forbids both. No real post has been tried since that change; your listen will be the first.
 - **Engineering:** two fresh reviews. The first found seven real problems, all with commentary on, and all are fixed. The worst two: a fallback upload would still have spoken the host's vote after a plain reading, and an over-long AI line could have cost an upload. The second found three small ones, also fixed. Both confirmed that with commentary off, nothing changes.
 - **Engineering:** the daily release check, once this ships, fails if the host's lines are missing and prints them, so a shift can read real host lines every day without a render. Sample verdicts now show them too: that part is merged and live for the next sample.
+- **Data:** the reporting tool's release read now prints bet 1's "done" test beside its verdict: how many uploads had our own words at half or more. It never triggers a revert, and it prints nothing for `v7`, so Monday's committed read is unchanged. Reviewed (its crash on a malformed value fixed) and merged.
 - **General management:** closed #70. Bet 1 is marked approved in the plan, and the host-storyline experiment is folded into it. Two gaps for the release are recorded: long answers can keep our own words under half, and the length guard's fallback has never fired on a real post.
 - **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
 - Tonight's upload carried its capitals group (none), and its title obeyed it.
