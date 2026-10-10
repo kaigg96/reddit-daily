@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-10 (10:00) — The capitals test goes live tonight, and three tests are now judged against what chance actually produces
+
+    Worked (% of the shift): data 40 · product 25 · gm 15 · reliability 10 · strategy 5 · security 5
+
+**Summary:** The fair test of capital letters in titles passed its sample video. It goes live with tonight's upload, together with the safety check's crash fix. I also corrected how three of our tests will be judged. Their watch-time limits were small enough that chance alone would trip them about one read in five, which could wrongly drop the second subreddit and, with it, the case for more uploads a day.
+
+### Toward revenue
+- **Yes, a bet on views is live.** From tonight each upload flips a coin: one word in capitals in its title, or none. Titles with capitals got about twice the views, but that was an observation; this test shows whether the capitals cause it. It reads around 16 November.
+- **The judging fix protects the route to four uploads a day,** the one lever our data says grows views. The subreddit test decides whether we have enough material for it.
+
+### Done
+- **Product (a bet):** the sample passed, and its title obeyed its coin (a "none" draw, no capitals). Merged with the crash fix, which stops an oddly shaped AI reply from costing a slot its upload.
+- **Data (a fix):** beside every two-way comparison, the reporting tool now prints how far two random groups of the same sizes land apart one time in ten with nothing changed, measured over the last six weeks. It can also keep a comparison to the weeks a test ran. The subreddit, title-style and capitals tests now judge watch time against that: about 31%, 38% and 16%, in place of 12–13%. All three were set before any of their data was read. A fresh review found real problems in my first version, and the biggest changed the answer: random groups of our uploads now land about three times further apart than in July, so measuring chance over all history understated it. Fixed, and checked again before going live.
+- **Reliability:** this morning's upload was the first live need for the backup safety model. It answered, and the log recorded it. The main model was overloaded on 3 of the last 5 uploads, and all were covered.
+- **General management:** ranked the queue in a separate pass. Checked that the patch on #50 still applies cleanly to today's code, so your four commands work as written. Cut the product tracker's release history to one line per release, which two shifts running had spent about a tenth of their time working around.
+- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- Fixing against improving: one of each. The improvement is the one viewers will see.
+
+### Blocked
+- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50 (still current); the Groq key and label on #69; the planning session (#55); asking Reddit (#60, a draft is in the issue); the music script (#66); the account checks (#59); re-running the comments job on #53.
+
+### Next
+- After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
+- 12 October: read `v7` under its rule, then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
+- Around 26 October, a week before the subreddit test reads: ask you by label for four-a-day's narration spend (about $0.90 a month more, inside the $3 budget), so volume can ship the day the test passes. Not now: it is three weeks from being needed, and you have eight open asks.
+- Worth a look at the next audit: noise that has tripled since July makes every test slower to read. Only more uploads per group narrows it.
+- Considered and dropped: a backup model for titles (a failed title costs no watch time, per the 28 September finding, and none has failed since the longer overload wait of 4 October); a question-mark title test from existing data (views need about 30 uploads a side, so only an effect larger than the capitals one could show); cutting narration's second paid call per segment by timing words locally (it needs real narration files, which a shift never holds); building four-a-day ahead of your answer (the audit's lesson).
+
+### Better?
+- **Than last shift:** Yes. The first change in two weeks aimed at views is live, and the tests that gate more uploads a day can no longer be failed by chance so easily.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals test reads in mid-November.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-09 (23:15) — Titles with one word in capitals get about twice the views; a fair test of it is built and needs only its sample video
 
     Worked (% of the shift): data 35 · product 20 · legal 10 · market 10 · engineering 10 · strategy 5 · security 5 · gm 5
@@ -93,39 +126,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. For the first time in several shifts, something that changes what we ship is ready, aimed at views, and costs nothing to run.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the video itself has not changed since 25 September. The capitals result is the largest views difference any logged title trait has shown, but it is a correlation until the test reads, in mid-November at the earliest.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-09 (17:27) — When our main AI model is overloaded, the safety check now asks a second model instead of falling back to a keyword list
-
-    Worked (% of the shift): reliability 45 · engineering 20 · market 10 · security 10 · gm 10 · product 5
-
-**Summary:** The safety check that keeps risky posts out of our videos used to drop to a crude keyword list whenever Google's main model was overloaded. That happened to this morning's upload. It now asks a second model first, which has its own daily allowance. This is a fix, not a step toward revenue: it protects uploads from being buried, and it does not grow views.
-
-### Toward revenue
-- **Nothing directly.** Videos YouTube quietly buries earn nothing, and this check is our only defence against that, so keeping it working protects what we have. The steps that would move revenue still wait on you, #70 first.
-
-### Done
-- **Reliability (a fix):** before changing anything, I tested the second model on the safety check's five known cases. All five were right (5 AI requests, on that model's own allowance, so the upload's was untouched). The upload log shows the problem is real but rare: 2 of the last 38 uploads lost the full check. Both times the second model was answering in that same run. And on the two occasions the second model was overloaded, the main one was fine. The two don't fail together, so either of those uploads would have had a proper check. A sample video passed and a fresh review checked the change before it went live. The log records whenever the second model stands in, so we will see it working.
-- **Market intelligence:** our main AI model's sibling was closed to new users last month, and one Google page lists our model for retirement on 20 October. Google's own page for the service we use says it is "not deprecated and will continue to be served until further notice"; the 20 October date is for a different Google service. So nothing is closing, and today's change covers the safety check if that changes without notice.
-- **Product:** the safety check's weekly audit found nothing to fix. Its last skipped post was on 12 September, far under the level where it would need narrowing.
-- **Security:** standing check clean. $0.25 spent on narration this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
-- **Engineering:** the fresh review found nothing blocking, plus a few small things. The one that matters was there before today: an oddly shaped answer from the AI could crash a run, and that slot would get no upload. It has never happened, but the second model now sends its answers through the same code. The fix and the rest are on a separate branch. Two more fresh reviews went over it, and their suggestions are in: the check can no longer crash a run on any reply. It waits for tomorrow morning's sample-video slot, because changing the merged version after its sample would have voided it.
-- **General management:** closed a long-standing code-health item about the AI's daily limit running out before the morning upload. Since we began recording why AI calls fail, 28 uploads in, it has not happened once. Every failure was an overload, which the earlier fix and today's change now cover. The comments change you approved (#53) never applied because GitHub's job died before running a single step. That looks like a GitHub glitch, not a fault in the change, so a re-run should do it.
-- Fixing against improving: all fixing. Everything that would improve the video or the business waits on you or on Monday's data.
-
-### Blocked
-- **For you, in order of what they unblock:** the label on #70 (bet 1's first step); the four commands on #50, which let every approved rule change land by label (#65 waits on it); the Groq key and the label on #69 (#68); the planning session for bets 2 and 3 (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53.
-
-### Next
-- 12 October: read `v7` under its rule; then the engaged-view, narrator, dark-morbid and zero-view questions, the b-roll clip check, and the first subscriber count.
-- If #70 is approved: build it on a branch as the last entry describes.
-- First: check tonight's upload landed cleanly. It is the first live run of today's change, and it starts after this shift ends.
-- Tomorrow morning, after 07:00: ask for a sample video of the follow-up branch, which three fresh reviews have already passed, and merge it on a pass.
-- Watch the upload log for the second model standing in, and for any upload where both models failed.
-- Process: I asked for the sample video before the fresh review, so the review's fixes could not use it, and only one sample is allowed per 12 hours. Review first, then ask for the sample: it costs about six minutes and lets fixes ship the same shift.
-- I spent the last 25 minutes watching for tonight's upload, ready to undo the change. It had not started by 18:16. Nothing else cleared the bar. Considered and dropped: testing the second model on two more cases (2 requests; whatever the result, it beats the keyword list, so no decision rides on it); a title fallback for the main model being retired (Google says it is served "until further notice"); stopping two runs from overlapping (still belongs with four uploads a day); reading engaged views by topic (one week of data, wait for Monday's); whether long questions lose viewers now that videos open on them (answered on 25 September: it was video length, not the question); building bet 1 ahead of your label (the audit's lesson).
-
-### Better?
-- **Than last shift:** Slightly, on reliability only. An overload no longer leaves an upload with only the keyword list. Nothing in the video or the business changed.
-- **Than ~10 shifts ago:** No, on the audit's evidence: no video change, watch time flat (12.0 seconds a week ago and now), and the decisions that would change it wait on you.
 - **Than ~100 shifts ago:** Too early to say.
