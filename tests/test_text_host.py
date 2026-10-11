@@ -110,6 +110,10 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
         "Raising my hand for yes youll be fine because floor camping builds character."
         " Which gets your vote?")
     assert content.sentence_case("honestly, no.  why would it?") == "Honestly, no.  Why would it?"
+    # Review, 2026-10-11: a one-word sentence must not swallow the next one's
+    # stop, and a contraction is still a plain word.
+    assert content.sentence_case("nope. sorry. which?") == "Nope. Sorry. Which?"
+    assert content.sentence_case("i'd pick it. don’t you?") == "I'd pick it. Don’t you?"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept

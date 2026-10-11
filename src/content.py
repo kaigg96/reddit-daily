@@ -85,10 +85,11 @@ def sentence_case(text):
     The video's own lines are untouched: its captions are shown in capitals,
     and the host's notes are capitalised in video.note_clips."""
     def cap(m):
-        word = m.group(2).rstrip(",;:.!?")
+        word = m.group(2).rstrip(",;:.!?").replace("'", "").replace("’", "")  # "i'd", "don’t"
         plain = word.isalpha() and word.islower()
         return m.group(1) + (m.group(2)[:1].upper() + m.group(2)[1:] if plain else m.group(2))
-    return re.sub(r"(^|[.!?]\s+)(\S+)", cap, text)
+    # The stop is looked behind, not matched, so "nope. which?" caps both.
+    return re.sub(r"(^|(?<=[.!?])\s+)(\S+)", cap, text)
 
 
 def _has_emoji(text):
