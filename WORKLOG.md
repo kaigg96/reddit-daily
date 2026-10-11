@@ -68,11 +68,11 @@ and more useful than a confident guess.
 **Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments, and bet 2 is down to one label (#72). Bet 1's voiced host will not ship, as you asked.
 
 ### Toward revenue
-- **Not yet, but the queue is honest again.** Your verdict on the host settles the step queued for Monday. Bet 1 (make the format ours) still stands, and its next step is now ready work. It needs no second voice and no extra audio spend. Facebook, like YouTube and TikTok, pays nothing for narrated readings, so bet 1 comes first whichever platform earns.
+- **Not yet, but the queue is honest again.** Your verdict on the host settles the step queued for Monday. Bet 1 (make the format ours) still stands, and its next step is built: one voice, no extra audio spend. Facebook, like YouTube and TikTok, pays nothing for narrated readings, so bet 1 comes first whichever platform earns.
 
 ### Done
 - **General management (a fix, #67):** found the cause in the record. Every ask you could answer with a label closed, most within a day (12 of 12). Asks needing a session, commands, a login or a listen waited for days, and shifts stopped once all their work waited on those. Worse, the list a shift reads at the start showed only labels and closes, so it missed your comments. The alarm no longer emails you. Each shift now starts with the rows waiting on you and a rule: do every part a shift can, so what reaches you is one label. Your comments now reach the shift. Both changes had fresh reviews, and every fault they found is fixed.
-- **Product:** acted on your three replies. The voiced host is recorded as rejected, and bet 1's next step is ready work: text on screen or visible curation, brought to you as one label with a sample you can just watch. Groq: tonight's checks on it passed for titles, but its safety screen skipped one test post Gemini passes, so we are not switching yet. Gemini was overloaded on 3 of the last 5 uploads, so Gemini first, with Groq when it fails, looks like the right shape. Reddit: recorded that we ask before applying to any programme, not now.
+- **Product:** acted on your three replies. The voiced host is recorded as rejected. Bet 1's next step is built behind a switch: the host's setup and reactions as text on screen while the answers are read, and the narrator speaking the vote as today's closing line. One voice, no host audio. A free local sample rendered cleanly, with our own words at 54% of what the viewer gets. Groq: tonight's checks on it passed for titles, but its safety screen skipped one test post Gemini passes, so we are not switching yet. Gemini was overloaded on 3 of the last 5 uploads, so Gemini first, with Groq when it fails, looks like the right shape. Reddit: recorded that we ask before applying to any programme, not now.
 - **Strategy:** bet 2 is one label (#72), including four a day's narration spend. The planning issue (#55) now says no session is needed.
 - **Distribution:** Meta's own pages answered what the plan said needed your logged-in read. Facebook's programme is invite-only, paid per 1,000 qualified views. It demonetises accounts that mostly narrate what is on screen.
 - **Reliability:** two upload runs can overlap and both pick one post; the fix is on #72. The daily release check was about to spend up to 8 of production's 20 daily AI requests on the rejected release; it now checks the live code.
@@ -86,14 +86,14 @@ and more useful than a confident guess.
 
 ### Next
 - **After tonight's upload:** check its log names the music track, not "none".
-- **Bet 1's next step:** design it under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label. My recommendation: the host's reactions as short text on each answer while it is read, plus a closing verdict card, with no host voice. That separates our take from Reddit's words, adds no time or audio cost, and reuses the host lines already built. It is built tonight behind a switch, with tests; it needs a fresh review and a sample. Since the host is silent, you can judge it from a sample link with nothing to run.
+- **Bet 1's next step:** fix the fresh review's findings on the text-only host, then request its sample after 10:46 (one render per 12 hours) and bring it to you as one label. Since the host is silent, you can judge it from the sample link, with nothing to run.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it.
 - **Groq:** build Gemini first with Groq on Gemini's failures; it shares the one render slot with bet 1, so bet 1 goes first.
 - **Once #72 is labelled:** build four a day switched off, for the ~2 November read.
 
 ### Better?
 - **Than last shift:** Yes. Three of your answers had sat unread, and shifts were still waiting on you for them. Now they are acted on, and the cause is fixed in code.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat (12.0 seconds), and the first originality step is back to design. But the queue now holds work that changes what we ship.
+- **Than ~10 shifts ago:** Unclear. Watch time is flat (12.0 seconds), and the first originality step is back to a first sample. But the queue now holds work that changes what we ship.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-10 (22:32) — You approved bet 1, and it is built: a host's commentary, ready to ship after Monday's read
