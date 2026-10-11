@@ -382,6 +382,8 @@ def test_every_cron_line_in_the_video_workflow_is_one_the_code_knows():
     import re
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                         ".github", "workflows", "run-reddit-video.yml")
-    lines = re.findall(r"^\s*- cron: '([^']*)'", open(path).read(), re.M)
+    text = open(path).read()
+    lines = re.findall(r"^\s*- cron:\s*['\"]?([^'\"\n]*?)['\"]?\s*$", text, re.M)
+    assert len(lines) == text.count("cron:")
     assert lines
     assert lines == [config.LEGACY_CRON] or sorted(lines) == sorted(config.SLOT_CRONS)
