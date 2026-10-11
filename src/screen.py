@@ -205,24 +205,28 @@ GROQ_SOURCE = "groq_fallback"
 
 def _groq_rescue(prompt):
     """One try on Groq once both Gemini models have failed, before the keyword
-    backstop; None when off (config.GROQ_FALLBACK), keyless or failing. Gemini
-    failed on 3 of the 5 uploads to 2026-10-10. Groq's screen errs strict (its
-    first replay, 2026-10-11, skipped a must-pass case), which beats keywords
-    alone. The owner left Gemini's role to us (#68)."""
+    backstop: (reply, failure). The reply is None when off
+    (config.GROQ_FALLBACK), keyless or failing, and the failure is blank unless
+    a try was made and missed, so the log tells "Groq failed" from "Groq off".
+    Gemini failed on 3 of the 5 uploads to 2026-10-10. Groq's screen errs
+    strict (its first replay, 2026-10-11, skipped a must-pass case), which
+    beats keywords alone. The owner left Gemini's role to us (#68)."""
     if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
-        return None
+        return None, ""
     try:
-        return llm._generate_groq(prompt, reasoning=SCREEN_THINKING_BUDGET > 0)
+        return llm._generate_groq(prompt, reasoning=SCREEN_THINKING_BUDGET > 0), ""
     except Exception as e:
-        print(f"Screen: Groq fallback failed ({llm._failure_kind(e)})")
-        return None
+        failure = llm._failure_kind(e)
+        print(f"Screen: Groq fallback failed ({failure})")
+        return None, failure
 
 
-def _after(prior, failure):
-    """The failure label once the fallback model has also missed: the main
-    model's stays first, so the column still counts overloads and caps as
-    before, and the fallback's says why it missed too."""
-    return f"{prior};fallback_{failure}" if prior else failure
+def _after(prior, failure, route="fallback"):
+    """The failure label once a later route has also missed: the main model's
+    stays first, so the column still counts overloads and caps as before, and
+    each later route's says why it missed too, named `fallback_` (Gemini's
+    second model) or `groq_`."""
+    return f"{prior};{route}_{failure}" if prior else failure
 
 
 def _fall_back(question, comments, failure):
@@ -274,8 +278,10 @@ def screen(question, comments):
             raw = _generate_screened(prompt, tries=1, model=FALLBACK_MODEL)
         except Exception as e2:
             failure = _after(failure, llm._failure_kind(e2))
-            raw = _groq_rescue(prompt)
+            raw, groq_failure = _groq_rescue(prompt)
             if raw is None:
+                if groq_failure:
+                    failure = _after(failure, groq_failure, "groq")
                 return _fall_back(question, comments, failure)
             source = GROQ_SOURCE
         else:
@@ -283,20 +289,21 @@ def screen(question, comments):
         # The failures are kept on an answered fallback, so the log shows why
         # it ran.
         prior = failure
+    route = "groq" if source == GROQ_SOURCE else "fallback"
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         # Parsing this as {} would pass the post as screened by Gemini while
         # skipping even the backstop. Labels match llm.get_metadata's.
-        return _fall_back(question, comments, _after(prior, "no_json"))
+        return _fall_back(question, comments, _after(prior, "no_json", route))
     # screen() must never raise: a null unsafe list once could, and a raise
     # costs the slot its upload. Anything unparseable is a failure, not a pass.
     try:
         data = json.loads(match.group(0))
         risk, topic, reason, unsafe = _parse(data, len(comments))
     except _BadShape:
-        return _fall_back(question, comments, _after(prior, "bad_shape"))
+        return _fall_back(question, comments, _after(prior, "bad_shape", route))
     except Exception:
-        return _fall_back(question, comments, _after(prior, "bad_json"))
+        return _fall_back(question, comments, _after(prior, "bad_json", route))
 
     if risk in SKIP_CATEGORIES:
         return ScreenResult("skip_post", unsafe=unsafe, category=risk, reason=reason,

@@ -203,21 +203,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   log's source naming the route that answered. **Merged off 2026-10-11** for
   the screen only, after both Gemini models and before the backstop
   (`config.GROQ_FALLBACK`, `screen_source=groq_fallback`); titles would need
-  the same in `llm.get_metadata`. Before switching on (review's gaps): a
-  failed Groq try shows only on the console, not in `screen_failure`, and its
-  no-JSON label reads `fallback_no_json`, not naming Groq. Up to four screens run back to
+  the same in `llm.get_metadata`. Its review's two logging gaps closed
+  2026-10-11: a missed Groq try and its parse failures now end
+  `screen_failure` as `;groq_<kind>`. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
-  backstop (`screen_failure=http_429`). **Switch on in `src/config.py`, never a
+  backstop (`…;groq_http_429`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
-
-- **The Audio Library track was public from 2026-10-05 to 10-10.** The
-  owner sealed it on 2026-10-10 (a925f51; #66): the repo now carries it
-  encrypted and the video job unseals it. Left: (1) the plain file stays in
-  git history, and purging it means rewriting `main`'s history, the owner's
-  call; worth it only if the Audio Library terms are ever raised. (2) A failed
-  unseal renders without music and logs `music_track` as `none`. **Closes
-  when** the first upload after the seal logs `funk_bg_lower.mp3`.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
