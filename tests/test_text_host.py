@@ -97,5 +97,6 @@ def test_a_text_reaction_has_a_tighter_cap(text_host):
 def test_a_lower_case_note_is_shown_with_its_capital():
     _, note = video.note_clips("looking past the paycheck to find real charm.", 0.0, 1.0)
     assert " ".join(note.text.split()) == "Looking past the paycheck to find real charm."
-    _, note = video.note_clips("YouTube knows.", 0.0, 1.0)
-    assert " ".join(note.text.split()) == "YouTube knows."
+    for kept in ("YouTube knows.", "r/AskReddit agrees.", "iPhone people, again."):
+        _, note = video.note_clips(kept, 0.0, 1.0)
+        assert " ".join(note.text.split()) == kept

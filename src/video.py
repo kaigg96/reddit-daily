@@ -126,8 +126,11 @@ def note_clips(text, start, duration):
     2026-10-11 local sample's yellow notes read on orange smoke, but not
     crisply. The band sits behind the note (first in the list). The AI
     writes some notes all lower case (the 2026-10-11 sample's did), so the
-    first letter is capitalised; the rest is left as written."""
-    text = text[:1].upper() + text[1:]
+    first letter is capitalised when its first word is plain lower case, so
+    "r/AskReddit" and "iPhone" stay as written."""
+    first = text.split(" ", 1)[0]
+    if first.isalpha() and first.islower():
+        text = text[:1].upper() + text[1:]
     note = overlay_text(text, start, duration, config.NOTE_FONT_SIZE, config.NOTE_Y,
                         color=config.HOST_CAPTION_COLOR, width=config.NOTE_WIDTH)
     band = (ColorClip(note.size, color=(0, 0, 0))
