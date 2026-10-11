@@ -155,19 +155,16 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **Bet 1's commentary (2026-10-10, branch `product/commentary-led`): two
-  gaps left for its release.** (1) The own-words done-when (≥0.50 every
-  upload) cannot be met on long answers: the host's caps total 54 words (~300
-  characters), so two 150-character answers and a 60-character question top
-  out near 0.45. The first real sample read 0.63 on short answers. Read
-  `own_words_share` after ~10 uploads before changing caps, since raising them
-  lengthens the video. (2) The duration guard's own path (setup dropped, vote
-  swapped) has unit tests only: no real post has been long enough to fire it.
-  (3) The vote may fall back on length: on the sample model, once the vote
-  had to name its answer by what it says, it ran 23 words, past its 22-word
-  limit (15 × 1.5), so that upload would be a plain reading. One try on a
-  model uploads do not use. If `commentary_ok` shows fallbacks, raise the
-  vote's cap to 18 words (about one second) before anything else.
+- **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
+  `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
+  render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
+  Before its sample: (1) yellow notes on a busy clip (orange smoke) read but
+  not crisply; a dark band behind them would help; (2) the fixture's reaction
+  repeats its answer's words, which on screen duplicates the caption, so the
+  prompt should forbid quoting the answer; (3) the prompt still says "spoken"
+  and "heard" for lines now shown; (4) the voiced build's caps (setup 15,
+  reaction 12 words) were sized for speech; a note over about 10 words runs
+  to three lines. Needs a fresh review and `FORMAT_VERSION` before sampling.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
