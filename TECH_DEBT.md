@@ -223,8 +223,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   The upload log has no metadata source column: a Groq answer shows as a
   non-blank `meta_failure` beside any field logged ok. Nothing reads that,
   so once switched on, Groq's titles count in the style and caps reads
-  (#10, #14) unmarked (review, 2026-10-11): rare at 2 in 30, but name the
-  route in the log if rescues turn out common. Its review's two logging gaps closed
+  (#10, #14) unmarked (review, 2026-10-11). A `meta_source` column is built
+  on `data/meta-source-column`, on top of `product/text-host`: land it after
+  `v8` and before the switch. Its review's two logging gaps closed
   2026-10-11: a missed Groq try and its parse failures now end
   `screen_failure` as `;groq_<kind>`. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
