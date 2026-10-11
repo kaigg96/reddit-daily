@@ -20,3 +20,45 @@ def test_a_note_comes_in_partway_and_runs_to_the_next_segment():
 
 def test_notes_sit_between_the_captions_and_the_watermark():
     assert 700 < config.NOTE_Y < 1500 - config.NOTE_FONT_SIZE * 2
+
+
+# --- the narration, text-only (HOST_TEXT) -------------------------------------
+
+import pytest
+
+from src import llm, run
+from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_until
+
+
+@pytest.fixture
+def text_host(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+
+
+def _segments():
+    host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
+    return host, run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+
+
+def test_the_host_is_shown_never_heard(text_host):
+    _, segs = _segments()
+    assert [s.kind for s in segs] == ["title", "comment", "comment", "vote"]
+    assert [s.note for s in segs] == [HOST["setup"], *HOST["reactions"], ""]
+    assert all(s.speaker is None for s in segs)        # one voice: the narrator's
+    assert segs[-1].text == HOST["cta"]                # the vote, spoken as a CTA
+
+
+def test_the_guard_drops_an_answer_with_its_note(text_host):
+    host, segs = _segments()
+    outro = run.fit_to_length(segs, _too_long_until(3), host, _synth)
+    assert [s.text for s in segs][1:2] == [POST_ANSWERS[0]] and len(segs) == 3
+    assert HOST["reactions"][1] not in [s.note for s in segs]
+    assert outro == config.OUTRO_TEXT == segs[-1].text  # the vote may name it
+
+
+def test_own_words_count_the_notes_and_the_vote():
+    segs = [video.Segment("title", "a" * 20, "", [], note="b" * 10),
+            video.Segment("comment", "c" * 20, "", [], note="d" * 10),
+            video.Segment("vote", "e" * 20, "", [])]
+    assert run.own_words_share(segs) == "0.500"

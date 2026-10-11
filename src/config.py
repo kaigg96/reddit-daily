@@ -114,6 +114,9 @@ NOTE_Y = 1150
 NOTE_FONT_SIZE = 64
 NOTE_WIDTH = 900
 NOTE_LEAD = 0.35  # share of the segment before its note appears
+# The host's setup and reactions as on-screen notes, never spoken; the
+# narrator speaks the vote, as today's CTA (#71). Off until its sample.
+HOST_TEXT = False
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech

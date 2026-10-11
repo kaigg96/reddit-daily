@@ -49,16 +49,25 @@ def build_segments(post, outro_text, host, synth, host_voice):
     # written from, so a "2 Answers" title is never read over three.
     two = host or config.COMMENTARY
     answers = post.comments[:config.COMMENTARY_ANSWERS] if two else post.comments
-    if host:
+    text = host and config.HOST_TEXT    # #71: the host is read, never heard
+    if text:
+        segments[0].note = host.setup
+    elif host:
         segments.append(synth("setup", host.setup, kind="host", speaker=host_voice))
     for i, comment in enumerate(answers, 1):
         segments.append(synth(f"comment_{i}", comment, kind="comment"))
-        if host:
+        if text:
+            segments[-1].note = host.reactions[i - 1]
+        elif host:
             segments.append(synth(f"reaction_{i}", host.reactions[i - 1], kind="host",
                                   speaker=host_voice))
-    # The vote is the host's line, so it takes the host's voice and colour.
-    segments.append(synth("outro", outro_text, kind="host" if host else "outro",
-                          speaker=host_voice if host else None))
+    # The vote is the host's line. Voiced, it takes the host's voice and
+    # colour; text-only, the narrator speaks it, as it speaks today's CTA.
+    if text:
+        segments.append(synth("outro", outro_text, kind="vote"))
+    else:
+        segments.append(synth("outro", outro_text, kind="host" if host else "outro",
+                              speaker=host_voice if host else None))
     return segments
 
 
@@ -90,7 +99,7 @@ def fit_to_length(segments, too_long, host, synth):
     outro = segments[-1].text
     if not too_long(segments):
         return outro
-    if host:
+    if host and not config.HOST_TEXT:   # a text setup is a note: it costs no time
         assert segments[1].kind == "host", "the setup follows the question"
         segments.pop(1)
         print("Duration guard: dropped the host's setup")
@@ -106,10 +115,12 @@ def fit_to_length(segments, too_long, host, synth):
 
 
 def own_words_share(segments):
-    """Bet 1's done-when (#70): the host's share of the narration's characters,
-    as spoken. The question and the answers are Reddit's; the rest is ours."""
-    ours = sum(len(s.text) for s in segments if s.kind == "host")
-    total = sum(len(s.text) for s in segments)
+    """Bet 1's done-when (#70): the host's share of the characters the viewer
+    is given, spoken or shown as a note. The question and the answers are
+    Reddit's; the rest is ours."""
+    ours = (sum(len(s.text) for s in segments if s.kind in ("host", "vote"))
+            + sum(len(getattr(s, "note", "")) for s in segments))
+    total = sum(len(s.text) + len(getattr(s, "note", "")) for s in segments)
     return f"{ours / total:.3f}" if total else ""  # 3 places: 0.496 must not log as 0.50
 
 
