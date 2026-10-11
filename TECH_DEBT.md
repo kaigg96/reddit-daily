@@ -183,8 +183,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   left by two reviews; the crash fix around it merged 2026-10-10).** The
   fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
   every sample, up to 4 requests a run. **Closes when** a replay case shows
-  an omitted `post_risk` on a post that should skip, or the screen is next
-  changed.
+  an omitted `post_risk` on a post that should skip, or the screen's parsing
+  is next changed (2026-10-11's failure-label change left it).
 
 - **A viewed upload can log 0 watch-seconds (found 2026-10-10, R4).** 6 of
   144 viewed uploads at 7 days read `avg_view_duration_s` 0.0 on 1–6 views,
