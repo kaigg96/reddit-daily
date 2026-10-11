@@ -163,8 +163,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   repeated its answer's words, duplicating the caption: fixed on the branch,
   where the text-mode ask says lines are shown, forbids quoting the answer
   and caps setup and reactions at 10 words (12 with slack: four lines would
-  meet the watermark). Reviewed, findings fixed, `v8`, switched on. Left
-  (cosmetic): the dark band, and notes are not in the SRT caption track.
+  meet the watermark). Reviewed, findings fixed, `v8`, switched on. The dark
+  band (55%, behind each note) landed 2026-10-11, reviewed. Left (cosmetic):
+  notes are not in the SRT caption track; the band is full width behind a
+  short note; a rare three-line caption's bottom pixels reach the band's top.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
