@@ -168,8 +168,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   notes are not in the SRT caption track; the band is full width behind a
   short note; a rare three-line caption's bottom pixels reach the band's top.
   The 10-11 sample's notes came back all lower case; `note_clips` now
-  capitalises a plain lower-case first word (0a0712c, reviewed). Re-sample
-  before merge.
+  capitalises a plain lower-case first word (0a0712c, reviewed). Re-sampled
+  on `907d6ad` (10-11 22:59): PASS. Its vote, posted as the comment, came
+  back lower case: fixed on `product/vote-comment-caps`, to land after `v8`.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
@@ -177,8 +178,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   cancels a pending one in the `reddit-video` group, so an off-slot run could
   cancel a waiting live one (needs a ~6h pile-up); (3) after the patch, a
   12:23 run landing after midnight takes the previous day's style, and an
-  00:23 one landing after noon the morning subreddit (11.6h+ delays; 5.5–6.6h
-  seen); (4) the digest counts days by publish date, so an 18:23 run landing
+  00:23 one landing after noon the morning subreddit (11.6h+ delays; 3.0–7.4h
+  seen over 81 runs to 10-11); (4) the digest counts days by publish date, so an 18:23 run landing
   after midnight reads as a missed day, and drift over 6h reads as small.
   **Closes when** the switch goes to four.
 
