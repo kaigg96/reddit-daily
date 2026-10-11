@@ -209,14 +209,34 @@ def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
 
 # --- publish drift (2026-09-07: 4.5h drift ran unnoticed for 10 days) --------
 
-def test_publish_drift_is_measured_against_nearest_slot_across_midnight():
-    """A 23:50 publish is 33 min from the 00:23 slot, not 1407 min — without
-    wrapping, near-midnight uploads would look catastrophically late."""
+def test_publish_drift_is_measured_forward_from_the_latest_slot_across_midnight():
+    """A run never starts before its slot: a 00:40 publish is 17 min after the
+    00:23 slot, and a 23:50 one is 11h27m after 12:23, not 33 min early for
+    00:23. Without the wrap, a 00:10 publish would read as negative."""
     import sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     from scripts import weekly_digest as wd
-    vids = [{"published": "2026-09-07T23:50:00Z"}, {"published": "2026-09-07T00:23:00Z"}]
-    assert wd.median_publish_drift(vids, days=36500) == 16.5   # median of 33 and 0
+    vids = [{"published": "2026-09-07T23:50:00Z"}, {"published": "2026-09-07T00:40:00Z"},
+            {"published": "2026-09-07T07:00:00Z"}]
+    assert wd.median_publish_drift(vids, days=36500) == 397   # of 687, 17 and 397 (6.6h)
+
+
+def test_publish_drift_reads_four_slots_at_four_a_day(monkeypatch):
+    import importlib, sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from src import config, content
+    from scripts import weekly_digest as wd
+    assert wd.LIVE_SLOTS == content.live_slots()
+    monkeypatch.setattr(config, "UPLOADS_PER_DAY", 4)
+    wd4 = importlib.reload(wd)
+    try:
+        assert wd4.CRON_SLOTS == (23, 383, 743, 1103)
+        assert wd4.LIVE_SLOTS == content.live_slots()
+        vids = [{"published": "2026-09-07T11:00:00Z"}]   # the 06:23 run, 4h37m late
+        assert wd4.median_publish_drift(vids, days=36500) == 277
+    finally:
+        monkeypatch.undo()
+        importlib.reload(wd)
 
 
 # --- traffic sources (R4.7) -------------------------------------------------

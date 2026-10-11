@@ -44,8 +44,12 @@ def fetch_channel(yt):
     return subs, videos
 
 
-# Scheduled cron slots (UTC minutes past midnight) — see run-reddit-video.yml.
-CRON_SLOTS = (23, 12 * 60 + 23)
+# Scheduled cron slots (UTC minutes past midnight) that upload: slot s is at
+# 6s:23 (src/config.py SLOT_CRONS), two of them at two a day, four at four.
+# As src.content.live_slots(), which this job cannot import: it installs only
+# the Google clients, not Reddit's (a test holds the two equal).
+LIVE_SLOTS = (0, 1, 2, 3) if config.UPLOADS_PER_DAY == 4 else (0, 2)
+CRON_SLOTS = tuple(s * 360 + 23 for s in LIVE_SLOTS)
 DRIFT_ALERT_MIN = 120
 
 
@@ -63,7 +67,10 @@ def median_publish_drift(channel_videos, days=7):
         if p < cutoff:
             continue
         mins = int(p[11:13]) * 60 + int(p[14:16])
-        drifts.append(min(min(abs(mins - s), 1440 - abs(mins - s)) for s in CRON_SLOTS))
+        # A run never starts before its slot, so the delay is measured forward
+        # from the latest slot. Nearest-slot read a 6.6h delay as 5.4h at two
+        # a day, and would read today's ~4.6h as ~1.4h at four.
+        drifts.append(min((mins - s) % 1440 for s in CRON_SLOTS))
     return analytics.median(drifts) if drifts else float("nan")
 
 
@@ -123,7 +130,7 @@ def main():
     last_7_days = [(now.date() - datetime.timedelta(days=d)).isoformat() for d in range(1, 8)]
     per_day = Counter(v["published"][:10] for v in channel_videos if v["published"] >= iso(9))
     week_count = sum(per_day.get(d, 0) for d in last_7_days)
-    missed_days = [d for d in last_7_days if per_day.get(d, 0) < 2]
+    missed_days = [d for d in last_7_days if per_day.get(d, 0) < config.UPLOADS_PER_DAY]
     week_videos = [v for v in channel_videos if v["published"][:10] in last_7_days]
 
     # Unlogged = on the channel but absent from upload_log: catches uploads
