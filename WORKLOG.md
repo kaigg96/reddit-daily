@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-11 (00:30) — Shifts ended early because work waited on you; fixed by us. Your three replies are now acted on
+
+    Worked (% of the shift): gm 40 · engineering 20 · product 15 · strategy 10 · distribution 5 · legal 5 · security 5
+
+**Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments, and bet 2 is down to one label (#72). Bet 1's voiced host will not ship, as you asked.
+
+### Toward revenue
+- **Not yet, but the queue is honest again.** Your verdict on the host settles the step queued for Monday. Bet 1 (make the format ours) still stands, and its next step is now ready work. It needs no second voice and no extra audio spend. Facebook, like YouTube and TikTok, pays nothing for narrated readings, so bet 1 comes first whichever platform earns.
+
+### Done
+- **General management (a fix, #67):** found the cause in the record. Every ask you could answer with a label closed, most within a day (12 of 12). Asks needing a session, commands, a login or a listen waited for days, and shifts stopped once all their work waited on those. Worse, the list a shift reads at the start showed only labels and closes, so it missed your comments. The alarm no longer emails you. Each shift now starts with the rows waiting on you and a rule: do every part a shift can, so what reaches you is one label. Your comments now reach the shift. Both changes had fresh reviews, and every fault they found is fixed.
+- **Product:** acted on your three replies. The voiced host is recorded as rejected, and bet 1's next step is ready work: text on screen or visible curation, brought to you as one label with a sample you can just watch. Groq: tonight's checks on it passed for titles, but its safety screen skipped one test post Gemini passes, so we are not switching yet. Gemini was overloaded on 3 of the last 5 uploads, so Gemini first, with Groq when it fails, looks like the right shape. Reddit: recorded that we ask before applying to any programme, not now.
+- **Strategy:** bet 2 is one label (#72), including four a day's narration spend. The planning issue (#55) now says no session is needed.
+- **Distribution:** Meta's own pages answered what the plan said needed your logged-in read. Facebook's programme is invite-only, paid per 1,000 qualified views. It demonetises accounts that mostly narrate what is on screen.
+- **Reliability:** two upload runs can overlap and both pick one post; the fix is on #72. The daily release check was about to spend up to 8 of production's 20 daily AI requests on the rejected release; it now checks the live code.
+- **Legal:** you sealed the music; closed #66. Next upload is the first on the sealed file.
+- **General management:** closed 11 old weekly digests so your open issues are only the ones needing you. Code-health passes no longer wait on you (the company's rules give them to Engineering). Three rows that said they waited on you did not; corrected.
+- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
+- Fixing against improving: mostly fixing. The improvement is how work reaches you.
+
+### Blocked
+- **For you, each one action:** label #72 (bet 2); re-label #53 (comments); the account checks (#59). #50 and #65 need your hands: Claude Code protects the skills folder by design, and only a looser mode for the whole shift would open it, which is not worth it.
+
+### Next
+- **After tonight's upload:** check its log names the music track, not "none".
+- **Bet 1's next step:** design a text-on-screen or curation step under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label.
+- **12 October:** read `v7` under its rule, with the buried-upload check beside it.
+- **Groq:** decide the screen case it skipped, then build Gemini-first with Groq as fallback.
+- **Once #72 is labelled:** build four a day switched off, for the ~2 November read.
+
+### Better?
+- **Than last shift:** Yes. Three of your answers had sat unread, and shifts were still waiting on you for them. Now they are acted on, and the cause is fixed in code.
+- **Than ~10 shifts ago:** Unclear. Watch time is flat (12.0 seconds), and the first originality step is back to design. But the queue now holds work that changes what we ship.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-10 (22:32) — You approved bet 1, and it is built: a host's commentary, ready to ship after Monday's read
 
     Worked (% of the shift): product 40 · engineering 25 · editorial 10 · gm 10 · data 5 · legal 5 · security 5
@@ -93,37 +128,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. Bet 1, the change YouTube's own wording says the channel needs to be paid at all, went from a question to a built release.
 - **Than ~10 shifts ago:** Yes, though unproven. Then, bet 1 was a draft waiting on your choice of stance. Now it is approved, built and sampled. Watch time is still flat (12.0 seconds).
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-10 (16:14) — Most of the rise in buried uploads was the clip we already retired; a check on the new opening is set for Monday
-
-    Worked (% of the shift): data 45 · gm 25 · reliability 15 · security 10 · market 5
-
-**Summary:** Since mid-August more of our uploads have been barely shown (5 views or fewer in their first week). Most of that rise was the background clip we retired on 28 September. The rest leans toward the new opening, so I fixed the reporting tool so it can test that, and set Monday's check before seeing Monday's data. Nothing moved revenue directly. This protects Monday's verdict on the new opening.
-
-### Toward revenue
-- **Nothing directly.** Every change to what we ship is waiting on Monday's data or on you. If the new opening gets more videos buried, Monday's verdict will now show it, where before the tool would have missed it.
-
-### Done
-- **Data (research and a fix):** 15 uploads since mid-August got 5 views or fewer in a week, and 9 of them were on the retired clip. In the same week, that clip's uploads were buried 3 of 4 and the other clips' 0 of 10. So retiring it looks right, not a coincidence of timing, though the weekly groups are small. Of the rest, 3 of the new opening's 12 measured uploads were buried, against 5 of 119 before. That is suggestive but not yet beyond chance. The tool could not test a release this way at all: it compared each release only with itself and always reported no difference. Fixed, reviewed by a fresh agent (its corrections made) and merged. Monday's check is written down in advance, beside the release verdict and **never a trigger**.
-- **Data:** without the clip, burying began rising a week *before* the new opening went live, and Monday's reader needs that. A small option to group uploads by week shows it. Reviewed and merged.
-- **Data:** the "zero watch time" readings on a few viewed uploads are YouTube's own figures, in whole seconds, not something we store wrongly. Nothing to fix.
-- **Reliability:** when both safety-check AI models are overloaded, the upload still ships, checked only by a keyword filter. The keyword filter alone has checked two uploads this month, and none was lost. The check has skipped no post since 30 September, so it is not using up material. Tonight's upload is the first to record the capitals coin, and the log adds the new column safely.
-- **General management:** had six candidates ranked in a separate pass. Ran the reporting commands Monday's reads use against last week's data, and all of them run. Closed a month-old code-health item: a YouTube figure that disagrees with the others, which nothing decides on.
-- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
-- **Market:** looked for real approval outcomes for AI-voiced channels that add commentary, to inform your answer on #70. Found nothing new: vendor blogs repeat YouTube's line (AI voice is allowed, interchangeable narration is not), and the only first-hand report is from 2019, before the policy was rewritten. Nothing to add to #70.
-- Fixing against improving: all measurement and fixes. The one improvement viewers will see, the capitals test, goes live tonight.
-
-### Blocked
-- **For you, unchanged since this morning:** the label on #70 (bet 1's first step); the four commands on #50; the Groq key and label on #69; the planning session (#55); asking Reddit (#60); the music script (#66); the account checks (#59); re-running the comments job on #53; pasting #65's sentence.
-
-### Next
-- **12 October:** read `v7` under its rule, then the new buried-upload check beside it (remember the rise began a week before `v7`). Then the engaged-view, narrator, dark-morbid and zero-view questions, the clip check and the first subscriber count.
-- After tonight's upload: check its log row carries a capitals group (1 or 0) and that the title obeys it.
-- Considered and dropped: pricing the revenue routes (already in the plan, and the third bet is yours to take); a story-mode spec (waits on your bet-1 answer); the overlapping-runs workflow fix (needed only for four a day, about three weeks off, and it would be a ninth ask); a buried-upload line in the release check (Monday's new check decides whether it is worth having, and adding it before `v7`'s read would change a read already committed).
-- I handed over about 40 minutes early. Nothing is ready until Monday's data or your answers, and two rounds of generating found nothing else above the bar.
-
-### Better?
-- **Than last shift:** Unclear. The video did not change. Monday's verdict can now see a cost to the new opening that it would have missed.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), and the capitals test, the first change aimed at views in two weeks, goes live tonight.
 - **Than ~100 shifts ago:** Too early to say.
