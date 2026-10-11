@@ -23,6 +23,7 @@ keyword backstop is the only check; if that also passes, the post ships.
 """
 
 import json
+import os
 import re
 
 from . import config, llm
@@ -199,6 +200,22 @@ def _generate_screened(prompt, tries=2, model=None):
 # wrong model, so there it would only spend requests on an inconclusive case.
 FALLBACK_MODEL = llm.SAMPLE_MODEL
 FALLBACK_SOURCE = "gemini_fallback"
+GROQ_SOURCE = "groq_fallback"
+
+
+def _groq_rescue(prompt):
+    """One try on Groq once both Gemini models have failed, before the keyword
+    backstop; None when off (config.GROQ_FALLBACK), keyless or failing. Gemini
+    failed on 3 of the 5 uploads to 2026-10-10. Groq's screen errs strict (its
+    first replay, 2026-10-11, skipped a must-pass case), which beats keywords
+    alone. The owner left Gemini's role to us (#68)."""
+    if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
+        return None
+    try:
+        return llm._generate_groq(prompt, reasoning=SCREEN_THINKING_BUDGET > 0)
+    except Exception as e:
+        print(f"Screen: Groq fallback failed ({llm._failure_kind(e)})")
+        return None
 
 
 def _after(prior, failure):
@@ -256,10 +273,16 @@ def screen(question, comments):
         try:
             raw = _generate_screened(prompt, tries=1, model=FALLBACK_MODEL)
         except Exception as e2:
-            return _fall_back(question, comments, _after(failure, llm._failure_kind(e2)))
-        # The main model's failure is kept on an answered fallback, so the log
-        # shows why it ran.
-        source, prior = FALLBACK_SOURCE, failure
+            failure = _after(failure, llm._failure_kind(e2))
+            raw = _groq_rescue(prompt)
+            if raw is None:
+                return _fall_back(question, comments, failure)
+            source = GROQ_SOURCE
+        else:
+            source = FALLBACK_SOURCE
+        # The failures are kept on an answered fallback, so the log shows why
+        # it ran.
+        prior = failure
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         # Parsing this as {} would pass the post as screened by Gemini while

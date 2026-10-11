@@ -473,3 +473,39 @@ def test_screen_drops_keep_each_author_with_their_answer(monkeypatch):
     assert post.comments == ["a", "c", "d"]
     assert [c.author for c in post.comments] == ["ann", "cat", "dan"]
     assert post.author == "quinn"
+
+
+SKIP_REPLY = json.dumps({"post_risk": "sexual_suggestive", "reason": "r",
+                         "unsafe_comments": [], "topic": "sex-adjacent"})
+
+
+def test_groq_answers_when_both_gemini_models_fail(monkeypatch):
+    calls = _main_model_fails(monkeypatch, 503, fallback_code=429)
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    monkeypatch.setattr(screen.llm, "_generate_groq", lambda p, reasoning=False: SKIP_REPLY)
+    r = screen.screen("q", ["a", "b", "c"])
+    assert calls == [None, None, screen.FALLBACK_MODEL]
+    assert (r.verdict, r.source, r.failure) == ("skip_post", "groq_fallback", "http_503;fallback_http_429")
+
+
+def test_off_or_keyless_the_backstop_is_unchanged(monkeypatch):
+    _main_model_fails(monkeypatch, 503, fallback_code=429)
+    monkeypatch.setattr(screen.llm, "_generate_groq",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("called")))
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", False)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    assert screen.screen("an ordinary question", ["a", "b", "c"]).source == "backstop"
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
+    monkeypatch.delenv("GROQ_API_KEY")
+    assert screen.screen("an ordinary question", ["a", "b", "c"]).source == "backstop"
+
+
+def test_a_failing_groq_still_reaches_the_backstop(monkeypatch):
+    _main_model_fails(monkeypatch, 503, fallback_code=429)
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    monkeypatch.setattr(screen.llm, "_generate_groq",
+                        lambda *a, **k: (_ for _ in ()).throw(_http_error(503)))
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop" and r.failure == "http_503;fallback_http_429"

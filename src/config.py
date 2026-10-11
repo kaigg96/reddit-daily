@@ -87,6 +87,9 @@ SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since 
 # Normalised: an unset Actions variable arrives as "", which must mean Gemini.
 AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
+# The screen's last try before its keyword backstop (screen._groq_rescue).
+# Off until merged with a sample; switch it here, never by a variable.
+GROQ_FALLBACK = False
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
