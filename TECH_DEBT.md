@@ -159,12 +159,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
   Before its sample: (1) yellow notes on a busy clip (orange smoke) read but
-  not crisply; a dark band behind them would help; (2) the fixture's reaction
-  repeats its answer's words, which on screen duplicates the caption, so the
-  prompt should forbid quoting the answer; (3) the prompt still says "spoken"
-  and "heard" for lines now shown; (4) the voiced build's caps (setup 15,
-  reaction 12 words) were sized for speech; a note over about 10 words runs
-  to three lines. Needs a fresh review and `FORMAT_VERSION` before sampling.
+  not crisply; a dark band behind them would help. (2) The fixture's reaction
+  repeated its answer's words, duplicating the caption: fixed on the branch,
+  where the text-mode ask says lines are shown, forbids quoting the answer
+  and caps setup and reactions at 10 words. Needs a fresh review's findings
+  fixed and `FORMAT_VERSION` before sampling.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
