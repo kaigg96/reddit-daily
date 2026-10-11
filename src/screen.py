@@ -23,7 +23,6 @@ keyword backstop is the only check; if that also passes, the post ships.
 """
 
 import json
-import os
 import re
 
 from . import config, llm
@@ -200,7 +199,7 @@ def _generate_screened(prompt, tries=2, model=None):
 # wrong model, so there it would only spend requests on an inconclusive case.
 FALLBACK_MODEL = llm.SAMPLE_MODEL
 FALLBACK_SOURCE = "gemini_fallback"
-GROQ_SOURCE = "groq_fallback"
+GROQ_SOURCE = llm.GROQ_SOURCE
 
 
 def _groq_rescue(prompt):
@@ -211,14 +210,10 @@ def _groq_rescue(prompt):
     Gemini failed on 3 of the 5 uploads to 2026-10-10. Groq's screen errs
     strict (its first replay, 2026-10-11, skipped a must-pass case), which
     beats keywords alone. The owner left Gemini's role to us (#68)."""
-    if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
-        return None, ""
-    try:
-        return llm._generate_groq(prompt, reasoning=SCREEN_THINKING_BUDGET > 0), ""
-    except Exception as e:
-        failure = llm._failure_kind(e)
+    reply, failure = llm.groq_rescue(prompt, reasoning=SCREEN_THINKING_BUDGET > 0)
+    if failure:
         print(f"Screen: Groq fallback failed ({failure})")
-        return None, failure
+    return reply, failure
 
 
 def _after(prior, failure, route="fallback"):

@@ -144,6 +144,16 @@ def test_a_dead_api_is_inconclusive_not_a_failed_release(monkeypatch):
     assert _metadata(monkeypatch, MetadataResult(None, None, None, "error")) is None
 
 
+def test_a_groq_rescue_is_inconclusive_not_a_verdict(monkeypatch):
+    """Groq answering for a failed Gemini tests the wrong route, and a pass
+    would spend gate 2's requests on the Gemini that just failed."""
+    assert _metadata(monkeypatch, MetadataResult(
+        "A Rewritten Title", ["a", "b", "c"], "Comment below!",
+        "groq_fallback", "http_429")) is None
+    assert _metadata(monkeypatch, MetadataResult(
+        "x" * 101, None, None, "groq_fallback", "http_503")) is None
+
+
 def test_gemini_answering_with_junk_is_a_real_failure(monkeypatch):
     """Empty fields when the call itself succeeded means the prompt degraded."""
     assert _metadata(monkeypatch, MetadataResult(None, None, None, "gemini")) is False
