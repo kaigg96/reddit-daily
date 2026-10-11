@@ -100,3 +100,22 @@ def test_a_lower_case_note_is_shown_with_its_capital():
     for kept in ("YouTube knows.", "r/AskReddit agrees.", "iPhone people, again."):
         _, note = video.note_clips(kept, 0.0, 1.0)
         assert " ".join(note.text.split()) == kept
+
+
+def test_the_posted_vote_starts_each_sentence_with_a_capital():
+    from src import content
+    vote = ("raising my hand for yes youll be fine because floor camping builds character."
+            " which gets your vote?")
+    assert content.sentence_case(vote) == (
+        "Raising my hand for yes youll be fine because floor camping builds character."
+        " Which gets your vote?")
+    assert content.sentence_case("honestly, no.  why would it?") == "Honestly, no.  Why would it?"
+    for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
+                 "Raising my hand for yes. Which gets your vote?", ""):
+        assert content.sentence_case(kept) == kept
+
+
+def test_the_comment_posts_the_vote_capitalised():
+    import inspect
+    from src import run
+    assert "comment_text = content.sentence_case(outro_text)" in inspect.getsource(run.main)
