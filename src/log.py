@@ -94,8 +94,8 @@ def uploaded_titles():
     prev_post.txt holds only the last upload. On 2026-07-20 an extra run came
     between, so the 13:46 upload repeated the 01:23 one; and under subreddit
     rotation (content.subreddit_for_run) at four runs a day one
-    subreddit is drawn four runs in a row, so a post still on top of the day
-    would ship again two runs later. Fails soft to an empty set, leaving the
+    subreddit is drawn twice in a row, so a post still on top of the day
+    would ship again a run or two later. Fails soft to an empty set, leaving the
     prev_post guard, and says so: a silent fallback looks like working."""
     try:
         with open(config.UPLOAD_LOG, newline="") as f:
