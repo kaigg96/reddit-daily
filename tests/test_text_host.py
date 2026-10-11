@@ -22,6 +22,14 @@ def test_notes_sit_between_the_captions_and_the_watermark():
     assert 700 < config.NOTE_Y < 1500 - config.NOTE_FONT_SIZE * 2
 
 
+def test_a_note_sits_on_a_see_through_band_of_its_own_size_and_time():
+    band, note = video.note_clips("Bold pick.", 3.0, 2.0)
+    assert band.size == note.size
+    assert (band.start, band.duration) == (note.start, note.duration) == (3.0, 2.0)
+    assert band.pos(0) == note.pos(0)
+    assert 0 < config.NOTE_BAND_OPACITY < 1
+
+
 # --- the narration, text-only (HOST_TEXT) -------------------------------------
 
 import pytest

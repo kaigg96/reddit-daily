@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 from moviepy import (
     AudioFileClip,
+    ColorClip,
     CompositeAudioClip,
     CompositeVideoClip,
     TextClip,
@@ -120,6 +121,20 @@ def overlay_text(text, start, duration, font_size, y, color="white", width=confi
     )
 
 
+def note_clips(text, start, duration):
+    """A host note over a dark band, so it stays crisp on a busy clip: the
+    2026-10-11 local sample's yellow notes read on orange smoke, but not
+    crisply. The band sits behind the note (first in the list)."""
+    note = overlay_text(text, start, duration, config.NOTE_FONT_SIZE, config.NOTE_Y,
+                        color=config.HOST_CAPTION_COLOR, width=config.NOTE_WIDTH)
+    band = (ColorClip(note.size, color=(0, 0, 0))
+            .with_opacity(config.NOTE_BAND_OPACITY)
+            .with_start(start)
+            .with_duration(duration)
+            .with_position(("center", config.NOTE_Y)))
+    return [band, note]
+
+
 # ---------------------------------------------------------------- audio
 
 
@@ -210,9 +225,7 @@ def assemble(question, segments, rng):
             overlays += caption_clips(groups, t, font_size=100, y=700)
         if seg.note:
             start, span = note_window(t, display_dur)
-            overlays.append(overlay_text(seg.note, start, span, config.NOTE_FONT_SIZE,
-                                         config.NOTE_Y, color=config.HOST_CAPTION_COLOR,
-                                         width=config.NOTE_WIDTH))
+            overlays += note_clips(seg.note, start, span)
 
         t += display_dur + config.INTER_SEGMENT_GAP
 

@@ -114,6 +114,7 @@ NOTE_Y = 1150
 NOTE_FONT_SIZE = 64
 NOTE_WIDTH = 900
 NOTE_LEAD = 0.35  # share of the segment before its note appears
+NOTE_BAND_OPACITY = 0.55  # the dark band behind a note; the clip still shows through
 # The host's setup and reactions as on-screen notes, never spoken; the
 # narrator speaks the vote, as today's CTA (#71).
 HOST_TEXT = True
