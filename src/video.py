@@ -124,7 +124,10 @@ def overlay_text(text, start, duration, font_size, y, color="white", width=confi
 def note_clips(text, start, duration):
     """A host note over a dark band, so it stays crisp on a busy clip: the
     2026-10-11 local sample's yellow notes read on orange smoke, but not
-    crisply. The band sits behind the note (first in the list)."""
+    crisply. The band sits behind the note (first in the list). The AI
+    writes some notes all lower case (the 2026-10-11 sample's did), so the
+    first letter is capitalised; the rest is left as written."""
+    text = text[:1].upper() + text[1:]
     note = overlay_text(text, start, duration, config.NOTE_FONT_SIZE, config.NOTE_Y,
                         color=config.HOST_CAPTION_COLOR, width=config.NOTE_WIDTH)
     band = (ColorClip(note.size, color=(0, 0, 0))
