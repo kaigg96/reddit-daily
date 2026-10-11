@@ -521,3 +521,16 @@ def test_a_groq_reply_without_json_is_labelled_as_groqs(monkeypatch):
     monkeypatch.setattr(screen.llm, "_generate_groq", lambda p, reasoning=False: "no idea")
     r = screen.screen("an ordinary question", ["a", "b", "c"])
     assert r.source == "backstop" and r.failure == "http_503;fallback_http_429;groq_no_json"
+
+
+def test_the_replay_spends_nothing_when_given_arguments():
+    """Every replay run spends live requests, so `--help` must not be one."""
+    import os
+    import subprocess
+    import sys
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("GEMINI_API_KEY", "GROQ_API_KEY")}
+    out = subprocess.run([sys.executable, "scripts/replay_screen.py", "--help"],
+                         capture_output=True, text=True, env=env, timeout=60)
+    assert out.returncode == 2
+    assert "Replay the R4.6 screen" in out.stdout and "want=" not in out.stdout

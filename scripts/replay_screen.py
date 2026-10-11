@@ -17,6 +17,13 @@ quota, and while the screen fails open, that leaves live runs on the keyword
 backstop until the quota resets.
 """
 import sys, time
+
+# It takes no arguments, and every run spends live requests: "--help" once ran
+# the whole replay on production's model an hour before an upload (2026-10-11).
+if __name__ == "__main__" and len(sys.argv) > 1:
+    print(__doc__)
+    sys.exit(2)
+
 sys.path.insert(0, ".")
 from src import config, llm, screen
 
