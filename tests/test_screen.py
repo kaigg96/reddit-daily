@@ -508,4 +508,14 @@ def test_a_failing_groq_still_reaches_the_backstop(monkeypatch):
     monkeypatch.setattr(screen.llm, "_generate_groq",
                         lambda *a, **k: (_ for _ in ()).throw(_http_error(503)))
     r = screen.screen("an ordinary question", ["a", "b", "c"])
-    assert r.source == "backstop" and r.failure == "http_503;fallback_http_429"
+    # The log says Groq was tried and why it missed, not only the console.
+    assert r.source == "backstop" and r.failure == "http_503;fallback_http_429;groq_http_503"
+
+
+def test_a_groq_reply_without_json_is_labelled_as_groqs(monkeypatch):
+    _main_model_fails(monkeypatch, 503, fallback_code=429)
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    monkeypatch.setattr(screen.llm, "_generate_groq", lambda p, reasoning=False: "no idea")
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    assert r.source == "backstop" and r.failure == "http_503;fallback_http_429;groq_no_json"
