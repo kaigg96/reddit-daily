@@ -86,7 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - **After tonight's upload:** check its log names the music track, not "none".
-- **Bet 1's next step:** design it under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label. My recommendation: the host's reactions as short text on each answer while it is read, plus a closing verdict card, with no host voice. That separates our take from Reddit's words, adds no time or audio cost, and reuses the host lines already built.
+- **Bet 1's next step:** design it under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label. My recommendation: the host's reactions as short text on each answer while it is read, plus a closing verdict card, with no host voice. That separates our take from Reddit's words, adds no time or audio cost, and reuses the host lines already built. Its spec is written, and since the host is silent, you can judge it from a sample link with nothing to run.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it.
 - **Groq:** build Gemini first with Groq on Gemini's failures; it shares the one render slot with bet 1, so bet 1 goes first.
 - **Once #72 is labelled:** build four a day switched off, for the ~2 November read.
