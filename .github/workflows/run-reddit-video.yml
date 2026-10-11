@@ -19,6 +19,13 @@ on:
         type: boolean
         default: false
 
+# One upload run at a time. Two that overlap check out the same
+# prev_post.txt and upload_log.csv, so neither repeat guard sees the other's
+# pick (TECH_DEBT, 2026-10-08). A run that starts while one is going waits.
+concurrency:
+  group: reddit-video
+  cancel-in-progress: false
+
 jobs:
   generate_and_upload_video:
     runs-on: ubuntu-latest
@@ -67,6 +74,7 @@ jobs:
         YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
         YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '' }}
       run: python -m src.run
 

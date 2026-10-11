@@ -84,7 +84,9 @@ Lesson for future passes: deleting the *files* is the easy half — the stale **
 - No tests over the rendering path — still correctly covered by the dry-run + frame-extraction ritual, which checks things assertions can't (legibility, timing feel).
 - `create_video.ipynb` remains in the repo as deprecated reference; harmless, owner's call.
 
-## Pass 3 — 2026-09-19 (proposed; at the pending `v6` bump) — **awaiting owner scoping**
+## Pass 3 — 2026-09-19 — scoped by Engineering 2026-10-11 (ORG.md: Act; it waited three weeks on the owner)
+
+Tier 1 item 1 lands with `v8`: the release branch extracts the guard as `run.fit_to_length`, with tests. Item 2 stays deferred until `analyze_channel.py` next needs a change (Pass 2's call; R4.4, the gate it fed, is parked).
 
 Read fresh, per the ritual. `src/` is ~2,000 lines and the Pass-1 module split is
 still holding; nothing has rotted structurally. Two findings are worth acting on,
@@ -146,37 +148,26 @@ test can reach, and two implementations of one question that quietly disagree.**
 
 ## Ritual
 
-Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, get owner scoping, execute, update this file.
+Run this check-in after each version bump (`FORMAT_VERSION` change in `src/config.py`) or major non-video feature ships (like R4.2). Read the current state fresh — don't assume the last pass's findings still apply — propose tiered findings, scope them (Engineering's call, ORG.md; never the owner's), execute, update this file.
 
 ## Open items (logged between passes)
 
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **Audit 2026-10-09: the owner's hands are the bottleneck, and built-ahead
-  work goes stale waiting on them.** Over the 8 shifts since the 10-06 audit,
-  none changed a video, and every "Better?" answer hedged (6 "slightly", 2
-  "unclear"). Shifts used 58% of their minutes. Every label-only escalation
-  since 09-25 closed, most within a day (12 of 12); all 8 open ones need hands
-  or a session. The vote (#7) took two shifts to build ahead of an answer, and
-  the 10-09 market read now undercuts it. Groq (#13) waits on a key. Changed:
-  bet 1 was split out of #55 as a label (#70); declines now show in
-  `escalations.py approved` (#62 was missed on 10-08); decision re-reviews went
-  into D4, D6, D7, D9 and D11; the WORKLOG header now matches its budget.
-  Proposed nothing to the skills, because #50, the patch that would let
-  approved skill changes land by label, is itself waiting on the owner's
-  hands. Left alone: the template's length, which is the owner's report.
-  Outward look (Claude Code best-practices page, read 10-09): subagents for
-  research and review are **adopted** (this shift used them to rank, gather
-  evidence and review twice). `/clear` and `/doctor` are interactive, so they do
-  not apply to a headless shift; `/doctor` suits an owner session if
-  `CLAUDE.md` grows. **Candidate, not adopted:** the page's deterministic gate
-  for unattended runs, a Stop hook that blocks a shift from ending until its
-  handover is on `main`, since the 70-minute cutoff loses an unpushed one. It
-  is a process proposal, best raised after #50 lands, and it must not be able
-  to loop a shift to its cutoff.
-  **Closes when** #70 is answered and shifts stop ending early, or the next
-  audit finds a different binding limit.
+- **Bet 1's commentary (2026-10-10, branch `product/commentary-led`): two
+  gaps left for its release.** (1) The own-words done-when (≥0.50 every
+  upload) cannot be met on long answers: the host's caps total 54 words (~300
+  characters), so two 150-character answers and a 60-character question top
+  out near 0.45. The first real sample read 0.63 on short answers. Read
+  `own_words_share` after ~10 uploads before changing caps, since raising them
+  lengthens the video. (2) The duration guard's own path (setup dropped, vote
+  swapped) has unit tests only: no real post has been long enough to fire it.
+  (3) The vote may fall back on length: on the sample model, once the vote
+  had to name its answer by what it says, it ran 23 words, past its 22-word
+  limit (15 × 1.5), so that upload would be a plain reading. One try on a
+  model uploads do not use. If `commentary_ok` shows fallbacks, raise the
+  vote's cap to 18 words (about one second) before anything else.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
@@ -202,37 +193,37 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `--min-views` nits its review left: without `--at-age` the buried line
   counts uploads too new to be reported; `--replays` ignores the flag.
 
-- **The Groq route is merged switched off; what remains before switching it
-  on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
-  every AI call to Groq; with no key it falls back to Gemini, and the log's
-  sources name the route that answered. Left: the workflow patch (#69, the
-  owner's label); up to four screens run back to back, so at
-  8K tokens a minute a second 429 inside one retry falls to the backstop
-  (watch `screen_failure=http_429`). **Switch on by changing the default in
-  `src/config.py`, never a workflow or repo variable:** the release check
-  re-runs only when code changes, so a variable flip would ride on Gemini's
-  PASS (its verdict now names the route it tested). Some log lines still say
-  "Gemini" whichever route answered (`screen.py`, `validate_release.py`).
+- **The Groq route is merged switched off; key and patch are in (#68, #69,
+  2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
+  **First replay on Groq (2026-10-11, run with no Gemini key, so nothing
+  touched Gemini's quota):** titles pass; the screen went 6/7, skipping as
+  `named_wrongdoing` the Epstein-files question that `_PROMPT` itself lists as
+  must-pass. One run, but Groq's model follows the prompt's calibration less
+  well. The owner leaves Gemini's role to us (#68) and suspects it titles
+  better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
+  falls to the keyword backstop. So the likely build is Gemini first, Groq on
+  a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
+  log's source naming the route that answered. Up to four screens run back to
+  back: at 8K tokens a minute a second 429 inside one retry falls to the
+  backstop (`screen_failure=http_429`). **Switch on in `src/config.py`, never a
+  workflow or repo variable:** the release check re-runs only when code
+  changes. Some log lines still say "Gemini" whichever route answered.
 
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one
   checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
   guard (the 2026-10-08 upload-log one included) sees the other's pick, and
   the second push's rebase likely conflicts on the log. Rare at two a day;
-  likelier at four (PRD #4, whose build should carry the one-line fix as an
-  owner-applied workflow patch).
+  likelier at four (PRD #4). The one-line fix is attached to #72 as a
+  label-applied patch (2026-10-11).
 
-- **The public repo distributes a YouTube Audio Library track (found
-  2026-10-07).** `assets/funk_bg_lower.mp3`, the only music in every upload,
-  has been downloadable from the repo since it went public on 2026-10-05. The
-  Audio Library terms (behind YouTube Studio's login; quoted by secondary
-  sources) say "You may not make available, distribute or perform the music
-  files from this library separately from videos". The Pexels clips are fine:
-  its licence bars only stock and wallpaper platforms and selling unaltered
-  copies. The fix needs a secret and a workflow line: the patch on #64
-  (applied 2026-10-07) and `scripts/seal_assets.sh`, the owner's to run (#66,
-  pending). Until then, **do not add tracks to `assets/music/` in plain
-  form**: the PRD owner task to add Audio Library tracks would widen it.
+- **The Audio Library track was public from 2026-10-05 to 10-10.** The
+  owner sealed it on 2026-10-10 (a925f51; #66): the repo now carries it
+  encrypted and the video job unseals it. Left: (1) the plain file stays in
+  git history, and purging it means rewriting `main`'s history, the owner's
+  call; worth it only if the Audio Library terms are ever raised. (2) A failed
+  unseal renders without music and logs `music_track` as `none`. **Closes
+  when** the first upload after the seal logs `funk_bg_lower.mp3`.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check

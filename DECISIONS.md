@@ -31,6 +31,20 @@ revisit trigger.
 
 ---
 
+## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
+
+The owner on #67, after the unused-time alarm emailed them three times:
+diagnosing and fixing it is the shifts' job, not the board's. The cause: the
+queue was empty because its rows waited on the owner, and only asks needing
+their hands or a session waited. So the alarm no longer escalates; it prints
+at shift start with the rows waiting on the owner, and the shift reduces each
+to one label before generating (bet 2 became #72 the same night).
+**Alternatives:** fewer or shorter shifts (hides the cause); keep escalating
+(the owner declined). **Assumptions:** (1) label-only asks close within a day
+(12 of 12 since 09-25; #70 the same day); (2) the hands-only remainder (keys,
+logins, a listen) is small. **Revisit** if a label-only ask waits over three
+days, or shifts still run short with no row waiting on the owner.
+
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
 The owner's reframe: the company is the unit being improved, and the channel

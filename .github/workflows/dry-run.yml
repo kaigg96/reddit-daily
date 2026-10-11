@@ -142,6 +142,7 @@ jobs:
           AWS_POLLY_ACCESS_KEY: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_ACCESS_KEY || '' }}
           AWS_POLLY_SECRET_ACCESS_KEY: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_SECRET_ACCESS_KEY || '' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           set +e
           timeout 900 python -m src.run > "$RUNNER_TEMP/render.log" 2>&1
@@ -162,12 +163,13 @@ jobs:
           S3: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_ACCESS_KEY || '' }}
           S4: ${{ steps.req.outputs.branch == 'main' && secrets.AWS_POLLY_SECRET_ACCESS_KEY || '' }}
           S5: ${{ secrets.GEMINI_API_KEY }}
+          S6: ${{ secrets.GROQ_API_KEY }}
         run: |
           python3 - "$RUNNER_TEMP/render.log" <<'PY'
           import os, sys
           p = sys.argv[1]
           text = open(p, errors="replace").read() if os.path.exists(p) else ""
-          for k in ("S1", "S2", "S3", "S4", "S5"):
+          for k in ("S1", "S2", "S3", "S4", "S5", "S6"):
               v = os.environ.get(k, "")
               if len(v) >= 6:
                   text = text.replace(v, "***")
@@ -234,12 +236,13 @@ jobs:
           S3: ${{ secrets.AWS_POLLY_ACCESS_KEY }}
           S4: ${{ secrets.AWS_POLLY_SECRET_ACCESS_KEY }}
           S5: ${{ secrets.GEMINI_API_KEY }}
+          S6: ${{ secrets.GROQ_API_KEY }}
         run: |
           python3 - "$RUNNER_TEMP/sample/render.log" "$RUNNER_TEMP/render.log" <<'PY'
           import os, sys
           src, dst = sys.argv[1], sys.argv[2]
           text = open(src, errors="replace").read() if os.path.exists(src) else ""
-          for k in ("S1", "S2", "S3", "S4", "S5"):
+          for k in ("S1", "S2", "S3", "S4", "S5", "S6"):
               v = os.environ.get(k, "")
               if len(v) >= 6:
                   text = text.replace(v, "***")

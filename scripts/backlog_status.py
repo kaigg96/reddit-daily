@@ -124,7 +124,47 @@ def main(argv=None):
               "first (/backlog §1-2). Research questions tested against existing "
               "data are always available, and the risk register (PLAN.md §4) "
               "names what no function is yet answering.")
+    for line in short_shifts():
+        print(line)
     return 0
+
+
+def waiting_on_owner():
+    """Blocked rows whose block names the owner, across both trackers."""
+    return [f"[{label}] {name[:50]}: {raw.split(':', 1)[-1].strip()[:80]}"
+            for label, text, section in sources()
+            for status, raw, name in items(text, section)
+            if status == "blocked" and "owner" in raw.lower()]
+
+
+def short_shifts():
+    """What to print when recent shifts ran short. The cause, found on
+    2026-10-11 for #67: the queue is empty because its rows wait on the owner,
+    and an ask that needs the owner's hands or a session waits for days, while
+    one they answer with a label closes within a day (12 of 12, audit
+    2026-10-09; bet 1 was approved the day it was split out of the planning
+    session). Every row cleared of hands-work is one less reason to stop."""
+    if __package__:
+        from . import context_budget
+    else:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import context_budget
+    short = context_budget.capacity_shortfall()
+    if not short:
+        return []
+    minutes, used = short
+    owner = waiting_on_owner()
+    out = [f"\nSHIFTS ARE ENDING EARLY: the last {len(minutes)} ran "
+           f"{', '.join(f'{m:.0f}' for m in minutes)} of their "
+           f"{context_budget.SHIFT_MINUTES} minutes ({used:.0%}). This is the "
+           "shift's to fix, never the owner's (#67)."]
+    if owner:
+        out.append(f"{len(owner)} rows wait on the owner. Asks they answer with "
+                   "a label close within a day; asks needing their hands or a "
+                   "session wait. Before generating, do every part of these a "
+                   "shift can, so what is left for the owner is one label:")
+        out += [f"  - {o}" for o in owner]
+    return out
 
 
 if __name__ == "__main__":

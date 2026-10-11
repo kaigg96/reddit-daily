@@ -651,6 +651,38 @@ def render_duration(release, before, threshold=1.0):
     return line
 
 
+OWN_WORDS_DONE = 0.50  # bet 1's done-when (#70): our own words, every upload
+
+
+def render_own_words(log_rows, version, key="format_version"):
+    """Bet 1's done-when beside its release verdict (#70): how many of the
+    release's uploads had our own words at OWN_WORDS_DONE or more of the
+    narration. Read from the log, at any age: it is a property of what
+    shipped, not of how it performed, so it never waits on snapshots. A
+    fallback logs 0.00 and counts as a miss. Counts every upload of the release,
+    whatever --within narrowed above it. Empty when nothing logs a share."""
+    vals = []
+    for r in log_rows:
+        if r.get(key) != version:
+            continue
+        try:
+            v = float((r.get("own_words_share") or "").strip())
+        except ValueError:  # blank (before the column) or malformed: not read
+            continue
+        if v == v:  # not NaN
+            vals.append(v)
+    vals.sort()
+    if not vals:
+        return ""
+    met = sum(1 for v in vals if v >= OWN_WORDS_DONE)
+    line = (f"own words (bet 1's done-when, >= {OWN_WORDS_DONE:.2f} on every upload): "
+            f"{met} of {len(vals)} uploads, median {statistics.median(vals):.2f}")
+    fell_back = sum(1 for v in vals if v == 0)
+    if fell_back:
+        line += f", {fell_back} fell back to a plain reading"
+    return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
+
+
 def render_within_length(read, threshold=1.0):
     """When a release shifted length, its watch-seconds within each length half.
 
