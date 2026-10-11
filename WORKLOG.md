@@ -77,14 +77,14 @@ and more useful than a confident guess.
 - **Reliability:** when Gemini fails and the Groq fallback (still off) also misses, the upload log now says so, and why. Before, only the console showed it. Reviewed and merged. The weekly digest's lateness figure measured to the nearest scheduled time, so it read a 6.6-hour delay as 5.4 hours, and at four a day would have read today's delays as about 1. It now counts forward from the run's own scheduled time. Reviewed and merged; what is left of it for four a day is recorded.
 - **General management:** the sealed music is confirmed working: this morning's upload, the first after the seal, logged its track. That item is closed. Two things made this shift awkward. The one-render-per-12-hours limit meant bet 1's sample could only be asked for in the last quarter-hour, because last night's shift rendered at 22:46. And the daily release check, set for 08:17, has started between 14:27 and 17:07 on each of its last six runs, so a morning shift never sees that day's verdict. The handover had expected it by morning.
 - **Security:** standing check clean. Narration spend $0.32 this month (forecast $0.92 of $3), money controls in place, no secrets in the project, no workflow change.
-- Fixing against improving: mostly improving. Both bets moved; one small logging fix.
+- Fixing against improving: mostly improving. Both bets moved; two small fixes (the screen's log, the digest's lateness).
 
 ### Blocked
-- **For you, each one label:** bet 1's sample (the label follows the render); four a day's schedule (#73). Still open from before: re-label #53 (comments); the account checks (#59).
+- **For you, each one label:** bet 1's sample (the label follows the render); four a day's schedule (#73). Still open from before: re-label #53 (comments; its change still applies to today's file, so the label is all it needs); the account checks (#59).
 
 ### Next
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it. If you approve bet 1, it ships as `v8` after that read.
-- **Groq:** switch the safety screen's fallback on with a sample, the next render slot after bet 1's (from about 23:00 today).
+- **Groq:** switch the safety screen's fallback on with a sample, the next render slot after bet 1's (from about 23:00 today). The screen fell to the keyword filter on 2 of the last 30 uploads; those are what it would cover.
 - **Four a day, before the switch:** cap the extra runs' AI use or send them to Groq; raise how many posts a run fetches.
 
 ### Better?
