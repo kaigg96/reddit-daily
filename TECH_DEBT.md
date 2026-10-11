@@ -207,14 +207,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
-- **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
-  has no `concurrency:` group, so a manual run during a late scheduled one
-  checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
-  guard (the 2026-10-08 upload-log one included) sees the other's pick, and
-  the second push's rebase likely conflicts on the log. Rare at two a day;
-  likelier at four (PRD #4). The one-line fix is attached to #72 as a
-  label-applied patch (2026-10-11).
-
 - **The Audio Library track was public from 2026-10-05 to 10-10.** The
   owner sealed it on 2026-10-10 (a925f51; #66): the repo now carries it
   encrypted and the video job unseals it. Left: (1) the plain file stays in
