@@ -155,26 +155,39 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **Bet 1's commentary (2026-10-10, branch `product/commentary-led`): two
-  gaps left for its release.** (1) The own-words done-when (≥0.50 every
-  upload) cannot be met on long answers: the host's caps total 54 words (~300
-  characters), so two 150-character answers and a 60-character question top
-  out near 0.45. The first real sample read 0.63 on short answers. Read
-  `own_words_share` after ~10 uploads before changing caps, since raising them
-  lengthens the video. (2) The duration guard's own path (setup dropped, vote
-  swapped) has unit tests only: no real post has been long enough to fire it.
-  (3) The vote may fall back on length: on the sample model, once the vote
-  had to name its answer by what it says, it ran 23 words, past its 22-word
-  limit (15 × 1.5), so that upload would be a plain reading. One try on a
-  model uploads do not use. If `commentary_ok` shows fallbacks, raise the
-  vote's cap to 18 words (about one second) before anything else.
+- **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
+  `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
+  render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
+  Before its sample: (1) yellow notes on a busy clip (orange smoke) read but
+  not crisply; a dark band behind them would help. (2) The fixture's reaction
+  repeated its answer's words, duplicating the caption: fixed on the branch,
+  where the text-mode ask says lines are shown, forbids quoting the answer
+  and caps setup and reactions at 10 words (12 with slack: four lines would
+  meet the watermark). Reviewed, findings fixed, `v8`, switched on. The dark
+  band (55%, behind each note) landed 2026-10-11, reviewed. Left (cosmetic):
+  notes are not in the SRT caption track; the band is full width behind a
+  short note; a rare three-line caption's bottom pixels reach the band's top.
+  The 10-11 sample's notes came back all lower case; `note_clips` now
+  capitalises a plain lower-case first word (0a0712c, reviewed). Re-sample
+  before merge.
+
+- **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
+  the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
+  (2) a run queued behind another
+  cancels a pending one in the `reddit-video` group, so an off-slot run could
+  cancel a waiting live one (needs a ~6h pile-up); (3) after the patch, a
+  12:23 run landing after midnight takes the previous day's style, and an
+  00:23 one landing after noon the morning subreddit (11.6h+ delays; 5.5–6.6h
+  seen); (4) the digest counts days by publish date, so an 18:23 run landing
+  after midnight reads as a missed day, and drift over 6h reads as small.
+  **Closes when** the switch goes to four.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
   fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
   every sample, up to 4 requests a run. **Closes when** a replay case shows
-  an omitted `post_risk` on a post that should skip, or the screen is next
-  changed.
+  an omitted `post_risk` on a post that should skip, or the screen's parsing
+  is next changed (2026-10-11's failure-label change left it).
 
 - **A viewed upload can log 0 watch-seconds (found 2026-10-10, R4).** 6 of
   144 viewed uploads at 7 days read `avg_view_duration_s` 0.0 on 1–6 views,
@@ -203,27 +216,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
   falls to the keyword backstop. So the likely build is Gemini first, Groq on
   a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
-  log's source naming the route that answered. Up to four screens run back to
+  log's source naming the route that answered. **Merged off 2026-10-11** for
+  the screen only, after both Gemini models and before the backstop
+  (`config.GROQ_FALLBACK`, `screen_source=groq_fallback`); titles would need
+  the same in `llm.get_metadata`. Its review's two logging gaps closed
+  2026-10-11: a missed Groq try and its parse failures now end
+  `screen_failure` as `;groq_<kind>`. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
-  backstop (`screen_failure=http_429`). **Switch on in `src/config.py`, never a
+  backstop (`…;groq_http_429`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
-
-- **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
-  has no `concurrency:` group, so a manual run during a late scheduled one
-  checks out the same `prev_post.txt` and `upload_log.csv`: neither repeat
-  guard (the 2026-10-08 upload-log one included) sees the other's pick, and
-  the second push's rebase likely conflicts on the log. Rare at two a day;
-  likelier at four (PRD #4). The one-line fix is attached to #72 as a
-  label-applied patch (2026-10-11).
-
-- **The Audio Library track was public from 2026-10-05 to 10-10.** The
-  owner sealed it on 2026-10-10 (a925f51; #66): the repo now carries it
-  encrypted and the video job unseals it. Left: (1) the plain file stays in
-  git history, and purging it means rewriting `main`'s history, the owner's
-  call; worth it only if the Audio Library terms are ever raised. (2) A failed
-  unseal renders without music and logs `music_track` as `none`. **Closes
-  when** the first upload after the seal logs `funk_bg_lower.mp3`.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check

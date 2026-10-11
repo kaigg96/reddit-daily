@@ -5,6 +5,7 @@ without touching YouTube, prev_post.txt, or upload_log.csv (PRD R0.1).
 """
 
 import datetime
+import os
 import random
 import sys
 
@@ -139,13 +140,23 @@ def main():
     rng = random.Random()
     print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} "
           f"SILENT_NARRATION={config.SILENT_NARRATION} format={config.FORMAT_VERSION}")
+    # PRD §0 #4: the workflow passes the cron line that started this run.
+    now = datetime.datetime.now(datetime.timezone.utc)
+    schedule = os.environ.get("RUN_SCHEDULE", "")
+    try:
+        day, slot = content.run_slot(now, schedule)
+    except ValueError as e:
+        sys.exit(f"Not uploading: {e}")   # fails the run, so it is seen
+    if slot not in content.live_slots():
+        print(f"Slot {slot} is off at {config.UPLOADS_PER_DAY} uploads a day; nothing to do")
+        return
     check_channel_name()
 
     # --- content ---
     prev_title = ""
     if config.PREV_POST_FILE.exists():
         prev_title = config.PREV_POST_FILE.read_text().strip()
-    subreddit_name = content.subreddit_for_run(datetime.datetime.now(datetime.timezone.utc))
+    subreddit_name = content.subreddit_for_run(now, schedule=schedule)
 
     # R4.6: log every non-pass verdict for weekly false-positive audit.
     def record_verdict(post_title, result, action):
@@ -186,7 +197,7 @@ def main():
     # two weeks in Sept 2026 and were only discoverable by comparing the shipped
     # title back to the Reddit question (PRD §2, TECH_DEBT 2026-09-19).
     # R2.2: one title style per day so both daily uploads share it; logged per upload
-    title_style = llm.title_style_for(datetime.date.today())
+    title_style = llm.title_style_for(day)
     # PRD §0 #14: a coin per run, independent of the day's style.
     title_caps = llm.title_caps_arm(rng)
 
