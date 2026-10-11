@@ -528,8 +528,9 @@ def test_the_replay_spends_nothing_when_given_arguments():
     import os
     import subprocess
     import sys
-    env = {k: v for k, v in os.environ.items()
-           if k not in ("GEMINI_API_KEY", "GROQ_API_KEY")}
+    # Blank, not removed: config fills a missing key from .env (setdefault),
+    # so a regressed guard would send keyless requests, never spend quota.
+    env = dict(os.environ, GEMINI_API_KEY="", GROQ_API_KEY="")
     out = subprocess.run([sys.executable, "scripts/replay_screen.py", "--help"],
                          capture_output=True, text=True, env=env, timeout=60)
     assert out.returncode == 2
