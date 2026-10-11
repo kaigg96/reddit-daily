@@ -68,6 +68,14 @@ MIN_COMMENT_DISPLAY = 2.0  # short answers hold on screen this long so they land
 # NoStupidQuestions: closest general-audience analogue; its first screen
 # replay is the branch's dry run (PRD §6 R4.1 build note).
 SUBREDDITS = ["AskReddit", "NoStupidQuestions"]
+# PRD §0 #4 (bet 2, approved with its narration spend on #72): uploads a day,
+# 2 or 4. Switch to 4 only after #3's read. Each scheduled run's cron line
+# names its slot (0-3, nominal hour 6 x slot), because GitHub starts runs
+# ~4-5h late and the clock alone cannot tell four slots apart. While this is
+# 2, a run in slot 1 or 3 exits before any API call. Must match the cron
+# lines in run-reddit-video.yml.
+UPLOADS_PER_DAY = 2
+SLOT_CRONS = {"23 0 * * *": 0, "23 6 * * *": 1, "23 12 * * *": 2, "23 18 * * *": 3}
 CANDIDATE_LIMIT = 10          # top posts fetched per run
 COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS survive
 MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota

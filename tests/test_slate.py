@@ -7,6 +7,7 @@ now labels the whole eligible slate in ONE request, on a model whose free
 allowance is separate from the one titles and the screen share.
 """
 
+import collections
 import json
 
 import pytest
@@ -308,3 +309,58 @@ def test_description_credits_each_author_by_username_when_known():
     assert desc.startswith("Today's top AskReddit post, asked by u/quentin: Q?\n")
     assert "1. a (u/alice)\n2. b\n3. c\n" in desc
     assert "https://redd.it/x" in desc
+
+
+# --- PRD §0 #4: four a day, built off ------------------------------------------
+
+def _at(day, hour, minute=0):
+    import datetime
+    return datetime.datetime(2026, 10, day, hour, minute, tzinfo=datetime.timezone.utc)
+
+
+def _old_rule(now, subs):
+    return subs[(now.toordinal() + (now.hour >= 12)) % len(subs)]
+
+
+def test_at_two_a_day_both_cron_shapes_pick_as_before():
+    subs = ["AskReddit", "NoStupidQuestions"]
+    for d in range(5, 12):
+        for hour, line in ((5, "23 0 * * *"), (17, "23 12 * * *")):
+            now = _at(d, hour)
+            assert content.subreddit_for_run(now, subs) == _old_rule(now, subs)
+            assert content.subreddit_for_run(now, subs, schedule="23 0,12 * * *") == _old_rule(now, subs)
+            assert content.subreddit_for_run(now, subs, schedule=line) == _old_rule(now, subs)
+
+
+def test_at_two_a_day_the_extra_slots_are_off():
+    assert config.UPLOADS_PER_DAY == 2
+    assert content.run_slot(_at(5, 11), "23 6 * * *")[1] not in content.live_slots()
+    assert content.run_slot(_at(5, 23), "23 18 * * *")[1] not in content.live_slots()
+
+
+def test_a_late_evening_run_belongs_to_the_day_it_was_scheduled_for():
+    import datetime
+    assert content.run_slot(_at(6, 0, 40), "23 18 * * *") == (datetime.date(2026, 10, 5), 3)
+    assert content.run_slot(_at(5, 23, 10), "23 18 * * *") == (datetime.date(2026, 10, 5), 3)
+
+
+def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch):
+    monkeypatch.setattr(config, "UPLOADS_PER_DAY", 4)
+    subs = ["AskReddit", "NoStupidQuestions"]
+    lines = [("23 0 * * *", 5), ("23 6 * * *", 11), ("23 12 * * *", 17), ("23 18 * * *", 23)]
+    picks, seen = [], collections.Counter()
+    for d in range(5, 11):
+        for slot, (line, hour) in enumerate(lines):
+            sub = content.subreddit_for_run(_at(d, hour), subs, schedule=line)
+            picks.append(sub)
+            seen[(sub, slot)] += 1
+    assert not any(picks[i] == picks[i + 1] == picks[i + 2] for i in range(len(picks) - 2))
+    assert set(seen.values()) == {3}
+
+
+def test_an_off_slot_exits_before_any_call(monkeypatch):
+    from src import run
+    monkeypatch.setenv("RUN_SCHEDULE", "23 6 * * *")
+    monkeypatch.setattr(run, "check_channel_name",
+                        lambda: (_ for _ in ()).throw(AssertionError("ran past the slot check")))
+    assert run.main() is None

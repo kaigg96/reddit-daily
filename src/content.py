@@ -1,5 +1,6 @@
 """Reddit content selection and text cleanup."""
 
+import datetime
 import os
 import re
 from dataclasses import dataclass
@@ -96,7 +97,7 @@ def _comment_pool(post, limit):
     ][:limit]
 
 
-def subreddit_for_run(now, subreddits=None):
+def subreddit_for_run(now, subreddits=None, schedule=""):
     """R4.1: the subreddit this run draws from, deterministic per run.
 
     Morning and evening take consecutive entries and the start moves on a day
@@ -109,9 +110,34 @@ def subreddit_for_run(now, subreddits=None):
     one subreddit-to-slot pairing (style A days: NoStupidQuestions in the
     morning; C days: AskReddit). Subreddit-vs-subreddit and style-vs-style
     reads stay balanced; a style comparison *within* one subreddit is
-    confounded with slot."""
+    confounded with slot. At four a day each run takes the next entry, so
+    no subreddit runs more than twice in a row."""
     subs = subreddits or config.SUBREDDITS
-    return subs[(now.toordinal() + (now.hour >= 12)) % len(subs)]
+    day, slot = run_slot(now, schedule)
+    live = live_slots()
+    position = live.index(slot) if slot in live else slot // 2
+    return subs[(day.toordinal() + position) % len(subs)]
+
+
+def run_slot(now, schedule=""):
+    """PRD §0 #4: (day, slot) of this run. The slot is the triggering cron
+    line's (config.SLOT_CRONS), and so is the day: the 18:23 run can land
+    after midnight, and it still belongs to the day it was scheduled for. A
+    run no cron line names (today's '23 0,12' line, a manual run) keeps the
+    clock's split: before noon is slot 0, after it slot 2."""
+    slot = config.SLOT_CRONS.get(schedule)
+    if slot is None:
+        return now.date(), (2 if now.hour >= 12 else 0)
+    day = now.date()
+    if now.hour < 6 * slot:
+        day -= datetime.timedelta(days=1)
+    return day, slot
+
+
+def live_slots():
+    """The slots that upload. At two a day, the two the schedule has always
+    had, so turning four on changes nothing about them."""
+    return (0, 1, 2, 3) if config.UPLOADS_PER_DAY == 4 else (0, 2)
 
 
 def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, on_verdict=None,
