@@ -167,8 +167,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   band (55%, behind each note) landed 2026-10-11, reviewed. Left (cosmetic):
   notes are not in the SRT caption track; the band is full width behind a
   short note; a rare three-line caption's bottom pixels reach the band's top.
-  **Before merge:** the 10-11 sample's AI notes came back all lower case
-  ("looking past the paycheck…"); capitalise their first letter, then re-sample.
+  The 10-11 sample's notes came back all lower case; `note_clips` now
+  capitalises a plain lower-case first word (0a0712c, reviewed). Re-sample
+  before merge.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
