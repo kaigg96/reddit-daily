@@ -78,7 +78,9 @@ def due(held, today, snapshot):
         out.append(("quarterly prep", f"no packet yet this quarter (last {prep or 'never'})"))
     plan = held.get("quarterly planning")
     if prep and _quarter(prep) == _quarter(today) and (plan is None or plan < prep):
-        out.append(("quarterly planning", "packet prepared; waiting on the owner's session"))
+        # A bet is decided by its own label, not a session (D13, 2026-10-11).
+        out.append(("quarterly planning", "packet prepared; waiting on the owner's "
+                                          "labels on its bets"))
     return out
 
 
