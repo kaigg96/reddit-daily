@@ -162,8 +162,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   not crisply; a dark band behind them would help. (2) The fixture's reaction
   repeated its answer's words, duplicating the caption: fixed on the branch,
   where the text-mode ask says lines are shown, forbids quoting the answer
-  and caps setup and reactions at 10 words. Needs a fresh review's findings
-  fixed and `FORMAT_VERSION` before sampling.
+  and caps setup and reactions at 10 words (12 with slack: four lines would
+  meet the watermark). Reviewed, findings fixed, `v8`, switched on. Left
+  (cosmetic): the dark band, and notes are not in the SRT caption track.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The

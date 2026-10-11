@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-11 (00:30) — Shifts ended early because work waited on you; fixed by us. Your three replies are now acted on
 
-    Worked (% of the shift): gm 30 · product 25 · engineering 20 · strategy 10 · distribution 5 · legal 5 · security 5
+    Worked (% of the shift): gm 25 · product 30 · engineering 20 · strategy 10 · distribution 5 · legal 5 · security 5
 
 **Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments. Asked as one label, bet 2 was approved in 11 minutes (#72). Bet 1's voiced host will not ship, as you asked; its text-only successor is built.
 
