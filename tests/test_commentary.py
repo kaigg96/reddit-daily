@@ -24,6 +24,13 @@ HOST = {"title": "t", "keywords": ["k"],
         "cta": "My hand goes up for lifeguarding. Which gets your vote?"}
 
 
+@pytest.fixture(autouse=True)
+def voiced_host(monkeypatch):
+    """These tests pin the voiced host (rejected, #71); the text-only host,
+    now the default, is tested in test_text_host.py."""
+    monkeypatch.setattr(config, "HOST_TEXT", False)
+
+
 @pytest.fixture
 def commentary_on(monkeypatch):
     monkeypatch.setattr(config, "COMMENTARY", True)

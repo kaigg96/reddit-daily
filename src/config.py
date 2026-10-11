@@ -89,7 +89,7 @@ AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v8"  # v8 = bet 1: a host sets up, reacts to the top two answers, and votes (#70)
+FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and reactions on screen, the narrator speaks its vote
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
@@ -115,8 +115,8 @@ NOTE_FONT_SIZE = 64
 NOTE_WIDTH = 900
 NOTE_LEAD = 0.35  # share of the segment before its note appears
 # The host's setup and reactions as on-screen notes, never spoken; the
-# narrator speaks the vote, as today's CTA (#71). Off until its sample.
-HOST_TEXT = False
+# narrator speaks the vote, as today's CTA (#71).
+HOST_TEXT = True
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
