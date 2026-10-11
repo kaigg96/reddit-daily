@@ -285,7 +285,11 @@ _TEXT_EDITS = [
     ("lines of AT MOST 12 words each, in order; each is\n     heard straight after its answer and reacts to that answer only.",
      "lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only. Never\n     repeat the answer's own words: they are already on screen."),
     ("Every line must make sense heard once.", "Every line must make sense read once, in two seconds."),
+    ("Plain spoken words.", "Plain words."),
 ]
+# A note past about 12 words runs to four lines and meets the watermark
+# (measured at 64px, 900px wide, 2026-10-11), so text lines get less slack.
+_TEXT_SLACK = 1.2
 
 
 def _commentary_ask(n):
@@ -298,8 +302,9 @@ def _commentary_ask(n):
 
 
 def _within_cap(line, kind):
-    caps = _TEXT_CAPS if config.HOST_TEXT else _HOST_CAPS
-    return len(line.split()) <= caps[kind] * _CAP_SLACK
+    if config.HOST_TEXT:
+        return len(line.split()) <= _TEXT_CAPS[kind] * _TEXT_SLACK
+    return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
 
 
 def _clean_commentary(data, n):
