@@ -219,7 +219,7 @@ def main():
     med_90 = analytics.median([views(v["id"]) for v in d90])
     views_90 = sum(views(v["id"]) for v in d90)
 
-    cadence = f"{week_count}/14 uploads"
+    cadence = f"{week_count}/{7 * config.UPLOADS_PER_DAY} uploads"
     cadence += " (no missed days)" if not missed_days else f" — **missed: {', '.join(sorted(missed_days))}**"
     if drift == drift:  # not NaN
         cadence += (f" · publish drift: **{drift:.0f} min late**" if drift >= DRIFT_ALERT_MIN
