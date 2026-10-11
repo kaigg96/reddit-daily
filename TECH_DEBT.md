@@ -168,6 +168,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   notes are not in the SRT caption track; the band is full width behind a
   short note; a rare three-line caption's bottom pixels reach the band's top.
 
+- **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
+  the switch to four: (1) `scripts/weekly_digest.py` `CRON_SLOTS` knows two
+  slots, so its drift line misreads four; (2) a run queued behind another
+  cancels a pending one in the `reddit-video` group, so an off-slot run could
+  cancel a waiting live one (needs a ~6h pile-up); (3) after the patch, a
+  12:23 run landing after midnight takes the previous day's style, and an
+  00:23 one landing after noon the morning subreddit (11.6h+ delays; 5.5–6.6h
+  seen). **Closes when** the switch goes to four with (1) fixed.
+
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
   fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
