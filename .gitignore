@@ -14,3 +14,7 @@ __pycache__/
 .github/last-release-detail.md
 /assets/funk_bg_lower.mp3
 /assets/music/*.mp3
+# viewer comments (PLAN C5, #75): kept 30 days as a workflow download, never
+# committed. YouTube allows comment text 30 days (III.E.4), and git keeps it
+# for good in a public repository.
+/analysis/viewer_comments.csv
