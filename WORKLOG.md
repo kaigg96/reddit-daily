@@ -61,11 +61,11 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-11 (10:55) — Bet 1's host is easier to read and its sample is out to you; four a day is built, switched off
+## 2026-10-11 (10:55) — Bet 1's host is easier to read; its sample is with you as one label; four a day is built, switched off
 
     Worked (% of the shift): product 45 · engineering 20 · reliability 10 · data 10 · gm 10 · security 5
 
-**Summary:** Bet 1's on-screen host now reads clearly on any background. Its sample is asked for at the first slot the render limit allows, 10:47, and comes to you as one label. Bet 2, four uploads a day, is built and switched off: it waits on one label from you for the schedule, then on the subreddit read about 2 November.
+**Summary:** Bet 1's on-screen host now reads clearly on any background. Its sample rendered cleanly and is with you as one label (#74): you can judge it by watching, with nothing to run. Bet 2, four uploads a day, is built and switched off: it waits on one label from you for the schedule, then on the subreddit read about 2 November.
 
 ### Toward revenue
 - **Yes, both bets moved.** Bet 1 (make the format ours) is the step YouTube's payment rules need. It is now one label from you, judged on a video you can watch. Bet 2 (four a day, the views lever) needs only your label on the schedule change, and the read it was always waiting for.
@@ -80,11 +80,12 @@ and more useful than a confident guess.
 - Fixing against improving: mostly improving. Both bets moved; two small fixes (the screen's log, the digest's lateness).
 
 ### Blocked
-- **For you, each one label:** bet 1's sample (the label follows the render); four a day's schedule (#73). Still open from before: re-label #53 (comments; its change still applies to today's file, so the label is all it needs); the account checks (#59).
+- **For you, each one label:** bet 1's sample (#74); four a day's schedule (#73). Still open from before: re-label #53 (comments; its change still applies to today's file, so the label is all it needs); the account checks (#59).
 
 ### Next
-- **12 October:** read `v7` under its rule, with the buried-upload check beside it. If you approve bet 1, it ships as `v8` after that read.
-- **Groq:** switch the safety screen's fallback on with a sample, the next render slot after bet 1's (from about 23:00 today). The screen fell to the keyword filter on 2 of the last 30 uploads; those are what it would cover.
+- **Tonight (render slot from about 22:49):** give bet 1's host lines their capitals (the AI wrote them in lower case), then sample it again, since a merge needs a pass on the current version.
+- **12 October:** read `v7` under its rule, with the buried-upload check beside it. If you approve bet 1 (#74), it ships as `v8` after that read.
+- **Groq:** switch the safety screen's fallback on with a sample, in the render slot after bet 1's second one. The screen fell to the keyword filter on 2 of the last 30 uploads; those are what it would cover.
 - **Four a day, before the switch:** cap the extra runs' AI use or send them to Groq; raise how many posts a run fetches.
 
 ### Better?
