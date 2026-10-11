@@ -113,6 +113,23 @@ def _generate_groq(prompt, reasoning=False):
     return resp.json()["choices"][0]["message"]["content"] or ""
 
 
+GROQ_SOURCE = "groq_fallback"
+
+
+def groq_rescue(prompt, reasoning=False):
+    """One try on Groq after Gemini has failed: (reply, failure). Shared by the
+    screen and the metadata call, so the switch (config.GROQ_FALLBACK) means
+    the same thing for both. The reply is None when off, keyless or missing;
+    the failure is blank unless a try was made and missed, so the log tells
+    "Groq failed" from "Groq off"."""
+    if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
+        return None, ""
+    try:
+        return _generate_groq(prompt, reasoning=reasoning), ""
+    except Exception as e:
+        return None, _failure_kind(e)
+
+
 def generate_retrying(prompt, tries=2, **kw):
     """`_generate`, retrying a transient failure once. Shared by the screen and
     the metadata call so the two cannot drift: the metadata call had no retry,
@@ -285,34 +302,54 @@ Produce three things.
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
 """
+    route, prior = provider(), ""
     try:
         raw = generate_retrying(prompt)
     except Exception as e:
-        # never echo the exception body: HTTPError messages embed the keyed URL
-        # The reason, not just the type: a dry run writes no upload log, so
-        # its "HTTPError" could not be told apart as a 429 or a 503 (2026-10-08).
-        print(f"{provider().title()} metadata failed with {type(e).__name__} "
-              f"({_failure_kind(e)}; title, keywords and CTA all fall back)")
-        # The request never landed -- a 429 on the shared daily cap, a timeout,
-        # a transport error. Nothing was learned about the prompt's quality.
-        return MetadataResult(None, None, None, "error", _failure_kind(e))
+        prior = _failure_kind(e)
+        # PRD §0 #13: Groq answers before the fields fall back, as it does for
+        # the screen, and on the same terms: Gemini only, never in a dry run.
+        raw, missed = (groq_rescue(prompt) if route == "gemini" and not config.DRY_RUN
+                       else (None, ""))
+        if raw is None:
+            # never echo the exception body: HTTPError messages embed the keyed URL
+            # The reason, not just the type: a dry run writes no upload log, so
+            # its "HTTPError" could not be told apart as a 429 or a 503 (2026-10-08).
+            print(f"{provider().title()} metadata failed with {type(e).__name__} "
+                  f"({prior}; title, keywords and CTA all fall back)")
+            # The request never landed -- a 429 on the shared daily cap, a timeout,
+            # a transport error. Nothing was learned about the prompt's quality.
+            return MetadataResult(None, None, None, "error", _then(prior, missed))
+        print(f"Gemini metadata failed ({prior}); Groq answered instead")
+        route = GROQ_SOURCE
 
+    # On a Groq answer the Gemini failure stays first, as the screen's does, so
+    # the log shows why it ran: a blank failure is still "Gemini answered".
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
-        print("Gemini metadata returned no JSON object (all fields fall back)")
-        return MetadataResult(None, None, None, provider(), "no_json")
+        print(f"{route} metadata returned no JSON object (all fields fall back)")
+        return MetadataResult(None, None, None, route, _then(prior, "no_json"))
     try:
         data = json.loads(match.group(0))
     except ValueError:
-        print("Gemini metadata returned unparseable JSON (all fields fall back)")
-        return MetadataResult(None, None, None, provider(), "bad_json")
+        print(f"{route} metadata returned unparseable JSON (all fields fall back)")
+        return MetadataResult(None, None, None, route, _then(prior, "bad_json"))
 
     return MetadataResult(
         title=_clean_str(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
         cta=_clean_str(data.get("cta")),
-        source=provider(),
+        source=route,
+        failure=prior,
     )
+
+
+def _then(prior, failure):
+    """The failure label after Groq's try: Gemini's first, then Groq's, named
+    `groq_` as the screen names them. Gemini's alone when no try was made."""
+    if not failure:
+        return prior
+    return f"{prior};groq_{failure}" if prior else failure
 
 
 def _clean_str(value):

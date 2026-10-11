@@ -598,3 +598,66 @@ def test_the_capitals_coin_lands_both_ways():
     import random
     arms = {llm.title_caps_arm(random.Random(seed)) for seed in range(20)}
     assert arms == {True, False}
+
+
+# PRD §0 #13: Groq answers the metadata call when Gemini fails, behind the
+# screen's switch (config.GROQ_FALLBACK) and on its terms.
+
+def _gemini_429(monkeypatch, groq_reply=None, groq_error=None):
+    """Gemini's call fails on the daily cap; Groq answers `groq_reply` or
+    raises `groq_error`. Returns the prompts Groq was sent."""
+    quota = llm.requests.Response()
+    quota.status_code = 429
+    monkeypatch.setattr(llm, "_generate",
+                        _raises(llm.requests.HTTPError("429", response=quota)))
+    sent = []
+
+    def groq(prompt, reasoning=False):
+        sent.append(prompt)
+        if groq_error:
+            raise groq_error
+        return groq_reply
+    monkeypatch.setattr(llm, "_generate_groq", groq)
+    monkeypatch.setattr(config, "AI_PROVIDER", "gemini")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    monkeypatch.setattr(config, "GROQ_FALLBACK", True)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    return sent
+
+
+def test_groq_answers_the_metadata_when_gemini_fails(monkeypatch):
+    sent = _gemini_429(monkeypatch, groq_reply=GOOD_JSON)
+    meta = llm.get_metadata("q", ["a"])
+    assert len(sent) == 1
+    assert meta.title and meta.keywords and meta.cta
+    # Gemini's failure stays, so the log shows why Groq ran.
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+
+
+def test_off_keyless_dry_or_already_on_groq_the_fields_fall_back_as_before(monkeypatch):
+    for case in ("off", "keyless", "dry", "groq"):
+        sent = _gemini_429(monkeypatch, groq_reply=GOOD_JSON)
+        if case == "off":
+            monkeypatch.setattr(config, "GROQ_FALLBACK", False)
+        elif case == "keyless":
+            monkeypatch.delenv("GROQ_API_KEY")
+        elif case == "dry":
+            monkeypatch.setattr(config, "DRY_RUN", True)
+        else:
+            monkeypatch.setattr(config, "AI_PROVIDER", "groq")
+        meta = llm.get_metadata("q", ["a"])
+        assert sent == [], case
+        assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429"), case
+
+
+def test_a_groq_miss_is_named_after_geminis(monkeypatch):
+    _gemini_429(monkeypatch, groq_error=llm.requests.ReadTimeout())
+    meta = llm.get_metadata("q", ["a"])
+    assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429;groq_timeout")
+
+    _gemini_429(monkeypatch, groq_reply="no json here")
+    meta = llm.get_metadata("q", ["a"])
+    assert (meta.title, meta.source, meta.failure) == (None, "groq_fallback", "http_429;groq_no_json")
+
+    _gemini_429(monkeypatch, groq_reply="{not: json}")
+    assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"

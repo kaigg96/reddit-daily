@@ -165,6 +165,13 @@ def check_metadata():
              "unreachable). The prompt was never exercised, so this is not a "
              "verdict either way; the next scheduled run re-checks it.\n")
         return None
+    if meta.source == llm.GROQ_SOURCE:
+        # Groq's answer says nothing about the route under test, and a pass
+        # here would send gate 2's five requests to a Gemini that just failed.
+        note(f"- ⚠️ INCONCLUSIVE — Gemini did not answer ({meta.failure}); "
+             "Groq, its fallback, did, which does not test this release's "
+             "route. The next scheduled run re-checks it.\n")
+        return None
 
     ok = True
     for field, value in (("title", meta.title), ("keywords", meta.keywords),
