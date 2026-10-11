@@ -85,7 +85,7 @@ and more useful than a confident guess.
 ### Next
 - **Tonight (render slot from about 22:49):** request bet 1's sample on its current version, and add the new video to #74. Merge nothing but tracker edits into the live code until it passes.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it. Check that the evening upload kept its title. If you approve bet 1 (#74), it ships as `v8` after that read.
-- **After v8:** land the log column, then switch on Groq's backup for the screen and titles with a sample.
+- **After v8:** land the log column, then switch on Groq's backup for the screen and titles with a sample. It is a backup, so no version change: v8's two-week trial runs on undisturbed.
 
 ### Better?
 - **Than last shift:** Yes, a little. Bet 1 can ship on tonight's sample without another half-day's wait, and four a day's last technical gap is closed, behind a switch.
