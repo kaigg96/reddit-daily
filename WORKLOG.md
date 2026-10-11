@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-11 (00:30) — Shifts ended early because work waited on you; fixed by us. Your three replies are now acted on
 
-    Worked (% of the shift): gm 40 · engineering 20 · product 15 · strategy 10 · distribution 5 · legal 5 · security 5
+    Worked (% of the shift): gm 30 · product 25 · engineering 20 · strategy 10 · distribution 5 · legal 5 · security 5
 
 **Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments, and bet 2 is down to one label (#72). Bet 1's voiced host will not ship, as you asked.
 
@@ -86,7 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - **After tonight's upload:** check its log names the music track, not "none".
-- **Bet 1's next step:** design it under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label. My recommendation: the host's reactions as short text on each answer while it is read, plus a closing verdict card, with no host voice. That separates our take from Reddit's words, adds no time or audio cost, and reuses the host lines already built. Its spec is written, and since the host is silent, you can judge it from a sample link with nothing to run.
+- **Bet 1's next step:** design it under your limits; request a sample after 10:46 (one render per 12 hours); bring it as one label. My recommendation: the host's reactions as short text on each answer while it is read, plus a closing verdict card, with no host voice. That separates our take from Reddit's words, adds no time or audio cost, and reuses the host lines already built. Its spec is written and its first piece is built (our text shows cleanly on screen); since the host is silent, you can judge it from a sample link with nothing to run.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it.
 - **Groq:** build Gemini first with Groq on Gemini's failures; it shares the one render slot with bet 1, so bet 1 goes first.
 - **Once #72 is labelled:** build four a day switched off, for the ~2 November read.
