@@ -200,9 +200,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
   falls to the keyword backstop. So the likely build is Gemini first, Groq on
   a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
-  log's source naming the route that answered. In `screen.screen` it goes
-  between the main model and `FALLBACK_MODEL`, whose guard skips any
-  non-Gemini route today; titles need the same in `llm.get_metadata`. Up to four screens run back to
+  log's source naming the route that answered. **Merged off 2026-10-11** for
+  the screen only, after both Gemini models and before the backstop
+  (`config.GROQ_FALLBACK`, `screen_source=groq_fallback`); titles would need
+  the same in `llm.get_metadata`. Before switching on (review's gaps): a
+  failed Groq try shows only on the console, not in `screen_failure`, and its
+  no-JSON label reads `fallback_no_json`, not naming Groq. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
   backstop (`screen_failure=http_429`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
