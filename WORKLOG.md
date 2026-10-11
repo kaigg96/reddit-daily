@@ -86,7 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - **After tonight's upload:** check its log names the music track, not "none".
-- **Bet 1's next step:** fix the fresh review's findings on the text-only host, then request its sample after 10:46 (one render per 12 hours) and bring it to you as one label. Since the host is silent, you can judge it from the sample link, with nothing to run.
+- **Bet 1's next step:** the text-only host is built, reviewed (its findings fixed) and switched on in its release. Tomorrow's 08:17 release check reads its lines on the AI that uploads use. Then request its sample after 10:46 (one render per 12 hours) and bring it to you as one label. Since the host is silent, you can judge it from the sample link, with nothing to run.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it.
 - **Groq:** build Gemini first with Groq on Gemini's failures; it shares the one render slot with bet 1, so bet 1 goes first.
 - **Four a day (approved):** build it switched off, for the subreddit read about 2 November.
