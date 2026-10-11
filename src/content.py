@@ -127,6 +127,10 @@ def run_slot(now, schedule=""):
     clock's split: before noon is slot 0, after it slot 2."""
     slot = config.SLOT_CRONS.get(schedule)
     if slot is None:
+        if schedule and schedule != config.LEGACY_CRON:
+            # A line the code does not know must not fall to the clock: an
+            # 06:23 run landing near noon would read as slot 2 and upload.
+            raise ValueError(f"cron line {schedule!r} is not in config.SLOT_CRONS")
         return now.date(), (2 if now.hour >= 12 else 0)
     day = now.date()
     if now.hour < 6 * slot:

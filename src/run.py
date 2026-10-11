@@ -59,7 +59,10 @@ def main():
     # PRD §0 #4: the workflow passes the cron line that started this run.
     now = datetime.datetime.now(datetime.timezone.utc)
     schedule = os.environ.get("RUN_SCHEDULE", "")
-    day, slot = content.run_slot(now, schedule)
+    try:
+        day, slot = content.run_slot(now, schedule)
+    except ValueError as e:
+        sys.exit(f"Not uploading: {e}")   # fails the run, so it is seen
     if slot not in content.live_slots():
         print(f"Slot {slot} is off at {config.UPLOADS_PER_DAY} uploads a day; nothing to do")
         return

@@ -364,3 +364,24 @@ def test_an_off_slot_exits_before_any_call(monkeypatch):
     monkeypatch.setattr(run, "check_channel_name",
                         lambda: (_ for _ in ()).throw(AssertionError("ran past the slot check")))
     assert run.main() is None
+
+
+def test_an_unknown_cron_line_fails_the_run_rather_than_upload(monkeypatch):
+    from src import run
+    with pytest.raises(ValueError):
+        content.run_slot(_at(5, 12), " 23 6 * * *")
+    monkeypatch.setenv("RUN_SCHEDULE", "25 6 * * *")
+    monkeypatch.setattr(run, "check_channel_name",
+                        lambda: (_ for _ in ()).throw(AssertionError("ran past the slot check")))
+    with pytest.raises(SystemExit):
+        run.main()
+
+
+def test_every_cron_line_in_the_video_workflow_is_one_the_code_knows():
+    import os
+    import re
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        ".github", "workflows", "run-reddit-video.yml")
+    lines = re.findall(r"^\s*- cron: '([^']*)'", open(path).read(), re.M)
+    assert lines
+    assert lines == [config.LEGACY_CRON] or sorted(lines) == sorted(config.SLOT_CRONS)

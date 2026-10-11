@@ -76,6 +76,7 @@ SUBREDDITS = ["AskReddit", "NoStupidQuestions"]
 # lines in run-reddit-video.yml.
 UPLOADS_PER_DAY = 2
 SLOT_CRONS = {"23 0 * * *": 0, "23 6 * * *": 1, "23 12 * * *": 2, "23 18 * * *": 3}
+LEGACY_CRON = "23 0,12 * * *"  # the two-a-day line before the split: slots by the clock
 CANDIDATE_LIMIT = 10          # top posts fetched per run
 COMMENT_POOL = 8              # screened comments per candidate; NUM_COMMENTS survive
 MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-tier quota
