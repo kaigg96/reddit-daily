@@ -498,7 +498,9 @@ def test_off_or_keyless_the_backstop_is_unchanged(monkeypatch):
     assert screen.screen("an ordinary question", ["a", "b", "c"]).source == "backstop"
     monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
     monkeypatch.delenv("GROQ_API_KEY")
-    assert screen.screen("an ordinary question", ["a", "b", "c"]).source == "backstop"
+    r = screen.screen("an ordinary question", ["a", "b", "c"])
+    # No try was made, so the label names no Groq miss.
+    assert r.source == "backstop" and r.failure == "http_503;fallback_http_429"
 
 
 def test_a_failing_groq_still_reaches_the_backstop(monkeypatch):
