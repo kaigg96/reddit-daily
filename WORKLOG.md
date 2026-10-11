@@ -65,7 +65,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): gm 30 · product 25 · engineering 20 · strategy 10 · distribution 5 · legal 5 · security 5
 
-**Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments, and bet 2 is down to one label (#72). Bet 1's voiced host will not ship, as you asked.
+**Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments. Asked as one label, bet 2 was approved in 11 minutes (#72). Bet 1's voiced host will not ship, as you asked; its text-only successor is built.
 
 ### Toward revenue
 - **Not yet, but the queue is honest again.** Your verdict on the host settles the step queued for Monday. Bet 1 (make the format ours) still stands, and its next step is built: one voice, no extra audio spend. Facebook, like YouTube and TikTok, pays nothing for narrated readings, so bet 1 comes first whichever platform earns.
@@ -73,23 +73,23 @@ and more useful than a confident guess.
 ### Done
 - **General management (a fix, #67):** found the cause in the record. Every ask you could answer with a label closed, most within a day (12 of 12). Asks needing a session, commands, a login or a listen waited for days, and shifts stopped once all their work waited on those. Worse, the list a shift reads at the start showed only labels and closes, so it missed your comments. The alarm no longer emails you. Each shift now starts with the rows waiting on you and a rule: do every part a shift can, so what reaches you is one label. Your comments now reach the shift. Both changes had fresh reviews, and every fault they found is fixed.
 - **Product:** acted on your three replies. The voiced host is recorded as rejected. Bet 1's next step is built behind a switch: the host's setup and reactions as text on screen while the answers are read, and the narrator speaking the vote as today's closing line. One voice, no host audio. A free local sample rendered cleanly, with our own words at 54% of what the viewer gets. Groq: tonight's checks on it passed for titles, but its safety screen skipped one test post Gemini passes, so we are not switching yet. Gemini was overloaded on 3 of the last 5 uploads, so Gemini first, with Groq when it fails, looks like the right shape. Reddit: recorded that we ask before applying to any programme, not now.
-- **Strategy:** bet 2 is one label (#72), including four a day's narration spend. The planning issue (#55) now says no session is needed.
+- **Strategy:** bet 2 went to you as one label (#72), including four a day's narration spend, and you approved it 11 minutes later. With bets 1 and 2 set by label, the quarter's planning is recorded as held, with no session, and #55 is closed. Bet 3's pilot comes back as its own label once bet 1's next step keeps.
 - **Distribution:** Meta's own pages answered what the plan said needed your logged-in read. Facebook's programme is invite-only, paid per 1,000 qualified views. It demonetises accounts that mostly narrate what is on screen.
-- **Reliability:** two upload runs can overlap and both pick one post; the fix is on #72. The daily release check was about to spend up to 8 of production's 20 daily AI requests on the rejected release; it now checks the live code.
+- **Reliability:** two upload runs could overlap and both pick one post. The fix came with #72 and is live. The daily release check was about to spend up to 8 of production's 20 daily AI requests on the rejected release; it now checks the live code.
 - **Legal:** you sealed the music; closed #66. Next upload is the first on the sealed file.
 - **General management:** closed 11 old weekly digests so your open issues are only the ones needing you. Code-health passes no longer wait on you (the company's rules give them to Engineering). Three rows that said they waited on you did not; corrected.
 - **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
 - Fixing against improving: mostly fixing. The improvement is how work reaches you.
 
 ### Blocked
-- **For you, each one action:** label #72 (bet 2); re-label #53 (comments); the account checks (#59). #50 and #65 need your hands: Claude Code protects the skills folder by design, and only a looser mode for the whole shift would open it, which is not worth it.
+- **For you, each one action:** re-label #53 (comments); the account checks (#59). #50 and #65 need your hands: Claude Code protects the skills folder by design, and only a looser mode for the whole shift would open it, which is not worth it.
 
 ### Next
 - **After tonight's upload:** check its log names the music track, not "none".
 - **Bet 1's next step:** fix the fresh review's findings on the text-only host, then request its sample after 10:46 (one render per 12 hours) and bring it to you as one label. Since the host is silent, you can judge it from the sample link, with nothing to run.
 - **12 October:** read `v7` under its rule, with the buried-upload check beside it.
 - **Groq:** build Gemini first with Groq on Gemini's failures; it shares the one render slot with bet 1, so bet 1 goes first.
-- **Once #72 is labelled:** build four a day switched off, for the ~2 November read.
+- **Four a day (approved):** build it switched off, for the subreddit read about 2 November.
 
 ### Better?
 - **Than last shift:** Yes. Three of your answers had sat unread, and shifts were still waiting on you for them. Now they are acted on, and the cause is fixed in code.
