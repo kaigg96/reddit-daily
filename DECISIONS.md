@@ -44,6 +44,11 @@ to one label before generating (bet 2 became #72 the same night).
 (12 of 12 since 09-25; #70 the same day; #72 in 11 minutes); (2) the hands-only remainder (keys,
 logins, a listen) is small. **Revisit** if a label-only ask waits over three
 days, or shifts still run short with no row waiting on the owner.
+**Re-reviewed 2026-10-11 — trigger fired.** #53's re-label waited six days;
+it is now withdrawn (it said the repo was private), so (1) is strained, not
+yet false. (2) holds only loosely: #50, #65 and #59 need hands, the oldest six
+days, and #50 is the root, since applying it makes #65 and any later skill
+change label-only. So the handover leads with #50's four commands.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
