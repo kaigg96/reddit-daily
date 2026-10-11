@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - Fixing against improving: about half each. Improving: bet 1's sample and its pre-commitment, the log column made ready. Fixing: the comment capitals, the comments approval, the tracker.
 
 ### Blocked
-- **For you, in order of what each unblocks:** #50 (four commands, still current); #74 (bet 1, one label); the comments replacement filed tonight (one label, then close #53 unapplied); #65 (one label once #50 is in); the account checks (#59).
+- **For you, in order of what each unblocks:** #50 (four commands, still current); #74 (bet 1, one label); #75, the comments replacement (one label, then close #53 unapplied); #65 (one label once #50 is in); the account checks (#59).
 
 ### Next
 - **Morning shift (about 07:00):** the weekly review is due. Monday's snapshot lands about 11:00 to 13:00, so the `v7` read waits for the afternoon shift.
