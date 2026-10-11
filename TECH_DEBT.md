@@ -193,17 +193,21 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `--min-views` nits its review left: without `--at-age` the buried line
   counts uploads too new to be reported; `--replays` ignores the flag.
 
-- **The Groq route is merged switched off; what remains before switching it
-  on (2026-10-08, #68, PRD §0 #13).** `config.AI_PROVIDER == "groq"` sends
-  every AI call to Groq; with no key it falls back to Gemini, and the log's
-  sources name the route that answered. Left: the workflow patch (#69, the
-  owner's label); up to four screens run back to back, so at
-  8K tokens a minute a second 429 inside one retry falls to the backstop
-  (watch `screen_failure=http_429`). **Switch on by changing the default in
-  `src/config.py`, never a workflow or repo variable:** the release check
-  re-runs only when code changes, so a variable flip would ride on Gemini's
-  PASS (its verdict now names the route it tested). Some log lines still say
-  "Gemini" whichever route answered (`screen.py`, `validate_release.py`).
+- **The Groq route is merged switched off; key and patch are in (#68, #69,
+  2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
+  **First replay on Groq (2026-10-11, run with no Gemini key, so nothing
+  touched Gemini's quota):** titles pass; the screen went 6/7, skipping as
+  `named_wrongdoing` the Epstein-files question that `_PROMPT` itself lists as
+  must-pass. One run, but Groq's model follows the prompt's calibration less
+  well. The owner leaves Gemini's role to us (#68) and suspects it titles
+  better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
+  falls to the keyword backstop. So the likely build is Gemini first, Groq on
+  a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
+  log's source naming the route that answered. Up to four screens run back to
+  back: at 8K tokens a minute a second 429 inside one retry falls to the
+  backstop (`screen_failure=http_429`). **Switch on in `src/config.py`, never a
+  workflow or repo variable:** the release check re-runs only when code
+  changes. Some log lines still say "Gemini" whichever route answered.
 
 - **Two video runs can overlap (found 2026-10-08).** `run-reddit-video.yml`
   has no `concurrency:` group, so a manual run during a late scheduled one
