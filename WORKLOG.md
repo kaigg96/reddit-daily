@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-11 (16:39) — Bet 1's branch is up to date, so tonight's sample can be its last; titles get a backup AI, switched off
+
+    Worked (% of the shift): product 35 · reliability 35 · data 10 · gm 10 · engineering 5 · security 5
+
+**Summary:** Bet 1 (making the format ours) was behind the live code. That would have voided tonight's sample and cost at least another half-day, so it is now up to date, reviewed, and plays cleanly. Titles now have a backup AI for when Gemini fails, built switched off; it is also what lets four uploads a day fit Gemini's free allowance.
+
+### Toward revenue
+- **Yes, indirectly, on both bets.** Bet 1 is the step YouTube's payment rules need. A sample must name the exact version that ships, and the live code's last day of changes were missing from bet 1. Folding them in after tonight's sample would have voided it and pushed v8 back by at least 12 hours. That is done, so tonight's sample can be the final one. Bet 2 (four a day) had one open problem: on a bad day it would overspend Gemini's 20 free requests. Groq now covers both AI calls when Gemini runs out, so that problem goes away once the switch is on.
+
+### Done
+- **Product (bet 1):** merged the live code into bet 1's branch three times, ending with this shift's own changes, so it carries everything now live. Two small clashes, both resolved; two fresh reviews found no faults; all tests pass; a free local render plays (19.9 seconds, the host's lines capitalised on their dark band). Also fixed in advance how bet 1 will be judged: it skips medical threads, but those are only 1 to 2% of uploads, too few to move its result, so no allowance is made for them.
+- **Reliability (a bet on reliability, built off):** when Gemini fails, the title request now gets one try on Groq before the upload falls back to the plain Reddit question, as the safety screen already does. One switch turns on both. Titles were lost on 2 of the last 30 uploads. A review found the daily release check would have judged Groq's answer as if it were Gemini's; that is fixed. Merged, switched off. A second piece is built and waiting: the upload log will name which AI wrote each title, so Groq's titles cannot blur the title experiments. It lands after bet 1, before the switch.
+- **Data:** ran the safety screen's test cases on Groq a second time (free, no Gemini use). Same result as this morning: 6 of 7, and the same must-pass question skipped. So Groq is consistently stricter. That is fine as a backup, where a wrong skip costs one candidate post, but not yet as the main screen. Also checked whether Gemini's failures cluster by time of day, which would matter for the new slots at four a day: 4 failures in 42 runs, too few to say.
+- **A mistake, and its fix:** I ran the screen's test script with a request for its help text. It ignores arguments, so it ran the whole test instead: about 5 Gemini requests from production's allowance, an hour before the evening upload. My estimate for today is about 13 of 20 requests used, leaving room for the evening upload's usual 2 and its worst case of 5. The script now refuses any argument before spending anything, with a test.
+- **Security:** standing check clean: no secrets in the project, no unapproved workflow change, money controls in place, narration spend $0.33 this month (forecast $0.92 of $3).
+- **General management:** process health is fine. Awkward this shift: every merge into the live code has to be folded into bet 1's branch before its sample, and that happened three times. Until the sample passes, the live code should take nothing but tracker edits.
+- Fixing against improving: mostly improving (both bets). Two fixes: the release check's blind spot, and the test script's guard.
+
+### Blocked
+- **For you, each one label:** bet 1's sample (#74); four a day's schedule (#73). Still open: re-label #53 (comments); the account checks (#59).
+
+### Next
+- **Tonight (render slot from about 22:49):** request bet 1's sample on its current version, and add the new video to #74. Merge nothing but tracker edits into the live code until it passes.
+- **12 October:** read `v7` under its rule, with the buried-upload check beside it. Check that the evening upload kept its title. If you approve bet 1 (#74), it ships as `v8` after that read.
+- **After v8:** land the log column, then switch on Groq's backup for the screen and titles with a sample.
+
+### Better?
+- **Than last shift:** Yes, a little. Bet 1 can ship on tonight's sample without another half-day's wait, and four a day's last technical gap is closed, behind a switch.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds); both bets that would change it wait on you and on data.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-11 (10:55) — Bet 1's host is easier to read; its sample is with you as one label; four a day is built, switched off
 
     Worked (% of the shift): product 45 · engineering 20 · reliability 10 · data 10 · gm 10 · security 5
@@ -91,39 +122,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. Bet 1's next step reached you as one label with a video to watch, and bet 2 went from approved to built.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds), but both bets meant to change what we ship and how far it reaches now wait only on you and on data.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-11 (00:30) — Shifts ended early because work waited on you; fixed by us. Your three replies are now acted on
-
-    Worked (% of the shift): gm 25 · product 30 · engineering 20 · strategy 10 · distribution 5 · legal 5 · security 5
-
-**Summary:** You told us on #67 to find why shifts end early and fix it ourselves. We did. Work waited on you, and shifts missed replies you had already given: three of your comments (the host, the Groq key, Reddit) sat unread for up to a day. Shifts now see your comments. Asked as one label, bet 2 was approved in 11 minutes (#72). Bet 1's voiced host will not ship, as you asked; its text-only successor is built.
-
-### Toward revenue
-- **Not yet, but the queue is honest again.** Your verdict on the host settles the step queued for Monday. Bet 1 (make the format ours) still stands, and its next step is built: one voice, no extra audio spend. Facebook, like YouTube and TikTok, pays nothing for narrated readings, so bet 1 comes first whichever platform earns.
-
-### Done
-- **General management (a fix, #67):** found the cause in the record. Every ask you could answer with a label closed, most within a day (12 of 12). Asks needing a session, commands, a login or a listen waited for days, and shifts stopped once all their work waited on those. Worse, the list a shift reads at the start showed only labels and closes, so it missed your comments. The alarm no longer emails you. Each shift now starts with the rows waiting on you and a rule: do every part a shift can, so what reaches you is one label. Your comments now reach the shift. Both changes had fresh reviews, and every fault they found is fixed.
-- **Product:** acted on your three replies. The voiced host is recorded as rejected. Bet 1's next step is built behind a switch: the host's setup and reactions as text on screen while the answers are read, and the narrator speaking the vote as today's closing line. One voice, no host audio. A free local sample rendered cleanly, with our own words at 54% of what the viewer gets. Groq: tonight's checks on it passed for titles, but its safety screen skipped one test post Gemini passes, so we are not switching yet. Gemini was overloaded on 3 of the last 5 uploads, so Gemini first, with Groq when it fails, is the shape: that fallback for the safety screen is built, reviewed and merged switched off. Reddit: recorded that we ask before applying to any programme, not now.
-- **Strategy:** bet 2 went to you as one label (#72), including four a day's narration spend, and you approved it 11 minutes later. With bets 1 and 2 set by label, the quarter's planning is recorded as held, with no session, and #55 is closed. Bet 3's pilot comes back as its own label once bet 1's next step keeps.
-- **Distribution:** Meta's own pages answered what the plan said needed your logged-in read. Facebook's programme is invite-only, paid per 1,000 qualified views. It demonetises accounts that mostly narrate what is on screen.
-- **Reliability:** two upload runs could overlap and both pick one post. The fix came with #72 and is live. The daily release check was about to spend up to 8 of production's 20 daily AI requests on the rejected release; it now checks the live code.
-- **Legal:** you sealed the music; closed #66. Next upload is the first on the sealed file.
-- **General management:** closed 11 old weekly digests so your open issues are only the ones needing you. Code-health passes no longer wait on you (the company's rules give them to Engineering). Three rows that said they waited on you did not; corrected.
-- **Security:** standing check clean. Narration spend $0.29 this month (forecast $0.90 of $3), money controls in place, no secrets in the project, no workflow change.
-- Fixing against improving: mostly fixing. The improvement is how work reaches you.
-
-### Blocked
-- **For you, each one action:** re-label #53 (comments); the account checks (#59). #50 and #65 need your hands: Claude Code protects the skills folder by design, and only a looser mode for the whole shift would open it, which is not worth it.
-
-### Next
-- **After tonight's upload:** check its log names the music track, not "none".
-- **Bet 1's next step:** the text-only host is built, reviewed (its findings fixed) and switched on in its release. Tomorrow's 08:17 release check reads its lines on the AI that uploads use. Then request its sample after 10:46 (one render per 12 hours) and bring it to you as one label. Since the host is silent, you can judge it from the sample link, with nothing to run.
-- **12 October:** read `v7` under its rule, with the buried-upload check beside it.
-- **Groq:** the safety screen's Groq fallback is merged, switched off; it would have checked the two uploads this month that fell to the keyword filter. Close its two small logging gaps, then switch it on with a sample, after bet 1's (one render slot).
-- **Four a day (approved):** build it switched off, for the subreddit read about 2 November.
-
-### Better?
-- **Than last shift:** Yes. Three of your answers had sat unread, and shifts were still waiting on you for them. Now they are acted on, and the cause is fixed in code.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat (12.0 seconds), and the first originality step is back to a first sample. But the queue now holds work that changes what we ship.
 - **Than ~100 shifts ago:** Too early to say.
