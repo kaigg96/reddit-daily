@@ -270,11 +270,36 @@ _COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. I
 # push the video toward the 60s limit and Polly's per-run budget, either of
 # which would cost the upload, so it falls back instead.
 _HOST_CAPS = {"setup": 15, "reaction": 12, "cta": 15}
+# Shown as text (config.HOST_TEXT, #71), a line must read in about two
+# seconds and fit two lines on screen; the vote is still spoken.
+_TEXT_CAPS = {"setup": 10, "reaction": 10, "cta": 15}
 _CAP_SLACK = 1.5
+
+# What changes in the ask when the host is read, not heard (#71). Each pair
+# must match the voiced ask exactly; a test holds them to it.
+_TEXT_EDITS = [
+    ("Spoken lines:",
+     "Lines shown on screen as text, never spoken (the narrator speaks only the vote):"),
+    ('"setup": AT MOST 15 words, after the question and before the first answer:',
+     '"setup": AT MOST 10 words, shown under the question:'),
+    ("lines of AT MOST 12 words each, in order; each is\n     heard straight after its answer and reacts to that answer only.",
+     "lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only. Never\n     repeat the answer's own words: they are already on screen."),
+    ("Every line must make sense heard once.", "Every line must make sense read once, in two seconds."),
+]
+
+
+def _commentary_ask(n):
+    """The host's instructions, for a voiced host or a text-only one."""
+    ask = _COMMENTARY_ASK
+    if config.HOST_TEXT:
+        for old, new in _TEXT_EDITS:
+            ask = ask.replace(old, new)
+    return ask.format(n=n)
 
 
 def _within_cap(line, kind):
-    return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
+    caps = _TEXT_CAPS if config.HOST_TEXT else _HOST_CAPS
+    return len(line.split()) <= caps[kind] * _CAP_SLACK
 
 
 def _clean_commentary(data, n):
@@ -361,7 +386,7 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-{_COMMENTARY_ASK.format(n=len(comments)) if commentary
+{_commentary_ask(len(comments)) if commentary
  else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:

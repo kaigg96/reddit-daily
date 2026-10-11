@@ -62,3 +62,25 @@ def test_own_words_count_the_notes_and_the_vote():
             video.Segment("comment", "c" * 20, "", [], note="d" * 10),
             video.Segment("vote", "e" * 20, "", [])]
     assert run.own_words_share(segs) == "0.500"
+
+
+def test_every_text_edit_matches_the_voiced_ask():
+    # A reworded voiced ask would silently leave a text host told to "speak".
+    for old, _ in llm._TEXT_EDITS:
+        assert old in llm._COMMENTARY_ASK, old
+
+
+def test_a_text_host_is_told_it_is_read_and_must_not_quote(text_host):
+    ask = llm._commentary_ask(2)
+    assert "never spoken" in ask and "Never\n     repeat the answer's own words" in ask
+    assert "heard" not in ask
+
+
+def test_a_voiced_host_keeps_its_ask(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", False)
+    assert llm._commentary_ask(2) == llm._COMMENTARY_ASK.format(n=2)
+
+
+def test_a_text_reaction_has_a_tighter_cap(text_host):
+    assert not llm._within_cap(" ".join(["word"] * 16), "reaction")
+    assert llm._within_cap(" ".join(["word"] * 15), "reaction")
