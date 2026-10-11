@@ -11,7 +11,15 @@ on:
     # deliberately not chased (PRD R4.5) -- cadence is unaffected at exactly
     # 2/day, and time-of-day is not a growth lever for Shorts. The weekly
     # digest reports median drift so it stays visible.
-    - cron: '23 0,12 * * *'
+    #
+    # PRD §0 #4 (four a day): one line per slot, because the run reads its
+    # slot from the line that started it (RUN_SCHEDULE; src/config.py
+    # SLOT_CRONS). The 06:23 and 18:23 runs exit at once while
+    # UPLOADS_PER_DAY is 2.
+    - cron: '23 0 * * *'
+    - cron: '23 6 * * *'
+    - cron: '23 12 * * *'
+    - cron: '23 18 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -76,6 +84,7 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '' }}
+        RUN_SCHEDULE: ${{ github.event.schedule }}
       run: python -m src.run
 
     - name: Attach sample video (dry runs only)
