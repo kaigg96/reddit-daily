@@ -108,6 +108,12 @@ HOUSE_VOTE_RULE = None
 COMMENTARY = True
 COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
 HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
+# The text-only host's notes (PRD R3.2, after #71): below the word captions
+# (y=700) and above the watermark (y=1500), inside the Shorts safe zone.
+NOTE_Y = 1150
+NOTE_FONT_SIZE = 64
+NOTE_WIDTH = 900
+NOTE_LEAD = 0.35  # share of the segment before its note appears
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech

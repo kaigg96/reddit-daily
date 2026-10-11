@@ -25,6 +25,9 @@ class Segment:
     text: str
     audio_path: str
     marks: list  # from tts.synthesize_with_marks
+    # Bet 1's text-only host (PRD R3.2, after #71): our line about this
+    # segment, shown on screen and never spoken.
+    note: str = ""
 
 
 @dataclass
@@ -98,6 +101,14 @@ def caption_clips(groups, seg_start, font_size, y, color="white"):
         )
         clips.append(clip)
     return clips
+
+
+def note_window(start, display_dur):
+    """(start, duration) of a segment's on-screen note. It comes in partway
+    through, once the viewer has the segment's point, and stays to the next
+    segment, so the narrator's words and ours are never on screen at once
+    in the same place."""
+    return start + display_dur * config.NOTE_LEAD, display_dur * (1 - config.NOTE_LEAD) + config.INTER_SEGMENT_GAP
 
 
 def overlay_text(text, start, duration, font_size, y, color="white", width=config.CAPTION_WIDTH):
@@ -197,6 +208,11 @@ def assemble(question, segments, rng):
                                       color=config.HOST_CAPTION_COLOR)
         else:  # outro
             overlays += caption_clips(groups, t, font_size=100, y=700)
+        if seg.note:
+            start, span = note_window(t, display_dur)
+            overlays.append(overlay_text(seg.note, start, span, config.NOTE_FONT_SIZE,
+                                         config.NOTE_Y, color=config.HOST_CAPTION_COLOR,
+                                         width=config.NOTE_WIDTH))
 
         t += display_dur + config.INTER_SEGMENT_GAP
 
