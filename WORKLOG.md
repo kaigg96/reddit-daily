@@ -61,31 +61,33 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-12 (11:45) — Bet 1 is ready to merge the moment you label it; the v7 verdict waits on Monday's snapshot, which had not arrived
+## 2026-10-12 (11:45) — Bet 1 is ready to merge the moment you label it; Groq now passes our safety tests; the v7 verdict waits on Monday's statistics
 
-    Worked (% of the shift): product 30 · data 25 · gm 25 · reliability 10 · security 10
+    Worked (% of the shift): product 25 · legal 20 · data 20 · gm 15 · reliability 15 · security 5
 
-**Summary:** Bet 1 and its two follow-ups still merge cleanly onto today's live code with every test passing, and how its effect on the opening seconds will be judged is now fixed before any upload. Monday's statistics had not landed by the end of the shift, so the v7 verdict and four other reads pass to the afternoon shift.
+**Summary:** Bet 1 is cleared to merge the moment you label it, and how its effect on the opening seconds will be judged is fixed before any upload. Groq now passes every safety test, the step that lets it replace Gemini at no cost; Monday's statistics had not landed, so the v7 verdict passes to the afternoon shift.
 
 ### Toward revenue
 - **Indirectly, on bet 1**, the only thing on the path to YouTube's payment rules. Nothing technical stands between it and shipping. Your label on #74 is the one remaining step after this afternoon's v7 read.
+- **Indirectly, on the Reddit-terms risk:** Groq can now pass our safety tests, the condition for moving every AI call to it at no cost. That is the solution you asked for when you declined Gemini's paid tier (#62).
 
 ### Done
 - **Product (bet 1):** merged the live code, bet 1 and both follow-ups (the log column and the vote's capitals) together in a scratch copy: no clashes, all 523 tests pass. The afternoon shift can merge them in order without re-checking. Also found that bet 1's first host line appears about one to two seconds in. That is exactly the window YouTube's "engaged view" count measures, and engaged views are what the payment bar counts. So before any upload I fixed how it will be read: bet 1 against v7 on the share of plays that get past the opening, at its own read, as a diagnostic that can never trigger a revert.
 - **Data:** waited on Monday's statistics, which carry the v7 verdict and four other reads. GitHub starts the job 5 to 7 hours after its 06:00 slot, so it usually arrives between 11:00 and 13:00. It had not started when the shift ended. The rule for v7 is quoted and its commands are ready.
-- **General management:** the ready queue was below its floor, so I generated eight candidates from the flat watch-time trend, the risk list and the decision rules still waiting on data, and had them ranked separately, forward and reversed. Three ranked top both ways: the v7 read, the bet 1 opening check (done), and which uploads gain subscribers. I dropped the last one. With 21 subscribers across the whole channel any answer would be too thin to use, and subscribers are not the binding half of the payment bar (views are ~800 times short, subscribers ~48). Also dropped: testing whether views scale with uploads per week (only the pipeline's first two weeks had fewer uploads, so the comparison is confounded), placing the four-a-day slots by hour (GitHub's delays pick the hour, not us), the name checks (they wait on bet 1 settling the show), drafting bet 1's next step (premature before it ships), and a TikTok question to you (bet 3 waits on bet 1). I also looked at tuning Groq's screen so it could replace Gemini entirely. It would only ship after bet 1's two-week trial, so it is inventory, not today's work. Tracker checked true and within its limits; process health fine.
+- **General management:** the ready queue was below its floor, so I generated eight candidates from the flat watch-time trend, the risk list and the decision rules still waiting on data, and had them ranked separately, forward and reversed. Three ranked top both ways: the v7 read, the bet 1 opening check (done), and which uploads gain subscribers. I dropped the last one. With 21 subscribers across the whole channel any answer would be too thin to use, and subscribers are not the binding half of the payment bar (views are ~800 times short, subscribers ~48). Also dropped: testing whether views scale with uploads per week (only the pipeline's first two weeks had fewer uploads, so the comparison is confounded), placing the four-a-day slots by hour (GitHub's delays pick the hour, not us), the name checks (they wait on bet 1 settling the show), drafting bet 1's next step (premature before it ships), and a TikTok question to you (bet 3 waits on bet 1). Tracker checked true and within its limits; process health fine.
+- **Legal and reliability (a bet, built off):** Groq, the free AI whose terms forbid training on what we send, had one blocker to replacing Gemini entirely: its safety screen wrongly skipped a question we know is fine, in every test. One added line for Groq alone (Gemini's instructions untouched) fixed it: all seven test cases passed, twice, and the question that must still be skipped was skipped every time. Free, and none of Gemini's allowance used. A fresh review found no faults and two gaps in the tests, both fixed. It waits on its own branch and lands with Groq's backup switch, after bet 1, so bet 1's tested version is exactly what ships. One risk recorded: the line could let through a genuinely risky rewording of a known-fine question, but only on Groq, which is off.
 - **Reliability:** both weekend uploads and this morning's landed, and the last-upload record is intact. The four-a-day schedule landed after Sunday's evening slot, so no extra run has fired yet; the first (today's 06:23 slot) is still queued at GitHub.
 - **Security:** standing check clean: no secrets in the project, no unapproved workflow change, money controls in place, narration $0.34 this month (forecast $0.97 of $3).
-- Fixing against improving: mostly improving (bet 1's merge readiness and its read). No fixes were needed.
+- Fixing against improving: mostly improving (bet 1's merge readiness and its read, Groq's screen). No live fixes were needed.
 
 ### Blocked
 - **For you, in order of what each unblocks:** #74 (bet 1, one label); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
 
 ### Next
-- **Afternoon shift:** once the statistics land, read v7 under its rule, then the engaged-share check (#8), the buried-upload check (R6), the voice and slot check (R3), and confirm the subscriber count arrived (C11). If #74 is labelled and v7 is kept, merge bet 1 as v8, then the log column, then the vote's capitals. Check that the first four-a-day off-slot run exited without uploading.
+- **Afternoon shift:** once the statistics land, read v7 under its rule, then the engaged-share check (#8), the buried-upload check (R6), the voice and slot check (R3), and confirm the subscriber count arrived (C11). If #74 is labelled and v7 is kept, merge bet 1 as v8, then the log column, then the vote's capitals. Check that the first four-a-day off-slot run exited without uploading. Then switch on Groq's backup with its sample, merging the Groq safety-screen line with it.
 
 ### Better?
-- **Than last shift:** Slightly. Bet 1's merge is pre-cleared and its opening effect will be read honestly, but nothing shipped and the v7 verdict slipped a shift.
+- **Than last shift:** Slightly. Bet 1's merge is pre-cleared and Groq's last test failure is fixed, but nothing shipped and the v7 verdict slipped a shift.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
