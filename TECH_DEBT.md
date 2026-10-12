@@ -237,7 +237,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   sent six Gemini-failure tests to Groq's rescue, so the tests' shared
   fixture now clears it. Reviewed: no bugs. Its two risks: the rescue never
   waited out Groq's per-minute cap, so on a Gemini-spent day the title and
-  `v8`'s host lines could fall back (fixed on the branch: one wait of ≤60s);
+  `v8`'s host lines could fall back (fixed on the branch: one printed wait of ≤60s, reviewed);
   and Groq had never written `v8`'s host lines (the release gates routed to
   Groq, no Gemini key, pass: setup, both reactions, screen 8/8). Left: the
   rescue fires on any Gemini exception, not only 429/5xx (harmless);
