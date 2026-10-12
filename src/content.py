@@ -77,6 +77,21 @@ def clean_text(text):
     return text
 
 
+def sentence_case(text):
+    """The host's vote, as posted in the channel's comment: the AI writes it
+    all lower case ("raising my hand for yes. which gets your vote?", the
+    2026-10-11 sample), so each sentence's first letter is capitalised when
+    its first word is plain lower case, keeping "r/AskReddit" and "iPhone".
+    The video's own lines are untouched: its captions are shown in capitals,
+    and the host's notes are capitalised in video.note_clips."""
+    def cap(m):
+        word = m.group(2).rstrip(",;:.!?").replace("'", "").replace("’", "")  # "i'd", "don’t"
+        plain = word.isalpha() and word.islower()
+        return m.group(1) + (m.group(2)[:1].upper() + m.group(2)[1:] if plain else m.group(2))
+    # The stop is looked behind, not matched, so "nope. which?" caps both.
+    return re.sub(r"(^|(?<=[.!?])\s+)(\S+)", cap, text)
+
+
 def _has_emoji(text):
     return any(emoji.is_emoji(ch) for ch in text)
 

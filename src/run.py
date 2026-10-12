@@ -286,7 +286,7 @@ def main():
         asker=post.author)
 
     # R3.3: engagement comment posted from the channel account (the CTA doubles as it)
-    comment_text = outro_text
+    comment_text = content.sentence_case(outro_text)
 
     if config.DRY_RUN:
         print("\n=== DRY RUN — nothing uploaded ===")
