@@ -120,6 +120,16 @@ Return ONLY compact JSON, no markdown fence:
 - topic: for performance tracking only — never a reason to flag.
 """
 
+# Groq follows the worked examples less well than Gemini: both its replays on
+# 2026-10-11 skipped the Epstein-files must-pass case, and 3 of 3 tries alone
+# on 10-12. With this line just before the question it passed 5 of 5 and the
+# replay went 7/7 (10-12). Groq only: Gemini's live record is on `_PROMPT`.
+_GROQ_CHECK = ("Check this first: if the QUESTION matches or closely paraphrases a FINE example "
+               "above, post_risk is \"none\". Those are this channel's measured outcomes and they "
+               "override general caution.\n\n")
+_GROQ_PROMPT = _PROMPT.replace("QUESTION: {question}", _GROQ_CHECK + "QUESTION: {question}")
+assert _GROQ_PROMPT != _PROMPT, "the Groq check lost its anchor in _PROMPT"
+
 # Same taxonomy as R4.3's historical analysis, so logged topics join cleanly
 # against analysis/topic_performance.md.
 TOPICS = (
@@ -260,10 +270,12 @@ def _parse(data, n_comments):
 def screen(question, comments):
     """Screen one candidate. Never raises — worst case returns a permissive result."""
     numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(comments))
-    prompt = _PROMPT.format(question=question, numbered=numbered, topics=", ".join(TOPICS))
+    fields = dict(question=question, numbered=numbered, topics=", ".join(TOPICS))
+    prompt = _PROMPT.format(**fields)
+    groq_prompt = _GROQ_PROMPT.format(**fields)
     source, prior = None, ""
     try:
-        raw = _generate_screened(prompt)
+        raw = _generate_screened(groq_prompt if llm.provider() == "groq" else prompt)
     except Exception as e:
         failure = llm._failure_kind(e)
         if not FALLBACK_MODEL or config.DRY_RUN or llm.provider() != "gemini":
@@ -273,7 +285,7 @@ def screen(question, comments):
             raw = _generate_screened(prompt, tries=1, model=FALLBACK_MODEL)
         except Exception as e2:
             failure = _after(failure, llm._failure_kind(e2))
-            raw, groq_failure = _groq_rescue(prompt)
+            raw, groq_failure = _groq_rescue(groq_prompt)
             if raw is None:
                 if groq_failure:
                     failure = _after(failure, groq_failure, "groq")
