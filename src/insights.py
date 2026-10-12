@@ -704,10 +704,35 @@ def render_within_length(read, threshold=1.0):
     return "\n".join(lines)
 
 
+# Plays below which an upload leaves the robustness read: its average is
+# YouTube's whole-second figure over a handful of viewers, often 0.0 on 1-6
+# plays (TECH_DEBT). The floor #3 and #10 read with (`--min-views 10`).
+RELEASE_MIN_VIEWS = 10
+
+
+def render_without_near_zero(read, min_views=RELEASE_MIN_VIEWS):
+    """The release's watch-seconds without uploads under `min_views` plays.
+
+    Robustness, never a trigger: `v7` read +20% on every upload and +9%
+    without them (2026-10-12), the retired clip's buried uploads sitting in
+    the before-cohort. The verdict stands as the owner set it (#18). Empty
+    when no upload on either side is under the floor."""
+    a = [v for v in read.release if v.views >= min_views]
+    b = [v for v in read.before if v.views >= min_views]
+    dropped_a, dropped_b = len(read.release) - len(a), len(read.before) - len(b)
+    if not dropped_a and not dropped_b:
+        return ""
+    label = read.comparisons[0].a.label if read.comparisons else "release"
+    head = (f"WITHOUT UPLOADS UNDER {min_views} VIEWS ({dropped_a} and {dropped_b} left out)"
+            " — robustness only, never a trigger")
+    return head + "\n" + compare(a, b, label, "before", read.load.anchor,
+                                 Metric.WATCH).render()
+
+
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
-# that committed to more (#1: `v7` commits to 20).
-RELEASE_MIN_UPLOADS = {"v7": 20}
+# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20).
+RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
 
 
 @dataclass
