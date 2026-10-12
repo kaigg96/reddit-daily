@@ -229,7 +229,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `v8` and before the switch (reviewed 10-11, no faults; its test reads
   `run.py`'s source, not the written row). It and `product/vote-comment-caps`
   (the vote posted as the comment, capitalised; reviewed, fixed) merge
-  cleanly over `v8` and `main` together, tests green. Its review's two logging gaps closed
+  cleanly over `v8` and `main` together, tests green (re-checked 10-12
+  over that morning's `main`: 523 pass). Its review's two logging gaps closed
   2026-10-11: a missed Groq try and its parse failures now end
   `screen_failure` as `;groq_<kind>`. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
