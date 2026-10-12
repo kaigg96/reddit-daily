@@ -489,6 +489,33 @@ def test_groq_answers_when_both_gemini_models_fail(monkeypatch):
     assert (r.verdict, r.source, r.failure) == ("skip_post", "groq_fallback", "http_503;fallback_http_429")
 
 
+PASS_REPLY = json.dumps({"post_risk": "none", "reason": "r",
+                         "unsafe_comments": [], "topic": "other"})
+
+
+@pytest.mark.parametrize("route", ["gemini", "groq"])
+def test_only_groq_is_sent_the_calibration_check(monkeypatch, route):
+    """Gemini's live record was measured on `_PROMPT` as it stands."""
+    sent = []
+    monkeypatch.setattr(screen.llm, "provider", lambda: route)
+    monkeypatch.setattr(screen.llm, "generate_retrying",
+                        lambda p, *a, **k: sent.append(p) or PASS_REPLY)
+    assert screen.screen("q", ["a", "b", "c"]).verdict == "pass"
+    assert (screen._GROQ_CHECK in sent[0]) == (route == "groq")
+    assert sent[0].index("QUESTION: q") > 0
+
+
+def test_the_groq_rescue_is_sent_the_calibration_check(monkeypatch):
+    _main_model_fails(monkeypatch, 503, fallback_code=429)
+    monkeypatch.setattr(screen.config, "GROQ_FALLBACK", True)
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    sent = []
+    monkeypatch.setattr(screen.llm, "_generate_groq",
+                        lambda p, reasoning=False: sent.append(p) or PASS_REPLY)
+    assert screen.screen("q", ["a", "b", "c"]).source == "groq_fallback"
+    assert screen._GROQ_CHECK + "QUESTION: q" in sent[0]
+
+
 def test_off_or_keyless_the_backstop_is_unchanged(monkeypatch):
     _main_model_fails(monkeypatch, 503, fallback_code=429)
     monkeypatch.setattr(screen.llm, "_generate_groq",
