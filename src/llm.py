@@ -136,6 +136,8 @@ def groq_rescue(prompt, reasoning=False):
             wait = None if last else _groq_minute_wait(e)
             if wait is None:
                 return None, _failure_kind(e)
+            # A wait that then succeeds leaves no failure label, so say so.
+            print(f"Groq rescue: waiting {wait:.0f}s on its per-minute cap, then one retry")
             time.sleep(wait)
 
 

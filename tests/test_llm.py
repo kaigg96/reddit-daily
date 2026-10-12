@@ -673,15 +673,7 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
     assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"
 
 
-def _groq_429(retry_after):
-    r = llm.requests.Response()
-    r.status_code = 429
-    if retry_after is not None:
-        r.headers["retry-after"] = retry_after
-    return llm.requests.HTTPError("429", response=r)
-
-
-def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch):
+def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
     """Review, 2026-10-12: with Gemini spent, the screens and the metadata
     call reach Groq in one minute, over its 8K-token cap."""
     _gemini_429(monkeypatch)
@@ -698,12 +690,24 @@ def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch):
     meta = llm.get_metadata("q", ["a"])
     assert slept == [7.0]
     assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+    # The success leaves no failure label, so the wait is printed instead.
+    assert "per-minute cap" in capsys.readouterr().out
 
 
-def test_the_rescue_never_waits_twice_or_on_a_daily_cap(monkeypatch):
-    for headers, sleeps, calls in ((["7", "7"], [7.0], 2), (["3600"], [], 1), ([None], [], 1)):
+def _groq_503(retry_after):
+    resp = FakeGroqResponse(status=503)
+    resp.headers = {"retry-after": retry_after}
+    return llm.requests.HTTPError("503", response=resp)
+
+
+def test_the_rescue_never_waits_twice_on_a_daily_cap_or_off_a_429(monkeypatch):
+    cases = ((["7", "7"], [7.0], 2, "groq_http_429"), (["3600"], [], 1, "groq_http_429"),
+             ([None], [], 1, "groq_http_429"), (["503:7"], [], 1, "groq_http_503"))
+    for headers, sleeps, calls, groq_failure in cases:
         _gemini_429(monkeypatch)
-        errors, slept, sent = [_groq_429(h) for h in headers], [], []
+        errors = [_groq_503(h[4:]) if h and h.startswith("503:") else _groq_429(h)
+                  for h in headers]
+        slept, sent = [], []
 
         def groq(prompt, reasoning=False):
             sent.append(prompt)
@@ -712,4 +716,4 @@ def test_the_rescue_never_waits_twice_or_on_a_daily_cap(monkeypatch):
         monkeypatch.setattr(llm.time, "sleep", slept.append)
         meta = llm.get_metadata("q", ["a"])
         assert (slept, len(sent)) == (sleeps, calls), headers
-        assert meta.failure == "http_429;groq_http_429", headers
+        assert meta.failure == f"http_429;{groq_failure}", headers
