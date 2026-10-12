@@ -914,14 +914,28 @@ def test_no_within_length_read_when_length_held(tmp_path, monkeypatch):
 def test_near_zero_uploads_get_a_robustness_read_beside_the_verdict(tmp_path, monkeypatch):
     """v7 (2026-10-12): +20% on every upload, +9% without those under 10
     views, because the before-cohort held a buried clip's 0-second readings."""
-    old = [("20.0", 10.0)] * 16 + [("20.0", 0.0, 3)] * 4
-    new = [("20.0", 11.0)] * 20
+    old = [("20.0", 11.0)] * 10 + [("20.0", 0.0, 3)] * 10 + [("20.0", 0.0, 0)] * 2
+    new = [("20.0", 11.0)] * 19 + [("20.0", 0.0, 4)]
     _write_series_with_length(tmp_path, monkeypatch,
                               [("old", 0, "v4", old), ("new", 60, "v5", new)])
-    out = insights.render_without_near_zero(insights.release_read("v5"))
-    assert "UNDER 10 VIEWS (0 and 4 left out)" in out
+    read = insights.release_read("v5")
+    assert read.comparisons[0].delta > 0.1          # the headline flattered by zeros
+    out = insights.render_without_near_zero(read, min_uploads=20)
+    # Zero-view uploads were never in the medians, so they are not counted.
+    assert "(1 release and 10 before left out)" in out
     assert "robustness only, never a trigger" in out
-    assert "before" in out and "n=16" in out
+    assert "format_version=v5 vs before v5 -> no material difference" in out
+
+
+def test_no_robustness_read_before_the_pre_committed_size(tmp_path, monkeypatch):
+    """At 12 of 20 the verdict says bake longer; this line must not answer."""
+    old = [("20.0", 11.0)] * 10 + [("20.0", 0.0, 3)] * 8
+    new = [("20.0", 9.0)] * 12
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", old), ("new", 60, "v5", new)])
+    read = insights.release_read("v5")
+    assert insights.render_without_near_zero(read, min_uploads=20) == ""
+    assert insights.render_without_near_zero(read, min_uploads=12) != ""
 
 
 def test_no_robustness_read_when_every_upload_has_plays(tmp_path, monkeypatch):
