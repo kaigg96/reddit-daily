@@ -61,6 +61,34 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-12 (11:45) — Bet 1 is ready to merge the moment you label it; the v7 verdict waits on Monday's snapshot, which had not arrived
+
+    Worked (% of the shift): product 30 · data 25 · gm 25 · reliability 10 · security 10
+
+**Summary:** Bet 1 and its two follow-ups still merge cleanly onto today's live code with every test passing, and how its effect on the opening seconds will be judged is now fixed before any upload. Monday's statistics had not landed by the end of the shift, so the v7 verdict and four other reads pass to the afternoon shift.
+
+### Toward revenue
+- **Indirectly, on bet 1**, the only thing on the path to YouTube's payment rules. Nothing technical stands between it and shipping. Your label on #74 is the one remaining step after this afternoon's v7 read.
+
+### Done
+- **Product (bet 1):** merged the live code, bet 1 and both follow-ups (the log column and the vote's capitals) together in a scratch copy: no clashes, all 523 tests pass. The afternoon shift can merge them in order without re-checking. Also found that bet 1's first host line appears about one to two seconds in. That is exactly the window YouTube's "engaged view" count measures, and engaged views are what the payment bar counts. So before any upload I fixed how it will be read: bet 1 against v7 on the share of plays that get past the opening, at its own read, as a diagnostic that can never trigger a revert.
+- **Data:** waited on Monday's statistics, which carry the v7 verdict and four other reads. GitHub starts the job 5 to 7 hours after its 06:00 slot, so it usually arrives between 11:00 and 13:00. It had not started when the shift ended. The rule for v7 is quoted and its commands are ready.
+- **General management:** the ready queue was below its floor, so I generated eight candidates from the flat watch-time trend, the risk list and the decision rules still waiting on data, and had them ranked separately, forward and reversed. Three ranked top both ways: the v7 read, the bet 1 opening check (done), and which uploads gain subscribers. I dropped the last one. With 21 subscribers across the whole channel any answer would be too thin to use, and subscribers are not the binding half of the payment bar (views are ~800 times short, subscribers ~48). Also dropped: testing whether views scale with uploads per week (only the pipeline's first two weeks had fewer uploads, so the comparison is confounded), placing the four-a-day slots by hour (GitHub's delays pick the hour, not us), the name checks (they wait on bet 1 settling the show), drafting bet 1's next step (premature before it ships), and a TikTok question to you (bet 3 waits on bet 1). I also looked at tuning Groq's screen so it could replace Gemini entirely. It would only ship after bet 1's two-week trial, so it is inventory, not today's work. Tracker checked true and within its limits; process health fine.
+- **Reliability:** both weekend uploads and this morning's landed, and the last-upload record is intact. The four-a-day schedule landed after Sunday's evening slot, so no extra run has fired yet; the first (today's 06:23 slot) is still queued at GitHub.
+- **Security:** standing check clean: no secrets in the project, no unapproved workflow change, money controls in place, narration $0.34 this month (forecast $0.97 of $3).
+- Fixing against improving: mostly improving (bet 1's merge readiness and its read). No fixes were needed.
+
+### Blocked
+- **For you, in order of what each unblocks:** #74 (bet 1, one label); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
+
+### Next
+- **Afternoon shift:** once the statistics land, read v7 under its rule, then the engaged-share check (#8), the buried-upload check (R6), the voice and slot check (R3), and confirm the subscriber count arrived (C11). If #74 is labelled and v7 is kept, merge bet 1 as v8, then the log column, then the vote's capitals. Check that the first four-a-day off-slot run exited without uploading.
+
+### Better?
+- **Than last shift:** Slightly. Bet 1's merge is pre-cleared and its opening effect will be read honestly, but nothing shipped and the v7 verdict slipped a shift.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-11 (23:13) — Bet 1's final sample passed and is with you; the viewer-comments approval rested on a wrong fact, now corrected
 
     Worked (% of the shift): product 30 · legal 20 · engineering 15 · gm 15 · reliability 10 · audience 5 · security 5
@@ -92,35 +120,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. Bet 1 is ready to ship on your label, and a compliance mistake was caught before it applied.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1, the first change aimed at earning, has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-11 (16:39) — Bet 1's branch is up to date, so tonight's sample can be its last; titles get a backup AI, switched off
-
-    Worked (% of the shift): product 35 · reliability 35 · data 10 · gm 10 · engineering 5 · security 5
-
-**Summary:** Bet 1 (making the format ours) was behind the live code. That would have voided tonight's sample and cost at least another half-day, so it is now up to date, reviewed, and plays cleanly. Titles now have a backup AI for when Gemini fails, built switched off; it is also what lets four uploads a day fit Gemini's free allowance.
-
-### Toward revenue
-- **Yes, indirectly, on both bets.** Bet 1 is the step YouTube's payment rules need. A sample must name the exact version that ships, and the live code's last day of changes were missing from bet 1. Folding them in after tonight's sample would have voided it and pushed v8 back by at least 12 hours. That is done, so tonight's sample can be the final one. Bet 2 (four a day) had one open problem: on a bad day it would overspend Gemini's 20 free requests. Groq now covers both AI calls when Gemini runs out, so that problem goes away once the switch is on.
-
-### Done
-- **Product (bet 1):** merged the live code into bet 1's branch three times, ending with this shift's own changes, so it carries everything now live. Two small clashes, both resolved; two fresh reviews found no faults; all tests pass; a free local render plays (19.9 seconds, the host's lines capitalised on their dark band). Also fixed in advance how bet 1 will be judged: it skips medical threads, but those are only 1 to 2% of uploads, too few to move its result, so no allowance is made for them.
-- **Reliability (a bet on reliability, built off):** when Gemini fails, the title request now gets one try on Groq before the upload falls back to the plain Reddit question, as the safety screen already does. One switch turns on both. Titles were lost on 2 of the last 30 uploads. A review found the daily release check would have judged Groq's answer as if it were Gemini's; that is fixed. Merged, switched off. A second piece is built and waiting: the upload log will name which AI wrote each title, so Groq's titles cannot blur the title experiments. It lands after bet 1, before the switch.
-- **Data:** ran the safety screen's test cases on Groq a second time (free, no Gemini use). Same result as this morning: 6 of 7, and the same must-pass question skipped. So Groq is consistently stricter. That is fine as a backup, where a wrong skip costs one candidate post, but not yet as the main screen. Also checked whether Gemini's failures cluster by time of day, which would matter for the new slots at four a day: 4 failures in 42 runs, too few to say.
-- **A mistake, and its fix:** I ran the screen's test script with a request for its help text. It ignores arguments, so it ran the whole test instead: about 5 Gemini requests from production's allowance, an hour before the evening upload. My estimate for today is about 13 of 20 requests used, leaving room for the evening upload's usual 2 and its worst case of 5. The script now refuses any argument before spending anything, with a test.
-- **Security:** standing check clean: no secrets in the project, no unapproved workflow change, money controls in place, narration spend $0.33 this month (forecast $0.92 of $3). A fresh dependency audit found nothing new since 30 September.
-- **General management:** process health is fine. Awkward this shift: every merge into the live code has to be folded into bet 1's branch before its sample, and that happened three times. Until the sample passes, the live code should take nothing but tracker edits.
-- Fixing against improving: mostly improving (both bets). Two fixes: the release check's blind spot, and the test script's guard.
-
-### Blocked
-- **For you, each one label:** bet 1's sample (#74); four a day's schedule (#73). Still open: re-label #53 (comments); the account checks (#59).
-
-### Next
-- **Tonight (render slot from about 22:49):** request bet 1's sample on its current version, and add the new video to #74. Merge nothing but tracker edits into the live code until it passes.
-- **12 October:** read `v7` under its rule, with the buried-upload check beside it. Check that the evening upload kept its title. If you approve bet 1 (#74), it ships as `v8` after that read.
-- **After v8:** land the log column, then switch on Groq's backup for the screen and titles with a sample. It is a backup, so no version change: v8's two-week trial runs on undisturbed.
-
-### Better?
-- **Than last shift:** Yes, a little. Bet 1 can ship on tonight's sample without another half-day's wait, and four a day's last technical gap is closed, behind a switch.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat (12.0 seconds); both bets that would change it wait on you and on data.
 - **Than ~100 shifts ago:** Too early to say.
