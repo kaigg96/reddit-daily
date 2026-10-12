@@ -98,9 +98,9 @@ AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
 # Groq's one try once Gemini has failed (llm.groq_rescue): the screen's last
 # before its keyword backstop, and the metadata call's before the title, CTA
-# and keywords fall back. Off until merged with a sample; switch it here,
-# never by a variable.
-GROQ_FALLBACK = False
+# and keywords fall back. Switched on with a sample (PRD §0 #13); switch it
+# here, never by a variable.
+GROQ_FALLBACK = True
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and reactions on screen, the narrator speaks its vote
