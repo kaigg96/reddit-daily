@@ -191,26 +191,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   an omitted `post_risk` on a post that should skip, or the screen's parsing
   is next changed (2026-10-11's failure-label change left it).
 
-- **A viewed upload can log 0 watch-seconds (found 2026-10-10, R4).** 6 of
-  144 viewed uploads at 7 days read `avg_view_duration_s` 0.0 on 1–6 views,
-  with 0 minutes and 0%. The 0 is YouTube's, not ours (2026-10-10): the
-  weekly job fills 0 only for a video with no Analytics row, and those
-  views come from the same row, so there is nothing to fix in storage. It
-  comes in whole seconds, so it may be a real average under 1s.
-  Each pulls its cohort's watch-seconds median down, and in the newest 90
-  they are most of why the chance gap grew (PRD §4). One is `v7`'s, so read
-  12 October's `v7` result knowing that. #3 and #10 now read with
-  `--min-views 10` (2026-10-10): a 0 on 1–6 plays may be real (each viewer
-  swiping at once), so the uploads leave the read rather than being declared
-  missing, and the buried rate prints beside it. **Still open** for every
-  other watch-seconds reader, `--release` included. **A release read moved
-  on them (2026-10-12):** `v7`'s +20% is +9% without uploads under 10 views
-  (`--compare format_version=v7 --min-views 10`), the verdict unchanged.
-  The before-cohort holds the retired clip's buried uploads, so `--release`
-  leans toward keep; `v8` is read the same way. **Closes when** `--release`
-  prints that read beside its verdict, or the next audit drops it.
-  `--min-views` nits its review left: without `--at-age` the buried line
-  counts uploads too new to be reported; `--replays` ignores the flag.
+- **A viewed upload can log 0 watch-seconds (2026-10-10, R4): closed for
+  releases 2026-10-12.** YouTube's whole-second 0.0 on 1–6 plays pulls a
+  cohort's median down; #3 and #10 read with `--min-views 10`, and
+  `--release` now prints the same read beside its verdict, never a trigger,
+  once the release reaches its committed size (`v7`: +20%, +9% without them).
+  Left: without `--at-age` the buried line counts uploads too new to be
+  reported; `--replays` ignores `--min-views`.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
@@ -248,7 +235,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   backstop (`…;groq_http_429`). **Switched on, pre-built on
   `reliability/groq-switch` (10-12):** with it on, a shell's `GROQ_API_KEY`
   sent six Gemini-failure tests to Groq's rescue, so the tests' shared
-  fixture now clears it. **Switch on in `src/config.py`, never a
+  fixture now clears it. Reviewed: no bugs. Its two risks: the rescue never
+  waited out Groq's per-minute cap, so on a Gemini-spent day the title and
+  `v8`'s host lines could fall back (fixed on the branch: one wait of ≤60s);
+  and Groq had never written `v8`'s host lines (the release gates routed to
+  Groq, no Gemini key, pass: setup, both reactions, screen 8/8). Left: the
+  rescue fires on any Gemini exception, not only 429/5xx (harmless);
+  `title_caps` is logged for Groq titles, so #10 and #14's reads must filter
+  on `meta_source` once any appear; 3 `test_llm` tests fail with `DRY_RUN=1`
+  in the shell (on `main` too). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 

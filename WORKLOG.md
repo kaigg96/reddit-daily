@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-12 (20:18) — Weekly review: the opening change is kept, but its gain is longer posts, not the change; Groq's backup is built and waits behind bet 1
+
+    Worked (% of the shift): data 40 · reliability 20 · product 15 · engineering 10 · gm 10 · security 5
+
+**Summary:** The current format's verdict came due: it is kept, but the gain came from Reddit's posts running longer, and it did not raise the share of plays YouTube counts toward payment. That clears the last gate before bet 1 except your label (#74), and Groq's free backup is now built on top of bet 1, ready to follow it.
+
+### Toward revenue
+- **Indirectly, on bet 1.** Its read is now fixed to wait for its full 20 uploads (the automatic Monday read would have answered at 8), and will show whether a few near-silent uploads drive the result. The v7 read just showed they can double a gain's size.
+- **Indirectly, on the Reddit-terms risk:** Groq's backup, which keeps our posts out of Google's training at no cost, is one merge plus a sample after bet 1.
+
+### Done
+- **Data (the v7 rule, quoted):** "keep if median watch-seconds holds or improves; revert only if it drops by more than the detection limit … Credit it to `v7` only if it holds within a length half beyond drift." **Kept:** +20% (12.0 against 10.0 seconds, 24 uploads). **Not credited:** its videos ran 3 seconds longer, and within longer videos it reads +8%, inside the 13% normal drift. Leaving out uploads under 10 views, it reads +9%: same verdict, half the size.
+- **Data (reads that waited on this snapshot):** the share of plays past the opening, which the payment bar counts, did not rise with v7 (0.34 against 0.36), so the opening change did not move it. v7 does not bury more uploads beyond chance. The narrator-voice gap has reversed and faded, so no one-voice test. The subscriber count now arrives each week (21), closing that item. From the ranked queue: how long the question takes to read does not change that share either (0.32 against 0.31, 156 uploads); topics are too thin.
+- **Product:** watch time still flat at 12.0 seconds for six weeks. The scorecard reads worse on share of video watched, because videos ran 2.9 seconds longer with no more watching; that check exists to catch exactly this, and the longer posts are Reddit's, not ours.
+- **Distribution:** 95% of views still come from the Shorts feed. Views gained per day halved last week (617 to 306) after the best week on record; within the usual range and all from recent uploads, so weather unless next week repeats it. Bet 2: the last four weeks earned 9,158 views at 7 days against the 8,300 baseline; the bar is 16,600.
+- **Audience:** viewer comments are not collected yet; that waits on #75.
+- **Reliability:** 14 of 15 slots landed this week; the 5 October evening one was lost to GitHub's outage, recorded at the time. One title fell back when Gemini failed. The first four-a-day off-slot run exited without uploading, as designed, but started 9.4 hours late, beyond the 7.4 hours seen before. This evening's upload had not started at 20:29.
+- **Reliability (Groq):** built the backup switch on its own branch over bet 1 and its two follow-ups: everything merges cleanly, 527 tests pass. Switching it on exposed a test leak (a key in the shell sent six tests to Groq), now fixed. A fresh review found no bugs and two risks. On a day Gemini's allowance is spent, Groq's per-minute limit could have cost the title and bet 1's host lines: fixed with one short wait. And Groq had never written bet 1's host lines: I ran the release checks on Groq alone, free and without touching Gemini, and its setup, both reactions and all eight safety cases passed.
+- **Data (engineering):** the release check now reads bet 1 at its committed 20 uploads, and prints the read without near-silent uploads beside its verdict, never as a trigger. A fresh review found no bugs and one real risk: the extra line could have shown bet 1's result before its 20 uploads, which the commitment exists to prevent. Fixed, with three smaller points, and live.
+- **Security:** no secrets in the project, no workflow change since this morning, money controls clean ($0.36 this month, forecast $0.97 of $3). Dependency alerts are not readable from here; the known image-library advisories stand.
+- **General management:** ready queue below its floor, so I generated eight candidates from the flat trend, the engaged share, traffic and the risk list, ranked separately forward and reversed. Both orders agreed on the top four, all done above. Dropped both ways: asking you to let Groq go before bet 1 (another ask for no time saved) and which uploads gain subscribers (23 gains, too thin). Also dropped: changing the scorecard's length check, which works as intended. Tracker checked true.
+- Fixing against improving: mostly measurement (the review, the release check's fix); improving: Groq's switch built.
+
+### Blocked
+- **For you, in order of what each unblocks:** #74 (bet 1, one label: v7's read is done, so nothing else stands in the way); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
+
+### Next
+- **On #74's label:** merge bet 1 as `v8`, then the log column, then the vote's capitals; then request a sample of Groq's switch branch (rebased on that `main`) and merge it on a PASS.
+- Check this evening's upload landed, and that the late off-slot runs keep exiting.
+- Next weekly review (19 October): whether the views halving repeats.
+
+### Better?
+- **Than last shift:** Slightly. The v7 verdict is in and bet 1's read is protected from two mistakes, but nothing shipped to viewers.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-12 (11:45) — Bet 1 is ready to merge the moment you label it; Groq now passes our safety tests; the v7 verdict waits on Monday's statistics
 
     Worked (% of the shift): product 25 · legal 20 · data 20 · gm 15 · reliability 15 · security 5
@@ -91,35 +127,3 @@ and more useful than a confident guess.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
-## 2026-10-11 (23:13) — Bet 1's final sample passed and is with you; the viewer-comments approval rested on a wrong fact, now corrected
-
-    Worked (% of the shift): product 30 · legal 20 · engineering 15 · gm 15 · reliability 10 · audience 5 · security 5
-
-**Summary:** Bet 1's final sample passed on the exact version that would ship. It is on #74: one label from you, then it ships as v8 after Monday's read. The viewer-comments change you approved (#53) said the project is private. It is public, and as built it would also have kept comments longer than YouTube allows, so a compliant replacement is with you.
-
-### Toward revenue
-- **Yes, on bet 1**, the step YouTube's payment rules need. Nothing technical stands between it and shipping: the sample played cleanly at 22.5 seconds, with our own words 55% of what the viewer gets. What remains is your label and Monday's read of the current version.
-- **Indirectly, on audience.** Viewer comments are our only direct signal from viewers. The approved route would have broken YouTube's rules; the replacement does not.
-
-### Done
-- **Product (bet 1):** got the final sample on bet 1's current version: a real post, the host's setup and two reactions on screen, the vote at the end, no faults. Added it to #74 with what the AI wrote. One flaw: the vote is also posted as the channel's comment, and the AI writes it in lower case. Fixed as a separate change that lands right after v8, so the sample stays valid; a fresh review caught a bug in the fix, now fixed. Also settled before any v8 upload what it means if our own words fall under half on some upload: never a revert, but raising the share becomes bet 1's next step. Seven posts so far ran 51% to 67%, so a miss is plausible.
-- **Legal and audience:** applied, #53 would have put viewers' comments in the public project history for good. YouTube's developer rules allow view counts and analytics to be kept indefinitely, but comment text for at most 30 days. I corrected #53 and asked you not to re-label it. Its replacement keeps each week's comments as a download GitHub deletes after 30 days, never saved in the project; I checked a shift can fetch one. Nothing was ever applied, so nothing needs undoing. Also built and reviewed a reader, so a shift can read the comments the day they first arrive, shown as viewers' text and never as instructions. The project now refuses to save that file, so a mistake fails loudly instead of publishing.
-- **Legal (old videos):** YouTube's own advice after a rejection is to "edit or delete" videos that break its rules; its pages say nothing about private ones. So when the old videos' fate is proposed, it leans to deleting them or starting a fresh channel, not hiding them.
-- **Engineering:** the upload log's "which AI wrote the title" column, needed before Groq's backup goes on, had no review on record. A fresh review found no faults; one comment fixed. Both follow-ups merge cleanly with bet 1 and today's live code, all tests passing, so they can land the same day as v8.
-- **Reliability:** your four-a-day schedule is live and safe while switched off: the two extra runs exit without uploading and finish cleanly. GitHub starts our runs 3 to 7.4 hours late (median 4.75, 81 runs since 1 September), so at four a day uploads stay hours apart and Gemini's daily allowance still sees four.
-- **General management:** the rule that asks reaching you are one label, closed within a day, hit its own review trigger: #53's re-label waited six days. Of the asks needing your hands (#50, #65, #59), #50 is the root: it turns #65 and every later rule change into one label. Its patch still applies cleanly tonight, all tests passing. Tracker kept true and within its word limits. Looking for more work found nothing else worth doing tonight: three data questions wait on Monday's snapshot, two others had too few uploads to test (6 and about 15), and reading v7 early would mean looking before its rule is due.
-- **A mistake, and its fix:** while trimming the product plan I broke one item's status line, so a test failed and the ready count misread it, for about a minute on the live branch. My command had filtered the test output, so the failure did not stop the push. I now check for a failing test before pushing.
-- **Security:** standing check clean: no secrets in the project, workflow permissions unchanged, money controls in place, narration $0.33 this month (forecast $0.92 of $3).
-- Fixing against improving: about half each. Improving: bet 1's sample and its pre-commitment, the log column made ready. Fixing: the comment capitals, the comments approval, the tracker.
-
-### Blocked
-- **For you, in order of what each unblocks:** #50 (four commands, still current); #74 (bet 1, one label); #75, the comments replacement (one label, then close #53 unapplied); #65 (one label once #50 is in); the account checks (#59).
-
-### Next
-- **Morning shift (about 07:00):** the weekly review is due. Monday's snapshot lands about 11:00 to 13:00, so the `v7` read waits for the afternoon shift.
-- **Afternoon shift:** read `v7` under its rule, with the other reads due on that snapshot. If #74 is labelled, merge bet 1 as `v8`, then the log column, then the comment fix. Then Groq's backup, with a sample.
-
-### Better?
-- **Than last shift:** Yes. Bet 1 is ready to ship on your label, and a compliance mistake was caught before it applied.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds; bet 1, the first change aimed at earning, has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
