@@ -55,7 +55,7 @@ The source of ready work that never waits on a sample video or costs money. When
 
 | # | Status | Question | Test |
 |---|---|---|---|
-| R1 | blocked: 2 more dark-morbid uploads aged 7 days (n=10 at the 2026-10-05 snapshot, lead +12%) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds at ~+50% → reopens R4.4 (§0 #2); otherwise recorded. |
+| R1 | blocked: 1 more dark-morbid upload aged 7 days (n=11 at the 2026-10-12 snapshot, lead +8%; +12% at n=10) | **Does dark-morbid's lead survive more data?** (+27% at 7 days, n=9, all `v5`, so read within era; §4) | `report.py --at-age 7 --compare topic=dark-morbid` at n≥12. Holds at ~+50% → reopens R4.4 (§0 #2); otherwise recorded. |
 
 #### Owner tasks (anytime, no version bump)
 - **Music variety** (R1.6): 2–3 more Audio Library tracks in `assets/music/`, sealed (public repo): `git rm` the `.enc` files, then re-run `scripts/seal_assets.sh` with every plain track in place.
