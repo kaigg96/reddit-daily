@@ -49,6 +49,13 @@ FIELDS = [
     # blank while commentary is off; and our own words' share of the
     # narration's characters, its done-when (at least 0.50 on every upload).
     "commentary_ok", "own_words_share",
+    # Added 2026-10-11 (PRD §0 #13): who answered the metadata call, as
+    # screen_source does for the screen: gemini, groq, groq_fallback when Groq
+    # answered for a failed Gemini, error when nobody did. A model that
+    # answered with junk keeps its own name: read meta_failure beside it.
+    # Without it a Groq title would count unmarked in the title-style and caps
+    # reads (#10, #14).
+    "meta_source",
 ]
 
 

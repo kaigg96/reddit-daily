@@ -262,6 +262,15 @@ def test_the_upload_log_keeps_the_failure_kind():
     assert "meta_failure" in log.FIELDS
 
 
+def test_the_upload_log_names_who_answered_the_metadata_call():
+    """A Groq title for a failed Gemini must not count unmarked in the title
+    reads (#10, #14): the run logs the source the call returned."""
+    import inspect
+    from src import log, run
+    assert log.FIELDS[-1] == "meta_source"
+    assert '"meta_source": meta.source' in inspect.getsource(run.main)
+
+
 def _called_url(monkeypatch, dry_run):
     seen = {}
 

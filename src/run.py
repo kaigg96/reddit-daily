@@ -334,6 +334,7 @@ def main():
         "title_caps": title_caps_logged,
         "commentary_ok": commentary_ok,
         "own_words_share": own_words,
+        "meta_source": meta.source,
     })
 
 
