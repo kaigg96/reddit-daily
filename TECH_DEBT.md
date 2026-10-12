@@ -203,8 +203,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `--min-views 10` (2026-10-10): a 0 on 1–6 plays may be real (each viewer
   swiping at once), so the uploads leave the read rather than being declared
   missing, and the buried rate prints beside it. **Still open** for every
-  other watch-seconds reader, `--release` included. **Closes when** a
-  release read is shown to move on them, or the next audit drops it.
+  other watch-seconds reader, `--release` included. **A release read moved
+  on them (2026-10-12):** `v7`'s +20% is +9% without uploads under 10 views
+  (`--compare format_version=v7 --min-views 10`), the verdict unchanged.
+  The before-cohort holds the retired clip's buried uploads, so `--release`
+  leans toward keep; `v8` is read the same way. **Closes when** `--release`
+  prints that read beside its verdict, or the next audit drops it.
   `--min-views` nits its review left: without `--at-age` the buried line
   counts uploads too new to be reported; `--replays` ignores the flag.
 
@@ -241,7 +245,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   2026-10-11: a missed Groq try and its parse failures now end
   `screen_failure` as `;groq_<kind>`. Up to four screens run back to
   back: at 8K tokens a minute a second 429 inside one retry falls to the
-  backstop (`…;groq_http_429`). **Switch on in `src/config.py`, never a
+  backstop (`…;groq_http_429`). **Switched on, pre-built on
+  `reliability/groq-switch` (10-12):** with it on, a shell's `GROQ_API_KEY`
+  sent six Gemini-failure tests to Groq's rescue, so the tests' shared
+  fixture now clears it. **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
