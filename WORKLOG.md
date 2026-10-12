@@ -84,7 +84,7 @@ and more useful than a confident guess.
 - **For you, in order of what each unblocks:** #74 (bet 1, one label); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
 
 ### Next
-- **Afternoon shift:** once the statistics land, read v7 under its rule, then the engaged-share check (#8), the buried-upload check (R6), the voice and slot check (R3), and confirm the subscriber count arrived (C11). If #74 is labelled and v7 is kept, merge bet 1 as v8, then the log column, then the vote's capitals. Check that the first four-a-day off-slot run exited without uploading. Then switch on Groq's backup with its sample, merging the Groq safety-screen line with it.
+- **Afternoon shift:** the statistics' arrival makes the weekly review due, and it carries these reads: v7 under its rule, then the engaged-share check (#8), the buried-upload check (R6), the voice and slot check (R3), and confirm the subscriber count arrived (C11). If #74 is labelled and v7 is kept, merge bet 1 as v8, then the log column, then the vote's capitals. Check that the first four-a-day off-slot run exited without uploading. Then switch on Groq's backup with its sample, merging the Groq safety-screen line with it.
 
 ### Better?
 - **Than last shift:** Slightly. Bet 1's merge is pre-cleared and Groq's last test failure is fixed, but nothing shipped and the v7 verdict slipped a shift.
