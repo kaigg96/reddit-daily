@@ -213,7 +213,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   touched Gemini's quota):** titles pass; the screen went 6/7, skipping as
   `named_wrongdoing` the Epstein-files question that `_PROMPT` itself lists as
   must-pass. A second run that evening skipped the same case (6/7 again), so
-  Groq's model follows the prompt's calibration less well, consistently. The owner leaves Gemini's role to us (#68) and suspects it titles
+  Groq's model follows the prompt's calibration less well, consistently.
+  **Fixed on a branch (10-12):** one Groq-only line before the question
+  (`_GROQ_CHECK`) took the case to 6 of 6 and the replay to 7/7 twice;
+  `reliability/groq-screen-calibration`, to land with the switch. The owner leaves Gemini's role to us (#68) and suspects it titles
   better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
   falls to the keyword backstop. So the likely build is Gemini first, Groq on
   a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
