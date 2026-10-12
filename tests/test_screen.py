@@ -501,8 +501,30 @@ def test_only_groq_is_sent_the_calibration_check(monkeypatch, route):
     monkeypatch.setattr(screen.llm, "generate_retrying",
                         lambda p, *a, **k: sent.append(p) or PASS_REPLY)
     assert screen.screen("q", ["a", "b", "c"]).verdict == "pass"
-    assert (screen._GROQ_CHECK in sent[0]) == (route == "groq")
-    assert sent[0].index("QUESTION: q") > 0
+    plain = screen._PROMPT.format(question="q", numbered="1. a\n2. b\n3. c",
+                                  topics=", ".join(screen.TOPICS))
+    if route == "gemini":
+        assert sent[0] == plain
+    else:
+        assert screen._GROQ_CHECK + "QUESTION: q" in sent[0]
+        assert sent[0].replace(screen._GROQ_CHECK, "") == plain
+
+
+def test_the_gemini_fallback_model_is_sent_the_plain_prompt(monkeypatch):
+    sent = []
+
+    def fake(prompt, thinking_budget=0, model=None):
+        sent.append((model, prompt))
+        if model is None:
+            raise _http_error(503)
+        return PASS_REPLY
+
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
+    monkeypatch.setattr(screen.llm, "_generate", fake)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)
+    assert screen.screen("q", ["a", "b", "c"]).source == "gemini_fallback"
+    assert sent[-1][0] == screen.FALLBACK_MODEL
+    assert all(screen._GROQ_CHECK not in p for _, p in sent)
 
 
 def test_the_groq_rescue_is_sent_the_calibration_check(monkeypatch):
