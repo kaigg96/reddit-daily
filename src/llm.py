@@ -204,8 +204,13 @@ _STYLE_GUIDANCE = {
 # Gemini answered with JSON. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
-MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure")
-MetadataResult.__new__.__defaults__ = ("gemini", "")
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure commentary")
+MetadataResult.__new__.__defaults__ = ("gemini", "", None)
+
+# Bet 1's host lines (config.COMMENTARY): a setup, one reaction per answer read,
+# and the verdict, which is also the CTA. All or nothing: a partial set would
+# leave answers unreacted to, so it falls back to today's video instead.
+Commentary = collections.namedtuple("Commentary", "setup reactions verdict")
 
 
 def _failure_kind(exc):
@@ -242,6 +247,99 @@ def _cta_instruction(vote_rule):
    or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
 
 
+# Bet 1 (#70, PRD R3.2's commentary-led variant). The rules are the ones the
+# 2026-10-09 drafts needed (PRD §4): each failure they showed has a line here.
+# The first real sample (2026-10-10, a politics thread) added two: its setup
+# restated the question as "Reddit weighs in on ...", a frame that would repeat
+# across uploads, and a reaction took a side ("skips right over the diplomatic
+# fallout"). Politics is 5 of 86 topic-tagged uploads: too many to skip.
+# Re-tried on the sample model: both fixed, but its vote said "the second one",
+# so the vote's own instruction repeats the never-by-number rule.
+# Word caps keep narration near today's ~455 characters (drafts: 410-546) with
+# our own words at half or more, which is the done-when.
+_COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. Its stance is a show
+   of hands: it hears the answers, then raises its hand for one. Spoken lines:
+   - "setup": AT MOST 15 words, after the question and before the first answer:
+     the host's own hunch or angle on this question. Never restate the
+     question, and never open on "Reddit" or a stock frame like "weighs in".
+   - "reactions": exactly {n} lines of AT MOST 12 words each, in order; each is
+     heard straight after its answer and reacts to that answer only.
+   - "cta": the host's vote, AT MOST 15 words: which answer it raises its hand
+     for, named by what it says (never "the first" or "the second one"), and
+     in a few words why, then ask which one gets the viewer's vote.
+   Rules for every line:
+   - Name something specific from this thread, never a stock phrase.
+   - React with opinion, humour or a question. Never state a fact, statistic or
+     diagnosis in your own voice. Judge, never advise: no advice on health,
+     law, money or politics.
+   - Refer to an answer by what it says, never by its number.
+   - Vote on the answer, never on the person: no claims about health
+     conditions, identities or groups of people.
+   - On threads about illness, injury, death or crime, be warm or wry about the
+     people, never about the harm.
+   - On politics or news threads, take no side on the issue itself: react to
+     how an answer is put (its wit, its nerve), and vote on that.
+   - Every line must make sense heard once. Plain spoken words. No hashtags, no
+     emoji, no profanity."""
+
+
+# The prompt's word caps, enforced with slack: a line well past its cap would
+# push the video toward the 60s limit and Polly's per-run budget, either of
+# which would cost the upload, so it falls back instead.
+_HOST_CAPS = {"setup": 15, "reaction": 12, "cta": 15}
+# Shown as text (config.HOST_TEXT, #71), a line must read in about two
+# seconds and fit two lines on screen; the vote is still spoken.
+_TEXT_CAPS = {"setup": 10, "reaction": 10, "cta": 15}
+_CAP_SLACK = 1.5
+
+# What changes in the ask when the host is read, not heard (#71). Each pair
+# must match the voiced ask exactly; a test holds them to it.
+_TEXT_EDITS = [
+    ("Spoken lines:",
+     "Lines shown on screen as text, never spoken (the narrator speaks only the vote):"),
+    ('"setup": AT MOST 15 words, after the question and before the first answer:',
+     '"setup": AT MOST 10 words, shown under the question:'),
+    ("lines of AT MOST 12 words each, in order; each is\n     heard straight after its answer and reacts to that answer only.",
+     "lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only. Never\n     repeat the answer's own words: they are already on screen."),
+    ("Every line must make sense heard once.", "Every line must make sense read once, in two seconds."),
+    ("Plain spoken words.", "Plain words."),
+]
+# A note past about 12 words runs to four lines and meets the watermark
+# (measured at 64px, 900px wide, 2026-10-11), so text lines get less slack.
+_TEXT_SLACK = 1.2
+
+
+def _commentary_ask(n):
+    """The host's instructions, for a voiced host or a text-only one."""
+    ask = _COMMENTARY_ASK
+    if config.HOST_TEXT:
+        for old, new in _TEXT_EDITS:
+            ask = ask.replace(old, new)
+    return ask.format(n=n)
+
+
+def _within_cap(line, kind):
+    if config.HOST_TEXT:
+        return len(line.split()) <= _TEXT_CAPS[kind] * _TEXT_SLACK
+    return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
+
+
+def _clean_commentary(data, n):
+    """The host's lines, or None unless every one is usable (see Commentary)."""
+    setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
+    reactions = data.get("reactions")
+    if not isinstance(reactions, list) or len(reactions) != n:
+        return None
+    reactions = [_clean_str(r) for r in reactions]
+    if not (setup and verdict and all(reactions)):
+        return None
+    if not (_within_cap(setup, "setup") and _within_cap(verdict, "cta")
+            and all(_within_cap(r, "reaction") for r in reactions)):
+        print("Commentary: a host line ran past its length cap")
+        return None
+    return Commentary(setup, reactions, verdict)
+
+
 # PRD §0 #14: titles with a capitalised word earned ~2x the views at 7 days,
 # observationally (PRD §4, 2026-10-09). Each run's coin assigns an arm, so the
 # read is causal. Both arms ban shock phrases: YouTube's monetization review
@@ -262,6 +360,11 @@ def title_caps_arm(rng):
     return rng.random() < 0.5
 
 
+_PLAIN_SHAPE = '{"title": "...", "keywords": ["...", "..."], "cta": "..."}'
+_COMMENTARY_SHAPE = ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
+                     '"reactions": ["...", "..."], "cta": "..."}')
+
+
 def get_metadata(reddit_title, comments, style="A", caps=None):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
@@ -277,9 +380,17 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     single all-or-nothing result would have made one bad field as expensive as
     a dead API.
     """
-    guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
+    template = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"])
+    if config.COMMENTARY:
+        # Style C's examples promise a count; two answers are read, not three.
+        # Replaced before the question goes in, so the question is never edited.
+        template = template.replace('"3 ', f'"{config.COMMENTARY_ANSWERS} ')
+    guidance = template.format(reddit_title=reddit_title)
     if caps is not None:
         guidance += _CAPS_GUIDANCE[bool(caps)] + _NO_SHOCK
+    commentary = config.COMMENTARY
+    if commentary:
+        comments = comments[:config.COMMENTARY_ANSWERS]
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
@@ -297,10 +408,11 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-{_cta_instruction(config.HOUSE_VOTE_RULE)}
+{_commentary_ask(len(comments)) if commentary
+ else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
-{{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
+{_COMMENTARY_SHAPE if commentary else _PLAIN_SHAPE}
 """
     route, prior = provider(), ""
     try:
@@ -341,6 +453,7 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         cta=_clean_str(data.get("cta")),
         source=route,
         failure=prior,
+        commentary=_clean_commentary(data, len(comments)) if commentary else None,
     )
 
 

@@ -194,6 +194,19 @@ def check_metadata():
             ok = False
     if meta.keywords is not None and len(meta.keywords) < 3:
         note(f"- ⚠️ only {len(meta.keywords)} keywords (expected ~10)")
+    # Bet 1 (#70): the host's lines fail soft to a plain reading, so a prompt
+    # that never produces them would otherwise pass. Shown in full, since the
+    # verdict file is where a shift reads them.
+    from src import config
+    if config.COMMENTARY:
+        host = meta.commentary
+        if host is None:
+            note("- ❌ host lines missing or past their caps (the upload would be a plain reading)")
+            ok = False
+        else:
+            note(f"- ✅ host setup: {host.setup}")
+            for i, line in enumerate(host.reactions, 1):
+                note(f"- ✅ host reaction {i}: {line}")
     note("")
     return ok
 

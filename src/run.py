@@ -41,6 +41,90 @@ def upload_text(subreddit, post_title, comments, shortlink, keywords, asker=""):
     return description, tags
 
 
+def build_segments(post, outro_text, host, synth, host_voice):
+    """The narration in order. With bet 1's host lines (#70): question, setup,
+    then each answer followed by its reaction, then the host's vote. Without
+    them, today's: question, the answers, the CTA."""
+    segments = [synth("title", post.title, kind="title")]
+    # With commentary on, a fallback reads the same two answers its title was
+    # written from, so a "2 Answers" title is never read over three.
+    two = host or config.COMMENTARY
+    answers = post.comments[:config.COMMENTARY_ANSWERS] if two else post.comments
+    text = host and config.HOST_TEXT    # #71: the host is read, never heard
+    if text:
+        segments[0].note = host.setup
+    elif host:
+        segments.append(synth("setup", host.setup, kind="host", speaker=host_voice))
+    for i, comment in enumerate(answers, 1):
+        segments.append(synth(f"comment_{i}", comment, kind="comment"))
+        if text:
+            segments[-1].note = host.reactions[i - 1]
+        elif host:
+            segments.append(synth(f"reaction_{i}", host.reactions[i - 1], kind="host",
+                                  speaker=host_voice))
+    # The vote is the host's line. Voiced, it takes the host's voice and
+    # colour; text-only, the narrator speaks it, as it speaks today's CTA.
+    if text:
+        segments.append(synth("outro", outro_text, kind="vote"))
+    else:
+        segments.append(synth("outro", outro_text, kind="host" if host else "outro",
+                              speaker=host_voice if host else None))
+    return segments
+
+
+def drop_last_answer(segments):
+    """R1.7: drop the last answer, and the host's reaction to it with it, since
+    a reaction to an answer nobody heard makes no sense. Returns the answer."""
+    i = max(i for i, s in enumerate(segments) if s.kind == "comment")
+    dropped = segments.pop(i)
+    if i < len(segments) and segments[i].kind == "host":
+        segments.pop(i)
+    return dropped
+
+
+def closing_line(meta, host):
+    """The AI's closing line, or None for the generic one. With commentary on,
+    the call's "cta" is the host's vote: after a plain reading it would answer
+    a question nobody heard argued, so a fallback upload gets None."""
+    if host:
+        return host.verdict
+    return None if config.COMMENTARY else meta.cta
+
+
+def fit_to_length(segments, too_long, host, synth):
+    """R1.7's duration guard; returns the closing line actually spoken.
+
+    Today's video drops its last answer. With host lines the setup goes first,
+    as nothing refers to it. If an answer must still go, its reaction goes with
+    it, and today's closing line replaces the vote, which may name that answer."""
+    outro = segments[-1].text
+    if not too_long(segments):
+        return outro
+    if host and not config.HOST_TEXT:   # a text setup is a note: it costs no time
+        assert segments[1].kind == "host", "the setup follows the question"
+        segments.pop(1)
+        print("Duration guard: dropped the host's setup")
+        if not too_long(segments):
+            return outro
+    dropped = drop_last_answer(segments)
+    print(f"Duration guard: dropped comment '{dropped.text[:40]}...'")
+    if host:
+        segments[-1] = synth("outro", config.OUTRO_TEXT, kind="outro")
+        print("Duration guard: the vote may name that answer, so the generic line closes")
+        outro = config.OUTRO_TEXT
+    return outro
+
+
+def own_words_share(segments):
+    """Bet 1's done-when (#70): the host's share of the characters the viewer
+    is given, spoken or shown as a note. The question and the answers are
+    Reddit's; the rest is ours."""
+    ours = (sum(len(s.text) for s in segments if s.kind in ("host", "vote"))
+            + sum(len(getattr(s, "note", "")) for s in segments))
+    total = sum(len(s.text) + len(getattr(s, "note", "")) for s in segments)
+    return f"{ours / total:.3f}" if total else ""  # 3 places: 0.496 must not log as 0.50
+
+
 def check_channel_name():
     """Refuse a real upload without the channel's name.
 
@@ -136,29 +220,39 @@ def main():
     title_caps_logged = "" if not title_ok or config.SAMPLE else int(title_caps)
     print(f"Title style {title_style or '-'}, caps arm {title_caps_logged}: {video_title}")
 
+    # Bet 1 (#70): the host's lines, or today's video if any is missing. The
+    # flag is blank while bet 1 is off, as title_caps is when no arm applied.
+    host = meta.commentary if config.COMMENTARY else None
+    commentary_ok = int(host is not None) if config.COMMENTARY else ""
+    if config.COMMENTARY and not host:
+        print("Commentary: no usable host lines -- shipping today's reading")
+    if host:
+        print(f"Commentary setup: {host.setup}")
+        for i, line in enumerate(host.reactions, 1):
+            print(f"Commentary reaction {i}: {line}")
+
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
-    cta_ok = meta.cta is not None
-    outro_text = meta.cta or config.OUTRO_TEXT
+    cta = closing_line(meta, host)
+    outro_text = cta or config.OUTRO_TEXT
     print(f"CTA: {outro_text}")
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
+    # R3.2: the host speaks in the voice the narrator is not using.
+    host_voice = next((v for v in config.VOICES if v != voice), voice)
     silent = config.SAMPLE or config.SILENT_NARRATION
     polly = None if silent else tts.make_polly()
-    print(f"Narrator voice: {voice}")
+    print(f"Narrator voice: {voice}" + (f", host voice: {host_voice}" if host else ""))
 
-    def synth(name, text, kind):
+    def synth(name, text, kind, speaker=None):
         path = config.GEN / f"{name}.mp3"
         if silent:
             marks = sample.synthesize(text, path)
         else:
-            marks = tts.synthesize_with_marks(polly, text, voice, path)
+            marks = tts.synthesize_with_marks(polly, text, speaker or voice, path)
         return video.Segment(kind=kind, text=text, audio_path=str(path), marks=marks)
 
-    segments = [synth("title", post.title, kind="title")]
-    for i, comment in enumerate(post.comments, 1):
-        segments.append(synth(f"comment_{i}", comment, kind="comment"))
-    segments.append(synth("outro", outro_text, kind="outro"))
+    segments = build_segments(post, outro_text, host, synth, host_voice)
 
     # --- duration guard (R1.7): drop the last comment rather than run long ---
     def projected(segs):
@@ -167,11 +261,15 @@ def main():
             return max(dur, config.MIN_COMMENT_DISPLAY) if s.kind == "comment" else dur
         return sum(display(s) for s in segs) + config.INTER_SEGMENT_GAP * (len(segs) - 1)
 
-    if projected(segments) > config.MAX_TOTAL_SECONDS:
-        last_comment = max(i for i, s in enumerate(segments) if s.kind == "comment")
-        dropped = segments.pop(last_comment)
-        print(f"Duration guard: dropped comment '{dropped.text[:40]}...'")
+    outro_text = fit_to_length(segments, lambda segs: projected(segs) > config.MAX_TOTAL_SECONDS,
+                               host, synth)
     assert projected(segments) <= 60, "video must never exceed 60s"
+    # Whether the AI's closing line is the one spoken: the guard can swap it.
+    cta_ok = cta is not None and outro_text == cta
+    # Zero on a fallback, so the done-when's misses count, not vanish.
+    own_words = own_words_share(segments) if config.COMMENTARY else ""
+    if config.COMMENTARY:
+        print(f"Commentary: our own words are {own_words} of the narration")
 
     # --- assemble + render ---
     result = video.assemble(post.title, segments, rng)
@@ -234,6 +332,8 @@ def main():
         "meta_failure": meta.failure,
         "screen_failure": post.screen_failure,
         "title_caps": title_caps_logged,
+        "commentary_ok": commentary_ok,
+        "own_words_share": own_words,
     })
 
 

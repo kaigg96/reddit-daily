@@ -3,6 +3,7 @@
 import datetime
 import os
 import re
+import types
 from dataclasses import dataclass
 
 import emoji
@@ -97,6 +98,34 @@ def _comment_pool(post, limit):
     ][:limit]
 
 
+# Bet 1 (#70, PRD R3.2): with commentary on, medical threads are skipped at
+# selection. Drafts slipped facts and advice there even under prompt rules, and
+# YouTube refuses AI personas advising on health. The screen's health-body
+# label catches 1 of 83 uploads, so the title is checked too (2 of 165 by
+# keyword). Broad on purpose: a wrong skip costs one candidate, not an upload.
+_MEDICAL = re.compile(
+    r"\b(doctors?|nurses?|hospitals?|medical|medicine|medications?|illness(es)?|"
+    r"diseases?|cancer|symptoms?|diagnos\w*|surger(y|ies)|surgeons?|paramedics?|"
+    r"ambulances?|911|chiropract\w*|therap(y|ies|ists?)|pharmac\w*|health)\b", re.I)
+_MEDICAL_CAPS = re.compile(r"\b(ER|EMTs?)\b")  # case-folded, "er" is in "were"
+
+
+def is_medical(title, topic=""):
+    """True for a thread the host must not comment on (bet 1, #70)."""
+    return (topic == "health-body" or bool(_MEDICAL.search(title))
+            or bool(_MEDICAL_CAPS.search(title)))
+
+
+def _medical_skip(title, on_verdict, why):
+    print(f"Commentary: skipping a medical thread ({why}) — {title[:60]}")
+    if on_verdict:
+        on_verdict(title, types.SimpleNamespace(
+            category="medical", reason=why, source="commentary", unsafe=(), demoted=""),
+            # Not "skip_*": the weekly digest reads those as the screen's
+            # verdicts to audit for false positives, and this is not one.
+            "medical_excluded")
+
+
 def subreddit_for_run(now, subreddits=None, schedule=""):
     """R4.1: the subreddit this run draws from, deterministic per run.
 
@@ -185,7 +214,16 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         if slate:
             slate_topics = "|".join(t or "?" for t in slate)
 
-    for rank, post in enumerate(candidates[: config.MAX_SCREENED_CANDIDATES], 1):
+    examined = 0
+    for rank, post in enumerate(candidates, 1):
+        # Before the screen, and outside its cap: a thread skipped on its title
+        # spends no request, so it must not cost the run a screened candidate.
+        if config.COMMENTARY and is_medical(post.title):
+            _medical_skip(post.title, on_verdict, "title")
+            continue
+        examined += 1
+        if examined > config.MAX_SCREENED_CANDIDATES:
+            break
         pool = _comment_pool(post, config.COMMENT_POOL)
         if len(pool) < config.NUM_COMMENTS:
             continue
@@ -199,6 +237,9 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
                 print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                 if on_verdict:
                     on_verdict(post.title, result, "skip_post")
+                continue
+            if config.COMMENTARY and is_medical("", topic):
+                _medical_skip(post.title, on_verdict, "topic")
                 continue
 
             # Answer-level category raised against the post: not a skip, but

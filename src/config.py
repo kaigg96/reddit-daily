@@ -103,7 +103,7 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_FALLBACK = False
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
+FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and reactions on screen, the narrator speaks its vote
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
@@ -112,6 +112,26 @@ FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + form
 # instead of "comment your answer". None keeps the prompt unchanged. Turning it
 # on changes the video: bump FORMAT_VERSION and take a real sample.
 HOUSE_VOTE_RULE = None
+
+# Bet 1's first step as the owner approved it (#70, 2026-10-10; PRD R3.2's
+# commentary-led variant): the host speaks a setup, a reaction after each of
+# the top two answers, and its vote in place of the CTA, all from the same
+# metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
+# threads at selection (content.is_medical). Turning it on changes the video:
+# bump FORMAT_VERSION, take a sample, and the owner listens to one first.
+COMMENTARY = True
+COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
+HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
+# The text-only host's notes (PRD R3.2, after #71): below the word captions
+# (y=700) and above the watermark (y=1500), inside the Shorts safe zone.
+NOTE_Y = 1150
+NOTE_FONT_SIZE = 64
+NOTE_WIDTH = 900
+NOTE_LEAD = 0.35  # share of the segment before its note appears
+NOTE_BAND_OPACITY = 0.55  # the dark band behind a note; the clip still shows through
+# The host's setup and reactions as on-screen notes, never spoken; the
+# narrator speaks the vote, as today's CTA (#71).
+HOST_TEXT = True
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
