@@ -868,8 +868,8 @@ def test_a_release_that_shifts_video_length_says_so():
 
 
 def _write_series_with_length(tmp_path, monkeypatch, eras):
-    """eras: [(prefix, start_day, fv, [(duration_s, watch), ...])], each upload
-    snapshotted at 7 days old."""
+    """eras: [(prefix, start_day, fv, [(duration_s, watch[, views]), ...])],
+    each upload snapshotted at 7 days old; views default to 200."""
     from src import config
     log, snap = tmp_path / "upload_log.csv", tmp_path / "analytics_snapshots.csv"
     with open(log, "w", newline="") as lf, open(snap, "w", newline="") as sf:
@@ -877,12 +877,13 @@ def _write_series_with_length(tmp_path, monkeypatch, eras):
         sf.write("snapshot_date,video_id,published_at,views,likes,comments,shares,"
                  "est_minutes_watched,avg_view_duration_s,avg_view_pct\n")
         for prefix, start_day, fv, uploads in eras:
-            for i, (dur, watch) in enumerate(uploads):
+            for i, upload in enumerate(uploads):
+                dur, watch, views = (*upload, 200)[:3]
                 published = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc) \
                     + datetime.timedelta(days=start_day + i)
                 lf.write(f"{published.isoformat()},{prefix}{i},q,t,pexels_1.mp4,{fv},{dur}\n")
                 seen = (published + datetime.timedelta(days=7)).date().isoformat()
-                sf.write(f"{seen},{prefix}{i},,200,0,0,0,0,{watch},50\n")
+                sf.write(f"{seen},{prefix}{i},,{views},0,0,0,0,{watch},50\n")
     monkeypatch.setattr(config, "UPLOAD_LOG", log)
     monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
 
@@ -908,6 +909,46 @@ def test_no_within_length_read_when_length_held(tmp_path, monkeypatch):
     _write_series_with_length(tmp_path, monkeypatch,
                               [("old", 0, "v4", same), ("new", 60, "v5", same)])
     assert insights.render_within_length(insights.release_read("v5")) == ""
+
+
+def test_near_zero_uploads_get_a_robustness_read_beside_the_verdict(tmp_path, monkeypatch):
+    """v7 (2026-10-12): +20% on every upload, +9% without those under 10
+    views, because the before-cohort held a buried clip's 0-second readings."""
+    old = [("20.0", 11.0)] * 10 + [("20.0", 0.0, 3)] * 10 + [("20.0", 0.0, 0)] * 2
+    new = [("20.0", 11.0)] * 19 + [("20.0", 0.0, 4)]
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", old), ("new", 60, "v5", new)])
+    read = insights.release_read("v5")
+    assert read.comparisons[0].delta > 0.1          # the headline flattered by zeros
+    out = insights.render_without_near_zero(read, min_uploads=20)
+    # Zero-view uploads were never in the medians, so they are not counted.
+    assert "(1 release and 10 before left out)" in out
+    assert "robustness only, never a trigger" in out
+    assert "format_version=v5 vs before v5 -> no material difference" in out
+
+
+def test_no_robustness_read_before_the_pre_committed_size(tmp_path, monkeypatch):
+    """At 12 of 20 the verdict says bake longer; this line must not answer."""
+    old = [("20.0", 11.0)] * 10 + [("20.0", 0.0, 3)] * 8
+    new = [("20.0", 9.0)] * 12
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", old), ("new", 60, "v5", new)])
+    read = insights.release_read("v5")
+    assert insights.render_without_near_zero(read, min_uploads=20) == ""
+    assert insights.render_without_near_zero(read, min_uploads=12) != ""
+
+
+def test_no_robustness_read_when_every_upload_has_plays(tmp_path, monkeypatch):
+    same = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", same), ("new", 60, "v5", same)])
+    assert insights.render_without_near_zero(insights.release_read("v5")) == ""
+
+
+def test_bet_1_is_read_at_its_pre_committed_size():
+    """PRD §0 #15: `v8` at 7 days on >= 20 uploads. Unlisted, the Monday
+    digest would answer at 8 and pre-empt the rule."""
+    assert insights.RELEASE_MIN_UPLOADS["v8"] == 20
 
 
 def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
