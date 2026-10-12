@@ -179,7 +179,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   cancel a waiting live one (needs a ~6h pile-up); (3) after the patch, a
   12:23 run landing after midnight takes the previous day's style, and an
   00:23 one landing after noon the morning subreddit (11.6h+ delays; 3.0–7.4h
-  seen over 81 runs to 10-11); (4) the digest counts days by publish date, so an 18:23 run landing
+  seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
+  as an off slot should); (4) the digest counts days by publish date, so an 18:23 run landing
   after midnight reads as a missed day, and drift over 6h reads as small.
   **Closes when** the switch goes to four.
 

@@ -15,7 +15,7 @@ revenue above costs (`DECISIONS.md` D12).
 |---|---|
 | Revenue | $0 |
 | Costs | Claude subscription, plus about $0.90/month of Polly (AWS budget $3/month; `scripts/money_check.py`) |
-| Path to revenue | **No route is within reach of the current path** (Strategy, 2026-10-05). Partner Program: 1,000 subscribers and 10M Shorts views in 90 days (YouTube's page); the channel gains ~32,000–37,000 play starts per 90 days, back catalogue included though it earns under 1% (`report.py --trajectory --metric views`, `--catalogue`), but **the bar counts engaged views**, and only **36%** of ours are (`report.py --engaged-share`, 2026-10-05): ~11,000–13,000 per 90 days, **~760–880× short**. It has **21 subscribers** (weekly digest, 2026-10-05), ~48× short. Views are the binding half. YouTube publishes no per-1,000 rate: creators keep 45% of a pool shared by engaged views, and secondary sources put it at $0.01–$0.10. Other routes: **TikTok** Creator Rewards is nearest (its own page, 2026-10-06): 10k followers and 100k views in 30 days (~8× short), only original videos over one minute, and **the account must be based in the US, UK, Germany, Japan, South Korea, France, Mexico or Brazil**; ours run ~21s; **Facebook** (Meta's newsroom, March 2026) is invite-only, paid per 1,000 qualified views, and calls "narrating what's already on screen" unoriginal: deprioritised, and demonetised if most posts are; **Instagram** pays no reliable per-view rate. **No route pays for a reading**, so bet 1 comes first on every platform |
+| Path to revenue | **No route is within reach of the current path** (Strategy, 2026-10-05). Partner Program: 1,000 subscribers and 10M Shorts views in 90 days (YouTube's page); the channel gains ~32,000–37,000 play starts per 90 days, back catalogue included though it earns under 1% (`report.py --trajectory --metric views`, `--catalogue`), but **the bar counts engaged views**, and only **36%** of ours are (`report.py --engaged-share`, 2026-10-05): ~11,000–13,000 per 90 days, **~760–880× short**. It has **21 subscribers** (weekly snapshot, 2026-10-12), ~48× short. Views are the binding half. YouTube publishes no per-1,000 rate: creators keep 45% of a pool shared by engaged views, and secondary sources put it at $0.01–$0.10. Other routes: **TikTok** Creator Rewards is nearest (its own page, 2026-10-06): 10k followers and 100k views in 30 days (~8× short), only original videos over one minute, and **the account must be based in the US, UK, Germany, Japan, South Korea, France, Mexico or Brazil**; ours run ~21s; **Facebook** (Meta's newsroom, March 2026) is invite-only, paid per 1,000 qualified views, and calls "narrating what's already on screen" unoriginal: deprioritised, and demonetised if most posts are; **Instagram** pays no reliable per-view rate. **No route pays for a reading**, so bet 1 comes first on every platform |
 | Product scorecard | `venv/bin/python scripts/report.py --scorecard` |
 
 **Function coverage.** General management updates this at each monthly review.
@@ -40,7 +40,6 @@ places.
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C11 | baking: commit line applied 2026-10-05 (#52); first snapshot 2026-10-12 | Data | **Collect the subscriber count** | Half of the Partner Program's bar. The weekly statistics job saves it, failing soft so it can never cost the per-video snapshot. Done when a snapshot carries it, and each upload's subscribers gained (added 2026-10-07, fail-soft). |
 | C5 | blocked: the owner's label on #75, replacing #53 (public repo; YouTube's 30-day limit) | Audience | **Collect viewer comments** | Kept as a 30-day download, never committed; `scripts/comments.py` reads it. Done when a shift has read last week's. |
 | C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The company's working name is Show of Hands, and the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it** (2026-10-09): all 1,041 are readings, 883 pre-pipeline (30 duplicates) earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos (10-11); private ones go unmentioned. Renaming is the owner's. Done when the owner has decided. |
@@ -64,7 +63,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | 2026-10-05 |
+| Weekly | 2026-10-12 |
 | Monthly | 2026-10-05 |
 | Quarterly prep | 2026-10-05 |
 | Quarterly planning | 2026-10-10 |
