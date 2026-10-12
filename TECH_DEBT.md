@@ -217,9 +217,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Fixed on a branch (10-12):** one Groq-only line before the question
   (`_GROQ_CHECK`) took the case to 6 of 6 and the replay to 7/7 twice;
   `reliability/groq-screen-calibration`, to land with the switch. Reviewed:
-  no bugs, two test gaps fixed. Left: the line names only the FINE list, and
-  "closely paraphrases" could pass a real `named_wrongdoing` variant on Groq
-  (the replay's must-skip one still skipped 3 of 3). The owner leaves Gemini's role to us (#68) and suspects it titles
+  no bugs, two test gaps fixed. Its risk, that "closely paraphrases" passes a
+  real `named_wrongdoing` rewording, was probed: two rewordings skipped, and
+  one is now a Groq-only replay case. The owner leaves Gemini's role to us (#68) and suspects it titles
   better. Gemini failed on 3 of the last 5 uploads (503s), when the screen
   falls to the keyword backstop. So the likely build is Gemini first, Groq on
   a Gemini 429/5xx (stricter than the backstop, which errs safe), with the
