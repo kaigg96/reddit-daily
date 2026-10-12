@@ -121,13 +121,22 @@ def groq_rescue(prompt, reasoning=False):
     screen and the metadata call, so the switch (config.GROQ_FALLBACK) means
     the same thing for both. The reply is None when off, keyless or missing;
     the failure is blank unless a try was made and missed, so the log tells
-    "Groq failed" from "Groq off"."""
+    "Groq failed" from "Groq off".
+
+    A 429 whose retry-after is Groq's per-minute cap waits once and tries
+    again: on a day Gemini's allowance is spent, up to four screens reach
+    Groq back to back and the metadata call, which carries bet 1's host
+    lines, lands in the same minute (review, 2026-10-12)."""
     if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
         return None, ""
-    try:
-        return _generate_groq(prompt, reasoning=reasoning), ""
-    except Exception as e:
-        return None, _failure_kind(e)
+    for last in (False, True):
+        try:
+            return _generate_groq(prompt, reasoning=reasoning), ""
+        except Exception as e:
+            wait = None if last else _groq_minute_wait(e)
+            if wait is None:
+                return None, _failure_kind(e)
+            time.sleep(wait)
 
 
 def generate_retrying(prompt, tries=2, **kw):
@@ -169,10 +178,19 @@ def generate_retrying(prompt, tries=2, **kw):
 def _groq_rate_wait(exc):
     """Seconds a Groq 429 asks us to wait, if short enough to be its
     per-minute cap; None for Gemini, a missing header, or a longer wait."""
-    if provider() != "groq" or exc.response is None:
+    if provider() != "groq":
+        return None
+    return _groq_minute_wait(exc)
+
+
+def _groq_minute_wait(exc):
+    """Seconds a Groq 429 asks for, if short enough to be its per-minute cap;
+    None for anything else, a missing header, or a longer wait."""
+    response = getattr(exc, "response", None)
+    if response is None or response.status_code != 429:
         return None
     try:
-        wait = float(exc.response.headers.get("retry-after", ""))
+        wait = float(response.headers.get("retry-after", ""))
     except ValueError:
         return None
     return wait if 0 <= wait <= _GROQ_RATE_WAIT_MAX else None

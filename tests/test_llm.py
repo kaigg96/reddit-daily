@@ -671,3 +671,45 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
     assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"
+
+
+def _groq_429(retry_after):
+    r = llm.requests.Response()
+    r.status_code = 429
+    if retry_after is not None:
+        r.headers["retry-after"] = retry_after
+    return llm.requests.HTTPError("429", response=r)
+
+
+def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch):
+    """Review, 2026-10-12: with Gemini spent, the screens and the metadata
+    call reach Groq in one minute, over its 8K-token cap."""
+    _gemini_429(monkeypatch)
+    replies = [_groq_429("7"), GOOD_JSON]
+    slept = []
+
+    def groq(prompt, reasoning=False):
+        r = replies.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+    monkeypatch.setattr(llm, "_generate_groq", groq)
+    monkeypatch.setattr(llm.time, "sleep", slept.append)
+    meta = llm.get_metadata("q", ["a"])
+    assert slept == [7.0]
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+
+
+def test_the_rescue_never_waits_twice_or_on_a_daily_cap(monkeypatch):
+    for headers, sleeps, calls in ((["7", "7"], [7.0], 2), (["3600"], [], 1), ([None], [], 1)):
+        _gemini_429(monkeypatch)
+        errors, slept, sent = [_groq_429(h) for h in headers], [], []
+
+        def groq(prompt, reasoning=False):
+            sent.append(prompt)
+            raise errors.pop(0)
+        monkeypatch.setattr(llm, "_generate_groq", groq)
+        monkeypatch.setattr(llm.time, "sleep", slept.append)
+        meta = llm.get_metadata("q", ["a"])
+        assert (slept, len(sent)) == (sleeps, calls), headers
+        assert meta.failure == "http_429;groq_http_429", headers
