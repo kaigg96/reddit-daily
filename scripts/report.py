@@ -153,11 +153,19 @@ def compare(videos, spec, metric, now, pool=None, min_views=1):
     if unset:
         print(f"({unset} video(s) have no {key} recorded — excluded from both cohorts)")
     if min_views > 1:
+        # Without --at-age the newest uploads have had no time to be seen, and
+        # would count as buried: only those old enough to be judged count. An
+        # --at-age read (true_published set) has already chosen its uploads.
+        aged = lambda vs: [v for v in vs if v.true_published is not None
+                           or v.age_days(now) >= insights.ZERO_MIN_AGE_DAYS]
+        a_aged, b_aged = aged(a), aged(b)
+        young = len(a) + len(b) - len(a_aged) - len(b_aged)
         buried = lambda vs: sum(1 for v in vs if v.views <= insights.BURIED_VIEWS)
-        p = insights.buried_rate_p(buried(a), len(a), buried(b), len(b))
+        p = insights.buried_rate_p(buried(a_aged), len(a_aged), buried(b_aged), len(b_aged))
         print(f"buried (<={insights.BURIED_VIEWS} views), every upload: {key}={value} "
-              f"{buried(a)}/{len(a)} vs {key}!={value} {buried(b)}/{len(b)}, "
-              f"Fisher p={p:.3f} (two-sided)")
+              f"{buried(a_aged)}/{len(a_aged)} vs {key}!={value} {buried(b_aged)}/{len(b_aged)}, "
+              f"Fisher p={p:.3f} (two-sided)"
+              + (f"; {young} under {insights.ZERO_MIN_AGE_DAYS} days left out" if young else ""))
         a = [v for v in a if v.views >= min_views]
         b = [v for v in b if v.views >= min_views]
         print(f"(read below: only uploads with >= {min_views} views)")
@@ -595,7 +603,7 @@ def main():
              args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
-    if args.min_views > 1 and (any(early) or not args.compare):
+    if args.min_views > 1 and (any(early) or args.replays or not args.compare):
         sys.exit("--min-views applies to --compare only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
                                                   Metric.ENGAGED_SHARE):
