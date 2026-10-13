@@ -197,7 +197,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (3) and (4) cannot be fixed from publish times: at four a day slots are 6h
   apart and delays reach 9.4h, so any carry-over rule either hides a real miss
   or raises a false one (10-13). Log each run's slot in the upload log, through
-  a sample after `v8`. **Closes when** the switch goes to four.
+  a sample after `v8`. The delay is rising: weekly median 4.3–4.6h (W36–W38),
+  5.5h (W40), 5.9h (W41), 6.5h (W42 so far, n=3), so at four a day the median
+  run lands after the next slot's cron time. Runs are safe (`run_slot` takes
+  the day from the cron line); the digest is what misreads. **Closes when** the switch goes to four.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
