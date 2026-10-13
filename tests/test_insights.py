@@ -221,6 +221,24 @@ def test_publish_drift_is_measured_forward_from_the_latest_slot_across_midnight(
     assert wd.median_publish_drift(vids, days=36500) == 397   # of 687, 17 and 397 (6.6h)
 
 
+def test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for():
+    """At four a day an 18:23 run can land after midnight: counted by publish
+    date it reads as a missed day, and its 7h delay as 1h past 00:23."""
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    log = [{"video_id": "late", "run_slot": "2026-10-05/3"}, {"video_id": "old", "run_slot": ""},
+           {"video_id": "odd", "run_slot": "garbage"}]
+    sched = wd.scheduled_slots(log)
+    assert sched == {"late": ("2026-10-05", 3)}
+    late = {"id": "late", "published": "2026-10-06T01:23:00Z"}
+    old = {"id": "old", "published": "2026-10-06T01:23:00Z"}
+    assert wd.upload_day(late, sched) == "2026-10-05"
+    assert wd.upload_day(old, sched) == "2026-10-06"
+    assert wd.median_publish_drift([late], days=36500, sched=sched) == 420   # 7h from 18:23
+    assert wd.median_publish_drift([late], days=36500) == 60                 # the estimate's misread
+
+
 def test_publish_drift_reads_four_slots_at_four_a_day(monkeypatch):
     import importlib, sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
