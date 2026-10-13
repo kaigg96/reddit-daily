@@ -1430,6 +1430,17 @@ def test_weekly_totals_leave_out_a_week_still_filling_in():
     assert insights.weekly_totals(rows) == []
 
 
+def test_weekly_totals_leave_out_a_week_with_an_unmeasured_upload():
+    """An upload with views but no engaged reading is absent from the engaged
+    rows; the play-start rows still know it, so the week is held back rather
+    than summed low (2026-10-13)."""
+    engaged = _week_of_uploads(5, 16, [10] * 6)            # the seventh unmeasured
+    views = _week_of_uploads(5, 16, [30] * 7)
+    assert insights.weekly_totals(engaged) == [("2026-W28", 6, 60)]
+    assert insights.weekly_totals(engaged, known_rows=views) == []
+    assert insights.weekly_totals(views, known_rows=views) == [("2026-W28", 7, 210)]
+
+
 def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
     """Uploads from before the first snapshot appear only at 30+ days old;
     the week is known but unread, so it is left out rather than summed low."""

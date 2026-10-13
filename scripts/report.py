@@ -429,7 +429,8 @@ def show_weekly_views(args):
     age = args.at_age or 7
     col = args.metric
     series = insights.weekly_totals(_within_rows(_snapshot_metric_rows(col), args.within),
-                                    at_age=age)
+                                    at_age=age, known_rows=_within_rows(
+                                        _snapshot_metric_rows("views"), args.within))
     if not series:
         print("no publish week is fully read yet")
         return

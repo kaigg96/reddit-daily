@@ -893,7 +893,7 @@ def _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=False):
     return [(value, pub) for _, value, pub in best.values()]
 
 
-def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, known_rows=None):
     """Total views per publish-week, every upload read at the same age.
 
     Bet 2 (PLAN §2) is judged on total weekly views, because the Partner
@@ -907,6 +907,10 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     That leaves out the newest weeks, still filling in, and the weeks before
     the snapshots began or across a missed one, rather than reporting them
     low. Returns [(period, n, total)] oldest first.
+
+    `known_rows` says which uploads exist when `snapshot_rows` may leave some
+    out: an upload with views but no engaged reading is skipped there, and
+    judged from those rows alone its week would sum low (2026-10-13).
     """
     stamps = [r["snapshot"] for r in snapshot_rows if r.get("snapshot")]
     if not stamps:
@@ -914,7 +918,7 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     newest = (max(stamps) - datetime.timedelta(days=at_age - tolerance)).date()
     week = lambda pub: pub.strftime("%G-W%V")
     known = {}
-    for r in snapshot_rows:
+    for r in list(snapshot_rows) + list(known_rows or ()):
         if r.get("published") and r.get("video_id"):
             known.setdefault(week(r["published"]), set()).add(r["video_id"])
     read = {}
