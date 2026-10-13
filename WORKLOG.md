@@ -63,20 +63,22 @@ and more useful than a confident guess.
 
 ## 2026-10-13 (23:17) — Bet 1's final version plays; your label on #74 is now the only step
 
-    Worked (% of the shift): product 35 · gm 25 · data 20 · reliability 10 · security 10
+    Worked (% of the shift): product 30 · reliability 20 · gm 20 · data 15 · security 10 · engineering 5
 
 **Summary:** The exact version of bet 1 that would ship was rendered tonight and plays, with all of the host's lines on screen; its four frames are on #74, so judging it takes a glance from a phone. Nothing reached viewers yet; your label ships it.
 
 ### Toward revenue
 - **Bet 1, our best answer to YouTube's reused-content rule, is one label from shipping.** Tonight's sample is the final build, brought up to date with this afternoon's library fixes: it played (29 seconds), showed all three of the host's lines plus the vote, with the capitals fixed, and our own words were 44% of what the viewer gets. #74 now shows its four frames inline.
+- **Four uploads a day, bet 2's lever, came closer:** the plan no longer reads as if it waits for a separate release, and its last missing piece is built (below), so it can switch on the day its read allows.
 
 ### Done
 - **Product:** the sample above, and the frames on #74. Two checks a sample cannot make: the first live upload of bet 1 adds four columns to our upload record, so I replayed that on a copy (old rows intact, new row right); and bet 1's pre-committed read runs as written today, so tooling will not hold it up when its 20 uploads are in. Also made plain in the plan that four uploads a day waits only for the Groq backup, which ships inside bet 1, not for a separate release; the old wording could have cost bet 2 about two and a half weeks.
 - **Data:** two pre-commitments made before any data, so later reads cannot be bent: the title tests (style B and the capitalised word) will also be read on the share of plays YouTube actually counts, since their extra views could be swipe-aways that don't count toward the bar. Today's read is too thin to say (9 against 14 uploads). Also checked whether buried uploads (5 views or fewer at a week, 13% of them) share a topic, title style or version: none does beyond chance.
 - **Reliability:** every upload landed, including this evening's; the record of the last upload is intact; Gemini failed on 1 of the last 20 uploads. GitHub's late starts have never made two video runs collide (none in 99 runs since August; the closest were 3.5 hours apart), which matters once we post four a day.
+- **Reliability, for bet 2 (four uploads a day):** built its last missing piece, on a branch behind bet 1. Each upload now records the slot it was scheduled for, and the weekly report counts it under that day and times its delay from that slot, so a run GitHub starts after midnight no longer reads as a missed day. Two fresh reviews found no bugs and two risks, both fixed: an upload started by hand would have recorded a guessed slot that looked like a scheduled one, and one hand-edited value could have stopped the weekly report. It needs its own sample after bet 1 ships, before four a day is switched on. The safety screen's weekly audit is clean: one post skipped since September.
 - **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.37 this month, forecast $0.88 of $3); tonight's sample logs hold no keys.
 - **General management:** your replies since 20 September fall on 15 of 24 days, with gaps of up to three days. So #74's wait is still within your normal rhythm, and the rule that fires tomorrow morning should check that before changing how asks reach you. Fixed the tracker checker, which flagged a closed issue as open for the third time in three weeks (reviewed, merged).
-- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: improving (bet 1 made shippable), plus one fix and measurement.
+- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: mostly improving (bet 1 made shippable, four a day's last piece), plus one fix and measurement.
 
 ### Blocked
 - **For you, in order:** #74 (bet 1: a glance at four frames, then a label); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks). Adding two or three music tracks also answers the template risk.
@@ -84,6 +86,7 @@ and more useful than a confident guess.
 ### Next
 - On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
 - Tomorrow's 08:17 release check reads the same build; a PASS there is expected.
+- Once bet 1 is live, sample the slot-recording branch (it sits on top of bet 1) and merge it before four a day is switched on.
 - If #74 is still open at 10:49 tomorrow, read the rhythm note in the decision log before re-asking.
 
 ### Better?
