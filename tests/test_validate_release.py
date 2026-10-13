@@ -135,6 +135,20 @@ def test_with_commentary_on_missing_host_lines_fail_the_gate(monkeypatch):
     assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
 
 
+def test_a_dropped_host_line_warns_but_passes(monkeypatch):
+    """A line past its cap drops alone (#15): the upload keeps a host, so the
+    gate passes, but the verdict file must show the prompt overran."""
+    from src.llm import Commentary
+    lines = []
+    monkeypatch.setattr(vr, "note", lines.append)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    host = Commentary("An angle.", ["", "Two."], "")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+    assert "- ⚠️ host reaction 1: dropped, past its cap (the rest still ship)" in lines
+    assert "- ⚠️ host vote: dropped, past its cap (the usual closing line ships)" in lines
+    assert "- ✅ host reaction 2: Two." in lines
+
+
 def test_with_commentary_off_host_lines_are_not_asked_for(monkeypatch):
     fine = MetadataResult("A title", ["a", "b", "c"], "Comment yours!", "gemini")
     assert _metadata(monkeypatch, fine) is True

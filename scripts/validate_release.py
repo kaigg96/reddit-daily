@@ -204,9 +204,16 @@ def check_metadata():
             note("- ❌ host lines missing or past their caps (the upload would be a plain reading)")
             ok = False
         else:
-            note(f"- ✅ host setup: {host.setup}")
+            # A line past its cap now drops alone (#15), so the upload keeps a
+            # host; warn, so the verdict file still shows the prompt overran.
+            def shown(label, line, ships="the rest still ship"):
+                note(f"- ✅ host {label}: {line}" if line
+                     else f"- ⚠️ host {label}: dropped, past its cap ({ships})")
+            shown("setup", host.setup)
             for i, line in enumerate(host.reactions, 1):
-                note(f"- ✅ host reaction {i}: {line}")
+                shown(f"reaction {i}", line)
+            if not host.verdict:
+                shown("vote", "", "the usual closing line ships")
     note("")
     return ok
 
