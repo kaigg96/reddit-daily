@@ -180,8 +180,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   review (10-13) found no blockers; left: the setup note shows for 65% of the
   question's audio, so under 2 s on a short question (`video.py` ~107). Keep it
   up to the first answer, after the owner's label, since it changes the look.
-  Host lines now also drop on emoji (the font lacks them); `emoji` is the one
-  unpinned dependency in requirements.txt.
+  Host lines now also drop on emoji (the font lacks them). `emoji` and
+  `better-profanity` (which filters posts and comments) are pinned since
+  10-13, and `test_requirements.py` fails any unpinned line.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
