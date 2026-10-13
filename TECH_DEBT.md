@@ -274,7 +274,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   SessionStart `compact` hook re-stating the deadline; `!command` injection
   in `/shift` (needs `|| true`). Rejected: `/goal` (cannot see clock or git),
   skill `context: fork`, `effort`/`model` fields. Sequencing: `v8`'s read and
-  four a day collide (PRD #4, noted). Left alone: PRD's cautionary records
+  four a day collide (PRD #4, noted). **Gates:** fresh reviews caught real
+  defects in 11 of 13 shifts; samples (6 of 6 PASS) judge playability only, and
+  4 content bugs were found by reading their lines; the release check passed a
+  shock-phrase title (10-09). No reverts. **Early endings:** 7 of 13 with over
+  15 minutes left, 2 after #67's fix. **Before `v8` merges:** the branch
+  carries Groq as a fallback (`GROQ_FALLBACK`), which 9872be8 let ride without
+  a bump, while #13's rule says the full switch ships as its own version. A
+  fallback is not the switch, but `v8`'s read should count Groq-written uploads
+  (`meta_source`) apart; check before merging. Left alone: PRD's cautionary records
   (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
