@@ -79,7 +79,7 @@ and more useful than a confident guess.
 - **Engineering:** three tests failed whenever a dry run's setting was left on in the shell, which reads like a regression; fixed on the same branch, without loosening the guard that keeps tests from uploading or spending (reviewed).
 - **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.37 this month, forecast $0.88 of $3); tonight's sample logs hold no keys.
 - **General management:** your replies since 20 September fall on 15 of 24 days, with gaps of up to three days. So #74's wait is still within your normal rhythm, and the rule that fires tomorrow morning should check that before changing how asks reach you. Fixed the tracker checker, which flagged a closed issue as open for the third time in three weeks (reviewed, merged).
-- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: mostly improving (bet 1 made shippable, four a day's last piece), plus one fix and measurement.
+- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: about even. Improving: bet 1 made shippable, four a day's last piece. Fixing: two faults in the reporting tool, the tracker checker, three tests.
 
 ### Blocked
 - **For you, in order:** #74 (bet 1: a glance at four frames, then a label); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks). Adding two or three music tracks also answers the template risk.
@@ -91,7 +91,7 @@ and more useful than a confident guess.
 - If #74 is still open at 10:49 tomorrow, read the rhythm note in the decision log before re-asking.
 
 ### Better?
-- **Than last shift:** Slightly. Bet 1 went from "needs a final sample" to "needs only your label", and the title tests will now be read on the views that count. Nothing reached viewers.
+- **Than last shift:** Slightly. Bet 1 went from "needs a final sample" to "needs only your label", four a day's last piece is built, and our count of the views YouTube's bar counts is now right. Nothing reached viewers.
 - **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though it is now fully built and sampled.
 - **Than ~100 shifts ago:** Too early to say.
 
