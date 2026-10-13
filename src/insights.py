@@ -941,17 +941,36 @@ def views_gained(snapshot_rows):
     snapshots. A video first seen in a snapshot counts in full, since it
     was published after the one before.
     """
-    by_snap = {}
-    for r in snapshot_rows:
-        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
-            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
     out = []
-    dates = sorted(by_snap)
-    for prev, cur in zip(dates, dates[1:]):
-        before, after = by_snap[prev], by_snap[cur]
+    for prev, cur, before, after, _ in _measured_pairs(snapshot_rows):
         gained = sum(max(v - before.get(vid, 0), 0) for vid, v in after.items())
         out.append((cur, gained, (cur - prev).days))
     return out
+
+
+def _measured_pairs(snapshot_rows):
+    """Consecutive snapshots as (prev, cur, before, after, published), leaving
+    out a snapshot holding under half the videos published by its date: it
+    did not measure this column. A column added later is absent before it
+    began, except on zero-view rows, read as zero: engaged views began
+    2026-10-05, so 09-28 held only zero-view videos and every video's
+    lifetime engaged count read as gained in one week (19,027 of 19,771;
+    10-13). Within a kept pair, a video missing from the earlier snapshot
+    though published before it was unmeasured, not new: the callers count
+    only videos in `before` or published since."""
+    by_snap, published = {}, {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+            if r.get("published"):
+                published[r["video_id"]] = r["published"]
+    out_by = lambda d: sum(1 for p in published.values() if p <= d)
+    dates = sorted(d for d in by_snap if len(by_snap[d]) * 2 >= out_by(d))
+    for prev, cur in zip(dates, dates[1:]):
+        before = by_snap[prev]
+        after = {vid: v for vid, v in by_snap[cur].items()
+                 if vid in before or published.get(vid) is None or published[vid] > prev}
+        yield prev, cur, before, after, published
 
 
 def views_gained_by_age(snapshot_rows, old_days=60):
@@ -960,16 +979,8 @@ def views_gained_by_age(snapshot_rows, old_days=60):
     views that the back catalogue shares at the same moment is the channel's
     distribution, not anything about the new uploads (the September 2026 drop
     held across every field we log, PRD §4)."""
-    by_snap, published = {}, {}
-    for r in snapshot_rows:
-        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
-            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
-            if r.get("published"):
-                published[r["video_id"]] = r["published"]
     out = []
-    dates = sorted(by_snap)
-    for prev, cur in zip(dates, dates[1:]):
-        before, after = by_snap[prev], by_snap[cur]
+    for prev, cur, before, after, published in _measured_pairs(snapshot_rows):
         old = recent = 0
         for vid, v in after.items():
             gained = max(v - before.get(vid, 0), 0)
