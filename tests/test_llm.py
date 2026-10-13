@@ -47,6 +47,10 @@ def captured(monkeypatch):
 
     monkeypatch.setattr(llm.requests, "post", fake_post)
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    # These pin production's request shape. A shell's DRY_RUN=1 (how a dry run
+    # is started) routes to SAMPLE_MODEL's instead and failed three of them;
+    # nothing leaves the process here, so the live route is safe to read.
+    monkeypatch.setattr(config, "DRY_RUN", False)
     return calls
 
 
