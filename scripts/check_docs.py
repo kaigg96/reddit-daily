@@ -87,9 +87,13 @@ NEAR = 80   # characters either side of a citation
 def describes_as_open(text, n):
     """Whether a mention of #n sits near a word calling it open. A whole line
     was too wide: a PRD §0 row is one long line, so a row citing closed #18
-    and titled "Open on the hook" read as describing #18 as open (2026-09-29)."""
+    and titled "Open on the hook" read as describing #18 as open (2026-09-29).
+    Nor does it cross a table cell: "keep while #74 is open) | **Bet 1's next
+    step, under #71's limits" read as describing #71 as open (2026-10-13)."""
     for m in re.finditer(rf"#{n}\b", text):
-        near = text[max(0, m.start() - NEAR):m.end() + NEAR].lower()
+        before = text[max(0, m.start() - NEAR):m.start()].rsplit("|", 1)[-1]
+        after = text[m.end():m.end() + NEAR].split("|", 1)[0]
+        near = (before + m.group() + after).lower()
         # Whole words: "spending" is not "pending" (2026-10-08).
         if any(re.search(rf"\b{w}\b", near) for w in OPEN_WORDS):
             return True
