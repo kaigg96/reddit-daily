@@ -228,6 +228,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     within_length = insights.render_within_length(read)
     if within_length:
         print(within_length)
+    near_zero = insights.render_without_near_zero(read, min_uploads)
+    if near_zero:
+        print(near_zero)
 
 
 def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):

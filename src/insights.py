@@ -704,10 +704,44 @@ def render_within_length(read, threshold=1.0):
     return "\n".join(lines)
 
 
+# Plays below which an upload leaves the robustness read: its average is
+# YouTube's whole-second figure over a handful of viewers, often 0.0 on 1-6
+# plays (TECH_DEBT). The floor #3 and #10 read with (`--min-views 10`).
+RELEASE_MIN_VIEWS = 10
+
+
+def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN_VIEWS):
+    """The release's watch-seconds without uploads under `min_views` plays.
+
+    Robustness, never a trigger: `v7` read +20% on every upload and +9%
+    without them (2026-10-12), the retired clip's buried uploads sitting in
+    the before-cohort. The verdict stands as the owner set it (#18). Empty
+    when no upload on either side is under the floor, and until the release
+    reaches its pre-committed size, so it cannot show a result the rule has
+    not yet allowed (`release_verdict` counts the same way)."""
+    if not read.comparisons:
+        return ""
+    head = read.comparisons[0]
+    if head.a.n + head.a.zero_view_count < min_uploads:
+        return ""
+    # Zero-view uploads already sit outside the verdict's medians; count only
+    # the ones this line removes.
+    few = [sum(1 for v in side if 0 < v.views < min_views)
+           for side in (read.release, read.before)]
+    if not any(few):
+        return ""
+    a = [v for v in read.release if v.views >= min_views]
+    b = [v for v in read.before if v.views >= min_views]
+    return (f"WITHOUT UPLOADS UNDER {min_views} VIEWS ({few[0]} release and {few[1]} "
+            "before left out) — robustness only, never a trigger\n"
+            + compare(a, b, head.a.label, head.b.label, read.load.anchor,
+                      Metric.WATCH).render())
+
+
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
-# that committed to more (#1: `v7` commits to 20).
-RELEASE_MIN_UPLOADS = {"v7": 20}
+# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20).
+RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
 
 
 @dataclass
