@@ -222,9 +222,11 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     import csv
     from src import config
     with open(config.UPLOAD_LOG) as f:
-        own_words = insights.render_own_words(list(csv.DictReader(f)), version, key)
-    if own_words:
-        print(own_words)
+        rows = list(csv.DictReader(f))
+    for line in (insights.render_own_words(rows, version, key),
+                 insights.render_host_lines(rows, version, key)):
+        if line:
+            print(line)
     within_length = insights.render_within_length(read)
     if within_length:
         print(within_length)

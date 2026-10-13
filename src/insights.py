@@ -683,6 +683,26 @@ def render_own_words(log_rows, version, key="format_version"):
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
 
 
+def render_host_lines(log_rows, version, key="format_version"):
+    """Bet 1's dose beside its verdict: of the release's uploads logging
+    `host_lines`, how many showed every host line, some (a line too long
+    dropped alone, or the duration guard cut one) or none. Never a trigger: it
+    says how much of the change the verdict measured. Whole is a note per
+    answer read, the setup and the vote. Empty when nothing logs a count."""
+    whole = config.COMMENTARY_ANSWERS + 2
+    counts = []
+    for r in log_rows:
+        n = (r.get("host_lines") or "").strip()
+        if r.get(key) == version and n.isdecimal():
+            counts.append(int(n))
+    if not counts:
+        return ""
+    full = sum(1 for n in counts if n >= whole)
+    none = sum(1 for n in counts if n == 0)
+    return (f"host lines shown (the dose, never a trigger): all {whole} on {full} of "
+            f"{len(counts)} uploads, some on {len(counts) - full - none}, none on {none}")
+
+
 def render_within_length(read, threshold=1.0):
     """When a release shifted length, its watch-seconds within each length half.
 
