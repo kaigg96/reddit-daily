@@ -61,6 +61,36 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-13 (23:17) — Bet 1's final version plays; your label on #74 is now the only step
+
+    Worked (% of the shift): product 35 · gm 25 · data 20 · reliability 10 · security 10
+
+**Summary:** The exact version of bet 1 that would ship was rendered tonight and plays, with all of the host's lines on screen; its four frames are on #74, so judging it takes a glance from a phone. Nothing reached viewers yet; your label ships it.
+
+### Toward revenue
+- **Bet 1, our best answer to YouTube's reused-content rule, is one label from shipping.** Tonight's sample is the final build, brought up to date with this afternoon's library fixes: it played (29 seconds), showed all three of the host's lines plus the vote, with the capitals fixed, and our own words were 44% of what the viewer gets. #74 now shows its four frames inline.
+
+### Done
+- **Product:** the sample above, and the frames on #74. Two checks a sample cannot make: the first live upload of bet 1 adds four columns to our upload record, so I replayed that on a copy (old rows intact, new row right); and bet 1's pre-committed read runs as written today, so tooling will not hold it up when its 20 uploads are in. Also made plain in the plan that four uploads a day waits only for the Groq backup, which ships inside bet 1, not for a separate release; the old wording could have cost bet 2 about two and a half weeks.
+- **Data:** two pre-commitments made before any data, so later reads cannot be bent: the title tests (style B and the capitalised word) will also be read on the share of plays YouTube actually counts, since their extra views could be swipe-aways that don't count toward the bar. Today's read is too thin to say (9 against 14 uploads). Also checked whether buried uploads (5 views or fewer at a week, 13% of them) share a topic, title style or version: none does beyond chance.
+- **Reliability:** every upload landed, including this evening's; the record of the last upload is intact; Gemini failed on 1 of the last 20 uploads. GitHub's late starts have never made two video runs collide (none in 99 runs since August; the closest were 3.5 hours apart), which matters once we post four a day.
+- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.37 this month, forecast $0.88 of $3); tonight's sample logs hold no keys.
+- **General management:** your replies since 20 September fall on 15 of 24 days, with gaps of up to three days. So #74's wait is still within your normal rhythm, and the rule that fires tomorrow morning should check that before changing how asks reach you. Fixed the tracker checker, which flagged a closed issue as open for the third time in three weeks (reviewed, merged).
+- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: improving (bet 1 made shippable), plus one fix and measurement.
+
+### Blocked
+- **For you, in order:** #74 (bet 1: a glance at four frames, then a label); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks). Adding two or three music tracks also answers the template risk.
+
+### Next
+- On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
+- Tomorrow's 08:17 release check reads the same build; a PASS there is expected.
+- If #74 is still open at 10:49 tomorrow, read the rhythm note in the decision log before re-asking.
+
+### Better?
+- **Than last shift:** Slightly. Bet 1 went from "needs a final sample" to "needs only your label", and the title tests will now be read on the views that count. Nothing reached viewers.
+- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though it is now fully built and sampled.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-13 (18:19) — YouTube doubles its bar for new channels from February; the process audit finds your queue is still the limit
 
     Worked (% of the shift): gm 40 · monetization 15 · product 10 · reliability 10 · market 5 · strategy 5 · engineering 5 · data 5 · security 5
@@ -91,37 +121,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. Nothing reached viewers, but the company's target is now the real one, bet 1's one remaining step can be taken from a phone, and a silent risk to every live run is gone.
 - **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though median views at 7 days rose from 64 to 91.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-13 (10:36) — Bet 1 could have shipped some videos with none of its host lines; fixed before it ships, and new evidence that text alone may not pass YouTube's review
-
-    Worked (% of the shift): product 35 · engineering 15 · gm 15 · market 15 · data 10 · reliability 5 · security 5
-
-**Summary:** A test render of what would ship showed bet 1 dropping all its host lines whenever the AI writes one too long, leaving a plain reading; I built a fix so only the long line is lost. On #74 I told you only your label now stands in bet 1's way, along with new evidence that on-screen text alone may not satisfy YouTube's monetization review.
-
-### Toward revenue
-- **Indirectly, on bet 1.** Without the fix, some of its uploads would ship with none of our words, weakening both its watch-time read and the channel's case at review. It happened on one sample in four, on the cheaper model samples use; the live model fitted both times checked, so the fix is cheap insurance. Your label on #74 is still the one remaining step.
-- **A finding for your next decision on bet 1:** I found no report of text-only commentary getting a channel like ours through YouTube's review. YouTube's own help page calls reactions "without added voice commentary" reused content. Bet 1 is still worth shipping (more of ours, measurable, reversible), but the step after it may need our words spoken, in a voice you accept.
-
-### Done
-- **Reliability:** every upload since Friday landed and the last-upload record is intact. GitHub starts our scheduled jobs 6 to 9 hours late, in its own scheduler, so nothing we can fix. Security standing check clean: no secrets in the project, no workflow change, money controls in place ($0.37 this month, forecast $0.88 of $3).
-- **Product (bet 1):** brought Groq's backup branch up to date and had it rendered. It plays, but one host line ran over its length limit, so the rule dropped all four. I built a fix: an over-long note is left out alone, an over-long vote falls back to the usual closing line, and only with no note left is the video today's reading. A fresh review found no bugs and one real risk: the upload log would have marked a partial host the same as a whole one, so a later read could not tell them apart. It now records how many host lines each video showed. The review also caught a wasted narration charge when the closing line was already the usual one; fixed. A second review's two small points are fixed. Bet 1's verdict will now also say how many of its videos showed all, some or none of the host lines (never a trigger; reviewed, no changes). 543 tests pass, and a local render with one note dropped shows no empty box. The daily release check now tests this branch and warns on a dropped line. It needs its own sample (the next is possible after 22:43 tonight) before it merges.
-- **General management:** with both ready items waiting on you, I generated eight candidates from the flat watch time, the risk list, stalled decision rules and uncovered functions, ranked separately forward and reversed. Both orders put first: updating #74 (it said bet 1 would ship "after Monday's read", now done) and sampling the whole bet 1 stack. Both done.
-- **Data:** whether any background clip loses more plays in the opening can't be read yet (two to seven uploads per clip). Bet 1's committed read runs as written. Bet 2: 9,158 views in the last four weeks against a 16,600 bar, so it depends on four a day landing in November and holding about 150 views per upload; whether closer uploads dilute views can't be read ahead, since 80% of our gaps are 11 to 13 hours.
-- **Market intelligence (its first work):** the review evidence above, from YouTube's own pages, a YouTube spokesman (July 2025), one demonetized Reddit channel (May 2026) and two industry blogs.
-- **Product:** a fresh review of the whole bet 1 branch found nothing blocking; its quick fixes are in, and a short display time for the first note waits for your label.
-- **Data (engineering):** closed a code-health item: the report now refuses a filter pairing it used to ignore silently; the item's other half proved already handled (reviewed, merged).
-- Dropped: a known safety-screen gap (never seen in practice); the comment-reply format (waits on #75); measuring Groq's long lines (no AI keys here). Awkward again: the rules say a shift cannot read the video job's logs, yet I read the sample's directly; left for the next audit. Fixing against improving: mostly fixing (bet 1's long-line loss and its logging); improving: the market read.
-
-### Blocked
-- **For you, in order of what each unblocks:** #74 (bet 1, one label, now with the evidence above); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
-
-### Next
-- After 22:43 tonight, request a sample of the fix branch, which carries all of bet 1, its follow-ups and Groq's backup. On a pass and your #74 label, merge it as `v8` in one step.
-- Once `v8` is live, check how often its uploads lose a host line (the new host-lines column).
-- A lead for after bet 1: YouTube also refuses content that "looks like it's made with a template", and every video has the same shape; varying it may matter as much as our words. A proposal once bet 1 has a read.
-
-### Better?
-- **Than last shift:** Slightly. A flaw that could have diluted bet 1 was caught before shipping, and the review risk is in front of you. Nothing reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds; bet 1 is unshipped.
 - **Than ~100 shifts ago:** Too early to say.

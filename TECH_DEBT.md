@@ -182,7 +182,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   up to the first answer, after the owner's label, since it changes the look.
   Host lines now also drop on emoji (the font lacks them). `emoji` and
   `better-profanity` (which filters posts and comments) are pinned since
-  10-13, and `test_requirements.py` fails any unpinned line.
+  10-13, and `test_requirements.py` fails any unpinned line. The final
+  branch, with those pins merged in, sampled PASS on `0fbc37c` (10-13
+  23:22): all four lines shown, notes capitalised, own words 0.439.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
