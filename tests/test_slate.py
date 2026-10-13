@@ -347,12 +347,17 @@ def test_a_late_evening_run_belongs_to_the_day_it_was_scheduled_for():
 def test_the_log_records_the_slot_a_run_was_scheduled_for():
     """A late run is logged under its cron line's day and slot, not its
     publish time, so the digest can tell it from a missed day (PRD §0 #4)."""
-    import inspect
-    from src import log, run
-    assert content.slot_key(*content.run_slot(_at(6, 0, 40), "23 18 * * *")) == "2026-10-05/3"
-    assert content.slot_key(*content.run_slot(_at(5, 19), "23 12 * * *")) == "2026-10-05/2"
-    assert log.FIELDS[-1] == "run_slot"   # appended, so old rows keep their columns
-    assert '"run_slot": content.slot_key(day, slot)' in inspect.getsource(run.main)
+    import csv, inspect
+    from src import config, log, run
+    key = lambda now, line: content.slot_key(*content.run_slot(now, line), line)
+    assert key(_at(6, 0, 40), "23 18 * * *") == "2026-10-05/3"
+    assert key(_at(5, 19), "23 12 * * *") == "2026-10-05/2"
+    assert key(_at(5, 19), "") == ""   # a manual run: the clock's guess is not logged
+    assert '"run_slot": content.slot_key(day, slot, schedule)' in inspect.getsource(run.main)
+    # Columns only ever append, so the committed log's rows keep theirs.
+    with open(config.UPLOAD_LOG, newline="") as f:
+        header = next(csv.reader(f))
+    assert log.FIELDS[:len(header)] == header and "run_slot" in log.FIELDS
 
 
 def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch):
