@@ -123,3 +123,46 @@ def test_the_comment_posts_the_vote_capitalised():
     import inspect
     from src import run
     assert "comment_text = content.sentence_case(outro_text)" in inspect.getsource(run.main)
+
+
+# --- one long line drops alone (sample of 2026-10-13 lost its whole host) -----
+
+def _text_metadata(monkeypatch, **lines):
+    import json
+    from tests.test_commentary import _metadata
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    return _metadata(monkeypatch, json.dumps({**HOST, **lines}))[0].commentary
+
+
+def test_a_long_reaction_drops_only_its_own_note(monkeypatch):
+    host = _text_metadata(monkeypatch, reactions=[HOST["reactions"][0], "word " * 13])
+    assert host == (HOST["setup"], [HOST["reactions"][0], ""], HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    assert [s.note for s in segs] == [HOST["setup"], HOST["reactions"][0], "", ""]
+
+
+def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
+    host = _text_metadata(monkeypatch, cta="word " * 19)
+    assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
+    assert run.closing_line(None, host) is None          # so today's line closes
+    segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
+    assert segs[-1].kind == "outro"                     # not counted as our words
+    notes = sum(len(n) for n in [HOST["setup"], *HOST["reactions"]])
+    total = sum(len(s.text) + len(s.note) for s in segs)
+    assert run.own_words_share(segs) == f"{notes / total:.3f}"
+
+
+def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):
+    assert _text_metadata(monkeypatch, setup="word " * 13,
+                          reactions=["word " * 13, "word " * 13]) is None
+
+
+def test_a_voiced_host_still_falls_back_whole(monkeypatch):
+    host = _text_metadata(monkeypatch)
+    assert host is not None
+    monkeypatch.setattr(config, "HOST_TEXT", False)
+    from tests.test_commentary import _metadata
+    import json
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, "reactions": ["ok", "word " * 19]}))
+    assert meta.commentary is None

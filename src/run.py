@@ -64,8 +64,8 @@ def build_segments(post, outro_text, host, synth, host_voice):
                                   speaker=host_voice))
     # The vote is the host's line. Voiced, it takes the host's voice and
     # colour; text-only, the narrator speaks it, as it speaks today's CTA.
-    if text:
-        segments.append(synth("outro", outro_text, kind="vote"))
+    if text:   # a vote dropped as too long leaves today's line, not ours
+        segments.append(synth("outro", outro_text, kind="vote" if host.verdict else "outro"))
     else:
         segments.append(synth("outro", outro_text, kind="host" if host else "outro",
                               speaker=host_voice if host else None))
@@ -85,9 +85,10 @@ def drop_last_answer(segments):
 def closing_line(meta, host):
     """The AI's closing line, or None for the generic one. With commentary on,
     the call's "cta" is the host's vote: after a plain reading it would answer
-    a question nobody heard argued, so a fallback upload gets None."""
+    a question nobody heard argued, so a fallback upload gets None, as does a
+    host whose vote alone ran long."""
     if host:
-        return host.verdict
+        return host.verdict or None
     return None if config.COMMENTARY else meta.cta
 
 
@@ -227,9 +228,9 @@ def main():
     if config.COMMENTARY and not host:
         print("Commentary: no usable host lines -- shipping today's reading")
     if host:
-        print(f"Commentary setup: {host.setup}")
+        print(f"Commentary setup: {host.setup or '(dropped)'}")
         for i, line in enumerate(host.reactions, 1):
-            print(f"Commentary reaction {i}: {line}")
+            print(f"Commentary reaction {i}: {line or '(dropped)'}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta = closing_line(meta, host)

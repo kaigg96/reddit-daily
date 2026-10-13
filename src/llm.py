@@ -345,7 +345,12 @@ def _within_cap(line, kind):
 
 
 def _clean_commentary(data, n):
-    """The host's lines, or None unless every one is usable (see Commentary)."""
+    """The host's lines, or None unless every one is usable (see Commentary).
+
+    Shown as text, an over-long line is dropped alone: a note costs no time,
+    and one long line cost a whole upload its host in one of four samples (
+    2026-10-13). Its note is left blank, and a long vote leaves the generic
+    closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
     reactions = data.get("reactions")
     if not isinstance(reactions, list) or len(reactions) != n:
@@ -353,10 +358,18 @@ def _clean_commentary(data, n):
     reactions = [_clean_str(r) for r in reactions]
     if not (setup and verdict and all(reactions)):
         return None
-    if not (_within_cap(setup, "setup") and _within_cap(verdict, "cta")
+    if (_within_cap(setup, "setup") and _within_cap(verdict, "cta")
             and all(_within_cap(r, "reaction") for r in reactions)):
-        print("Commentary: a host line ran past its length cap")
+        return Commentary(setup, reactions, verdict)
+    print("Commentary: a host line ran past its length cap")
+    if not config.HOST_TEXT:
         return None
+    setup = setup if _within_cap(setup, "setup") else ""
+    reactions = [r if _within_cap(r, "reaction") else "" for r in reactions]
+    verdict = verdict if _within_cap(verdict, "cta") else ""
+    if not (setup or any(reactions)):
+        return None
+    print("Commentary: dropped only the long line(s)")
     return Commentary(setup, reactions, verdict)
 
 
