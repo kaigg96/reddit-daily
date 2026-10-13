@@ -302,15 +302,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
 
-- **Bet 2's engaged weekly total could read low without saying so (2026-10-13).**
-  `_snapshot_metric_rows` skips a blank `engaged_views` on a row with views,
-  and `weekly_totals` judges a week complete from the rows it is given, so an
-  upload never measured in engaged views drops out of its week instead of
-  holding the week back. `weekly_analytics.py`'s engaged-only retry can leave
-  such blanks. None so far (all 41 blanks on 10-12 are zero-view rows, read as
-  zero). Fix: build `known` from every snapshot row, not only measured ones.
-  **Closes when** that lands, or at bet 2's engaged read if still none.
-
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
