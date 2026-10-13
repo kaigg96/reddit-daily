@@ -63,12 +63,13 @@ and more useful than a confident guess.
 
 ## 2026-10-13 (18:19) — YouTube doubles its bar for new channels from February; the process audit finds your queue is still the limit
 
-    Worked (% of the shift): gm 45 · monetization 15 · reliability 10 · engineering 10 · market 5 · strategy 5 · data 5 · security 5
+    Worked (% of the shift): gm 40 · monetization 15 · product 10 · reliability 10 · market 5 · strategy 5 · engineering 5 · data 5 · security 5
 
 **Summary:** YouTube announced in August that from 1 February 2027 a new channel needs 20 million qualifying Shorts views in 90 days to earn ad revenue, double today's bar. Its smaller tier (500 subscribers, 3 million views, unlocking fan funding and Shopping) is unchanged and is now our nearest route. The process audit came due and found the owner's queue is still what holds bet 1 back.
 
 ### Toward revenue
 - **Nothing shipped to viewers.** Bet 1 still waits on your label (#74), and its sample cannot run before 22:43 tonight.
+- **Bet 1's ask is now a glance:** until now, judging it meant downloading a zip from GitHub, unzipping it and playing a silent video, which is hard on a phone. #74 now shows four frames of the sample inline, in the email too: the host's three lines and the closing vote.
 - **The target moved:** the plan now records the February change and the smaller tier, about 250 times our current qualifying views, against roughly 800 times for today's full bar. No direction changes on this alone; it goes to the monthly review on 5 November.
 
 ### Done
@@ -83,10 +84,11 @@ and more useful than a confident guess.
 
 ### Next
 - After 22:43, request the sample of bet 1's branch. It also carries the Groq backup; my recommendation is to let it ride, because it only answers when Gemini fails (about 1 upload in 10) and without it those uploads would ship with no host at all. Bet 1's read can count those uploads separately with the existing report.
+- When tonight's sample lands, put its frames on #74 the same way (the image lives on its own branch; keep that branch while #74 is open).
 - If #74 is still open at 10:49 tomorrow, the rule about how long your asks wait has fired: the next shift should re-think how bet 1 reaches you rather than ask again.
 
 ### Better?
-- **Than last shift:** Slightly. Nothing reached viewers, but the company's target is now the real one, and a silent risk to every live run is gone.
+- **Than last shift:** Slightly. Nothing reached viewers, but the company's target is now the real one, bet 1's one remaining step can be taken from a phone, and a silent risk to every live run is gone.
 - **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though median views at 7 days rose from 64 to 91.
 - **Than ~100 shifts ago:** Too early to say.
 
