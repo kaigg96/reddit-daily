@@ -60,7 +60,11 @@ def scheduled_slots(log_rows):
     out = {}
     for r in log_rows:
         day, _, slot = (r.get("run_slot") or "").partition("/")
-        if day and slot.isdigit():
+        try:   # a hand-edited value falls back to the estimate, never stops the report
+            datetime.date.fromisoformat(day)
+        except ValueError:
+            continue
+        if slot in ("0", "1", "2", "3"):
             out[r["video_id"]] = (day, int(slot))
     return out
 

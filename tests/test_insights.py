@@ -227,10 +227,14 @@ def test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for():
     import sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     from scripts import weekly_digest as wd
-    log = [{"video_id": "late", "run_slot": "2026-10-05/3"}, {"video_id": "old", "run_slot": ""},
-           {"video_id": "odd", "run_slot": "garbage"}]
+    import inspect
+    log = [{"video_id": "late", "run_slot": "2026-10-05/3"}, {"video_id": "old", "run_slot": ""}]
+    log += [{"video_id": "odd", "run_slot": v}
+            for v in ("garbage", "garbage/3", " 2026-10-05/3", "2026-10-05/9", "2026-10-05/\u00b2")]
     sched = wd.scheduled_slots(log)
     assert sched == {"late": ("2026-10-05", 3)}
+    src = inspect.getsource(wd.main)
+    assert "upload_day(v, sched)" in src and "median_publish_drift(channel_videos, sched=sched)" in src
     late = {"id": "late", "published": "2026-10-06T01:23:00Z"}
     old = {"id": "old", "published": "2026-10-06T01:23:00Z"}
     assert wd.upload_day(late, sched) == "2026-10-05"
