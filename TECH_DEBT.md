@@ -202,8 +202,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   or raises a false one (10-13). Log each run's slot in the upload log, through
   a sample after `v8`: **built 10-13 on `reliability/run-slot-log`**, stacked
   on `v8` (`run_slot`; the digest counts each upload for its scheduled day and
-  times its delay from that slot; older rows keep the estimate). Sample and
-  merge it after `v8`, before the switch. **At the switch, keep
+  times its delay from that slot; older rows keep the estimate; reviewed
+  twice, fixed). Merge it after `v8`, before the switch, on tests and review:
+  no sample reaches it (a dry run returns before the log), and `prev_post.txt`
+  is written first, so a fault there cannot repeat an upload. **At the switch, keep
   `MAX_SCREENED_CANDIDATES` at 4:** PRD §2's cut to 2 was the free route for
   Gemini's worst case, which `v8`'s Groq fallback now answers, so the cut
   would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising: weekly median 4.3–4.6h (W36–W38),
