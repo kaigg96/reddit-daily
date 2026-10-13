@@ -171,6 +171,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   capitalises a plain lower-case first word (0a0712c, reviewed). Re-sampled
   on `907d6ad` (10-11 22:59): PASS. Its vote, posted as the comment, came
   back lower case: fixed on `product/vote-comment-caps`, to land after `v8`.
+  The 10-13 sample of the whole stack (`reliability/groq-switch` `74c81a7`)
+  played, but one line past its cap dropped all four (own words 0.000), 1 of
+  4 samples; the log does not say which line. `product/host-line-fallback`
+  drops only the long line in text mode. The overrun was `SAMPLE_MODEL`'s;
+  `MODEL`'s two text-host release checks fit (votes 15 words, cap 18), so
+  production's rate is unmeasured: read `commentary` and own words after `v8`.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
