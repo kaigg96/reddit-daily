@@ -176,7 +176,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   4 samples; the log does not say which line. `product/host-line-fallback`
   drops only the long line in text mode. The overrun was `SAMPLE_MODEL`'s;
   `MODEL`'s two text-host release checks fit (votes 15 words, cap 18), so
-  production's rate is unmeasured: read `commentary` and own words after `v8`.
+  production's rate is unmeasured: read `host_lines` after `v8`. A full-branch
+  review (10-13) found no blockers; left: the setup note shows for 65% of the
+  question's audio, so under 2 s on a short question (`video.py` ~107). Keep it
+  up to the first answer, after the owner's label, since it changes the look.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):

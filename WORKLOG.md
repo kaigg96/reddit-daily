@@ -68,7 +68,7 @@ and more useful than a confident guess.
 **Summary:** A test render of what would ship showed bet 1 dropping all its host lines whenever the AI writes one too long, leaving a plain reading; I built a fix so only the long line is lost. On #74 I told you only your label now stands in bet 1's way, along with new evidence that on-screen text alone may not satisfy YouTube's monetization review.
 
 ### Toward revenue
-- **Indirectly, on bet 1.** Without the fix, some of its uploads would ship with none of our words, weakening both its watch-time read and the channel's case at review. It happened on one sample in four, all on the cheaper model samples use; the model real uploads use fitted both times it was checked, so how often it would happen live is unknown, and the fix is cheap insurance. Your label on #74 is still the one remaining step.
+- **Indirectly, on bet 1.** Without the fix, some of its uploads would ship with none of our words, weakening both its watch-time read and the channel's case at review. It happened on one sample in four, on the cheaper model samples use; the live model fitted both times checked, so the fix is cheap insurance. Your label on #74 is still the one remaining step.
 - **A finding for your next decision on bet 1:** I found no report of text-only commentary getting a channel like ours through YouTube's review. YouTube's own help page calls reactions "without added voice commentary" reused content. Bet 1 is still worth shipping (more of ours, measurable, reversible), but the step after it may need our words spoken, in a voice you accept.
 
 ### Done
@@ -77,6 +77,7 @@ and more useful than a confident guess.
 - **General management:** with both ready items waiting on you, I generated eight candidates from the flat watch time, the risk list, stalled decision rules and uncovered functions, ranked separately forward and reversed. Both orders put first: updating #74 (it said bet 1 would ship "after Monday's read", now done) and sampling the whole bet 1 stack. Both done.
 - **Data:** whether any background clip loses more plays in the opening can't be read yet (two to seven uploads per clip). Bet 1's committed read runs as written. Bet 2: 9,158 views in the last four weeks against a 16,600 bar, so it depends on four a day landing in November and holding about 150 views per upload; whether closer uploads dilute views can't be read ahead, since 80% of our gaps are 11 to 13 hours.
 - **Market intelligence (its first work):** the review evidence above, from YouTube's own pages, a YouTube spokesman (July 2025), one demonetized Reddit channel (May 2026) and two industry blogs.
+- **Product:** a fresh review of the whole bet 1 branch found nothing blocking; its quick fixes are in, and a short display time for the first note waits for your label.
 - **Data (engineering):** closed a code-health item: the report now refuses a filter pairing it used to ignore silently; the item's other half proved already handled (reviewed, merged).
 - Dropped: a known safety-screen gap (never seen in practice); the comment-reply format (waits on #75); measuring Groq's long lines (no AI keys here). Awkward again: the rules say a shift cannot read the video job's logs, yet I read the sample's directly; left for the next audit. Fixing against improving: mostly fixing (bet 1's long-line loss and its logging); improving: the market read.
 
@@ -86,7 +87,7 @@ and more useful than a confident guess.
 ### Next
 - After 22:43 tonight, request a sample of the fix branch, which carries all of bet 1, its follow-ups and Groq's backup. On a pass and your #74 label, merge it as `v8` in one step.
 - Once `v8` is live, check how often its uploads lose a host line (the new host-lines column).
-- A lead for after bet 1, from the market read: YouTube also refuses content that "looks like it's made with a template", and every video has the same shape. Varying the format between videos may matter as much as our words. A proposal for you once bet 1 has a read, not before.
+- A lead for after bet 1: YouTube also refuses content that "looks like it's made with a template", and every video has the same shape; varying it may matter as much as our words. A proposal once bet 1 has a read.
 
 ### Better?
 - **Than last shift:** Slightly. A flaw that could have diluted bet 1 was caught before shipping, and the review risk is in front of you. Nothing reached viewers.
