@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - **For you, in order:** #74 (bet 1: watch tonight's sample, then label); #50 (four commands; it unblocks #65 and the rule fixes above); #75 (comments, one label); #59 (account checks). Adding two or three music tracks now also answers a monetization risk.
 
 ### Next
-- After 22:43, request the sample of bet 1's branch. Before merging, decide whether the Groq backup riding in it is a second variable; at minimum, bet 1's read should count Groq-written uploads separately.
+- After 22:43, request the sample of bet 1's branch. It also carries the Groq backup; my recommendation is to let it ride, because it only answers when Gemini fails (about 1 upload in 10) and without it those uploads would ship with no host at all. Bet 1's read can count those uploads separately with the existing report.
 - If #74 is still open at 10:49 tomorrow, the rule about how long your asks wait has fired: the next shift should re-think how bet 1 reaches you rather than ask again.
 
 ### Better?
