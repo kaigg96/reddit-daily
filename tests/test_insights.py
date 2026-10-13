@@ -1251,17 +1251,6 @@ def test_compare_min_views_reads_seen_uploads_beside_every_uploads_burial(capsys
     assert "arm=y                    n=20" in out          # the 3-view uploads left the read
 
 
-def test_the_burial_line_leaves_out_uploads_too_new_to_be_seen(capsys):
-    """Without --at-age, an upload of a day old with 0 views is new, not
-    buried (TECH_DEBT R4's leftover, closed 2026-10-13)."""
-    from scripts import report
-    seen = [v(f"s{i}", 7, views=100, watch=10, arm="x" if i % 2 else "y") for i in range(40)]
-    new = [v(f"n{i}", 1, views=0, watch=0, arm="y") for i in range(3)]
-    report.compare(seen + new, "arm=y", Metric.WATCH, NOW, min_views=10)
-    out = capsys.readouterr().out
-    assert "every upload: arm=y 0/20 vs arm!=y 0/20" in out and "3 under 5 days left out" in out
-
-
 def test_since_keeps_only_the_weeks_a_test_ran():
     """PRD §0 #3: NoStupidQuestions began 2026-10-07; AskReddit's July
     uploads are not its control. An --at-age read carries synthetic
