@@ -264,7 +264,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   rescue fires on any Gemini exception, not only 429/5xx (harmless);
   `title_caps` is logged for Groq titles, so #10 and #14's reads must filter
   on `meta_source` once any appear; 3 `test_llm` tests fail with `DRY_RUN=1`
-  in the shell (on `main` too). **Switch on in `src/config.py`, never a
+  in the shell (on `main` too; fixed on `reliability/run-slot-log`, after `v8`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
