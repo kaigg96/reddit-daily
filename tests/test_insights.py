@@ -2120,6 +2120,7 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
         (["--since", "2026-10-07", "--release", "v7"], since),
         (["--since", "2026-10-07"], since),
         (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--replays", "--compare", "title_style=B"], only),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
     )

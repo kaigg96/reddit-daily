@@ -171,6 +171,18 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   capitalises a plain lower-case first word (0a0712c, reviewed). Re-sampled
   on `907d6ad` (10-11 22:59): PASS. Its vote, posted as the comment, came
   back lower case: fixed on `product/vote-comment-caps`, to land after `v8`.
+  The 10-13 sample of the whole stack (`reliability/groq-switch` `74c81a7`)
+  played, but one line past its cap dropped all four (own words 0.000), 1 of
+  4 samples; the log does not say which line. `product/host-line-fallback`
+  drops only the long line in text mode. The overrun was `SAMPLE_MODEL`'s;
+  `MODEL`'s two text-host release checks fit (votes 15 words, cap 18), so
+  production's rate is unmeasured: read `host_lines` after `v8`. A full-branch
+  review (10-13) found no blockers; left: the setup note shows for 65% of the
+  question's audio, so under 2 s on a short question (`video.py` ~107). Keep it
+  up to the first answer, after the owner's label, since it changes the look.
+  Host lines now also drop on emoji (the font lacks them). `emoji` and
+  `better-profanity` (which filters posts and comments) are pinned since
+  10-13, and `test_requirements.py` fails any unpinned line.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
@@ -182,7 +194,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
   as an off slot should); (4) the digest counts days by publish date, so an 18:23 run landing
   after midnight reads as a missed day, and drift over 6h reads as small.
-  **Closes when** the switch goes to four.
+  (3) and (4) cannot be fixed from publish times: at four a day slots are 6h
+  apart and delays reach 9.4h, so any carry-over rule either hides a real miss
+  or raises a false one (10-13). Log each run's slot in the upload log, through
+  a sample after `v8`. The delay is rising: weekly median 4.3–4.6h (W36–W38),
+  5.5h (W40), 5.9h (W41), 6.5h (W42 so far, n=3), so at four a day the median
+  run lands after the next slot's cron time. Runs are safe (`run_slot` takes
+  the day from the cron line); the digest is what misreads. **Closes when** the switch goes to four.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
@@ -190,14 +208,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   every sample, up to 4 requests a run. **Closes when** a replay case shows
   an omitted `post_risk` on a post that should skip, or the screen's parsing
   is next changed (2026-10-11's failure-label change left it).
-
-- **A viewed upload can log 0 watch-seconds (2026-10-10, R4): closed for
-  releases 2026-10-12.** YouTube's whole-second 0.0 on 1–6 plays pulls a
-  cohort's median down; #3 and #10 read with `--min-views 10`, and
-  `--release` now prints the same read beside its verdict, never a trigger,
-  once the release reaches its committed size (`v7`: +20%, +9% without them).
-  Left: without `--at-age` the buried line counts uploads too new to be
-  reported; `--replays` ignores `--min-views`.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
@@ -247,11 +257,45 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
+- **Audit 2026-10-13: the owner's queue is still the binding limit, and two
+  rules are now false.** 13 shifts since 10-09. Decisions re-reviewed, dated,
+  in all 11 live ones; most due: D13 (label asks waiting ~2 days; its trigger
+  fires 10-14 10:49), D9 (watch-seconds rose, the counted share did not) and
+  D10 (YouTube's bar doubles for new applicants on 1 Feb 2027). Allocation:
+  monetization and finance got no time in 9 shifts, strategy one; fine while
+  the 11-05 monthly runs. **False rule 1:** the shift skill says a shift cannot
+  read Actions logs; `gh run view <id> --log` works (three shifts). Proposed
+  text for §2 item 1: "To see *why* a run failed, read its log: `gh run list
+  --workflow run-reddit-video.yml`, then `gh run view <id> --log`." Not raised:
+  skill files are write-protected for shifts, so it lands only after #50; raise
+  it then, bundled. **False rule 2:** D13 assumes label asks close in a day.
+  **Outward look (hooks, skills pages):** a Stop hook's consecutive blocks are
+  capped at 5, which answers the 10-09 objection (a loop to the cutoff), so a
+  hook that refuses to stop before the handover is pushed is now a candidate
+  for the same bundle. Adopted: reviews use general-purpose agents (Explore and
+  Plan skip CLAUDE.md) and ask only for correctness gaps. Candidates: a
+  SessionStart `compact` hook re-stating the deadline; `!command` injection
+  in `/shift` (needs `|| true`). Rejected: `/goal` (cannot see clock or git),
+  skill `context: fork`, `effort`/`model` fields. Sequencing: `v8`'s read and
+  four a day collide (PRD #4, noted). **Gates:** fresh reviews caught real
+  defects in 11 of 13 shifts; samples (6 of 6 PASS) judge playability only, and
+  4 content bugs were found by reading their lines; the release check passed a
+  shock-phrase title (10-09). No reverts. **Early endings:** 7 of 13 with over
+  15 minutes left, 2 after #67's fix. **Before `v8` merges:** the branch
+  carries Groq as a fallback (`GROQ_FALLBACK`), which 9872be8 let ride without
+  a bump, while #13's rule says the full switch ships as its own version. A
+  fallback is not the switch, but `v8`'s read should count Groq-written uploads
+  apart: the branch logs `meta_source`, so `report.py --at-age 7 --by
+  meta_source --since <merge date>` reads it with today's tool, no new code. Left alone: PRD's cautionary records
+  (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
+  inside `integration/preview`. **Closes when** #50 lands and the bundle is
+  raised, or the next audit.
+
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
   Grape, by design, since a missed credit beats printing a slur. Nothing
-  records how often it fires, and shifts cannot read Actions logs. If the
+  records how often it fires. If the
   attribution term ever turns on it, add an upload-log column (asker credited,
   answers credited of shown) through a sample run, then tune the word floor.
 
