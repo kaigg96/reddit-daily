@@ -194,7 +194,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
   as an off slot should); (4) the digest counts days by publish date, so an 18:23 run landing
   after midnight reads as a missed day, and drift over 6h reads as small.
-  **Closes when** the switch goes to four.
+  (3) and (4) cannot be fixed from publish times: at four a day slots are 6h
+  apart and delays reach 9.4h, so any carry-over rule either hides a real miss
+  or raises a false one (10-13). Log each run's slot in the upload log, through
+  a sample after `v8`. **Closes when** the switch goes to four.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
@@ -251,11 +254,36 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
+- **Audit 2026-10-13: the owner's queue is still the binding limit, and two
+  rules are now false.** 13 shifts since 10-09. Decisions re-reviewed, dated,
+  in all 11 live ones; most due: D13 (label asks waiting ~2 days; its trigger
+  fires 10-14 10:49), D9 (watch-seconds rose, the counted share did not) and
+  D10 (YouTube's bar doubles for new applicants on 1 Feb 2027). Allocation:
+  monetization and finance got no time in 9 shifts, strategy one; fine while
+  the 11-05 monthly runs. **False rule 1:** the shift skill says a shift cannot
+  read Actions logs; `gh run view <id> --log` works (three shifts). Proposed
+  text for §2 item 1: "To see *why* a run failed, read its log: `gh run list
+  --workflow run-reddit-video.yml`, then `gh run view <id> --log`." Not raised:
+  skill files are write-protected for shifts, so it lands only after #50; raise
+  it then, bundled. **False rule 2:** D13 assumes label asks close in a day.
+  **Outward look (hooks, skills pages):** a Stop hook's consecutive blocks are
+  capped at 5, which answers the 10-09 objection (a loop to the cutoff), so a
+  hook that refuses to stop before the handover is pushed is now a candidate
+  for the same bundle. Adopted: reviews use general-purpose agents (Explore and
+  Plan skip CLAUDE.md) and ask only for correctness gaps. Candidates: a
+  SessionStart `compact` hook re-stating the deadline; `!command` injection
+  in `/shift` (needs `|| true`). Rejected: `/goal` (cannot see clock or git),
+  skill `context: fork`, `effort`/`model` fields. Sequencing: `v8`'s read and
+  four a day collide (PRD #4, noted). Left alone: PRD's cautionary records
+  (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
+  inside `integration/preview`. **Closes when** #50 lands and the bundle is
+  raised, or the next audit.
+
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
   Grape, by design, since a missed credit beats printing a slur. Nothing
-  records how often it fires, and shifts cannot read Actions logs. If the
+  records how often it fires. If the
   attribution term ever turns on it, add an upload-log column (asker credited,
   answers credited of shown) through a sample run, then tune the word floor.
 

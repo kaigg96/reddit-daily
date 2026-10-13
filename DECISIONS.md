@@ -49,6 +49,7 @@ it is now withdrawn (it said the repo was private), so (1) is strained, not
 yet false. (2) holds only loosely: #50, #65 and #59 need hands, the oldest six
 days, and #50 is the root, since applying it makes #65 and any later skill
 change label-only. So the handover leads with #50's four commands.
+**Re-reviewed 2026-10-13 (audit):** (1) false for now: #74 and #75 have waited ~2 days, the owner's last close was 10-11, and #74 needs a watch, not only a label. The trigger fires 10-14 10:49.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
@@ -87,6 +88,7 @@ unowned:
 **Revisit when:** a function stays at "none" after its first monthly cycle
 (1 or 2 false); proposals from outside evidence are mostly declined or pile up
 unanswered (4 false); or the cadences push shifts past the reserve (3 false).
+**Re-reviewed 2026-10-13 (audit):** holds. Market and Monetization did their first work (10-13); Audience is still none, blocked on #75, so a finding at the 11-05 monthly.
 
 ## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
 
@@ -136,6 +138,7 @@ ask for a session, a login, a script, a key or a hand edit. D11 stands, because
 the floor makes that wait visible, which is its job. The response is to shape
 asks as labels (#70 splits bet 1 out of #55). Revisit if shifts still end early
 once #70 is answered.
+**Re-reviewed 2026-10-13 (audit) — trigger fired:** after #70 closed, two shifts ran 26 and 25 of 60 minutes (shift-usage.csv); both ready items wait on #74. Carried by D13.
 
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
@@ -170,6 +173,7 @@ lifted until then.
 **Re-reviewed 2026-10-08:** still holds. The owner declined Gemini's paid tier,
 asked for so Reddit posts stop reaching a free tier that trains on them (#62):
 *"Not approved to spend money on this, find another solution."*
+**Re-reviewed 2026-10-13 (audit):** (1) holds for longer: new applicants need 20M Shorts views from 1 Feb 2027 (PLAN §1). (2) in doubt: text-only commentary may fail YouTube's review, and a spoken host needs spend or the owner's voice.
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
@@ -199,6 +203,7 @@ watch-seconds only (#18, `b303b37`); views never trigger a revert.
 (PRD #4, 3–4 a day) would break (b): batches of 8 would span two days, not
 four. Any release judged during it needs its floor re-measured on uploads at
 the new cadence, not borrowed from the 2-a-day era.
+**Re-reviewed 2026-10-13 (audit):** (b) at risk: `v8` is read on AskReddit alone (~1 a day under #3), so its 20 uploads take ~20 days and four a day (#4) could land mid-bake.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
@@ -234,6 +239,7 @@ and the revenue bar counts engaged views (PLAN §1). The 12 October engaged-shar
 read (§0 #8) is the evidence; re-review then. The 3-point `zero_rate` margin
 breaches today on 2.4% → 5.6% (n=42 vs 36), which the scorecard itself calls
 weather at this size.
+**Re-reviewed 2026-10-13 (audit):** (2) weakened: `v7` raised watch-seconds 20% while the engaged share stayed 0.34–0.36 (PRD #8), and bet 1's real gate, YouTube's review, has no metric.
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
@@ -263,6 +269,7 @@ which name what went wrong with Gemini: exploit and subordinate, never elevate.
 
 **Revisit when:** `/backlog` produces candidates that all look alike (1 false),
 or `WORKLOG` shows the method skipped (2 false).
+**Re-reviewed 2026-10-13 (audit):** holds; the last three shifts ranked forward and reversed.
 
 ## D7 · 2026-09-21 · Slack goes to PM and research, not back to the clock
 
@@ -309,6 +316,7 @@ changes no rule, 2 is false.
 **Re-reviewed 2026-10-09 (audit):** 1 is false for now, for the reason under D11:
 the work above the bar waits on the owner's hands. 2 holds. This shift's research
 (commentary drafts, PRD §4) changed a proposal (#70) rather than padding.
+**Re-reviewed 2026-10-13 (audit):** (1) still false (D11's evidence); (2) holds: the 10-13 market read changed #74.
 
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
@@ -338,6 +346,7 @@ failing); or a revert loses work rather than unlanding it (2 false).
 day. The weak link is the apply step after approval. Of the last three
 approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
 #50's could not be read. Each failure costs the owner another round trip.
+**Re-reviewed 2026-10-13 (audit):** (1) strained: two shifts held back a rule fix to spare the owner's queue, and no skill change can land until #50 is applied (8 days).
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
@@ -366,6 +375,7 @@ trim commits across 8 shifts, and 15 log commits in one. The header now says
 the word budget decides. 3 is strained for `TECH_DEBT.md`: 24 of 25, and its
 largest item runs past 500 words, so items grow rather than count. Shorter
 entries would come from the template, which is what the owner reads. Left as is.
+**Re-reviewed 2026-10-13 (audit):** the count fell to 21 of 25, but items grow instead (the Groq item runs ~500 words); (3) still strained.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
@@ -390,6 +400,7 @@ the bottleneck, with one branch waiting 8 days while six stacked behind it).
 a bad release survives more than a few days (2); or the escalation rate looks
 wrong in either direction — trivia means too tight, silence means shifts are
 deciding what they shouldn't (3).
+**Re-reviewed 2026-10-13 (audit):** holds; a sample and a fresh review caught bet 1's dropped host lines before merge.
 
 ## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3**
 
