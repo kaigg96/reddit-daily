@@ -348,6 +348,7 @@ def main():
         "own_words_share": own_words,
         "meta_source": meta.source,
         "host_lines": host_lines,
+        "run_slot": content.slot_key(day, slot),
     })
 
 

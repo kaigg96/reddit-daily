@@ -344,6 +344,17 @@ def test_a_late_evening_run_belongs_to_the_day_it_was_scheduled_for():
     assert content.run_slot(_at(5, 23, 10), "23 18 * * *") == (datetime.date(2026, 10, 5), 3)
 
 
+def test_the_log_records_the_slot_a_run_was_scheduled_for():
+    """A late run is logged under its cron line's day and slot, not its
+    publish time, so the digest can tell it from a missed day (PRD §0 #4)."""
+    import inspect
+    from src import log, run
+    assert content.slot_key(*content.run_slot(_at(6, 0, 40), "23 18 * * *")) == "2026-10-05/3"
+    assert content.slot_key(*content.run_slot(_at(5, 19), "23 12 * * *")) == "2026-10-05/2"
+    assert log.FIELDS[-1] == "run_slot"   # appended, so old rows keep their columns
+    assert '"run_slot": content.slot_key(day, slot)' in inspect.getsource(run.main)
+
+
 def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch):
     monkeypatch.setattr(config, "UPLOADS_PER_DAY", 4)
     subs = ["AskReddit", "NoStupidQuestions"]

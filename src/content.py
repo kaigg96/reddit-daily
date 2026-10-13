@@ -182,6 +182,11 @@ def run_slot(now, schedule=""):
     return day, slot
 
 
+def slot_key(day, slot):
+    """How the upload log records a run's slot: "2026-10-05/3"."""
+    return f"{day.isoformat()}/{slot}"
+
+
 def live_slots():
     """The slots that upload. At two a day, the two the schedule has always
     had, so turning four on changes nothing about them."""

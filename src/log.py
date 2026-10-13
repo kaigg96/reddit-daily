@@ -61,6 +61,12 @@ FIELDS = [
     # commentary is off. commentary_ok is 1 for a partial host too, since a
     # text line too long now drops alone: read this beside it.
     "host_lines",
+    # Added 2026-10-13 (PRD §0 #4): the slot this run was scheduled for, as
+    # "<day>/<slot>" from the cron line that started it (content.run_slot).
+    # GitHub starts runs hours late, so the publish time cannot say which
+    # slot an upload filled; at four a day the digest needs this to tell a
+    # late run from a missed one (TECH_DEBT, four a day).
+    "run_slot",
 ]
 
 
