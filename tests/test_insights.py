@@ -1483,12 +1483,20 @@ def test_views_gained_skips_a_snapshot_before_the_column_began():
     """Engaged views began 2026-10-05; before it only zero-view rows carried a
     value (zero). Read as a baseline, every video's lifetime count looked
     gained in one week, doubling the channel's engaged rate (10-13)."""
-    rows = [_snap("zero", 0, -4, 0), _snap("zero", 0, 3, 0),   # before: only zero-view rows
+    rows = [_snap("zero", 0, 1, 0), _snap("zero", 0, 3, 0),   # before: only zero-view rows
             _snap("a", 0, 10, 500), _snap("b", 0, 10, 300), _snap("zero", 0, 10, 0),
             _snap("a", 0, 17, 520), _snap("b", 0, 17, 310), _snap("zero", 0, 17, 0),
             _snap("new", 12, 17, 15)]
     assert [(g, d) for _, g, d in insights.views_gained(rows)] == [(45, 7)]
     assert [(o + r, d) for _, o, r, d in insights.views_gained_by_age(rows)] == [(45, 7)]
+    # A small first snapshot that measured everything published by then is kept,
+    # however much the channel grows after it (review, 10-13).
+    grow = [_snap("a", 0, 7, 10), _snap("a", 0, 14, 20), _snap("b", 9, 14, 5), _snap("c", 11, 14, 5)]
+    assert [(g, d) for _, g, d in insights.views_gained(grow)] == [(20, 7)]
+    # A video left out of a kept snapshot was unmeasured there, not new.
+    part = [_snap(v, 0, 7, 100) for v in "abcd"] + [_snap(v, 0, 14, 110) for v in "abc"]
+    part += [_snap(v, 0, 21, 120) for v in "abcd"]
+    assert [g for _, g, _ in insights.views_gained(part)] == [30, 30]
 
 
 def test_totals_change_compares_the_last_four_weeks_with_the_four_before():

@@ -950,21 +950,27 @@ def views_gained(snapshot_rows):
 
 def _measured_pairs(snapshot_rows):
     """Consecutive snapshots as (prev, cur, before, after, published), leaving
-    out a snapshot holding under half the videos of the fullest one: it did
-    not measure this column. A column added later is absent before it began,
-    except on zero-view rows, read as zero: engaged views began 2026-10-05,
-    so 09-28 held only zero-view videos and every video's lifetime engaged
-    count read as gained in one week (19,027 of 19,771; 10-13)."""
+    out a snapshot holding under half the videos published by its date: it
+    did not measure this column. A column added later is absent before it
+    began, except on zero-view rows, read as zero: engaged views began
+    2026-10-05, so 09-28 held only zero-view videos and every video's
+    lifetime engaged count read as gained in one week (19,027 of 19,771;
+    10-13). Within a kept pair, a video missing from the earlier snapshot
+    though published before it was unmeasured, not new: the callers count
+    only videos in `before` or published since."""
     by_snap, published = {}, {}
     for r in snapshot_rows:
         if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
             by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
             if r.get("published"):
                 published[r["video_id"]] = r["published"]
-    full = max((len(v) for v in by_snap.values()), default=0)
-    dates = sorted(d for d in by_snap if len(by_snap[d]) * 2 >= full)
+    out_by = lambda d: sum(1 for p in published.values() if p <= d)
+    dates = sorted(d for d in by_snap if len(by_snap[d]) * 2 >= out_by(d))
     for prev, cur in zip(dates, dates[1:]):
-        yield prev, cur, by_snap[prev], by_snap[cur], published
+        before = by_snap[prev]
+        after = {vid: v for vid, v in by_snap[cur].items()
+                 if vid in before or published.get(vid) is None or published[vid] > prev}
+        yield prev, cur, before, after, published
 
 
 def views_gained_by_age(snapshot_rows, old_days=60):
