@@ -1439,6 +1439,10 @@ def test_weekly_totals_leave_out_a_week_with_an_unmeasured_upload():
     assert insights.weekly_totals(engaged) == [("2026-W28", 6, 60)]
     assert insights.weekly_totals(engaged, known_rows=views) == []
     assert insights.weekly_totals(views, known_rows=views) == [("2026-W28", 7, 210)]
+    import inspect, sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import report
+    assert "known_rows=known" in inspect.getsource(report.show_weekly_views)
 
 
 def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
