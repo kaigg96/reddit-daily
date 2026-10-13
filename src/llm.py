@@ -350,7 +350,11 @@ def _usable(line, kind):
     """Within its cap, with a letter in it (a weak reply can echo the shape's
     "...") and no emoji, which the note's font draws as an empty box."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
-            and not any(emoji.is_emoji(ch) for ch in line))
+            and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line))
+
+
+# The emoji package counts these as emoji, but they are text marks the font draws.
+_TEXT_SYMBOLS = "©®™"
 
 
 def _clean_commentary(data, n):

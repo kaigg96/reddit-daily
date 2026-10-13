@@ -216,3 +216,8 @@ def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
 def test_the_sample_setup_fits_the_text_cap():
     from src import sample
     assert llm._within_cap(sample.METADATA.commentary.setup, "setup")
+
+
+def test_a_trademark_sign_is_text_not_an_emoji(monkeypatch):
+    host = _text_metadata(monkeypatch, reactions=["Reddit™ users loved this.", HOST["reactions"][1]])
+    assert host.reactions[0] == "Reddit™ users loved this."
