@@ -251,7 +251,8 @@ def main():
     host_voice = next((v for v in config.VOICES if v != voice), voice)
     silent = config.SAMPLE or config.SILENT_NARRATION
     polly = None if silent else tts.make_polly()
-    print(f"Narrator voice: {voice}" + (f", host voice: {host_voice}" if host else ""))
+    print(f"Narrator voice: {voice}"
+          + (f", host voice: {host_voice}" if host and not config.HOST_TEXT else ""))
 
     def synth(name, text, kind, speaker=None):
         path = config.GEN / f"{name}.mp3"

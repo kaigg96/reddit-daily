@@ -37,7 +37,7 @@ METADATA = MetadataResult(
     source="sample",
     # Used only while config.COMMENTARY is on (bet 1, #70).
     commentary=Commentary(
-        setup="Everyone thinks they could do these jobs. Let's hear from people who did.",
+        setup="Everyone thinks they could do these. Let's hear from people who did.",
         reactions=["Ten hours of smiling sounds harder than the carrying.",
                    "Boredom, then thirty seconds of everything. That's a lot to hold."],
         verdict="My hand goes up for lifeguarding. Which one gets your vote?",

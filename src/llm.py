@@ -6,6 +6,7 @@ import os
 import re
 import time
 
+import emoji
 import requests
 
 from . import config  # also ensures .env is loaded for direct imports
@@ -345,6 +346,13 @@ def _within_cap(line, kind):
     return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
 
 
+def _usable(line, kind):
+    """Within its cap, with a letter in it (a weak reply can echo the shape's
+    "...") and no emoji, which the note's font draws as an empty box."""
+    return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
+            and not any(emoji.is_emoji(ch) for ch in line))
+
+
 def _clean_commentary(data, n):
     """The host's lines, or None when they cannot ship (see Commentary).
 
@@ -359,15 +367,15 @@ def _clean_commentary(data, n):
     reactions = [_clean_str(r) for r in reactions]
     if not (setup and verdict and all(reactions)):
         return None
-    if (_within_cap(setup, "setup") and _within_cap(verdict, "cta")
-            and all(_within_cap(r, "reaction") for r in reactions)):
+    if (_usable(setup, "setup") and _usable(verdict, "cta")
+            and all(_usable(r, "reaction") for r in reactions)):
         return Commentary(setup, reactions, verdict)
-    print("Commentary: a host line ran past its length cap")
+    print("Commentary: a host line ran past its length cap, or was a placeholder or emoji")
     if not config.HOST_TEXT:
         return None
-    setup = setup if _within_cap(setup, "setup") else ""
-    reactions = [r if _within_cap(r, "reaction") else "" for r in reactions]
-    verdict = verdict if _within_cap(verdict, "cta") else ""
+    setup = setup if _usable(setup, "setup") else ""
+    reactions = [r if _usable(r, "reaction") else "" for r in reactions]
+    verdict = verdict if _usable(verdict, "cta") else ""
     if not (setup or any(reactions)):
         return None
     print("Commentary: dropped only the long line(s)")

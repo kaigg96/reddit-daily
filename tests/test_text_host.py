@@ -205,3 +205,14 @@ def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     assert run.host_lines_shown(segs) == 4
     run.fit_to_length(segs, _too_long_until(3), host, _synth)
     assert run.host_lines_shown(segs) == 1     # setup, last answer and its line, the vote
+
+
+@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂"])
+def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
+    host = _text_metadata(monkeypatch, reactions=[junk, HOST["reactions"][1]])
+    assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
+
+
+def test_the_sample_setup_fits_the_text_cap():
+    from src import sample
+    assert llm._within_cap(sample.METADATA.commentary.setup, "setup")
