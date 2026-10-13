@@ -197,14 +197,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   an omitted `post_risk` on a post that should skip, or the screen's parsing
   is next changed (2026-10-11's failure-label change left it).
 
-- **A viewed upload can log 0 watch-seconds (2026-10-10, R4): closed for
-  releases 2026-10-12.** YouTube's whole-second 0.0 on 1–6 plays pulls a
-  cohort's median down; #3 and #10 read with `--min-views 10`, and
-  `--release` now prints the same read beside its verdict, never a trigger,
-  once the release reaches its committed size (`v7`: +20%, +9% without them).
-  Left: without `--at-age` the buried line counts uploads too new to be
-  reported; `--replays` ignores `--min-views`.
-
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
   **First replay on Groq (2026-10-11, run with no Gemini key, so nothing
