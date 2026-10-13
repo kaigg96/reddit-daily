@@ -348,8 +348,8 @@ def _clean_commentary(data, n):
     """The host's lines, or None unless every one is usable (see Commentary).
 
     Shown as text, an over-long line is dropped alone: a note costs no time,
-    and one long line cost a whole upload its host in one of four samples (
-    2026-10-13). Its note is left blank, and a long vote leaves the generic
+    and one long line cost a whole upload its host in one of four samples
+    (2026-10-13). Its note is left blank, and a long vote leaves the generic
     closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
     reactions = data.get("reactions")
