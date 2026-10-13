@@ -282,7 +282,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   carries Groq as a fallback (`GROQ_FALLBACK`), which 9872be8 let ride without
   a bump, while #13's rule says the full switch ships as its own version. A
   fallback is not the switch, but `v8`'s read should count Groq-written uploads
-  (`meta_source`) apart; check before merging. Left alone: PRD's cautionary records
+  apart: the branch logs `meta_source`, so `report.py --at-age 7 --by
+  meta_source --since <merge date>` reads it with today's tool, no new code. Left alone: PRD's cautionary records
   (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
