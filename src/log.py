@@ -56,6 +56,11 @@ FIELDS = [
     # Without it a Groq title would count unmarked in the title-style and caps
     # reads (#10, #14).
     "meta_source",
+    # Added 2026-10-13 (bet 1, #15): how many host lines the viewer got (notes
+    # shown plus the vote; 4 when whole with two answers), blank while
+    # commentary is off. commentary_ok is 1 for a partial host too, since a
+    # text line too long now drops alone: read this beside it.
+    "host_lines",
 ]
 
 

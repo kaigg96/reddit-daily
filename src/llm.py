@@ -228,8 +228,9 @@ MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta so
 MetadataResult.__new__.__defaults__ = ("gemini", "", None)
 
 # Bet 1's host lines (config.COMMENTARY): a setup, one reaction per answer read,
-# and the verdict, which is also the CTA. All or nothing: a partial set would
-# leave answers unreacted to, so it falls back to today's video instead.
+# and the verdict, which is also the CTA. Voiced, all or nothing: a partial set
+# would leave answers unreacted to, so it falls back to today's video instead.
+# Shown as text, a line too long is "" and the rest still ship (_clean_commentary).
 Commentary = collections.namedtuple("Commentary", "setup reactions verdict")
 
 
@@ -345,7 +346,7 @@ def _within_cap(line, kind):
 
 
 def _clean_commentary(data, n):
-    """The host's lines, or None unless every one is usable (see Commentary).
+    """The host's lines, or None when they cannot ship (see Commentary).
 
     Shown as text, an over-long line is dropped alone: a note costs no time,
     and one long line cost a whole upload its host in one of four samples

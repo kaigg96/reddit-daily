@@ -109,7 +109,7 @@ def fit_to_length(segments, too_long, host, synth):
             return outro
     dropped = drop_last_answer(segments)
     print(f"Duration guard: dropped comment '{dropped.text[:40]}...'")
-    if host:
+    if host and segments[-1].kind != "outro":   # a dropped vote already closes generically
         segments[-1] = synth("outro", config.OUTRO_TEXT, kind="outro")
         print("Duration guard: the vote may name that answer, so the generic line closes")
         outro = config.OUTRO_TEXT
@@ -124,6 +124,14 @@ def own_words_share(segments):
             + sum(len(getattr(s, "note", "")) for s in segments))
     total = sum(len(s.text) + len(getattr(s, "note", "")) for s in segments)
     return f"{ours / total:.3f}" if total else ""  # 3 places: 0.496 must not log as 0.50
+
+
+def host_lines_shown(segments):
+    """How many of the host's lines the viewer got: notes shown, plus the vote
+    or a voiced line spoken. A long line dropped, or the guard's cuts, read
+    below the full count, so a partial host never logs as a whole one."""
+    return (sum(1 for s in segments if getattr(s, "note", ""))
+            + sum(1 for s in segments if s.kind in ("host", "vote")))
 
 
 def check_channel_name():
@@ -269,8 +277,10 @@ def main():
     cta_ok = cta is not None and outro_text == cta
     # Zero on a fallback, so the done-when's misses count, not vanish.
     own_words = own_words_share(segments) if config.COMMENTARY else ""
+    host_lines = host_lines_shown(segments) if config.COMMENTARY else ""
     if config.COMMENTARY:
-        print(f"Commentary: our own words are {own_words} of the narration")
+        print(f"Commentary: our own words are {own_words} of the narration, "
+              f"{host_lines} host line(s) shown")
 
     # --- assemble + render ---
     result = video.assemble(post.title, segments, rng)
@@ -336,6 +346,7 @@ def main():
         "commentary_ok": commentary_ok,
         "own_words_share": own_words,
         "meta_source": meta.source,
+        "host_lines": host_lines,
     })
 
 

@@ -166,3 +166,33 @@ def test_a_voiced_host_still_falls_back_whole(monkeypatch):
     import json
     meta, _ = _metadata(monkeypatch, json.dumps({**HOST, "reactions": ["ok", "word " * 19]}))
     assert meta.commentary is None
+
+
+def test_the_log_counts_the_host_lines_actually_shown(monkeypatch):
+    whole = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
+    assert run.host_lines_shown(run.build_segments(_Post, whole.verdict, whole, _synth, "S")) == 4
+    host = _text_metadata(monkeypatch, reactions=[HOST["reactions"][0], "word " * 13])
+    assert run.host_lines_shown(run.build_segments(_Post, host.verdict, host, _synth, "S")) == 3
+
+
+def test_a_long_setup_drops_alone(monkeypatch):
+    host = _text_metadata(monkeypatch, setup="word " * 13)
+    assert host == ("", HOST["reactions"], HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    assert segs[0].note == "" and [s.note for s in segs[1:3]] == HOST["reactions"]
+
+
+def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
+    host = _text_metadata(monkeypatch, cta="word " * 19)
+    segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
+    calls = []
+    outro = run.fit_to_length(segs, _too_long_until(3), host,
+                              lambda *a, **k: calls.append(a) or _synth(*a, **k))
+    assert calls == [] and outro == config.OUTRO_TEXT == segs[-1].text
+
+
+def test_the_upload_log_carries_the_host_line_count():
+    import inspect
+    from src import log
+    assert log.FIELDS[-1] == "host_lines"
+    assert '"host_lines": host_lines' in inspect.getsource(run.main)
