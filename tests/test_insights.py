@@ -1479,6 +1479,18 @@ def test_views_gained_counts_the_back_catalogue_and_new_uploads():
     assert [(g, d) for _, g, d in gained] == [(50, 7)]
 
 
+def test_views_gained_skips_a_snapshot_before_the_column_began():
+    """Engaged views began 2026-10-05; before it only zero-view rows carried a
+    value (zero). Read as a baseline, every video's lifetime count looked
+    gained in one week, doubling the channel's engaged rate (10-13)."""
+    rows = [_snap("zero", 0, -4, 0), _snap("zero", 0, 3, 0),   # before: only zero-view rows
+            _snap("a", 0, 10, 500), _snap("b", 0, 10, 300), _snap("zero", 0, 10, 0),
+            _snap("a", 0, 17, 520), _snap("b", 0, 17, 310), _snap("zero", 0, 17, 0),
+            _snap("new", 12, 17, 15)]
+    assert [(g, d) for _, g, d in insights.views_gained(rows)] == [(45, 7)]
+    assert [(o + r, d) for _, o, r, d in insights.views_gained_by_age(rows)] == [(45, 7)]
+
+
 def test_totals_change_compares_the_last_four_weeks_with_the_four_before():
     series = [(f"w{i}", 14, t) for i, t in enumerate([100] * 4 + [250] * 4)]
     prior, recent, ratio = insights.totals_change(series)
