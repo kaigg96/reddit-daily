@@ -196,3 +196,12 @@ def test_the_upload_log_carries_the_host_line_count():
     from src import log
     assert log.FIELDS[-1] == "host_lines"
     assert '"host_lines": host_lines' in inspect.getsource(run.main)
+
+
+def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", False)
+    host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    assert run.host_lines_shown(segs) == 4
+    run.fit_to_length(segs, _too_long_until(3), host, _synth)
+    assert run.host_lines_shown(segs) == 1     # setup, last answer and its line, the vote

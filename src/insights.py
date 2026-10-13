@@ -677,9 +677,9 @@ def render_own_words(log_rows, version, key="format_version"):
     met = sum(1 for v in vals if v >= OWN_WORDS_DONE)
     line = (f"own words (bet 1's done-when, >= {OWN_WORDS_DONE:.2f} on every upload): "
             f"{met} of {len(vals)} uploads, median {statistics.median(vals):.2f}")
-    fell_back = sum(1 for v in vals if v == 0)
+    fell_back = sum(1 for v in vals if v == 0)   # a plain reading, or every note cut
     if fell_back:
-        line += f", {fell_back} fell back to a plain reading"
+        line += f", {fell_back} showed none of our words"
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
 
 
