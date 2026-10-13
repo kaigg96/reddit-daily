@@ -428,8 +428,10 @@ def show_weekly_views(args):
     `--metric engaged_views` reads the same totals in the bar's own unit."""
     age = args.at_age or 7
     col = args.metric
-    series = insights.weekly_totals(_within_rows(_snapshot_metric_rows(col), args.within),
-                                    at_age=age)
+    rows = _within_rows(_snapshot_metric_rows(col), args.within)
+    ids = insights.ids_within(args.within) if args.within else None
+    known = [r for r in _snapshot_metric_rows("views") if ids is None or r["video_id"] in ids]
+    series = insights.weekly_totals(rows, at_age=age, known_rows=known)
     if not series:
         print("no publish week is fully read yet")
         return
