@@ -7,29 +7,29 @@ a PASS that names the branch's current commit.
 ## Last render
 
 - **Branch:** `product/host-line-fallback`
-- **Commit:** `0fbc37c`
-- **When:** 2026-10-13T23:21:55Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 28.8 s, audio, no dead air
+- **Commit:** `79a3873`
+- **When:** 2026-10-14T16:07:48Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 16.0 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38483439606)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38595017637)
 
 What it picked:
 
 ```
-Selected post: My close friends are becoming obsessed with discourse about "hypergamy"
-Slate topics (rank order): relationships-dating
-Title style B, caps arm 0: are your friends losing their minds to algorithm brainrot?
-Commentary setup: watching a buddy vanish into an endless internet rabbit hole.
-Commentary reaction 1: impossible to pull someone back once the feed takes over.
-Commentary reaction 2: every hang turns into the exact same broken record.
-CTA: raising my hand for the sad reality of algorithms ruining chats. which one gets your vote?
-Commentary: our own words are 0.439 of the narration, 4 host line(s) shown
-Assembled: 28.8s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/Unable-Barber1511: My close friends are becoming obsessed with discourse about "hypergamy"
+Selected post: What celebrity doesn't want to realize their 15 minutes is over?
+Slate topics (rank order): fame-celebrity|health-body|dark-morbid|dark-morbid|life-advice|humor-absurd|money-work
+Title style A, caps arm 0: Celebrities who refuse to let go of the spotlight
+Commentary setup: some famous people just do not know when to leave
+Commentary reaction 1: trying way too hard to stay relevant these days
+Commentary reaction 2: still sprinkling salt like anyone is watching anymore
+CTA: salt bae gets my vote for refusing to stop seasoning. who gets yours?
+Commentary: our own words are 0.661 of the narration, 4 host line(s) shown
+Assembled: 16.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Today's top AskReddit post, asked by u/Agitated-Distance740: What celebrity doesn't want to realize their 15 minutes is over?
 ```
 
 ## Last request
 
 - **Branch:** `product/host-line-fallback`
-- **When:** 2026-10-13T23:21:55Z
+- **When:** 2026-10-14T16:07:48Z
 - **Outcome:** rendered -- see above
