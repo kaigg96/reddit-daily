@@ -158,10 +158,37 @@ def check_decision_ids():
     return True, f"{len(ids)} decisions, ids unique and contiguous"
 
 
+def check_next_release_merges(root=ROOT, base="origin/main",
+                              head="origin/integration/preview"):
+    """The next release still merges into main, as the handover promises.
+
+    The owner's label on a release is promised as a one-step merge. On
+    2026-10-14 a morning handover said bet 1's branch "still merges cleanly";
+    that shift's own reporting work then conflicted with it on main, and the
+    claim stood until a later shift tried the merge."""
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+    if any(run("rev-parse", "--verify", "--quiet", ref).returncode for ref in (base, head)):
+        return None, f"{head} or {base} is not fetched here"
+    r = run("merge-tree", "--write-tree", "--name-only", base, head)
+    if r.returncode == 0:
+        return True, f"{head} merges into {base} cleanly"
+    if r.returncode != 1:
+        return None, "git merge-tree --write-tree unavailable (git 2.38+)"
+    files = []
+    for line in r.stdout.splitlines()[1:]:   # the tree id, then conflicted paths
+        if not line.strip():
+            break
+        files.append(line.strip())
+    return False, (f"{head} no longer merges into {base}: conflicts in "
+                   + ", ".join(files) + "; bring it current before the owner's label")
+
+
 CHECKS = [
     ("decision ids", check_decision_ids),
     ("live format", check_live_format),
     ("merged branches", check_merged_branches),
+    ("next release merges", check_next_release_merges),
     ("cohort sizes", check_upload_counts),
     ("issue references", check_open_escalations),
 ]

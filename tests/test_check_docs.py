@@ -43,3 +43,40 @@ def test_only_the_newest_worklog_entry_is_read_as_current():
     entry = c.latest_worklog_entry(log)
     assert entry.startswith("## 2026-10-04") and "#45" in entry
     assert "#44" not in entry and "template" not in entry
+
+
+def _repo(tmp_path):
+    import subprocess
+    git = lambda *a: subprocess.run(["git", *a], cwd=tmp_path, check=True,
+                                    capture_output=True, text=True)
+    git("init", "-q", "-b", "main")
+    git("config", "user.email", "t@t"); git("config", "user.name", "t")
+    (tmp_path / "f.txt").write_text("a\n")
+    git("add", "."); git("commit", "-q", "-m", "base")
+    git("checkout", "-q", "-b", "next")
+    (tmp_path / "f.txt").write_text("next\n")
+    git("commit", "-qam", "next")
+    git("checkout", "-q", "main")
+    return git
+
+
+def test_a_release_branch_that_merges_cleanly_passes(tmp_path):
+    git = _repo(tmp_path)
+    (tmp_path / "g.txt").write_text("other\n")
+    git("add", "."); git("commit", "-q", "-m", "unrelated")
+    ok, why = c.check_next_release_merges(str(tmp_path), "main", "next")
+    assert ok is True, why
+
+
+def test_a_release_branch_that_conflicts_with_main_is_caught(tmp_path):
+    """10-14: main's own work conflicted with bet 1's branch in one test file."""
+    git = _repo(tmp_path)
+    (tmp_path / "f.txt").write_text("main\n")
+    git("commit", "-qam", "main moved")
+    ok, why = c.check_next_release_merges(str(tmp_path), "main", "next")
+    assert ok is False and "f.txt" in why
+
+
+def test_a_missing_release_branch_is_skipped_not_failed(tmp_path):
+    _repo(tmp_path)
+    assert c.check_next_release_merges(str(tmp_path), "main", "nope")[0] is None
