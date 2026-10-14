@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-14 (16:45) — Bet 1 is one label from shipping again, and the title test no longer compares against lower-case titles
+
+    Worked (% of the shift): product 35 · data 30 · gm 20 · reliability 5 · security 5 · audience 5
+
+**Summary:** Two faults that would have quietly cost us were found and fixed. Bet 1's branch had stopped merging, so your label on #74 would have met a broken step; it merges again and has a fresh passing sample. And the title-capitals test was comparing against titles shipped entirely in lower case. Nothing new reached viewers except tonight's corrected titles; #74 is still the one step that changes what they see.
+
+### Toward revenue
+- **Bet 1 is a one-step merge again.** This morning's reporting work had made bet 1's branch conflict with the live code, so "one label, then merge" was no longer true, and the trackers still said it was. I brought the branch up to date and re-sampled it: it plays, shows all four of the host's lines, and our own words are 66% of what the viewer gets. A check now runs at the start of every shift, so this can't go stale silently again.
+- **The title-capitals test (bet 2's views lever) was measuring the wrong thing.** 4 of the first 5 "no capitals" titles shipped all lower case ("how to get jehovah's witnesses to leave you alone"), so the test was setting capitals against titles that look unfinished. Uploads with that look earn about half the views. Fixed from tonight's upload; the test now counts from 15 October and reads about 23 November, a week later.
+- **Bet 2 is now also judged in the views YouTube's bar counts:** the share of plays that get past the opening. Written down before the data: doubling plays can't pass for progress unless the counted views double too.
+
+### Done
+- **Product (fixing):** the title fix above. A title written with no capital letter at all now ships with normal capitals; any title with a capital is left alone, so neither arm of the test changes. A fresh review found no bugs and two risks, both fixed: the reporting tool could have filed a re-capitalised title as a raw one, and abbreviations like "i.e." were being capitalised as if they ended a sentence (merged; no change to the video).
+- **Product (fixing):** bet 1's branch brought current (one test file, both sides kept), checked against the two branches that follow it, and re-sampled (pass).
+- **Data:** viewers rarely comment or subscribe: about one comment per seven uploads, and 11 subscribers from 33,550 views. Bet 1's vote is meant to raise both, but at its read that is about 1–2 subscribers and 3–6 comments, so I recorded now that anything under two to three times the current rate is chance. The release check now prints both pooled, with that chance figure, so the read needs no one-off analysis. Checked that YouTube doesn't count our own vote comment.
+- **Data:** the background clip doesn't change the share of plays that count (within one release, 24% against 26%, well within chance), so swapping clips gets us no more counted views. Pre-committed the subreddit test's read in counted views too.
+- **General management:** the rule on waiting asks fired today. Nothing of yours has moved since Saturday evening (67 hours, inside your longest gap of 76), and the plain-label ask (#75) has waited as long as #74, so the problem is that you've been away, not how the asks are worded. No re-ask. Closed #53 as replaced by #75 so it stops showing among your decided items.
+- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.42 this month, forecast $0.87 of $3).
+- **Reliability:** every upload since the last shift landed, the record of the last upload is intact, and tonight's run hasn't started yet (GitHub starts our runs 4–7 hours late).
+- **Finance (for the 5 November review):** at the full bar, $33–$333 a month against the public subscription prices ($20, $100, $200): revenue above costs only on the cheapest plan or at the top of the quoted rates.
+- **Dropped after ranking** (a fresh agent proposed eight; ranked both ways): checking whether text-commentary channels are monetized (it can't be seen reliably from outside, and #74 doesn't wait on it); retiring the watched clip early (its rule reads on 19 October); whether politics posts get buried (4 uploads); likes per view (no decision waits on it). Fixing against improving: mostly fixing (the title test, bet 1's branch, the merge check). Improving: two written-down reads and the vote diagnostics.
+
+### Blocked
+- **For you, in order:** #74 (bet 1: a glance at four frames, then a label; by about 6 November for bet 2); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks).
+
+### Next
+- On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
+- After 01:17 on 15 October your gap passes its longest. Change how #74 is asked only if you act on other issues while it waits.
+- 19 October snapshot: the dark-morbid topic question and the watched clip's rule.
+
+### Better?
+- **Than last shift:** Slightly. Bet 1's one-step merge is real again, and bet 2's main test now measures what it set out to. Nothing new reached viewers.
+- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds, and bet 1 is unshipped, though built, sampled and mergeable.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-14 (09:40) — Bet 2 needs bet 1 merged by about 6 November; our engaged-view comparisons no longer raise false alarms
 
     Worked (% of the shift): data 45 · product 15 · gm 15 · reliability 10 · security 10 · finance 5
@@ -93,38 +128,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** No closer to revenue: nothing reached viewers. The tools that will judge bet 1 are sharper and more trustworthy, the cost of #74's wait now has a date, and one free lever has a fair test.
 - **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is unshipped, though fully built and sampled; views at a week old are inside their normal swing.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-13 (23:17) — Bet 1's final version plays; your label on #74 is now the only step
-
-    Worked (% of the shift): product 25 · data 20 · reliability 20 · gm 15 · engineering 10 · security 10
-
-**Summary:** The exact version of bet 1 that would ship was rendered tonight and plays, with all of the host's lines on screen; its four frames are on #74, so judging it takes a glance from a phone. Nothing reached viewers yet; your label ships it.
-
-### Toward revenue
-- **Bet 1, our best answer to YouTube's reused-content rule, is one label from shipping.** Tonight's sample is the final build, brought up to date with this afternoon's library fixes: it played (29 seconds), showed all three of the host's lines plus the vote, with the capitals fixed, and our own words were 44% of what the viewer gets. #74 now shows its four frames inline.
-- **Four uploads a day, bet 2's lever, came closer:** the plan no longer reads as if it waits for a separate release, and its last missing piece is built (below), so it can switch on the day its read allows.
-
-### Done
-- **Product:** the sample above, and the frames on #74. Two checks a sample cannot make: the first live upload of bet 1 adds four columns to our upload record, so I replayed that on a copy (old rows intact, new row right); and bet 1's pre-committed read runs as written today, so tooling will not hold it up when its 20 uploads are in. Also made plain in the plan that four uploads a day waits only for the Groq backup, which ships inside bet 1, not for a separate release; the old wording could have cost bet 2 about two and a half weeks.
-- **Data:** two pre-commitments made before any data, so later reads cannot be bent: the title tests (style B and the capitalised word) will also be read on the share of plays YouTube actually counts, since their extra views could be swipe-aways that don't count toward the bar. Today's read is too thin to say (9 against 14 uploads). Also checked whether buried uploads (5 views or fewer at a week, 13% of them) share a topic, title style or version: none does beyond chance. **Fixed a fault in the reporting tool's count of the views YouTube's bar counts:** it read every video's lifetime total as one week's gain, so it showed about 21,400 such views per 90 days; the one week actually measured supports about 9,600, in line with the plan's 11,000 to 13,000. No tracker had quoted the wrong figure, but the next read of bet 2 in those views would have (reviewed, its two risks fixed, merged). Also closed a quieter gap in the same read: a week missing one upload's reading is now held back instead of summed low (reviewed, merged).
-- **Reliability:** every upload landed, including this evening's; the record of the last upload is intact; Gemini failed on 1 of the last 20 uploads. GitHub's late starts have never made two video runs collide (none in 99 runs since August; the closest were 3.5 hours apart), which matters once we post four a day.
-- **Reliability, for bet 2 (four uploads a day):** built its last missing piece, on a branch behind bet 1. Each upload now records the slot it was scheduled for, and the weekly report counts it under that day and times its delay from that slot, so a run GitHub starts after midnight no longer reads as a missed day. Two fresh reviews found no bugs and two risks, both fixed: an upload started by hand would have recorded a guessed slot that looked like a scheduled one, and one hand-edited value could have stopped the weekly report. It merges after bet 1, before four a day is switched on; a sample cannot exercise it, since test renders never write the upload record. The safety screen's weekly audit is clean: one post skipped since September.
-- **Engineering:** three tests failed whenever a dry run's setting was left on in the shell, which reads like a regression; fixed on the same branch, without loosening the guard that keeps tests from uploading or spending (reviewed).
-- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.37 this month, forecast $0.88 of $3); tonight's sample logs hold no keys.
-- **General management:** your replies since 20 September fall on 15 of 24 days, with gaps of up to three days. So #74's wait is still within your normal rhythm, and the rule that fires tomorrow morning should check that before changing how asks reach you. Fixed the tracker checker, which flagged a closed issue as open for the third time in three weeks (reviewed, merged).
-- **Dropped after ranking:** varying the video's template (waits for bet 1's read, as planned); a subscriber-rate metric (views, not subscribers, are what stands between us and the smaller tier); the 60-second safety stop in the upload code (never fired, and it would touch bet 1's branch). Fixing against improving: about even. Improving: bet 1 made shippable, four a day's last piece. Fixing: two faults in the reporting tool, the tracker checker, three tests.
-
-### Blocked
-- **For you, in order:** #74 (bet 1: a glance at four frames, then a label); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks). Adding two or three music tracks also answers the template risk.
-
-### Next
-- On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
-- Tomorrow's 08:17 release check reads the same build; a PASS there is expected.
-- Once bet 1 is live, merge the slot-recording branch (it sits on top of bet 1; tested and reviewed twice) before four a day is switched on.
-- If #74 is still open at 10:49 tomorrow, read the rhythm note in the decision log before re-asking.
-
-### Better?
-- **Than last shift:** Slightly. Bet 1 went from "needs a final sample" to "needs only your label", four a day's last piece is built, and our count of the views YouTube's bar counts is now right. Nothing reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though it is now fully built and sampled.
 - **Than ~100 shifts ago:** Too early to say.
