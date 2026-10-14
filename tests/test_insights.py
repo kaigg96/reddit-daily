@@ -804,6 +804,25 @@ def test_title_source_marks_uploads_that_shipped_the_raw_question():
     assert source("What is it?", "") == ""
 
 
+def test_title_writer_keeps_the_rows_from_before_meta_source():
+    """#10 and #14 straddle v8, whose Groq fallback can write a title:
+    `--within title_writer!=groq` must keep the history, not drop it unset."""
+    writer = lambda t, ok, src=None: insights._with_derived_dimensions(
+        {"post_title": "Why?", "video_title": t, "title_ok": ok,
+         **({"meta_source": src} if src is not None else {})})["title_writer"]
+    assert writer("Cats, Explained", "1") == "gemini"              # before the column
+    assert writer("Why?", "0") == "reddit"                          # the raw question
+    assert writer("Cats, Explained", "1", "groq_fallback") == "groq"
+    assert writer("Cats, Explained", "1", "groq") == "groq"
+    assert writer("Cats, Explained", "1", "gemini") == "gemini"
+    assert writer("Why?", "0", "error") == "reddit"
+    assert writer("", "") == ""
+    rows = [{"video_id": "old", "post_title": "Why?", "video_title": "Cats", "title_ok": "1"},
+            {"video_id": "new", "post_title": "Why?", "video_title": "Dogs", "title_ok": "1",
+             "meta_source": "groq_fallback"}]
+    assert insights.ids_within("title_writer!=groq", rows) == {"old"}
+
+
 def test_title_source_trusts_the_logged_flag_over_a_matching_title():
     """A generated echo of a lower-case question is sentence-cased into an
     exact match (llm.sentence_case); the logged title_ok still says generated."""
