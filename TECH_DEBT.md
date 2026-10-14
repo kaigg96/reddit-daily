@@ -308,7 +308,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   a bump, while #13's rule says the full switch ships as its own version. A
   fallback is not the switch, but `v8`'s read should count Groq-written uploads
   apart: the branch logs `meta_source`, so `report.py --at-age 7 --by
-  meta_source --since <merge date>` reads it with today's tool, no new code. Left alone: PRD's cautionary records
+  meta_source --since <merge date>` reads it with today's tool. The title tests
+  (#10, #14) set Groq's titles apart with `--within title_writer!=groq`
+  (merged 10-14), which keeps the rows from before the column. Left alone: PRD's cautionary records
   (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
