@@ -288,7 +288,9 @@ def compare(videos_a, videos_b, label_a, label_b, now, metric=Metric.WATCH):
         metric=metric,
         a=summarize(videos_a, label_a, metric, now),
         b=summarize(videos_b, label_b, metric, now),
-        age_matched=ages_comparable(videos_a, videos_b),
+        # Ages are matched over the uploads in the medians, as `summarize` reports them.
+        age_matched=ages_comparable([v for v in videos_a if v.views > 0],
+                                    [v for v in videos_b if v.views > 0]),
     )
 
 

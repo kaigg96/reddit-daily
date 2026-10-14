@@ -1888,7 +1888,8 @@ def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
 def test_engaged_share_checks_read_only_the_uploads_in_the_medians(capsys):
     """On 2026-10-14 a 7-day engaged-share read of `v7` uploads warned of a
     `v4` mix and would refuse on age: both checks counted uploads read before
-    the column existed, which the medians never saw."""
+    the column existed, which the medians never saw. Zero-view uploads leave
+    those checks for the same reason: the medians exclude them."""
     import importlib.util, pathlib, sys
     root = pathlib.Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
@@ -1906,13 +1907,14 @@ def test_engaged_share_checks_read_only_the_uploads_in_the_medians(capsys):
                              meta={"voice": voice, "format_version": "v4"})
                        for i in range(zeros)]
 
-    stephen, danielle = arm("Stephen", 10, 20), arm("Danielle", 10, 2, zeros=3)
+    # More zeros than measured uploads: a median age over every upload would be 60 days.
+    stephen, danielle = arm("Stephen", 10, 20), arm("Danielle", 10, 2, zeros=11)
     result = insights.compare(stephen, danielle, "a", "b", NOW, Metric.ENGAGED_SHARE)
     assert result.age_matched and (result.a.n, result.b.n) == (10, 10)
-    assert result.b.zero_view_count == 3          # zeros still counted, not averaged
+    assert result.b.zero_view_count == 11         # zeros still counted, not averaged
     report.compare(stephen + danielle, "voice=Stephen", Metric.ENGAGED_SHARE, NOW)
     out = capsys.readouterr().out
-    assert "uneven across releases" not in out and "starts" not in out
+    assert "uneven across releases" not in out and "one arm starts" not in out
     # On a metric every upload reports, the old uploads are in the medians.
     report.compare(stephen + danielle, "voice=Stephen", Metric.VIEWS, NOW)
     assert "uneven across releases (v4" in capsys.readouterr().out
