@@ -18,6 +18,14 @@ def test_an_unrelated_open_elsewhere_on_a_long_row_is_not():
     assert not c.describes_as_open(row, 18)
 
 
+def test_an_open_word_in_the_next_table_cell_is_not_this_issues():
+    row = ("| ready | frames inline (keep while #74 is open) | **Bet 1's next step, "
+           "under #71's limits** | R3.2 |")
+    assert not c.describes_as_open(row, 71)
+    assert c.describes_as_open(row, 74)
+    assert c.describes_as_open("| blocked: awaiting #71's label | Item |", 71)
+
+
 def test_an_open_word_inside_another_word_is_not_one():
     assert not c.describes_as_open('your #62 decision on "no new spending"', 62)
     assert c.describes_as_open("#62, still pending", 62)

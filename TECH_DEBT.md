@@ -182,13 +182,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   up to the first answer, after the owner's label, since it changes the look.
   Host lines now also drop on emoji (the font lacks them). `emoji` and
   `better-profanity` (which filters posts and comments) are pinned since
-  10-13, and `test_requirements.py` fails any unpinned line.
+  10-13, and `test_requirements.py` fails any unpinned line. The final
+  branch, with those pins merged in, sampled PASS on `0fbc37c` (10-13
+  23:22): all four lines shown, notes capitalised, own words 0.439.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
   (2) a run queued behind another
   cancels a pending one in the `reddit-video` group, so an off-slot run could
-  cancel a waiting live one (needs a ~6h pile-up); (3) after the patch, a
+  cancel a waiting live one (needs a ~6h pile-up; none in 99 scheduled runs
+  08-27 to 10-13, the closest two 3.5h apart); (3) after the patch, a
   12:23 run landing after midnight takes the previous day's style, and an
   00:23 one landing after noon the morning subreddit (11.6h+ delays; 3.0–7.4h
   seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
@@ -197,7 +200,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (3) and (4) cannot be fixed from publish times: at four a day slots are 6h
   apart and delays reach 9.4h, so any carry-over rule either hides a real miss
   or raises a false one (10-13). Log each run's slot in the upload log, through
-  a sample after `v8`. The delay is rising: weekly median 4.3–4.6h (W36–W38),
+  a sample after `v8`: **built 10-13 on `reliability/run-slot-log`**, stacked
+  on `v8` (`run_slot`; the digest counts each upload for its scheduled day and
+  times its delay from that slot; older rows keep the estimate; reviewed
+  twice, fixed). Merge it after `v8`, before the switch, on tests and review:
+  no sample reaches it (a dry run returns before the log), and `prev_post.txt`
+  is written first, so a fault there cannot repeat an upload. **At the switch, keep
+  `MAX_SCREENED_CANDIDATES` at 4:** PRD §2's cut to 2 was the free route for
+  Gemini's worst case, which `v8`'s Groq fallback now answers, so the cut
+  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising: weekly median 4.3–4.6h (W36–W38),
   5.5h (W40), 5.9h (W41), 6.5h (W42 so far, n=3), so at four a day the median
   run lands after the next slot's cron time. Runs are safe (`run_slot` takes
   the day from the cron line); the digest is what misreads. **Closes when** the switch goes to four.
@@ -253,7 +264,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   rescue fires on any Gemini exception, not only 429/5xx (harmless);
   `title_caps` is logged for Groq titles, so #10 and #14's reads must filter
   on `meta_source` once any appear; 3 `test_llm` tests fail with `DRY_RUN=1`
-  in the shell (on `main` too). **Switch on in `src/config.py`, never a
+  in the shell (on `main` too; fixed on `reliability/run-slot-log`, after `v8`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
@@ -290,6 +301,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
+
+- **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
+  `weekly-analytics.yml` names three Google packages in `pip install`; every
+  other workflow reads `requirements.txt`, and `test_requirements.py` reads
+  only the requirements files. A broken release on a Monday loses that week's
+  snapshot for good (no backfill). Not raised alone: unlikely, and the owner's
+  queue is the binding limit. **Closes when** the next workflow patch to the
+  owner carries `pip install -r requirements.txt` there, with a test that
+  fails any workflow `pip install` naming a package.
 
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check

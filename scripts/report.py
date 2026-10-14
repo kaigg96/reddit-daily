@@ -163,6 +163,8 @@ def compare(videos, spec, metric, now, pool=None, min_views=1):
         print(f"(read below: only uploads with >= {min_views} views)")
     result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
     print(result.render())
+    # The checks below judge the medians, so they read only the uploads in them.
+    a, b = ([v for v in insights.reported(c, metric) if v.views > 0] for c in (a, b))
     when = lambda vs: [v.true_published or v.published for v in vs]
     if result.a.sufficient and result.b.sufficient and result.age_matched:
         (a0, a1), (b0, b1) = ((min(when(c)), max(when(c))) for c in (a, b))
@@ -233,6 +235,18 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     near_zero = insights.render_without_near_zero(read, min_uploads)
     if near_zero:
         print(near_zero)
+
+
+def _fine_watch_rows(path=None, log_rows=None):
+    """`_snapshot_metric_rows` in fractional watch-seconds: percentage viewed x
+    the upload's logged length (`Video.watch_seconds_fine`). An upload with no
+    logged length is left out, never read as zero."""
+    if log_rows is None:
+        log_rows = insights._read_upload_log()
+    length = {r["video_id"]: insights._optional_float(r.get("duration_s")) for r in log_rows}
+    return [dict(r, value=r["value"] / 100 * length[r["video_id"]])
+            for r in _snapshot_metric_rows("avg_view_pct", path)
+            if length.get(r["video_id"])]
 
 
 def _snapshot_metric_rows(metric_col="avg_view_duration_s", path=None):
@@ -401,15 +415,19 @@ def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
-    if args.metric != Metric.WATCH:
+    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE):
         print(f"--trajectory reads watch-seconds, views or engaged_views, not {args.metric}")
         return
-    rows = _within_rows(_snapshot_metric_rows(), args.within)
+    rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
+            else _snapshot_metric_rows())
+    rows = _within_rows(rows, args.within)
     series = insights.trajectory(rows, at_age=args.at_age or 7)
     if not series:
         print("not enough comparable history yet")
         return
-    print(f"Median watch-seconds, every upload read at ~{args.at_age or 7} days old\n")
+    fine = (" (percentage viewed x length, to a fraction; logged uploads only; a diagnostic:"
+            " pre-committed rules read whole seconds)" if args.metric == Metric.WATCH_FINE else "")
+    print(f"Median watch-seconds{fine}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
         print(f"  {period:10} {n:>4} {med:>7.1f}s")
@@ -430,8 +448,10 @@ def show_weekly_views(args):
     `--metric engaged_views` reads the same totals in the bar's own unit."""
     age = args.at_age or 7
     col = args.metric
-    series = insights.weekly_totals(_within_rows(_snapshot_metric_rows(col), args.within),
-                                    at_age=age)
+    rows = _within_rows(_snapshot_metric_rows(col), args.within)
+    ids = insights.ids_within(args.within) if args.within else None
+    known = [r for r in _snapshot_metric_rows("views") if ids is None or r["video_id"] in ids]
+    series = insights.weekly_totals(rows, at_age=age, known_rows=known)
     if not series:
         print("no publish week is fully read yet")
         return
@@ -580,7 +600,7 @@ def main():
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL, Metric.ENGAGED, Metric.ENGAGED_SHARE,
-                            Metric.ENGAGED_VIEWS])
+                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -600,7 +620,7 @@ def main():
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
         sys.exit("--min-views applies to --compare only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
-                                                  Metric.ENGAGED_SHARE):
+                                                  Metric.ENGAGED_SHARE, Metric.WATCH_FINE):
         # Per-play ratios only. A count (views, likes, total watch time) rises
         # with views, so leaving out the uploads with few would hide the very
         # effect it measures, such as a change that gets fewer uploads seen.

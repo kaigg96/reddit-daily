@@ -1430,6 +1430,21 @@ def test_weekly_totals_leave_out_a_week_still_filling_in():
     assert insights.weekly_totals(rows) == []
 
 
+def test_weekly_totals_leave_out_a_week_with_an_unmeasured_upload():
+    """An upload with views but no engaged reading is absent from the engaged
+    rows; the play-start rows still know it, so the week is held back rather
+    than summed low (2026-10-13)."""
+    engaged = _week_of_uploads(5, 16, [10] * 6)            # the seventh unmeasured
+    views = _week_of_uploads(5, 16, [30] * 7)
+    assert insights.weekly_totals(engaged) == [("2026-W28", 6, 60)]
+    assert insights.weekly_totals(engaged, known_rows=views) == []
+    assert insights.weekly_totals(views, known_rows=views) == [("2026-W28", 7, 210)]
+    import inspect, sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import report
+    assert "known_rows=known" in inspect.getsource(report.show_weekly_views)
+
+
 def test_weekly_totals_leave_out_a_week_the_snapshots_never_read():
     """Uploads from before the first snapshot appear only at 30+ days old;
     the week is known but unread, so it is left out rather than summed low."""
@@ -1477,6 +1492,26 @@ def test_views_gained_counts_the_back_catalogue_and_new_uploads():
             _snap("new", 12, 17, 20)]
     gained = insights.views_gained(rows)
     assert [(g, d) for _, g, d in gained] == [(50, 7)]
+
+
+def test_views_gained_skips_a_snapshot_before_the_column_began():
+    """Engaged views began 2026-10-05; before it only zero-view rows carried a
+    value (zero). Read as a baseline, every video's lifetime count looked
+    gained in one week, doubling the channel's engaged rate (10-13)."""
+    rows = [_snap("zero", 0, 1, 0), _snap("zero", 0, 3, 0),   # before: only zero-view rows
+            _snap("a", 0, 10, 500), _snap("b", 0, 10, 300), _snap("zero", 0, 10, 0),
+            _snap("a", 0, 17, 520), _snap("b", 0, 17, 310), _snap("zero", 0, 17, 0),
+            _snap("new", 12, 17, 15)]
+    assert [(g, d) for _, g, d in insights.views_gained(rows)] == [(45, 7)]
+    assert [(o + r, d) for _, o, r, d in insights.views_gained_by_age(rows)] == [(45, 7)]
+    # A small first snapshot that measured everything published by then is kept,
+    # however much the channel grows after it (review, 10-13).
+    grow = [_snap("a", 0, 7, 10), _snap("a", 0, 14, 20), _snap("b", 9, 14, 5), _snap("c", 11, 14, 5)]
+    assert [(g, d) for _, g, d in insights.views_gained(grow)] == [(20, 7)]
+    # A video left out of a kept snapshot was unmeasured there, not new.
+    part = [_snap(v, 0, 7, 100) for v in "abcd"] + [_snap(v, 0, 14, 110) for v in "abc"]
+    part += [_snap(v, 0, 21, 120) for v in "abcd"]
+    assert [g for _, g, _ in insights.views_gained(part)] == [30, 30]
 
 
 def test_totals_change_compares_the_last_four_weeks_with_the_four_before():
@@ -1850,6 +1885,41 @@ def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     assert _ins.summarize(vids, "all", _ins.Metric.VIEWS, t).n == 3
 
 
+def test_engaged_share_checks_read_only_the_uploads_in_the_medians(capsys):
+    """On 2026-10-14 a 7-day engaged-share read of `v7` uploads warned of a
+    `v4` mix and would refuse on age: both checks counted uploads read before
+    the column existed, which the medians never saw. Zero-view uploads leave
+    those checks for the same reason: the medians exclude them."""
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+
+    def arm(voice, measured, old, zeros=0):
+        vids = [Video(f"{voice}{i}", NOW - datetime.timedelta(days=10), views=100,
+                      engaged_views=30 + i, meta={"voice": voice, "format_version": "v7"})
+                for i in range(measured)]
+        vids += [Video(f"{voice}old{i}", NOW - datetime.timedelta(days=60), views=100,
+                       meta={"voice": voice, "format_version": "v4"}) for i in range(old)]
+        return vids + [Video(f"{voice}zero{i}", NOW - datetime.timedelta(days=60), views=0,
+                             meta={"voice": voice, "format_version": "v4"})
+                       for i in range(zeros)]
+
+    # More zeros than measured uploads: a median age over every upload would be 60 days.
+    stephen, danielle = arm("Stephen", 10, 20), arm("Danielle", 10, 2, zeros=11)
+    result = insights.compare(stephen, danielle, "a", "b", NOW, Metric.ENGAGED_SHARE)
+    assert result.age_matched and (result.a.n, result.b.n) == (10, 10)
+    assert result.b.zero_view_count == 11         # zeros still counted, not averaged
+    report.compare(stephen + danielle, "voice=Stephen", Metric.ENGAGED_SHARE, NOW)
+    out = capsys.readouterr().out
+    assert "uneven across releases" not in out and "one arm starts" not in out
+    # On a metric every upload reports, the old uploads are in the medians.
+    report.compare(stephen + danielle, "voice=Stephen", Metric.VIEWS, NOW)
+    assert "uneven across releases (v4" in capsys.readouterr().out
+
+
 def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path):
     import importlib.util, pathlib, sys
     root = pathlib.Path(__file__).resolve().parents[1]
@@ -2160,3 +2230,31 @@ def test_host_lines_report_the_dose_of_the_release():
     line = insights.render_host_lines(rows, "v8")
     assert line.endswith("all 4 on 2 of 5 uploads, some on 2, none on 1")
     assert insights.render_host_lines([{"format_version": "v7", "host_lines": ""}], "v7") == ""
+
+
+def test_fine_watch_seconds_is_percentage_viewed_times_length():
+    """Whole seconds move medians in half-second steps under a ~1s drift; the
+    fine figure keeps the fraction. No length logged reads as unmeasured."""
+    x = Video("a", NOW, views=100, watch_seconds=12.0, avg_view_pct=58.0,
+              meta={"duration_s": "21.3"})
+    assert x.watch_seconds_fine == pytest.approx(12.354)
+    assert Video("b", NOW, views=100, avg_view_pct=58.0, meta={}).watch_seconds_fine is None
+    c = insights.summarize([x, Video("b", NOW, views=100, avg_view_pct=58.0)], "all",
+                           Metric.WATCH_FINE, NOW)
+    assert c.n == 1                                   # the unmeasured one leaves the median
+
+
+def test_fine_watch_trajectory_rows_scale_by_logged_length(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    snap = tmp_path / "snap.csv"
+    snap.write_text("snapshot_date,video_id,published_at,avg_view_pct,avg_view_duration_s\n"
+                    "2026-10-12,a,2026-10-05T06:00:00Z,50.0,10\n"
+                    "2026-10-12,b,2026-10-05T18:00:00Z,50.0,10\n")
+    rows = report._fine_watch_rows(snap, [{"video_id": "a", "duration_s": "21.0"},
+                                          {"video_id": "b", "duration_s": ""}])
+    assert [(r["video_id"], r["value"]) for r in rows] == [("a", 10.5)]

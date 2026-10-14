@@ -57,6 +57,7 @@ class Metric:
     ENGAGED = "implied_engaged"  # NOT the engaged share: refuted 2026-10-05 (engaged_check)
     ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
     ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
+    WATCH_FINE = "watch_seconds_fine"  # diagnostic: watch-seconds to a fraction; rules stay on WATCH
 
 
 @dataclass
@@ -94,6 +95,18 @@ class Video:
         if self.engaged_views is None:
             return None
         return self.engaged_views / self.views if self.views else 0.0
+
+    @property
+    def watch_seconds_fine(self):
+        """Percentage viewed x the upload's length: watch-seconds to a fraction.
+        YouTube reports whole seconds, so medians move in half-second steps and
+        a 4% change hides under the channel's ~1s drift. On 2026-10-12 it fell
+        within a second of the whole figure on all 162 logged uploads, and the
+        lengths YouTube implies sit ~0.3s from ours. None without a length."""
+        duration = _optional_float(self.meta.get("duration_s"))
+        if not duration:
+            return None
+        return self.avg_view_pct / 100 * duration
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
@@ -169,12 +182,21 @@ def median(values):
     return statistics.median(values) if values else float("nan")
 
 
+def reported(videos, metric):
+    """The videos a cohort counts on `metric`.
+
+    A metric the snapshot never reported (engaged views before 2026-10-05)
+    leaves the cohort, but only for a video with views: the API leaves
+    engaged views blank on zero-view rows, and those are still zero-view.
+    Every check beside a median reads this set too, or it judges uploads the
+    median never saw: on 2026-10-14 a 7-day engaged-share read of `v7`
+    uploads warned of a `v4` mix."""
+    return [v for v in videos if not v.views or v.get(metric) is not None]
+
+
 def summarize(videos, label, metric, now):
     """Cohort summary. Zero-view videos are counted, not averaged in (rule 4)."""
-    # A metric the snapshot never reported (engaged views before 2026-10-05)
-    # leaves the cohort, but only for a video with views: the API leaves
-    # engaged views blank on zero-view rows, and those are still zero-view.
-    videos = [v for v in videos if not v.views or v.get(metric) is not None]
+    videos = reported(videos, metric)
     live = [v for v in videos if v.views > 0]
     zeros = len(videos) - len(live)
     return Cohort(
@@ -272,13 +294,16 @@ def ages_comparable(a, b, tolerance=0.5):
 def compare(videos_a, videos_b, label_a, label_b, now, metric=Metric.WATCH):
     """Compare two cohorts on `metric`, refusing to mislead when the data can't
     support a conclusion (rules 2 and 3)."""
+    videos_a, videos_b = reported(videos_a, metric), reported(videos_b, metric)
     for v in videos_a + videos_b:
         v.age_days_cached = v.age_days(now)
     return Comparison(
         metric=metric,
         a=summarize(videos_a, label_a, metric, now),
         b=summarize(videos_b, label_b, metric, now),
-        age_matched=ages_comparable(videos_a, videos_b),
+        # Ages are matched over the uploads in the medians, as `summarize` reports them.
+        age_matched=ages_comparable([v for v in videos_a if v.views > 0],
+                                    [v for v in videos_b if v.views > 0]),
     )
 
 
@@ -913,7 +938,7 @@ def _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=False):
     return [(value, pub) for _, value, pub in best.values()]
 
 
-def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, known_rows=None):
     """Total views per publish-week, every upload read at the same age.
 
     Bet 2 (PLAN §2) is judged on total weekly views, because the Partner
@@ -927,6 +952,10 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     That leaves out the newest weeks, still filling in, and the weeks before
     the snapshots began or across a missed one, rather than reporting them
     low. Returns [(period, n, total)] oldest first.
+
+    `known_rows` says which uploads exist when `snapshot_rows` may leave some
+    out: an upload with views but no engaged reading is skipped there, and
+    judged from those rows alone its week would sum low (2026-10-13).
     """
     stamps = [r["snapshot"] for r in snapshot_rows if r.get("snapshot")]
     if not stamps:
@@ -934,7 +963,7 @@ def weekly_totals(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     newest = (max(stamps) - datetime.timedelta(days=at_age - tolerance)).date()
     week = lambda pub: pub.strftime("%G-W%V")
     known = {}
-    for r in snapshot_rows:
+    for r in list(snapshot_rows) + list(known_rows or ()):
         if r.get("published") and r.get("video_id"):
             known.setdefault(week(r["published"]), set()).add(r["video_id"])
     read = {}
@@ -961,17 +990,36 @@ def views_gained(snapshot_rows):
     snapshots. A video first seen in a snapshot counts in full, since it
     was published after the one before.
     """
-    by_snap = {}
-    for r in snapshot_rows:
-        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
-            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
     out = []
-    dates = sorted(by_snap)
-    for prev, cur in zip(dates, dates[1:]):
-        before, after = by_snap[prev], by_snap[cur]
+    for prev, cur, before, after, _ in _measured_pairs(snapshot_rows):
         gained = sum(max(v - before.get(vid, 0), 0) for vid, v in after.items())
         out.append((cur, gained, (cur - prev).days))
     return out
+
+
+def _measured_pairs(snapshot_rows):
+    """Consecutive snapshots as (prev, cur, before, after, published), leaving
+    out a snapshot holding under half the videos published by its date: it
+    did not measure this column. A column added later is absent before it
+    began, except on zero-view rows, read as zero: engaged views began
+    2026-10-05, so 09-28 held only zero-view videos and every video's
+    lifetime engaged count read as gained in one week (19,027 of 19,771;
+    10-13). Within a kept pair, a video missing from the earlier snapshot
+    though published before it was unmeasured, not new: the callers count
+    only videos in `before` or published since."""
+    by_snap, published = {}, {}
+    for r in snapshot_rows:
+        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
+            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
+            if r.get("published"):
+                published[r["video_id"]] = r["published"]
+    out_by = lambda d: sum(1 for p in published.values() if p <= d)
+    dates = sorted(d for d in by_snap if len(by_snap[d]) * 2 >= out_by(d))
+    for prev, cur in zip(dates, dates[1:]):
+        before = by_snap[prev]
+        after = {vid: v for vid, v in by_snap[cur].items()
+                 if vid in before or published.get(vid) is None or published[vid] > prev}
+        yield prev, cur, before, after, published
 
 
 def views_gained_by_age(snapshot_rows, old_days=60):
@@ -980,16 +1028,8 @@ def views_gained_by_age(snapshot_rows, old_days=60):
     views that the back catalogue shares at the same moment is the channel's
     distribution, not anything about the new uploads (the September 2026 drop
     held across every field we log, PRD §4)."""
-    by_snap, published = {}, {}
-    for r in snapshot_rows:
-        if r.get("snapshot") and r.get("video_id") and r.get("value") is not None:
-            by_snap.setdefault(r["snapshot"], {})[r["video_id"]] = r["value"]
-            if r.get("published"):
-                published[r["video_id"]] = r["published"]
     out = []
-    dates = sorted(by_snap)
-    for prev, cur in zip(dates, dates[1:]):
-        before, after = by_snap[prev], by_snap[cur]
+    for prev, cur, before, after, published in _measured_pairs(snapshot_rows):
         old = recent = 0
         for vid, v in after.items():
             gained = max(v - before.get(vid, 0), 0)

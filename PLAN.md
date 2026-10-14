@@ -41,7 +41,7 @@ places.
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
 | C5 | blocked: the owner's label on #75, replacing #53 (public repo; YouTube's 30-day limit) | Audience | **Collect viewer comments** | Kept as a 30-day download, never committed; `scripts/comments.py` reads it. Done when a shift has read last week's. |
-| C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies into a queue, and a workflow posts them, under ORG.md's publishing policy. |
+| C10 | blocked: C5 | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy. Viewers leave about one comment per seven uploads (2026-10-14). |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The company's working name is Show of Hands, and the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it** (2026-10-09): all 1,041 are readings, 883 pre-pipeline (30 duplicates) earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos (10-11); private ones go unmentioned. Renaming is the owner's. Done when the owner has decided. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response; never held. The logins are the owner's. Done when the owner reports a date; the next is due a quarter later. |
 
