@@ -184,7 +184,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `better-profanity` (which filters posts and comments) are pinned since
   10-13, and `test_requirements.py` fails any unpinned line. The final
   branch, with those pins merged in, sampled PASS on `0fbc37c` (10-13
-  23:22): all four lines shown, notes capitalised, own words 0.439.
+  23:22): all four lines shown, notes capitalised, own words 0.439. By 10-14
+  afternoon it no longer merged: main's reporting work conflicted in
+  `tests/test_insights.py` (both sides appended tests; kept both). Brought
+  current, it sampled PASS on `79a3873` (10-14 16:08, own words 0.661);
+  `check_docs.py` now flags such a conflict at shift start.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
