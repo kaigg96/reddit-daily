@@ -364,10 +364,18 @@ def matches(meta, spec):
     return bool(got) and (got == value) != negate
 
 
+# A derived field's possible values, so a filter can name one no upload has
+# yet: `title_writer!=groq` is meant to be in the title tests' reads before
+# Groq writes any title (#10, #14), and must not be refused as a typo.
+_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}}
+
+
 def _require_value(metas, spec):
     """Refuse a filter whose value no upload has. "!=" with a typo would
     otherwise keep every upload and print as if it had filtered."""
     key, value, _ = _parse_spec(spec)
+    if value in _DERIVED_VALUES.get(key, ()):
+        return
     if not any(str(m.get(key, "")).strip() == value for m in metas):
         raise ValueError(f"no logged upload has {key}={value}: check the spelling")
 
@@ -1469,6 +1477,15 @@ def _with_derived_dimensions(row):
     ok = (r.get("title_ok") or "").strip()
     r["title_source"] = ("" if not (q and t) else "raw" if ok == "0" else
                          "generated" if ok == "1" else "raw" if t == q else "generated")
+    # Who wrote the title, so the title tests (#10, #14) can set Groq's apart
+    # once v8 logs `meta_source` (#13). `meta_source!=groq` would drop every
+    # older row, since an unset field matches neither side; before the column
+    # no production call reached Groq (GROQ_FALLBACK was never on in `main`),
+    # so an older generated title is Gemini's.
+    src = (r.get("meta_source") or "").strip()
+    r["title_writer"] = ("" if not r["title_source"] else
+                         "reddit" if r["title_source"] == "raw" else
+                         "groq" if src.startswith("groq") else "gemini")
     # Raw titles run ~64 characters, generated ~41 (the generated median,
     # 2026-10-04): is length, not source, behind raw titles' views gap?
     r["title_length"] = "" if not t else "short" if len(t) <= 41 else "long"
