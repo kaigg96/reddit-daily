@@ -2222,3 +2222,31 @@ def test_own_words_is_silent_for_a_release_without_commentary():
 def test_own_words_skips_a_malformed_value_rather_than_crash_the_read():
     rows = [{"format_version": "v8", "own_words_share": s} for s in ("abc", "nan", "0.60")]
     assert "1 of 1 uploads" in insights.render_own_words(rows, "v8")
+
+
+def test_fine_watch_seconds_is_percentage_viewed_times_length():
+    """Whole seconds move medians in half-second steps under a ~1s drift; the
+    fine figure keeps the fraction. No length logged reads as unmeasured."""
+    x = Video("a", NOW, views=100, watch_seconds=12.0, avg_view_pct=58.0,
+              meta={"duration_s": "21.3"})
+    assert x.watch_seconds_fine == pytest.approx(12.354)
+    assert Video("b", NOW, views=100, avg_view_pct=58.0, meta={}).watch_seconds_fine is None
+    c = insights.summarize([x, Video("b", NOW, views=100, avg_view_pct=58.0)], "all",
+                           Metric.WATCH_FINE, NOW)
+    assert c.n == 1                                   # the unmeasured one leaves the median
+
+
+def test_fine_watch_trajectory_rows_scale_by_logged_length(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    snap = tmp_path / "snap.csv"
+    snap.write_text("snapshot_date,video_id,published_at,avg_view_pct,avg_view_duration_s\n"
+                    "2026-10-12,a,2026-10-05T06:00:00Z,50.0,10\n"
+                    "2026-10-12,b,2026-10-05T18:00:00Z,50.0,10\n")
+    rows = report._fine_watch_rows(snap, [{"video_id": "a", "duration_s": "21.0"},
+                                          {"video_id": "b", "duration_s": ""}])
+    assert [(r["video_id"], r["value"]) for r in rows] == [("a", 10.5)]
