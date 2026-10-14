@@ -1885,6 +1885,39 @@ def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     assert _ins.summarize(vids, "all", _ins.Metric.VIEWS, t).n == 3
 
 
+def test_engaged_share_checks_read_only_the_uploads_in_the_medians(capsys):
+    """On 2026-10-14 a 7-day engaged-share read of `v7` uploads warned of a
+    `v4` mix and would refuse on age: both checks counted uploads read before
+    the column existed, which the medians never saw."""
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+
+    def arm(voice, measured, old, zeros=0):
+        vids = [Video(f"{voice}{i}", NOW - datetime.timedelta(days=10), views=100,
+                      engaged_views=30 + i, meta={"voice": voice, "format_version": "v7"})
+                for i in range(measured)]
+        vids += [Video(f"{voice}old{i}", NOW - datetime.timedelta(days=60), views=100,
+                       meta={"voice": voice, "format_version": "v4"}) for i in range(old)]
+        return vids + [Video(f"{voice}zero{i}", NOW - datetime.timedelta(days=60), views=0,
+                             meta={"voice": voice, "format_version": "v4"})
+                       for i in range(zeros)]
+
+    stephen, danielle = arm("Stephen", 10, 20), arm("Danielle", 10, 2, zeros=3)
+    result = insights.compare(stephen, danielle, "a", "b", NOW, Metric.ENGAGED_SHARE)
+    assert result.age_matched and (result.a.n, result.b.n) == (10, 10)
+    assert result.b.zero_view_count == 3          # zeros still counted, not averaged
+    report.compare(stephen + danielle, "voice=Stephen", Metric.ENGAGED_SHARE, NOW)
+    out = capsys.readouterr().out
+    assert "uneven across releases" not in out and "starts" not in out
+    # On a metric every upload reports, the old uploads are in the medians.
+    report.compare(stephen + danielle, "voice=Stephen", Metric.VIEWS, NOW)
+    assert "uneven across releases (v4" in capsys.readouterr().out
+
+
 def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path):
     import importlib.util, pathlib, sys
     root = pathlib.Path(__file__).resolve().parents[1]

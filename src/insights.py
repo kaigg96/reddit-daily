@@ -169,12 +169,21 @@ def median(values):
     return statistics.median(values) if values else float("nan")
 
 
+def reported(videos, metric):
+    """The videos a cohort counts on `metric`.
+
+    A metric the snapshot never reported (engaged views before 2026-10-05)
+    leaves the cohort, but only for a video with views: the API leaves
+    engaged views blank on zero-view rows, and those are still zero-view.
+    Every check beside a median reads this set too, or it judges uploads the
+    median never saw: on 2026-10-14 a 7-day engaged-share read of `v7`
+    uploads warned of a `v4` mix."""
+    return [v for v in videos if not v.views or v.get(metric) is not None]
+
+
 def summarize(videos, label, metric, now):
     """Cohort summary. Zero-view videos are counted, not averaged in (rule 4)."""
-    # A metric the snapshot never reported (engaged views before 2026-10-05)
-    # leaves the cohort, but only for a video with views: the API leaves
-    # engaged views blank on zero-view rows, and those are still zero-view.
-    videos = [v for v in videos if not v.views or v.get(metric) is not None]
+    videos = reported(videos, metric)
     live = [v for v in videos if v.views > 0]
     zeros = len(videos) - len(live)
     return Cohort(
@@ -272,6 +281,7 @@ def ages_comparable(a, b, tolerance=0.5):
 def compare(videos_a, videos_b, label_a, label_b, now, metric=Metric.WATCH):
     """Compare two cohorts on `metric`, refusing to mislead when the data can't
     support a conclusion (rules 2 and 3)."""
+    videos_a, videos_b = reported(videos_a, metric), reported(videos_b, metric)
     for v in videos_a + videos_b:
         v.age_days_cached = v.age_days(now)
     return Comparison(

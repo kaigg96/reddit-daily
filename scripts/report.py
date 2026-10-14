@@ -163,6 +163,8 @@ def compare(videos, spec, metric, now, pool=None, min_views=1):
         print(f"(read below: only uploads with >= {min_views} views)")
     result = insights.compare(a, b, f"{key}={value}", f"{key}!={value}", now, metric)
     print(result.render())
+    # The checks below judge the medians, so they read only the uploads in them.
+    a, b = ([v for v in insights.reported(c, metric) if v.views > 0] for c in (a, b))
     when = lambda vs: [v.true_published or v.published for v in vs]
     if result.a.sufficient and result.b.sufficient and result.age_matched:
         (a0, a1), (b0, b1) = ((min(when(c)), max(when(c))) for c in (a, b))
