@@ -39,7 +39,8 @@ METADATA = MetadataResult(
     commentary=Commentary(
         setup="Everyone thinks they could do these. Let's hear from people who did.",
         reactions=["Ten hours of smiling sounds harder than the carrying.",
-                   "Boredom, then thirty seconds of everything. That's a lot to hold."],
+                   "Boredom, then thirty seconds of everything. That's a lot to hold.",
+                   "Twenty tiny bosses and no breaks. Respect."],
         verdict="My hand goes up for lifeguarding. Which one gets your vote?",
     ),
 )

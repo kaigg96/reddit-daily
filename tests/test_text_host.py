@@ -40,8 +40,11 @@ from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_u
 
 @pytest.fixture
 def text_host(monkeypatch):
+    """The mechanics below count nothing, so they reuse the two-answer
+    fixtures; what ships, three answers, is pinned at the end of this file."""
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
 
 
 def _segments():
@@ -132,6 +135,7 @@ def _text_metadata(monkeypatch, **lines):
     from tests.test_commentary import _metadata
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)   # as text_host
     return _metadata(monkeypatch, json.dumps({**HOST, **lines}))[0].commentary
 
 
@@ -169,6 +173,7 @@ def test_a_voiced_host_still_falls_back_whole(monkeypatch):
 
 
 def test_the_log_counts_the_host_lines_actually_shown(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     whole = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
     assert run.host_lines_shown(run.build_segments(_Post, whole.verdict, whole, _synth, "S")) == 4
     host = _text_metadata(monkeypatch, reactions=[HOST["reactions"][0], "word " * 13])
@@ -200,6 +205,7 @@ def test_the_upload_log_carries_the_host_line_count():
 
 def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     monkeypatch.setattr(config, "HOST_TEXT", False)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
     segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
     assert run.host_lines_shown(segs) == 4
@@ -221,3 +227,42 @@ def test_the_sample_setup_fits_the_text_cap():
 def test_a_trademark_sign_is_text_not_an_emoji(monkeypatch):
     host = _text_metadata(monkeypatch, reactions=["Reddit™ users loved this.", HOST["reactions"][1]])
     assert host.reactions[0] == "Reddit™ users loved this."
+
+
+# --- what ships: three answers (2026-10-14) -----------------------------------
+# Two answers made room for the voiced host's spoken lines (#70). Notes take no
+# time, and two answers would cut the median video from 23.3s to ~17.2s, where
+# uploads hold 25% less watch time (PRD §4), so the text host reads all three.
+
+THREE = [*HOST["reactions"], "Twenty five small bosses, zero breaks."]
+
+
+def test_the_text_host_reads_all_three_answers():
+    assert config.HOST_TEXT and config.COMMENTARY_ANSWERS == config.NUM_COMMENTS == 3
+
+
+def test_the_call_asks_for_a_reaction_to_each_of_the_three(monkeypatch):
+    import json
+    from tests.test_commentary import _metadata
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    meta, prompt = _metadata(monkeypatch, json.dumps({**HOST, "reactions": THREE}))
+    assert "exactly 3 lines" in prompt and '"reactions": ["...", "...", "..."]' in prompt
+    assert all(f'{i}. "{a}"' in prompt for i, a in enumerate(POST_ANSWERS, 1))
+    assert meta.commentary == llm.Commentary(HOST["setup"], THREE, HOST["cta"])
+
+
+def test_three_answers_each_carry_their_note(text_host, monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 3)
+    host = llm.Commentary(HOST["setup"], THREE, HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    assert [s.kind for s in segs] == ["title", "comment", "comment", "comment", "vote"]
+    assert [s.text for s in segs[1:4]] == POST_ANSWERS
+    assert [s.note for s in segs] == [HOST["setup"], *THREE, ""]
+    assert run.host_lines_shown(segs) == 5
+
+
+def test_the_free_sample_has_a_note_for_every_answer_it_reads():
+    from src import sample
+    host = sample.METADATA.commentary
+    assert len(host.reactions) == len(sample.POST.comments[:config.COMMENTARY_ANSWERS])
+    assert all(llm._usable(r, "reaction") for r in host.reactions)

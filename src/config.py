@@ -120,7 +120,10 @@ HOUSE_VOTE_RULE = None
 # threads at selection (content.is_medical). Turning it on changes the video:
 # bump FORMAT_VERSION, take a sample, and the owner listens to one first.
 COMMENTARY = True
-COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
+# In vote order (owner, 2026-08-23). Two made room for the spoken host (#70);
+# text notes take no time, and two answers cut the median video from 23.3s to
+# ~17.2s, where uploads hold 25% less watch time (PRD §4, 2026-10-14).
+COMMENTARY_ANSWERS = 3
 HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
 # The text-only host's notes (PRD R3.2, after #71): below the word captions
 # (y=700) and above the watermark (y=1500), inside the Shorts safe zone.

@@ -2234,7 +2234,8 @@ def test_own_words_skips_a_malformed_value_rather_than_crash_the_read():
     assert "1 of 1 uploads" in insights.render_own_words(rows, "v8")
 
 
-def test_host_lines_report_the_dose_of_the_release():
+def test_host_lines_report_the_dose_of_the_release(monkeypatch):
+    monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 2)   # whole: two notes, setup, vote
     rows = [{"format_version": "v8", "host_lines": n} for n in ("4", "4", "3", "0", "1")]
     rows += [{"format_version": "v8", "host_lines": ""}, {"format_version": "v7", "host_lines": "4"}]
     line = insights.render_host_lines(rows, "v8")

@@ -407,8 +407,10 @@ def title_caps_arm(rng):
 
 
 _PLAIN_SHAPE = '{"title": "...", "keywords": ["...", "..."], "cta": "..."}'
-_COMMENTARY_SHAPE = ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
-                     '"reactions": ["...", "..."], "cta": "..."}')
+def _commentary_shape(n):
+    """The reply's shape, with one reaction slot per answer read."""
+    return ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
+            f'"reactions": [{", ".join(['"..."'] * n)}], "cta": "..."}}')
 
 
 def get_metadata(reddit_title, comments, style="A", caps=None):
@@ -428,7 +430,7 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     """
     template = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"])
     if config.COMMENTARY:
-        # Style C's examples promise a count; two answers are read, not three.
+        # Style C's examples promise a count: the answers actually read.
         # Replaced before the question goes in, so the question is never edited.
         template = template.replace('"3 ', f'"{config.COMMENTARY_ANSWERS} ')
     guidance = template.format(reddit_title=reddit_title)
@@ -458,7 +460,7 @@ Produce three things.
  else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
-{_COMMENTARY_SHAPE if commentary else _PLAIN_SHAPE}
+{_commentary_shape(len(comments)) if commentary else _PLAIN_SHAPE}
 """
     route, prior = provider(), ""
     try:
