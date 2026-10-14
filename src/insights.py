@@ -57,6 +57,7 @@ class Metric:
     ENGAGED = "implied_engaged"  # NOT the engaged share: refuted 2026-10-05 (engaged_check)
     ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
     ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
+    WATCH_FINE = "watch_seconds_fine"  # diagnostic: watch-seconds to a fraction; rules stay on WATCH
 
 
 @dataclass
@@ -94,6 +95,18 @@ class Video:
         if self.engaged_views is None:
             return None
         return self.engaged_views / self.views if self.views else 0.0
+
+    @property
+    def watch_seconds_fine(self):
+        """Percentage viewed x the upload's length: watch-seconds to a fraction.
+        YouTube reports whole seconds, so medians move in half-second steps and
+        a 4% change hides under the channel's ~1s drift. On 2026-10-12 it fell
+        within a second of the whole figure on all 162 logged uploads, and the
+        lengths YouTube implies sit ~0.3s from ours. None without a length."""
+        duration = _optional_float(self.meta.get("duration_s"))
+        if not duration:
+            return None
+        return self.avg_view_pct / 100 * duration
 
     def age_days(self, now):
         return (now - self.published).total_seconds() / 86400
