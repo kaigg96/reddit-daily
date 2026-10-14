@@ -84,7 +84,7 @@ and more useful than a confident guess.
 - **Dropped after ranking** (a fresh agent proposed eight; ranked both ways): checking whether text-commentary channels are monetized (it can't be seen reliably from outside, and #74 doesn't wait on it); retiring the watched clip early (its rule reads on 19 October); whether politics posts get buried (4 uploads); likes per view (no decision waits on it). Fixing against improving: mostly fixing (the title test, bet 1's branch, the merge check). Improving: two written-down reads and the vote diagnostics.
 
 ### Blocked
-- **For you, in order:** #74 (bet 1: a glance at four frames, then a label; by about 6 November for bet 2); #50 (four commands; it unblocks #65); #75 (comments, one label); #59 (account checks).
+- **For you, in order:** #74 (bet 1: a glance at four frames, then a label; by about 6 November for bet 2); #50 (four commands, checked today: they still apply to the current code and every test passes; it unblocks #65); #75 (comments, one label); #59 (account checks).
 
 ### Next
 - On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
