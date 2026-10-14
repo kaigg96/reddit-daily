@@ -71,6 +71,7 @@ class Video:
     comments: float = 0.0
     est_minutes: float = 0.0
     engaged_views: float = None   # None where the snapshot predates the column (2026-10-05)
+    subs_gained: float = None     # None where the snapshot predates the column (2026-10-12)
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
@@ -733,6 +734,57 @@ def render_within_length(read, threshold=1.0):
 # YouTube's whole-second figure over a handful of viewers, often 0.0 on 1-6
 # plays (TECH_DEBT). The floor #3 and #10 read with (`--min-views 10`).
 RELEASE_MIN_VIEWS = 10
+
+
+def binomial_two_sided(k, n, p):
+    """P(a result at least as unlikely as k of n, at rate p). Exact; computed
+    in logs, since math.comb(n, i) overflows a float past ~1,000 events."""
+    if n == 0 or not 0 < p < 1:
+        return 1.0
+    logs = [math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1)
+            + i * math.log(p) + (n - i) * math.log1p(-p) for i in range(n + 1)]
+    cut = logs[k] + 1e-9
+    return min(1.0, sum(math.exp(x) for x in logs if x <= cut))
+
+
+def render_vote_diagnostics(read, min_uploads=MIN_COHORT):
+    """Comments and subscribers gained per 100 views, each side pooled.
+
+    Bet 1's vote is for these (PRD R3.2, pre-committed 2026-10-07), but both
+    are almost always zero per upload (median 0 in every release, 2026-10-14),
+    so a median reads 0 vs 0. Pooled, the test conditions on the total: given
+    k events on both sides, the release's share is binomial in its share of
+    the views. Never a trigger. That test treats events as independent, so
+    the count of uploads carrying any is printed beside it: one busy thread
+    is not an effect. Subscriber gains are read only over uploads whose
+    snapshot carries them (from 2026-10-12), so their baseline is the late
+    weeks of the era before, not all of it; a side with fewer than
+    MIN_COHORT such uploads reads "insufficient data". Empty until the
+    release reaches its pre-committed size, as `render_without_near_zero`."""
+    if not read.comparisons:
+        return ""
+    head = read.comparisons[0]
+    if head.a.n + head.a.zero_view_count < min_uploads:
+        return ""
+    lines = []
+    for label, get in (("comments", lambda v: v.comments),
+                       ("subscribers gained", lambda v: v.subs_gained)):
+        sides = [[v for v in side if get(v) is not None and v.views > 0]
+                 for side in (read.release, read.before)]
+        if min(len(side) for side in sides) < MIN_COHORT:
+            lines.append(f"  {label}: insufficient data ({len(sides[0])} vs "
+                         f"{len(sides[1])} uploads log it, under {MIN_COHORT})")
+            continue
+        views = [sum(v.views for v in side) for side in sides]
+        k = [int(round(sum(get(v) for v in side))) for side in sides]
+        any_ = [sum(1 for v in side if get(v) > 0) for side in sides]
+        p = binomial_two_sided(k[0], k[0] + k[1], views[0] / (views[0] + views[1]))
+        lines.append(f"  {label}: {100 * k[0] / views[0]:.2f} vs {100 * k[1] / views[1]:.2f} "
+                     f"per 100 views ({k[0]} over {views[0]:,.0f} on {any_[0]} of "
+                     f"{len(sides[0])} uploads, vs {k[1]} over {views[1]:,.0f} on "
+                     f"{any_[1]} of {len(sides[1])}), p={p:.2g}"
+                     + ("" if p < 0.05 else ": chance-sized"))
+    return "VOTE DIAGNOSTICS, pooled (never a trigger):\n" + "\n".join(lines)
 
 
 def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN_VIEWS):
@@ -1751,6 +1803,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0),
             comments=float(s.get("comments") or 0),
+            subs_gained=_optional_float(s.get("subs_gained")),
             meta=meta,
         ))
     return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
