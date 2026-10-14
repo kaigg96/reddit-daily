@@ -423,7 +423,8 @@ def show_trajectory(args):
     if not series:
         print("not enough comparable history yet")
         return
-    fine = " (percentage viewed x length, to a fraction)" if args.metric == Metric.WATCH_FINE else ""
+    fine = (" (percentage viewed x length, to a fraction; logged uploads only; a diagnostic:"
+            " pre-committed rules read whole seconds)" if args.metric == Metric.WATCH_FINE else "")
     print(f"Median watch-seconds{fine}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
