@@ -302,6 +302,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.
 
+- **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
+  `weekly-analytics.yml` names three Google packages in `pip install`; every
+  other workflow reads `requirements.txt`, and `test_requirements.py` reads
+  only the requirements files. A broken release on a Monday loses that week's
+  snapshot for good (no backfill). Not raised alone: unlikely, and the owner's
+  queue is the binding limit. **Closes when** the next workflow patch to the
+  owner carries `pip install -r requirements.txt` there, with a test that
+  fails any workflow `pip install` naming a package.
+
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
