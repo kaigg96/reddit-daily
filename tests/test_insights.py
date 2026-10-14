@@ -804,6 +804,16 @@ def test_title_source_marks_uploads_that_shipped_the_raw_question():
     assert source("What is it?", "") == ""
 
 
+def test_title_source_trusts_the_logged_flag_over_a_matching_title():
+    """A generated echo of a lower-case question is sentence-cased into an
+    exact match (llm.sentence_case); the logged title_ok still says generated."""
+    source = lambda q, t, ok: insights._with_derived_dimensions(
+        {"post_title": q, "video_title": t, "title_ok": ok})["title_source"]
+    assert source("Why do cats knead?", "Why do cats knead?", "1") == "generated"
+    assert source("why do cats knead?", "why do cats knead?", "0") == "raw"
+    assert source("Why do cats knead?", "Why do cats knead?", "") == "raw"
+
+
 def test_title_length_splits_at_the_generated_median():
     """Is title length, not title source, behind raw titles' views gap?"""
     length = lambda t: insights._with_derived_dimensions({"video_title": t})["title_length"]

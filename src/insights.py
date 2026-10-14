@@ -1430,8 +1430,13 @@ def _with_derived_dimensions(row):
         "you" if re.search(r"\byou(?:r|rs|'re|'ve|'d|'ll)?\b", q, re.I) else "other")
     # A failed title call ships the Reddit question verbatim. title_ok only
     # exists from 2026-09-19; comparing the two titles covers the older rows.
+    # Where it is logged it decides: a generated echo of a lower-case question
+    # can now be sentence-cased into an exact match (llm.sentence_case, 10-14).
+    # The two agreed on all 48 rows that log it.
     t = (r.get("video_title") or "").strip()
-    r["title_source"] = "" if not (q and t) else "raw" if t == q else "generated"
+    ok = (r.get("title_ok") or "").strip()
+    r["title_source"] = ("" if not (q and t) else "raw" if ok == "0" else
+                         "generated" if ok == "1" else "raw" if t == q else "generated")
     # Raw titles run ~64 characters, generated ~41 (the generated median,
     # 2026-10-04): is length, not source, behind raw titles' views gap?
     r["title_length"] = "" if not t else "short" if len(t) <= 41 else "long"

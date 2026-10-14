@@ -554,12 +554,34 @@ def resolve_title(generated, style, fallback, max_len=100):
     and 23% of the last 30 uploads) — a bias, not just noise. Keeping the rule
     here rather than in run.py means the log and the experiment can't disagree.
     """
-    ok = bool(generated and generated.strip())
+    # ok follows the cleaned title: a reply that cleans to nothing (a lone
+    # quote) ships the fallback, so it must not claim a style.
+    cleaned = sanitize_title(generated, "", max_len)
+    ok = bool(cleaned)
     return TitleResult(
-        title=sanitize_title(generated, fallback, max_len),
+        title=sentence_case(cleaned) if ok else sanitize_title(None, fallback, max_len),
         style=style if ok else "",
         ok=ok,
     )
+
+
+def sentence_case(title):
+    """Capitalise a generated title written with no capital letter at all.
+
+    PRD §0 #14's no-capitals arm asks for no word in capitals for emphasis, and
+    the model read it as no capitals at all: 4 of the arm's first 5 titles
+    shipped entirely lower case ("how to get jehovah's witnesses to leave you
+    alone"), so the test was comparing capitals against titles that look
+    unfinished. A title with any capital letter is the model's own choice and
+    is left exactly as it is; the raw Reddit fallback never comes here.
+    """
+    if not title or any(c.isupper() for c in title):
+        return title
+    # A sentence ends at ? or !, or at a full stop after a word of two or more
+    # letters: not an ellipsis ("self... and why") or "i.e." / "a.i.".
+    title = re.sub(r"(^\W*|(?:(?<=\w\w)\.|[?!])\s+\W*)([a-z])",
+                   lambda m: m.group(1) + m.group(2).upper(), title)
+    return re.sub(r"(?<![./])\bi\b(?![./])", "I", title)
 
 
 def sanitize_title(title, fallback, max_len=100):
