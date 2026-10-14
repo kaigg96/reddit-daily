@@ -229,6 +229,9 @@ def test_an_all_lower_case_title_ships_in_sentence_case():
             "If they lose: what do you think happens next?",
         "what i'd tell my younger self... and why": "What I'd tell my younger self... and why",
         "3 answers about wi-fi": "3 answers about wi-fi",
+        "i.e. what now?": "I.e. what now?",
+        "what is a.i. doing? you tell me": "What is a.i. doing? You tell me",
+        "wi-fi or i/o?": "Wi-fi or i/o?",
     }
     for generated, shipped in cases.items():
         r = llm.resolve_title(generated, style="B", fallback="Raw?")
@@ -244,9 +247,11 @@ def test_a_title_with_any_capital_is_left_as_the_model_wrote_it():
 
 
 def test_the_raw_fallback_is_never_recased():
-    """A raw Reddit question is its own cohort (title_source=raw)."""
-    r = llm.resolve_title(None, style="B", fallback="why do cats knead?")
-    assert r.title == "why do cats knead?"
+    """A raw Reddit question is its own cohort (title_source=raw), including
+    when the reply cleans to nothing, which must not claim a style either."""
+    for generated in (None, "'"):
+        r = llm.resolve_title(generated, style="B", fallback="why do cats knead?")
+        assert (r.title, r.style, r.ok) == ("why do cats knead?", "", False)
 
 
 def test_sanitize_title_falls_back_when_generation_failed():

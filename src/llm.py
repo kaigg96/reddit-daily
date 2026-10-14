@@ -395,10 +395,12 @@ def resolve_title(generated, style, fallback, max_len=100):
     and 23% of the last 30 uploads) — a bias, not just noise. Keeping the rule
     here rather than in run.py means the log and the experiment can't disagree.
     """
-    ok = bool(generated and generated.strip())
-    title = sanitize_title(generated, fallback, max_len)
+    # ok follows the cleaned title: a reply that cleans to nothing (a lone
+    # quote) ships the fallback, so it must not claim a style.
+    cleaned = sanitize_title(generated, "", max_len)
+    ok = bool(cleaned)
     return TitleResult(
-        title=sentence_case(title) if ok else title,
+        title=sentence_case(cleaned) if ok else sanitize_title(None, fallback, max_len),
         style=style if ok else "",
         ok=ok,
     )
@@ -416,10 +418,11 @@ def sentence_case(title):
     """
     if not title or any(c.isupper() for c in title):
         return title
-    # A sentence ends at . ? or !, but not at an ellipsis ("self... and why").
-    title = re.sub(r"(^\W*|(?<!\.)[.?!]\s+\W*)([a-z])",
+    # A sentence ends at ? or !, or at a full stop after a word of two or more
+    # letters: not an ellipsis ("self... and why") or "i.e." / "a.i.".
+    title = re.sub(r"(^\W*|(?:(?<=\w\w)\.|[?!])\s+\W*)([a-z])",
                    lambda m: m.group(1) + m.group(2).upper(), title)
-    return re.sub(r"\bi\b", "I", title)
+    return re.sub(r"(?<![./])\bi\b(?![./])", "I", title)
 
 
 def sanitize_title(title, fallback, max_len=100):
