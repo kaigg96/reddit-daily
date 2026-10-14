@@ -188,7 +188,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   afternoon it no longer merged: main's reporting work conflicted in
   `tests/test_insights.py` (both sides appended tests; kept both). Brought
   current, it sampled PASS on `79a3873` (10-14 16:08, own words 0.661);
-  `check_docs.py` now flags such a conflict at shift start.
+  `check_docs.py` now flags such a conflict at shift start. **Three answers
+  (#77, 10-14 night):** `product/host-three-answers` (`e20a53e`, on top of it;
+  565 tests; a fresh review found no bugs). Left by that review: a style C
+  title promising "3 Answers" ships over two if the duration guard drops one
+  (as in `v7`; the guard has not fired on a `v7` upload, peak 31.5 s of 45);
+  the voiced host (`HOST_TEXT=False`, rejected) would now speak three
+  reactions, and its tests pin two. Its sample waits for the 12-hour render
+  limit (last render 10-14 16:07).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
