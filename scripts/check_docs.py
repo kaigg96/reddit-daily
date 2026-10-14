@@ -158,10 +158,42 @@ def check_decision_ids():
     return True, f"{len(ids)} decisions, ids unique and contiguous"
 
 
+def check_next_release_merges(root=ROOT, base="origin/main",
+                              head="origin/integration/preview"):
+    """The next release still merges into main, as the handover promises.
+
+    The owner's label on a release is promised as a one-step merge. On
+    2026-10-14 a morning handover said bet 1's branch "still merges cleanly";
+    that shift's own reporting work then conflicted with it on main, and the
+    claim stood until a later shift tried the merge."""
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+    if any(run("rev-parse", "--verify", "--quiet", ref).returncode for ref in (base, head)):
+        return None, f"{head} or {base} is not fetched here"
+    r = run("-c", "core.quotePath=false", "merge-tree", "--write-tree", "--name-only",
+            base, head)
+    if r.returncode == 0:
+        return True, f"{head} merges into {base} cleanly (as of the last fetch)"
+    if r.returncode != 1:
+        # 128: a shallow clone, unrelated histories or missing objects; 129:
+        # a git older than 2.38. Either way the answer is unknown, not clean.
+        why = (r.stderr.strip().splitlines() or ["no message"])[0]
+        return None, f"could not try the merge (git exit {r.returncode}: {why[:80]})"
+    files = []
+    for line in r.stdout.splitlines()[1:]:   # the tree id, then conflicted paths
+        if not line.strip():
+            break
+        files.append(line.strip())
+    return False, (f"{head} no longer merges into {base}: conflicts in "
+                   + (", ".join(files) or "files git did not list")
+                   + "; bring it current before the owner's label")
+
+
 CHECKS = [
     ("decision ids", check_decision_ids),
     ("live format", check_live_format),
     ("merged branches", check_merged_branches),
+    ("next release merges", check_next_release_merges),
     ("cohort sizes", check_upload_counts),
     ("issue references", check_open_escalations),
 ]
