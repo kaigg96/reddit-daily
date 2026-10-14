@@ -821,6 +821,10 @@ def test_title_writer_keeps_the_rows_from_before_meta_source():
             {"video_id": "new", "post_title": "Why?", "video_title": "Dogs", "title_ok": "1",
              "meta_source": "groq_fallback"}]
     assert insights.ids_within("title_writer!=groq", rows) == {"old"}
+    # Usable before Groq writes any title, while a misspelling is still refused.
+    assert insights.ids_within("title_writer!=groq", rows[:1]) == {"old"}
+    with pytest.raises(ValueError):
+        insights.ids_within("title_writer!=grok", rows[:1])
 
 
 def test_title_source_trusts_the_logged_flag_over_a_matching_title():

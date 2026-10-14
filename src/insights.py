@@ -364,10 +364,18 @@ def matches(meta, spec):
     return bool(got) and (got == value) != negate
 
 
+# A derived field's possible values, so a filter can name one no upload has
+# yet: `title_writer!=groq` is meant to be in the title tests' reads before
+# Groq writes any title (#10, #14), and must not be refused as a typo.
+_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}}
+
+
 def _require_value(metas, spec):
     """Refuse a filter whose value no upload has. "!=" with a typo would
     otherwise keep every upload and print as if it had filtered."""
     key, value, _ = _parse_spec(spec)
+    if value in _DERIVED_VALUES.get(key, ()):
+        return
     if not any(str(m.get(key, "")).strip() == value for m in metas):
         raise ValueError(f"no logged upload has {key}={value}: check the spelling")
 
