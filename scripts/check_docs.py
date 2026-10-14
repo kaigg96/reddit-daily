@@ -170,18 +170,23 @@ def check_next_release_merges(root=ROOT, base="origin/main",
         return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
     if any(run("rev-parse", "--verify", "--quiet", ref).returncode for ref in (base, head)):
         return None, f"{head} or {base} is not fetched here"
-    r = run("merge-tree", "--write-tree", "--name-only", base, head)
+    r = run("-c", "core.quotePath=false", "merge-tree", "--write-tree", "--name-only",
+            base, head)
     if r.returncode == 0:
-        return True, f"{head} merges into {base} cleanly"
+        return True, f"{head} merges into {base} cleanly (as of the last fetch)"
     if r.returncode != 1:
-        return None, "git merge-tree --write-tree unavailable (git 2.38+)"
+        # 128: a shallow clone, unrelated histories or missing objects; 129:
+        # a git older than 2.38. Either way the answer is unknown, not clean.
+        why = (r.stderr.strip().splitlines() or ["no message"])[0]
+        return None, f"could not try the merge (git exit {r.returncode}: {why[:80]})"
     files = []
     for line in r.stdout.splitlines()[1:]:   # the tree id, then conflicted paths
         if not line.strip():
             break
         files.append(line.strip())
     return False, (f"{head} no longer merges into {base}: conflicts in "
-                   + ", ".join(files) + "; bring it current before the owner's label")
+                   + (", ".join(files) or "files git did not list")
+                   + "; bring it current before the owner's label")
 
 
 CHECKS = [

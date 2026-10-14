@@ -71,10 +71,23 @@ def test_a_release_branch_that_merges_cleanly_passes(tmp_path):
 def test_a_release_branch_that_conflicts_with_main_is_caught(tmp_path):
     """10-14: main's own work conflicted with bet 1's branch in one test file."""
     git = _repo(tmp_path)
+    git("checkout", "-q", "next")
+    (tmp_path / "h.txt").write_text("next\n")
+    git("add", "."); git("commit", "-q", "-m", "next adds h")
+    git("checkout", "-q", "main")
     (tmp_path / "f.txt").write_text("main\n")
-    git("commit", "-qam", "main moved")
+    (tmp_path / "h.txt").write_text("main\n")
+    git("add", "."); git("commit", "-q", "-m", "main moved")
     ok, why = c.check_next_release_merges(str(tmp_path), "main", "next")
-    assert ok is False and "f.txt" in why
+    assert ok is False and "conflicts in f.txt, h.txt;" in why
+
+
+def test_unrelated_histories_are_unknown_not_clean(tmp_path):
+    git = _repo(tmp_path)
+    git("checkout", "-q", "--orphan", "lone")
+    (tmp_path / "f.txt").write_text("lone\n")
+    git("add", "."); git("commit", "-q", "-m", "lone")
+    assert c.check_next_release_merges(str(tmp_path), "main", "lone")[0] is None
 
 
 def test_a_missing_release_branch_is_skipped_not_failed(tmp_path):
