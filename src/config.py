@@ -114,8 +114,8 @@ FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and react
 HOUSE_VOTE_RULE = None
 
 # Bet 1's first step as the owner approved it (#70, 2026-10-10; PRD R3.2's
-# commentary-led variant): the host speaks a setup, a reaction after each of
-# the top two answers, and its vote in place of the CTA, all from the same
+# commentary-led variant): the host speaks a setup, a reaction after each
+# answer read, and its vote in place of the CTA, all from the same
 # metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
 # threads at selection (content.is_medical). Turning it on changes the video:
 # bump FORMAT_VERSION, take a sample, and the owner listens to one first.

@@ -48,8 +48,8 @@ def build_segments(post, outro_text, host, synth, host_voice):
     segments = [synth("title", post.title, kind="title")]
     # With commentary on, a fallback reads the same answers its title was
     # written from, so a title's count always matches what is read.
-    two = host or config.COMMENTARY
-    answers = post.comments[:config.COMMENTARY_ANSWERS] if two else post.comments
+    capped = host or config.COMMENTARY
+    answers = post.comments[:config.COMMENTARY_ANSWERS] if capped else post.comments
     text = host and config.HOST_TEXT    # #71: the host is read, never heard
     if text:
         segments[0].note = host.setup

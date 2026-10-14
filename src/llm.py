@@ -407,6 +407,8 @@ def title_caps_arm(rng):
 
 
 _PLAIN_SHAPE = '{"title": "...", "keywords": ["...", "..."], "cta": "..."}'
+
+
 def _commentary_shape(n):
     """The reply's shape, with one reaction slot per answer read."""
     return ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
