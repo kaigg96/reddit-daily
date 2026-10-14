@@ -91,6 +91,7 @@ and more useful than a confident guess.
 - On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
 - After 01:17 on 15 October your gap passes its longest. Change how #74 is asked only if you act on other issues while it waits.
 - 19 October snapshot: the dark-morbid topic question and the watched clip's rule.
+- After bet 1's read: widen the background library from 6 clips toward the 10–15 planned. Variety across videos is what YouTube's template rule looks at; doing it now would muddy bet 1's read.
 
 ### Better?
 - **Than last shift:** Slightly. Bet 1's one-step merge is real again, and bet 2's main test now measures what it set out to. Nothing new reached viewers.
