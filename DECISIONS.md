@@ -50,6 +50,7 @@ yet false. (2) holds only loosely: #50, #65 and #59 need hands, the oldest six
 days, and #50 is the root, since applying it makes #65 and any later skill
 change label-only. So the handover leads with #50's four commands.
 **Re-reviewed 2026-10-13 (audit):** (1) false for now: #74 and #75 have waited ~2 days, the owner's last close was 10-11, and #74 needs a watch, not only a label. The trigger fires 10-14 10:49. **Evidence for whoever reads it (10-13 night):** the owner's labels, closes and comments since 09-20 fall on 15 of 24 days, with gaps of up to 76 hours (10-01 to 10-05); the current gap began 10-11 21:17, when #74 still said "after Monday's read" and #75 did not exist. A three-day wait is inside their rhythm, so check whether the ask's form is the cause before changing it.
+**Re-reviewed 2026-10-14 15:55 — trigger fired; the form is not the cause.** #74 has waited 3.2 days, but nothing of the owner's has moved since 10-11 21:17 (67 hours, inside their 76-hour longest gap): #75, a plain label, waits just as long. So it is absence, not the ask's shape; no re-ask (#74 was re-raised twice on 10-13). Revisit after 10-15 01:17, when the gap passes their longest; even then, change the ask only if they act on other issues while #74 sits.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
