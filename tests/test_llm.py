@@ -216,6 +216,39 @@ def test_resolve_title_treats_whitespace_only_as_a_failure():
     assert r.ok is False
 
 
+def test_an_all_lower_case_title_ships_in_sentence_case():
+    """PRD §0 #14: the no-capitals arm came back with no capitals at all."""
+    cases = {
+        "how to get jehovah's witnesses to leave you alone":
+            "How to get jehovah's witnesses to leave you alone",
+        "which celeb aged best without trying? you decide.":
+            "Which celeb aged best without trying? You decide.",
+        "is your 'dream' career on this list?": "Is your 'dream' career on this list?",
+        "(not) a dumb question?": "(Not) a dumb question?",
+        "if they lose: what do you think happens next?":
+            "If they lose: what do you think happens next?",
+        "what i'd tell my younger self... and why": "What I'd tell my younger self... and why",
+        "3 answers about wi-fi": "3 answers about wi-fi",
+    }
+    for generated, shipped in cases.items():
+        r = llm.resolve_title(generated, style="B", fallback="Raw?")
+        assert (r.title, r.style, r.ok) == (shipped, "B", True)
+
+
+def test_a_title_with_any_capital_is_left_as_the_model_wrote_it():
+    """Capitals are #14's variable: only a title with none at all is touched,
+    so neither arm's capitals are added to or taken away."""
+    for title in ("Who's YOUR hero?", "when did Reddit go bad for you?",
+                  "3 Answers: Is Baby Formula REALLY Necessary?", "i love NYC"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").title == title
+
+
+def test_the_raw_fallback_is_never_recased():
+    """A raw Reddit question is its own cohort (title_source=raw)."""
+    r = llm.resolve_title(None, style="B", fallback="why do cats knead?")
+    assert r.title == "why do cats knead?"
+
+
 def test_sanitize_title_falls_back_when_generation_failed():
     """The fallback path is what shipped raw Reddit questions as titles."""
     assert llm.sanitize_title(None, fallback="Raw question?") == "Raw question?"

@@ -396,11 +396,30 @@ def resolve_title(generated, style, fallback, max_len=100):
     here rather than in run.py means the log and the experiment can't disagree.
     """
     ok = bool(generated and generated.strip())
+    title = sanitize_title(generated, fallback, max_len)
     return TitleResult(
-        title=sanitize_title(generated, fallback, max_len),
+        title=sentence_case(title) if ok else title,
         style=style if ok else "",
         ok=ok,
     )
+
+
+def sentence_case(title):
+    """Capitalise a generated title written with no capital letter at all.
+
+    PRD §0 #14's no-capitals arm asks for no word in capitals for emphasis, and
+    the model read it as no capitals at all: 4 of the arm's first 5 titles
+    shipped entirely lower case ("how to get jehovah's witnesses to leave you
+    alone"), so the test was comparing capitals against titles that look
+    unfinished. A title with any capital letter is the model's own choice and
+    is left exactly as it is; the raw Reddit fallback never comes here.
+    """
+    if not title or any(c.isupper() for c in title):
+        return title
+    # A sentence ends at . ? or !, but not at an ellipsis ("self... and why").
+    title = re.sub(r"(^\W*|(?<!\.)[.?!]\s+\W*)([a-z])",
+                   lambda m: m.group(1) + m.group(2).upper(), title)
+    return re.sub(r"\bi\b", "I", title)
 
 
 def sanitize_title(title, fallback, max_len=100):
