@@ -4,26 +4,28 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `0fbc37c`
-- **When:** 2026-10-14T13:42:42Z
+- **Commit:** `79a3873`
+- **When:** 2026-10-15T13:24:33Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/38573903627)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/38742266829)
 
 ## What the gates said
 
-## Release validation
+…(truncated)…
+ validation
 
 Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared with production).
 
 ### Gate 1 — merged metadata prompt
 
 - ✅ `title`: What Hobby Will BANKRUPT You?
-- ✅ `keywords`: expensive hobbies, hobbies, too expensive, reddit hobbies, photography
-- ✅ `cta`: Photography gets my vote; that lens-to-car comparison hit HARD. What's YOUR pick?
-- ✅ host setup: My wallet shivers just thinking about some of these.
-- ✅ host reaction 1: Lenses really are an investment. Or an obsession?
-- ✅ host reaction 2: Plastic crack: the perfect, terrifying name.
+- ✅ `keywords`: expensive hobbies, hobbies, too expensive, reddit hobbies, photography cost
+- ✅ `cta`: I'm raising my hand for Warhammer; the plastic crack genuinely sounds like a menace. Which
+- ✅ host setup: My wallet already feels a chill just thinking about this.
+- ✅ host reaction 1: Lenses costing more than a car? That's brutal!
+- ✅ host reaction 2: Plastic crack sounds like a serious, costly addiction.
+- ⚠️ host vote: dropped, past its cap (the usual closing line ships)
 
 ### Gate 2 — R4.6 screen replay
 
