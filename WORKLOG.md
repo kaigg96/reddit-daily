@@ -61,6 +61,38 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-16 (23:00) — Bet 1's recommended version now has its sample, and one label on #77 ships it; the title test's control arm no longer leaks
+
+    Worked (% of the shift): product 45 · data 25 · gm 20 · security 5 · reliability 5
+
+**Summary:** No shift ran for two days, so the three-answer version of bet 1 that #77 recommends still had no sample. It has one now (it plays; four frames are on #77), and a single label there settles bet 1, #74 included. Separately, the title-capitals test, bet 2's main views lever, had a leak that made a real lead harder to find; that is fixed from tonight's upload.
+
+### Toward revenue
+- **Bet 1 is one label from shipping.** You acted on the comments question on 15 October but not on bet 1. #77 then promised a sample that didn't exist yet, so there was nothing to judge. Tonight's sample of exactly the version that would ship played without a fault, and its four frames are on #77, with no download needed. One label there ships it; you no longer need to label #74. Each day bet 1 waits also delays four uploads a day, bet 2's best-evidenced views lever, which comes after bet 1's read.
+- **What the sample shows, honestly:** our own words were 35% of what was read, because this thread's answers were long. Its closing vote ran past the length limit on the free AI that writes samples, so the video fell back to the usual "like and subscribe". With the vote, our share would be about 44%; reading two answers instead would give about 45%, so the third answer costs almost nothing in share here. The AI that writes real uploads kept its vote within the limit in today's release check.
+- **The title-capitals test (bet 2's views lever) had a leak.** One of the nine "no capitals" titles shipped "What's YOUR unforgetable deathbed confession?", which is the other arm's treatment. Leaks like that make the roughly double views the test is looking for harder to tell from chance. The arm is now held in code. A fresh review replayed it over all 166 past titles and found none mangled; its edge cases (CPR, World War II, a title opening on a number) are fixed. The test keeps its start date, counting each upload in the arm it was given.
+
+### Done
+- **Product (fixing):** bet 1's three-answer version brought up to date with the live code, sampled, framed and re-asked as one label (above). Tomorrow's release check now tests that version, so a label can merge it straight away.
+- **Product (fixing):** the title-test fix above (merged, reviewed; it changes titles, not the video).
+- **Data (improving):** reports can now see topic labels for 76 older uploads that were logged without one. I wrote down the one test before running it: does the dark-morbid topic lead within the older era? The tool refused (5 uploads, fewer than the 8 it needs), so the topic picker stays parked.
+- **General management:** the tracker said viewer comments were waiting on you. You approved that on 15 October and it is applied; the first week's comments arrive after Monday's weekly run. Trackers trimmed back under their size limits. Two fresh-agent passes generated candidates (data-led, then company-led); what survived is above, and the rest is listed below.
+- **Security:** standing check clean: no secrets in the project, the only workflow change is the comments one you approved, money controls in place ($0.46 this month, forecast $0.80 of $3).
+- **Reliability:** all four uploads since the last shift landed, and the record of the last upload is intact. Process note: no shift ran between 14 October 22:54 and tonight, so the sample planned for the 15th waited two days. I can't see why from here.
+
+### Blocked
+- **For you, in order:** #77 (one label settles bet 1; four frames, no download); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- On #77's label: check that the 08:17 release check passed on the three-answer version, merge it as the next version, close #74, then update the trackers.
+- 19 October: read the first week's viewer comments, and the weekly snapshot's items (the dark-morbid question, the watched clip's rule).
+- After bet 1 merges: the run-slot log, then the vote comment's capitals.
+
+### Better?
+- **Than last shift:** Yes, slightly. Bet 1's recommended version is sampled and asked as one label, and bet 2's title test now measures what it set out to. Nothing new reached viewers except the corrected titles.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-14 (22:18) — Bet 1 as built would cut our videos by a quarter, risking a revert for length alone; the fix is built and waits on your label (#77)
 
     Worked (% of the shift): product 50 · data 20 · gm 15 · reliability 5 · security 5 · legal 5
@@ -94,41 +126,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, slightly. Bet 1 was headed for a read it could fail on length alone; that is caught before any upload, and the fix is built. Nothing new reached viewers.
 - **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds, and bet 1 is unshipped, though now in better shape to be judged fairly.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-14 (16:45) — Bet 1 is one label from shipping again, and the title test no longer compares against lower-case titles
-
-    Worked (% of the shift): product 35 · data 25 · gm 20 · market 5 · reliability 5 · security 5 · audience 5
-
-**Summary:** Two faults that would have quietly cost us were found and fixed. Bet 1's branch had stopped merging, so your label on #74 would have met a broken step; it merges again and has a fresh passing sample. And the title-capitals test was comparing against titles shipped entirely in lower case. Nothing new reached viewers except tonight's corrected titles; #74 is still the one step that changes what they see.
-
-### Toward revenue
-- **Bet 1 is a one-step merge again.** This morning's reporting work had made bet 1's branch conflict with the live code, so "one label, then merge" was no longer true, and the trackers still said it was. I brought the branch up to date and re-sampled it: it plays, shows all four of the host's lines, and our own words are 66% of what the viewer gets. A check now runs at the start of every shift, so this can't go stale silently again.
-- **The title-capitals test (bet 2's views lever) was measuring the wrong thing.** 4 of the first 5 "no capitals" titles shipped all lower case ("how to get jehovah's witnesses to leave you alone"), so the test was setting capitals against titles that look unfinished. Uploads with that look earn about half the views. Fixed from tonight's upload; the test now counts from 15 October and reads about 23 November, a week later.
-- **Bet 2 is now also judged in the views YouTube's bar counts:** the share of plays that get past the opening. Written down before the data: doubling plays can't pass for progress unless the counted views double too.
-
-### Done
-- **Product (fixing):** the title fix above. A title written with no capital letter at all now ships with normal capitals; any title with a capital is left alone, so neither arm of the test changes. A fresh review found no bugs and two risks, both fixed: the reporting tool could have filed a re-capitalised title as a raw one, and abbreviations like "i.e." were being capitalised as if they ended a sentence (merged; no change to the video).
-- **Product (fixing):** bet 1's branch brought current (one test file, both sides kept), checked against the branches that follow it, re-sampled (pass).
-- **Data:** viewers rarely comment or subscribe: about one comment per seven uploads, and 11 subscribers from 33,550 views. Bet 1's vote is meant to raise both, but at its read that is about 1–2 subscribers and 3–6 comments, so I recorded now that anything under two to three times the current rate is chance. The release check now prints both pooled, with that chance figure, so the read needs no one-off analysis. YouTube doesn't count our own vote comment.
-- **Data:** the background clip doesn't change the share of plays that count (within one release, 24% against 26%, well within chance), so swapping clips gets us no more counted views. Pre-committed the subreddit test's read in counted views too.
-- **General management:** the last audit named one decision as overdue for re-checking (no new spending until we earn): it still holds. The rule on waiting asks fired today. Nothing of yours has moved since Saturday evening (67 hours, inside your longest gap of 76), and the plain-label ask (#75) has waited as long as #74, so the problem is that you've been away, not how the asks are worded. No re-ask. Closed #53 as replaced by #75 so it stops showing among your decided items.
-- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.42 this month, forecast $0.87 of $3).
-- **Reliability:** every upload since the last shift landed, the record of the last upload is intact, and tonight's run hasn't started yet (GitHub starts our runs 4–7 hours late).
-- **Finance (for the 5 November review):** at the full bar, $33–$333 a month against the public subscription prices ($20, $100, $200): revenue above costs only on the cheapest plan or at the top of the quoted rates.
-- **Market (a bounded check):** I found no report either way of on-screen text commentary passing YouTube's monetization review, and YouTube's policy page is unchanged since July 2025. A July 2026 press report (TechTimes) lists "text-to-speech narration over stock footage" among the patterns YouTube's crackdown hit. That describes our videos, with or without bet 1. One app vendor's article says a 246,000-subscriber Reddit-story channel with human narrators was demonetized in May 2026, but I could not open it to confirm. Nothing here changes a decision: this risk is already in front of you on #74.
-- **Dropped after ranking** (a fresh agent proposed eight; ranked both ways): retiring the watched clip early (its rule reads on 19 October); whether politics posts get buried (4 uploads); likes per view (no decision waits on it). Mostly fixing (the title test, bet 1's branch, the merge check); improving: two written-down reads, the vote diagnostics. Handed over about 30 minutes early: nothing else cleared the bar.
-
-### Blocked
-- **For you, in order:** #74 (bet 1: a glance at four frames, then a label; by about 6 November for bet 2); #50 (four commands, checked today: they still apply to the current code and every test passes; it unblocks #65); #75 (comments, one label); #59 (account checks).
-
-### Next
-- On #74's label, merge bet 1's branch as the next version in one step (its sample names its current commit), then update the trackers.
-- After 01:17 on 15 October your gap passes its longest. Change how #74 is asked only if you act on other issues while it waits.
-- 19 October snapshot: the dark-morbid topic question and the watched clip's rule.
-- After bet 1's read: widen the background library from 6 clips toward the 10–15 planned. Variety across videos is what YouTube's template rule looks at; doing it now would muddy bet 1's read.
-
-### Better?
-- **Than last shift:** Slightly. Bet 1's one-step merge is real again, and bet 2's main test now measures what it set out to. Nothing new reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds, and bet 1 is unshipped, though built, sampled and mergeable.
 - **Than ~100 shifts ago:** Too early to say.
