@@ -235,6 +235,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     near_zero = insights.render_without_near_zero(read, min_uploads)
     if near_zero:
         print(near_zero)
+    vote = insights.render_vote_diagnostics(read, min_uploads)
+    if vote:
+        print(vote)
 
 
 def _fine_watch_rows(path=None, log_rows=None):

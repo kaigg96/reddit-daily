@@ -170,6 +170,7 @@ bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
 1–2 cents per extra upload. The packet asks for it explicitly, so the owner's
 answer there re-decides this ruling for those items. No shift may read it as
 lifted until then.
+**Re-reviewed 2026-10-14 (named most due by the 10-13 audit):** holds. (1) revenue is still $0, and YouTube's bar doubling for new applicants on 1 February 2027 pushes "earning" further out, so this binds longer than first thought. The owner applied it both ways since: bet 2's narration spend approved with the bet (#72), Gemini's paid tier refused (#62, "find another solution"). (2) holds: the free answers keep coming (Groq for #62, samples on a separate free allowance). Revisit as written.
 
 **Re-reviewed 2026-10-08:** still holds. The owner declined Gemini's paid tier,
 asked for so Reddit posts stop reaching a free tier that trains on them (#62):

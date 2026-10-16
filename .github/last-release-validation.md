@@ -4,11 +4,11 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `0fbc37c`
-- **When:** 2026-10-14T13:42:42Z
+- **Commit:** `79a3873`
+- **When:** 2026-10-16T13:16:02Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/38573903627)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/38906238246)
 
 ## What the gates said
 
@@ -18,12 +18,12 @@ Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared wit
 
 ### Gate 1 — merged metadata prompt
 
-- ✅ `title`: What Hobby Will BANKRUPT You?
-- ✅ `keywords`: expensive hobbies, hobbies, too expensive, reddit hobbies, photography
-- ✅ `cta`: Photography gets my vote; that lens-to-car comparison hit HARD. What's YOUR pick?
-- ✅ host setup: My wallet shivers just thinking about some of these.
-- ✅ host reaction 1: Lenses really are an investment. Or an obsession?
-- ✅ host reaction 2: Plastic crack: the perfect, terrifying name.
+- ✅ `title`: What Hobby Will REALLY Drain Your Wallet?
+- ✅ `keywords`: expensive hobbies, hobby costs, photography cost, Warhammer price, budget hobbies
+- ✅ `cta`: Photography gets my vote; those lenses are just BRUTAL. Which one hits YOU hardest?
+- ✅ host setup: Some passions demand more than just dedication.
+- ✅ host reaction 1: Lenses costing more than a car? Ouch.
+- ✅ host reaction 2: Plastic crack sounds dangerously accurate.
 
 ### Gate 2 — R4.6 screen replay
 

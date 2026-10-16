@@ -184,7 +184,18 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `better-profanity` (which filters posts and comments) are pinned since
   10-13, and `test_requirements.py` fails any unpinned line. The final
   branch, with those pins merged in, sampled PASS on `0fbc37c` (10-13
-  23:22): all four lines shown, notes capitalised, own words 0.439.
+  23:22): all four lines shown, notes capitalised, own words 0.439. By 10-14
+  afternoon it no longer merged: main's reporting work conflicted in
+  `tests/test_insights.py` (both sides appended tests; kept both). Brought
+  current, it sampled PASS on `79a3873` (10-14 16:08, own words 0.661);
+  `check_docs.py` now flags such a conflict at shift start. **Three answers
+  (#77, 10-14 night):** `product/host-three-answers` (`e20a53e`, on top of it;
+  565 tests; a fresh review found no bugs). Left by that review: a style C
+  title promising "3 Answers" ships over two if the duration guard drops one
+  (as in `v7`; the guard has not fired on a `v7` upload, peak 31.5 s of 45);
+  the voiced host (`HOST_TEXT=False`, rejected) would now speak three
+  reactions, and its tests pin two. Its sample waits for the 12-hour render
+  limit (last render 10-14 16:07).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
@@ -297,7 +308,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   a bump, while #13's rule says the full switch ships as its own version. A
   fallback is not the switch, but `v8`'s read should count Groq-written uploads
   apart: the branch logs `meta_source`, so `report.py --at-age 7 --by
-  meta_source --since <merge date>` reads it with today's tool, no new code. Left alone: PRD's cautionary records
+  meta_source --since <merge date>` reads it with today's tool. The title tests
+  (#10, #14) set Groq's titles apart with `--within title_writer!=groq`
+  (merged 10-14), which keeps the rows from before the column. Left alone: PRD's cautionary records
   (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
   inside `integration/preview`. **Closes when** #50 lands and the bundle is
   raised, or the next audit.

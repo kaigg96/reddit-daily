@@ -804,6 +804,29 @@ def test_title_source_marks_uploads_that_shipped_the_raw_question():
     assert source("What is it?", "") == ""
 
 
+def test_title_writer_keeps_the_rows_from_before_meta_source():
+    """#10 and #14 straddle v8, whose Groq fallback can write a title:
+    `--within title_writer!=groq` must keep the history, not drop it unset."""
+    writer = lambda t, ok, src=None: insights._with_derived_dimensions(
+        {"post_title": "Why?", "video_title": t, "title_ok": ok,
+         **({"meta_source": src} if src is not None else {})})["title_writer"]
+    assert writer("Cats, Explained", "1") == "gemini"              # before the column
+    assert writer("Why?", "0") == "reddit"                          # the raw question
+    assert writer("Cats, Explained", "1", "groq_fallback") == "groq"
+    assert writer("Cats, Explained", "1", "groq") == "groq"
+    assert writer("Cats, Explained", "1", "gemini") == "gemini"
+    assert writer("Why?", "0", "error") == "reddit"
+    assert writer("", "") == ""
+    rows = [{"video_id": "old", "post_title": "Why?", "video_title": "Cats", "title_ok": "1"},
+            {"video_id": "new", "post_title": "Why?", "video_title": "Dogs", "title_ok": "1",
+             "meta_source": "groq_fallback"}]
+    assert insights.ids_within("title_writer!=groq", rows) == {"old"}
+    # Usable before Groq writes any title, while a misspelling is still refused.
+    assert insights.ids_within("title_writer!=groq", rows[:1]) == {"old"}
+    with pytest.raises(ValueError):
+        insights.ids_within("title_writer!=grok", rows[:1])
+
+
 def test_title_source_trusts_the_logged_flag_over_a_matching_title():
     """A generated echo of a lower-case question is sentence-cased into an
     exact match (llm.sentence_case); the logged title_ok still says generated."""
@@ -2269,3 +2292,49 @@ def test_fine_watch_trajectory_rows_scale_by_logged_length(tmp_path):
     rows = report._fine_watch_rows(snap, [{"video_id": "a", "duration_s": "21.0"},
                                           {"video_id": "b", "duration_s": ""}])
     assert [(r["video_id"], r["value"]) for r in rows] == [("a", 10.5)]
+
+
+def _vote_read(release, before, n=None):
+    from types import SimpleNamespace
+    head = SimpleNamespace(a=SimpleNamespace(n=len(release) if n is None else n,
+                                             zero_view_count=0))
+    return SimpleNamespace(comparisons=[head], release=release, before=before)
+
+
+def test_vote_diagnostics_pool_counts_a_median_would_read_as_zero():
+    """PRD R3.2 (sized 2026-10-14): comments and subscribers are almost always
+    zero per upload, so they are read pooled per 100 views, with the chance
+    of the split given the total."""
+    v = lambda c, s, views=100: Video("x", NOW, views=views, comments=c, subs_gained=s)
+    release = [v(1, 1)] + [v(0, 0)] * 19                   # 1 comment over 2,000 views
+    before = [v(1, None)] * 4 + [v(0, None)] * 16 + [v(0, 1)] * 20
+    out = insights.render_vote_diagnostics(_vote_read(release, before), min_uploads=20)
+    assert out.startswith("VOTE DIAGNOSTICS, pooled (never a trigger):")
+    assert ("comments: 0.05 vs 0.10 per 100 views (1 over 2,000 on 1 of 20 uploads, "
+            "vs 4 over 4,000 on 4 of 40)") in out
+    # Subscriber gains only over uploads that log them: 20 before, 2,000 views.
+    assert ("subscribers gained: 0.05 vs 1.00 per 100 views (1 over 2,000 on 1 of 20 "
+            "uploads, vs 20 over 2,000 on 20 of 20)") in out
+    assert out.count("chance-sized") == 1                 # 1 of 21 at an even split is not
+
+
+def test_vote_diagnostics_wait_for_the_pre_committed_size():
+    v = Video("x", NOW, views=100, comments=1, subs_gained=0)
+    assert insights.render_vote_diagnostics(_vote_read([v] * 12, [v] * 30), min_uploads=20) == ""
+
+
+def test_vote_diagnostics_say_when_a_side_logs_too_few_subscribers():
+    """A rate over 1-2 uploads breaks the thin-cohort rule (CLAUDE.md §6)."""
+    v = lambda s: Video("x", NOW, views=100, comments=0, subs_gained=s)
+    before = [v(None)] * 20 + [v(1)] * 3
+    out = insights.render_vote_diagnostics(_vote_read([v(0)] * 20, before), min_uploads=20)
+    assert "subscribers gained: insufficient data (20 vs 3 uploads log it" in out
+
+
+def test_binomial_two_sided_matches_known_values():
+    assert insights.binomial_two_sided(5, 10, 0.5) == pytest.approx(1.0)
+    assert insights.binomial_two_sided(0, 10, 0.5) == pytest.approx(2 / 1024)
+    assert insights.binomial_two_sided(0, 0, 0.3) == 1.0
+    # No overflow past ~1,000 events, where math.comb stops fitting a float.
+    assert insights.binomial_two_sided(600, 1200, 0.5) == pytest.approx(1.0)
+    assert insights.binomial_two_sided(0, 1200, 0.5) < 1e-300
