@@ -386,7 +386,7 @@ def title_style_for(day):
 TitleResult = collections.namedtuple("TitleResult", "title style ok")
 
 
-def resolve_title(generated, style, fallback, max_len=100):
+def resolve_title(generated, style, fallback, max_len=100, caps=None, source=""):
     """Decide the shipped title, the style to log, and whether generation worked.
 
     The style is blanked whenever generation failed, because an upload carrying
@@ -394,16 +394,45 @@ def resolve_title(generated, style, fallback, max_len=100):
     such contaminated the R2.2 cohorts unevenly (A 7%, B 12%, C 5% mislabelled,
     and 23% of the last 30 uploads) — a bias, not just noise. Keeping the rule
     here rather than in run.py means the log and the experiment can't disagree.
+    `caps` is #14's arm and `source` the Reddit text the title was written from.
     """
     # ok follows the cleaned title: a reply that cleans to nothing (a lone
     # quote) ships the fallback, so it must not claim a style.
     cleaned = sanitize_title(generated, "", max_len)
     ok = bool(cleaned)
+    if ok and caps is False:
+        cleaned = drop_emphasis_caps(cleaned, source)
     return TitleResult(
         title=sentence_case(cleaned) if ok else sanitize_title(None, fallback, max_len),
         style=style if ok else "",
         ok=ok,
     )
+
+
+_CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:'[A-Za-z]+)?\b")
+
+
+def drop_emphasis_caps(title, source=""):
+    """Hold PRD §0 #14's no-capitals arm to its word; the prompt alone leaked.
+
+    1 of the arm's 9 titles from 10-10 to 10-16 shipped a word in capitals
+    ("What's YOUR unforgetable deathbed confession?"): the other arm's
+    treatment, which shrinks the lead the test has to show. A word in capitals
+    stays when it is a known acronym or the Reddit text writes it in capitals
+    ("ICU nurses"); any other takes the case of the words around it.
+    """
+    keep = config.TITLE_ACRONYMS | set(re.findall(r"\b[A-Z]{2,}\b", source))
+    words = [w for w in re.findall(r"[A-Za-z][\w']*", title) if not _CAPS_WORD.fullmatch(w)]
+    titled = sum(w[0].isupper() for w in words) * 2 > len(words)
+
+    def recase(m):
+        word = m.group(0)
+        if word.split("'")[0] in keep:
+            return word
+        starts = re.search(r"(^|[.?!:]\s+)\W*$", title[:m.start()]) is not None
+        return word.capitalize() if titled or starts else word.lower()
+
+    return _CAPS_WORD.sub(recase, title)
 
 
 def sentence_case(title):
