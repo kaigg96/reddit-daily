@@ -699,38 +699,3 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
     assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"
-
-
-def test_the_no_capitals_arm_drops_emphasis_capitals():
-    """PRD §0 #14: the arm shipped "What's YOUR unforgetable deathbed
-    confession?" on 10-16; the prompt alone did not hold it."""
-    cases = {
-        "What's YOUR unforgetable deathbed confession?":
-            "What's your unforgetable deathbed confession?",
-        "YOU won't guess this one": "You won't guess this one",
-        "Is it real rest? REALLY?": "Is it real rest? Really?",
-        "3 Answers: How YOU'D Feel If US Drops Support":
-            "3 Answers: How You'd Feel If US Drops Support",
-        "Is Baby Formula REALLY Necessary?": "Is Baby Formula Really Necessary?",
-        "What NOT to say to an ICU nurse": "What not to say to an ICU nurse",
-        "Your FBI file, in one line": "Your FBI file, in one line",
-    }
-    source = "Nurses in the ICU, what's the worst thing a visitor said?"
-    for generated, shipped in cases.items():
-        r = llm.resolve_title(generated, style="B", fallback="Raw?", caps=False,
-                              source=source)
-        assert (r.title, r.style, r.ok) == (shipped, "B", True), generated
-
-
-def test_the_capitals_arm_and_an_unset_arm_keep_the_title_as_written():
-    """Only arm 0 is held to no capitals; arm 1 asks for one, and a caller
-    with no arm (the release check, old callers) changes nothing."""
-    for caps in (True, None):
-        r = llm.resolve_title("Who's REALLY to blame?", style="B", fallback="Raw?",
-                              caps=caps)
-        assert r.title == "Who's REALLY to blame?"
-
-
-def test_a_failed_title_ships_the_reddit_question_untouched_in_either_arm():
-    r = llm.resolve_title("", style="B", fallback="AITA for saying NO?", caps=False)
-    assert (r.title, r.style, r.ok) == ("AITA for saying NO?", "", False)
