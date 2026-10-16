@@ -65,7 +65,7 @@ and more useful than a confident guess.
 
     Worked (% of the shift): product 45 · data 25 · gm 20 · security 5 · reliability 5
 
-**Summary:** No shift ran for two days, so the three-answer version of bet 1 that #77 recommends still had no sample. It has one now (it plays; four frames are on #77), and a single label there settles bet 1, #74 included. Separately, the title-capitals test, bet 2's main views lever, had a leak that made a real lead harder to find; that is fixed from tonight's upload.
+**Summary:** The week's shift allowance ran out on 14 October, so for two days no shift worked, and the three-answer version of bet 1 that #77 recommends still had no sample. It has one now (it plays; four frames are on #77), and a single label there settles bet 1, #74 included. Separately, the title-capitals test, bet 2's main views lever, had a leak that made a real lead harder to find; that is fixed from tonight's upload.
 
 ### Toward revenue
 - **Bet 1 is one label from shipping.** You acted on the comments question on 15 October but not on bet 1. #77 then promised a sample that didn't exist yet, so there was nothing to judge. Tonight's sample of exactly the version that would ship played without a fault, and its four frames are on #77, with no download needed. One label there ships it; you no longer need to label #74. Each day bet 1 waits also delays four uploads a day, bet 2's best-evidenced views lever, which comes after bet 1's read.
@@ -78,7 +78,7 @@ and more useful than a confident guess.
 - **Data (improving):** reports can now see topic labels for 76 older uploads that were logged without one. I wrote down the one test before running it: does the dark-morbid topic lead within the older era? The tool refused (5 uploads, fewer than the 8 it needs), so the topic picker stays parked.
 - **General management:** the tracker said viewer comments were waiting on you. You approved that on 15 October and it is applied; the first week's comments arrive after Monday's weekly run. Trackers trimmed back under their size limits. Two fresh-agent passes generated candidates (data-led, then company-led); what survived is above, and the rest is listed below.
 - **Security:** standing check clean: no secrets in the project, the only workflow change is the comments one you approved, money controls in place ($0.46 this month, forecast $0.80 of $3).
-- **Reliability:** all four uploads since the last shift landed, and the record of the last upload is intact. Process note: no shift ran between 14 October 22:54 and tonight, so the sample planned for the 15th waited two days. I can't see why from here.
+- **Reliability:** all four uploads since the last shift landed, and the record of the last upload is intact. Process note: no shift worked between 14 October 22:54 and tonight because the week's shift allowance ran out. Five scheduled shifts started and stopped at the guard until it reset at 18:00 today. At three shifts a day it lasts about five and a half days, so the end of each week goes dark, and longer shifts (which #67 asks for) would widen the gap. It cost two days on bet 1's sample this time. That is your reserve working as set, so I changed nothing; worth a look at the 5 November monthly review.
 
 ### Blocked
 - **For you, in order:** #77 (one label settles bet 1; four frames, no download); #50 (four commands, which unblocks #65); #59 (account checks).
