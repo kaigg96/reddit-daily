@@ -126,12 +126,16 @@ VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
 
 # Capitals in a title that are real acronyms, not emphasis. One list for both
-# PRD §0 #14's no-capitals arm (llm.drop_emphasis_caps) and its compliance read
-# (insights' title_hype), so the arm and the read can't disagree.
-TITLE_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BF", "CEO", "CIA", "COVID", "DIY",
-                  "DM", "DMV", "DNA", "ER", "EU", "FBI", "GF", "GPS", "HOA", "HR", "ID",
-                  "IQ", "IRS", "LA", "MLB", "NASA", "NBA", "NFL", "NHL", "NYC", "OCD", "OK",
-                  "PC", "PM", "PTSD", "RIP", "TSA", "TV", "UFC", "UFO", "UK", "US", "USA", "WC"}
+# PRD §0 #14's no-capitals arm (llm.drop_emphasis_caps) and the title_hype
+# read (insights), so the two share what counts as an acronym. Roman numerals
+# ("World War II") count too.
+TITLE_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BBQ", "BF", "CDC", "CEO", "CIA",
+                  "COVID", "CPR", "DIY", "DM", "DMV", "DNA", "DR", "ER", "EU", "FBI", "GF",
+                  "GOAT", "GPS", "HOA", "HP", "HR", "IBM", "ICU", "ID", "IQ", "IRS", "LA",
+                  "LGBTQ", "MIL", "MIT", "MLB", "NASA", "NBA", "NFL", "NHL", "NPC", "NSA",
+                  "NYC", "OCD", "OK", "PC", "PM", "POV", "PTSD", "RIP", "SUV", "TL", "TSA",
+                  "TV", "UFC", "UFO", "UK", "US", "USA", "WC",
+                  "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII"}
 
 # --- paths ---
 ASSETS = ROOT / "assets"

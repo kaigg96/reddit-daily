@@ -409,7 +409,7 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     )
 
 
-_CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:'[A-Za-z]+)?\b")
+_CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:['’][A-Za-z]+)?\b")
 
 
 def drop_emphasis_caps(title, source=""):
@@ -419,17 +419,21 @@ def drop_emphasis_caps(title, source=""):
     ("What's YOUR unforgetable deathbed confession?"): the other arm's
     treatment, which shrinks the lead the test has to show. A word in capitals
     stays when it is a known acronym or the Reddit text writes it in capitals
-    ("ICU nurses"); any other takes the case of the words around it.
+    ("ICU nurses"); any other takes the case of the words around it. Emphasis
+    copied from the Reddit text ("I was SO angry") passes as written there.
     """
-    keep = config.TITLE_ACRONYMS | set(re.findall(r"\b[A-Z]{2,}\b", source))
-    words = [w for w in re.findall(r"[A-Za-z][\w']*", title) if not _CAPS_WORD.fullmatch(w)]
-    titled = sum(w[0].isupper() for w in words) * 2 > len(words)
+    keep = config.TITLE_ACRONYMS | set(re.findall(r"\b([A-Z]{2,})s?\b", source))
+    # Title Case when three in four words after the first are capitalised; a
+    # plain majority read "Tom Hanks in New York" as Title Case.
+    words = [w for w in re.findall(r"[A-Za-z][\w'’]*", title)
+             if not _CAPS_WORD.fullmatch(w)][1:]
+    titled = bool(words) and sum(w[0].isupper() for w in words) * 4 >= len(words) * 3
 
     def recase(m):
         word = m.group(0)
-        if word.split("'")[0] in keep:
+        if re.split("['’]", word)[0] in keep:
             return word
-        starts = re.search(r"(^|[.?!:]\s+)\W*$", title[:m.start()]) is not None
+        starts = re.search(r"(^[\d\W]*|[.?!:]\s+\W*)$", title[:m.start()]) is not None
         return word.capitalize() if titled or starts else word.lower()
 
     return _CAPS_WORD.sub(recase, title)
