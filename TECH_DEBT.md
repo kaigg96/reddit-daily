@@ -194,8 +194,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   title promising "3 Answers" ships over two if the duration guard drops one
   (as in `v7`; the guard has not fired on a `v7` upload, peak 31.5 s of 45);
   the voiced host (`HOST_TEXT=False`, rejected) would now speak three
-  reactions, and its tests pin two. Its sample waits for the 12-hour render
-  limit (last render 10-14 16:07).
+  reactions, and its tests pin two. Brought current with main, it sampled
+  PASS on `b9bc23b` (10-16 22:12): 29.7 s, own words 0.347 on a long-answer
+  thread (34 of our words to 64 of Reddit's); the sample model's vote ran
+  past its cap again and fell back to the outro, so read `host_lines` and the
+  vote's fallback rate after `v8`.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
