@@ -175,8 +175,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   played, but one line past its cap dropped all four (own words 0.000), 1 of
   4 samples; the log does not say which line. `product/host-line-fallback`
   drops only the long line in text mode. The overrun was `SAMPLE_MODEL`'s;
-  `MODEL`'s two text-host release checks fit (votes 15 words, cap 18), so
-  production's rate is unmeasured: read `host_lines` after `v8`. A full-branch
+  `MODEL`'s votes fit in all six text-host release checks to 10-16 (12–15
+  words, cap 18), but on one fixed post, so production's rate is unmeasured:
+  read `host_lines` after `v8`. A full-branch
   review (10-13) found no blockers; left: the setup note shows for 65% of the
   question's audio, so under 2 s on a short question (`video.py` ~107). Keep it
   up to the first answer, after the owner's label, since it changes the look.
