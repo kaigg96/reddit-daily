@@ -22,6 +22,8 @@ that hit the YouTube API are not.
 
 import csv
 import datetime
+import functools
+import json
 import math
 import re
 import statistics
@@ -1439,6 +1441,22 @@ _HYPE_WORD = re.compile(
 _ACRONYMS = config.TITLE_ACRONYMS
 
 
+# Topic labels for uploads from before the screen logged one (82 rows, mostly
+# `v4`): the channel-wide labelling pass (scripts/analyze_channel.py) keeps
+# them here, keyed by the Reddit question. Where both exist they agree on 29 of
+# 30 uploads (2026-10-16). Read as `topic_any`, never into `topic`, so reads
+# pre-committed on `topic` (R1, PRD §0 #2) keep their population.
+_TOPICS_CACHE = config.ROOT / "analysis" / "topics_cache.json"
+
+
+@functools.lru_cache(maxsize=1)
+def _cached_topics():
+    try:
+        return json.loads(_TOPICS_CACHE.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
 def _with_derived_dimensions(row):
     """Group-able dimensions computed from an upload_log row.
 
@@ -1461,6 +1479,8 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # The logged topic, else the labelling pass's (see _TOPICS_CACHE).
+    r["topic_any"] = (r.get("topic") or "").strip() or (_cached_topics().get(q, "") if q else "")
     # The question is the narrated opening: does addressing the viewer hold
     # them? 90 of 154 logged questions say "you" (2026-10-03).
     r["question_person"] = "" if not q else (
