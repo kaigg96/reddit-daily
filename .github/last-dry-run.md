@@ -7,32 +7,38 @@ a PASS that names the branch's current commit.
 ## Last render
 
 - **Branch:** `product/host-three-answers`
-- **Commit:** `b9bc23b`
-- **When:** 2026-10-16T22:12:31Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 29.7 s, audio, no dead air
+- **Commit:** `2e26595`
+- **When:** 2026-10-17T14:27:52Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 33.0 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38973971633)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39040582950)
+
+Failed soft (the video still passed):
+
+```
+Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
+tags:        ['NoStupidQuestions', 'Shorts', 'Reddit', 'Top NoStupidQuestions Post', 'Trending NoStupidQuestions', 'failed domestications', 'animals humans tried to domesticate', 'domesticated foxes experiment', 'squirrels as pets history', 'did cats domesticate us', 'unsuccessful animal breeding', 'colonial america pets', 'why foxes cant be pets', 'wild animal attempts', 'reddit failed domestications']
+Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
+```
 
 What it picked:
 
 ```
-Selected post: What job used to be considered the dream career, but is basically a nightmare now?
-Slate topics (rank order): money-work|nostalgia|money-work|money-work|money-work|relationships-dating
-Commentary: a host line ran past its length cap, or was a placeholder or emoji
-Commentary: dropped only the long line(s)
-Title style B, caps arm 0: Which of your dream jobs turned into a complete nightmare?
-Commentary setup: Growing up, these fields promised the absolute world.
-Commentary reaction 1: Eighty hours for a pink slip at the finish line.
-Commentary reaction 2: Sending ten thousand applications just to hear crickets.
-Commentary reaction 3: Watching the entire foundation of education crumble hurts.
-CTA: Like, subscribe, and comment your answer below!
-Commentary: our own words are 0.347 of the narration, 4 host line(s) shown
-Assembled: 29.7s, bg=pexels_15168364.mp4, music=funk_bg_lower.mp3
-Today's top AskReddit post, asked by u/sexy-maud: What job used to be considered the dream career, but is basically a nightmare now?
+Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
+Slate topics (rank order): other|relationships-dating|dark-morbid|politics-news|humor-absurd
+Title style C, caps arm 1: 3 Animals We TRIED To Tame
+Commentary setup: Nature always finds a way to ruin human plans.
+Commentary reaction 1: Accidental dogs do not count as a successful harvest.
+Commentary reaction 2: Rabies cabinets sound like a terrible colonial trend.
+Commentary reaction 3: Truth has rarely been spoken so lazily.
+CTA: I raise my hand for cats domesticating us because it is too true. Which gets your vote?
+Commentary: our own words are 0.434 of the narration, 5 host line(s) shown
+Assembled: 33.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
 ```
 
 ## Last request
 
 - **Branch:** `product/host-three-answers`
-- **When:** 2026-10-16T22:12:31Z
+- **When:** 2026-10-17T14:27:52Z
 - **Outcome:** rendered -- see above
