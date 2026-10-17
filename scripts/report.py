@@ -679,8 +679,11 @@ def main():
         print("\nSubscribers gained per 1,000 views, same snapshot")
         for label, since in (("all videos", None), ("published in the last 90 days", cut)):
             n, views, subs, rate = insights.subscriber_rate(rows, since)
-            verdict = (f"{rate:.2f}" if rate is not None else
-                       f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)")
+            if rate is None:
+                verdict = f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)"
+            else:
+                lo, hi = (x / views * 1000 for x in insights.poisson_interval(subs))
+                verdict = f"{rate:.2f} (95%: {lo:.2f}-{hi:.2f})"
             print(f"  {label:32} n={n:<5} views {views:>8,}  gained {subs:>6,}  per 1,000 {verdict}")
         print("\n  A follower bar is this far away in views: followers needed / rate x 1,000.")
         return

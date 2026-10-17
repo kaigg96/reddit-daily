@@ -1920,6 +1920,18 @@ def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
     assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
 
 
+def test_poisson_interval_matches_the_exact_tables():
+    from src import insights as _ins
+    lo, hi = _ins.poisson_interval(11)
+    assert abs(lo - 5.491) < 0.01 and abs(hi - 19.68) < 0.01   # Garwood, 95%
+    lo, hi = _ins.poisson_interval(0)
+    assert lo == 0.0 and abs(hi - 3.689) < 0.01
+    lo, hi = _ins.poisson_interval(1)
+    assert abs(lo - 0.0253) < 0.001 and abs(hi - 5.572) < 0.01
+    lo, hi = _ins.poisson_interval(100)
+    assert abs(lo - 81.36) < 0.05 and abs(hi - 121.63) < 0.05
+
+
 def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     import datetime as _dt
     from src import insights as _ins

@@ -2108,6 +2108,35 @@ def subscriber_rate(snapshot_rows, published_since=None):
     return n, views, subs, subs / views * 1000
 
 
+def poisson_interval(k, conf=0.95):
+    """Exact (Garwood) interval for a Poisson count `k`: the range of true
+    means that could have produced it. Subscriber gains are counts in the
+    tens, so a rate built on them needs its range printed beside it; 11 gains
+    reads anywhere from ~5 to ~20 (2026-10-17). It treats views as fixed and
+    gains as independent; one video bringing a burst would make it too narrow
+    (today the 23 gains sit one to a video, one video with two)."""
+    assert 0 < conf < 1, conf
+    alpha = (1 - conf) / 2
+
+    def cdf(n, lam):        # P(X <= n), summed in logs so large lam is safe
+        if n < 0:
+            return 0.0
+        return sum(math.exp(i * math.log(lam) - lam - math.lgamma(i + 1))
+                   for i in range(n + 1)) if lam > 0 else 1.0
+
+    def solve(f, target, hi):   # f falls as lam rises
+        lo = 0.0
+        for _ in range(100):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if f(mid) > target else (lo, mid)
+        return (lo + hi) / 2
+
+    top = k + 10 * math.sqrt(k + 1) + 10
+    lower = 0.0 if k == 0 else solve(lambda lam: cdf(k - 1, lam), 1 - alpha, top)
+    upper = solve(lambda lam: cdf(k, lam), alpha, top)
+    return lower, upper
+
+
 def _summed(snapshot_rows, column, published_since):
     """(n, views, column total) over rows reporting both, optionally only
     videos published on or after `published_since`."""
