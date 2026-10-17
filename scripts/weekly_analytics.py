@@ -182,22 +182,26 @@ def fetch_retention(ya, video_id, end_date):
 
 
 def add_retention(ya, stats, videos, today):
-    """Retention points for uploads under RETENTION_MAX_AGE_DAYS old.
+    """Retention points for uploads under RETENTION_MAX_AGE_DAYS old that the
+    main query returned (one it did not has nothing to retain yet, and adding
+    it would count it in the log's summaries as an upload with no watching).
 
     Fail-soft, as subscribers are: the first refusal stops the loop, so a
     report the channel cannot have costs one query, and its reason goes in the
-    first column of every upload left, because no shift can read the log."""
+    first column of every upload left, because no shift can read the log. A
+    transient error reads the same way for that week; the next run re-reads."""
     cutoff = (datetime.date.fromisoformat(today)
               - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
-    recent = [v for v, published_at, *_ in videos if (published_at or "")[:10] >= cutoff]
+    recent = [v for v, published_at, *_ in videos
+              if v in stats and (published_at or "")[:10] >= cutoff]
     for i, video_id in enumerate(recent):
         try:
-            stats.setdefault(video_id, {}).update(fetch_retention(ya, video_id, today))
+            stats[video_id].update(fetch_retention(ya, video_id, today))
         except Exception as e:
             reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
             print(f"::warning::retention {reason}; snapshotting without it")
             for v in recent[i:]:
-                stats.setdefault(v, {})[RETENTION_FIELDS[0]] = reason
+                stats[v][RETENTION_FIELDS[0]] = reason
             break
     return stats
 

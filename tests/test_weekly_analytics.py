@@ -282,6 +282,13 @@ def test_retention_points_are_read_for_recent_uploads_only():
     assert "old" not in stats
 
 
+def test_an_upload_the_main_query_did_not_return_is_not_added():
+    ya = _FakeRetention()
+    videos = _VIDEOS + [("unseen", "2026-10-18T04:43:55Z", "public")]
+    stats = wa.add_retention(ya, {"new": {"views": 9}}, videos, "2026-10-19")
+    assert ya.videos == ["new"] and set(stats) == {"new"}
+
+
 def test_a_point_with_no_reading_near_it_is_left_blank():
     ya = _FakeRetention(rows=[[0.1, 0.9], [0.5, 0.6]])
     got = wa.fetch_retention(ya, "new", "2026-10-19")
@@ -292,7 +299,8 @@ def test_a_point_with_no_reading_near_it_is_left_blank():
 def test_a_refused_retention_report_costs_one_query_and_its_column_only():
     ya = _FakeRetention(refuse=True)
     videos = _VIDEOS + [("new2", "2026-10-16T04:43:55Z", "public")]
-    stats = wa.add_retention(ya, {"new": {"views": 9}}, videos, "2026-10-19")
+    stats = wa.add_retention(ya, {"new": {"views": 9}, "new2": {"views": 4}},
+                             videos, "2026-10-19")
     assert ya.videos == ["new"]
     assert stats["new"]["views"] == 9
     assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
