@@ -41,9 +41,16 @@ OUT = config.ANALYTICS_SNAPSHOTS
 # views x avg_view_duration_s on most rows (by >2x on 686 of 727, 2026-09-09)
 # and is not the engaged count either (--engaged-check, 2026-10-05). Nothing
 # decides on it; kept rather than spend a schema change dropping it.
+# Where viewers leave (PRD §0, "Retention points"): YouTube's audienceWatchRatio,
+# the share of views still watching, at each percent of the video. The report
+# takes one video per query, so only recent uploads are read (added 2026-10-17).
+# Above 1 means replays. Appended last, so ensure_header only extends the header.
+RETENTION_POINTS = (10, 25, 50, 75, 100)
+RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
+RETENTION_MAX_AGE_DAYS = 30
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
-          "engaged_views", "subs_gained", "privacy_status"]
+          "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
 ENGAGED_METRIC = "engagedViews"
@@ -149,6 +156,49 @@ def add_subscribers_gained(ya, stats, video_ids, end_date):
         return stats
     for video, d in stats.items():
         d[SUBS_METRIC] = subs.get(video, {}).get(SUBS_METRIC, "")
+    return stats
+
+
+def fetch_retention(ya, video_id, end_date):
+    """{watch_ratio_<p>: audienceWatchRatio nearest p% of the video} for one
+    upload; a point with no reading within 5% of it is left out."""
+    resp = ya.reports().query(
+        ids="channel==MINE",
+        startDate=START_DATE,
+        endDate=end_date,
+        metrics="audienceWatchRatio",
+        dimensions="elapsedVideoTimeRatio",
+        filters=f"video=={video_id}",
+    ).execute()
+    columns = [h["name"] for h in resp.get("columnHeaders", [])]
+    at, ratio = columns.index("elapsedVideoTimeRatio"), columns.index("audienceWatchRatio")
+    rows = [(float(r[at]), float(r[ratio])) for r in resp.get("rows", [])]
+    out = {}
+    for p, field in zip(RETENTION_POINTS, RETENTION_FIELDS):
+        near = min(rows, key=lambda r: abs(r[0] - p / 100), default=None)
+        if near is not None and abs(near[0] - p / 100) <= 0.05:
+            out[field] = round(near[1], 4)
+    return out
+
+
+def add_retention(ya, stats, videos, today):
+    """Retention points for uploads under RETENTION_MAX_AGE_DAYS old.
+
+    Fail-soft, as subscribers are: the first refusal stops the loop, so a
+    report the channel cannot have costs one query, and its reason goes in the
+    first column of every upload left, because no shift can read the log."""
+    cutoff = (datetime.date.fromisoformat(today)
+              - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
+    recent = [v for v, published_at, *_ in videos if (published_at or "")[:10] >= cutoff]
+    for i, video_id in enumerate(recent):
+        try:
+            stats.setdefault(video_id, {}).update(fetch_retention(ya, video_id, today))
+        except Exception as e:
+            reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+            print(f"::warning::retention {reason}; snapshotting without it")
+            for v in recent[i:]:
+                stats.setdefault(v, {})[RETENTION_FIELDS[0]] = reason
+            break
     return stats
 
 
@@ -386,6 +436,11 @@ def main():
         print(f"channel has {len(videos)} videos")
         stats = fetch_stats_with_engaged(ya, [v for v, *_ in videos], today)
         add_subscribers_gained(ya, stats, [v for v, *_ in videos], today)
+        try:
+            add_retention(ya, stats, videos, today)
+        except Exception as e:  # never the snapshot, whatever goes wrong here
+            print(f"::warning::retention failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
         print(f"analytics rows returned for {len(stats)} videos")
 
         is_new = not OUT.exists()
@@ -415,6 +470,7 @@ def main():
                     "engaged_views": s.get(ENGAGED_METRIC, ""),
                     "subs_gained": s.get(SUBS_METRIC, ""),
                     "privacy_status": privacy,
+                    **{f: s.get(f, "") for f in RETENTION_FIELDS},
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)

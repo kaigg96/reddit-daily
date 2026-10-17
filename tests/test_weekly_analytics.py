@@ -240,4 +240,66 @@ def test_the_live_header_extends_by_two_columns_in_one_run(tmp_path):
     p.write_bytes(",".join(LIVE).encode() + b"\n" + body)
     wa.ensure_header(p, wa.FIELDS)
     assert p.read_bytes() == ",".join(wa.FIELDS).encode() + b"\n" + body
-    assert wa.FIELDS[len(LIVE):] == ["subs_gained", "privacy_status"]
+    assert wa.FIELDS[len(LIVE):len(LIVE) + 2] == ["subs_gained", "privacy_status"]
+
+
+# ------------------------------------------- retention points (2026-10-17)
+
+class _FakeRetention:
+    """The audience-retention report: one video per query, a row per percent."""
+
+    def __init__(self, refuse=False, rows=None):
+        self.refuse, self.rows, self.videos = refuse, rows, []
+
+    def reports(self):
+        return self
+
+    def query(self, **kw):
+        assert kw["dimensions"] == "elapsedVideoTimeRatio" and "," not in kw["filters"]
+        self.videos.append(kw["filters"].removeprefix("video=="))
+        return self
+
+    def execute(self):
+        if self.refuse:
+            raise RuntimeError("HttpError 403: Forbidden")
+        rows = self.rows if self.rows is not None else [
+            [i / 100, 1.2 - i / 100] for i in range(1, 101)]
+        return {"columnHeaders": [{"name": "elapsedVideoTimeRatio"},
+                                  {"name": "audienceWatchRatio"}],
+                "rows": rows}
+
+
+_VIDEOS = [("new", "2026-10-15T04:43:55Z", "public"),
+           ("old", "2026-08-01T04:43:55Z", "public")]
+
+
+def test_retention_points_are_read_for_recent_uploads_only():
+    ya = _FakeRetention()
+    stats = wa.add_retention(ya, {"new": {"views": 9}}, _VIDEOS, "2026-10-19")
+    assert ya.videos == ["new"]
+    assert stats["new"]["views"] == 9
+    assert [stats["new"][f] for f in wa.RETENTION_FIELDS] == [1.1, 0.95, 0.7, 0.45, 0.2]
+    assert "old" not in stats
+
+
+def test_a_point_with_no_reading_near_it_is_left_blank():
+    ya = _FakeRetention(rows=[[0.1, 0.9], [0.5, 0.6]])
+    got = wa.fetch_retention(ya, "new", "2026-10-19")
+    assert got == {"watch_ratio_10": 0.9, "watch_ratio_50": 0.6}
+    assert wa.fetch_retention(_FakeRetention(rows=[]), "new", "2026-10-19") == {}
+
+
+def test_a_refused_retention_report_costs_one_query_and_its_column_only():
+    ya = _FakeRetention(refuse=True)
+    videos = _VIDEOS + [("new2", "2026-10-16T04:43:55Z", "public")]
+    stats = wa.add_retention(ya, {"new": {"views": 9}}, videos, "2026-10-19")
+    assert ya.videos == ["new"]
+    assert stats["new"]["views"] == 9
+    assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
+
+
+def test_retention_columns_extend_the_live_header_as_a_pure_append():
+    assert wa.FIELDS[-len(wa.RETENTION_FIELDS):] == wa.RETENTION_FIELDS
+    live = open(os.path.join(os.path.dirname(__file__), "..", "analysis",
+                             "analytics_snapshots.csv")).readline().strip().split(",")
+    assert wa.FIELDS[:len(live)] == live
