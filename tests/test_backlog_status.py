@@ -92,3 +92,67 @@ def test_the_company_queue_is_well_formed_and_counted():
     assert not bad, f"unknown statuses: {bad}"
     assert not b.malformed(text, b.queue_section)
     assert all(name.startswith(("[product] ", "[company] ")) for name in b.ready_all())
+
+
+_OLD = """## 2026-10-16 (22:36) — older shift
+
+### Done
+- **Considered and dropped:** likes per view (a median of 0).
+- **Security:** clean.
+
+## 2026-10-14 (09:40) — oldest shift
+
+- **Ranked and dropped** (eight candidates): retention curves, which need
+  a workflow change.
+"""
+
+_NEW = """# Work log
+
+## 2026-10-17 (14:13) — newest shift
+
+- **Engineering:** a fix, which dropped nothing.
+- **Considered and dropped:** a spelling guard (1 in 50).
+
+## 2026-10-16 (22:36) — older shift
+
+- **Considered and dropped:** likes per view, edited later.
+"""
+
+
+def test_dropped_candidates_are_read_per_entry_and_wrapped_lines_joined():
+    got = dict(b.dropped_in(_OLD))
+    assert got["2026-10-16 (22:36) — older shift"] == [
+        "Considered and dropped: likes per view (a median of 0)."]
+    assert got["2026-10-14 (09:40) — oldest shift"] == [
+        "Ranked and dropped (eight candidates): retention curves, which need "
+        "a workflow change."]
+
+
+def test_a_bullet_that_only_mentions_dropping_is_not_a_dropped_list():
+    assert "2026-10-17 (14:13) — newest shift" in dict(b.dropped_in(_NEW))
+    assert dict(b.dropped_in(_NEW))["2026-10-17 (14:13) — newest shift"] == [
+        "Considered and dropped: a spelling guard (1 in 50)."]
+
+
+def test_entries_pruned_from_the_worklog_are_still_listed_newest_first():
+    got = b.recently_dropped(versions=[_NEW, _OLD])
+    assert [h for h, _ in got] == ["2026-10-17 (14:13) — newest shift",
+                                   "2026-10-16 (22:36) — older shift",
+                                   "2026-10-14 (09:40) — oldest shift"]
+    # The newest version of an entry wins over the one it was edited from.
+    assert got[1][1] == "Considered and dropped: likes per view, edited later."
+    assert len(b.recently_dropped(limit=2, versions=[_NEW, _OLD])) == 2
+
+
+def test_a_shift_that_restamped_or_reworded_its_heading_is_one_entry():
+    restamped = _OLD.replace("(22:36) — older shift", "(22:31) — older shift")
+    reworded = _OLD.replace("(22:36) — older shift", "(22:36) — older, reworded")
+    got = b.recently_dropped(versions=[_NEW, restamped, reworded])
+    assert [h for h, _ in got] == ["2026-10-17 (14:13) — newest shift",
+                                   "2026-10-16 (22:36) — older shift",
+                                   "2026-10-14 (09:40) — oldest shift"]
+
+
+def test_the_real_history_reads_without_error_even_in_a_shallow_clone():
+    got = b.recently_dropped(limit=3)
+    assert len(got) <= 3 and all(bullet for _, bullet in got)

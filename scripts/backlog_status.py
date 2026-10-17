@@ -8,6 +8,7 @@ video. Supply is work whose next step can be taken now; this counts it.
 
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
+    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped
 
 Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
 other function of the company, ORG.md). Every row of a table with a Status
@@ -20,11 +21,13 @@ column, in either, carries one of:
 """
 import os
 import re
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRD = os.path.join(ROOT, "PRD.md")
 PLAN = os.path.join(ROOT, "PLAN.md")
+WORKLOG = os.path.join(ROOT, "WORKLOG.md")
 # 3 until 2026-10-05, when shifts grew from 25 to 60 minutes (D11).
 FLOOR = 5
 STATUSES = ("ready", "blocked", "baking", "parked", "done")
@@ -109,6 +112,10 @@ def main(argv=None):
     if "--count" in argv:
         print(len(found))
         return 0
+    if "--dropped" in argv:
+        for heading, bullet in recently_dropped():
+            print(f"{heading[:70]}\n  {bullet[:600]}\n")
+        return 0
     counts = {s: 0 for s in STATUSES}
     for label, text, section in sources():
         for status, _, _ in items(text, section):
@@ -123,10 +130,72 @@ def main(argv=None):
         print("\nBelow the floor: generating and ranking more ready work comes "
               "first (/backlog §1-2). Research questions tested against existing "
               "data are always available, and the risk register (PLAN.md §4) "
-              "names what no function is yet answering.")
+              "names what no function is yet answering. What the last ten "
+              "shifts already dropped, and why: --dropped.")
     for line in short_shifts():
         print(line)
     return 0
+
+
+_ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
+_DROPPED = re.compile(r"^- \*\*[^*]*\bdropped\b", re.I)
+
+
+def dropped_in(text):
+    """(entry heading, [dropped bullets]) for each WORKLOG entry that has any."""
+    out, heading, bullets = [], None, []
+    for line in text.splitlines() + ["## 0000-00-00 end"]:
+        m = _ENTRY.match(line)
+        if m:
+            if heading and bullets:
+                out.append((heading, bullets))
+            heading, bullets = m.group(1).strip(), []
+        elif heading and _DROPPED.match(line):
+            bullets.append(line[2:].replace("**", "").strip())
+        elif bullets and line.startswith("  ") and line.strip():
+            bullets[-1] += " " + line.strip()   # a bullet wrapped onto more lines
+    return out
+
+
+def _worklog_versions(commits):
+    """WORKLOG.md as it stands, then as each of its last `commits` commits left
+    it, newest first. Nothing when git is unavailable."""
+    yield _read(WORKLOG)
+    try:
+        shas = subprocess.run(
+            ["git", "log", f"-{commits}", "--format=%H", "--", "WORKLOG.md"],
+            cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        return
+    for sha in shas:
+        r = subprocess.run(["git", "show", f"{sha}:WORKLOG.md"],
+                           cwd=ROOT, capture_output=True, text=True)
+        if r.returncode == 0:
+            yield r.stdout
+
+
+def recently_dropped(limit=10, commits=200, versions=None):
+    """What the last `limit` shifts considered and dropped, newest first.
+
+    WORKLOG.md's word budget keeps about two entries, so a shift could not see
+    what the shift before last had dropped, and re-proposed it: the 10-17
+    audit found four candidates dropped twice (retention curves, likes, the
+    length check's fail-soft, a subscriber test). Git keeps every entry; each
+    is read from the newest version that has it. A shift that re-stamps its
+    heading (08:24, then 08:28) or rewords its headline is still one entry:
+    a heading repeating an earlier one's date and time, or date and headline,
+    is the same shift."""
+    out, keys = [], set()
+    for text in (versions if versions is not None else _worklog_versions(commits)):
+        for heading, bullets in dropped_in(text):
+            m = re.match(r"(\S+)\s*(\(\d\d:\d\d\))?\s*(?:—\s*)?(.*)", heading)
+            date, time, headline = m.group(1), m.group(2), m.group(3).strip()
+            mine = {(date, headline)} | ({(date, time)} if time else set())
+            if mine & keys:
+                continue
+            keys |= mine
+            out.append((heading, " | ".join(bullets)))
+    return sorted(out, reverse=True)[:limit]
 
 
 def waiting_on_owner():
