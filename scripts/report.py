@@ -601,7 +601,7 @@ def main():
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL, Metric.ENGAGED, Metric.ENGAGED_SHARE,
-                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE])
+                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE, *Metric.RETENTION])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -621,7 +621,8 @@ def main():
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
         sys.exit("--min-views applies to --compare only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
-                                                  Metric.ENGAGED_SHARE, Metric.WATCH_FINE):
+                                                  Metric.ENGAGED_SHARE, Metric.WATCH_FINE,
+                                                  *Metric.RETENTION):
         # Per-play ratios only. A count (views, likes, total watch time) rises
         # with views, so leaving out the uploads with few would hide the very
         # effect it measures, such as a change that gets fewer uploads seen.
