@@ -141,6 +141,11 @@ a PASS that names the branch's current commit.
 
 
 SOFT_FAILURE = re.compile(r"failed|not logged|not collected|fall(?:ing)? ?back", re.I)
+# Lines that echo the post or what the AI wrote, never a failure of ours: the
+# 2026-10-17 sample's thread asked about a "failed attempt", and its post,
+# tags and greeting were all listed as calls that failed soft.
+ECHOES_CONTENT = re.compile(r"^(Selected post:|Today's top |tags:|Title style|"
+                            r"Commentary (setup|reaction)|CTA:)")
 # What the run chose, and what the screen turned down on the way. A new
 # subreddit needs its screen replayed before it ships (PRD §6 R4.1), and the
 # log that shows the replay is otherwise readable only in Actions.
@@ -176,7 +181,7 @@ def record(args):
             # A PASS only proves the video plays. A Gemini call that failed soft
             # (raw title, no slate) says so only in the log, which shifts cannot read.
             soft = [l for l in open(args.log, errors="replace").read().splitlines()
-                    if SOFT_FAILURE.search(l)][:10]
+                    if SOFT_FAILURE.search(l) and not ECHOES_CONTENT.match(l)][:10]
             if soft:
                 body += ["", "Failed soft (the video still passed):", "", "```", *soft, "```"]
             picked = [l for l in open(args.log, errors="replace").read().splitlines()

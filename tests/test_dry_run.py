@@ -90,6 +90,26 @@ def test_a_pass_still_shows_calls_that_failed_soft(tmp_path, monkeypatch):
     assert "Uploaded fine" not in out
 
 
+def test_a_post_about_failure_is_not_a_soft_failure(tmp_path, monkeypatch):
+    """2026-10-17: a thread asking about a "failed attempt" listed its own post,
+    tags and greeting as failed calls. Our failures on those lines still show."""
+    (tmp_path / "check.txt").write_text("PASS -- playable")
+    (tmp_path / "run.log").write_text(
+        "Selected post: What failed attempt at domesticating?\n"
+        "tags:        ['failed domestications']\n"
+        "Title style C, caps arm 1: 3 Failed Pets\n"
+        "Commentary reaction 1: A failed plan, falling back on cats.\n"
+        "CTA: Which failed hardest?\n"
+        "Today's top AskReddit post, asked by u/x: What failed attempt?\n"
+        "Screen: Gemini failed (http_503) — using keyword backstop\n")
+    out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
+                 "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
+                 "--run-url", "u")
+    soft = out.split("Failed soft", 1)[1].split("What it picked", 1)[0]
+    assert "Screen: Gemini failed" in soft
+    assert "domesticat" not in soft and "Which failed" not in soft and "cats" not in soft
+
+
 def test_a_pass_shows_what_the_screen_picked_and_skipped(tmp_path, monkeypatch):
     """A screen replay on a new subreddit is read from here, not from Actions."""
     (tmp_path / "check.txt").write_text("PASS -- playable")
