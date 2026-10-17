@@ -773,7 +773,7 @@ def main():
                 args.min_uploads, args.within)
         return
 
-    if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)
+    if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS, *Metric.RETENTION)
             and args.at_age is None and not args.offline):
         sys.exit(f"--metric {args.metric} comes from the weekly snapshot, which the "
                  f"live path does not read: add --offline or --at-age.")
