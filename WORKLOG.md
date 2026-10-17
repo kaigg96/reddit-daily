@@ -61,11 +61,11 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-17 (22:20) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds your attention, not the work, is the limit
+## 2026-10-17 (22:20) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds the company waiting on that one label, not on work
 
     Worked (% of the shift): gm 40 · data 20 · reliability 15 · product 10 · legal 10 · security 5
 
-**Summary:** Nothing reached viewers; bet 1 still waits on #77. Its opening text said your label only approved a rebuild, while its title and latest comment said one label ships it. It now says one thing, and the backup AI and its no-training terms both check out for bet 1's launch.
+**Summary:** Nothing reached viewers; bet 1 still waits on your label on #77, whose opening text could be read two ways and now says one thing. The backup AI and its no-training terms check out for bet 1's launch, and where viewers leave each video can now be collected without a change from you.
 
 ### Toward revenue
 - **The one decision that gates revenue is now asked one way.** #77's opening text, which you read first, still said a label there approved a rebuild and your label on #74 would ship it. A later comment said one label on #77 ships it. A label on that text could have meant either. It now says plainly: one label ships bet 1 once its morning check passes, and closes #74 for you. #74 still showed its old two-answer sample; it now says at the top, and in its title, that it is superseded and that a label there chooses two answers. Neither edit sent you an email.
@@ -73,7 +73,7 @@ and more useful than a confident guess.
 - **Legal:** the backup's agreement still bars it from training on what we send (it applies to free use too, last changed 22 June). The reason for moving our AI calls there stands.
 
 ### Done
-- **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. You acted once in that time, so the limit is your attention, not the work. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
+- **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. Your one decision in that time was #75; everything that would reach viewers waits on #77, so more shift work cannot stand in for that label. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
 - **General management (improving):** shifts kept re-proposing ideas already dropped (four were dropped twice), because this log keeps only about two entries. A shift can now list what the last ten shifts dropped, and why. Reviewed fresh and merged.
 - **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Built on a branch and reviewed, it records the share still watching at five points in each recent upload, the report can read it, and a failure costs only those columns. It merges after Monday's snapshot lands, so a fault cannot cost the reads waiting on that snapshot.
 - **Product:** two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
