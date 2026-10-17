@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-17 (22:20) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds your attention, not the work, is the limit
+
+    Worked (% of the shift): gm 45 · reliability 20 · product 15 · legal 10 · data 5 · security 5
+
+**Summary:** Nothing reached viewers; bet 1 still waits on #77. Its opening text said your label only approved a rebuild, while its title and latest comment said one label ships it. It now says one thing, and the backup AI and its no-training terms both check out for bet 1's launch.
+
+### Toward revenue
+- **The one decision that gates revenue is now asked one way.** #77's opening text, which you read first, still said a label there approved a rebuild and your label on #74 would ship it. A later comment said one label on #77 ships it. A label on that text could have meant either. It now says plainly: one label ships bet 1 once its morning check passes, and closes #74 for you. #74 still showed its old two-answer sample; it now says at the top, and in its title, that it is superseded and that a label there chooses two answers. Neither edit sent you an email.
+- **The backup AI holds bet 1's notes.** When Gemini's daily allowance runs out, which happens more at four uploads a day, a backup AI writes the host's notes. In 12 free test calls on six posts it returned the right shape every time, with three notes. One vote ran long and would fall back to the usual closing line. So the four-a-day plan can lean on it as planned.
+- **Legal:** the backup's agreement still bars it from training on what we send (it applies to free use too, last changed 22 June). The reason for moving our AI calls there stands.
+
+### Done
+- **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. You acted once in that time, so the limit is your attention, not the work. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
+- **General management (improving):** shifts kept re-proposing ideas already dropped (four were dropped twice), because this log keeps only about two entries. A shift can now list what the last ten shifts dropped, and why. Reviewed fresh and merged.
+- **Product:** two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
+- **Data:** every pending experiment's pre-committed read still runs on today's tools (results not looked at, so nothing was peeked).
+- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); writing retention figures into the weekly file already saved, which avoids a workflow change you would land, but cannot be tested before the 19 October run and could cost several reads their snapshot (for 5 November); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. This shift was mostly fixing, with one improvement (the dropped list).
+- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3).
+- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- 18 October: read the 08:17 release check. On a pass with #77 labelled, merge bet 1 as the next version, close #74, #77 and #78, and update the trackers.
+- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule.
+- 5 November monthly review: as listed in the entry below, plus retention figures in the saved weekly file, and re-raises that update an ask's opening text.
+
+### Better?
+- **Than last shift:** Slightly, in the ask rather than the product: the decision that gates revenue can no longer be read two ways. Nothing reached viewers.
+- **Than ~10 shifts ago:** No, on the audit's evidence: two title fixes in 8 shifts, watch time flat at 12.0 seconds, bet 1 unshipped since 11 October.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-17 (14:13) — Bet 1's release check failed today, and its cause is fixed: the AI's reply could cost an upload every host note
 
     Worked (% of the shift): reliability 35 · engineering 20 · product 15 · legal 10 · data 5 · gm 10 · security 5
@@ -92,37 +125,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Yes, slightly. A fault that would have stopped bet 1 at the gate, or quietly stripped its host from some uploads, is fixed before any upload. Nothing new reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-17 (08:28) — TikTok, which the plan called our nearest paying route, is far further away; bet 1's judging rule is fixed before its first upload
-
-    Worked (% of the shift): monetization 25 · product 20 · gm 20 · data 20 · market 5 · security 5 · reliability 5
-
-**Summary:** Bet 1 still waits on your label on #77, so nothing new reached viewers. This shift corrected the plan's claim that TikTok is the nearest paying route (its follower requirement, not its views requirement, is the hard half), and fixed how bet 1 will be judged on a measure that already reads worse, before any upload can colour the rule.
-
-### Toward revenue
-- **TikTok is close only on views.** The plan put it about 8× short on its 100,000 views a month. It also needs 10,000 followers, and we gain about one subscriber per 3,000 views (11 from 33,650 views over 90 days). At that rate 10,000 followers takes about 30 million views (17 to 60 million, since 11 is a small count). So TikTok is nearer than YouTube's lowest paying tier only if it turns viewers into followers 3 to 4 times better than YouTube does for us. No published figure says whether it does (one unsourced one puts a typical Shorts channel's subscribe rate near ten times ours). The TikTok country question for the 5 November review now carries that caveat.
-- **What the Partner Program would pay:** at its bar, Shorts ads would bring roughly $33 to $330 a month (10 million counted views a quarter at the $0.01 to $0.10 per 1,000 that outside sources quote). Whether that is "revenue above costs" depends on the Claude subscription's price, which the plan does not record. Worth naming on 5 November.
-- **Bet 1's "share watched" flag can no longer sink it, or be waved away, over video length.** The channel's scorecard already flags "share of each video watched" as worse, because recent posts run longer. Unwritten, that flag would either sink bet 1 or be explained away afterwards. Now written down: it never triggers a revert (your rule is watch time only), and it is read on longer videos only, against today's version over the same mix of subreddits. More than 5 points lower means viewers leave during the host's notes, bet 1 claims no watch-time gain, and fixing that comes next.
-
-### Done
-- **Monetization (improving):** the subscriber rate is now in the standard report, with its likely range and tests, so the follower half of any route, and how unsure it is, comes from the tool rather than a hand count. Reviewed fresh: no bugs.
-- **Product (fixing):** bet 1's rule above. A fresh review caught three wrong claims in my first draft: one compared two different kinds of view count (it said 10×, the right figure is 3 to 4×), and one named a length window the report cannot read. All were fixed before merging. Both versions of bet 1 still merge cleanly.
-- **General management:** trackers trimmed back under their limits; one stale line corrected (the backup AI that bans training on what we send was described as waiting on you; it ships with bet 1).
-- **Ranked and dropped** (nine candidates; two rankers, opposite orders, agreed on the top three, done above): per-video retention curves from the weekly job, the best idea for the flat watch time, but it needs a workflow change only you can land, and #77 should stay the one thing asking for you (for a later review); the chance of a 10,000-view hit (none of 1,054 uploads has reached 2,000, so it changes no decision); audience numbers on their own (the subscriber rate covers the one that matters); a survey of comparable channels' monetization (ads show on unpaid channels too); selling the pipeline (no sign of demand); making the upload step's last length check fail soft (it cannot be reached). A second pass of five added one finding: no subscriber experiment can be read within a quarter, since a test arm gains about five subscribers in that time, so none may decide anything; two shifts running had proposed and dropped one. Its others: whether longer videos hold more watch time within one version (already recorded: yes, by 37%); a steadier views measure for the title-capitals test (chosen after seeing data, it invites picking the flattering one); a daily stats snapshot (needs a workflow change from you). This shift was mostly improving, with one fix. Handed over about 18 minutes early: both ready items wait on #77, and nothing else left cleared the bar.
-- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.47 this month, forecast $0.82 of $3).
-- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
-
-### Blocked
-- **For you, in order:** #77 (one label settles bet 1; four frames, no download); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- On #77's label: check that today's release check (it lands around 13:15) passed on the three-answer version, merge it as the next version, close #74, then update the trackers. If you label #74's two-answer version instead, its videos run about a quarter shorter, so before its first upload ask you whether its watch-time check should allow for length (the one ranked idea this shift left for you).
-- 19 October: read the first week's viewer comments, the dark-morbid question and the watched clip's rule.
-- 5 November monthly review: the TikTok question with the follower caveat above; the subscription's price against Partner Program revenue; retention curves, as a change for you to land; the weekly shift allowance's dark days.
-
-### Better?
-- **Than last shift:** Slightly, in planning rather than for viewers. A route the plan leaned toward is now priced on both halves, and bet 1 cannot be judged on a flag that measures length. Nothing new reached viewers.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
 - **Than ~100 shifts ago:** Too early to say.

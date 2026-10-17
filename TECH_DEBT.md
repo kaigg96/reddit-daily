@@ -199,13 +199,17 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   PASS on `b9bc23b` (10-16 22:12): 29.7 s, own words 0.347 on a long-answer
   thread (34 of our words to 64 of Reddit's); a sample-model line ran past
   its cap again, this time the vote, which fell back to the outro. Read
-  `host_lines` and the vote's fallback rate after `v8`. **10-17:** its
+  `host_lines` after `v8` (its dose rule, PRD #15): the count includes the
+  vote, so a fallen-back vote already reads as "some". **10-17:** its
   release check failed, the reply unparseable (#78). Live, prompt-only JSON
   also gave a trailing comma (sample model) and four reactions for three
   (`MODEL`), each costing every host line; the metadata call now sends a
   `responseSchema` (exact keys, one reaction per answer) and forgives a
   trailing comma, logged (`2e26595`, reviewed; live on both models: valid,
-  three reactions). Left: a repair records no `meta_failure`, so only stdout
+  three reactions). Groq's fallback sends no schema, and needs none: 12 free
+  calls on `2e26595`'s prompt (six posts, styles A/B/C, both caps arms,
+  10-17 21:33) all parsed with three reactions; one vote overran its cap, so
+  its closing line would ship. Left: a repair records no `meta_failure`, so only stdout
   counts it; the prompt lists `comments[:3]` while the schema follows
   `COMMENTARY_ANSWERS` (harmless at 3). The screen's JSON is unchanged: 3
   fallbacks in 180 uploads.
@@ -292,41 +296,35 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
 
-- **Audit 2026-10-13: the owner's queue is still the binding limit, and two
-  rules are now false.** 13 shifts since 10-09. Decisions re-reviewed, dated,
-  in all 11 live ones; most due: D13 (label asks waiting ~2 days; its trigger
-  fires 10-14 10:49), D9 (watch-seconds rose, the counted share did not) and
-  D10 (YouTube's bar doubles for new applicants on 1 Feb 2027). Allocation:
-  monetization and finance got no time in 9 shifts, strategy one; fine while
-  the 11-05 monthly runs. **False rule 1:** the shift skill says a shift cannot
-  read Actions logs; `gh run view <id> --log` works (three shifts). Proposed
-  text for §2 item 1: "To see *why* a run failed, read its log: `gh run list
-  --workflow run-reddit-video.yml`, then `gh run view <id> --log`." Not raised:
-  skill files are write-protected for shifts, so it lands only after #50; raise
-  it then, bundled. **False rule 2:** D13 assumes label asks close in a day.
-  **Outward look (hooks, skills pages):** a Stop hook's consecutive blocks are
-  capped at 5, which answers the 10-09 objection (a loop to the cutoff), so a
-  hook that refuses to stop before the handover is pushed is now a candidate
-  for the same bundle. Adopted: reviews use general-purpose agents (Explore and
-  Plan skip CLAUDE.md) and ask only for correctness gaps. Candidates: a
-  SessionStart `compact` hook re-stating the deadline; `!command` injection
-  in `/shift` (needs `|| true`). Rejected: `/goal` (cannot see clock or git),
-  skill `context: fork`, `effort`/`model` fields. Sequencing: `v8`'s read and
-  four a day collide (PRD #4, noted). **Gates:** fresh reviews caught real
-  defects in 11 of 13 shifts; samples (6 of 6 PASS) judge playability only, and
-  4 content bugs were found by reading their lines; the release check passed a
-  shock-phrase title (10-09). No reverts. **Early endings:** 7 of 13 with over
-  15 minutes left, 2 after #67's fix. **Before `v8` merges:** the branch
-  carries Groq as a fallback (`GROQ_FALLBACK`), which 9872be8 let ride without
-  a bump, while #13's rule says the full switch ships as its own version. A
-  fallback is not the switch, but `v8`'s read should count Groq-written uploads
-  apart: the branch logs `meta_source`, so `report.py --at-age 7 --by
-  meta_source --since <merge date>` reads it with today's tool. The title tests
-  (#10, #14) set Groq's titles apart with `--within title_writer!=groq`
-  (merged 10-14), which keeps the rows from before the column. Left alone: PRD's cautionary records
-  (cited by `/backlog`); 11 unmerged branches, all but `data/release-chance`
-  inside `integration/preview`. **Closes when** #50 lands and the bundle is
-  raised, or the next audit.
+- **Audit 2026-10-17 (21:45): the owner's attention is the company's limit,
+  and one of our asks had a defect.** 8 shifts since 10-13 (five more were
+  stopped by the weekly allowance, 10-14 to 10-16), 258 minutes, 23–43 of 60
+  each. Two changes reached the live pipeline (title fixes 20bef55, 2b3c26d);
+  bet 1, built 10-11, is unshipped. 5 of 8 mostly fixed, 1 mostly improved.
+  Every "Better?" said "slightly" or "no"; the scorecard is flat. The owner
+  acted once (#75, 10-15 01:26), approving nothing else. **Ask defect, fixed:**
+  #77's body still said its label approved a rebuild and #74's would ship,
+  while a later comment said one label ships; a re-raise only comments
+  (`escalations.yml`), so the body went stale. Rewritten 10-17 21:42 (D13).
+  **Proposed, for the bundle after #50** (a workflow change, and #77 stays the
+  one ask): a re-raise that changes the ask replaces the body. **Repeats:** of 45
+  candidates dropped, retention curves, likes, the length check's fail-soft and
+  a subscriber test were each dropped by two shifts. `WORKLOG.md`'s budget
+  holds about two entries, so a shift cannot see what the shift before last
+  dropped. Fixed the same night: `backlog_status.py --dropped` lists the last
+  ten shifts' dropped candidates from git, and the below-the-floor message
+  points at it. **Allocation:** distribution and editorial got none;
+  strategy, finance and audience 5 of 800; each has nothing ready (all wait
+  on bet 1 or C5), so fine while the 11-05 monthly runs. **Gates:** the release
+  check caught bet 1's unparseable reply before any merge (10-17), its first
+  catch of a live defect; no reverts. Decisions: D13 re-reviewed; the rest
+  unchanged since 10-13 (D5 strained further: #50 unapplied 12 days).
+  **Carried from 10-13, pending #50:** the shift skill's false "cannot read
+  Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to stop
+  before the handover is pushed. Outward look not repeated (done 10-13).
+  **Before `v8` merges:** read Groq-written uploads apart (`--by meta_source`;
+  titles `--within title_writer!=groq`). **Closes when** #50 lands and the
+  bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
