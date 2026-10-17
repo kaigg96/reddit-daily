@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-17 (08:24) — TikTok, which the plan called our nearest paying route, is far further away; bet 1's judging rule is fixed before its first upload
+## 2026-10-17 (08:27) — TikTok, which the plan called our nearest paying route, is far further away; bet 1's judging rule is fixed before its first upload
 
     Worked (% of the shift): monetization 25 · product 20 · gm 20 · data 20 · market 5 · security 5 · reliability 5
 
@@ -70,7 +70,7 @@ and more useful than a confident guess.
 ### Toward revenue
 - **TikTok is close only on views.** The plan put it about 8× short on its 100,000 views a month. It also needs 10,000 followers, and we gain about one subscriber per 3,000 views (11 from 33,650 views over 90 days). At that rate 10,000 followers takes about 30 million views (17 to 60 million, since 11 is a small count). So TikTok is nearer than YouTube's lowest paying tier only if it turns viewers into followers 3 to 4 times better than YouTube does for us. No published figure says whether it does (one unsourced one puts a typical Shorts channel's subscribe rate near ten times ours). The TikTok country question for the 5 November review now carries that caveat.
 - **What the Partner Program would pay:** at its bar, Shorts ads would bring roughly $33 to $330 a month (10 million counted views a quarter at the $0.01 to $0.10 per 1,000 that outside sources quote). Whether that is "revenue above costs" depends on the Claude subscription's price, which the plan does not record. Worth naming on 5 November.
-- **Bet 1's "share watched" flag can no longer sink it, or be waved away, over video length.** The channel's scorecard already flags "share of each video watched" as worse, because recent posts run longer. With no rule written in advance, that flag would either sink bet 1 or be explained away after the fact. Now written down: it never triggers a revert (your rule is watch time only), and it is read on longer videos only, against today's 56%. More than 5 points lower means viewers leave during the host's notes, bet 1 claims no watch-time gain, and fixing that comes next.
+- **Bet 1's "share watched" flag can no longer sink it, or be waved away, over video length.** The channel's scorecard already flags "share of each video watched" as worse, because recent posts run longer. Unwritten, that flag would either sink bet 1 or be explained away afterwards. Now written down: it never triggers a revert (your rule is watch time only), and it is read on longer videos only, against today's version over the same mix of subreddits. More than 5 points lower means viewers leave during the host's notes, bet 1 claims no watch-time gain, and fixing that comes next.
 
 ### Done
 - **Monetization (improving):** the subscriber rate is now in the standard report, with its likely range and tests, so the follower half of any route, and how unsure it is, comes from the tool rather than a hand count. Reviewed fresh: no bugs.
