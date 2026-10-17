@@ -143,18 +143,27 @@ _DROPPED = re.compile(r"^- \*\*[^*]*\bdropped\b", re.I)
 
 def dropped_in(text):
     """(entry heading, [dropped bullets]) for each WORKLOG entry that has any."""
-    out, heading, bullets = [], None, []
+    out, heading, bullets, inside = [], None, [], False
     for line in text.splitlines() + ["## 0000-00-00 end"]:
         m = _ENTRY.match(line)
         if m:
             if heading and bullets:
                 out.append((heading, bullets))
-            heading, bullets = m.group(1).strip(), []
+            heading, bullets, inside = m.group(1).strip(), [], False
         elif heading and _DROPPED.match(line):
             bullets.append(line[2:].replace("**", "").strip())
-        elif bullets and line.startswith("  ") and line.strip():
-            bullets[-1] += " " + line.strip()   # a bullet wrapped onto more lines
+            inside = True
+        elif inside and line.startswith("  ") and line.strip():
+            bullets[-1] += " " + line.strip()   # the bullet wrapped onto more lines
+        else:
+            inside = False                      # any other line ends it
     return out
+
+
+def _heading_parts(heading):
+    """(date, time or "", headline) of an entry heading."""
+    m = re.match(r"(\S+)\s*(?:\((\d\d:\d\d)\))?\s*(?:—\s*)?(.*)", heading)
+    return m.group(1), m.group(2) or "", m.group(3).strip()
 
 
 def _worklog_versions(commits):
@@ -168,8 +177,8 @@ def _worklog_versions(commits):
     except (OSError, subprocess.CalledProcessError):
         return
     for sha in shas:
-        r = subprocess.run(["git", "show", f"{sha}:WORKLOG.md"],
-                           cwd=ROOT, capture_output=True, text=True)
+        r = subprocess.run(["git", "show", f"{sha}:WORKLOG.md"], cwd=ROOT,
+                           capture_output=True, encoding="utf-8", errors="replace")
         if r.returncode == 0:
             yield r.stdout
 
@@ -188,14 +197,13 @@ def recently_dropped(limit=10, commits=200, versions=None):
     out, keys = [], set()
     for text in (versions if versions is not None else _worklog_versions(commits)):
         for heading, bullets in dropped_in(text):
-            m = re.match(r"(\S+)\s*(\(\d\d:\d\d\))?\s*(?:—\s*)?(.*)", heading)
-            date, time, headline = m.group(1), m.group(2), m.group(3).strip()
-            mine = {(date, headline)} | ({(date, time)} if time else set())
-            if mine & keys:
-                continue
-            keys |= mine
-            out.append((heading, " | ".join(bullets)))
-    return sorted(out, reverse=True)[:limit]
+            date, time, headline = _heading_parts(heading)
+            mine = {(date, "h", headline)} | ({(date, "t", time)} if time else set())
+            seen = bool(mine & keys)
+            keys |= mine      # even when skipped, so a chain of edits links up
+            if not seen:
+                out.append((heading, " | ".join(bullets)))
+    return sorted(out, key=lambda e: _heading_parts(e[0])[:2], reverse=True)[:limit]
 
 
 def waiting_on_owner():

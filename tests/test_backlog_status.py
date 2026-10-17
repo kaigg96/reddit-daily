@@ -153,6 +153,23 @@ def test_a_shift_that_restamped_or_reworded_its_heading_is_one_entry():
                                    "2026-10-14 (09:40) — oldest shift"]
 
 
+def test_indented_lines_of_a_later_bullet_stay_out_of_the_dropped_one():
+    text = ("## 2026-10-17 (08:00) — X\n"
+            "- **Considered and dropped:** a.\n"
+            "- **Security:** clean, and\n"
+            "  more security text.\n"
+            "### Next\n"
+            "  indented note\n")
+    assert b.dropped_in(text) == [("2026-10-17 (08:00) — X", ["Considered and dropped: a."])]
+
+
+def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
+    def v(time, headline):
+        return f"## 2026-10-17 ({time}) — {headline}\n- **Considered and dropped:** a.\n"
+    got = b.recently_dropped(versions=[v("08:28", "Y"), v("08:28", "X"), v("08:24", "X")])
+    assert [h for h, _ in got] == ["2026-10-17 (08:28) — Y"]
+
+
 def test_the_real_history_reads_without_error_even_in_a_shallow_clone():
     got = b.recently_dropped(limit=3)
     assert len(got) <= 3 and all(bullet for _, bullet in got)
