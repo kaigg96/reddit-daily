@@ -323,8 +323,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to stop
   before the handover is pushed. Outward look not repeated (done 10-13).
   **Before `v8` merges:** read Groq-written uploads apart (`--by meta_source`;
-  titles `--within title_writer!=groq`). **Closes when** #50 lands and the
-  bundle is raised, or the next audit.
+  titles `--within title_writer!=groq`). **Closes when** #50
+  lands and the bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
