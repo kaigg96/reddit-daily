@@ -2088,16 +2088,37 @@ def engaged_share(snapshot_rows, published_since=None):
     Returns (n videos, views, engaged views, share), or (n, views, engaged,
     None) under ENGAGED_SHARE_MIN_VIDEOS — too few to restate a gap with.
     """
-    n, views, engaged = 0, 0, 0
-    for r in snapshot_rows:
-        try:
-            v, e = int(float(r["views"])), int(float(r["engaged_views"]))
-        except (KeyError, TypeError, ValueError):
-            continue        # blank engaged_views: the API did not report it
-        if published_since and (not r.get("published_at")
-                                or _parse_ts(r["published_at"]) < published_since):
-            continue
-        n, views, engaged = n + 1, views + v, engaged + e
+    n, views, engaged = _summed(snapshot_rows, "engaged_views", published_since)
     if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
         return n, views, engaged, None
     return n, views, engaged, engaged / views
+
+
+def subscriber_rate(snapshot_rows, published_since=None):
+    """Subscribers gained per 1,000 views, summed like `engaged_share`. A
+    follower bar (TikTok's 10k, the Partner Program's 1,000) is a distance in
+    views only through this rate, so a route priced on views alone hides its
+    other half (PLAN §1, 2026-10-17).
+
+    Returns (n videos, views, subscribers gained, per 1,000), the last None
+    under ENGAGED_SHARE_MIN_VIDEOS."""
+    n, views, subs = _summed(snapshot_rows, "subs_gained", published_since)
+    if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
+        return n, views, subs, None
+    return n, views, subs, subs / views * 1000
+
+
+def _summed(snapshot_rows, column, published_since):
+    """(n, views, column total) over rows reporting both, optionally only
+    videos published on or after `published_since`."""
+    n, views, total = 0, 0, 0
+    for r in snapshot_rows:
+        try:
+            v, x = int(float(r["views"])), int(float(r[column]))
+        except (KeyError, TypeError, ValueError):
+            continue        # blank: the API did not report it
+        if published_since and (not r.get("published_at")
+                                or _parse_ts(r["published_at"]) < published_since):
+            continue
+        n, views, total = n + 1, views + v, total + x
+    return n, views, total

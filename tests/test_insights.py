@@ -1904,6 +1904,22 @@ def test_engaged_share_sums_both_counts_and_refuses_a_thin_cohort():
     assert _ins.engaged_share([new] * 19) == (19, 5700, 1140, None)
 
 
+def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
+    import datetime as _dt
+    from src import insights as _ins
+    old = {"views": "1000", "subs_gained": "1", "published_at": "2026-06-01T12:00:00Z"}
+    new = dict(old, views="500", subs_gained="2", published_at="2026-09-01T12:00:00Z")
+    blank = dict(new, subs_gained="")
+    rows = [old] * 10 + [new] * 20 + [blank] * 5
+    n, views, subs, rate = _ins.subscriber_rate(rows)
+    assert (n, views, subs) == (30, 20000, 50)
+    assert abs(rate - 2.5) < 1e-9               # 50 over 20,000 views, not a mean of ratios
+    since = _dt.datetime(2026, 7, 1, tzinfo=_dt.timezone.utc)
+    assert _ins.subscriber_rate(rows, since) == (20, 10000, 40, 4.0)
+    assert _ins.subscriber_rate([new] * 19) == (19, 9500, 38, None)
+    assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
+
+
 def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     import datetime as _dt
     from src import insights as _ins
