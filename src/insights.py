@@ -60,6 +60,11 @@ class Metric:
     ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
     ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
     WATCH_FINE = "watch_seconds_fine"  # diagnostic: watch-seconds to a fraction; rules stay on WATCH
+    # Share of views still watching at 10..100% of the video (weekly snapshot
+    # from 2026-10-19, uploads under 30 days old; above 1 means replays).
+    # Diagnostics for where viewers leave (PRD §0, "Retention points"), never a trigger.
+    RETENTION = ("watch_ratio_10", "watch_ratio_25", "watch_ratio_50",
+                 "watch_ratio_75", "watch_ratio_100")
 
 
 @dataclass
@@ -74,6 +79,13 @@ class Video:
     est_minutes: float = 0.0
     engaged_views: float = None   # None where the snapshot predates the column (2026-10-05)
     subs_gained: float = None     # None where the snapshot predates the column (2026-10-12)
+    # Metric.RETENTION: None where not collected (before 2026-10-19, past 30
+    # days old, or a refused week), so cohorts skip them rather than read 0.
+    watch_ratio_10: float = None
+    watch_ratio_25: float = None
+    watch_ratio_50: float = None
+    watch_ratio_75: float = None
+    watch_ratio_100: float = None
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
@@ -178,7 +190,7 @@ class Comparison:
 
 def decimals(metric):
     """Places to print: a share lives between 0 and 1, where .1f hides 0.33 vs 0.38."""
-    return 2 if metric == Metric.ENGAGED_SHARE else 1
+    return 2 if metric == Metric.ENGAGED_SHARE or metric in Metric.RETENTION else 1
 
 
 def median(values):
@@ -1719,6 +1731,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0), comments=float(s.get("comments") or 0),
             meta=r,
+            **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         )
         if v.age_days(asof) >= min_age_days:
             videos.append(v)
@@ -1839,6 +1852,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             comments=float(s.get("comments") or 0),
             subs_gained=_optional_float(s.get("subs_gained")),
             meta=meta,
+            **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         ))
     return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
                           non_public, bool(privacy))

@@ -2357,3 +2357,32 @@ def test_binomial_two_sided_matches_known_values():
     # No overflow past ~1,000 events, where math.comb stops fitting a float.
     assert insights.binomial_two_sided(600, 1200, 0.5) == pytest.approx(1.0)
     assert insights.binomial_two_sided(0, 1200, 0.5) < 1e-300
+
+
+# ------------------------------------------- retention points (2026-10-17)
+
+def test_retention_points_load_as_numbers_and_skip_blanks_and_refusals(tmp_path, monkeypatch):
+    """A blank (not collected) or a refusal's reason must leave the cohort,
+    never read as 0, which would invent a video nobody kept watching."""
+    from src import config
+    old = NOW - datetime.timedelta(days=20)
+    log = tmp_path / "upload_log.csv"
+    log.write_text("timestamp_utc,video_id,post_title,video_title,bg_clip\n"
+                   + "".join(f"{old.isoformat()},{v},q,t,pexels_1.mp4\n"
+                             for v in ("kept", "blank", "refused")))
+    snap = tmp_path / "analytics_snapshots.csv"
+    head = ("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+            "est_minutes_watched,avg_view_duration_s,avg_view_pct,"
+            + ",".join(Metric.RETENTION))
+    snap.write_text(head + "\n"
+                    "2026-08-20,kept,,100,0,0,0,0,12,50,1.1,0.8,0.5,0.3,0.2\n"
+                    "2026-08-20,blank,,100,0,0,0,0,12,50,,,,,\n"
+                    '2026-08-20,refused,,100,0,0,0,0,12,50,"refused: HttpError 403",,,,\n')
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+    videos = {v.video_id: v for v in insights.load_videos_offline().videos}
+    assert videos["kept"].watch_ratio_25 == 0.8 and videos["kept"].watch_ratio_100 == 0.2
+    assert videos["blank"].watch_ratio_10 is None and videos["refused"].watch_ratio_10 is None
+    c = insights.summarize(list(videos.values()), "all", "watch_ratio_10", NOW)
+    assert c.n == 1 and c.median == 1.1
+    assert insights.decimals("watch_ratio_50") == 2
