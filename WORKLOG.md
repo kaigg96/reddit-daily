@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-17 (22:20) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds your attention, not the work, is the limit
 
-    Worked (% of the shift): gm 45 · reliability 20 · product 15 · legal 10 · data 5 · security 5
+    Worked (% of the shift): gm 40 · data 20 · reliability 15 · product 10 · legal 10 · security 5
 
 **Summary:** Nothing reached viewers; bet 1 still waits on #77. Its opening text said your label only approved a rebuild, while its title and latest comment said one label ships it. It now says one thing, and the backup AI and its no-training terms both check out for bet 1's launch.
 
@@ -75,9 +75,10 @@ and more useful than a confident guess.
 ### Done
 - **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. You acted once in that time, so the limit is your attention, not the work. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
 - **General management (improving):** shifts kept re-proposing ideas already dropped (four were dropped twice), because this log keeps only about two entries. A shift can now list what the last ten shifts dropped, and why. Reviewed fresh and merged.
+- **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Built on a branch, it records the share still watching at five points in each recent upload, and a failure costs only those columns. It merges after Monday's snapshot lands, so a fault cannot cost the reads waiting on that snapshot.
 - **Product:** two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
 - **Data:** every pending experiment's pre-committed read still runs on today's tools (results not looked at, so nothing was peeked).
-- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); writing retention figures into the weekly file already saved, which avoids a workflow change you would land, but cannot be tested before the 19 October run and could cost several reads their snapshot (for 5 November); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. This shift was mostly fixing, with one improvement (the dropped list).
+- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. This shift was mostly fixing, with two improvements (the dropped list, retention).
 - **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3).
 - **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
 
@@ -86,8 +87,8 @@ and more useful than a confident guess.
 
 ### Next
 - 18 October: read the 08:17 release check. On a pass with #77 labelled, merge bet 1 as the next version, close #74, #77 and #78, and update the trackers.
-- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule.
-- 5 November monthly review: as listed in the entry below, plus retention figures in the saved weekly file, and re-raises that update an ask's opening text.
+- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule. Once that snapshot has landed, merge the retention branch after its review's findings are fixed, then teach the report to read it.
+- 5 November monthly review: as listed in the entry below (retention curves now need nothing from you), plus re-raises that update an ask's opening text.
 
 ### Better?
 - **Than last shift:** Slightly, in the ask rather than the product: the decision that gates revenue can no longer be read two ways. Nothing reached viewers.
