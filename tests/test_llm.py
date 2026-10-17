@@ -67,6 +67,79 @@ def test_metadata_is_one_request_not_three(captured):
     assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
 
 
+def test_metadata_asks_gemini_for_its_exact_shape(captured):
+    """The 2026-10-17 release check: asked for JSON in the prompt alone, the
+    three-answer reply did not parse, and a live retry gave four reactions for
+    three answers. Either cost the upload every host line."""
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    cfg = captured[0]["json"]["generationConfig"]
+    assert cfg["responseMimeType"] == "application/json"
+    assert cfg["thinkingConfig"]["thinkingBudget"] == 0
+    reactions = cfg["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == llm.config.COMMENTARY_ANSWERS
+    assert cfg["responseSchema"]["required"] == ["title", "keywords", "setup", "reactions", "cta"]
+
+
+def test_the_schema_counts_the_answers_actually_read(captured):
+    """A thread with fewer answers than the setting reads fewer, one note each."""
+    llm.get_metadata("q", ["a", "b"], style="B")
+    reactions = captured[0]["json"]["generationConfig"]["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == 2
+
+
+def test_the_plain_reading_asks_only_for_its_three_fields(captured, monkeypatch):
+    monkeypatch.setattr(llm.config, "COMMENTARY", False)
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    schema = captured[0]["json"]["generationConfig"]["responseSchema"]
+    assert schema["required"] == ["title", "keywords", "cta"]
+
+
+def test_a_sample_model_gets_the_schema_without_a_thinking_budget(captured):
+    """Gemini 3.x 400s on thinkingBudget, so the schema must not bring it back."""
+    llm._generate("x", model="gemini-3.5-flash-lite", schema={"type": "OBJECT"})
+    assert captured[0]["json"]["generationConfig"] == {
+        "responseMimeType": "application/json", "responseSchema": {"type": "OBJECT"}}
+
+
+def test_other_calls_are_not_switched_to_json_mode(captured):
+    """Only the metadata call changed; the screen's request stays as validated."""
+    llm._generate("hello")
+    assert set(captured[0]["json"]["generationConfig"]) == {"thinkingConfig"}
+
+
+def test_an_unparseable_reply_is_quoted_near_the_fault(monkeypatch, capsys):
+    """The 2026-10-17 failure logged only "unparseable JSON", so its cause could
+    not be read; the log now shows the reply around the error, on one line."""
+    reply = '{"title": "Ok", "cta": "Vote for "plastic crack" now"' + " pad" * 200 + "}"
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    llm.get_metadata("q", ["a", "b", "c"])
+    out = capsys.readouterr().out
+    assert "plastic crack" in out and "fall back" in out
+    assert len(out.strip().splitlines()) == 1 and len(out) < 400
+
+
+def test_a_trailing_comma_no_longer_costs_every_field(monkeypatch, capsys):
+    """Measured 2026-10-17 on the sample model, in JSON mode: a pretty-printed
+    reply ending `"cta": "...",\\n}`. Strict parsing dropped title, keywords,
+    vote and host lines over one comma. The repair is logged, not silent."""
+    reply = ('{\n  "title": "T",\n  "keywords": ["a", "b",],\n  "setup": "S",\n'
+             '  "reactions": ["r1", "r2", "r3"],\n  "cta": "Which one, YOU?",\n}')
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.keywords, meta.cta) == ("T", ["a", "b"], "Which one, YOU?")
+    assert meta.failure == ""
+    assert "trailing comma" in capsys.readouterr().out
+
+
+def test_a_comma_inside_a_line_is_never_touched(monkeypatch):
+    """The repair only runs on a reply that failed, and only drops a comma
+    that sits before a closing bracket."""
+    reply = '{"title": "Wait, really?", "keywords": ["x"], "cta": "One, two, three",}'
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.cta) == ("Wait, really?", "One, two, three")
+
+
 def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
     """v1 answers thinkingConfig with HTTP 400 'Thinking is not enabled for
     api version v1'. Dropping back to v1 would silently restore the bug."""

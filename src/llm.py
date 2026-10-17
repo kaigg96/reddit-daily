@@ -67,20 +67,33 @@ def provider():
     return "gemini"
 
 
-def _generate(prompt, thinking_budget=0, model=None):
+def _generate(prompt, thinking_budget=0, model=None, schema=None):
     """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
     default, and what every caller here wants); pass a token budget only for a
     task where reasoning demonstrably helps. `model` exists because the free
     tier is counted per model: a caller on another model draws on its own
-    daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
+    daily allowance, not the one titles and the screen share (PRD §5 no. 3).
+
+    `schema` makes Gemini answer in that JSON shape, enforced while it writes.
+    Asked in the prompt alone, the 2026-10-17 release check's three-answer
+    reply did not parse, and a live retry gave four reactions for three
+    answers; either costs an upload every host line. Groq's route is
+    unchanged: it is a fallback, and a mode its model may refuse would turn a
+    rescue into a 400."""
     if provider() == "groq":
         return _generate_groq(prompt, reasoning=thinking_budget > 0)
     model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
     body = {"contents": [{"parts": [{"text": prompt}]}]}
+    gen = {}
     # Gemini 3.x answers thinkingBudget with HTTP 400 (measured 2026-09-26),
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
-        body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
+        gen["thinkingConfig"] = {"thinkingBudget": thinking_budget}
+    if schema:
+        gen["responseMimeType"] = "application/json"
+        gen["responseSchema"] = schema
+    if gen:
+        body["generationConfig"] = gen
     # The key goes in a header, not the URL: HTTP errors quote the URL, which
     # put the key in any log or file that recorded a failed request.
     resp = requests.post(
@@ -411,6 +424,22 @@ _COMMENTARY_SHAPE = ('{"title": "...", "keywords": ["...", "..."], "setup": "...
                      '"reactions": ["...", "..."], "cta": "..."}')
 
 
+def _reply_schema(reactions=None):
+    """The shapes above as Gemini's responseSchema. With `reactions`, the
+    host's lines, with exactly one reaction per answer read: notes are shown
+    in answer order, so a reply with one too many cannot be trimmed safely."""
+    text = {"type": "STRING"}
+    props = {"title": text, "keywords": {"type": "ARRAY", "items": text}}
+    if reactions is not None:
+        props["setup"] = text
+        props["reactions"] = {"type": "ARRAY", "items": text,
+                              "minItems": reactions, "maxItems": reactions}
+    props["cta"] = text
+    order = list(props)
+    return {"type": "OBJECT", "properties": props, "required": order,
+            "propertyOrdering": order}
+
+
 def get_metadata(reddit_title, comments, style="A", caps=None):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
@@ -462,7 +491,8 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
 """
     route, prior = provider(), ""
     try:
-        raw = generate_retrying(prompt)
+        raw = generate_retrying(
+            prompt, schema=_reply_schema(len(comments) if commentary else None))
     except Exception as e:
         prior = _failure_kind(e)
         # PRD §0 #13: Groq answers before the fields fall back, as it does for
@@ -485,12 +515,18 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     # the log shows why it ran: a blank failure is still "Gemini answered".
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
-        print(f"{route} metadata returned no JSON object (all fields fall back)")
+        print(f"{route} metadata returned no JSON object (all fields fall back): "
+              f"{_excerpt(raw)}")
         return MetadataResult(None, None, None, route, _then(prior, "no_json"))
     try:
-        data = json.loads(match.group(0))
-    except ValueError:
-        print(f"{route} metadata returned unparseable JSON (all fields fall back)")
+        data = _loads_tolerant(match.group(0), route)
+    except ValueError as e:
+        # The reply, not just the verdict: the 2026-10-17 failure printed only
+        # this line, so whether it was quoting, truncation or a stray comma
+        # could not be told from the log.
+        at = match.start() + getattr(e, "pos", 0)
+        print(f"{route} metadata returned unparseable JSON (all fields fall back): "
+              f"{e}; near it: {_excerpt(raw, at)}")
         return MetadataResult(None, None, None, route, _then(prior, "bad_json"))
 
     return MetadataResult(
@@ -501,6 +537,34 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         failure=prior,
         commentary=_clean_commentary(data, len(comments)) if commentary else None,
     )
+
+
+_TRAILING_COMMA = re.compile(r",(\s*[}\]])")
+
+
+def _loads_tolerant(text, route):
+    """json.loads, forgiving a comma before a closing bracket. Measured
+    2026-10-17: the sample model, in JSON mode, ended a pretty-printed reply
+    `"cta": "...",\\n}`, and that one comma would have cost the upload every
+    field and every host line. Only a reply that fails strict parsing is
+    repaired, and the repair is logged so it never passes as a clean answer.
+    Raises the strict parse's error, whose position is in the reply as sent."""
+    try:
+        return json.loads(text)
+    except ValueError as strict:
+        try:
+            data = json.loads(_TRAILING_COMMA.sub(r"\1", text))
+        except ValueError:
+            raise strict from None
+        print(f"{route} metadata had a trailing comma; parsed without it")
+        return data
+
+
+def _excerpt(text, at=0, width=160):
+    """One log line of a reply around `at`. Model output about a public post,
+    so it is safe in a public log; bounded so a runaway reply stays one line."""
+    start = max(0, at - width // 2)
+    return repr(text[start:start + width])
 
 
 def _then(prior, failure):
