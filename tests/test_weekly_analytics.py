@@ -293,7 +293,8 @@ def test_a_point_with_no_reading_near_it_is_left_blank():
     ya = _FakeRetention(rows=[[0.1, 0.9], [0.5, 0.6]])
     got = wa.fetch_retention(ya, "new", "2026-10-19")
     assert got == {"watch_ratio_10": 0.9, "watch_ratio_50": 0.6}
-    assert wa.fetch_retention(_FakeRetention(rows=[]), "new", "2026-10-19") == {}
+    assert wa.fetch_retention(_FakeRetention(rows=[]), "new", "2026-10-19") == {
+        "watch_ratio_10": "no rows"}
 
 
 def test_a_refused_retention_report_costs_one_query_and_its_column_only():

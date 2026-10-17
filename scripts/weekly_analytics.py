@@ -161,7 +161,9 @@ def add_subscribers_gained(ya, stats, video_ids, end_date):
 
 def fetch_retention(ya, video_id, end_date):
     """{watch_ratio_<p>: audienceWatchRatio nearest p% of the video} for one
-    upload; a point with no reading within 5% of it is left out."""
+    upload; a point with no reading within 5% of it is left out. An answer
+    with no rows says so in the first column: blank alone would look the same
+    as "not collected", and whether the report serves Shorts is unconfirmed."""
     resp = ya.reports().query(
         ids="channel==MINE",
         startDate=START_DATE,
@@ -173,6 +175,8 @@ def fetch_retention(ya, video_id, end_date):
     columns = [h["name"] for h in resp.get("columnHeaders", [])]
     at, ratio = columns.index("elapsedVideoTimeRatio"), columns.index("audienceWatchRatio")
     rows = [(float(r[at]), float(r[ratio])) for r in resp.get("rows", [])]
+    if not rows:
+        return {RETENTION_FIELDS[0]: "no rows"}
     out = {}
     for p, field in zip(RETENTION_POINTS, RETENTION_FIELDS):
         near = min(rows, key=lambda r: abs(r[0] - p / 100), default=None)
