@@ -199,7 +199,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   PASS on `b9bc23b` (10-16 22:12): 29.7 s, own words 0.347 on a long-answer
   thread (34 of our words to 64 of Reddit's); a sample-model line ran past
   its cap again, this time the vote, which fell back to the outro. Read
-  `host_lines` and the vote's fallback rate after `v8`.
+  `host_lines` and the vote's fallback rate after `v8`. **10-17:** its
+  release check failed, the reply unparseable (#78). Live, prompt-only JSON
+  also gave a trailing comma (sample model) and four reactions for three
+  (`MODEL`), each costing every host line; the metadata call now sends a
+  `responseSchema` (exact keys, one reaction per answer) and forgives a
+  trailing comma, logged (`2e26595`, reviewed; live on both models: valid,
+  three reactions). Left: a repair records no `meta_failure`, so only stdout
+  counts it; the prompt lists `comments[:3]` while the schema follows
+  `COMMENTARY_ANSWERS` (harmless at 3). The screen's JSON is unchanged: 3
+  fallbacks in 180 uploads.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
