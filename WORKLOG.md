@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-17 (14:13) — Bet 1's release check failed today, and its cause is fixed: the AI's reply could cost an upload every host note
+
+    Worked (% of the shift): reliability 40 · engineering 20 · product 15 · data 10 · gm 10 · security 5
+
+**Summary:** Today's automatic check on bet 1's three-answer version failed, so a label on #77 alone could not have shipped it. The cause was the AI's reply going wrong in ways that would have cost real uploads the host's notes. It is fixed and tested live, and tomorrow's check decides.
+
+### Toward revenue
+- **Bet 1 was quietly blocked on our side, not only on your label.** The midday release check found the AI's reply unreadable, so the title, the vote and every host note fell back to a plain reading. In live tests afterwards the same request failed two more ways: a stray comma at the end of the reply, and four host notes for three answers. Either drops the host for that whole upload, and one in a handful would have weakened bet 1's read. The request now gives the AI the exact shape of its reply, which it holds to while writing. On the model real uploads use, it returned every field and exactly three notes. The model that writes samples accepts it too.
+- **How bet 1 will be judged when some notes drop is now written down, before any upload.** Every bet 1 video counts. If fewer than 15 of the first 20 show all their notes, a keep is credited to the host as shipped, not to the notes, and fixing the drop rate comes next. Decided now, so the read cannot pick the flattering cut later.
+
+### Done
+- **Reliability (fixing):** the fix above, on bet 1's branch, reviewed fresh (no bugs; one test that passed for the wrong reason, fixed). It spent 2 of today's 20 shared AI requests; both uploads before the reset still fit. Failures now log the AI's reply around the fault, so the next one can be read without guessing. The issue the check raised (#78) has the explanation and needs nothing from you. A new sample of the fixed branch played, and for the first time on this version every note and the vote showed.
+- **Product and data (improving):** bet 1's rule above.
+- **General management:** trackers updated; the product tracker trimmed back under its size limit (settled history, all in git). #50's patch still applies cleanly to the live code, so its four commands are still current.
+- **Considered and dropped:** the same fix for the content screen, which has fallen back 3 times in 180 uploads; the same fix for the backup AI, which answers about 1 upload in 100; logging each repaired reply in the upload record (worth doing, but it would change the branch again and void the new sample; it is noted for after bet 1 merges). This shift was mostly fixing, plus one improvement (the rule).
+- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.48 this month, forecast $0.82 of $3). The screen's weekly audit is clean: it has skipped no post since September, only dropped unsafe answers.
+- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
+
+### Blocked
+- **For you, in order:** #77 (one label settles bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- 18 October: read the 08:17 release check. On a pass, close #78; if #77 is labelled, merge the three-answer version as the next version, close #74 and #77, and update the trackers. On a fail, the log now shows the reply.
+- 19 October: read the first week's viewer comments, the dark-morbid question and the watched clip's rule.
+- 5 November monthly review: the TikTok question with the follower caveat; the subscription's price against Partner Program revenue; retention curves; the weekly allowance's dark days; and a process note from today: a failed release check emails you an issue a shift can usually explain within hours, so it could go to the next shift first and reach you only if it persists.
+
+### Better?
+- **Than last shift:** Yes, slightly. A fault that would have stopped bet 1 at the gate, or quietly stripped its host from some uploads, is fixed before any upload. Nothing new reached viewers.
+- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-17 (08:28) — TikTok, which the plan called our nearest paying route, is far further away; bet 1's judging rule is fixed before its first upload
 
     Worked (% of the shift): monetization 25 · product 20 · gm 20 · data 20 · market 5 · security 5 · reliability 5
@@ -90,39 +121,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly, in planning rather than for viewers. A route the plan leaned toward is now priced on both halves, and bet 1 cannot be judged on a flag that measures length. Nothing new reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-16 (22:36) — Bet 1's recommended version now has its sample, and one label on #77 ships it; the title test's control arm no longer leaks
-
-    Worked (% of the shift): product 45 · data 25 · gm 20 · security 5 · reliability 5
-
-**Summary:** The week's shift allowance ran out on 14 October, so for two days no shift worked, and the three-answer version of bet 1 that #77 recommends still had no sample. It has one now (it plays; four frames are on #77), and a single label there settles bet 1, #74 included. Separately, the title-capitals test, bet 2's main views lever, had a leak that made a real lead harder to find; that is fixed from tonight's upload.
-
-### Toward revenue
-- **Bet 1 is one label from shipping.** You acted on the comments question on 15 October but not on bet 1. #77 then promised a sample that didn't exist yet, so there was nothing to judge. Tonight's sample of exactly the version that would ship played without a fault, and its four frames are on #77, with no download needed. One label there ships it; you no longer need to label #74. Each day bet 1 waits also delays four uploads a day, bet 2's best-evidenced views lever, which comes after bet 1's read.
-- **What the sample shows, honestly:** our own words were 35% of what was read, because this thread's answers were long. Its closing vote ran past the length limit on the free AI that writes samples, so the video fell back to the usual "like and subscribe". With the vote, our share would be about 44%; reading two answers instead would give about 45%, so the third answer costs almost nothing in share here. The AI that writes real uploads kept its vote within the limit in today's release check.
-- **The title-capitals test (bet 2's views lever) had a leak.** One of the nine "no capitals" titles shipped "What's YOUR unforgetable deathbed confession?", which is the other arm's treatment. Leaks like that make the roughly double views the test is looking for harder to tell from chance. The arm is now held in code. A fresh review replayed it over all 166 past titles and found none mangled; its edge cases (CPR, World War II, a title opening on a number) are fixed. The test keeps its start date, counting each upload in the arm it was given.
-
-### Done
-- **Product (fixing):** bet 1's three-answer version brought up to date with the live code, sampled, framed and re-asked as one label (above). Tomorrow's release check now tests that version, so a label can merge it straight away.
-- **Product (fixing):** the title-test fix above (merged, reviewed; it changes titles, not the video).
-- **Data (improving):** reports can now see topic labels for 76 older uploads that were logged without one. I wrote down the one test before running it: does the dark-morbid topic lead within the older era? The tool refused (5 uploads, fewer than the 8 it needs), so the topic picker stays parked.
-- **General management:** the tracker said viewer comments were waiting on you. You approved that on 15 October and it is applied; the first week's comments arrive after Monday's weekly run. Trackers trimmed back under their size limits.
-- **Ranked and dropped** (two fresh agents proposed sixteen; three survived): your own voice as bet 1's fallback (already in front of you on #74); a format of our own questions with no Reddit text (reopens the bets you set); a 60-second length test for TikTok (changes the video while two tests run); whether this year's crackdown on AI channels could close ours (it ends in losing payment, which bet 1 already answers); which uploads bring subscribers (23 gains in all, too few to read); reading next week's comments with a set rubric (about one comment per seven uploads). The third survivor, whether your TikTok account could be based in one of TikTok's eight eligible countries, asked on #55 and never answered, goes to the 5 November review rather than a new issue now, so #77 stays the one thing asking for you. This shift was mostly fixing (bet 1's sample and ask, the title test's leak), with one improvement (the older topic labels). Handed over about 30 minutes early: the code-health list's remaining items either ship with bet 1, are deferred on purpose, or touch the same code as bet 1's branch, where a change now would cost its fresh sample.
-- **Security:** standing check clean: no secrets in the project, the only workflow change is the comments one you approved, money controls in place ($0.46 this month, forecast $0.80 of $3).
-- **Reliability:** all four uploads since the last shift landed, and the record of the last upload is intact. Process note: no shift worked between 14 October 22:54 and tonight because the week's shift allowance ran out. Five scheduled shifts started and stopped at the guard until it reset at 18:00 today. At three shifts a day it lasts about five and a half days, so the end of each week goes dark, and longer shifts (which #67 asks for) would widen the gap. It cost two days on bet 1's sample this time. That is your reserve working as set, so I changed nothing; worth a look at the 5 November monthly review.
-
-### Blocked
-- **For you, in order:** #77 (one label settles bet 1; four frames, no download); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- On #77's label: check that the 08:17 release check passed on the three-answer version, merge it as the next version, close #74, then update the trackers.
-- 19 October: read the first week's viewer comments, and the weekly snapshot's items (the dark-morbid question, the watched clip's rule).
-- After bet 1 merges: the run-slot log, the vote comment's capitals, then make the upload step's last length check fail soft (it would stop the run rather than drop an answer; it has never fired).
-- 5 November monthly review: put the TikTok country question to you (it decides whether TikTok, the nearest paying route, stays open for bet 3), and look at the weekly shift allowance's dark days.
-
-### Better?
-- **Than last shift:** Yes, slightly. Bet 1's recommended version is sampled and asked as one label, and bet 2's title test now measures what it set out to. Nothing new reached viewers except the corrected titles.
 - **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
 - **Than ~100 shifts ago:** Too early to say.
