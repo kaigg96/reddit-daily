@@ -110,7 +110,9 @@ def test_other_calls_are_not_switched_to_json_mode(captured):
 def test_an_unparseable_reply_is_quoted_near_the_fault(monkeypatch, capsys):
     """The 2026-10-17 failure logged only "unparseable JSON", so its cause could
     not be read; the log now shows the reply around the error, on one line."""
-    reply = '{"title": "Ok", "cta": "Vote for "plastic crack" now"' + " pad" * 200 + "}"
+    # The fault sits past the excerpt's width, so the excerpt must follow it.
+    reply = ('{"title": "Ok", "keywords": [' + '"pad", ' * 60 + '"x"], '
+             '"cta": "Vote for "plastic crack" now"}')
     monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
     llm.get_metadata("q", ["a", "b", "c"])
     out = capsys.readouterr().out
