@@ -73,7 +73,7 @@ and more useful than a confident guess.
 - **Bet 1 can no longer be failed, or waved through, by a length effect.** The channel's scorecard already flags "share of each video watched" as worse, because recent posts run longer. With no rule written in advance, that flag would either sink bet 1 or be explained away after the fact. Now written down: it never triggers a revert (your rule is watch time only), and it is read on longer videos only, against today's 56%. More than 5 points lower means viewers leave during the host's notes, bet 1 claims no watch-time gain, and fixing that comes next.
 
 ### Done
-- **Monetization (improving):** the subscriber rate is now in the standard report, with a test, so the follower half of any route comes from the tool rather than a hand count.
+- **Monetization (improving):** the subscriber rate is now in the standard report, with its likely range and tests, so the follower half of any route, and how unsure it is, comes from the tool rather than a hand count. Reviewed fresh: no bugs.
 - **Product (fixing):** bet 1's rule above. A fresh review caught three wrong claims in my first draft: one compared two different kinds of view count (it said 10×, the right figure is 3 to 4×), and one named a length window the report cannot read. All were fixed before merging. Both versions of bet 1 still merge cleanly.
 - **Market:** looked for TikTok's follow rate; none is published.
 - **General management:** trackers trimmed back under their limits; one stale line corrected (the backup AI that bans training on what we send was described as waiting on you; it ships with bet 1).
