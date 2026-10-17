@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-17 (22:20) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds the company waiting on that one label, not on work
+## 2026-10-17 (22:08) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds the company waiting on that one label, not on work
 
     Worked (% of the shift): gm 40 · data 20 · reliability 15 · product 10 · legal 10 · security 5
 
@@ -78,7 +78,7 @@ and more useful than a confident guess.
 - **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Now live, reviewed twice: from Monday's snapshot it records the share still watching at five points in each recent upload, the report can read it, and a failure costs only those columns. It went in before Monday, not after, so today's version has a week of readings to compare bet 1 against.
 - **Product:** how bet 1 will read the new retention points is written down before any exist: the same cut as its "share watched" rule, never a trigger, and the first point that falls more than 5 points names where viewers leave (a quarter in: the setup note; half and three quarters in: the notes on the answers). Two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
 - **Data:** every pending experiment's pre-committed read still runs on today's tools (results not looked at, so nothing was peeked).
-- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. This shift was mostly fixing, with two improvements (the dropped list, retention).
+- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. Also below the bar at the end: a survey of comparable channels (dropped once already: ads show on unpaid channels too, so it cannot tell who is paid); a re-raise that rewrites the ask itself (a workflow change, so it waits for the bundle after #50); two code-health items whose closing conditions have not arrived. Handed over about 20 minutes early: both remaining ready items wait on #77. This shift was mostly fixing, with two improvements (the dropped list, retention).
 - **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3).
 - **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
 
