@@ -75,7 +75,7 @@ and more useful than a confident guess.
 ### Done
 - **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. Your one decision in that time was #75; everything that would reach viewers waits on #77, so more shift work cannot stand in for that label. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
 - **General management (improving):** shifts kept re-proposing ideas already dropped (four were dropped twice), because this log keeps only about two entries. A shift can now list what the last ten shifts dropped, and why. Reviewed fresh and merged.
-- **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Built on a branch and reviewed, it records the share still watching at five points in each recent upload, the report can read it, and a failure costs only those columns. It merges after Monday's snapshot lands, so a fault cannot cost the reads waiting on that snapshot.
+- **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Now live, reviewed twice: from Monday's snapshot it records the share still watching at five points in each recent upload, the report can read it, and a failure costs only those columns. It went in before Monday, not after, so today's version has a week of readings to compare bet 1 against.
 - **Product:** two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
 - **Data:** every pending experiment's pre-committed read still runs on today's tools (results not looked at, so nothing was peeked).
 - **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. This shift was mostly fixing, with two improvements (the dropped list, retention).
@@ -87,7 +87,7 @@ and more useful than a confident guess.
 
 ### Next
 - 18 October: read the 08:17 release check. On a pass with #77 labelled, merge bet 1 as the next version, close #74, #77 and #78, and update the trackers.
-- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule. Once that snapshot has landed, merge the retention branch (built, reviewed, and readable in the report), then check the next week's snapshot has the new columns.
+- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule. Check that snapshot carries the five new retention columns, filled or with a reason.
 - 5 November monthly review: as listed in the entry below (retention curves now need nothing from you), plus re-raises that update an ask's opening text.
 
 ### Better?
