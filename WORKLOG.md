@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-18 (08:50) — Bet 1 still waits on your label; two reads change what the 5 November review weighs: long-form is the nearest YouTube route on paper, and yesterday's "no voice requirement" was wrong
+
+    Worked (% of the shift): strategy 25 · legal 25 · gm 20 · engineering 15 · reliability 10 · security 5
+
+**Summary:** Nothing reached viewers; bet 1 still waits on your label on #77, and nothing of yours has moved for 79 hours, your longest gap yet. Two policy reads moved the plan instead: YouTube's long-form route is nearer on paper than any Shorts route, and I correct something yesterday's report told you about voice.
+
+### Toward revenue
+- **A correction to yesterday's report.** It said YouTube's monetization page sets no voice requirement. That page itself lists "mostly non-verbal reactions … without added voice commentary" as content that cannot earn. Bet 1's host writes its reactions, which is not non-verbal but is not voiced, so the wording does not settle it. My recommendation on #77 is unchanged: it is the only step toward pay we have, and a voice was your call (#71). The same page lets reused content earn where the creator "explains how the creator added to the content", and its reviewers read the channel and video descriptions: a cheap step once bet 1 ships.
+- **Long-form is the nearest YouTube route on paper.** The Partner Program also admits 1,000 subscribers with long-form watch hours: 8,000 a year for channels applying from February. Shorts hours never count, and we have none. At 1.5 to 5 minutes watched that is about 100,000 to 320,000 long-form views a year, against about 81 million Shorts views. So views stop being the gap (about 800 times short) and subscribers become it (about 48 times short). Either bar pays little: about $34–340 a month for Shorts, and roughly the same for long-form on industry estimates. It changes nothing before bet 1, because the reading rule applies to the whole channel. Long-form has been out of scope since July; reopening it is yours, for 5 November.
+- **No AI label is needed, and bet 1's host already meets the AI-persona rule.** YouTube asks for disclosure only of AI content that "seems realistic", and AI-written scripts and titles are exempt. A newer rule refuses pay to AI personas that give advice on health, law, money or politics; the host's instructions already forbid exactly those four.
+
+### Done
+- **Strategy and legal (improving):** the three reads above, from YouTube's own pages (fetched and checked today), recorded in the plan and product findings.
+- **General management (improving):** eight fresh candidates, ranked in two passes in opposite orders. The four that ranked well both ways are done above or below. Dropped: titles against the advertiser rules (5 of the last 23 touch politics, religion or a nationality, but ad rules limit pay only once we are paid); what a reviewer sees first (the old-videos item already covers all 1,041 readings); a second reopening rule for the parked topic ranker (not due for about 40 days); making the scorecard's length check length-aware (bet 1's own read already compares like with like).
+- **Engineering (fixing):** the defect behind #77's mixed message is fixed on a branch: a re-raise that changes an ask can now rewrite the issue's opening text, never on an approved issue. The same patch pins the weekly snapshot's libraries. It is a workflow change, so it waits for one ask after #77 settles; a fresh review is on the branch.
+- **Reliability:** bet 1 merged onto today's live code passes all 605 tests, and today's title-capitals change does not touch bet 1's AI request, so the merge plan stands. Tomorrow's first retention snapshot: its job loads cleanly with the libraries it installs. The daily release check, set for 08:17, has started between 12:10 and 17:51 on all of the last 8 days, so a morning shift cannot read it.
+- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3).
+- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
+- This shift was mostly improving (three reads), with one fix (the ask defect).
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- 18 October, afternoon: read today's release check, which lands around 12:00–18:00. On a pass, close #78; with #77 labelled, merge bet 1 as the next version and close #74, #77 and #78.
+- 19 October weekly review: first week's viewer comments; the dark-morbid question; the watched clip's rule; check the five new retention columns fill.
+- Once #77 settles: raise the re-raise fix with #50 as one ask, then merge its branch.
+- 5 November monthly review: reopen long-form after bet 1 keeps?; a release inside an approved bet that passes every check could ship unless you object within a set time; YouTube's originality rules (reach, and today's correction); bet 2's window (a label on #77 by about 1 November still covers all four of its weeks); TikTok with its follower caveat; the subscription's price against the $34–340 a month above; the weekly allowance's dark days; a failed release check going to the next shift before you.
+
+### Better?
+- **Than last shift:** Slightly, in knowledge rather than product: a wrong statement about voice is corrected before you decide on #77, and a nearer route is priced. Nothing reached viewers.
+- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds and bet 1, built 11 October, is unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-17 (22:08) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds the company waiting on that one label, not on work
 
     Worked (% of the shift): gm 40 · data 20 · reliability 15 · product 10 · legal 10 · security 5
@@ -93,38 +127,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly, in the ask rather than the product: the decision that gates revenue can no longer be read two ways. Nothing reached viewers.
 - **Than ~10 shifts ago:** No, on the audit's evidence: two title fixes in 8 shifts, watch time flat at 12.0 seconds, bet 1 unshipped since 11 October.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-17 (14:13) — Bet 1's release check failed today, and its cause is fixed: the AI's reply could cost an upload every host note
-
-    Worked (% of the shift): reliability 35 · engineering 20 · product 15 · legal 10 · data 5 · gm 10 · security 5
-
-**Summary:** Today's automatic check on bet 1's three-answer version failed, so a label on #77 alone could not have shipped it. The cause was the AI's reply going wrong in ways that would have cost real uploads the host's notes. It is fixed and tested live, and tomorrow's check decides.
-
-### Toward revenue
-- **Bet 1 was quietly blocked on our side, not only on your label.** The midday release check found the AI's reply unreadable, so the title, the vote and every host note fell back to a plain reading. Live, the same request failed two more ways: a stray comma at the end of the reply, and four host notes for three answers. Either drops the host for that whole upload, and one in a handful would have weakened bet 1's read. The request now gives the AI the exact shape of its reply, which it holds to while writing. On the model real uploads use, it returned every field and exactly three notes. The model that writes samples accepts it too.
-- **YouTube now rewards originality with reach, not only with pay.** On 1 October YouTube said the Shorts feed, which brings us 96% of our views, will favour original videos and cut reach for channels that mainly re-post others' clips. Readings like ours are not named, and there is no sign of a cut yet: the week it was announced was our best of six for views. But it makes bet 1 a defence of our reach, not only a step toward pay. Also, YouTube's own policy page sets no voice requirement for commentary ("a funny or thoughtful spin" counts), so the worry that a text-only host cannot qualify rests on a community guide and is weaker than the plan said. Both go to the 5 November review.
-- **How bet 1 will be judged when some notes drop is now written down, before any upload.** Every bet 1 video counts. If fewer than 15 of the first 20 show all their notes, a keep is credited to the host as shipped, not to the notes, and fixing the drop rate comes next. Decided now, so the read cannot pick the flattering cut later.
-
-### Done
-- **Reliability (fixing):** the fix above, on bet 1's branch, reviewed fresh (no bugs; one test that passed for the wrong reason, fixed). It spent 2 of today's 20 shared AI requests; both uploads before the reset still fit. Failures now log the AI's reply around the fault, so the next one can be read without guessing. #78, which the check raised, now explains this and needs nothing from you. A new sample of the fixed branch played, and for the first time on this version every note and the vote showed. Its frames are now on #77, so the version you would be approving is shown whole.
-- **Product and data (improving):** bet 1's rule above. The two-answer version (#74) now carries the same fix, so if you choose it, a sample is the only step left.
-- **Legal and distribution (improving):** the YouTube reading above, recorded in the plan's risk list.
-- **Engineering (fixing):** sample reports had listed a thread's own words as failed steps whenever the thread mentioned failure (today's was about "failed" attempts to domesticate animals). Fixed and merged after a fresh review.
-- **General management:** trackers updated; the product tracker trimmed back under its size limit (settled history, all in git). #50's patch still applies cleanly to the live code, so its four commands are still current.
-- **Considered and dropped:** the same fix for the content screen (3 fallbacks in 180 uploads) and the backup AI (about 1 upload in 100); logging each repaired reply (it would void the new sample; noted for after bet 1 merges). Ranked eight fresh candidates (two passes, opposite orders): the YouTube reading came first, done; a projection of bet 2's window came second, done as one line under Next; a spelling check found one misspelling in the last 50 AI-written titles (2%), so no guard; the rest scored low (likes, a median of 0 per upload; the old videos' cost, which waits on bet 1; Polly at four a day, already approved). Handed over about 30 minutes early: both ready items wait on #77, and nothing left cleared the bar. Pre-flight: bet 1's branch merged into today's live code passes all 592 tests. This shift was mostly fixing, with two improvements (the rule, the YouTube reading).
-- **Security:** standing check clean: no secrets in the project, no workflow changes, no new library advisories, money controls in place ($0.48 this month, forecast $0.82 of $3). The screen has skipped no post since September, only unsafe answers.
-- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
-
-### Blocked
-- **For you, in order:** #77 (one label settles bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- 18 October: read the 08:17 release check. On a pass, close #78; if #77 is labelled, merge the three-answer version as the next version, close #74 and #77, and update the trackers. On a fail, the log now shows the reply.
-- 19 October: read the first week's viewer comments, the dark-morbid question and the watched clip's rule.
-- 5 November monthly review: YouTube's originality rules (reach, and the policy's wording); bet 2's window: a label on #77 by about 1 November still puts four uploads a day in place for all four weeks bet 2 is measured on, where it needs about 148 views per upload (recent weeks: 71 to 310); the TikTok question with the follower caveat; the subscription's price against Partner Program revenue; retention curves; the weekly allowance's dark days; and a process note from today: a failed release check emails you an issue a shift can usually explain within hours, so it could go to the next shift first and reach you only if it persists.
-
-### Better?
-- **Than last shift:** Yes, slightly. A fault that would have stopped bet 1 at the gate, or quietly stripped its host from some uploads, is fixed before any upload. Nothing new reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is still flat at 12.0 seconds, and bet 1 is still unshipped.
 - **Than ~100 shifts ago:** Too early to say.

@@ -307,7 +307,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   while a later comment said one label ships; a re-raise only comments
   (`escalations.yml`), so the body went stale. Rewritten 10-17 21:42 (D13).
   **Proposed, for the bundle after #50** (a workflow change, and #77 stays the
-  one ask): a re-raise that changes the ask replaces the body. **Repeats:** of 45
+  one ask): a re-raise that changes the ask replaces the body. **Built 10-18** on
+  `process/reraise-replaces-ask` (`escalate.py --replace`, and the filer as a
+  patch in `.github/pending/` that also pins the weekly install below); raise
+  it with `--patch` when #77 is settled, then merge the branch. **Repeats:** of 45
   candidates dropped, retention curves, likes, the length check's fail-soft and
   a subscriber test were each dropped by two shifts. `WORKLOG.md`'s budget
   holds about two entries, so a shift cannot see what the shift before last
@@ -331,7 +334,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   other workflow reads `requirements.txt`, and `test_requirements.py` reads
   only the requirements files. A broken release on a Monday loses that week's
   snapshot for good (no backfill). Not raised alone: unlikely, and the owner's
-  queue is the binding limit. **Closes when** the next workflow patch to the
+  queue is the binding limit. Patch and test built 10-18 (the bundle above).
+  **Closes when** the next workflow patch to the
   owner carries `pip install -r requirements.txt` there, with a test that
   fails any workflow `pip install` naming a package.
 
