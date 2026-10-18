@@ -207,6 +207,7 @@ watch-seconds only (#18, `b303b37`); views never trigger a revert.
 four. Any release judged during it needs its floor re-measured on uploads at
 the new cadence, not borrowed from the 2-a-day era.
 **Re-reviewed 2026-10-13 (audit):** (b) at risk: `v8` is read on AskReddit alone (~1 a day under #3), so its 20 uploads take ~20 days and four a day (#4) could land mid-bake.
+**2026-10-18:** the floor still reads the whole era, but the comparison now reads the release replaced, at 20+ uploads: `v7` read +20% over the pool, so `v8` could have fallen ~17% below it and passed.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
