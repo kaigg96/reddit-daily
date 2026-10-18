@@ -4,11 +4,11 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `b9bc23b`
-- **When:** 2026-10-17T12:11:28Z
-- **Verdict:** ❌ FAIL — do not merge
+- **Commit:** `2e26595`
+- **When:** 2026-10-18T12:36:55Z
+- **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39031468205)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39127928723)
 
 ## What the gates said
 
@@ -18,10 +18,13 @@ Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared wit
 
 ### Gate 1 — merged metadata prompt
 
-- ❌ `title` came back empty
-- ❌ `keywords` came back empty
-- ❌ `cta` came back empty
-- ❌ host lines missing or past their caps (the upload would be a plain reading)
+- ✅ `title`: What hobby will cost YOU a fortune?
+- ✅ `keywords`: expensive hobbies, hobbies that cost too much, photography expensive, warhammer price, ski
+- ✅ `cta`: I'm raising my hand for Warhammer: 'plastic crack' is too accurate! Which one gets your vo
+- ✅ host setup: I bet a lot of these used to be affordable.
+- ✅ host reaction 1: My wallet just screamed in terror.
+- ✅ host reaction 2: Plastic crack is the perfect name!
+- ✅ host reaction 3: My knees also can't afford that price tag now.
 
 ### Gate 2 — R4.6 screen replay
 
@@ -39,7 +42,7 @@ ok   want=PASS got=PASS                                               Which famo
 
 ### Verdict
 
-**FAIL — do not merge**
+**PASS — release gates clear**
 
-- metadata: FAIL
+- metadata: pass
 - screen: pass
