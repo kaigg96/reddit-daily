@@ -934,7 +934,7 @@ def test_a_length_shifted_release_is_credited_only_within_each_length_half(tmp_p
     out = insights.render_within_length(read)
     assert "attribution only, never a trigger" in out
     assert "insufficient data" in out               # short half: 2 uploads
-    assert "long vs before, long -> no material difference" in out
+    assert "long vs format_version=v4, long -> no material difference" in out  # its predecessor
 
 
 def test_no_within_length_read_when_length_held(tmp_path, monkeypatch):
@@ -957,7 +957,7 @@ def test_near_zero_uploads_get_a_robustness_read_beside_the_verdict(tmp_path, mo
     # Zero-view uploads were never in the medians, so they are not counted.
     assert "(1 release and 10 before left out)" in out
     assert "robustness only, never a trigger" in out
-    assert "format_version=v5 vs before v5 -> no material difference" in out
+    assert "format_version=v5 vs format_version=v4 -> no material difference" in out  # its only predecessor, 20+ uploads
 
 
 def test_no_robustness_read_before_the_pre_committed_size(tmp_path, monkeypatch):
@@ -1904,6 +1904,34 @@ def test_engaged_share_sums_both_counts_and_refuses_a_thin_cohort():
     assert _ins.engaged_share([new] * 19) == (19, 5700, 1140, None)
 
 
+def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
+    import datetime as _dt
+    from src import insights as _ins
+    old = {"views": "1000", "subs_gained": "1", "published_at": "2026-06-01T12:00:00Z"}
+    new = dict(old, views="500", subs_gained="2", published_at="2026-09-01T12:00:00Z")
+    blank = dict(new, subs_gained="")
+    rows = [old] * 10 + [new] * 20 + [blank] * 5
+    n, views, subs, rate = _ins.subscriber_rate(rows)
+    assert (n, views, subs) == (30, 20000, 50)
+    assert abs(rate - 2.5) < 1e-9               # 50 over 20,000 views, not a mean of ratios
+    since = _dt.datetime(2026, 7, 1, tzinfo=_dt.timezone.utc)
+    assert _ins.subscriber_rate(rows, since) == (20, 10000, 40, 4.0)
+    assert _ins.subscriber_rate([new] * 19) == (19, 9500, 38, None)
+    assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
+
+
+def test_poisson_interval_matches_the_exact_tables():
+    from src import insights as _ins
+    lo, hi = _ins.poisson_interval(11)
+    assert abs(lo - 5.491) < 0.01 and abs(hi - 19.68) < 0.01   # Garwood, 95%
+    lo, hi = _ins.poisson_interval(0)
+    assert lo == 0.0 and abs(hi - 3.689) < 0.01
+    lo, hi = _ins.poisson_interval(1)
+    assert abs(lo - 0.0253) < 0.001 and abs(hi - 5.572) < 0.01
+    lo, hi = _ins.poisson_interval(100)
+    assert abs(lo - 81.36) < 0.05 and abs(hi - 121.63) < 0.05
+
+
 def test_engaged_share_metric_skips_videos_read_before_the_column_existed():
     import datetime as _dt
     from src import insights as _ins
@@ -2338,3 +2366,65 @@ def test_binomial_two_sided_matches_known_values():
     # No overflow past ~1,000 events, where math.comb stops fitting a float.
     assert insights.binomial_two_sided(600, 1200, 0.5) == pytest.approx(1.0)
     assert insights.binomial_two_sided(0, 1200, 0.5) < 1e-300
+
+
+# ------------------------------------------- retention points (2026-10-17)
+
+def test_retention_points_load_as_numbers_and_skip_blanks_and_refusals(tmp_path, monkeypatch):
+    """A blank (not collected) or a refusal's reason must leave the cohort,
+    never read as 0, which would invent a video nobody kept watching."""
+    from src import config
+    old = NOW - datetime.timedelta(days=20)
+    log = tmp_path / "upload_log.csv"
+    log.write_text("timestamp_utc,video_id,post_title,video_title,bg_clip\n"
+                   + "".join(f"{old.isoformat()},{v},q,t,pexels_1.mp4\n"
+                             for v in ("kept", "blank", "refused")))
+    snap = tmp_path / "analytics_snapshots.csv"
+    head = ("snapshot_date,video_id,published_at,views,likes,comments,shares,"
+            "est_minutes_watched,avg_view_duration_s,avg_view_pct,"
+            + ",".join(Metric.RETENTION))
+    snap.write_text(head + "\n"
+                    "2026-08-20,kept,,100,0,0,0,0,12,50,1.1,0.8,0.5,0.3,0.2\n"
+                    "2026-08-20,blank,,100,0,0,0,0,12,50,,,,,\n"
+                    '2026-08-20,refused,,100,0,0,0,0,12,50,"refused: HttpError 403",,,,\n')
+    monkeypatch.setattr(config, "UPLOAD_LOG", log)
+    monkeypatch.setattr(config, "ANALYTICS_SNAPSHOTS", snap)
+    videos = {v.video_id: v for v in insights.load_videos_offline().videos}
+    assert videos["kept"].watch_ratio_25 == 0.8 and videos["kept"].watch_ratio_100 == 0.2
+    assert videos["blank"].watch_ratio_10 is None and videos["refused"].watch_ratio_10 is None
+    c = insights.summarize(list(videos.values()), "all", "watch_ratio_10", NOW)
+    assert c.n == 1 and c.median == 1.1
+    assert insights.decimals("watch_ratio_50") == 2
+
+
+def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
+    """Pooling every earlier release let `v8` fall well below `v7` and still
+    clear the limit, because `v7` read +20% over the pool (2026-10-18)."""
+    def vids(version, n, watch, start):
+        return [insights.Video(video_id=f"{version}{i}",
+                               published=start + datetime.timedelta(hours=12 * i),
+                               views=100, watch_seconds=watch,
+                               meta={"format_version": version})
+                for i in range(n)]
+    t0 = datetime.datetime(2026, 8, 1, tzinfo=datetime.timezone.utc)
+    old, prev = vids("v6", 40, 9, t0), vids("v7", 20, 12, t0 + datetime.timedelta(days=30))
+    value, base = insights.predecessor(old + prev, "format_version")
+    assert value == "v7" and base == prev
+    # Too thin to stand alone: the pool, as before.
+    value, base = insights.predecessor(old + prev[:19], "format_version")
+    assert value is None and base == old + prev[:19]
+
+
+def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monkeypatch):
+    """One release is too short to measure the channel's drift, so the limit
+    keeps reading every earlier upload while the comparison narrows."""
+    wild = [("20.0", 5.0)] * 8 + [("20.0", 15.0)] * 8 + [("20.0", 5.0)] * 8
+    calm = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch, [("a", 0, "v3", wild),
+                                                      ("b", 30, "v4", calm),
+                                                      ("c", 60, "v5", calm)])
+    read = insights.release_read("v5")
+    assert read.comparisons[0].b.label == "format_version=v4"
+    history = [v for v in read.load.videos if v.meta.get("format_version") in ("v3", "v4")]
+    assert read.floors[Metric.WATCH] == insights.drift_floor(history, Metric.WATCH)
+    assert read.floors[Metric.WATCH] != insights.drift_floor(read.before, Metric.WATCH)

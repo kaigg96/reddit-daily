@@ -6,30 +6,39 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `product/host-line-fallback`
-- **Commit:** `79a3873`
-- **When:** 2026-10-14T16:07:48Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 16.0 s, audio, no dead air
+- **Branch:** `product/host-three-answers`
+- **Commit:** `2e26595`
+- **When:** 2026-10-17T14:27:52Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 33.0 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38595017637)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39040582950)
+
+Failed soft (the video still passed):
+
+```
+Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
+tags:        ['NoStupidQuestions', 'Shorts', 'Reddit', 'Top NoStupidQuestions Post', 'Trending NoStupidQuestions', 'failed domestications', 'animals humans tried to domesticate', 'domesticated foxes experiment', 'squirrels as pets history', 'did cats domesticate us', 'unsuccessful animal breeding', 'colonial america pets', 'why foxes cant be pets', 'wild animal attempts', 'reddit failed domestications']
+Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
+```
 
 What it picked:
 
 ```
-Selected post: What celebrity doesn't want to realize their 15 minutes is over?
-Slate topics (rank order): fame-celebrity|health-body|dark-morbid|dark-morbid|life-advice|humor-absurd|money-work
-Title style A, caps arm 0: Celebrities who refuse to let go of the spotlight
-Commentary setup: some famous people just do not know when to leave
-Commentary reaction 1: trying way too hard to stay relevant these days
-Commentary reaction 2: still sprinkling salt like anyone is watching anymore
-CTA: salt bae gets my vote for refusing to stop seasoning. who gets yours?
-Commentary: our own words are 0.661 of the narration, 4 host line(s) shown
-Assembled: 16.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
-Today's top AskReddit post, asked by u/Agitated-Distance740: What celebrity doesn't want to realize their 15 minutes is over?
+Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
+Slate topics (rank order): other|relationships-dating|dark-morbid|politics-news|humor-absurd
+Title style C, caps arm 1: 3 Animals We TRIED To Tame
+Commentary setup: Nature always finds a way to ruin human plans.
+Commentary reaction 1: Accidental dogs do not count as a successful harvest.
+Commentary reaction 2: Rabies cabinets sound like a terrible colonial trend.
+Commentary reaction 3: Truth has rarely been spoken so lazily.
+CTA: I raise my hand for cats domesticating us because it is too true. Which gets your vote?
+Commentary: our own words are 0.434 of the narration, 5 host line(s) shown
+Assembled: 33.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
 ```
 
 ## Last request
 
-- **Branch:** `product/host-line-fallback`
-- **When:** 2026-10-14T16:07:48Z
+- **Branch:** `product/host-three-answers`
+- **When:** 2026-10-17T14:27:52Z
 - **Outcome:** rendered -- see above

@@ -22,6 +22,8 @@ that hit the YouTube API are not.
 
 import csv
 import datetime
+import functools
+import json
 import math
 import re
 import statistics
@@ -58,6 +60,11 @@ class Metric:
     ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
     ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
     WATCH_FINE = "watch_seconds_fine"  # diagnostic: watch-seconds to a fraction; rules stay on WATCH
+    # Share of views still watching at 10..100% of the video (weekly snapshot
+    # from 2026-10-19, uploads under 30 days old; above 1 means replays).
+    # Diagnostics for where viewers leave (PRD §0, "Retention points"), never a trigger.
+    RETENTION = ("watch_ratio_10", "watch_ratio_25", "watch_ratio_50",
+                 "watch_ratio_75", "watch_ratio_100")
 
 
 @dataclass
@@ -72,6 +79,13 @@ class Video:
     est_minutes: float = 0.0
     engaged_views: float = None   # None where the snapshot predates the column (2026-10-05)
     subs_gained: float = None     # None where the snapshot predates the column (2026-10-12)
+    # Metric.RETENTION: None where not collected (before 2026-10-19, past 30
+    # days old, or a refused week), so cohorts skip them rather than read 0.
+    watch_ratio_10: float = None
+    watch_ratio_25: float = None
+    watch_ratio_50: float = None
+    watch_ratio_75: float = None
+    watch_ratio_100: float = None
     meta: dict = field(default_factory=dict)   # upload_log row (format_version, topic, ...)
     # Set only by load_videos_at_age, where `published` is deliberately
     # synthetic so that every age rule applies unchanged. See that docstring.
@@ -176,7 +190,7 @@ class Comparison:
 
 def decimals(metric):
     """Places to print: a share lives between 0 and 1, where .1f hides 0.33 vs 0.38."""
-    return 2 if metric == Metric.ENGAGED_SHARE else 1
+    return 2 if metric == Metric.ENGAGED_SHARE or metric in Metric.RETENTION else 1
 
 
 def median(values):
@@ -437,6 +451,31 @@ def release_cohorts(videos, key, value):
     started = min((v.true_published or v.published) for v in a)
     preceding = [v for v in b if (v.true_published or v.published) < started]
     return a, preceding, unset, len(b) - len(preceding)
+
+
+# As many as a release needs for its own verdict (RELEASE_MIN_UPLOADS): `v6`,
+# with 10 at 7 days, is too thin to stand alone, so `v7` still reads its pool.
+PREDECESSOR_MIN_UPLOADS = 20
+
+
+def predecessor(before, key, min_uploads=None):
+    """The release a new one replaced, and its uploads, from `release_cohorts`'
+    preceding side; (None, before) when it is too thin to stand alone.
+
+    Pooling every earlier release answers "worse than the channel's history?",
+    not "worse than what it replaced?": `v7` read +20% over its pool (12.0 vs
+    10.0 s), so `v8` judged against v2-v7 could fall ~17% below `v7` and still
+    clear a 13% limit (2026-10-18, before any `v8` upload). The drift floor
+    still reads the whole history, which a single release is too short for."""
+    if not before:
+        return None, before
+    latest = max(before, key=lambda v: v.true_published or v.published)
+    value = str(latest.meta.get(key, "")).strip()
+    if not value:
+        return None, before
+    own = [v for v in before if str(v.meta.get(key, "")).strip() == value]
+    need = PREDECESSOR_MIN_UPLOADS if min_uploads is None else min_uploads
+    return (value, own) if len(own) >= need else (None, before)
 
 
 def drift_floor(videos, metric, block=MIN_COHORT):
@@ -749,11 +788,13 @@ def render_within_length(read, threshold=1.0):
     if a is None or b is None or abs(a - b) < threshold:
         return ""
     label = read.comparisons[0].a.label if read.comparisons else "release"
+    # The baseline's own name: the release replaced, or "before vX" for a pool.
+    base = read.comparisons[0].b.label if read.comparisons else "before"
     lines = ["WITHIN LENGTH — the gain the release may claim; attribution only, never a trigger"]
     for half in ("short", "long"):
         spec = f"video_length={half}"
         lines.append(compare(within(read.release, spec), within(read.before, spec),
-                             f"{label}, {half}", f"before, {half}",
+                             f"{label}, {half}", f"{base}, {half}",
                              read.load.anchor, Metric.WATCH).render())
     return "\n".join(lines)
 
@@ -874,13 +915,15 @@ def release_read(version, key="format_version", target_age=None, within_spec=Non
     # `within_spec` reads the release inside one group, both sides alike, e.g.
     # bet 1 within subreddit=AskReddit while subreddit rotation runs (PRD §0 #7).
     videos = within(load.videos, within_spec) if within_spec else load.videos
-    a, b, unset, later = release_cohorts(videos, key, version)
+    a, history, unset, later = release_cohorts(videos, key, version)
+    prior, b = predecessor(history, key)
     triggers = release_triggers(a, b)
     metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
         t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
-    comparisons = [compare(a, b, f"{key}={version}", f"before {version}", load.anchor, m)
+    label = f"{key}={prior}" if prior else f"before {version}"
+    comparisons = [compare(a, b, f"{key}={version}", label, load.anchor, m)
                    for m in metrics]
-    floors = {m: drift_floor(b, m) for m in metrics}
+    floors = {m: drift_floor(history, m) for m in metrics}
     return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
 
 
@@ -1456,10 +1499,23 @@ def with_clip_use(rows):
 # "Who's YOUR Hero?"); capitals that are real acronyms don't count.
 _HYPE_WORD = re.compile(
     r"shock|won.?t believe|never guess|insane|exposed|jaw.?drop|mind.?blow", re.I)
-_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BF", "CEO", "CIA", "COVID", "DIY",
-             "DM", "DMV", "DNA", "ER", "EU", "FBI", "GF", "GPS", "HOA", "HR", "ID",
-             "IQ", "IRS", "LA", "MLB", "NASA", "NBA", "NFL", "NHL", "NYC", "OCD", "OK",
-             "PC", "PM", "PTSD", "RIP", "TSA", "TV", "UFC", "UFO", "UK", "US", "USA", "WC"}
+_ACRONYMS = config.TITLE_ACRONYMS
+
+
+# Topic labels for uploads from before the screen logged one (82 rows, mostly
+# `v4`): the channel-wide labelling pass (scripts/analyze_channel.py) keeps
+# them here, keyed by the Reddit question. Where both exist they agree on 29 of
+# 30 uploads (2026-10-16). Read as `topic_any`, never into `topic`, so reads
+# pre-committed on `topic` (R1, PRD §0 #2) keep their population.
+_TOPICS_CACHE = config.ROOT / "analysis" / "topics_cache.json"
+
+
+@functools.lru_cache(maxsize=1)
+def _cached_topics():
+    try:
+        return json.loads(_TOPICS_CACHE.read_text())
+    except (OSError, ValueError):
+        return {}
 
 
 def _with_derived_dimensions(row):
@@ -1484,6 +1540,8 @@ def _with_derived_dimensions(row):
     # 63 characters is the logged median (2026-09-25), so the halves are even.
     q = (r.get("post_title") or "").strip()
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
+    # The logged topic, else the labelling pass's (see _TOPICS_CACHE).
+    r["topic_any"] = (r.get("topic") or "").strip() or (_cached_topics().get(q, "") if q else "")
     # The question is the narrated opening: does addressing the viewer hold
     # them? 90 of 154 logged questions say "you" (2026-10-03).
     r["question_person"] = "" if not q else (
@@ -1722,6 +1780,7 @@ def load_videos_offline(min_age_days=MIN_AGE_DAYS):
             avg_view_pct=float(s.get("avg_view_pct") or 0),
             likes=float(s.get("likes") or 0), comments=float(s.get("comments") or 0),
             meta=r,
+            **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         )
         if v.age_days(asof) >= min_age_days:
             videos.append(v)
@@ -1842,6 +1901,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             comments=float(s.get("comments") or 0),
             subs_gained=_optional_float(s.get("subs_gained")),
             meta=meta,
+            **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         ))
     return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
                           non_public, bool(privacy))
@@ -2091,16 +2151,66 @@ def engaged_share(snapshot_rows, published_since=None):
     Returns (n videos, views, engaged views, share), or (n, views, engaged,
     None) under ENGAGED_SHARE_MIN_VIDEOS — too few to restate a gap with.
     """
-    n, views, engaged = 0, 0, 0
-    for r in snapshot_rows:
-        try:
-            v, e = int(float(r["views"])), int(float(r["engaged_views"]))
-        except (KeyError, TypeError, ValueError):
-            continue        # blank engaged_views: the API did not report it
-        if published_since and (not r.get("published_at")
-                                or _parse_ts(r["published_at"]) < published_since):
-            continue
-        n, views, engaged = n + 1, views + v, engaged + e
+    n, views, engaged = _summed(snapshot_rows, "engaged_views", published_since)
     if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
         return n, views, engaged, None
     return n, views, engaged, engaged / views
+
+
+def subscriber_rate(snapshot_rows, published_since=None):
+    """Subscribers gained per 1,000 views, summed like `engaged_share`. A
+    follower bar (TikTok's 10k, the Partner Program's 1,000) is a distance in
+    views only through this rate, so a route priced on views alone hides its
+    other half (PLAN §1, 2026-10-17).
+
+    Returns (n videos, views, subscribers gained, per 1,000), the last None
+    under ENGAGED_SHARE_MIN_VIDEOS."""
+    n, views, subs = _summed(snapshot_rows, "subs_gained", published_since)
+    if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
+        return n, views, subs, None
+    return n, views, subs, subs / views * 1000
+
+
+def poisson_interval(k, conf=0.95):
+    """Exact (Garwood) interval for a Poisson count `k`: the range of true
+    means that could have produced it. Subscriber gains are counts in the
+    tens, so a rate built on them needs its range printed beside it; 11 gains
+    reads anywhere from ~5 to ~20 (2026-10-17). It treats views as fixed and
+    gains as independent; one video bringing a burst would make it too narrow
+    (today the 23 gains sit one to a video, one video with two)."""
+    assert 0 < conf < 1, conf
+    alpha = (1 - conf) / 2
+
+    def cdf(n, lam):        # P(X <= n), summed in logs so large lam is safe
+        if n < 0:
+            return 0.0
+        return sum(math.exp(i * math.log(lam) - lam - math.lgamma(i + 1))
+                   for i in range(n + 1)) if lam > 0 else 1.0
+
+    def solve(f, target, hi):   # f falls as lam rises
+        lo = 0.0
+        for _ in range(100):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if f(mid) > target else (lo, mid)
+        return (lo + hi) / 2
+
+    top = k + 10 * math.sqrt(k + 1) + 10
+    lower = 0.0 if k == 0 else solve(lambda lam: cdf(k - 1, lam), 1 - alpha, top)
+    upper = solve(lambda lam: cdf(k, lam), alpha, top)
+    return lower, upper
+
+
+def _summed(snapshot_rows, column, published_since):
+    """(n, views, column total) over rows reporting both, optionally only
+    videos published on or after `published_since`."""
+    n, views, total = 0, 0, 0
+    for r in snapshot_rows:
+        try:
+            v, x = int(float(r["views"])), int(float(r[column]))
+        except (KeyError, TypeError, ValueError):
+            continue        # blank: the API did not report it
+        if published_since and (not r.get("published_at")
+                                or _parse_ts(r["published_at"]) < published_since):
+            continue
+        n, views, total = n + 1, views + v, total + x
+    return n, views, total

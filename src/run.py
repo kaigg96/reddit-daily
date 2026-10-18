@@ -220,7 +220,8 @@ def main():
     keywords = meta.keywords or []
 
     video_title, title_style, title_ok = llm.resolve_title(
-        meta.title, style=title_style, fallback=post.title)
+        meta.title, style=title_style, fallback=post.title, caps=title_caps,
+        source=" ".join([post.title, *post.comments[:3]]))
     if not title_ok:
         print("Title generation failed — shipping the Reddit question and "
               "logging no style (it was never applied)")
