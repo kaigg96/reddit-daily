@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-18 (08:45) — Bet 1 still waits on your label; its revert check now compares it with today's version, and two reads change the 5 November agenda
 
-    Worked (% of the shift): strategy 25 · legal 25 · gm 20 · engineering 15 · reliability 10 · security 5
+    Worked (% of the shift): strategy 20 · legal 20 · data 20 · gm 15 · engineering 15 · reliability 5 · security 5
 
 **Summary:** Nothing reached viewers; bet 1 still waits on your label on #77, and nothing of yours has moved for 79 hours, your longest gap yet. Bet 1's revert check had a blind spot, fixed before any upload, and two policy reads moved the plan: long-form is nearer on paper than any Shorts route, and yesterday's report was wrong about voice.
 
