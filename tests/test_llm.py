@@ -345,6 +345,7 @@ def _raises(exc):
 def test_failure_names_why_the_fields_are_empty(monkeypatch):
     """The upload log's ok-flags cannot tell the shared daily cap (429) from a
     timeout, and the two need different fixes. `failure` can."""
+    monkeypatch.setattr(config, "DRY_RUN", False)
     quota = llm.requests.Response()
     quota.status_code = 429
     monkeypatch.setattr(llm, "_generate",
@@ -366,6 +367,7 @@ def test_failure_names_why_the_fields_are_empty(monkeypatch):
 
 
 def test_failure_label_never_carries_the_keyed_url(monkeypatch):
+    monkeypatch.setattr(config, "DRY_RUN", False)
     monkeypatch.setattr(llm, "_generate", _raises(
         llm.requests.ConnectionError("failed for url: ...?key=super-secret")))
     assert llm.get_metadata("q", ["a"]).failure == "ConnectionError;fallback_ConnectionError"
@@ -488,6 +490,32 @@ def test_the_second_model_gets_the_main_calls_reply_schema(monkeypatch):
     assert model == llm.FALLBACK_MODEL and main and fallback == main
 
 
+def test_a_503_on_both_models_waits_once_and_never_retries_the_second(monkeypatch):
+    calls, waits = [], []
+
+    def overloaded(*a, **k):
+        calls.append(k.get("model"))
+        raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a"])
+    assert calls == [None, None, llm.FALLBACK_MODEL] and waits == [llm._OVERLOAD_WAIT]
+    assert (meta.source, meta.failure) == ("error", "http_503;fallback_http_503")
+
+
+def test_with_no_second_model_the_fields_fall_back_after_one_model(monkeypatch):
+    """The release check's setting: no request to a model it would not count."""
+    calls = []
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: calls.append(k.get("model")) or _raises(
+        llm.requests.HTTPError("429", response=FakeResponse(status=429)))())
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+    assert calls == [None]
+
+
 def test_a_second_model_junk_reply_is_named_after_geminis(monkeypatch):
     def overloaded(*a, **k):
         if k.get("model") != llm.FALLBACK_MODEL:
@@ -535,6 +563,7 @@ def test_metadata_never_retries_a_429(monkeypatch):
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
     meta = llm.get_metadata("q", ["a", "b", "c"])
     # One try on each model: the cap is counted per model, so only the other can answer.
     assert calls == [None, llm.FALLBACK_MODEL]
@@ -741,6 +770,7 @@ def test_a_gemini_429_is_not_retried_even_when_it_names_a_short_wait(monkeypatch
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: pytest.fail("slept on a Gemini 429"))
+    monkeypatch.setattr(config, "DRY_RUN", False)
     assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429;fallback_http_429"
     assert calls == [None, llm.FALLBACK_MODEL]
 

@@ -583,14 +583,17 @@ def _rescue_metadata(prompt, prior, schema=None):
     upload its title, keywords and CTA, which the screen's second model would
     have answered. That model gets the main call's reply `schema`, as every
     sample render already does; Groq takes none. Each route that misses adds
-    its reason after Gemini's."""
-    try:
-        reply = generate_retrying(prompt, tries=1, model=FALLBACK_MODEL, schema=schema)
-    except Exception as e:
-        prior = _then(prior, _failure_kind(e), "fallback")
-    else:
-        print(f"Gemini metadata failed ({prior}); {FALLBACK_MODEL} answered instead")
-        return reply, FALLBACK_SOURCE, prior
+    its reason after Gemini's. `validate_release.py` sets FALLBACK_MODEL to
+    None: an answer from it tests the wrong model, so there it would only
+    spend a request."""
+    if FALLBACK_MODEL:
+        try:
+            reply = generate_retrying(prompt, tries=1, model=FALLBACK_MODEL, schema=schema)
+        except Exception as e:
+            prior = _then(prior, _failure_kind(e), "fallback")
+        else:
+            print(f"Gemini metadata failed ({prior}); {FALLBACK_MODEL} answered instead")
+            return reply, FALLBACK_SOURCE, prior
     reply, missed = groq_rescue(prompt)
     if reply is None:
         return None, "gemini", _then(prior, missed)

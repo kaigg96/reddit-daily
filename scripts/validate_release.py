@@ -155,6 +155,9 @@ def check_metadata():
     comments = ["Photography. Lenses cost more than my car did.",
                 "Warhammer. The plastic crack is genuinely brutal now.",
                 "Skiing. A lift ticket is close to two hundred dollars."]
+    # As replay_screen.py does for the screen: the second model's answer would
+    # be inconclusive below, so trying it would only spend a request.
+    llm.FALLBACK_MODEL = None
     meta = llm.get_metadata(q, comments, style="A", caps=True)
 
     if meta.source == "error":
