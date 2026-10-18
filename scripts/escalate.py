@@ -26,8 +26,8 @@ is drawn in the right place.
 open issue instead of opening a second one. Use one that describes the
 *decision*, not the day it came up.
 
-`--replace` is for a re-raise that changes the ask itself: the issue's opening
-text becomes this message, and the comment only says so. Without it the opening
+`--replace` is for a re-raise that changes the ask itself: the issue's title and
+opening text become this message, and the comment only says so. Without it the opening
 text, which the owner reads first, goes stale under later comments: #77's said
 a label approved a rebuild while a comment said it shipped (2026-10-17 audit).
 The filer never replaces an approved issue or one carrying a patch, whose text

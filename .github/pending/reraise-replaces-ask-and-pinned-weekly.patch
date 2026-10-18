@@ -1,8 +1,8 @@
 diff --git a/.github/workflows/escalations.yml b/.github/workflows/escalations.yml
-index 39048b9..8ba40bb 100644
+index 39048b9..d6691d4 100644
 --- a/.github/workflows/escalations.yml
 +++ b/.github/workflows/escalations.yml
-@@ -69,7 +69,27 @@ jobs:
+@@ -69,7 +69,29 @@ jobs:
                  .split(',').map(s => s.trim()).filter(Boolean);
  
                const existing = open.find(i => (i.body || '').includes(marker));
@@ -13,18 +13,20 @@ index 39048b9..8ba40bb 100644
 +              // carrying a patch: that text is what the owner approved.
 +              const replaceable = existing && meta.replace === 'true'
 +                && !(existing.body || '').includes('<!-- apply-patch -->')
-+                && !existing.labels.some(l => (l.name || l) === 'approved');
++                // Case-blind, as protect-process.yml and apply-approved.yml read it.
++                && !existing.labels.some(l =>
++                  String(l.name || l).trim().toLowerCase() === 'approved');
 +              if (replaceable) {
 +                await github.rest.issues.update({
 +                  owner: context.repo.owner, repo: context.repo.repo,
-+                  issue_number: existing.number, body: `${marker}\n\n${body}`,
++                  issue_number: existing.number, title, body: `${marker}\n\n${body}`,
 +                });
 +                await github.rest.issues.createComment({
 +                  owner: context.repo.owner, repo: context.repo.repo,
 +                  issue_number: existing.number,
 +                  body: `**The ask changed:** a later shift (\`${file}\`) rewrote ` +
-+                        `the description above. It is now the current ask; ` +
-+                        `earlier comments describe what it replaced.`,
++                        `the description above, which is now the current ask. The ` +
++                        `text it replaced is in the description's edit history.`,
 +                });
 +                core.info(`replaced the ask on #${existing.number} (${key})`);
 +              } else if (existing) {
