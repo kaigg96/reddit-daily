@@ -299,9 +299,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   as the screen has since 10-09: two 503s 30s apart cost the 16:02 upload
   its title, keywords and CTA (third since 10-01, all 503s). Its answer logs
   a `meta_failure` beside fields logged ok and counts as `gemini` in
-  `title_writer`; the release check switches it off. `reliability/groq-switch`
-  and the two-answer branch conflict with it in `get_metadata`'s failure
-  branch: keep the second model first (`integration/bet1-meta-fallback` shows how).
+  `title_writer`; the release check switches it off. Both bet 1 branches
+  conflicted with it in `get_metadata`'s failure branch and are pre-resolved
+  (`integration/preview`, `integration/two-answer-meta-fallback`): the second
+  model first, given the main call's reply schema.
 
 - **Audit 2026-10-17 (21:45): the owner's attention is the company's limit,
   and one of our asks had a defect.** 8 shifts since 10-13 (five more were
