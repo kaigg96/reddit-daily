@@ -295,6 +295,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   in the shell (on `main` too; fixed on `reliability/run-slot-log`, after `v8`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
+  **Since 10-18 the metadata call tries Gemini's second model before Groq**,
+  as the screen has since 10-09: two 503s 30s apart cost the 16:02 upload
+  its title, keywords and CTA (third since 10-01, all 503s). Its answer logs
+  a `meta_failure` beside fields logged ok and counts as `gemini` in
+  `title_writer`; the release check switches it off. `reliability/groq-switch`
+  and the two-answer branch conflict with it in `get_metadata`'s failure
+  branch: keep the second model first (`integration/bet1-meta-fallback` shows how).
 
 - **Audit 2026-10-17 (21:45): the owner's attention is the company's limit,
   and one of our asks had a defect.** 8 shifts since 10-13 (five more were
