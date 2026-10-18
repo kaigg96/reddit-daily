@@ -453,6 +453,31 @@ def release_cohorts(videos, key, value):
     return a, preceding, unset, len(b) - len(preceding)
 
 
+# As many as a release needs for its own verdict (RELEASE_MIN_UPLOADS): `v6`,
+# with 10 at 7 days, is too thin to stand alone, so `v7` still reads its pool.
+PREDECESSOR_MIN_UPLOADS = 20
+
+
+def predecessor(before, key, min_uploads=None):
+    """The release a new one replaced, and its uploads, from `release_cohorts`'
+    preceding side; (None, before) when it is too thin to stand alone.
+
+    Pooling every earlier release answers "worse than the channel's history?",
+    not "worse than what it replaced?": `v7` read +20% over its pool (12.0 vs
+    10.0 s), so `v8` judged against v2-v7 could fall ~17% below `v7` and still
+    clear a 13% limit (2026-10-18, before any `v8` upload). The drift floor
+    still reads the whole history, which a single release is too short for."""
+    if not before:
+        return None, before
+    latest = max(before, key=lambda v: v.true_published or v.published)
+    value = str(latest.meta.get(key, "")).strip()
+    if not value:
+        return None, before
+    own = [v for v in before if str(v.meta.get(key, "")).strip() == value]
+    need = PREDECESSOR_MIN_UPLOADS if min_uploads is None else min_uploads
+    return (value, own) if len(own) >= need else (None, before)
+
+
 def drift_floor(videos, metric, block=MIN_COHORT):
     """How much `metric` moves between consecutive groups of uploads anyway.
 
@@ -868,13 +893,15 @@ def release_read(version, key="format_version", target_age=None, within_spec=Non
     # `within_spec` reads the release inside one group, both sides alike, e.g.
     # bet 1 within subreddit=AskReddit while subreddit rotation runs (PRD §0 #7).
     videos = within(load.videos, within_spec) if within_spec else load.videos
-    a, b, unset, later = release_cohorts(videos, key, version)
+    a, history, unset, later = release_cohorts(videos, key, version)
+    prior, b = predecessor(history, key)
     triggers = release_triggers(a, b)
     metrics = (Metric.WATCH, Metric.VIEWS) + tuple(
         t for t in triggers if t not in (Metric.WATCH, Metric.VIEWS))
-    comparisons = [compare(a, b, f"{key}={version}", f"before {version}", load.anchor, m)
+    label = f"{key}={prior}" if prior else f"before {version}"
+    comparisons = [compare(a, b, f"{key}={version}", label, load.anchor, m)
                    for m in metrics]
-    floors = {m: drift_floor(b, m) for m in metrics}
+    floors = {m: drift_floor(history, m) for m in metrics}
     return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
 
 

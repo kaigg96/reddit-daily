@@ -957,7 +957,7 @@ def test_near_zero_uploads_get_a_robustness_read_beside_the_verdict(tmp_path, mo
     # Zero-view uploads were never in the medians, so they are not counted.
     assert "(1 release and 10 before left out)" in out
     assert "robustness only, never a trigger" in out
-    assert "format_version=v5 vs before v5 -> no material difference" in out
+    assert "format_version=v5 vs format_version=v4 -> no material difference" in out  # its only predecessor, 20+ uploads
 
 
 def test_no_robustness_read_before_the_pre_committed_size(tmp_path, monkeypatch):
@@ -2386,3 +2386,21 @@ def test_retention_points_load_as_numbers_and_skip_blanks_and_refusals(tmp_path,
     c = insights.summarize(list(videos.values()), "all", "watch_ratio_10", NOW)
     assert c.n == 1 and c.median == 1.1
     assert insights.decimals("watch_ratio_50") == 2
+
+
+def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
+    """Pooling every earlier release let `v8` fall well below `v7` and still
+    clear the limit, because `v7` read +20% over the pool (2026-10-18)."""
+    def vids(version, n, watch, start):
+        return [insights.Video(video_id=f"{version}{i}",
+                               published=start + datetime.timedelta(hours=12 * i),
+                               views=100, watch_seconds=watch,
+                               meta={"format_version": version})
+                for i in range(n)]
+    t0 = datetime.datetime(2026, 8, 1, tzinfo=datetime.timezone.utc)
+    old, prev = vids("v6", 40, 9, t0), vids("v7", 20, 12, t0 + datetime.timedelta(days=30))
+    value, base = insights.predecessor(old + prev, "format_version")
+    assert value == "v7" and base == prev
+    # Too thin to stand alone: the pool, as before.
+    value, base = insights.predecessor(old + prev[:19], "format_version")
+    assert value is None and base == old + prev[:19]
