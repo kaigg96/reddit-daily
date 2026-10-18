@@ -121,6 +121,9 @@ from src.llm import MetadataResult
 
 def _metadata(monkeypatch, meta):
     monkeypatch.setattr("src.llm.get_metadata", lambda *a, **k: meta)
+    # check_metadata switches the second model off; restored after the test.
+    from src import llm
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
     return vr.check_metadata()
 
 
@@ -143,6 +146,18 @@ def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
     assert _metadata(monkeypatch, MetadataResult(
         "A Rewritten Title", ["a", "b", "c"], "Comment below!",
         "gemini_fallback", "http_503")) is None
+    assert _metadata(monkeypatch, MetadataResult(
+        None, None, None, "gemini_fallback", "http_503;fallback_no_json")) is None
+
+
+def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):
+    from src import llm
+    seen = []
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
+    monkeypatch.setattr(llm, "get_metadata", lambda *a, **k: seen.append(
+        llm.FALLBACK_MODEL) or MetadataResult(None, None, None, "error"))
+    vr.check_metadata()
+    assert seen == [None]
 
 
 def test_gemini_answering_with_junk_is_a_real_failure(monkeypatch):
