@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-18 (14:35) — Bet 1's last check passed, so it is now only your label on #77; a first look at paid channels in our genre finds only spoken commentary
+
+    Worked (% of the shift): gm 35 · reliability 20 · market 20 · data 10 · editorial 5 · security 5 · legal 5
+
+**Summary:** Nothing reached viewers. Bet 1's final automatic check passed today and it still fits cleanly onto the live code, so your label on #77, now waiting about 86 hours, becomes a release within one shift. Nothing else this shift generated was worth doing ahead of it.
+
+### Toward revenue
+- **Bet 1 has no technical blocker left.** Today's release check passed on the fixed version: every field came back with all three host notes, and the content screen sorted all five test posts as expected. Merged onto today's live code, it passes all 607 tests. #78 is closed. The pass holds a week; after that the check re-runs by itself.
+- **Market (first read):** among about 185 channels in our genre found by search, 11 show a members button, which only paid channels can have. Every one of those whose format could be confirmed adds a spoken human voice, reading or reacting; none with text-only commentary like bet 1's turned up. A missing button proves nothing, so this cannot tell whether text-only commentary gets paid; it leans weakly toward voice. It changes nothing before bet 1 (still the only step toward pay, and a voice was your call, #71), but it belongs with the originality item on 5 November.
+
+### Done
+- **Reliability (fixing):** the merge check above. The late-starting release check cannot starve the afternoon upload: in 12 days they never ran within three hours of each other, and a day's AI requests fit the cap even if they met.
+- **Editorial and legal:** the ban on shock phrases in titles holds: none of the 17 titles since it went live uses one.
+- **Data:** bet 2 looks ahead on paper: the last complete week drew 4,334 views at a week old, about the weekly pace its quarter-end target needs (16,600 over four weeks). One week sits inside the channel's normal 27–50% swing, so it changes nothing yet.
+- **General management:** eight fresh candidates, ranked twice in opposite orders, then the sources the first round missed. Done: the title check, the merge check, the market read. Closed the superseded 5 October digest issue. Handed over about 35 minutes early: both ready items wait on #77, and nothing else cleared the bar. That is the fourth shift running to stop early for this one reason; the 5 November item on releases inside an approved bet is its only fix.
+- **Considered and dropped:** a way for a shift to start the release check (first one way, fifth the other; it needs a new once-a-day guard on the AI allowance and your hands after #77); public-domain music for variety (it changes the video, so it waits about a month for bet 1's read, and YouTube's own library, your task, is safer against copyright claims); a reviewer-facing description (already recorded for after bet 1); bet 2's progress in the plan (the review reads it live); a long-form compilation (priced this morning, and a compilation of readings is still a reading); pre-writing the next bundled ask (waits on #77); the spread by topic and subreddit (nothing beyond the two open research questions); traffic (unchanged, 96% from the Shorts feed).
+- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.51 this month, forecast $0.83 of $3). This morning's upload landed and the record of the last upload is intact.
+- This shift was mostly checking and record-keeping; the market read was the one new step.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- On #77's label: merge bet 1 as the next version, close #74, update the trackers.
+- 19 October weekly review: as listed in the entry below.
+- Once #77 settles: the bundled ask (#50 with the re-raise fix).
+- 5 November monthly review: as listed below, with the market read above beside the originality item.
+
+### Better?
+- **Than last shift:** No change in substance: bet 1's last check passed, as expected, so only your label remains. Nothing reached viewers.
+- **Than ~10 shifts ago:** No: watch time flat at 12.0 seconds; bet 1, built 11 October, is unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-18 (08:45) — Bet 1 still waits on your label; its revert check now compares it with today's version, and two reads change the 5 November agenda
 
     Worked (% of the shift): strategy 20 · legal 20 · data 20 · gm 15 · engineering 15 · reliability 5 · security 5
@@ -75,7 +108,8 @@ and more useful than a confident guess.
 
 ### Done
 - **Strategy and legal (improving):** the three reads above, from YouTube's own pages, recorded in the trackers.
-- **General management (improving):** fourteen fresh candidates in two rounds, each ranked in two passes in opposite orders; the revert-check fix above led the second round. The four that ranked well both ways are done above or below. Dropped: titles against the advertiser rules (5 of the last 23 touch politics, religion or a nationality, but ad rules limit pay only once we are paid); what a reviewer sees first (the old-videos item already covers all 1,041 readings); a second reopening rule for the parked topic ranker (not due for about 40 days); making the scorecard's length check length-aware (bet 1's own read already compares like with like); the old videos' share of views (under 1%, already recorded); small record fixes and pre-writing tomorrow's reads (no decision waits on them). Handed over ~20 minutes early: both ready items wait on #77, and two rounds left nothing above the bar.
+- **General management (improving):** fourteen fresh candidates in two rounds, each ranked in two passes in opposite orders; the revert-check fix above led the second round. The four that ranked well both ways are done above or below.
+- **Considered and dropped:** titles against the advertiser rules (5 of the last 23 touch politics, religion or a nationality, but ad rules limit pay only once we are paid); what a reviewer sees first (the old-videos item already covers all 1,041 readings); a second reopening rule for the parked topic ranker (not due for about 40 days); making the scorecard's length check length-aware (bet 1's own read already compares like with like); the old videos' share of views (under 1%, already recorded); small record fixes and pre-writing tomorrow's reads (no decision waits on them). Handed over ~20 minutes early: both ready items wait on #77, and two rounds left nothing above the bar.
 - **Engineering (fixing):** the defect behind #77's mixed message is fixed on a branch: a re-raise that changes an ask can now rewrite the issue's opening text, never on an approved issue. The same patch pins the weekly snapshot's libraries. It is a workflow change, so it waits for one ask after #77 settles. Reviewed fresh; its one finding (it read the approval label case-sensitively) is fixed.
 - **Reliability:** bet 1 merged onto today's live code passes all 605 tests, and today's title-capitals change does not touch bet 1's AI request, so the merge plan stands. Tomorrow's first retention snapshot's job loads cleanly. The daily release check, set for 08:17, has started between 12:10 and 17:51 on all of the last 8 days, so a morning shift cannot read it.
 - **Security and reliability:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3). Both uploads since the last shift landed; the record of the last upload is intact.
@@ -93,38 +127,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: bet 1 will be judged against the right baseline, a wrong statement about voice is corrected before you decide, and a nearer route is priced. Nothing reached viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds; bet 1, built 11 October, is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-17 (22:08) — Bet 1's ask could be read two ways; it now says one thing, and the audit finds the company waiting on that one label, not on work
-
-    Worked (% of the shift): gm 40 · data 20 · reliability 15 · product 10 · legal 10 · security 5
-
-**Summary:** Nothing reached viewers; bet 1 still waits on your label on #77, whose opening text could be read two ways and now says one thing. The backup AI and its no-training terms check out for bet 1's launch, and where viewers leave each video can now be collected without a change from you.
-
-### Toward revenue
-- **The one decision that gates revenue is now asked one way.** #77's opening text, which you read first, still said a label there approved a rebuild and your label on #74 would ship it. A later comment said one label on #77 ships it. A label on that text could have meant either. It now says plainly: one label ships bet 1 once its morning check passes, and closes #74 for you. #74 still showed its old two-answer sample; it now says at the top, and in its title, that it is superseded and that a label there chooses two answers. Neither edit sent you an email.
-- **The backup AI holds bet 1's notes.** When Gemini's daily allowance runs out, which happens more at four uploads a day, a backup AI writes the host's notes. In 12 free test calls on six posts it returned the right shape every time, with three notes. One vote ran long and would fall back to the usual closing line. So the four-a-day plan can lean on it as planned.
-- **Legal:** the backup's agreement still bars it from training on what we send (it applies to free use too, last changed 22 June). The reason for moving our AI calls there stands.
-
-### Done
-- **General management (audit, fixing):** 8 shifts since the last audit. Two changes reached viewers (title fixes). Bet 1, built 11 October, is unshipped, and every shift's "better?" said slightly or no. Your one decision in that time was #75; everything that would reach viewers waits on #77, so more shift work cannot stand in for that label. #77's mixed message came from how re-raised asks work: they add a comment and leave the opening text stale. Proposed for later, bundled with #50 so #77 stays the one ask: a re-raise updates the opening text.
-- **General management (improving):** shifts kept re-proposing ideas already dropped (four were dropped twice), because this log keeps only about two entries. A shift can now list what the last ten shifts dropped, and why. Reviewed fresh and merged.
-- **Data (improving):** where viewers leave each video, the best-ranked idea for flat watch time, had waited on a workflow change only you can make. It does not need one: the weekly job can add it to the file it already saves. Now live, reviewed twice: from Monday's snapshot it records the share still watching at five points in each recent upload, the report can read it, and a failure costs only those columns. It went in before Monday, not after, so today's version has a week of readings to compare bet 1 against.
-- **Product:** how bet 1 will read the new retention points is written down before any exist: the same cut as its "share watched" rule, never a trigger, and the first point that falls more than 5 points names where viewers leave (a quarter in: the setup note; half and three quarters in: the notes on the answers). Two ranked checks were already answered. Bet 1's pre-committed rule already counts a vote that falls back. And three answers cannot push a video past the 45-second limit: today's version reads three too, and its longest of 45 uploads ran 31.5 s.
-- **Data:** every pending experiment's pre-committed read still runs on today's tools (results not looked at, so nothing was peeked).
-- **Considered and dropped:** a wider backup-AI check of the content screen (it needs Reddit access, and the current check passes 7 of 7 twice); questions addressed to a profession ("Nurses, …"; 5 in 168 uploads, too few to test); logging repaired AI replies (waits on bet 1's merge). Ranked in two passes, opposite orders. Also below the bar at the end: a survey of comparable channels (dropped once already: ads show on unpaid channels too, so it cannot tell who is paid); a re-raise that rewrites the ask itself (a workflow change, so it waits for the bundle after #50); two code-health items whose closing conditions have not arrived. Handed over about 20 minutes early: both remaining ready items wait on #77. This shift was mostly fixing, with two improvements (the dropped list, retention).
-- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.48 this month, forecast $0.82 of $3).
-- **Reliability:** both uploads since the last shift landed, and the record of the last upload is intact.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- 18 October: read the 08:17 release check. On a pass with #77 labelled, merge bet 1 as the next version, close #74, #77 and #78, and update the trackers.
-- 19 October: the weekly review; first week's viewer comments; the dark-morbid question; the watched clip's rule. Check that snapshot carries the five new retention columns, filled or with a reason.
-- 5 November monthly review: as listed in the entry below (retention curves now need nothing from you), plus re-raises that update an ask's opening text.
-
-### Better?
-- **Than last shift:** Slightly, in the ask rather than the product: the decision that gates revenue can no longer be read two ways. Nothing reached viewers.
-- **Than ~10 shifts ago:** No, on the audit's evidence: two title fixes in 8 shifts, watch time flat at 12.0 seconds, bet 1 unshipped since 11 October.
 - **Than ~100 shifts ago:** Too early to say.
