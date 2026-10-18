@@ -138,6 +138,13 @@ def test_a_groq_rescue_is_inconclusive_not_a_verdict(monkeypatch):
         "x" * 101, None, None, "groq_fallback", "http_503")) is None
 
 
+def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
+    """It is not the model this release ships on."""
+    assert _metadata(monkeypatch, MetadataResult(
+        "A Rewritten Title", ["a", "b", "c"], "Comment below!",
+        "gemini_fallback", "http_503")) is None
+
+
 def test_gemini_answering_with_junk_is_a_real_failure(monkeypatch):
     """Empty fields when the call itself succeeded means the prompt degraded."""
     assert _metadata(monkeypatch, MetadataResult(None, None, None, "gemini")) is False
