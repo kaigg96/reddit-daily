@@ -30,3 +30,31 @@ def test_every_requirement_is_pinned_to_an_exact_version(name):
     unpinned = [r for r in _requirements(name)
                 if not PINNED.match(r.split(";", 1)[0].strip())]
     assert not unpinned, f"{name}: pin these with ==: {unpinned}"
+
+
+# The weekly snapshot job named its packages unpinned (TECH_DEBT, 2026-10-14);
+# its fix is a workflow patch only the owner can land, so the line it replaces
+# is the one exception until then. A broken release on a Monday would lose that
+# week's snapshot for good: there is no backfill.
+_UNPINNED_UNTIL_PATCHED = {
+    ("weekly-analytics.yml",
+     "pip install google-api-python-client google-auth google-auth-httplib2"),
+}
+
+
+def test_workflows_install_only_from_the_pinned_files():
+    named = []
+    for wf in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        for line in wf.read_text().splitlines():
+            cmd = line.split("#", 1)[0].strip()
+            cmd = cmd[len("run:"):].strip() if cmd.startswith("run:") else cmd
+            if "pip install" not in cmd or (wf.name, cmd) in _UNPINNED_UNTIL_PATCHED:
+                continue
+            words = cmd.split("pip install", 1)[1].split()
+            # Every word is a flag, a requirements file after -r, or pip itself.
+            loose = [w for i, w in enumerate(words)
+                     if not w.startswith("-") and w != "pip"
+                     and not (i and words[i - 1] == "-r")]
+            if loose:
+                named.append(f"{wf.name}: {cmd}")
+    assert not named, f"install from requirements*.txt, not by name: {named}"

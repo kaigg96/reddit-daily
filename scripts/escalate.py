@@ -25,6 +25,15 @@ is drawn in the right place.
 `--key` is a stable dedupe handle: re-running with the same key comments on the
 open issue instead of opening a second one. Use one that describes the
 *decision*, not the day it came up.
+
+`--replace` is for a re-raise that changes the ask itself: the issue's opening
+text becomes this message, and the comment only says so. Without it the opening
+text, which the owner reads first, goes stale under later comments: #77's said
+a label approved a rebuild while a comment said it shipped (2026-10-17 audit).
+The filer never replaces an approved issue or one carrying a patch, whose text
+is what the owner approved; those get the usual comment.
+Needs the filer change in `.github/pending/` (a workflow patch the owner lands);
+until then the filer ignores the flag and comments as before.
 """
 import argparse
 import datetime
@@ -91,6 +100,9 @@ def main():
     ap.add_argument("--body-file", help="Read body from a file instead of stdin")
     ap.add_argument("--patch", help="A workflow change to apply once the owner "
                                     "approves (git diff output; workflow files only)")
+    ap.add_argument("--replace", action="store_true",
+                    help="The ask changed: this message replaces the open issue's "
+                         "opening text instead of only commenting on it")
     args = ap.parse_args()
     patch = validate_patch(pathlib.Path(args.patch).read_text()) if args.patch else None
 
@@ -112,6 +124,7 @@ def main():
         f"key: {key}",
         f"labels: {args.labels}",
         f"raised_at: {now.isoformat(timespec='seconds')}",
+    ] + (["replace: true"] if args.replace else []) + [
         "---",
         "",
         body,

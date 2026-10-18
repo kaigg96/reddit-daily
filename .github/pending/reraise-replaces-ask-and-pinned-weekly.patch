@@ -1,0 +1,46 @@
+diff --git a/.github/workflows/escalations.yml b/.github/workflows/escalations.yml
+index 39048b9..8ba40bb 100644
+--- a/.github/workflows/escalations.yml
++++ b/.github/workflows/escalations.yml
+@@ -69,7 +69,27 @@ jobs:
+                 .split(',').map(s => s.trim()).filter(Boolean);
+ 
+               const existing = open.find(i => (i.body || '').includes(marker));
+-              if (existing) {
++              // `replace: true` (escalate.py --replace): the ask itself changed,
++              // so the opening text the owner reads first becomes this message
++              // and the comment only says so. Never on an approved issue or one
++              // carrying a patch: that text is what the owner approved.
++              const replaceable = existing && meta.replace === 'true'
++                && !(existing.body || '').includes('<!-- apply-patch -->')
++                && !existing.labels.some(l => (l.name || l) === 'approved');
++              if (replaceable) {
++                await github.rest.issues.update({
++                  owner: context.repo.owner, repo: context.repo.repo,
++                  issue_number: existing.number, body: `${marker}\n\n${body}`,
++                });
++                await github.rest.issues.createComment({
++                  owner: context.repo.owner, repo: context.repo.repo,
++                  issue_number: existing.number,
++                  body: `**The ask changed:** a later shift (\`${file}\`) rewrote ` +
++                        `the description above. It is now the current ask; ` +
++                        `earlier comments describe what it replaced.`,
++                });
++                core.info(`replaced the ask on #${existing.number} (${key})`);
++              } else if (existing) {
+                 await github.rest.issues.createComment({
+                   owner: context.repo.owner, repo: context.repo.repo,
+                   issue_number: existing.number,
+diff --git a/.github/workflows/weekly-analytics.yml b/.github/workflows/weekly-analytics.yml
+index 942e805..6abe89f 100644
+--- a/.github/workflows/weekly-analytics.yml
++++ b/.github/workflows/weekly-analytics.yml
+@@ -23,7 +23,7 @@ jobs:
+         python-version: '3.12'
+ 
+     - name: Install dependencies
+-      run: pip install google-api-python-client google-auth google-auth-httplib2
++      run: pip install -r requirements.txt
+ 
+     - name: Pull analytics snapshot
+       env:

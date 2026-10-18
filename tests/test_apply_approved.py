@@ -185,3 +185,19 @@ def test_two_messages_on_one_key_queue_as_two_files(tmp_path, monkeypatch):
     assert len(files) == 2
     assert ["first" in files[0].read_text(), "second" in files[1].read_text()] == [True, True]
     assert all("key: same-key" in f.read_text() for f in files)
+
+
+def test_replace_marks_the_message_and_is_off_by_default(tmp_path, monkeypatch):
+    """--replace tells the filer the ask itself changed (2026-10-17 audit);
+    without it a re-raise stays a comment, as before."""
+    import io
+    monkeypatch.setattr(escalate, "QUEUE", tmp_path / ".escalations")
+    monkeypatch.setattr(escalate, "ROOT", tmp_path)
+    for extra in ([], ["--replace"]):
+        monkeypatch.setattr(sys, "argv", ["escalate.py", "--title", "T", "--key", "k", *extra])
+        monkeypatch.setattr(sys, "stdin", io.StringIO("the ask"))
+        escalate.main()
+    plain, replacing = sorted((tmp_path / ".escalations").glob("*.md"))
+    front = lambda f: f.read_text().split("\n---\n", 1)[0]
+    assert "replace:" not in front(plain)
+    assert "\nreplace: true" in front(replacing)
