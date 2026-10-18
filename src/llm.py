@@ -31,6 +31,11 @@ MODEL = "gemini-2.5-flash"
 # upload needs -- the 07:00 window also pays for the following 05:00 upload.
 # Release validation does not set DRY_RUN, so it still tests MODEL.
 SAMPLE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 "no longer available to new users" (2026-09-26)
+# One try on this model once MODEL has failed, for the screen and the metadata
+# call alike: an overload or spent cap on one model rarely means the other.
+# Every sample render already writes its title and CTA on it.
+FALLBACK_MODEL = SAMPLE_MODEL
+FALLBACK_SOURCE = "gemini_fallback"
 
 # Generous because it is now only a backstop against a pathological response,
 # not a routine limit — with thinking off, calls land in about a second.
@@ -307,10 +312,12 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         raw = generate_retrying(prompt)
     except Exception as e:
         prior = _failure_kind(e)
-        # PRD §0 #13: Groq answers before the fields fall back, as it does for
-        # the screen, and on the same terms: Gemini only, never in a dry run.
-        raw, missed = (groq_rescue(prompt) if route == "gemini" and not config.DRY_RUN
-                       else (None, ""))
+        # Gemini only, never in a dry run (already on FALLBACK_MODEL), as for
+        # the screen.
+        if route == "gemini" and not config.DRY_RUN:
+            raw, route, prior = _rescue_metadata(prompt, prior)
+        else:
+            raw = None
         if raw is None:
             # never echo the exception body: HTTPError messages embed the keyed URL
             # The reason, not just the type: a dry run writes no upload log, so
@@ -319,21 +326,20 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
                   f"({prior}; title, keywords and CTA all fall back)")
             # The request never landed -- a 429 on the shared daily cap, a timeout,
             # a transport error. Nothing was learned about the prompt's quality.
-            return MetadataResult(None, None, None, "error", _then(prior, missed))
-        print(f"Gemini metadata failed ({prior}); Groq answered instead")
-        route = GROQ_SOURCE
+            return MetadataResult(None, None, None, "error", prior)
 
-    # On a Groq answer the Gemini failure stays first, as the screen's does, so
-    # the log shows why it ran: a blank failure is still "Gemini answered".
+    # On a rescued answer the Gemini failure stays first, as the screen's does,
+    # so the log shows why it ran: a blank failure is still "Gemini answered".
+    tag = "fallback" if route == FALLBACK_SOURCE else "groq"
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
         print(f"{route} metadata returned no JSON object (all fields fall back)")
-        return MetadataResult(None, None, None, route, _then(prior, "no_json"))
+        return MetadataResult(None, None, None, route, _then(prior, "no_json", tag))
     try:
         data = json.loads(match.group(0))
     except ValueError:
         print(f"{route} metadata returned unparseable JSON (all fields fall back)")
-        return MetadataResult(None, None, None, route, _then(prior, "bad_json"))
+        return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     return MetadataResult(
         title=_clean_str(data.get("title")),
@@ -344,12 +350,32 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     )
 
 
-def _then(prior, failure):
-    """The failure label after Groq's try: Gemini's first, then Groq's, named
-    `groq_` as the screen names them. Gemini's alone when no try was made."""
+def _rescue_metadata(prompt, prior):
+    """Once MODEL has failed: one try on FALLBACK_MODEL, then Groq's (PRD §0
+    #13): (reply, route, failure). Two 503s 30s apart cost the 2026-10-18 16:02
+    upload its title, keywords and CTA, which the screen's second model would
+    have answered. Each route that misses adds its reason after Gemini's."""
+    try:
+        reply = generate_retrying(prompt, tries=1, model=FALLBACK_MODEL)
+    except Exception as e:
+        prior = _then(prior, _failure_kind(e), "fallback")
+    else:
+        print(f"Gemini metadata failed ({prior}); {FALLBACK_MODEL} answered instead")
+        return reply, FALLBACK_SOURCE, prior
+    reply, missed = groq_rescue(prompt)
+    if reply is None:
+        return None, "gemini", _then(prior, missed)
+    print(f"Gemini metadata failed ({prior}); Groq answered instead")
+    return reply, GROQ_SOURCE, prior
+
+
+def _then(prior, failure, route="groq"):
+    """The failure label after a later route's try: Gemini's first, then the
+    route's, named `fallback_` or `groq_` as the screen names them. Gemini's
+    alone when no try was made."""
     if not failure:
         return prior
-    return f"{prior};groq_{failure}" if prior else failure
+    return f"{prior};{route}_{failure}" if prior else failure
 
 
 def _clean_str(value):
