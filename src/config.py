@@ -145,6 +145,18 @@ POLLY_CHAR_BUDGET = int(os.environ.get("POLLY_CHAR_BUDGET", 5000))
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
 
+# Capitals in a title that are real acronyms, not emphasis. One list for both
+# PRD §0 #14's no-capitals arm (llm.drop_emphasis_caps) and the title_hype
+# read (insights), so the two share what counts as an acronym. Roman numerals
+# ("World War II") count too.
+TITLE_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BBQ", "BF", "CDC", "CEO", "CIA",
+                  "COVID", "CPR", "DIY", "DM", "DMV", "DNA", "DR", "ER", "EU", "FBI", "GF",
+                  "GOAT", "GPS", "HOA", "HP", "HR", "IBM", "ICU", "ID", "IQ", "IRS", "LA",
+                  "LGBTQ", "MIL", "MIT", "MLB", "NASA", "NBA", "NFL", "NHL", "NPC", "NSA",
+                  "NYC", "OCD", "OK", "PC", "PM", "POV", "PTSD", "RIP", "SUV", "TL", "TSA",
+                  "TV", "UFC", "UFO", "UK", "US", "USA", "WC",
+                  "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII"}
+
 # --- paths ---
 ASSETS = ROOT / "assets"
 GEN = ASSETS / "gen"  # per-run outputs, gitignored

@@ -345,14 +345,16 @@ def _raises(exc):
 def test_failure_names_why_the_fields_are_empty(monkeypatch):
     """The upload log's ok-flags cannot tell the shared daily cap (429) from a
     timeout, and the two need different fixes. `failure` can."""
+    monkeypatch.setattr(config, "DRY_RUN", False)
     quota = llm.requests.Response()
     quota.status_code = 429
     monkeypatch.setattr(llm, "_generate",
                         _raises(llm.requests.HTTPError("429", response=quota)))
-    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+    # Both Gemini models missed: the main model's reason first, then its fallback's.
+    assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429"
 
     monkeypatch.setattr(llm, "_generate", _raises(llm.requests.ReadTimeout()))
-    assert llm.get_metadata("q", ["a"]).failure == "timeout"
+    assert llm.get_metadata("q", ["a"]).failure == "timeout;fallback_timeout"
 
     monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no json here")
     assert llm.get_metadata("q", ["a"]).failure == "no_json"
@@ -365,9 +367,10 @@ def test_failure_names_why_the_fields_are_empty(monkeypatch):
 
 
 def test_failure_label_never_carries_the_keyed_url(monkeypatch):
+    monkeypatch.setattr(config, "DRY_RUN", False)
     monkeypatch.setattr(llm, "_generate", _raises(
         llm.requests.ConnectionError("failed for url: ...?key=super-secret")))
-    assert llm.get_metadata("q", ["a"]).failure == "ConnectionError"
+    assert llm.get_metadata("q", ["a"]).failure == "ConnectionError;fallback_ConnectionError"
 
 
 def test_the_upload_log_keeps_the_failure_kind():
@@ -447,6 +450,92 @@ def test_metadata_retries_a_503_once(monkeypatch):
     assert meta.title == "A Great Title"
 
 
+def test_two_503s_go_to_geminis_second_model_before_the_fields_fall_back(monkeypatch):
+    """Two 503s 30s apart cost the 2026-10-18 16:02 upload its title, keywords
+    and CTA; the screen already had this model for exactly that."""
+    calls = []
+
+    def overloaded(*a, **k):
+        calls.append(k.get("model"))
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert calls == [None, None, llm.FALLBACK_MODEL]   # one retry, then one fallback
+    assert meta.title == "A Great Title" and meta.keywords and meta.cta
+    # Gemini's failure stays, so the log shows why the second model ran.
+    assert (meta.source, meta.failure) == (llm.FALLBACK_SOURCE, "http_503")
+
+
+def test_a_503_on_both_models_waits_once_and_never_retries_the_second(monkeypatch):
+    calls, waits = [], []
+
+    def overloaded(*a, **k):
+        calls.append(k.get("model"))
+        raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a"])
+    assert calls == [None, None, llm.FALLBACK_MODEL] and waits == [llm._OVERLOAD_WAIT]
+    assert (meta.source, meta.failure) == ("error", "http_503;fallback_http_503")
+
+
+def test_with_no_second_model_the_fields_fall_back_after_one_model(monkeypatch):
+    """The release check's setting: no request to a model it would not count."""
+    calls = []
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: calls.append(k.get("model")) or _raises(
+        llm.requests.HTTPError("429", response=FakeResponse(status=429)))())
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+    assert calls == [None]
+
+
+def test_the_second_model_gets_the_main_calls_reply_schema(monkeypatch):
+    """Bet 1's host lines need the schema (2026-10-17); every sample render
+    already sends it to this model."""
+    sent = []
+
+    def overloaded(*a, **k):
+        sent.append((k.get("model"), k.get("schema")))
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    llm.get_metadata("q", ["a", "b", "c"])
+    (_, main), _, (model, fallback) = sent
+    assert model == llm.FALLBACK_MODEL and main and fallback == main
+
+
+def test_a_second_model_junk_reply_is_named_after_geminis(monkeypatch):
+    def overloaded(*a, **k):
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return "no json here"
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a"])
+    assert (meta.title, meta.source, meta.failure) == (
+        None, llm.FALLBACK_SOURCE, "http_503;fallback_no_json")
+
+
+def test_the_screen_and_metadata_share_one_fallback_model():
+    from src import screen
+    assert (screen.FALLBACK_MODEL, screen.FALLBACK_SOURCE) == (
+        llm.FALLBACK_MODEL, llm.FALLBACK_SOURCE)
+
+
 def test_a_503_waits_out_an_overload_before_retrying(monkeypatch):
     """A 4s wait did not outlast the 503s on the 2026-10-02 release check or
     the 2026-10-04 06:04 upload, which lost its title."""
@@ -469,14 +558,16 @@ def test_metadata_never_retries_a_429(monkeypatch):
     calls = []
 
     def capped(*a, **k):
-        calls.append(1)
+        calls.append(k.get("model"))
         raise llm.requests.HTTPError("429", response=FakeResponse(status=429))
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
     meta = llm.get_metadata("q", ["a", "b", "c"])
-    assert len(calls) == 1
-    assert meta.failure == "http_429"
+    # One try on each model: the cap is counted per model, so only the other can answer.
+    assert calls == [None, llm.FALLBACK_MODEL]
+    assert meta.failure == "http_429;fallback_http_429"
 
 
 def _metadata_prompt(monkeypatch, vote_rule):
@@ -672,15 +763,16 @@ def test_a_gemini_429_is_not_retried_even_when_it_names_a_short_wait(monkeypatch
     calls = []
 
     def capped(*a, **k):
-        calls.append(1)
+        calls.append(k.get("model"))
         resp = FakeResponse(status=429)
         resp.headers = {"retry-after": "7"}
         raise llm.requests.HTTPError("429", response=resp)
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: pytest.fail("slept on a Gemini 429"))
-    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429"
-    assert len(calls) == 1
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429;fallback_http_429"
+    assert calls == [None, llm.FALLBACK_MODEL]
 
 
 def test_a_groq_key_alone_leaves_every_call_on_gemini(monkeypatch):
@@ -754,7 +846,7 @@ def test_groq_answers_the_metadata_when_gemini_fails(monkeypatch):
     assert len(sent) == 1
     assert meta.title and meta.keywords and meta.cta
     # Gemini's failure stays, so the log shows why Groq ran.
-    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429;fallback_http_429")
 
 
 def test_off_keyless_dry_or_already_on_groq_the_fields_fall_back_as_before(monkeypatch):
@@ -770,20 +862,24 @@ def test_off_keyless_dry_or_already_on_groq_the_fields_fall_back_as_before(monke
             monkeypatch.setattr(config, "AI_PROVIDER", "groq")
         meta = llm.get_metadata("q", ["a"])
         assert sent == [], case
-        assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429"), case
+        # Off or keyless, Gemini's second model still tried; dry or on Groq, nothing did.
+        failure = "http_429;fallback_http_429" if case in ("off", "keyless") else "http_429"
+        assert (meta.title, meta.source, meta.failure) == (None, "error", failure), case
 
 
 def test_a_groq_miss_is_named_after_geminis(monkeypatch):
     _gemini_429(monkeypatch, groq_error=llm.requests.ReadTimeout())
     meta = llm.get_metadata("q", ["a"])
-    assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429;groq_timeout")
+    assert (meta.title, meta.source, meta.failure) == (
+        None, "error", "http_429;fallback_http_429;groq_timeout")
 
     _gemini_429(monkeypatch, groq_reply="no json here")
     meta = llm.get_metadata("q", ["a"])
-    assert (meta.title, meta.source, meta.failure) == (None, "groq_fallback", "http_429;groq_no_json")
+    assert (meta.title, meta.source, meta.failure) == (
+        None, "groq_fallback", "http_429;fallback_http_429;groq_no_json")
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
-    assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"
+    assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429;groq_bad_json"
 
 
 def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
@@ -802,7 +898,7 @@ def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
     monkeypatch.setattr(llm.time, "sleep", slept.append)
     meta = llm.get_metadata("q", ["a"])
     assert slept == [7.0]
-    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429;fallback_http_429")
     # The success leaves no failure label, so the wait is printed instead.
     assert "per-minute cap" in capsys.readouterr().out
 
@@ -829,4 +925,4 @@ def test_the_rescue_never_waits_twice_on_a_daily_cap_or_off_a_429(monkeypatch):
         monkeypatch.setattr(llm.time, "sleep", slept.append)
         meta = llm.get_metadata("q", ["a"])
         assert (slept, len(sent)) == (sleeps, calls), headers
-        assert meta.failure == f"http_429;{groq_failure}", headers
+        assert meta.failure == f"http_429;fallback_http_429;{groq_failure}", headers

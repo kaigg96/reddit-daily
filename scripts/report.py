@@ -235,6 +235,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     near_zero = insights.render_without_near_zero(read, min_uploads)
     if near_zero:
         print(near_zero)
+    vote = insights.render_vote_diagnostics(read, min_uploads)
+    if vote:
+        print(vote)
 
 
 def _fine_watch_rows(path=None, log_rows=None):
@@ -600,7 +603,7 @@ def main():
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL, Metric.ENGAGED, Metric.ENGAGED_SHARE,
-                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE])
+                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE, *Metric.RETENTION])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -620,7 +623,8 @@ def main():
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
         sys.exit("--min-views applies to --compare only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
-                                                  Metric.ENGAGED_SHARE, Metric.WATCH_FINE):
+                                                  Metric.ENGAGED_SHARE, Metric.WATCH_FINE,
+                                                  *Metric.RETENTION):
         # Per-play ratios only. A count (views, likes, total watch time) rises
         # with views, so leaving out the uploads with few would hide the very
         # effect it measures, such as a change that gets fewer uploads seen.
@@ -675,6 +679,16 @@ def main():
             print(f"  {label:32} n={n:<5} views {views:>8,}  engaged {engaged:>8,}  share {verdict}")
         print("\n  The Partner Program's 10M bar counts qualified (engaged) views, so a"
               "\n  gap stated in views understates it by 1/share.")
+        print("\nSubscribers gained per 1,000 views, same snapshot")
+        for label, since in (("all videos", None), ("published in the last 90 days", cut)):
+            n, views, subs, rate = insights.subscriber_rate(rows, since)
+            if rate is None:
+                verdict = f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)"
+            else:
+                lo, hi = (x / views * 1000 for x in insights.poisson_interval(subs))
+                verdict = f"{rate:.2f} (95%: {lo:.2f}-{hi:.2f})"
+            print(f"  {label:32} n={n:<5} views {views:>8,}  gained {subs:>6,}  per 1,000 {verdict}")
+        print("\n  A follower bar is this far away in views: followers needed / rate x 1,000.")
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
@@ -761,7 +775,7 @@ def main():
                 args.min_uploads, args.within)
         return
 
-    if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS)
+    if (args.metric in (Metric.ENGAGED_SHARE, Metric.ENGAGED_VIEWS, *Metric.RETENTION)
             and args.at_age is None and not args.offline):
         sys.exit(f"--metric {args.metric} comes from the weekly snapshot, which the "
                  f"live path does not read: add --offline or --at-age.")

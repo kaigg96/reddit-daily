@@ -155,6 +155,9 @@ def check_metadata():
     comments = ["Photography. Lenses cost more than my car did.",
                 "Warhammer. The plastic crack is genuinely brutal now.",
                 "Skiing. A lift ticket is close to two hundred dollars."]
+    # As replay_screen.py does for the screen: the second model's answer would
+    # be inconclusive below, so trying it would only spend a request.
+    llm.FALLBACK_MODEL = None
     meta = llm.get_metadata(q, comments, style="A", caps=True)
 
     if meta.source == "error":
@@ -165,12 +168,12 @@ def check_metadata():
              "unreachable). The prompt was never exercised, so this is not a "
              "verdict either way; the next scheduled run re-checks it.\n")
         return None
-    if meta.source == llm.GROQ_SOURCE:
-        # Groq's answer says nothing about the route under test, and a pass
-        # here would send gate 2's five requests to a Gemini that just failed.
+    if meta.source in (llm.GROQ_SOURCE, llm.FALLBACK_SOURCE):
+        # A fallback's answer says nothing about the model under test, and a
+        # pass here would send gate 2's five requests to a Gemini that just failed.
         note(f"- ⚠️ INCONCLUSIVE — Gemini did not answer ({meta.failure}); "
-             "Groq, its fallback, did, which does not test this release's "
-             "route. The next scheduled run re-checks it.\n")
+             f"its fallback ({meta.source}) did, which does not test this "
+             "release's model. The next scheduled run re-checks it.\n")
         return None
 
     ok = True

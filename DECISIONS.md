@@ -51,6 +51,7 @@ days, and #50 is the root, since applying it makes #65 and any later skill
 change label-only. So the handover leads with #50's four commands.
 **Re-reviewed 2026-10-13 (audit):** (1) false for now: #74 and #75 have waited ~2 days, the owner's last close was 10-11, and #74 needs a watch, not only a label. The trigger fires 10-14 10:49. **Evidence for whoever reads it (10-13 night):** the owner's labels, closes and comments since 09-20 fall on 15 of 24 days, with gaps of up to 76 hours (10-01 to 10-05); the current gap began 10-11 21:17, when #74 still said "after Monday's read" and #75 did not exist. A three-day wait is inside their rhythm, so check whether the ask's form is the cause before changing it.
 **Re-reviewed 2026-10-14 15:55 — trigger fired; the form is not the cause.** #74 has waited 3.2 days, but nothing of the owner's has moved since 10-11 21:17 (67 hours, inside their 76-hour longest gap): #75, a plain label, waits just as long. So it is absence, not the ask's shape; no re-ask (#74 was re-raised twice on 10-13). Revisit after 10-15 01:17, when the gap passes their longest; even then, change the ask only if they act on other issues while #74 sits.
+**Re-reviewed 2026-10-17 21:42 (audit) — that condition was met, unnoticed.** On 10-15 01:26 the owner labelled #75 three hours after #77 opened, and passed over #77. Its body then said a label approved a rebuild and #74's label would ship it; a later comment said one label on #77 ships it. A re-raise only comments (`escalations.yml`), so the body, read first, went stale, and a label on it was ambiguous consent to go live. Rewritten as one ask (no email). The owner has been absent since; the 76-hour gap passes 10-18 05:26. (1) false for now, whatever the ask's form: #75, a plain label, waited three days too; #74 six, #77 three.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
@@ -170,6 +171,7 @@ bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
 1–2 cents per extra upload. The packet asks for it explicitly, so the owner's
 answer there re-decides this ruling for those items. No shift may read it as
 lifted until then.
+**Re-reviewed 2026-10-14 (named most due by the 10-13 audit):** holds. (1) revenue is still $0, and YouTube's bar doubling for new applicants on 1 February 2027 pushes "earning" further out, so this binds longer than first thought. The owner applied it both ways since: bet 2's narration spend approved with the bet (#72), Gemini's paid tier refused (#62, "find another solution"). (2) holds: the free answers keep coming (Groq for #62, samples on a separate free allowance). Revisit as written.
 
 **Re-reviewed 2026-10-08:** still holds. The owner declined Gemini's paid tier,
 asked for so Reddit posts stop reaching a free tier that trains on them (#62):
@@ -205,6 +207,7 @@ watch-seconds only (#18, `b303b37`); views never trigger a revert.
 four. Any release judged during it needs its floor re-measured on uploads at
 the new cadence, not borrowed from the 2-a-day era.
 **Re-reviewed 2026-10-13 (audit):** (b) at risk: `v8` is read on AskReddit alone (~1 a day under #3), so its 20 uploads take ~20 days and four a day (#4) could land mid-bake.
+**2026-10-18:** the floor still reads the whole era, but the comparison now reads the release replaced, at 20+ uploads: `v7` read +20% over the pool, so `v8` could have fallen ~17% below it and passed.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
