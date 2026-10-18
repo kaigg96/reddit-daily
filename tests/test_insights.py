@@ -934,7 +934,7 @@ def test_a_length_shifted_release_is_credited_only_within_each_length_half(tmp_p
     out = insights.render_within_length(read)
     assert "attribution only, never a trigger" in out
     assert "insufficient data" in out               # short half: 2 uploads
-    assert "long vs before, long -> no material difference" in out
+    assert "long vs format_version=v4, long -> no material difference" in out  # its predecessor
 
 
 def test_no_within_length_read_when_length_held(tmp_path, monkeypatch):
@@ -2404,3 +2404,18 @@ def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
     # Too thin to stand alone: the pool, as before.
     value, base = insights.predecessor(old + prev[:19], "format_version")
     assert value is None and base == old + prev[:19]
+
+
+def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monkeypatch):
+    """One release is too short to measure the channel's drift, so the limit
+    keeps reading every earlier upload while the comparison narrows."""
+    wild = [("20.0", 5.0)] * 8 + [("20.0", 15.0)] * 8 + [("20.0", 5.0)] * 8
+    calm = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch, [("a", 0, "v3", wild),
+                                                      ("b", 30, "v4", calm),
+                                                      ("c", 60, "v5", calm)])
+    read = insights.release_read("v5")
+    assert read.comparisons[0].b.label == "format_version=v4"
+    history = [v for v in read.load.videos if v.meta.get("format_version") in ("v3", "v4")]
+    assert read.floors[Metric.WATCH] == insights.drift_floor(history, Metric.WATCH)
+    assert read.floors[Metric.WATCH] != insights.drift_floor(read.before, Metric.WATCH)

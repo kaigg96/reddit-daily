@@ -768,11 +768,13 @@ def render_within_length(read, threshold=1.0):
     if a is None or b is None or abs(a - b) < threshold:
         return ""
     label = read.comparisons[0].a.label if read.comparisons else "release"
+    # The baseline's own name: the release replaced, or "before vX" for a pool.
+    base = read.comparisons[0].b.label if read.comparisons else "before"
     lines = ["WITHIN LENGTH — the gain the release may claim; attribution only, never a trigger"]
     for half in ("short", "long"):
         spec = f"video_length={half}"
         lines.append(compare(within(read.release, spec), within(read.before, spec),
-                             f"{label}, {half}", f"before, {half}",
+                             f"{label}, {half}", f"{base}, {half}",
                              read.load.anchor, Metric.WATCH).render())
     return "\n".join(lines)
 
