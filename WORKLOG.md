@@ -68,7 +68,7 @@ and more useful than a confident guess.
 **Summary:** The weekly review found the channel flat on watch time, and nothing in it moves the company toward revenue until bet 1 ships on your label on #77. It closed one question, fixed a gap that lost a third of this week's retention readings, and parked the comment-reply work, since viewers barely comment.
 
 ### Toward revenue
-- Nothing directly: both ready items wait on #77. What this shift did keeps bet 1's readings complete: the weekly job now retries when YouTube's servers fail. Without that, one failure loses a week of "where viewers leave" readings for good, and bet 1's check of its notes depends on them. The comparison it needs already has the 8 earlier videos it needs.
+- Nothing directly: both ready items wait on #77. What this shift did keeps bet 1's readings complete: the weekly job now retries when YouTube's servers fail. Without that, one failure loses a week of "where viewers leave" readings for good, and bet 1's check of its notes depends on them. That check compares against today's version, and the 8 earlier videos it needs are already measured.
 
 ### Done
 - **Product:** watch time is flat at 12.0 seconds for a sixth week. Typical views at 7 days rose from about 49 to 139 over three weeks, but four-week totals are unchanged (×0.93), so fewer videos are buried while the hits are no bigger. No experiment's rule has come due: the subreddit test has 9 and 8 of its 15 a side, and the title-style test 13 and 5 of its 15 and 8.
@@ -76,6 +76,7 @@ and more useful than a confident guess.
 - **Engineering (fixing):** that server error now gets two retries before the job gives up, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged.
 - **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Building automatic replies would post nothing worth posting, so that work is parked until comments appear on three or more videos in a week.
 - **Distribution:** 95% of views still come from the Shorts feed and 2% from search, unchanged.
+- **Content screen:** it skipped no post this week and trimmed one comment, well inside its limits.
 - **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. Today's afternoon upload had not started by 17:40, which is late but inside the 9-hour delays seen before. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
 - This shift was fixing (the data gap) and reviewing; nothing new reached viewers.
 
