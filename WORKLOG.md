@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-19 (09:50) — Bet 1's final version is being sampled, so your label on #77 becomes a release within minutes; a missed date for bet 2 is fixed
+
+    Worked (% of the shift): gm 40 · product 15 · reliability 15 · strategy 10 · security 10 · data 10
+
+**Summary:** Nothing reached viewers. Bet 1's exact merged version is being sampled, its one sample of the day. On a pass, your label on #77 releases it without another twelve-hour wait. The plan also now says what a late label costs bet 2, and what four uploads a day would need if it goes first.
+
+### Toward revenue
+- **Bet 1 can ship the moment you label #77.** The version that would go live (three answers, the host's notes, and last night's backup for AI outages) passes all 615 tests and still merges cleanly. The sample was the last check a merge needed. I requested it at the first minute the once-every-12-hours limit allowed.
+- **What a late label costs is now written down.** If #77 is still unlabelled when the subreddit test reads (about 2 November), four uploads a day goes first, as the plan already implied. A later bet 1 then waits about four weeks for that read. So a label by about 1 November keeps both bets on time. The check for this had been set for the 5 November review, after the date it protects. It now falls to the 26 October weekly review, which will tell you on #77 if the label is still missing.
+- **Four a day going first would have hit a gap.** Two things it relies on are currently part of bet 1: the backup AI for days when Google's allowance runs short, and a record of which slot each upload belongs to. Both are now listed as steps to take first in that case.
+
+### Done
+- **Reliability:** GitHub is moving its standard machines to a newer Ubuntu between today and 19 November. I checked our upload job against it: it needs nothing from the system that changes, so I expect no effect. If an upload fails in that window, the note says to suspect this first, and the fix is a one-line change for you.
+- **Data:** style C titles (numbered lists) look 18% behind on watch time, inside the 18.2% gap chance alone produces; read within long and short videos, 8% behind and level. Not a finding; it changes nothing.
+- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.52 this month, forecast $0.82 of $3). This morning's upload landed with its AI title. The record of the last upload is intact. Nothing more of the account-security check (#59) is visible to a shift: GitHub refuses it the deploy keys and webhooks.
+- **General management:** two rounds of eight fresh candidates, each ranked twice in opposite orders. Round one: the bet 2 date led both passes, done; style C's gap came next, done. Round two: the Ubuntu check ranked high both ways, done; the gap for four a day first led one pass, done. **Settled in a line:** four a day's narration cost (about $1.64 a month against the $3 cap, so it fits); the extra plain readings four a day would add before bet 1 (about 56 on top of roughly 1,100, no change). **Considered and dropped:** pre-committing what today's first retention curve decides (retention is never a trigger, and the queue after bet 1 is set); a risk row for slow replies (the decisions log already tracks it); a check that the content screen is not too lenient (uploads are not buried more than usual, and today's weekly review audits the screen); a trademark check on the working name (renaming waits on bet 1); Snapchat's payments and a Partner Program checklist (neither changes a decision before bet 1); wording four a day's view-total clause and a noise-floor requirement (both ranked low, and neither binds before 2 November); this week's usage pace (each shift is already gated on it).
+- This shift was mostly fixing: the date, the gap and the sample. The Ubuntu check was prevention.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- Read the sample's verdict. On a pass naming the branch's current commit, bet 1 needs only #77's label.
+- Today's weekly snapshot, expected early afternoon, brings the 19 October weekly review. It covers the first week's viewer comments, the dark-morbid question, the watched clip's rule, and whether the five new retention columns fill.
+- On #77's label: merge it as the next version, close #74, update the trackers.
+- 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost.
+- 5 November monthly review: reopen long-form if bet 1 is kept?; let a release inside an approved bet that passes every check ship unless you object within a set time; YouTube's originality rules (reach, the voice correction, the paid-channel read); TikTok with its follower caveat; the subscription's price against $34–340 a month; the weekly allowance's dark days; a failed release check going to the next shift before you. Bet 2's window moved to 26 October.
+- Once #77 settles: the bundled ask (#50 with the re-raise fix).
+
+### Better?
+- **Than last shift:** Slightly: the last check a merge needed is under way, and a deadline that would have passed unseen is now watched.
+- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-18 (22:25) — This afternoon's upload lost its AI title to an outage; the backup that would have saved it is now live, and bet 1 is pre-merged with it
 
     Worked (% of the shift): reliability 35 · engineering 25 · gm 20 · legal 10 · data 5 · security 5
@@ -92,37 +126,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: one cause of degraded uploads is closed, and bet 1 is protected from it. Nothing reached viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds; bet 1, built 11 October, is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-18 (14:35) — Bet 1's last check passed, so it is now only your label on #77; a first look at paid channels in our genre finds only spoken commentary
-
-    Worked (% of the shift): gm 35 · reliability 20 · market 20 · data 10 · editorial 5 · security 5 · legal 5
-
-**Summary:** Nothing reached viewers. Bet 1's final automatic check passed today and it still fits cleanly onto the live code, so your label on #77, now waiting about 86 hours, becomes a release within one shift. Nothing else this shift generated was worth doing ahead of it.
-
-### Toward revenue
-- **Bet 1 has no technical blocker left.** Today's release check passed on the fixed version: every field came back with all three host notes, and the content screen sorted all five test posts as expected. Merged onto today's live code, it passes all 607 tests. #78 is closed. The pass holds a week; after that the check re-runs by itself.
-- **Market (first read):** among about 185 channels in our genre found by search, 11 show a members button, which only paid channels can have. Every one of those whose format could be confirmed adds a spoken human voice, reading or reacting; none with text-only commentary like bet 1's turned up. A missing button proves nothing, so this cannot tell whether text-only commentary gets paid; it leans weakly toward voice. It changes nothing before bet 1 (still the only step toward pay, and a voice was your call, #71), but it belongs with the originality item on 5 November.
-
-### Done
-- **Reliability (fixing):** the merge check above. The late-starting release check cannot starve the afternoon upload: in 12 days they never ran within three hours of each other, and a day's AI requests fit the cap even if they met.
-- **Editorial and legal:** the ban on shock phrases in titles holds: none of the 17 titles since it went live uses one.
-- **Data:** bet 2 looks ahead on paper: the last complete week drew 4,334 views at a week old, about the weekly pace its quarter-end target needs (16,600 over four weeks). One week sits inside the channel's normal 27–50% swing, so it changes nothing yet.
-- **General management:** eight fresh candidates, ranked twice in opposite orders, then the sources the first round missed. Done: the title check, the merge check, the market read. Closed the superseded 5 October digest issue. Handed over about 45 minutes early: both ready items wait on #77, and nothing else cleared the bar. A follow-up on the closest paid channel could not settle whether its commentary is spoken: YouTube refuses its transcripts to a server. That is the fourth shift running to stop early for this one reason; the 5 November item on releases inside an approved bet is its only fix.
-- **Considered and dropped:** a way for a shift to start the release check (first one way, fifth the other; it needs a new once-a-day guard on the AI allowance and your hands after #77); public-domain music for variety (it changes the video, so it waits about a month for bet 1's read, and YouTube's own library, your task, is safer against copyright claims); a reviewer-facing description (already recorded for after bet 1); bet 2's progress in the plan (the review reads it live); a long-form compilation (priced this morning, and a compilation of readings is still a reading); pre-writing the next bundled ask (waits on #77); the spread by topic and subreddit (nothing beyond the two open research questions); traffic (unchanged, 96% from the Shorts feed).
-- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.51 this month, forecast $0.83 of $3). This morning's upload landed and the record of the last upload is intact.
-- This shift was mostly checking and record-keeping; the market read was the one new step.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- On #77's label: merge bet 1 as the next version, close #74, update the trackers.
-- 19 October weekly review: as listed in the entry below.
-- Once #77 settles: the bundled ask (#50 with the re-raise fix).
-- 5 November monthly review: as listed below, with the market read above beside the originality item.
-
-### Better?
-- **Than last shift:** No change in substance: bet 1's last check passed, as expected, so only your label remains. Nothing reached viewers.
-- **Than ~10 shifts ago:** No: watch time flat at 12.0 seconds; bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
