@@ -78,13 +78,14 @@ and more useful than a confident guess.
 - **Engineering (fixing):** the retry above, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged. The waiting bet 1 release still merges cleanly.
 - **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Automatic replies would have nothing to answer, so that work is parked until comments appear on three or more videos in a week.
 - **Distribution:** 95% of views still come from the Shorts feed and 2% from search, unchanged.
-- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. The scheduler's delay is not rising after all: last week's median was 4.6 hours, against 6.5 from its first three runs. Today's afternoon upload had not started by 17:50, which is late but inside delays seen before. The content screen skipped no post and trimmed one comment. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
+- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. The scheduler's delay is not rising after all: last week's median was 4.6 hours, against 6.5 from its first three runs. Today's afternoon upload had not started by 18:15, which is late but inside delays seen before (up to 9 hours). The content screen skipped no post and trimmed one comment. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
 - **General management:** a fresh agent proposed eight candidates, ranked in both orders. The quota and model checks led both, done; the spam-policy read came from the same list, done. **Dropped:** rebuilding the slot log for four a day going first (wasted if my recommendation holds); re-checking AI disclosure (settled 18 October); three others already done above. Mostly fixing and checking; the spam read is the one finding that changes a plan.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November, so #77 still comes first); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
+- First: check today's afternoon upload landed; if not, it is an incident.
 - On #77's label: merge it as the next version, close #74, update the trackers.
 - On #80's label: make "four a day waits for bet 1" the plan in both trackers and close the issue.
 - 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost; check the retention readings came through without gaps and the comment count no longer includes ours.
