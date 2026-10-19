@@ -65,10 +65,10 @@ and more useful than a confident guess.
 
     Worked (% of the shift): legal 25 · data 25 · engineering 15 · audience 10 · gm 10 · product 5 · reliability 5 · security 5
 
-**Summary:** YouTube's spam policy, whose penalties run to closing a channel, now gives as its example of mass-production a channel very like ours: the same music on every video, over stock footage, read out by a computer voice. I recommend four uploads a day waits for bet 1 rather than going first on 2 November, and that the extra music goes in first (new issue). Watch time is flat at 12 seconds; nothing reached viewers, and bet 1 still waits on #77.
+**Summary:** YouTube's spam policy, whose penalties run to closing a channel, now gives as its example of mass-production a channel very like ours: the same music on every video, over stock footage, read out by a computer voice. I recommend four uploads a day waits for bet 1 rather than going first on 2 November, and that the extra music goes in first (#80). Watch time is flat at 12 seconds; nothing reached viewers, and bet 1 still waits on #77.
 
 ### Toward revenue
-- **A risk to the channel itself, found before we doubled the volume.** The policy's example is word for word: "Channels that use the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script." Every recent upload uses the same music track. We have had no strike in about 1,050 uploads, so this is a risk, not an event. But this morning's plan had four a day going first if bet 1 is still unshipped on about 2 November, and a 14 October shift set this concern aside only because four a day then waited for bet 1. The new issue asks you to approve waiting (bet 2 would likely miss its window) and the music task first. Your label on #77 is still the main answer: the host's notes are what make each video add something of ours.
+- **A risk to the channel itself, found before we doubled the volume.** The policy's example is word for word: "Channels that use the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script." Every recent upload uses the same music track. We have had no strike in about 1,050 uploads, so this is a risk, not an event. But this morning's plan had four a day going first if bet 1 is still unshipped on about 2 November, and a 14 October shift set this concern aside only because four a day then waited for bet 1. #80 asks you to approve waiting (bet 2 would likely miss its window) and the music task first. Your label on #77 is still the main answer: the host's notes are what make each video add something of ours.
 - **Two worries about four a day are settled.** YouTube now gives uploads their own allowance of 100 a day (Google's page, 15 October), so four a day uses a fifth of the remaining quota, not most of it. And Google has announced no retirement date for our main AI model.
 - The weekly job now retries when YouTube's servers fail. One failure this week lost 23 videos' "where viewers leave" readings, and bet 1's check of its notes depends on those readings. The 8 earlier videos that check compares against are already measured.
 
@@ -82,11 +82,11 @@ and more useful than a confident guess.
 - **General management:** a fresh agent proposed eight candidates, ranked in both orders. The quota and model checks led both, done; the spam-policy read came from the same list, done. **Dropped:** rebuilding the slot log for four a day going first (wasted if my recommendation holds); re-checking AI disclosure (settled 18 October); three others already done above. Mostly fixing and checking; the spam read is the one finding that changes a plan.
 
 ### Blocked
-- **For you, in order:** #77 (one label ships bet 1); the new spam-policy issue (one label: four a day waits for bet 1, music first); #50 (four commands, which unblocks #65); #59 (account checks).
+- **For you, in order:** #77 (one label ships bet 1); #80 (one label: four a day waits for bet 1, music first); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
 - On #77's label: merge it as the next version, close #74, update the trackers.
-- On the spam-policy label: make "four a day waits for bet 1" the plan in both trackers and close the issue.
+- On #80's label: make "four a day waits for bet 1" the plan in both trackers and close the issue.
 - 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost; check the retention readings came through without gaps and the comment count no longer includes ours.
 - 5 November monthly review: as listed in the previous entry, plus the spam policy beside YouTube's originality rules.
 
