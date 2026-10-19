@@ -628,6 +628,6 @@ youtube.commentThreads().insert(part='snippet', body={'snippet': {
     'topLevelComment': {'snippet': {'textOriginal': cta_text}}}}).execute()
 ```
 
-**Quota sanity:** uploads cost 1,600 units each; 2/day + thumbnails (50) + comments (50) ≪ 10,000/day default quota.
+**Quota sanity** (Google's quota page, updated 2026-10-15): uploads draw on their own allowance of 100 `videos.insert` calls a day; the other calls share 10,000 units, and an upload's thumbnail (50), captions (400) and comment (50) cost 500. Four a day: 4 inserts and 2,000 units, so a fifth landing inside one Pacific day (the reset is midnight PT) still fits.
 
 **Asset sources:** fonts — github.com/google/fonts (OFL). B-roll — pexels.com, pixabay.com, mixkit.co (check each file's license page; record URL in `assets/CREDITS.md`). Music — YouTube Audio Library (download via Studio; safest for Content ID). SFX — Pixabay/Mixkit.
