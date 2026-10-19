@@ -239,7 +239,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising: weekly median 4.3–4.6h (W36–W38),
   5.5h (W40), 5.9h (W41), 6.5h (W42 so far, n=3), so at four a day the median
   run lands after the next slot's cron time. Runs are safe (`run_slot` takes
-  the day from the cron line); the digest is what misreads. **Closes when** the switch goes to four.
+  the day from the cron line); the digest is what misreads. **If #4 goes
+  before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
+  `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
+  (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
+  `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
 
 - **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
   left by two reviews; the crash fix around it merged 2026-10-10).** The
@@ -388,6 +392,12 @@ a list nobody can read is the same as no list.
   **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
   0 differ, so the render is deterministic and **the override is a video
   change** — its own release with a real sample, after `v7`'s read.
+  **The runner image moves (2026-10-19):** `ubuntu-latest` becomes 26.04
+  between 10-19 and 11-19 (GitHub changelog, 09-17). Checked: no workflow
+  installs a system package or calls a system tool; `setup-python` has 3.12
+  for 26.04; ffmpeg and fonts ship with the repo's packages and assets. If
+  an upload fails in that window, suspect the image first; the fix is
+  `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
