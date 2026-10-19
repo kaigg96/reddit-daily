@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-19 (18:25) — Weekly review: watch time still flat at 12 seconds; the first read of viewer comments found almost none; a data gap in the weekly job is closed
+
+    Worked (% of the shift): data 30 · engineering 20 · audience 15 · gm 15 · product 10 · reliability 5 · security 5
+
+**Summary:** The weekly review found the channel flat on watch time, and nothing in it moves the company toward revenue until bet 1 ships on your label on #77. It closed one question, fixed a gap that lost a third of this week's retention readings, and parked the comment-reply work, since viewers barely comment.
+
+### Toward revenue
+- Nothing directly: both ready items wait on #77. What this shift did keeps bet 1's readings complete: the weekly job now retries when YouTube's servers fail. Without that, one failure loses a week of "where viewers leave" readings for good, and bet 1's check of its notes depends on them. The comparison it needs already has the 8 earlier videos it needs.
+
+### Done
+- **Product:** watch time is flat at 12.0 seconds for a sixth week. Typical views at 7 days rose from about 49 to 139 over three weeks, but four-week totals are unchanged (×0.93), so fewer videos are buried while the hits are no bigger. No experiment's rule has come due: the subreddit test has 9 and 8 of its 15 a side, and the title-style test 13 and 5 of its 15 and 8.
+- **Data:** dark-morbid topics' lead did not hold. At 12 videos it reads 8% ahead, inside what chance produces, so the idea of ranking posts by topic stays parked. The new retention readings arrived for every recent video with views, except 23 older ones lost to one server error.
+- **Engineering (fixing):** that server error now gets two retries before the job gives up, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged.
+- **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Building automatic replies would post nothing worth posting, so that work is parked until comments appear on three or more videos in a week.
+- **Distribution:** 95% of views still come from the Shorts feed and 2% from search, unchanged.
+- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. Today's afternoon upload had not started by 17:40, which is late but inside the 9-hour delays seen before. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
+- This shift was fixing (the data gap) and reviewing; nothing new reached viewers.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- On #77's label: merge it as the next version, close #74, update the trackers.
+- 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost; check the retention readings came through without gaps and the comment count no longer includes ours.
+- 5 November monthly review: as listed in the previous entry.
+
+### Better?
+- **Than last shift:** No change toward revenue; the measurement bet 1 relies on is more robust.
+- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-19 (09:50) — Bet 1's final version passed its sample, so your label on #77 is now a release within minutes; a missed date for bet 2 is fixed
 
     Worked (% of the shift): gm 40 · product 15 · reliability 15 · strategy 10 · security 10 · data 10
@@ -92,37 +123,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: bet 1's last check passed, and a deadline that would have passed unseen is now watched.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-18 (22:25) — This afternoon's upload lost its AI title to an outage; the backup that would have saved it is now live, and bet 1 is pre-merged with it
-
-    Worked (% of the shift): reliability 35 · engineering 25 · gm 20 · legal 10 · data 5 · security 5
-
-**Summary:** This afternoon's upload went out with the raw Reddit question as its title, because Google's AI was overloaded twice in a row. From the next upload on, a second Google model answers when that happens. Nothing new reached viewers: bet 1 still waits on your label on #77, and its merge now also needs one sample video, which a shift can request without you.
-
-### Toward revenue
-- **Fewer uploads lose their title, keywords and closing line.** The 16:02 upload was the third since 1 October to ship the raw question as its title, each time because the AI was overloaded. A second model, the content screen's backup since 9 October (it answered the one time it was needed), now writes them when the first fails. Under bet 1 this matters more: the same request writes the host's lines, so an outage would ship a plain reading inside the bet's own sample. Reviewed fresh: no defects, and its five smaller findings are fixed. The sample video passed, and all tests pass. No spending: it uses Google's free allowance, one extra request and only when the first model fails.
-
-### Done
-- **Reliability (fixing):** the backup above. The daily release check skips it, so the check cannot be passed by the wrong model or spend a request on it.
-- **Engineering (fixing):** both versions of bet 1 (three answers, or two if you choose that on #74) rewrite the same code, so I merged each with tonight's change and tested it (615 and 611 tests pass). Either now merges into the live code without conflicts. The three-answer one is now what the daily release check tests, and it will re-test it tomorrow by itself.
-- **Data:** in the last 60 uploads, five AI requests failed on overload, never two in one run, which is why a second model is a good bet. The evidence is thin: the screen's backup has been needed once, and it answered.
-- **Legal (improving):** the terms of every service whose output is in our videos allow paid use, as far as their own pages say: the narration (Amazon's voice service: "your output belongs to you"), the AI text (Google claims no ownership and does not bar the free tier from paid use; Groq leaves its outputs ours), and the stock clips (commercial use allowed). Pexels forbids showing identifiable people in a bad light; all six live clips are abstract, so a new clip with people needs that check against dark topics. Reddit's terms remain the only bar to paid use, as recorded. Quoted and dated beside the asset licences, for the check before any application. The backup above is Google's too, under the same terms, and is sent only what the first model was just sent.
-- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.51 this month, forecast $0.83 of $3). Both uploads today landed; the record of the last upload is intact.
-- **General management:** two rounds of candidates, each ranked in two passes in opposite orders. In the first, the overload backup led both passes and is done; pre-merging the two-answer version and pointing the release check at the merged one came out of it. In the second (eight from a fresh agent), the paid-use terms check led both passes and is done. Drafting the 5 November rule on releases inside an approved bet came second (that review will draft it), and the backup's worst daily use of its model came third (about 17 requests, and it fails soft). Also dropped from that round: a reading for YouTube's reach change (it would change no decision); a story-mode experiment after bet 1 (the queue after bet 1 is set); a test fix already queued after bet 1; a dependency scan (known findings recorded the day before). A late video run at 20:54 was the switched-off third slot, as designed. **Considered and dropped:** whether raw-title uploads underperform (3 uploads, too few to read); marking backup-written titles in the title tests (rare, and both arms are assigned by coin, not by model); weekly review prep (no decision waits on it); a further check of paid channels (YouTube still refuses their transcripts to a server). No experiment's rule has come due: the title test has 4 of its 15 needed uploads at a week old. **Awkward this shift:** any live fix that touches code a waiting release also changes forces a re-merge, which voids that release's sample, and one sample per 12 hours then holds the new one until morning. That cost is small while #77 is unanswered, but it grows with every day bet 1 waits. Handed over about 25 minutes early: both ready items wait on #77, and two rounds of sixteen candidates left nothing above the bar.
-- This shift was mostly fixing; the terms check was the one improving step, and bet 1 waits on #77.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- From 09:42 UTC (one sample per 12 hours), and not within an hour of an upload: request a sample of bet 1's merged version. With it and tomorrow's release check passing, your label on #77 becomes a merge within minutes.
-- On #77's label: merge it as the next version, close #74, update the trackers.
-- 19 October weekly review: the first week's viewer comments; the dark-morbid question; the watched clip's rule; check that the five new retention columns fill.
-- 5 November monthly review: reopen long-form if bet 1 is kept?; let a release inside an approved bet that passes every check ship unless you object within a set time; YouTube's originality rules (reach, the voice correction, the paid-channel read); bet 2's window (a label on #77 by about 1 November still covers all four of its weeks); TikTok with its follower caveat; the subscription's price against $34–340 a month; the weekly allowance's dark days; a failed release check going to the next shift before you.
-- Once #77 settles: the bundled ask (#50 with the re-raise fix).
-
-### Better?
-- **Than last shift:** Slightly: one cause of degraded uploads is closed, and bet 1 is protected from it. Nothing reached viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds; bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
