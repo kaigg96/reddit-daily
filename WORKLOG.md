@@ -61,35 +61,37 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-19 (18:25) — Weekly review: watch time still flat at 12 seconds; the first read of viewer comments found almost none; a data gap in the weekly job is closed
+## 2026-10-19 (18:25) — Weekly review: YouTube's spam rules now describe a channel like ours, so I recommend four uploads a day waits for bet 1; watch time is still flat
 
-    Worked (% of the shift): data 30 · engineering 20 · audience 15 · gm 15 · product 10 · reliability 5 · security 5
+    Worked (% of the shift): legal 25 · data 25 · engineering 15 · audience 10 · gm 10 · product 5 · reliability 5 · security 5
 
-**Summary:** The weekly review found the channel flat on watch time, and nothing in it moves the company toward revenue until bet 1 ships on your label on #77. It closed one question, fixed a gap that lost a third of this week's retention readings, and parked the comment-reply work, since viewers barely comment.
+**Summary:** YouTube's spam policy, whose penalties run to closing a channel, now gives as its example of mass-production a channel very like ours: the same music on every video, over stock footage, read out by a computer voice. I recommend four uploads a day waits for bet 1 rather than going first on 2 November, and that the extra music goes in first (new issue). Watch time is flat at 12 seconds; nothing reached viewers, and bet 1 still waits on #77.
 
 ### Toward revenue
-- Nothing directly: both ready items wait on #77. What this shift did keeps bet 1's readings complete: the weekly job now retries when YouTube's servers fail. Without that, one failure loses a week of "where viewers leave" readings for good, and bet 1's check of its notes depends on them. That check compares against today's version, and the 8 earlier videos it needs are already measured.
+- **A risk to the channel itself, found before we doubled the volume.** The policy's example is word for word: "Channels that use the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script." Every recent upload uses the same music track. We have had no strike in about 1,050 uploads, so this is a risk, not an event. But this morning's plan had four a day going first if bet 1 is still unshipped on about 2 November, and a 14 October shift set this concern aside only because four a day then waited for bet 1. The new issue asks you to approve waiting (bet 2 would likely miss its window) and the music task first. Your label on #77 is still the main answer: the host's notes are what make each video add something of ours.
+- **Two worries about four a day are settled.** YouTube now gives uploads their own allowance of 100 a day (Google's page, 15 October), so four a day uses a fifth of the remaining quota, not most of it. And Google has announced no retirement date for our main AI model.
+- The weekly job now retries when YouTube's servers fail. One failure this week lost 23 videos' "where viewers leave" readings, and bet 1's check of its notes depends on those readings. The 8 earlier videos that check compares against are already measured.
 
 ### Done
-- **Product:** watch time is flat at 12.0 seconds for a sixth week. Typical views at 7 days rose from about 49 to 139 over three weeks, but four-week totals are unchanged (×0.93), so fewer videos are buried while the hits are no bigger. No experiment's rule has come due: the subreddit test has 9 and 8 of its 15 a side, and the title-style test 13 and 5 of its 15 and 8.
-- **Data:** dark-morbid topics' lead did not hold. At 12 videos it reads 8% ahead, inside what chance produces, so the idea of ranking posts by topic stays parked. The new retention readings arrived for every recent video with views, except 23 older ones lost to one server error.
-- **Engineering (fixing):** that server error now gets two retries before the job gives up, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged.
-- **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Building automatic replies would post nothing worth posting, so that work is parked until comments appear on three or more videos in a week.
+- **Product:** watch time is flat at 12.0 seconds for a sixth week. Typical views at 7 days rose from about 49 to 139 over three weeks, but four-week totals are unchanged (×0.93), so fewer videos are buried while the hits are no bigger. No experiment's rule has come due: the subreddit test has 9 and 8 of its 15 a side, and should have about 17 by 2 November; the title-style test has 13 and 5 of its 15 and 8. Today's version still reads 15% ahead of the one before it (38 uploads). The watched background clip stays (its rule does not fire).
+- **Data:** dark-morbid topics' lead did not hold. At 12 videos it reads 8% ahead, inside what chance produces, so ranking posts by topic stays parked. The new retention readings arrived for every recent video with views, except the 23 above. Subscribers held at 21 for the week.
+- **Engineering (fixing):** the retry above, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged. The waiting bet 1 release still merges cleanly.
+- **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Automatic replies would have nothing to answer, so that work is parked until comments appear on three or more videos in a week.
 - **Distribution:** 95% of views still come from the Shorts feed and 2% from search, unchanged.
-- **Content screen:** it skipped no post this week and trimmed one comment, well inside its limits.
-- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. Today's afternoon upload had not started by 17:40, which is late but inside the 9-hour delays seen before. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
-- This shift was fixing (the data gap) and reviewing; nothing new reached viewers.
+- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. The scheduler's delay is not rising, as the plan had said: last week's median was 4.6 hours, against 6.5 from its first three runs. Today's afternoon upload had not started by 17:50, which is late but inside delays seen before. The content screen skipped no post and trimmed one comment. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
+- **General management:** a fresh agent proposed eight candidates, ranked in both orders. The quota and model checks led both, done; the spam-policy read came from the same list, done. **Dropped:** rebuilding the slot log for four a day going first (wasted if my recommendation holds); re-checking AI disclosure (settled 18 October); three others already done above. Mostly fixing and checking; the spam read is the one finding that changes a plan.
 
 ### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
+- **For you, in order:** #77 (one label ships bet 1); the new spam-policy issue (one label: four a day waits for bet 1, music first); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
 - On #77's label: merge it as the next version, close #74, update the trackers.
+- On the spam-policy label: make "four a day waits for bet 1" the plan in both trackers and close the issue.
 - 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost; check the retention readings came through without gaps and the comment count no longer includes ours.
-- 5 November monthly review: as listed in the previous entry.
+- 5 November monthly review: as listed in the previous entry, plus the spam policy beside YouTube's originality rules.
 
 ### Better?
-- **Than last shift:** No change toward revenue; the measurement bet 1 relies on is more robust.
+- **Than last shift:** Slightly: a risk to the channel itself is on record before we doubled the volume, and two worries about four a day are settled. Nothing reached viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
 
