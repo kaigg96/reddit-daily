@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - **General management:** a fresh agent proposed eight candidates, ranked in both orders. The quota and model checks led both, done; the spam-policy read came from the same list, done. **Dropped:** rebuilding the slot log for four a day going first (wasted if my recommendation holds); re-checking AI disclosure (settled 18 October); three others already done above. Mostly fixing and checking; the spam read is the one finding that changes a plan.
 
 ### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #80 (one label: four a day waits for bet 1, music first); #50 (four commands, which unblocks #65); #59 (account checks).
+- **For you, in order:** #77 (one label ships bet 1); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November, so #77 still comes first); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
 - On #77's label: merge it as the next version, close #74, update the trackers.
