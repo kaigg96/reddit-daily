@@ -4,27 +4,28 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `2e26595`
-- **When:** 2026-10-18T12:36:55Z
+- **Commit:** `0ddaae9`
+- **When:** 2026-10-19T15:44:44Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39127928723)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39279020815)
 
 ## What the gates said
 
-## Release validation
+…(truncated)…
+Release validation
 
 Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared with production).
 
 ### Gate 1 — merged metadata prompt
 
-- ✅ `title`: What hobby will cost YOU a fortune?
-- ✅ `keywords`: expensive hobbies, hobbies that cost too much, photography expensive, warhammer price, ski
-- ✅ `cta`: I'm raising my hand for Warhammer: 'plastic crack' is too accurate! Which one gets your vo
-- ✅ host setup: I bet a lot of these used to be affordable.
-- ✅ host reaction 1: My wallet just screamed in terror.
-- ✅ host reaction 2: Plastic crack is the perfect name!
-- ✅ host reaction 3: My knees also can't afford that price tag now.
+- ✅ `title`: What HOBBIES are costing YOU too much?
+- ✅ `keywords`: expensive hobbies, costly pastimes, hobbies to avoid, photography cost, warhammer price
+- ✅ `cta`: I'm raising my hand for 'Photography' – that gear adds up! Which one gets your vote?
+- ✅ host setup: My wallet is already crying just thinking about it.
+- ✅ host reaction 1: Those lenses are no joke, seriously pricey.
+- ✅ host reaction 2: The 'plastic crack' truly hits different.
+- ✅ host reaction 3: My knees hurt just looking at that lift ticket.
 
 ### Gate 2 — R4.6 screen replay
 
