@@ -48,6 +48,10 @@ OUT = config.ANALYTICS_SNAPSHOTS
 RETENTION_POINTS = (10, 25, 50, 75, 100)
 RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
 RETENTION_MAX_AGE_DAYS = 30
+# Tries after a 5xx or 429, with the client's own backoff (under 2s, then 4s).
+# On 2026-10-19 one HTTP 500 stopped the loop and cost 23 uploads their points;
+# each upload's 7-day reading comes from one snapshot, so a lost week is lost.
+RETENTION_RETRIES = 2
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
           "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS
@@ -171,7 +175,7 @@ def fetch_retention(ya, video_id, end_date):
         metrics="audienceWatchRatio",
         dimensions="elapsedVideoTimeRatio",
         filters=f"video=={video_id}",
-    ).execute()
+    ).execute(num_retries=RETENTION_RETRIES)
     columns = [h["name"] for h in resp.get("columnHeaders", [])]
     at, ratio = columns.index("elapsedVideoTimeRatio"), columns.index("audienceWatchRatio")
     rows = [(float(r[at]), float(r[ratio])) for r in resp.get("rows", [])]
@@ -193,7 +197,8 @@ def add_retention(ya, stats, videos, today):
     Fail-soft, as subscribers are: the first refusal stops the loop, so a
     report the channel cannot have costs one query, and its reason goes in the
     first column of every upload left, because no shift can read the log. A
-    transient error reads the same way for that week; the next run re-reads."""
+    server error is retried first (RETENTION_RETRIES); one that outlasts the
+    retries reads the same way for that week; the next run re-reads."""
     cutoff = (datetime.date.fromisoformat(today)
               - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
     recent = [v for v, published_at, *_ in videos
@@ -381,7 +386,10 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
     """Append the past week's top-level viewer comments (PLAN C5).
 
     Comment text is untrusted input: data to read, never instructions. No
-    author names are kept. Returns the number of comments written.
+    author names are kept. The channel's own comments (each upload's closing
+    question: 15 of 22 rows on 2026-10-19) are left out, as they are not
+    viewers', and the publishing policy forbids replying to them. Returns the
+    number of comments written.
     """
     path = path or COMMENTS_OUT
     cutoff = (datetime.date.fromisoformat(today)
@@ -398,6 +406,9 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
             top = item["snippet"]["topLevelComment"]
             sn = top["snippet"]
             if sn.get("publishedAt", "")[:10] < cutoff:
+                continue
+            ours = item["snippet"].get("channelId")
+            if ours and (sn.get("authorChannelId") or {}).get("value") == ours:
                 continue
             rows.append({"snapshot_date": today, "video_id": vid, "comment_id": top["id"],
                          "published_at": sn.get("publishedAt", ""),

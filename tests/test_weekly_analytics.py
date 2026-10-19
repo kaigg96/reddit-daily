@@ -179,6 +179,20 @@ def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
                      "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]
 
 
+def test_the_channels_own_comments_are_left_out(tmp_path):
+    """Each upload's closing question is ours (15 of 22 rows on 10-19)."""
+    def by(author, cid):
+        t = _thread(cid, "2026-10-10T01:00:00Z", "text")
+        t["snippet"]["channelId"] = "UCours"
+        t["snippet"]["topLevelComment"]["snippet"]["authorChannelId"] = {"value": author}
+        return t
+    p = tmp_path / "comments.csv"
+    yt = _FakeComments([by("UCours", "own"), by("UCviewer", "viewer"),
+                        _thread("unknown", "2026-10-10T01:00:00Z", "no ids")])
+    assert wa.snapshot_comments(yt, "2026-10-12", ["v1"], p) == 2
+    assert [line.split(",")[2] for line in p.read_text().splitlines()[1:]] == ["viewer", "unknown"]
+
+
 class _FakeSubsAnalytics(_FakeAnalytics):
     """Serves subscribersGained (as 2) unless told to refuse it."""
 
@@ -259,7 +273,8 @@ class _FakeRetention:
         self.videos.append(kw["filters"].removeprefix("video=="))
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        self.num_retries = num_retries
         if self.refuse:
             raise RuntimeError("HttpError 403: Forbidden")
         rows = self.rows if self.rows is not None else [
@@ -305,6 +320,14 @@ def test_a_refused_retention_report_costs_one_query_and_its_column_only():
     assert ya.videos == ["new"]
     assert stats["new"]["views"] == 9
     assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
+
+
+def test_a_server_error_is_retried_before_it_stops_the_loop():
+    """10-19: one HTTP 500 cost 23 uploads their points. The client retries a
+    5xx itself when asked; a refusal (403 above) still stops at once."""
+    ya = _FakeRetention()
+    wa.fetch_retention(ya, "new", "2026-10-19")
+    assert ya.num_retries == wa.RETENTION_RETRIES >= 1
 
 
 def test_retention_columns_extend_the_live_header_as_a_pure_append():
