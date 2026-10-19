@@ -61,14 +61,14 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-19 (09:50) — Bet 1's final version is being sampled, so your label on #77 becomes a release within minutes; a missed date for bet 2 is fixed
+## 2026-10-19 (09:50) — Bet 1's final version passed its sample, so your label on #77 is now a release within minutes; a missed date for bet 2 is fixed
 
     Worked (% of the shift): gm 40 · product 15 · reliability 15 · strategy 10 · security 10 · data 10
 
-**Summary:** Nothing reached viewers. Bet 1's exact merged version is being sampled, its one sample of the day. On a pass, your label on #77 releases it without another twelve-hour wait. The plan also now says what a late label costs bet 2, and what four uploads a day would need if it goes first.
+**Summary:** Nothing reached viewers. Bet 1's exact merged version passed its sample this morning, so your label on #77 releases it within minutes, with no further check to wait for. The plan also now says what a late label costs bet 2, and what four uploads a day would need if it goes first.
 
 ### Toward revenue
-- **Bet 1 can ship the moment you label #77.** The version that would go live (three answers, the host's notes, and last night's backup for AI outages) passes all 615 tests and still merges cleanly. The sample was the last check a merge needed. I requested it at the first minute the once-every-12-hours limit allowed.
+- **Bet 1 can ship the moment you label #77.** The version that would go live (three answers, the host's notes, and last night's backup for AI outages) passes all 615 tests and still merges cleanly. Its sample, the last check a merge needed, was requested at the first minute the once-every-12-hours limit allowed and passed: 18 seconds, the host's setup and all three reactions on screen. As on earlier samples, the free model that writes samples ran the host's closing vote past its length limit, so the usual closing line played instead.
 - **What a late label costs is now written down.** If #77 is still unlabelled when the subreddit test reads (about 2 November), four uploads a day goes first, as the plan already implied. A later bet 1 then waits about four weeks for that read. So a label by about 1 November keeps both bets on time. The check for this had been set for the 5 November review, after the date it protects. It now falls to the 26 October weekly review, which will tell you on #77 if the label is still missing.
 - **Four a day going first would have hit a gap.** Two things it relies on are currently part of bet 1: the backup AI for days when Google's allowance runs short, and a record of which slot each upload belongs to. Both are now listed as steps to take first in that case.
 
@@ -83,7 +83,6 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
-- Read the sample's verdict. On a pass naming the branch's current commit, bet 1 needs only #77's label.
 - Today's weekly snapshot, expected early afternoon, brings the 19 October weekly review. It covers the first week's viewer comments, the dark-morbid question, the watched clip's rule, and whether the five new retention columns fill.
 - On #77's label: merge it as the next version, close #74, update the trackers.
 - 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost.
@@ -91,7 +90,7 @@ and more useful than a confident guess.
 - Once #77 settles: the bundled ask (#50 with the re-raise fix).
 
 ### Better?
-- **Than last shift:** Slightly: the last check a merge needed is under way, and a deadline that would have passed unseen is now watched.
+- **Than last shift:** Slightly: bet 1's last check passed, and a deadline that would have passed unseen is now watched.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
 
