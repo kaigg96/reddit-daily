@@ -145,6 +145,11 @@ TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appe
 # tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to
 # move down, read and take it in (owner, 2026-10-19), so about 1.2s.
 TAG_PAUSE = 0.9
+# Each answer's top reply, when one passes the comment filters, is shown to the
+# AI under its answer as how Reddit reacted: a starting point for that answer's
+# tag, never quoted (owner's idea, 2026-10-19). Never displayed or narrated.
+HOST_TAG_REPLIES = True
+MAX_REPLY_LENGTH = 300
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
