@@ -61,6 +61,48 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-20 (16:35) — A new wording made the host's opening tag react on the free models, from none of 17 to 9 of 16; a failed AI request now says whether the day's allowance is gone
+
+    Worked (% of the shift): product 30 · reliability 25 · gm 20 · editorial 10 · engineering 5 · legal 5 · security 5
+
+**Summary:** The host's opening tag, which nearly every viewer sees, has come out as a title on every model tried. A new wording made it react on about half of the free models' tries, so tomorrow's few requests on the upload model can go straight to it. Separately, failed AI requests now say whether the day's allowance is spent, and that change is live. Nothing reached viewers.
+
+### Toward revenue
+- **A wording for the host's opening tag worth spending tomorrow's AI requests on.** On every model so far the opening tag came out as a title for the question ("Brutal truth"). I asked instead for "the words you would blurt out the moment a friend asked you this question". Both free models then reacted on 9 of 16 tries ("Ouch, right?", "Sounds shady"), against 0 of 17 with today's wording, scored blind in one mixed sheet. The catch: one model opened most of them with "Sounds…", which is the sameness YouTube's spam policy names. The model uploads use has not tried it yet. The trial tool now runs it with one setting.
+- **A better free model for the host's tags, if we must leave Gemini.** Moving every AI call to Groq would stop Reddit's text being used for training, which Reddit's terms forbid. But Groq's model turned the host's reactions into labels. Groq's other free model, on the same nine posts and scored blind, reacted to 10 of 24 answers against 4 of 27 ("Four hours?", "Sad face"). But none of its opening tags reacted with today's wording, and 2 of its 11 replies had no host lines at all. Neither model meets the bar, which the upload model nearly meets, so nothing switches.
+- **An upload's lost title can now be explained.** When the AI refuses a request for being over its limit, the upload log and the release check now say which limit it hit. If it was the daily allowance, the next upload's title is at risk until the 07:00 UTC reset. If it was the per-minute limit, a short wait would have cleared it. Today's release check was refused on its fifth content-screen case, after this morning's trials. It was the first such refusal in eight days of checks, and nothing recorded which limit it hit. The change was reviewed fresh with no defects found, all tests pass, and it is merged.
+
+### Done
+- **Editorial:** about 1 upload in 20 re-asks a question the channel already covered (4 of the last 60, such as "the scariest story you know is true"). Each was a different post with different answers. Exact repeats numbered 4 in 187, none since the 8 October guard. That is not enough to need a new guard before four a day.
+- **General management:** a fresh agent proposed eight candidates, and two more ranked them in opposite orders. The repeat check led both and is done. The Groq model trial came second and third and is done; the opening-tag wording grew out of it. **Dropped:**
+  - a pivot checkpoint: the quarterly planning already judges each bet against its set bar.
+  - whether 7-day watch time predicts later views: third one way, seventh the other, and under 1% of views come from old videos.
+  - the background clip and how many viewers stay: two weeks of data, split across many clips.
+  - pricing Reddit's commercial data deal: you said not yet (#60).
+  - why shifts end early: nothing records how much ready work each shift had.
+  - a subscriber benchmark: it changes no decision.
+
+  Mostly fixing; the two tag trials are bets.
+- **Engineering:** the trial tool now takes the new wording and a choice of Groq model, on bet 1's branch. A fresh review found no defect in that, but it did find an older hole: a Groq trial run without Groq's key would quietly spend up to 18 of the day's 20 upload-model requests. It now refuses before any request. All tests pass, and the branch still merges cleanly.
+- **Security:** the standing check is clean. No secrets are in the project, no workflows changed, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
+- AI use: none on Gemini (an upload was due within the hour), and about 55 requests on Groq (free).
+
+### Blocked
+- **For you, in order:**
+  - #77: nothing until a render is worth watching.
+  - #80: one label (four a day waits for bet 1, music first), needed by about 1 November.
+  - #50: four commands, which unblocks #65.
+  - #59: the account checks.
+
+### Next
+- First: check that this afternoon's upload landed, and read its log row. If its title fell back, the new label says whether this morning's trials used up the day's allowance.
+- After 07:00 UTC and away from uploads, run the opening tag on the upload model with the new wording against today's, on three posts per shift. Check whether it reacts, and whether every tag opens the same way.
+
+### Better?
+- **Than last shift:** Slightly: the weakest, most-seen part of bet 1 has a lead, and a failure that can cost an upload its title is now visible. Nothing changed what viewers see.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-20 (09:25) — The host's weak reactions came mostly from the cheaper test model; your next render can show the real ones and buy its narration once
 
     Worked (% of the shift): product 45 · engineering 25 · gm 10 · legal 10 · security 5 · reliability 5
@@ -92,39 +134,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, slightly: the weakest part of the main bet had been judged on the wrong model, and your next render will show the real thing at less narration cost. Nothing reached viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-19 (18:25) — Weekly review: YouTube's spam rules now reach formats like ours, so I recommend four uploads a day waits for bet 1; watch time is still flat
-
-    Worked (% of the shift): legal 25 · data 25 · engineering 15 · audience 10 · gm 10 · product 5 · reliability 5 · security 5
-
-**Summary:** YouTube's spam policy, whose penalties run to closing a channel, now treats mass-producing "similar content with minimal changes" as spam, and its example shares one trait with us exactly: the same music on every video. I recommend four uploads a day waits for bet 1 rather than going first on 2 November, and that the extra music goes in first (#80). Watch time is flat at 12 seconds; nothing reached viewers, and bet 1 still waits on #77.
-
-### Toward revenue
-- **A risk to the channel itself, found before we doubled the volume.** The policy's example is word for word: "Channels that use the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script." Every recent upload uses the same music track; our clips are filmed stock, not AI imagery, and our narration is mostly Reddit's own words, so the music is the one exact match. We have had no strike in about 1,050 uploads, so this is a risk, not an event. YouTube does enforce it: 20 channels closed in September for AI-scripted political commentary, and 16 large AI channels over the winter. A Reddit-story channel lost its pay in May but was not closed. I found no small channel like ours closed, so I rate the risk low but rising with volume (added to #80). Bet 1's host takes no side on political threads and states no facts in its own voice, so it does not resemble the closed political channels. But this morning's plan had four a day going first if bet 1 is still unshipped on about 2 November, and a 14 October shift set this concern aside only because four a day then waited for bet 1. #80 asks you to approve waiting (bet 2 would likely miss its window) and the music task first. Your label on #77 is still the main answer: the host's notes are what make each video add something of ours.
-- **Two worries about four a day are settled.** YouTube now gives uploads their own allowance of 100 a day (Google's page, 15 October), so four a day uses a fifth of the remaining quota, not most of it. And Google has announced no retirement date for our main AI model.
-- The weekly job now retries when YouTube's servers fail. One failure this week lost 23 videos' "where viewers leave" readings, and bet 1's check of its notes depends on those readings. The 8 earlier videos that check compares against are already measured.
-
-### Done
-- **Product:** watch time is flat at 12.0 seconds for a sixth week. Typical views at 7 days rose from about 49 to 139 over three weeks, but four-week totals are unchanged (×0.93), so fewer videos are buried while the hits are no bigger. No experiment's rule has come due: the subreddit test has 9 and 8 of its 15 a side, and should have about 17 by 2 November; the title-style test has 13 and 5 of its 15 and 8. Today's version still reads 15% ahead of the one before it (38 uploads). The watched background clip stays (its rule does not fire).
-- **Data:** dark-morbid topics' lead did not hold. At 12 videos it reads 8% ahead, inside what chance produces, so ranking posts by topic stays parked. The new retention readings arrived for every recent video with views, except the 23 above. Subscribers held at 21 for the week.
-- **Engineering (fixing):** the retry above, and the comment download no longer counts our own closing-question comments as viewers' (15 of its 22). Reviewed fresh with no defects found; all tests pass; merged. The waiting bet 1 release still merges cleanly.
-- **Audience:** the first read of viewer comments: 7 in a week, all on one political video (US support for Israel), mostly heated and one abusive. No other video drew a comment. Automatic replies would have nothing to answer, so that work is parked until comments appear on three or more videos in a week.
-- **Distribution:** 95% of views still come from the Shorts feed and 2% from search, unchanged.
-- **Reliability and security:** every upload this week landed; one (18 October) went out with the raw question as its title, as reported. The scheduler's delay is not rising after all: last week's median was 4.6 hours, against 6.5 from its first three runs. Today's afternoon upload had not started by 18:15, which is late but inside delays seen before (up to 9 hours). The content screen skipped no post and trimmed one comment. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.52 this month, forecast $0.82 of $3).
-- **General management:** a fresh agent proposed eight candidates, ranked in both orders. The quota and model checks led both, done; the spam-policy read came from the same list, done. **Dropped:** rebuilding the slot log for four a day going first (wasted if my recommendation holds); re-checking AI disclosure (settled 18 October); three others already done above. Mostly fixing and checking; the spam read is the one finding that changes a plan.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November, so #77 still comes first); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- First: check today's afternoon upload landed; if not, it is an incident.
-- On #77's label: merge it as the next version, close #74, update the trackers.
-- On #80's label: make "four a day waits for bet 1" the plan in both trackers and close the issue.
-- 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost; check the retention readings came through without gaps and the comment count no longer includes ours.
-- 5 November monthly review: as listed in the previous entry, plus the spam policy beside YouTube's originality rules, and whether it changes the proposal on the 1,041 old videos (all readings with the same music).
-
-### Better?
-- **Than last shift:** Slightly: a risk to the channel itself is on record before we doubled the volume, and two worries about four a day are settled. Nothing reached viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
