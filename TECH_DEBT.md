@@ -277,13 +277,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
   `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
 
-- **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
-  left by two reviews; the crash fix around it merged 2026-10-10).** The
-  fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
-  every sample, up to 4 requests a run. **Closes when** a replay case shows
-  an omitted `post_risk` on a post that should skip, or the screen's parsing
-  is next changed (2026-10-11's failure-label change left it).
-
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
   **First replay on Groq (2026-10-11, run with no Gemini key, so nothing

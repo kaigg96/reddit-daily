@@ -245,9 +245,15 @@ def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe, dropped):
     assert r.topic == "other"
 
 
-@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3])
+_MISSING = object()
+
+
+@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3, "", "  ", _MISSING])
 def test_a_verdict_that_is_not_a_string_is_a_failure_not_a_pass(monkeypatch, risk):
-    gemini(monkeypatch, {"post_risk": risk, "unsafe_comments": [], "topic": "other"})
+    reply = {"unsafe_comments": [], "topic": "other"}
+    if risk is not _MISSING:   # a reply with no verdict at all is no pass either
+        reply["post_risk"] = risk
+    gemini(monkeypatch, reply)
     r = screen.screen("What's a sign someone is amazing in bed?", ["a", "b", "c"])
     assert r.source == "backstop"
     assert r.failure == "bad_shape"
