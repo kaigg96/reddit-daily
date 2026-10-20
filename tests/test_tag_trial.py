@@ -30,7 +30,9 @@ def test_every_post_has_three_answers():
     assert len(tt.POSTS) == 9 and all(len(a) == 3 for _, a in tt.POSTS)
 
 
-def test_the_blurt_setup_reaches_the_prompt(monkeypatch):
+@pytest.mark.parametrize("setup, words", [("blurt", "blurt out the moment a friend asked you"),
+                                          ("specific", "only this question could get")])
+def test_a_setup_wording_reaches_the_prompt(monkeypatch, setup, words):
     from src import config
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
@@ -40,10 +42,9 @@ def test_the_blurt_setup_reaches_the_prompt(monkeypatch):
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
     shipped = llm._commentary_ask(3)
-    tt.setup_model("sample", setup="blurt")
+    tt.setup_model("sample", setup=setup)
     ask = llm._commentary_ask(3)
-    assert "blurt out the moment a friend asked you" in ask
-    assert "blurt out the moment" not in shipped
+    assert words in ask and words not in shipped
     # Only the setup changes: every reaction rule is as shipped.
     assert ask.split('"reactions":', 1)[1] == shipped.split('"reactions":', 1)[1]
 

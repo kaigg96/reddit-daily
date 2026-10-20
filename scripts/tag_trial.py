@@ -4,6 +4,7 @@
     venv/bin/python scripts/tag_trial.py --model sample        # all nine
     venv/bin/python scripts/tag_trial.py --model groq
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
+    venv/bin/python scripts/tag_trial.py --model groq --setup specific
     venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
@@ -78,6 +79,14 @@ SETUP_BLURT = (
     '     any answer. React to the question; never name or title it: "Brutal\n'
     '     truth" and "The mystery" are titles, not reactions. It must make sense\n'
     '     to someone who has only just read the question:')
+# SETUP_BLURT with the reactions' rule for sameness (#80's spam policy): a
+# reaction only this question could get, and a stock opener named as one.
+SETUP_SPECIFIC = SETUP_BLURT[:-1] + (
+    '. Best is a\n'
+    '     reaction only this question could get (to "What smell takes you straight\n'
+    '     back to childhood?": "Oh, crayons!"); never a stock opener like\n'
+    '     "Sounds..." or "Classic":')
+SETUPS = {"blurt": SETUP_BLURT, "specific": SETUP_SPECIFIC}
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -95,12 +104,12 @@ def pick(spec):
 
 def setup_model(model, setup="shipped", groq_model=None):
     """Point the metadata call at `model`, no second model; one try on Gemini.
-    `setup="blurt"` swaps in SETUP_BLURT for the shipped setup wording.
+    `setup="blurt"` or `"specific"` swaps in that wording for the shipped one.
     `groq_model` picks Groq's model; Qwen runs with reasoning off, as its free
     tier allows 1,000 output tokens a minute and it reasons ~2,000 a call."""
     from src import config, llm
-    if setup == "blurt":
-        llm._TAG_EDITS = [(llm._TAG_EDITS[0][0], SETUP_BLURT)] + llm._TAG_EDITS[1:]
+    if setup in SETUPS:
+        llm._TAG_EDITS = [(llm._TAG_EDITS[0][0], SETUPS[setup])] + llm._TAG_EDITS[1:]
     if groq_model:
         config.GROQ_MODEL = groq_model
     if model == "groq" and config.GROQ_MODEL.startswith("qwen"):
@@ -123,8 +132,8 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", choices=["upload", "sample", "groq"], required=True)
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
-    ap.add_argument("--setup", choices=["shipped", "blurt"], default="shipped",
-                    help="the setup's wording: as shipped, or SETUP_BLURT")
+    ap.add_argument("--setup", choices=["shipped", *SETUPS], default="shipped",
+                    help="the setup's wording: as shipped, or one of SETUPS")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
     args = ap.parse_args(argv)
