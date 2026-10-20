@@ -76,8 +76,9 @@ def make_polly():
 
 
 def _reused(text, voice_id):
-    """Where config.REUSE_NARRATION keeps this text's mp3 and marks."""
-    key = hashlib.sha256(f"{voice_id}|neural|{text}".encode("utf-8")).hexdigest()[:20]
+    """Where config.REUSE_NARRATION keeps this text's mp3 and marks. Bump
+    "marks-v1" if how marks are parsed changes, or old ones misalign captions."""
+    key = hashlib.sha256(f"marks-v1|{voice_id}|neural|{text}".encode("utf-8")).hexdigest()[:20]
     folder = config.GEN / "narration"
     return folder / f"{key}.mp3", folder / f"{key}.json"
 
