@@ -1924,6 +1924,21 @@ def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
     assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
 
 
+def test_route_distances_count_engaged_views_where_the_route_does():
+    from src import insights as _ins
+    routes = (("YPP", 10_000_000, 90, True, 1_000, True),
+              ("TikTok", 100_000, 30, False, 10_000, False))
+    ypp, tiktok = _ins.route_distances(36_000, 0.25, 20, 0.5, routes)
+    assert ypp["views_ours"] == 9_000 and abs(ypp["views_short"] - 10_000_000 / 9_000) < 1e-9
+    assert ypp["followers_short"] == 50 and ypp["views_to_follow"] == 1_960_000
+    assert tiktok["views_ours"] == 12_000             # a 30-day window, every play start
+    assert tiktok["followers_ours"] == 0 and tiktok["followers_short"] is None
+    assert tiktok["views_to_follow"] == 20_000_000
+    thin, _ = _ins.route_distances(36_000, None, 20, None, routes)
+    assert thin["views_ours"] is None and thin["views_short"] is None
+    assert thin["views_to_follow"] is None
+
+
 def test_poisson_interval_matches_the_exact_tables():
     from src import insights as _ins
     lo, hi = _ins.poisson_interval(11)

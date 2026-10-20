@@ -15,6 +15,7 @@ Usage:
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
+  venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -412,6 +413,45 @@ def show_scorecard(args):
         print(f"    - {n}")
 
 
+def show_routes():
+    """Each revenue route's distance, from the latest snapshot: views at our
+    90-day rate (engaged share where the route counts only those), followers
+    against today's count and in the views it would take at our rate."""
+    import csv as _csv
+    from src import config
+    with open(config.ANALYTICS_SNAPSHOTS) as f:
+        rows = list(_csv.DictReader(f))
+    latest = max(r["snapshot_date"] for r in rows if r.get("engaged_views"))
+    snap = [r for r in rows if r["snapshot_date"] == latest]
+    cut = (datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+           - datetime.timedelta(days=90))
+    *_, share = insights.engaged_share(snap, cut)
+    *_, rate = insights.subscriber_rate(snap, cut)
+    gained = insights.views_gained(_snapshot_metric_rows("views"))[-13:]
+    days = sum(d for _, _, d in gained)
+    per_90 = sum(g for _, g, _ in gained) * 90 / days if days else 0
+    with open(config.CHANNEL_LOG) as f:
+        subs = int([r for r in _csv.DictReader(f) if r["subscribers"]][-1]["subscribers"])
+    pct = f"{share:.0%}" if share is not None else "unknown (too few videos)"
+    print(f"Revenue routes: ~{per_90:,.0f} play starts per 90 days (over {days} days "
+          f"of snapshots), {subs} subscribers; from snapshot {latest}, {pct} engaged and "
+          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else "rate unknown")
+          + "\n")
+    fmt = lambda x: "-" if x is None else "met" if x <= 1 else f"~{x:,.0f}x short"
+    for d in insights.route_distances(per_90, share, subs, rate):
+        unit = "engaged views" if d["engaged_only"] else "views"
+        ours = f"{d['views_ours']:,.0f}" if d["views_ours"] is not None else "?"
+        follow = (f"; ~{d['views_to_follow'] / 1e6:,.1f}M views at our rate"
+                  if d["views_to_follow"] is not None else "")
+        print(f"  {d['route']}\n"
+              f"    views      {d['views_needed']:>11,} {unit} in {d['days']} days; ours ~{ours}"
+              f"  {fmt(d['views_short'])}\n"
+              f"    followers  {d['followers_needed']:>11,}; ours {d['followers_ours']}"
+              f"  {fmt(d['followers_short'])}{follow}")
+    print("\n  Bars and their sources: PLAN.md §1 (insights.ROUTES). A route pays only"
+          "\n  when both halves are met; the larger distance binds.")
+
+
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
@@ -586,6 +626,9 @@ def main():
     p.add_argument("--engaged-share", action="store_true",
                    help="share of views the Partner Program counts (engaged / all play "
                         "starts), all videos and the last 90 days; latest snapshot only")
+    p.add_argument("--routes", action="store_true",
+                   help="how far each revenue route (PLAN §1) is from its bar, on views and "
+                        "followers; latest snapshot only")
     p.add_argument("--placebo", action="store_true",
                    help="noise with nothing changed: consecutive batches (how a release "
                         "is judged) vs alternate days in the same weeks (PLAN C9)")
@@ -615,7 +658,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -687,6 +730,10 @@ def main():
                 verdict = f"{rate:.2f} (95%: {lo:.2f}-{hi:.2f})"
             print(f"  {label:32} n={n:<5} views {views:>8,}  gained {subs:>6,}  per 1,000 {verdict}")
         print("\n  A follower bar is this far away in views: followers needed / rate x 1,000.")
+        return
+
+    if args.routes:         # PLAN §1's distances, computed rather than copied
+        show_routes()
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
