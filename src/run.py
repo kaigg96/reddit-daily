@@ -270,7 +270,7 @@ def main():
         def display(s):
             dur = _probe_duration(s.audio_path)
             return max(dur, config.MIN_COMMENT_DISPLAY) if s.kind == "comment" else dur
-        return sum(display(s) for s in segs) + config.INTER_SEGMENT_GAP * (len(segs) - 1)
+        return sum(display(s) for s in segs) + sum(video.gap_after(s) for s in segs[:-1])
 
     outro_text = fit_to_length(segments, lambda segs: projected(segs) > config.MAX_TOTAL_SECONDS,
                                host, synth)

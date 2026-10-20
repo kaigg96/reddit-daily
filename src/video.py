@@ -112,6 +112,20 @@ def note_window(start, display_dur):
     return start + display_dur * config.NOTE_LEAD, display_dur * (1 - config.NOTE_LEAD) + config.INTER_SEGMENT_GAP
 
 
+def tag_window(start, audio_dur, display_dur):
+    """(start, duration) of a segment's tag (config.HOST_TAGS): it comes in on
+    the narration's last words and stays through the pause to the next
+    segment, so it is read while nothing else is being said (#77)."""
+    appear = start + max(0.0, audio_dur - config.TAG_LEAD_IN)
+    return appear, start + display_dur + config.TAG_PAUSE - appear
+
+
+def gap_after(seg):
+    """The silence after a segment: a longer pause when it carries a tag, so
+    the tag can be read. Shared with the duration guard (run.py)."""
+    return config.TAG_PAUSE if seg.note and config.HOST_TAGS else config.INTER_SEGMENT_GAP
+
+
 def overlay_text(text, start, duration, font_size, y, color="white", width=config.CAPTION_WIDTH):
     return (
         _text_clip(text, font_size, color=color, width=width)
@@ -230,12 +244,14 @@ def assemble(question, segments, rng):
         else:  # outro
             overlays += caption_clips(groups, t, font_size=100, y=700)
         if seg.note:
-            start, span = note_window(t, display_dur)
+            start, span = (tag_window(t, dur, display_dur) if config.HOST_TAGS
+                           else note_window(t, display_dur))
             overlays += note_clips(seg.note, start, span)
 
-        t += display_dur + config.INTER_SEGMENT_GAP
+        gap = gap_after(seg)
+        t += display_dur + gap
 
-    total = t - config.INTER_SEGMENT_GAP + 0.35  # small tail so the last word breathes
+    total = t - gap + 0.35  # small tail so the last word breathes
 
     # v7: the question is pinned from the first frame to the last. The opening
     # second is where the Shorts feed (~97% of views) decides, so it shows the

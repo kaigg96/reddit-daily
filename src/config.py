@@ -135,6 +135,13 @@ NOTE_BAND_OPACITY = 0.55  # the dark band behind a note; the clip still shows th
 # The host's setup and reactions as on-screen notes, never spoken; the
 # narrator speaks the vote, as today's CTA (#71).
 HOST_TEXT = True
+# The notes as tags of 1-3 words, each shown on its segment's last spoken
+# words and held through a longer pause, so it is read while nothing else is
+# said (owner, #77, 2026-10-19): a sentence shown mid-answer could not be read
+# while the answer was heard. False restores those notes (NOTE_LEAD).
+HOST_TAGS = True
+TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
+TAG_PAUSE = 0.5    # the gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech

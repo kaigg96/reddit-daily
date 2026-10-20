@@ -348,6 +348,26 @@ _TEXT_EDITS = [
 # (measured at 64px, 900px wide, 2026-10-11), so text lines get less slack.
 _TEXT_SLACK = 1.2
 
+# As tags (config.HOST_TAGS, #77): read at a glance as the narration ends, in
+# the pause before the next segment. Each pair must match the text ask
+# exactly; a test holds them to it.
+_TAG_EDITS = [
+    ('"setup": AT MOST 10 words, shown under the question:',
+     '"setup": a tag of 1 to 3 words, shown as the question finishes:'),
+    ("lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only.",
+     "lines of 1 to 3 words each, in order: a tag, never a sentence. Each is\n     shown as its answer finishes and reacts to that answer only."),
+    ("Every line must make sense read once, in two seconds.",
+     "Every tag must make sense at a glance, and the vote heard once."),
+]
+# The ask is 1-3 words; one over still reads at a glance. The vote is spoken,
+# so it keeps its text cap.
+_TAG_MAX_WORDS = {"setup": 4, "reaction": 4}
+# A run of letters this long is words the AI ran together: the 2026-10-19
+# local sample showed "Thatescalatedquickly." (20). Real words that long are
+# rare ("characteristically" is 18), and a line dropped for one loses only
+# its own note.
+_RUN_TOGETHER = re.compile(r"[^\W\d_]{19,}")
+
 
 def _commentary_ask(n):
     """The host's instructions, for a voiced host or a text-only one."""
@@ -355,10 +375,15 @@ def _commentary_ask(n):
     if config.HOST_TEXT:
         for old, new in _TEXT_EDITS:
             ask = ask.replace(old, new)
+        if config.HOST_TAGS:
+            for old, new in _TAG_EDITS:
+                ask = ask.replace(old, new)
     return ask.format(n=n)
 
 
 def _within_cap(line, kind):
+    if config.HOST_TEXT and config.HOST_TAGS and kind in _TAG_MAX_WORDS:
+        return len(line.split()) <= _TAG_MAX_WORDS[kind]
     if config.HOST_TEXT:
         return len(line.split()) <= _TEXT_CAPS[kind] * _TEXT_SLACK
     return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
@@ -366,8 +391,10 @@ def _within_cap(line, kind):
 
 def _usable(line, kind):
     """Within its cap, with a letter in it (a weak reply can echo the shape's
-    "...") and no emoji, which the note's font draws as an empty box."""
+    "...") and no emoji, which the note's font draws as an empty box, nor
+    words run together."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
+            and not _RUN_TOGETHER.search(line)
             and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line))
 
 

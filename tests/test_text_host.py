@@ -41,9 +41,12 @@ from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_u
 @pytest.fixture
 def text_host(monkeypatch):
     """The mechanics below count nothing, so they reuse the two-answer
-    fixtures; what ships, three answers, is pinned at the end of this file."""
+    fixtures; what ships, three answers, is pinned at the end of this file.
+    They are the sentence-long notes' (HOST_TAGS off); the tags have their own
+    section below."""
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
     monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
 
 
@@ -135,7 +138,8 @@ def _text_metadata(monkeypatch, **lines):
     from tests.test_commentary import _metadata
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
-    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)   # as text_host
+    monkeypatch.setattr(config, "HOST_TAGS", False)        # as text_host
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     return _metadata(monkeypatch, json.dumps({**HOST, **lines}))[0].commentary
 
 
@@ -245,6 +249,7 @@ def test_the_call_asks_for_a_reaction_to_each_of_the_three(monkeypatch):
     import json
     from tests.test_commentary import _metadata
     monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)   # THREE are sentence-long notes
     meta, prompt = _metadata(monkeypatch, json.dumps({**HOST, "reactions": THREE}))
     assert "exactly 3 lines" in prompt and '"reactions": ["...", "...", "..."]' in prompt
     assert all(f'{i}. "{a}"' in prompt for i, a in enumerate(POST_ANSWERS, 1))
@@ -266,3 +271,88 @@ def test_the_free_sample_has_a_note_for_every_answer_it_reads():
     host = sample.METADATA.commentary
     assert len(host.reactions) == len(sample.POST.comments[:config.COMMENTARY_ANSWERS])
     assert all(llm._usable(r, "reaction") for r in host.reactions)
+
+
+# --- tags (HOST_TAGS, #77, 2026-10-19) ----------------------------------------
+# The owner, on a narrated render: a sentence shown mid-answer cannot be read
+# while the answer is heard. So each note is a tag of 1-3 words, shown on its
+# segment's last spoken words and held through a longer pause.
+
+TAGS = {"setup": "Harder than it looks.", "reactions": ["Smiling is cardio.", "Boredom, then chaos."]}
+
+
+@pytest.fixture
+def tag_host(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
+
+
+def test_the_tags_ship():
+    assert config.HOST_TEXT and config.HOST_TAGS
+
+
+def test_every_tag_edit_matches_the_text_ask(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    ask = llm._commentary_ask(2)
+    for old, _ in llm._TAG_EDITS:
+        assert old.format(n=2) in ask, old
+
+
+def test_a_tag_host_is_asked_for_tags(tag_host):
+    ask = llm._commentary_ask(2)
+    assert ask.count("1 to 3 words") == 2 and "never a sentence" in ask and "at a glance" in ask
+    assert "AT MOST 10 words" not in ask and "two seconds" not in ask
+    assert "never spoken" in ask and "Never\n     repeat the answer's own words" in ask
+    assert "exactly 2 lines" in ask
+
+
+def test_a_tag_is_four_words_at_most_and_the_vote_keeps_its_cap(tag_host):
+    assert llm._within_cap("Fair point, honestly, yes.", "reaction")
+    assert not llm._within_cap("Fair point, honestly, yes, really.", "reaction")
+    assert not llm._within_cap("Everyone thinks they could do these.", "setup")
+    assert llm._within_cap(" ".join(["word"] * 18), "cta")
+
+
+@pytest.mark.parametrize("line, ok", [("Thatescalatedquickly.", False),
+                                      ("Characteristically bold.", True),
+                                      ("Bank statement? Checkmate.", True)])
+def test_words_run_together_drop(tag_host, line, ok):
+    assert llm._usable(line, "reaction") is ok
+
+
+def test_tags_survive_the_metadata_call_and_a_sentence_drops_alone(tag_host, monkeypatch):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS}))
+    assert meta.commentary == (TAGS["setup"], TAGS["reactions"], HOST["cta"])
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS,
+                                                 "reactions": [TAGS["reactions"][0], HOST["reactions"][1]]}))
+    assert meta.commentary == (TAGS["setup"], [TAGS["reactions"][0], ""], HOST["cta"])
+
+
+def test_a_tag_comes_in_on_the_last_words_and_holds_through_the_pause(tag_host):
+    start, span = video.tag_window(10.0, 3.0, 3.0)
+    assert abs(start - (13.0 - config.TAG_LEAD_IN)) < 1e-9
+    assert abs((start + span) - (13.0 + config.TAG_PAUSE)) < 1e-9
+    # A short answer holds on screen past its narration; its tag still comes
+    # in on the last words and stays until the next segment starts.
+    start, span = video.tag_window(10.0, 1.2, config.MIN_COMMENT_DISPLAY)
+    assert abs(start - (11.2 - config.TAG_LEAD_IN)) < 1e-9
+    assert abs((start + span) - (10.0 + config.MIN_COMMENT_DISPLAY + config.TAG_PAUSE)) < 1e-9
+
+
+def test_only_a_segment_with_a_tag_gets_the_longer_pause(tag_host, monkeypatch):
+    tagged = video.Segment("comment", "x", "", [], note="Oof.")
+    plain = video.Segment("comment", "x", "", [])
+    assert video.gap_after(tagged) == config.TAG_PAUSE > config.INTER_SEGMENT_GAP
+    assert video.gap_after(plain) == config.INTER_SEGMENT_GAP
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert video.gap_after(tagged) == config.INTER_SEGMENT_GAP
+
+
+def test_the_duration_guard_counts_the_pauses_the_video_will_have():
+    import inspect
+    assert "video.gap_after(s) for s in segs[:-1]" in inspect.getsource(run.main)

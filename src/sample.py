@@ -37,10 +37,11 @@ METADATA = MetadataResult(
     source="sample",
     # Used only while config.COMMENTARY is on (bet 1, #70).
     commentary=Commentary(
-        setup="Everyone thinks they could do these. Let's hear from people who did.",
-        reactions=["Ten hours of smiling sounds harder than the carrying.",
-                   "Boredom, then thirty seconds of everything. That's a lot to hold.",
-                   "Twenty tiny bosses and no breaks. Respect."],
+        # Tags (config.HOST_TAGS, #77), as the ask now writes them.
+        setup="Harder than it looks.",
+        reactions=["Smiling is cardio.",
+                   "Boredom, then chaos.",
+                   "Twenty tiny bosses."],
         verdict="My hand goes up for lifeguarding. Which one gets your vote?",
     ),
 )
