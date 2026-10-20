@@ -2160,6 +2160,44 @@ def subscriber_rate(snapshot_rows, published_since=None):
     return n, views, subs, subs / views * 1000
 
 
+# Each revenue route's bar, as PLAN §1 sources and dates it: (route, views
+# needed in its window, window in days, engaged views only, followers needed,
+# on YouTube). The distances are computed by `route_distances`, so PLAN's
+# figures come from `report.py --routes` rather than being copied by hand.
+ROUTES = (
+    ("Partner Program (Shorts)", 10_000_000, 90, True, 1_000, True),
+    ("Partner Program, applying from 2027-02-01", 20_000_000, 90, True, 1_000, True),
+    ("500-subscriber tier (fan funding, Shopping)", 3_000_000, 90, True, 500, True),
+    ("TikTok Creator Rewards", 100_000, 30, False, 10_000, False),
+)
+
+
+def route_distances(play_starts_per_90, engaged_share, subscribers, subs_per_1000,
+                    routes=ROUTES):
+    """How many times short of each route's bar we are, on each half.
+
+    Views: the bar against our rate over its window, in engaged views where
+    the route counts only those. Followers: the bar against today's count
+    (none on a platform we are not on), and the views it would take to gain
+    the rest at our subscriber rate. A figure is None when its input is
+    (`engaged_share` under its minimum, say). One dict per route."""
+    out = []
+    for name, need, days, engaged_only, followers, on_youtube in routes:
+        ours = play_starts_per_90 * days / 90
+        if engaged_only:
+            ours = None if engaged_share is None else ours * engaged_share
+        have = subscribers if on_youtube else 0
+        gap = max(followers - have, 0)
+        out.append({
+            "route": name, "views_needed": need, "days": days, "engaged_only": engaged_only,
+            "views_ours": ours, "views_short": need / ours if ours else None,
+            "followers_needed": followers, "followers_ours": have,
+            "followers_short": followers / have if have else None,
+            "views_to_follow": gap / subs_per_1000 * 1000 if subs_per_1000 else None,
+        })
+    return out
+
+
 def poisson_interval(k, conf=0.95):
     """Exact (Garwood) interval for a Poisson count `k`: the range of true
     means that could have produced it. Subscriber gains are counts in the
