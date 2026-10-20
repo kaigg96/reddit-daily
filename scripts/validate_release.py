@@ -163,9 +163,11 @@ def check_metadata():
     # Its log too: which host line ran long, and by how much, is printed
     # there and not otherwise in this file, which is what a shift reads.
     log = io.StringIO()
-    with contextlib.redirect_stdout(log):
-        meta = llm.get_metadata(q, comments, style="A", caps=True)
-    print(log.getvalue(), end="")
+    try:
+        with contextlib.redirect_stdout(log):
+            meta = llm.get_metadata(q, comments, style="A", caps=True)
+    finally:
+        print(log.getvalue(), end="")
     dropped = [ln for ln in log.getvalue().splitlines() if ln.startswith("Commentary: past")]
 
     if meta.source == "error":
@@ -225,8 +227,8 @@ def check_metadata():
                 shown(f"reaction {i}", line)
             if not host.verdict:
                 shown("vote", "", "the usual closing line ships")
-            for line in dropped:
-                note(f"- ⚠️ {line}")
+        for line in dropped:
+            note(f"- ⚠️ {line}")
     note("")
     return ok
 
