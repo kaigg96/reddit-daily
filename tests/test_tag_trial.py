@@ -28,3 +28,21 @@ def test_it_refuses_before_spending(no_calls, argv):
 
 def test_every_post_has_three_answers():
     assert len(tt.POSTS) == 9 and all(len(a) == 3 for _, a in tt.POSTS)
+
+
+def test_the_blurt_setup_reaches_the_prompt(monkeypatch):
+    from src import config
+    monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    for name in ("FALLBACK_MODEL", "generate_retrying"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    shipped = llm._commentary_ask(3)
+    tt.setup_model("sample", setup="blurt")
+    ask = llm._commentary_ask(3)
+    assert "blurt out the moment a friend asked you" in ask
+    assert "blurt out the moment" not in shipped
+    # Only the setup changes: every reaction rule is as shipped.
+    assert ask.split('"reactions":', 1)[1] == shipped.split('"reactions":', 1)[1]

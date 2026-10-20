@@ -3,6 +3,8 @@
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9
     venv/bin/python scripts/tag_trial.py --model sample        # all nine
     venv/bin/python scripts/tag_trial.py --model groq
+    venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
+    venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
 model reacted to 7 of 9 answers where the sample model and Groq mostly
@@ -66,6 +68,15 @@ POSTS = [
 ]
 UPLOAD_CAP = 3
 SAMPLE_CAP = len(POSTS)
+# The setup's wording on trial (PRD §4, 2026-10-20 afternoon): on both Groq
+# models, blind-scored, it reacted on 9 of 16 setups against 0 of 17 for the
+# shipped one, but 4 of gpt-oss's 5 opened "Sounds ...". Unread on Gemini.
+SETUP_BLURT = (
+    '"setup": a tag of 1 to 3 words, shown as the question finishes: the words\n'
+    '     you would blurt out the moment a friend asked you this question, before\n'
+    '     any answer. React to the question; never name or title it: "Brutal\n'
+    '     truth" and "The mystery" are titles, not reactions. It must make sense\n'
+    '     to someone who has only just read the question:')
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -81,9 +92,20 @@ def pick(spec):
     return chosen
 
 
-def setup_model(model):
-    """Point the metadata call at `model`, no second model; one try on Gemini."""
+def setup_model(model, setup="shipped", groq_model=None):
+    """Point the metadata call at `model`, no second model; one try on Gemini.
+    `setup="blurt"` swaps in SETUP_BLURT for the shipped setup wording.
+    `groq_model` picks Groq's model; Qwen runs with reasoning off, as its free
+    tier allows 1,000 output tokens a minute and it reasons ~2,000 a call."""
     from src import config, llm
+    if setup == "blurt":
+        llm._TAG_EDITS = [(llm._TAG_EDITS[0][0], SETUP_BLURT)] + llm._TAG_EDITS[1:]
+    if groq_model:
+        config.GROQ_MODEL = groq_model
+    if model == "groq" and config.GROQ_MODEL.startswith("qwen"):
+        post = llm.requests.post
+        llm.requests.post = lambda url, json=None, **kw: post(
+            url, json=dict(json or {}, reasoning_effort="none"), **kw)
     llm.FALLBACK_MODEL = None
     config.GROQ_FALLBACK = False
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
@@ -100,12 +122,16 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", choices=["upload", "sample", "groq"], required=True)
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
+    ap.add_argument("--setup", choices=["shipped", "blurt"], default="shipped",
+                    help="the setup's wording: as shipped, or SETUP_BLURT")
+    ap.add_argument("--groq-model", default=None,
+                    help="with --model groq: e.g. qwen/qwen3.8-27b")
     args = ap.parse_args(argv)
     chosen = pick(args.posts)
     cap = {"upload": UPLOAD_CAP, "sample": SAMPLE_CAP}.get(args.model)
     if cap is not None and len(chosen) > cap:
         raise SystemExit(f"--model {args.model} reads at most {cap} posts a run")
-    llm = setup_model(args.model)
+    llm = setup_model(args.model, args.setup, args.groq_model)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
             time.sleep(GROQ_SPACING)
