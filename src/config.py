@@ -33,6 +33,14 @@ SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
 SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
 DRY_RUN = SAMPLE or SILENT_NARRATION or \
     os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
+# the upload model (llm.MODEL): one request from the allowance uploads share,
+# so only for a render the owner judges (#77). The screen stays on the sample
+# model. On three posts (2026-10-20) the sample model's tags were labels where
+# the upload model's reacted (1 of 9 reactions against 7), so a render that
+# judges the tags must show what an upload would. Uploads use MODEL already.
+METADATA_ON_UPLOAD_MODEL = os.environ.get(
+    "METADATA_ON_UPLOAD_MODEL", "").lower() in ("1", "true", "yes")
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30

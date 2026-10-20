@@ -497,9 +497,12 @@ def _reply_schema(reactions=None):
 
 
 def _commentary_shape(n):
-    """The reply's shape, with one reaction slot per answer read."""
+    """The reply's shape, with one reaction slot per answer read. Kept to
+    Python 3.10's f-strings: the owner's machine, the only one that narrates
+    a sample, runs 3.10 (TECH_DEBT, 2026-10-19)."""
+    slots = ", ".join(['"..."'] * n)
     return ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
-            f'"reactions": [{", ".join(['"..."'] * n)}], "cta": "..."}}')
+            f'"reactions": [{slots}], "cta": "..."}}')
 
 
 def get_metadata(reddit_title, comments, style="A", caps=None):
@@ -553,12 +556,13 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
 """
     route, prior = provider(), ""
     schema = _reply_schema(len(comments) if commentary else None)
+    model = MODEL if config.METADATA_ON_UPLOAD_MODEL else None
     try:
-        raw = generate_retrying(prompt, schema=schema)
+        raw = generate_retrying(prompt, schema=schema, model=model)
     except Exception as e:
         prior = _failure_kind(e)
-        # Gemini only, never in a dry run (already on FALLBACK_MODEL), as for
-        # the screen.
+        # Gemini only, never in a dry run (on FALLBACK_MODEL already, or on
+        # MODEL by choice for a render), as for the screen.
         if route == "gemini" and not config.DRY_RUN:
             raw, route, prior = _rescue_metadata(prompt, prior, schema=schema)
         else:

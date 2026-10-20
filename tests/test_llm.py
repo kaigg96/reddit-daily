@@ -419,6 +419,24 @@ def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
 
 
+@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-2.5-flash")])
+def test_a_dry_run_can_write_its_tags_on_the_upload_model(monkeypatch, switch, model):
+    """#77: the owner judges tags in a narrated local render, a dry run. The
+    sample model's tags were labels where the upload model's reacted
+    (2026-10-20), so the switch puts the metadata call alone on MODEL."""
+    seen = []
+
+    def gen(prompt, **kw):
+        seen.append(kw.get("model"))
+        return '{"title": "t", "keywords": ["a"], "cta": "c"}'
+
+    monkeypatch.setattr(llm.config, "DRY_RUN", True)
+    monkeypatch.setattr(llm.config, "METADATA_ON_UPLOAD_MODEL", switch)
+    monkeypatch.setattr(llm, "_generate", gen)
+    llm.get_metadata("Q?", ["a", "b", "c"])
+    assert seen == [model]
+
+
 def test_title_styles_run_four_b_to_one_a_to_one_c():
     """§0 #10: any six consecutive days carry B:A:C = 4:1:1, A and C the control.
     Keyed on the date, so both daily uploads share a style and each day splits
