@@ -172,7 +172,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 - **The owner's machine cannot run bet 1's build, and only it can narrate a
   sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
   `src/llm.py` on `integration/preview` uses an f-string with nested quotes
-  (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there.
+  (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there
+  (that f-string rewritten for 3.10 on `product/host-tags`, 2026-10-20).
   That night's renders used a throwaway 3.12 venv. Its git (2.37) also fails
   `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38). It
   matters because CI samples are silent (branch code never holds the Polly
