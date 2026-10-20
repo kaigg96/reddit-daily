@@ -65,16 +65,16 @@ and more useful than a confident guess.
 
     Worked (% of the shift): data 30 · product 25 · gm 15 · monetization 15 · legal 5 · reliability 5 · security 5
 
-**Summary:** Nothing reached viewers. The one step that would, trying the host's new opening wording on the model uploads use, needs AI requests that tonight would come out of tomorrow morning's upload. Instead, two fixes make sure bet 1 is judged on the right viewers. The plan's distance to each revenue route is now computed from our data: the Partner Program is about 720 times short, not the 760–880 the plan said.
+**Summary:** Nothing reached viewers: the step that would needs AI requests that tomorrow morning's upload shares. Instead, bet 1 will now be judged on the right viewers, and the plan's distance to revenue is computed from our data (the Partner Program is about 720 times short, not 760–880).
 
 ### Toward revenue
-- **Nothing directly**, for the reason above. That trial waits for the 07:00 UTC reset.
+- **Nothing directly.** The upload-model trial waits for the 07:00 UTC reset.
 - **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. It shows in the share of plays that become real views, which we already track. The rule now says so, written before any of bet 1's uploads exist.
 - **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day; now an error that outlasts them costs only its own upload. Reviewed fresh (one missing test, added); merged.
 - **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first. Reviewed fresh; merged.
 
 ### Done
-- **Product (a bet):** a second wording for the host's opening tag names the "Sounds…" sameness and asks for a reaction only that question could get. Tried on both free models, nine posts each, and scored blind against the earlier wording in one mixed sheet. It reacted on 7 of 16 against 8 of 16, and made no sense on 5 against 1. It stopped "Sounds…" but repeated other openers. Not kept. The earlier wording stays the one to try on the upload model; on one draw it took a side on the privacy post ("That's a trap").
+- **Product (a bet):** a second wording for the host's opening tag, naming the "Sounds…" sameness, was tried on both free models and scored blind against the earlier one. It reacted on 7 of 16 against 8, made no sense more often (5 against 1), and repeated other openers. Not kept. The earlier wording stays the one for the upload model, though it once took a side on the privacy post.
 - **General management:** fewer than three items were ready, and both need the AI allowance. A fresh agent proposed eight; two more ranked them in opposite orders. The wording trial came first both ways. The two retention items came second and third both ways. The routes command came fourth and fifth, and was done because time remained. **Dropped:**
   - proposing to make the 883 old reading videos private now rather than with the rebrand: no new evidence since you tied the two together, and it spends your attention while every route is hundreds of times short.
   - counting replies to our automatic comment: 7 viewer comments in all, so the answer is already known.
@@ -84,11 +84,13 @@ and more useful than a confident guess.
   - **Groq's terms** (June 2026) are written for businesses and ban training on what we send, so nothing blocks the planned move there.
   - **YouTube's AI-content label** covers realistic depictions of real people, events or scenes. A stock narrator reading text over stock footage is none of these, so it stays unset.
 
-  Below the bar: Reddit's guidance that deleted posts and comments must stop showing. Ours stay in the videos, but your "not yet" on Reddit's terms already covers it. Also below: a test of skipping weak topics, which is not due until bet 1's read; checking the name "Show of Hands" before the rebrand is due; and the content screen's one skip.
+  Below the bar: Reddit's guidance that deleted posts and comments must stop showing. Ours stay in the videos, but your "not yet" on Reddit's terms already covers it. Also below: a weak-topic test (not due until bet 1's read), the name check (before the rebrand is due), and the content screen's one skip.
 
-  Mostly fixing; the wording trial was a bet.
+  With time left, the one ready item that could move tonight was the move to Groq, which waits on its host reactions: they come out as labels. A wording that rules out the label's shape (never an adjective and a noun) was tried the same way. Groq's main model reacted on 7 of 27 against 2, possibly chance, and labels were still most tags. Not kept: the move stays blocked on this.
+
+  Mostly fixing; the two wording trials were bets.
 - **Security:** the standing check is clean. No secrets are in the project, the only workflow change was the one you approved tonight, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
-- AI use: no Gemini; 36 Groq requests (free).
+- AI use: no Gemini; 72 Groq requests (free).
 
 ### Blocked
 - **For you, unchanged, in order:** #77 (nothing until a render is worth watching); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
