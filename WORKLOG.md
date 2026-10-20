@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-20 (16:35) — A new wording made the host's opening tag react on the free models, from none of 17 to 9 of 16; a failed AI request now says whether the day's allowance is gone
 
-    Worked (% of the shift): product 30 · reliability 25 · gm 20 · editorial 10 · engineering 5 · legal 5 · security 5
+    Worked (% of the shift): product 30 · reliability 25 · gm 15 · editorial 10 · engineering 5 · monetization 5 · legal 5 · security 5
 
 **Summary:** The host's opening tag, which nearly every viewer sees, has come out as a title on every model tried. A new wording made it react on about half of the free models' tries, so tomorrow's few requests on the upload model can go straight to it. Separately, failed AI requests now say whether the day's allowance is spent, and that change is live. Nothing reached viewers.
 
@@ -85,6 +85,7 @@ and more useful than a confident guess.
   A second round of six, from the functions no recent shift has worked (distribution, finance, money, audience), put the same item first both ways. Four a day's rule said only to revert if "the 4-week view total falls". That names no comparison, and it contradicts your standing rule that views never trigger a revert, since they swing 27–50% on noise. Before any data, it now reads the first four full weeks against the four before, and a fall is a finding for the review, not a revert. Second both ways: one command printing how far each revenue route is, replacing hand sums dated 5 October; for a later shift.
 
   Mostly fixing; the two tag trials are bets.
+- **Monetization:** our plan assumes the Partner Program counts only "engaged" Shorts views. YouTube's eligibility page, as served to our runner today, says "qualified Shorts views" from public Shorts in the Shorts feed. It never says engaged, and it does not list the 500-subscriber tier. So that is still unconfirmed, but it changes no decision: every route stays hundreds of times short.
 - **Engineering:** the trial tool now takes the new wording and a choice of Groq model, on bet 1's branch. A fresh review found no defect in that, but it did find an older hole: a Groq trial run without Groq's key would quietly spend up to 18 of the day's 20 upload-model requests. It now refuses before any request. All tests pass, and the branch still merges cleanly.
 - **Reliability (fixing):** if the AI's content screen ever replied without its verdict, or with a blank one, the post went through as checked, skipping even the keyword check. It now falls to the keyword check, which spends no request. Two reviews had left this open since 9 October. A fresh review found no defects, all tests pass, and it is merged.
 - **Security:** the standing check is clean. No secrets are in the project, no workflows changed, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
