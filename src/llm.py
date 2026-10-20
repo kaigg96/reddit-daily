@@ -204,8 +204,9 @@ _STYLE_GUIDANCE = {
 # -- one is "could not check", the other is "do not merge". Defaulted so the
 # upload path, which only ever reads the three content fields, is untouched.
 #
-# `failure` says WHY the fields came back empty: `http_429` (the shared daily
-# cap), another `http_<status>`, `timeout`, `no_json`, `bad_json`. Blank when
+# `failure` says WHY the fields came back empty: `http_429` (a cap; `_day` or
+# `_minute` when the body names which), another `http_<status>`, `timeout`,
+# `no_json`, `bad_json`. Blank when
 # Gemini answered with JSON. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
@@ -218,10 +219,32 @@ def _failure_kind(exc):
     HTTPError's message embeds the keyed URL."""
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.HTTPError) and response is not None:
-        return f"http_{response.status_code}"
+        kind = f"http_{response.status_code}"
+        return kind + _quota_window(response) if response.status_code == 429 else kind
     if isinstance(exc, requests.Timeout):
         return "timeout"
     return type(exc).__name__
+
+
+def _quota_window(response):
+    """"_day" or "_minute": which cap a 429's body names, "" when it names none.
+
+    A bare `http_429` could not say whether the day's 20 requests were spent
+    (the next upload loses its title) or a burst hit a per-minute cap (a wait
+    would have cleared it). The 2026-10-20 13:34 release check 429'd on its
+    fifth screen case after a shift's trials, and nothing recorded which.
+    Gemini's body names its quotaId (`GenerateRequestsPerDayPerProjectPerModel`),
+    Groq's message its window ("tokens per minute"). Only the label is kept,
+    never the body. A day cap wins when both are named: it is the one that
+    lasts."""
+    try:
+        body = response.text
+    except Exception:
+        return ""
+    flat = re.sub(r"[\s_-]", "", body).lower() if isinstance(body, str) else ""
+    if "perday" in flat:
+        return "_day"
+    return "_minute" if "perminute" in flat else ""
 
 
 _CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
