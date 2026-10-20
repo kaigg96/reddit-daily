@@ -156,15 +156,19 @@ Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
 - **A shift ended after 2 minutes with no handover (run 39338110057,
-  2026-10-19 22:54; the first in 40+ runs).** 32 turns, no commits, no error;
-  same Claude Code (2.1.280) and action pin as the passing runs before it, and
-  the budget gate returns GO in CI. The transcript is hidden (public logs), so
-  the cause is unknown; likeliest, it oriented, found every queue item waiting
-  on the owner (#77, #80, #59) and ended without §10's entry. The handover
-  check caught it as designed. **Closes when** ten more shifts pass; on a
-  repeat, propose (patch, owner) printing the agent's final message when that
-  check fails, which Actions masks for secrets.
-
+  2026-10-19; the first in 40+ runs).** 32 turns, no commits, no error; same
+  Claude Code (2.1.280) and action as the passing runs, and the budget gate
+  returns GO in CI. Cause unknown: the transcript was hidden. Likeliest, it
+  found every queue item waiting on the owner and ended without §10's entry.
+  **Visibility (owner, 2026-10-20):** `scripts/shift_trace.py` writes how a
+  shift ended (with an error result's reasons), its last message and its tool
+  calls, redacted, to `.github/last-shift-trace.md`; the emailed report now says
+  when a shift wrote no handover, with the trace's head. The workflow step that
+  runs it is the owner's to approve (its escalation, 2026-10-20). Not new, from
+  its review: a WORKLOG commit someone else pushes during a shift counts as that
+  shift's handover, in the workflow's check and the report alike. **Closes
+  when** the step is live and ten more shifts pass, or a repeat is root-caused
+  from its trace.
 - **The owner's machine cannot run bet 1's build, and only it can narrate a
   sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
   `src/llm.py` on `integration/preview` uses an f-string with nested quotes
