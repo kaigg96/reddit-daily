@@ -248,7 +248,7 @@ def test_a_malformed_unsafe_list_never_raises(monkeypatch, unsafe, dropped):
 _MISSING = object()
 
 
-@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3, _MISSING])
+@pytest.mark.parametrize("risk", [["sexual_suggestive"], {"x": 1}, None, 3, "", "  ", _MISSING])
 def test_a_verdict_that_is_not_a_string_is_a_failure_not_a_pass(monkeypatch, risk):
     reply = {"unsafe_comments": [], "topic": "other"}
     if risk is not _MISSING:   # a reply with no verdict at all is no pass either
