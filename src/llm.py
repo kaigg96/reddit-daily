@@ -410,7 +410,10 @@ def _commentary_ask(n):
 def _within_cap(line, kind):
     if config.HOST_TEXT and config.HOST_TAGS and kind in _TAG_MAX_WORDS:
         return len(line.split()) <= _TAG_MAX_WORDS[kind]
-    if config.HOST_TEXT:
+    # The vote is spoken, never a note, so it keeps a spoken line's slack:
+    # the notes' tighter one (screen wrapping) dropped it on 4 of 12 trial
+    # posts (2026-10-20), and #15's dose rule needs every line on 15 of 20.
+    if config.HOST_TEXT and kind != "cta":
         return len(line.split()) <= _TEXT_CAPS[kind] * _TEXT_SLACK
     return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
 
@@ -445,9 +448,8 @@ def _clean_commentary(data, n):
     if (_usable(setup, "setup") and _usable(verdict, "cta")
             and all(_usable(r, "reaction") for r in reactions)):
         return Commentary(setup, reactions, verdict)
-    # Which line, and how long: the vote, which is spoken, is held to the
-    # notes' cap, and ran past it on 4 of 12 trial posts (2026-10-20). Its
-    # word counts say whether a spoken line's slack would keep it.
+    # Which line, and how long: the vote ran past the notes' cap on 4 of 12
+    # trial posts (2026-10-20) and nothing said by how much.
     bad = [f"{name} ({len(line.split())} words)" for name, line, kind in
            [("setup", setup, "setup"), ("vote", verdict, "cta")]
            + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]

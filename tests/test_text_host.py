@@ -95,6 +95,16 @@ def test_a_voiced_host_keeps_its_ask(monkeypatch):
     assert llm._commentary_ask(2) == llm._COMMENTARY_ASK.format(n=2)
 
 
+@pytest.mark.parametrize("tags", [False, True])
+def test_the_spoken_vote_keeps_a_spoken_lines_cap(monkeypatch, tags):
+    """The vote is spoken, never a note: the notes' slack dropped it on 4 of
+    12 trial posts (2026-10-20)."""
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", tags)
+    assert llm._within_cap(" ".join(["word"] * 22), "cta")
+    assert not llm._within_cap(" ".join(["word"] * 23), "cta")
+
+
 def test_a_text_reaction_has_a_tighter_cap(text_host):
     assert not llm._within_cap(" ".join(["word"] * 13), "reaction")   # four lines
     assert llm._within_cap(" ".join(["word"] * 12), "reaction")
@@ -151,7 +161,7 @@ def test_a_long_reaction_drops_only_its_own_note(monkeypatch):
 
 
 def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
-    host = _text_metadata(monkeypatch, cta="word " * 19)
+    host = _text_metadata(monkeypatch, cta="word " * 23)
     assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
     assert run.closing_line(None, host) is None          # so today's line closes
     segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
@@ -162,11 +172,11 @@ def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
 
 
 def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
-    """The vote is spoken but held to the notes' cap: its word count is what
-    says whether a spoken line's slack would keep it (2026-10-20)."""
-    _text_metadata(monkeypatch, cta="word " * 19, reactions=[HOST["reactions"][0], "word " * 13])
+    """Which line ran long, and by how much: the vote's drops were counted,
+    never measured (2026-10-20)."""
+    _text_metadata(monkeypatch, cta="word " * 23, reactions=[HOST["reactions"][0], "word " * 13])
     out = capsys.readouterr().out
-    assert "vote (19 words), reaction 2 (13 words)" in out
+    assert "vote (23 words), reaction 2 (13 words)" in out
     assert "setup (" not in out and "reaction 1 (" not in out
 
 
@@ -201,7 +211,7 @@ def test_a_long_setup_drops_alone(monkeypatch):
 
 
 def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
-    host = _text_metadata(monkeypatch, cta="word " * 19)
+    host = _text_metadata(monkeypatch, cta="word " * 23)
     segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
     calls = []
     outro = run.fit_to_length(segs, _too_long_until(3), host,
