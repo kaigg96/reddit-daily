@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-20 (22:18) — Bet 1's planned check of where viewers leave would have missed the opening, and is fixed before any data; the distance to revenue is now computed, and had drifted
+
+    Worked (% of the shift): data 35 · product 25 · gm 15 · monetization 15 · reliability 5 · security 5
+
+**Summary:** Nothing reached viewers. The one step that would, trying the host's new opening wording on the model uploads use, needs AI requests that tonight would come out of tomorrow morning's upload. Instead, two fixes make sure bet 1 is judged on the right viewers. The plan's distance to each revenue route is now computed from our data: the Partner Program is about 720 times short, not the 760–880 the plan said.
+
+### Toward revenue
+- **Nothing directly**, for the reason above. That trial waits for the 07:00 UTC reset.
+- **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. It shows in the share of plays that become real views, which we already track. The rule now says so, written before any of bet 1's uploads exist.
+- **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day. Now an error that outlasts them costs only its own upload, and three in a row still stop the read. A fresh review found one missing test, now added. All tests pass, and it is merged.
+- **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first.
+
+### Done
+- **Product (a bet):** a second wording for the host's opening tag names the "Sounds…" sameness and asks for a reaction only that question could get. Tried on both free models, nine posts each, and scored blind against the earlier wording in one mixed sheet. It reacted on 7 of 16 against 8 of 16, and made no sense on 5 against 1. It stopped "Sounds…" but repeated other openers. Not kept. The earlier wording stays the one to try on the upload model; on one draw it took a side on the privacy post ("That's a trap").
+- **General management:** fewer than three items were ready, and both need the AI allowance. A fresh agent proposed eight; two more ranked them in opposite orders. The wording trial came first both ways. The two retention items came second and third both ways. The routes command came fourth and fifth, and was done because time remained. **Dropped:**
+  - proposing to make the 883 old reading videos private now rather than with the rebrand: no new evidence since you tied the two together, and it spends your attention while every route is hundreds of times short.
+  - counting replies to our automatic comment: 7 viewer comments in all, so the answer is already known.
+  - YouTube's definition of a qualifying view: read last shift, and it changes no decision.
+
+  Mostly fixing; the wording trial was a bet.
+- **Security:** the standing check is clean. No secrets are in the project, the only workflow change was the one you approved tonight, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
+- AI use: no Gemini; 36 Groq requests (free).
+
+### Blocked
+- **For you, unchanged, in order:** #77 (nothing until a render is worth watching); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- After 07:00 UTC and away from uploads: the host's opening tag on the upload model, with the new wording against today's, three posts. Watch for repeated openings and for taking a side on politics.
+- The 26 October weekly read is the first with the per-upload skip. Check how many uploads it marks as failed.
+
+### Better?
+- **Than last shift:** Slightly. Bet 1's verdict can no longer be misread at the opening, and the distance to revenue is measured rather than remembered. Nothing changed for viewers.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-20 (16:35) — A new wording made the host's opening tag react on the free models, from none of 17 to 9 of 16; a failed AI request now says whether the day's allowance is gone
 
     Worked (% of the shift): product 30 · reliability 25 · gm 15 · editorial 10 · engineering 5 · monetization 5 · legal 5 · security 5
@@ -105,37 +140,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: the weakest, most-seen part of bet 1 has a lead, and a failure that can cost an upload its title is now visible. Nothing changed what viewers see.
 - **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-20 (09:25) — The host's weak reactions came mostly from the cheaper test model; your next render can show the real ones and buy its narration once
-
-    Worked (% of the shift): product 45 · engineering 25 · gm 10 · legal 10 · security 5 · reliability 5
-
-**Summary:** The reactions you judged weak in last night's renders were written by the cheaper model that test renders use. On the same posts, the model real uploads use gave real reactions for 7 of 9 answers, against 1 of 9. Your next narrated render can now use the upload model, runs on your machine's Python, and pays for each narrated line only once. Nothing reached viewers.
-
-### Toward revenue
-- **Bet 1's tags are closer than they looked.** The main bet's tags were judged on the wrong model. On three posts the upload model reacted ("Ouch", "No thanks"); the test model labelled ("Liquid gold", "Free labor"). That shows direction, not a rate. Posted on #77; nothing there waits on you.
-- **Your next render is cheaper and shows what an upload would.** One setting writes its tags on the upload model (one request); another reuses narration already bought, so re-rendering to adjust timing does not pay again. The build now loads on your machine's Python 3.10.
-- **What to fix next is clear.** The host's opening tag, shown as the question ends, is seen by nearly every viewer. The first reaction is seen by about half and the third by under a fifth (current version, 14 videos at 7 days). The upload model's opening tag was a title, not a reaction, on 2 of 3 posts ("Brutal truth"), so that comes first.
-- **The host's spoken vote no longer gets dropped for running a few words long.** It was held to the on-screen notes' limit though it is spoken, and was dropped on 4 of 12 trial posts, risking bet 1's rule that every host line shows on 15 of its first 20 uploads. It now has a spoken line's limit (22 words).
-
-### Done
-- **Legal:** moving every AI call to Groq (whose terms forbid training on what we send) would turn the tags back into labels (about 2 of 27 reactions), so that move must now pass the tag bar too. A rule that lifted Groq to 14 of 24 made every tag open the same few ways, the sameness the spam policy names; not kept.
-- **Product:** a reworded prompt did not help on the test model (10 of 27 reactions against 9 of 27); not kept. Reddit blocks this runner, so trials used our real recent questions with answers written in Reddit's style. A small trial tool reruns the same nine posts on any of the three models, capped at 3 upload-model requests a run.
-- **Engineering:** the logs and release check now record which host line was dropped and its length. Each change was reviewed fresh, findings fixed, all tests pass; all on bet 1's branch. Merged: two tests no longer fail on your machine's older git.
-- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.53 this month, forecast $0.80 of $3). Every upload since Sunday landed.
-- **General management:** a fresh agent proposed eight candidates, and two more ranked them in opposite orders. Both put the vote fix first and a render kit for you second; the kit was covered by the note on #77. **Dropped:** a request counter (production does not record requests); a music shortlist (needs your Audio Library login); re-scoping bet 2 (for review). A second round of six, beyond the product, put an earlier read of new versions first both ways. Checking it, I found our reporting tool had been mislabelling ages, which is behind the rule to read new versions at 7 days. Fixed, reviewed and merged. By true age, a video's watch time at 3–4 days ranks it as a week later (0.99, 29 videos). Reads stay at 7 days: with weekly data, an earlier target would catch some videos under 3 days old, which a fresh check showed before I changed it. If Google retires the upload model, titles fall to the second model, logged (checked in code). Mostly fixing; the trial tool and narration reuse are bets.
-- AI use: 18 requests on the test model, 6 on the upload model (the shift may use 8), about 20 on Groq (free). The test model's allowance is undocumented and production falls back to it, so trials there stopped.
-
-### Blocked
-- **For you, in order:** #77 (nothing until a render is worth watching); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- First: check that this afternoon's upload landed.
-- Read today's release check: it runs this build, so it shows the upload model's tags for one post and, if a line is dropped, its length.
-- The opening tag on the upload model, using the trial tool after 07:00 UTC and away from uploads. One try this shift (a tease of the answers coming) moved it from 1 of 3 reactions to 2 of 3. But the unchanged reactions also swung from 3 of 3 to 1 of 3 on the same post, so three posts cannot tell two wordings apart. Compare on all nine posts, across two or three shifts' allowance.
-
-### Better?
-- **Than last shift:** Yes, slightly: the weakest part of the main bet had been judged on the wrong model, and your next render will show the real thing at less narration cost. Nothing reached viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
