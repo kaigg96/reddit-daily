@@ -181,7 +181,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   sample is a local run. Also: there is no way to re-render from saved
   narration, so each timing tweak costs a Polly run (CLAUDE.md §1 asks for
   reuse). **Closes when** the venv is rebuilt on 3.12 (`/usr/local/bin/python3.12`
-  is installed) and a render can reuse the last run's narration.
+  is installed) and a render can reuse the last run's narration. Both are
+  built on `product/host-tags` (2026-10-20): it imports on 3.10, and
+  `REUSE_NARRATION=1` on a dry run buys each line once; closes when it merges.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`

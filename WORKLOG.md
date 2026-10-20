@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-20 (09:25) — The host's weak reactions came mostly from the cheaper test model; your next render can show the real ones and buy its narration once
+
+    Worked (% of the shift): product 45 · engineering 25 · gm 10 · legal 10 · security 5 · reliability 5
+
+**Summary:** The reactions you judged weak in last night's renders were written by the cheaper model that test renders use. On the same posts, the model real uploads use gave real reactions for 7 of 9 answers, against 1 of 9. Your next narrated render can now use the upload model, runs on your machine's Python, and pays for each narrated line only once. Nothing reached viewers.
+
+### Toward revenue
+- **Bet 1's tags are closer than they looked.** Bet 1 is the main bet. Its tags were judged on the wrong model. Three posts, one request each: the upload model reacted ("Ouch", "No thanks", "Lunch delivery?!"); the test model labelled ("Liquid gold", "Free labor", "Timeless cycle"). Three posts show which way it points, not a rate. Posted on #77; nothing there waits on you.
+- **Your next render is cheaper and shows what an upload would.** One setting puts the render's title, tags and vote on the upload model, at one request from its daily allowance. A second setting reuses narration already bought for the same words, so re-rendering to adjust timing no longer pays for it again. The build also runs on your machine's Python 3.10 now; last night it would not load there.
+- **What to fix next is clear.** The host's opening tag, shown as the question ends, is seen by nearly every viewer. The first reaction is seen by about half and the third by under a fifth (current version, 14 videos at 7 days). The upload model's opening tag was a title, not a reaction, on 2 of 3 posts ("Brutal truth"), so that comes first.
+- **The host's spoken vote no longer gets dropped for running a few words long.** It was held to the length limit for on-screen notes, though it is spoken, and was dropped on 4 of 12 trial posts, with the usual closing line playing instead. That risked bet 1's own rule that every host line shows on 15 of its first 20 uploads. It now has a spoken line's limit (22 words). The narration budget is untouched.
+
+### Done
+- **Legal:** moving every AI call to Groq, the free service whose terms forbid training on what we send, would turn the tags back into labels: about 2 of 27 were reactions. That move now also has to pass the tag bar. A rule making every tag sound spoken lifted Groq to about 14 of 24, but every tag then opened the same few ways ("Oh", "Ha", "classic"). That sameness is what the spam policy names, so I did not keep it. It is the starting point if that move goes ahead.
+- **Product:** a reworded prompt (a test for labels, a rule for answers that are only a name) did not help on the test model: 10 of 27 reactions against 9 of 27. Not kept. Reddit blocks this runner, so trials used our real recent questions with answers written in Reddit's style, as the content-screen check already does. A small trial tool now reruns the same nine posts on any of the three models, capped at 3 upload-model requests a run.
+- **Engineering:** the logs and the daily release check now record which host line was dropped and how long it was. Each change was reviewed by a fresh agent and its findings were fixed. All 641 tests pass. Everything is on bet 1's branch, which today's release check reads; nothing on the live channel changed.
+- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.53 this month, forecast $0.80 of $3). Every upload since Sunday has landed, including this morning's.
+- **General management:** a fresh agent proposed eight candidates, and two more ranked them in opposite orders. Both put the vote fix first and a render kit for you second; the kit was covered by the note on #77. **Dropped:** spending more upload-model requests today (the release check and two uploads need the rest); a daily request counter (production doesn't record its requests, so it would print a guess); shortlisting music (only your Audio Library login reaches it); re-scoping bet 2 (a review question). Mostly fixing; the trial tool and the narration reuse are bets.
+- AI use: 18 requests on the test model, 3 on the upload model (the shift may use 8), about 20 on Groq (free). The test model's daily allowance is not written down anywhere, and production falls back to it, so trials there stopped at 18.
+
+### Blocked
+- **For you, in order:** #77 (nothing until a render is worth watching); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November); #50 (four commands, which unblocks #65); #59 (account checks).
+
+### Next
+- First: check that this afternoon's upload landed.
+- Read today's release check: it runs this build, so it shows the upload model's tags for one post and, if a line is dropped, its length.
+- After 07:00 UTC tomorrow, away from uploads: two or three wordings of the opening tag on the upload model, using the trial tool on three posts each (at most 8 requests).
+
+### Better?
+- **Than last shift:** Yes, slightly: the weakest part of the main bet had been judged on the wrong model, and your next render will show the real thing at less narration cost. Nothing reached viewers.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, is unshipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-19 (18:25) — Weekly review: YouTube's spam rules now reach formats like ours, so I recommend four uploads a day waits for bet 1; watch time is still flat
 
     Worked (% of the shift): legal 25 · data 25 · engineering 15 · audience 10 · gm 10 · product 5 · reliability 5 · security 5
@@ -93,38 +126,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly: a risk to the channel itself is on record before we doubled the volume, and two worries about four a day are settled. Nothing reached viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-19 (09:50) — Bet 1's final version passed its sample, so your label on #77 is now a release within minutes; a missed date for bet 2 is fixed
-
-    Worked (% of the shift): gm 40 · product 15 · reliability 15 · strategy 10 · security 10 · data 10
-
-**Summary:** Nothing reached viewers. Bet 1's exact merged version passed its sample this morning, so your label on #77 releases it within minutes, with no further check to wait for. The plan also now says what a late label costs bet 2, and what four uploads a day would need if it goes first.
-
-### Toward revenue
-- **Bet 1 can ship the moment you label #77.** The version that would go live (three answers, the host's notes, and last night's backup for AI outages) passes all 615 tests and still merges cleanly. Its sample, the last check a merge needed, was requested at the first minute the once-every-12-hours limit allowed and passed: 18 seconds, the host's setup and all three reactions on screen. As on earlier samples, the free model that writes samples ran the host's closing vote past its length limit, so the usual closing line played instead.
-- **What a late label costs is now written down.** If #77 is still unlabelled when the subreddit test reads (about 2 November), four uploads a day goes first, as the plan already implied. A later bet 1 then waits about four weeks for that read. So a label by about 1 November keeps both bets on time. The check for this had been set for the 5 November review, after the date it protects. It now falls to the 26 October weekly review, which will tell you on #77 if the label is still missing.
-- **Four a day going first would have hit a gap.** Two things it relies on are currently part of bet 1: the backup AI for days when Google's allowance runs short, and a record of which slot each upload belongs to. Both are now listed as steps to take first in that case.
-
-### Done
-- **Reliability:** GitHub is moving its standard machines to a newer Ubuntu between today and 19 November. I checked our upload job against it: it needs nothing from the system that changes, so I expect no effect. If an upload fails in that window, the note says to suspect this first, and the fix is a one-line change for you.
-- **Data:** style C titles (numbered lists) look 18% behind on watch time, inside the 18.2% gap chance alone produces; read within long and short videos, 8% behind and level. Not a finding; it changes nothing.
-- **Security:** standing check clean: no secrets in the project, no workflow changes, you remain the only collaborator, money controls in place ($0.52 this month, forecast $0.82 of $3). This morning's upload landed with its AI title. The record of the last upload is intact. Nothing more of the account-security check (#59) is visible to a shift: GitHub refuses it the deploy keys and webhooks.
-- **General management:** two rounds of eight fresh candidates, each ranked twice in opposite orders. Round one: the bet 2 date led both passes, done; style C's gap came next, done. Round two: the Ubuntu check ranked high both ways, done; the gap for four a day first led one pass, done. **Settled in a line:** four a day's narration cost (about $1.64 a month against the $3 cap, so it fits); the extra plain readings four a day would add before bet 1 (about 56 on top of roughly 1,100, no change). **Considered and dropped:** pre-committing what today's first retention curve decides (retention is never a trigger, and the queue after bet 1 is set); a risk row for slow replies (the decisions log already tracks it); a check that the content screen is not too lenient (uploads are not buried more than usual, and today's weekly review audits the screen); a trademark check on the working name (renaming waits on bet 1); Snapchat's payments and a Partner Program checklist (neither changes a decision before bet 1); wording four a day's view-total clause and a noise-floor requirement (both ranked low, and neither binds before 2 November); this week's usage pace (each shift is already gated on it).
-- This shift was mostly fixing: the date, the gap and the sample. The Ubuntu check was prevention.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #50 (four commands, which unblocks #65); #59 (account checks).
-
-### Next
-- Today's weekly snapshot, expected early afternoon, brings the 19 October weekly review. It covers the first week's viewer comments, the dark-morbid question, the watched clip's rule, and whether the five new retention columns fill.
-- On #77's label: merge it as the next version, close #74, update the trackers.
-- 26 October weekly review: if #77 is still open, one comment on it naming 1 November and the four-week cost.
-- 5 November monthly review: reopen long-form if bet 1 is kept?; let a release inside an approved bet that passes every check ship unless you object within a set time; YouTube's originality rules (reach, the voice correction, the paid-channel read); TikTok with its follower caveat; the subscription's price against $34–340 a month; the weekly allowance's dark days; a failed release check going to the next shift before you. Bet 2's window moved to 26 October.
-- Once #77 settles: the bundled ask (#50 with the re-raise fix).
-
-### Better?
-- **Than last shift:** Slightly: bet 1's last check passed, and a deadline that would have passed unseen is now watched.
 - **Than ~10 shifts ago:** No: watch time is flat at 12.0 seconds, and bet 1, built 11 October, is unshipped.
 - **Than ~100 shifts ago:** Too early to say.
