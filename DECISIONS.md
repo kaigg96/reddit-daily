@@ -31,6 +31,25 @@ revisit trigger.
 
 ---
 
+## D14 · 2026-10-19 · Audience first; the owner gives a viewer's feedback, shifts own the craft
+
+The owner, in a session on 10-19 (recorded on #77): the likely first step to
+money is an audience, which opens routes beyond YouTube views. Meeting
+YouTube's monetization rules (reused content, our own words' share) is worth
+pursuing but is **not the deciding test** for a format today; the owner doubts
+YouTube checks a channel this size. So a format change is judged first on
+whether a first-time viewer follows it and keeps watching; own-words share is
+reported, never a gate. Separate: the spam policy (#80) risks strikes and
+termination, not pay, and binds at any size.
+Same session, on weak host tags: "I gave you the feedback, this is your (or
+rather, the shifts) job to figure out what constitutes good reactions, how to
+generate, test, etc." The owner reacts as a viewer; defining the bar, building
+and testing are the shifts'. Bring back a result to watch, not a craft choice.
+**Alternatives:** keep YouTube's rules as bet 1's done-when (the owner
+declined it as a gate). **Assumptions:** (1) monetization review comes only
+when we apply; (2) audience is the binding step (21 subscribers, §1).
+**Revisit** before applying to any paid programme, or at 1,000 subscribers.
+
 ## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
 
 The owner on #67, after the unused-time alarm emailed them three times:

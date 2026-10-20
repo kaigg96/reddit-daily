@@ -155,6 +155,19 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The owner's machine cannot run bet 1's build, and only it can narrate a
+  sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
+  `src/llm.py` on `integration/preview` uses an f-string with nested quotes
+  (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there.
+  That night's renders used a throwaway 3.12 venv. Its git (2.37) also fails
+  `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38). It
+  matters because CI samples are silent (branch code never holds the Polly
+  keys) and the owner judges format changes with narration (#77): a narrated
+  sample is a local run. Also: there is no way to re-render from saved
+  narration, so each timing tweak costs a Polly run (CLAUDE.md §1 asks for
+  reuse). **Closes when** the venv is rebuilt on 3.12 (`/usr/local/bin/python3.12`
+  is installed) and a render can reuse the last run's narration.
+
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
