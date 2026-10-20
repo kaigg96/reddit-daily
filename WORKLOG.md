@@ -63,15 +63,15 @@ and more useful than a confident guess.
 
 ## 2026-10-20 (22:18) — Bet 1's planned check of where viewers leave would have missed the opening, and is fixed before any data; the distance to revenue is now computed, and had drifted
 
-    Worked (% of the shift): data 35 · product 25 · gm 15 · monetization 15 · reliability 5 · security 5
+    Worked (% of the shift): data 30 · product 25 · gm 15 · monetization 15 · legal 5 · reliability 5 · security 5
 
 **Summary:** Nothing reached viewers. The one step that would, trying the host's new opening wording on the model uploads use, needs AI requests that tonight would come out of tomorrow morning's upload. Instead, two fixes make sure bet 1 is judged on the right viewers. The plan's distance to each revenue route is now computed from our data: the Partner Program is about 720 times short, not the 760–880 the plan said.
 
 ### Toward revenue
 - **Nothing directly**, for the reason above. That trial waits for the 07:00 UTC reset.
 - **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. It shows in the share of plays that become real views, which we already track. The rule now says so, written before any of bet 1's uploads exist.
-- **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day. Now an error that outlasts them costs only its own upload, and three in a row still stop the read. A fresh review found one missing test, now added. All tests pass, and it is merged.
-- **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first.
+- **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day; now an error that outlasts them costs only its own upload. Reviewed fresh (one missing test, added); merged.
+- **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first. Reviewed fresh; merged.
 
 ### Done
 - **Product (a bet):** a second wording for the host's opening tag names the "Sounds…" sameness and asks for a reaction only that question could get. Tried on both free models, nine posts each, and scored blind against the earlier wording in one mixed sheet. It reacted on 7 of 16 against 8 of 16, and made no sense on 5 against 1. It stopped "Sounds…" but repeated other openers. Not kept. The earlier wording stays the one to try on the upload model; on one draw it took a side on the privacy post ("That's a trap").
@@ -79,6 +79,12 @@ and more useful than a confident guess.
   - proposing to make the 883 old reading videos private now rather than with the rebrand: no new evidence since you tied the two together, and it spends your attention while every route is hundreds of times short.
   - counting replies to our automatic comment: 7 viewer comments in all, so the answer is already known.
   - YouTube's definition of a qualifying view: read last shift, and it changes no decision.
+
+  A second round of six, from the functions not yet worked, put two quick legal reads top both ways. Neither changes a decision:
+  - **Groq's terms** (June 2026) are written for businesses and ban training on what we send, so nothing blocks the planned move there.
+  - **YouTube's AI-content label** covers realistic depictions of real people, events or scenes. A stock narrator reading text over stock footage is none of these, so it stays unset.
+
+  Below the bar: Reddit's guidance that deleted posts and comments must stop showing. Ours stay in the videos, but your "not yet" on Reddit's terms already covers it. Also below: a test of skipping weak topics, which is not due until bet 1's read; checking the name "Show of Hands" before the rebrand is due; and the content screen's one skip.
 
   Mostly fixing; the wording trial was a bet.
 - **Security:** the standing check is clean. No secrets are in the project, the only workflow change was the one you approved tonight, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
