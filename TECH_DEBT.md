@@ -155,6 +155,16 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **A shift ended after 2 minutes with no handover (run 39338110057,
+  2026-10-19 22:54; the first in 40+ runs).** 32 turns, no commits, no error;
+  same Claude Code (2.1.280) and action pin as the passing runs before it, and
+  the budget gate returns GO in CI. The transcript is hidden (public logs), so
+  the cause is unknown; likeliest, it oriented, found every queue item waiting
+  on the owner (#77, #80, #59) and ended without §10's entry. The handover
+  check caught it as designed. **Closes when** ten more shifts pass; on a
+  repeat, propose (patch, owner) printing the agent's final message when that
+  check fails, which Actions masks for secrets.
+
 - **The owner's machine cannot run bet 1's build, and only it can narrate a
   sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
   `src/llm.py` on `integration/preview` uses an f-string with nested quotes
