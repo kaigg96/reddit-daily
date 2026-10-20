@@ -52,6 +52,10 @@ RETENTION_MAX_AGE_DAYS = 30
 # On 2026-10-19 one HTTP 500 stopped the loop and cost 23 uploads their points;
 # each upload's 7-day reading comes from one snapshot, so a lost week is lost.
 RETENTION_RETRIES = 2
+# A 5xx that outlasts those retries costs its own upload only, as the 10-19 one
+# was the 33rd of 55 queries and those before it answered; this many in a row
+# means the report is down, so the rest wait for next week's run.
+RETENTION_SERVER_ERRORS = 3
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
           "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS
@@ -198,21 +202,37 @@ def add_retention(ya, stats, videos, today):
     report the channel cannot have costs one query, and its reason goes in the
     first column of every upload left, because no shift can read the log. A
     server error is retried first (RETENTION_RETRIES); one that outlasts the
-    retries reads the same way for that week; the next run re-reads."""
+    retries marks its own upload and the loop goes on, unless it is the
+    RETENTION_SERVER_ERRORS-th in a row, which reads as a refusal."""
     cutoff = (datetime.date.fromisoformat(today)
               - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
     recent = [v for v, published_at, *_ in videos
               if v in stats and (published_at or "")[:10] >= cutoff]
+    in_a_row = 0
     for i, video_id in enumerate(recent):
         try:
             stats[video_id].update(fetch_retention(ya, video_id, today))
+            in_a_row = 0
         except Exception as e:
             reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+            in_a_row = in_a_row + 1 if _server_error(e) else RETENTION_SERVER_ERRORS
+            if in_a_row < RETENTION_SERVER_ERRORS:
+                print(f"::warning::retention {reason}; this upload only")
+                stats[video_id][RETENTION_FIELDS[0]] = reason
+                continue
             print(f"::warning::retention {reason}; snapshotting without it")
             for v in recent[i:]:
                 stats[v][RETENTION_FIELDS[0]] = reason
             break
     return stats
+
+
+def _server_error(e):
+    """An HttpError with a 5xx status: the server's fault, not a refusal."""
+    try:
+        return 500 <= int(getattr(getattr(e, "resp", None), "status", None)) < 600
+    except (TypeError, ValueError):
+        return False
 
 
 def ensure_header(path, fields):
