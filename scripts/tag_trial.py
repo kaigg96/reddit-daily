@@ -23,6 +23,7 @@ name, which drift to labels; 1 and 5 are politics.
 """
 import argparse
 import json
+import os
 import sys
 import time
 
@@ -131,6 +132,10 @@ def main(argv=None):
     cap = {"upload": UPLOAD_CAP, "sample": SAMPLE_CAP}.get(args.model)
     if cap is not None and len(chosen) > cap:
         raise SystemExit(f"--model {args.model} reads at most {cap} posts a run")
+    # Without its key, provider() quietly answers on Gemini's upload model:
+    # uncapped and with retries, a run could spend 18 of the day's 20.
+    if args.model == "groq" and not os.environ.get("GROQ_API_KEY"):
+        raise SystemExit("--model groq needs GROQ_API_KEY; refusing before any request")
     llm = setup_model(args.model, args.setup, args.groq_model)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:

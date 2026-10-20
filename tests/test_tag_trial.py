@@ -46,3 +46,9 @@ def test_the_blurt_setup_reaches_the_prompt(monkeypatch):
     assert "blurt out the moment" not in shipped
     # Only the setup changes: every reaction rule is as shipped.
     assert ask.split('"reactions":', 1)[1] == shipped.split('"reactions":', 1)[1]
+
+
+def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    with pytest.raises(SystemExit, match="GROQ_API_KEY"):
+        tt.main(["--model", "groq", "--posts", "1"])
