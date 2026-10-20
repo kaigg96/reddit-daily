@@ -15,6 +15,7 @@ Usage:
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
+  venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -432,10 +433,11 @@ def show_routes():
     with open(config.CHANNEL_LOG) as f:
         subs = int([r for r in _csv.DictReader(f) if r["subscribers"]][-1]["subscribers"])
     pct = f"{share:.0%}" if share is not None else "unknown (too few videos)"
-    print(f"Revenue routes, snapshot {latest}: ~{per_90:,.0f} play starts per 90 days "
-          f"(over {days} days), {pct} engaged, {subs} subscribers, "
-          + (f"{rate:.2f} per 1,000 views" if rate is not None else "rate unknown") + "\n")
-    fmt = lambda x: f"~{x:,.0f}x short" if x is not None else "-"
+    print(f"Revenue routes: ~{per_90:,.0f} play starts per 90 days (over {days} days "
+          f"of snapshots), {subs} subscribers; from snapshot {latest}, {pct} engaged and "
+          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else "rate unknown")
+          + "\n")
+    fmt = lambda x: "-" if x is None else "met" if x <= 1 else f"~{x:,.0f}x short"
     for d in insights.route_distances(per_90, share, subs, rate):
         unit = "engaged views" if d["engaged_only"] else "views"
         ours = f"{d['views_ours']:,.0f}" if d["views_ours"] is not None else "?"
