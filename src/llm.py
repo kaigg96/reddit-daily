@@ -147,6 +147,8 @@ def generate_retrying(prompt, tries=2, **kw):
     2026-09-11: a verification pass retried 429s and burned ~40 requests to
     make 8 useful calls. The exception is Groq's per-minute cap, which its
     retry-after header tells apart from its daily one (`_groq_rate_wait`).
+    The log's `http_429_day` / `_minute` says which cap each 429 hit; a
+    Gemini `_minute` would be the evidence to revisit this rule.
 
     Timeouts and 503s are genuinely transient and are retried once. The budget
     is tight enough that `tries` is deliberately 2, not 3; a 503 waits
