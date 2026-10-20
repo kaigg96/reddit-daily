@@ -175,7 +175,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there
   (that f-string rewritten for 3.10 on `product/host-tags`, 2026-10-20).
   That night's renders used a throwaway 3.12 venv. Its git (2.37) also fails
-  `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38). It
+  `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38;
+  skipped below 2.38 since 2026-10-20). It
   matters because CI samples are silent (branch code never holds the Polly
   keys) and the owner judges format changes with narration (#77): a narrated
   sample is a local run. Also: there is no way to re-render from saved
