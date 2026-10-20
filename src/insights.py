@@ -671,14 +671,23 @@ def _ranks(xs):
     return r
 
 
-def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH):
+def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH,
+                         tolerance_days=None):
     """(n, Spearman rho) between each upload's early and late reading.
 
     Research row R3: if the early reading ranks uploads as the late one does,
     a release can be judged sooner. Within tolerance one weekly snapshot can
     match both ages, which would correlate a reading with itself; a pair is
-    kept only when its two readings came from different snapshots."""
-    early, late = load_videos_at_age(early_days), load_videos_at_age(late_days)
+    kept only when its two readings came from different snapshots.
+
+    At the default tolerance the ages are labels, not readings: snapshots are
+    weekly, so "3 against 7" paired readings 2-3 days old with ones 9-10 days
+    old (2026-10-20). Pass a tolerance under a day, and ages a week apart
+    (d against d + 7), to read what the ages say."""
+    if tolerance_days is None:
+        tolerance_days = AGE_MATCH_TOLERANCE_DAYS
+    early = load_videos_at_age(early_days, tolerance_days)
+    late = load_videos_at_age(late_days, tolerance_days)
     if not early.videos or not late.videos:
         return 0, None
     e = {v.video_id: v for v in early.videos}

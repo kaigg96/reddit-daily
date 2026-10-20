@@ -1020,6 +1020,10 @@ def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
     _write_series(tmp_path, monkeypatch, uploads, snaps)
     n, rho = insights.early_read_stability(3, 7)
     assert n == 6 and rho == pytest.approx(1.0)
+    # The pairs above are really 2 against 9 days; a tight tolerance says so.
+    assert insights.early_read_stability(3, 7, tolerance_days=0.6)[0] == 0
+    n, rho = insights.early_read_stability(2, 9, tolerance_days=0.6)
+    assert n == 6 and rho == pytest.approx(1.0)
 
 
 def test_total_watch_is_views_times_watch_seconds():
