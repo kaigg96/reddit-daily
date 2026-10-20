@@ -50,7 +50,7 @@ def test_the_trace_says_how_it_ended_what_it_ran_and_what_failed():
 
 
 def test_a_run_cut_off_before_its_result_says_so():
-    ending, final, calls = shift_trace.trace(RUN[:-1])
+    ending, final, calls, _ = shift_trace.trace(RUN[:-1])
     assert "did not finish" in ending
     assert final.startswith("Nothing is ready")     # its last words, from the turns
     assert len(calls) == 2
@@ -76,6 +76,43 @@ def test_secret_values_and_token_shapes_are_redacted():
         assert leaked not in text, leaked
 
 
+def test_more_token_shapes_and_aws_account_ids_are_redacted():
+    env = {"AWS_READONLY_SECRET_ACCESS_KEY": "wJalrXUtnFEMIK7MDENGbPxRfiCYEXAMPLEKEY\n"}
+    run = [_assistant(_tool(1, "Bash", command="curl -H 'authorization: bearer abcdefghijklmnopqrstu'"),
+                      _tool(2, "Bash", command="echo eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZXBvOm8vciJ9.c2lnbmF0dXJl"),
+                      _tool(3, "Bash", command="aws sts get-caller-identity")),
+           _result(1, "AUTHORIZATION: basic eC1hY2Nlc3MtdG9rZW46Z2hzX3h4eA==", error=True),
+           _result(3, "User arn:aws:iam::123456789012:user/claude-readonly is denied; key wJalrXUtnFEMIK7MDENGbPxRfiCYEXAMPLEKEY", error=True)]
+    text = shift_trace.render(*shift_trace.trace(run), env=env)
+    for leaked in ("abcdefghijklmnop", "eyJhbGci", "eC1hY2Nl", "123456789012", "wJalrXUtn"):
+        assert leaked not in text, leaked
+    assert "arn:aws:iam::***:user/claude-readonly" in text
+
+
+def test_helper_agents_are_counted_not_listed_and_never_speak_last():
+    run = [_assistant({"type": "text", "text": "Starting the review."}, _tool(1, "Agent", description="Rank candidates")),
+           {**_assistant({"type": "text", "text": "Helper: here are eight candidates."},
+                         _tool(2, "Bash", command="grep -r x")), "parent_tool_use_id": "t1"},
+           {**_result(2, "Exit code 2\ngrep: x: No such file", error=True), "parent_tool_use_id": "t1"},
+           {"type": "result", "subtype": "error_max_turns", "is_error": True, "num_turns": 900,
+            "duration_ms": 60000, "errors": ["Reached maximum number of turns (900)"],
+            "permission_denials": [{"tool_name": "WebFetch"}]}]
+    ending, final, calls, helper = shift_trace.trace(run)
+    assert final == "Starting the review."              # the shift's own words, not the helper's
+    assert [c[0] for c in calls] == ["Agent"] and helper == (1, 1)
+    assert "error_max_turns" in ending and "Reached maximum number of turns (900)" in ending
+    assert "1 permission denial(s): WebFetch" in ending
+    text = shift_trace.render(ending, final, calls, helper, env={})
+    assert "Helper agents made 1 more, 1 failed." in text and "grep -r x" not in text
+
+
+def test_a_failed_command_shows_its_message_not_only_its_exit_code():
+    run = [_assistant(_tool(1, "Bash", command="venv/bin/python -m pytest")),
+           _result(1, "Exit code 1\n\nImportError: cannot import name 'x'", error=True)]
+    text = shift_trace.render(*shift_trace.trace(run), env={})
+    assert "✗ Bash: venv/bin/python -m pytest — Exit code 1: ImportError: cannot import name 'x'" in text
+
+
 def test_a_token_cut_by_the_line_limit_leaves_no_prefix():
     token = "ghp_" + "A" * 36
     run = [_assistant(_tool(1, "Bash", command="x" * 125 + " " + token))]
@@ -91,11 +128,15 @@ def test_every_output_format_the_action_has_written_loads(tmp_path):
         assert shift_trace.load(str(p))[-1]["type"] == "result", name
 
 
-def test_an_unreadable_output_still_writes_a_trace_and_never_fails_the_job(tmp_path, capsys):
+def test_a_missing_or_unreadable_output_still_writes_a_trace_and_never_fails_the_job(tmp_path, capsys):
     out = tmp_path / "trace.md"
     assert shift_trace.main([str(tmp_path / "missing.json"), "--write", str(out), "--run-id", "7"]) == 0
-    assert "could not be read (FileNotFoundError)" in out.read_text()
     assert out.read_text().startswith("## Shift trace — run 7")
+    assert "no execution output: the agent did not finish" in out.read_text()   # killed or cancelled
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    assert shift_trace.main([str(bad), "--write", str(out)]) == 0
+    assert "could not be read" in out.read_text()
 
 
 def test_the_summary_stops_before_the_tool_list_and_ignores_another_runs_trace(tmp_path):
