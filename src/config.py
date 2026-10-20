@@ -141,7 +141,10 @@ HOST_TEXT = True
 # while the answer was heard. False restores those notes (NOTE_LEAD).
 HOST_TAGS = True
 TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
-TAG_PAUSE = 0.5    # the gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP
+# The gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP. A
+# tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to
+# move down, read and take it in (owner, 2026-10-19), so about 1.2s.
+TAG_PAUSE = 0.9
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
