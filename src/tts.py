@@ -11,8 +11,10 @@ spends ~910 billed characters, so a batch job trips the guard long before it
 reaches a surprising invoice.
 """
 
+import hashlib
 import json
 import os
+import shutil
 
 import boto3
 
@@ -73,8 +75,32 @@ def make_polly():
     )
 
 
+def _reused(text, voice_id):
+    """Where config.REUSE_NARRATION keeps this text's mp3 and marks."""
+    key = hashlib.sha256(f"{voice_id}|neural|{text}".encode("utf-8")).hexdigest()[:20]
+    folder = config.GEN / "narration"
+    return folder / f"{key}.mp3", folder / f"{key}.json"
+
+
 def synthesize_with_marks(polly, text, voice_id, out_path):
-    """Write mp3 to out_path; return word marks [{'t': sec, 'w': word, 'end_offset': int}]."""
+    """Write mp3 to out_path; return word marks [{'t': sec, 'w': word, 'end_offset': int}].
+
+    With config.REUSE_NARRATION (a dry run), the same text and voice bought
+    before is copied, with no call and no charge, and anything bought is kept."""
+    if config.REUSE_NARRATION:
+        mp3, marks_file = _reused(text, voice_id)
+        if mp3.exists() and marks_file.exists():
+            shutil.copyfile(mp3, out_path)
+            return json.loads(marks_file.read_text())
+        marks = _synthesize(polly, text, voice_id, out_path)
+        mp3.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(out_path, mp3)
+        marks_file.write_text(json.dumps(marks))
+        return marks
+    return _synthesize(polly, text, voice_id, out_path)
+
+
+def _synthesize(polly, text, voice_id, out_path):
     # Charged up front for both passes: a failed call still bills, so the guard
     # has to hold even when the second request never returns.
     _charge(text, calls=2)

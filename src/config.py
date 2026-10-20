@@ -41,6 +41,12 @@ DRY_RUN = SAMPLE or SILENT_NARRATION or \
 # judges the tags must show what an upload would. Uploads use MODEL already.
 METADATA_ON_UPLOAD_MODEL = os.environ.get(
     "METADATA_ON_UPLOAD_MODEL", "").lower() in ("1", "true", "yes")
+# REUSE_NARRATION=1, on a dry run only: narration already bought for the same
+# text and voice is reused from GEN/narration/ rather than billed again, and
+# the narrator is always VOICES[0] so a re-render finds it. For the owner's
+# narrated renders (#77): each timing tweak cost a Polly run (TECH_DEBT).
+REUSE_NARRATION = DRY_RUN and os.environ.get(
+    "REUSE_NARRATION", "").lower() in ("1", "true", "yes")
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30

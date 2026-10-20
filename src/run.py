@@ -248,6 +248,8 @@ def main():
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
+    if config.REUSE_NARRATION:   # drawn anyway, so later draws do not shift
+        voice = config.VOICES[0]
     # R3.2: the host speaks in the voice the narrator is not using.
     host_voice = next((v for v in config.VOICES if v != voice), voice)
     silent = config.SAMPLE or config.SILENT_NARRATION

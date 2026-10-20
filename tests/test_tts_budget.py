@@ -177,3 +177,41 @@ def test_budget_is_raisable_for_an_approved_bulk_run(tmp_path, monkeypatch):
     for i in range(50):
         synth(polly, "d" * 150, tmp_path, f"ok{i}.mp3")
     assert len(polly.calls) == 100
+
+
+# --- REUSE_NARRATION: the owner's re-renders buy each line once (#77) --------
+
+def test_a_reused_line_makes_no_call_and_no_charge(monkeypatch, tmp_path):
+    monkeypatch.setattr(config, "REUSE_NARRATION", True)
+    monkeypatch.setattr(config, "GEN", tmp_path)
+    polly = FakePolly()
+    first = synth(polly, "The same line.", tmp_path, "a.mp3")
+    spent = tts.spent_chars()
+    again = synth(polly, "The same line.", tmp_path, "b.mp3")
+    assert again == first and (tmp_path / "b.mp3").read_bytes() == b"fake-mp3"
+    assert len(polly.calls) == 2 and tts.spent_chars() == spent
+    synth(polly, "A new line.", tmp_path, "c.mp3")
+    assert len(polly.calls) == 4
+
+
+def test_another_voice_is_another_line(monkeypatch, tmp_path):
+    monkeypatch.setattr(config, "REUSE_NARRATION", True)
+    monkeypatch.setattr(config, "GEN", tmp_path)
+    polly = FakePolly()
+    tts.synthesize_with_marks(polly, "Hi.", "Danielle", tmp_path / "a.mp3")
+    tts.synthesize_with_marks(polly, "Hi.", "Stephen", tmp_path / "b.mp3")
+    assert len(polly.calls) == 4
+
+
+def test_without_the_switch_every_line_is_bought(monkeypatch, tmp_path):
+    monkeypatch.setattr(config, "REUSE_NARRATION", False)
+    monkeypatch.setattr(config, "GEN", tmp_path)
+    polly = FakePolly()
+    synth(polly, "The same line.", tmp_path, "a.mp3")
+    synth(polly, "The same line.", tmp_path, "b.mp3")
+    assert len(polly.calls) == 4 and not (tmp_path / "narration").exists()
+
+
+def test_the_switch_needs_a_dry_run():
+    import inspect
+    assert "REUSE_NARRATION = DRY_RUN and" in inspect.getsource(config)
