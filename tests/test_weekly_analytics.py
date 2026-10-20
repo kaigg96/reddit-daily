@@ -324,7 +324,7 @@ def test_a_refused_retention_report_costs_one_query_and_its_column_only():
     assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
 
 
-def test_a_server_error_is_retried_before_it_stops_the_loop():
+def test_a_server_error_is_retried_by_the_client_first():
     """10-19: one HTTP 500 cost 23 uploads their points. The client retries a
     5xx itself when asked; a refusal (403 above) still stops at once."""
     ya = _FakeRetention()
@@ -353,6 +353,13 @@ def test_a_server_error_past_its_retries_costs_its_own_upload_only():
     assert ya.videos == ids
     assert stats["v1"]["watch_ratio_10"].startswith("refused: _ServerError: <HttpError 500>")
     assert [stats[v]["watch_ratio_10"] for v in ("v0", "v2", "v3")] == [1.1] * 3
+
+
+def test_only_server_errors_in_a_row_count_toward_stopping():
+    ids, videos, stats = _recent(5)
+    ya = _FakeRetention(fail={"v0": 500, "v2": 500, "v3": 500})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids and stats["v4"]["watch_ratio_10"] == 1.1
 
 
 def test_server_errors_in_a_row_stop_the_loop_as_a_refusal_does():
