@@ -33,16 +33,12 @@ class Answer(str):
     """A cleaned comment that remembers its author, so the description can
     credit it (Reddit's attribution term, PLAN C15). Riding on the string
     keeps the name with its text through the screen's drops and the length
-    guard, with no parallel list to keep in step; a plain str credits no one.
-    `reply` is its top reply, for the host's tag only (config.HOST_TAG_REPLIES):
-    never shown or read."""
+    guard, with no parallel list to keep in step; a plain str credits no one."""
     author = ""
-    reply = ""
 
-    def __new__(cls, text, author="", reply=""):
+    def __new__(cls, text, author=""):
         obj = super().__new__(cls, text)
         obj.author = author
-        obj.reply = reply
         return obj
 
 
@@ -106,31 +102,15 @@ def _comment_pool(post, limit):
     post.comment_sort = "top"
     post.comments.replace_more(limit=0)
     return [
-        Answer(clean_text(c.body), credit_name(getattr(c, "author", None)), _top_reply(c))
+        Answer(clean_text(c.body), credit_name(getattr(c, "author", None)))
         for c in post.comments
-        if _passes(c.body, config.MAX_COMMENT_LENGTH)
+        if (
+            len(c.body) <= config.MAX_COMMENT_LENGTH
+            and c.body not in ("[deleted]", "[removed]")
+            and not _has_emoji(c.body)
+            and not profanity.contains_profanity(c.body)
+        )
     ][:limit]
-
-
-def _passes(body, max_length):
-    return (len(body) <= max_length
-            and body not in ("[deleted]", "[removed]")
-            and not _has_emoji(body)
-            and not profanity.contains_profanity(body))
-
-
-def _top_reply(comment):
-    """The first of a comment's replies (top-sorted, already loaded with the
-    post: no extra request) that passes the comment filters and is not a bot's,
-    or "" (config.HOST_TAG_REPLIES)."""
-    if not config.HOST_TAG_REPLIES:
-        return ""
-    for reply in getattr(comment, "replies", None) or []:
-        body = getattr(reply, "body", "")
-        author = str(getattr(reply, "author", "") or "")
-        if body and author != "AutoModerator" and _passes(body, config.MAX_REPLY_LENGTH):
-            return clean_text(body)
-    return ""
 
 
 # Bet 1 (#70, PRD R3.2): with commentary on, medical threads are skipped at

@@ -366,18 +366,25 @@ _TAG_EDITS = [
      "     answer finishes: your gut reaction to that answer only, the way a friend\n"
      "     blurts one out on hearing it (a laugh, a wince, surprise, agreement,\n"
      "     doubt). React to how it lands; never name, label or sum up what it says:\n"
-     '     "Retail monopoly" and "Savage logic" are labels, not reactions.'),
+     '     "Retail monopoly" and "Savage logic" are labels, not reactions. Best is a\n'
+     '     reaction only that answer could get (to "My cat has judged me for 14\n'
+     '     years": "Fourteen years, ouch."); a plain one is fine when nothing fits.'),
     ("Every line must make sense read once, in two seconds.",
      "Every tag must make sense at a glance, and the vote heard once."),
     ("   - Name something specific from this thread, never a stock phrase.",
      "   - The vote names something specific from this thread. A tag may be an\n"
      "     everyday reaction, but no two tags in one video alike."),
+    # Told to react, tags on a politics thread agreed with answers ("Math
+    # checks out" to "Inequality"): a reaction is a verdict unless it is told
+    # what to react to.
+    ("how an answer is put (its wit, its nerve), and vote on that.",
+     "how an answer is put (its wit, its nerve), and vote on that. A tag\n"
+     '     like "Math checks out" or "Finally said it" takes a side.'),
 ]
-# With an answer's top reply shown under it (config.HOST_TAG_REPLIES, owner's
-# idea, 2026-10-19): how Reddit itself reacted, as a starting point.
-_REPLY_RULE = """
-   - Under an answer, "Top reply" is how Reddit reacted to it: let it steer
-     that answer's tag, in your own words. Never quote or echo the reply."""
+# Tried 2026-10-19 (owner's idea): each answer's top reply shown to the AI as
+# how Reddit reacted. Tags then reacted to the reply, which the viewer never
+# sees ("Dark turn" from a reply's "sweet release of death"): 4 of 15 made no
+# sense from the answer alone. Removed; the build is in git (e5e24cc).
 # The ask is 1-3 words; one over still reads at a glance. The vote is spoken,
 # so it keeps its text cap.
 _TAG_MAX_WORDS = {"setup": 4, "reaction": 4}
@@ -388,9 +395,8 @@ _TAG_MAX_WORDS = {"setup": 4, "reaction": 4}
 _RUN_TOGETHER = re.compile(r"[^\W\d_]{19,}")
 
 
-def _commentary_ask(n, replies=False):
-    """The host's instructions, for a voiced host or a text-only one. With
-    `replies`, the answers listed above it carry their top replies."""
+def _commentary_ask(n):
+    """The host's instructions, for a voiced host or a text-only one."""
     ask = _COMMENTARY_ASK
     if config.HOST_TEXT:
         for old, new in _TEXT_EDITS:
@@ -398,25 +404,7 @@ def _commentary_ask(n, replies=False):
         if config.HOST_TAGS:
             for old, new in _TAG_EDITS:
                 ask = ask.replace(old, new)
-            if replies:
-                ask += _REPLY_RULE
     return ask.format(n=n)
-
-
-def _tag_replies():
-    return config.COMMENTARY and config.HOST_TEXT and config.HOST_TAGS and config.HOST_TAG_REPLIES
-
-
-def _numbered(comments, replies):
-    """The answers as the prompt lists them; with `replies`, each answer's top
-    reply under it, when it has one."""
-    lines = []
-    for i, c in enumerate(comments, 1):
-        lines.append(f'{i}. "{c}"')
-        reply = getattr(c, "reply", "") if replies else ""
-        if reply:
-            lines.append(f'   Top reply: "{reply}"')
-    return "\n".join(lines)
 
 
 def _within_cap(line, kind):
@@ -540,8 +528,7 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     commentary = config.COMMENTARY
     if commentary:
         comments = comments[:config.COMMENTARY_ANSWERS]
-    replies = _tag_replies() and any(getattr(c, "reply", "") for c in comments[:3])
-    numbered = _numbered(comments[:3], replies)
+    numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
 It features these answers:
@@ -558,7 +545,7 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-{_commentary_ask(len(comments), replies) if commentary
+{_commentary_ask(len(comments)) if commentary
  else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:

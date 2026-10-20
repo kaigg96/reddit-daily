@@ -303,7 +303,8 @@ def test_every_tag_edit_matches_the_text_ask(monkeypatch):
 
 def test_a_tag_host_is_asked_for_tags(tag_host):
     ask = llm._commentary_ask(2)
-    assert ask.count("1 to 3 words") == 2 and "never a sentence" in ask and "at a glance" in ask
+    assert ask.count("1 to 3 words") == 2 and "never name, label or sum up" in ask and "at a glance" in ask
+    assert "takes a side" in ask and "no two tags in one video alike" in ask
     assert "AT MOST 10 words" not in ask and "two seconds" not in ask
     assert "never spoken" in ask and "Never\n     repeat the answer's own words" in ask
     assert "exactly 2 lines" in ask
