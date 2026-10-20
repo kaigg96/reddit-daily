@@ -180,6 +180,25 @@ def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
         None, None, None, "gemini_fallback", "http_503;fallback_no_json")) is None
 
 
+def test_the_verdict_names_a_dropped_host_line_and_its_length(monkeypatch):
+    """The call's log says which line ran long; the verdict file is what a
+    shift reads, so it carries that line too (2026-10-20)."""
+    from src.llm import Commentary
+    meta = MetadataResult("A title", ["a", "b", "c"], "", "gemini",
+                          commentary=Commentary("Oof", ["Ha", "Wait", "Nope"], ""))
+
+    def get_metadata(*a, **k):
+        print("Commentary: past its length cap, or a placeholder or emoji: vote (21 words)")
+        return meta
+    monkeypatch.setattr("src.config.COMMENTARY", True)
+    monkeypatch.setattr("src.llm.get_metadata", get_metadata)
+    from src import llm
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    vr.check_metadata()
+    assert any("vote (21 words)" in line for line in vr.SUMMARY)
+
+
 def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):
     from src import llm
     seen = []

@@ -445,7 +445,14 @@ def _clean_commentary(data, n):
     if (_usable(setup, "setup") and _usable(verdict, "cta")
             and all(_usable(r, "reaction") for r in reactions)):
         return Commentary(setup, reactions, verdict)
-    print("Commentary: a host line ran past its length cap, or was a placeholder or emoji")
+    # Which line, and how long: the vote, which is spoken, is held to the
+    # notes' cap, and ran past it on 4 of 12 trial posts (2026-10-20). Its
+    # word counts say whether a spoken line's slack would keep it.
+    bad = [f"{name} ({len(line.split())} words)" for name, line, kind in
+           [("setup", setup, "setup"), ("vote", verdict, "cta")]
+           + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]
+           if not _usable(line, kind)]
+    print("Commentary: past its length cap, or a placeholder or emoji: " + ", ".join(bad))
     if not config.HOST_TEXT:
         return None
     setup = setup if _usable(setup, "setup") else ""

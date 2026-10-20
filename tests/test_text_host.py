@@ -161,6 +161,15 @@ def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
     assert run.own_words_share(segs) == f"{notes / total:.3f}"
 
 
+def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
+    """The vote is spoken but held to the notes' cap: its word count is what
+    says whether a spoken line's slack would keep it (2026-10-20)."""
+    _text_metadata(monkeypatch, cta="word " * 19, reactions=[HOST["reactions"][0], "word " * 13])
+    out = capsys.readouterr().out
+    assert "vote (19 words), reaction 2 (13 words)" in out
+    assert "setup (" not in out and "reaction 1 (" not in out
+
+
 def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):
     assert _text_metadata(monkeypatch, setup="word " * 13,
                           reactions=["word " * 13, "word " * 13]) is None

@@ -13,7 +13,9 @@ Exits 0 if every gate passes, 1 otherwise, and writes a Markdown verdict to
 $GITHUB_STEP_SUMMARY when present. Costs at most MAX_REQUESTS Gemini calls.
 """
 import argparse
+import contextlib
 import datetime
+import io
 import os
 import re
 import subprocess
@@ -158,7 +160,13 @@ def check_metadata():
     # As replay_screen.py does for the screen: the second model's answer would
     # be inconclusive below, so trying it would only spend a request.
     llm.FALLBACK_MODEL = None
-    meta = llm.get_metadata(q, comments, style="A", caps=True)
+    # Its log too: which host line ran long, and by how much, is printed
+    # there and not otherwise in this file, which is what a shift reads.
+    log = io.StringIO()
+    with contextlib.redirect_stdout(log):
+        meta = llm.get_metadata(q, comments, style="A", caps=True)
+    print(log.getvalue(), end="")
+    dropped = [ln for ln in log.getvalue().splitlines() if ln.startswith("Commentary: past")]
 
     if meta.source == "error":
         # Deliberately not retried, for the same reason check_screen doesn't:
@@ -217,6 +225,8 @@ def check_metadata():
                 shown(f"reaction {i}", line)
             if not host.verdict:
                 shown("vote", "", "the usual closing line ships")
+            for line in dropped:
+                note(f"- ⚠️ {line}")
     note("")
     return ok
 
