@@ -22,6 +22,7 @@ name, which drift to labels; 1 and 5 are politics.
 import argparse
 import json
 import sys
+import time
 
 sys.path.insert(0, ".")
 
@@ -65,6 +66,9 @@ POSTS = [
 ]
 UPLOAD_CAP = 3
 SAMPLE_CAP = len(POSTS)
+# Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
+# unspaced, the sixth of nine posts met its cap (2026-10-20).
+GROQ_SPACING = 15
 
 
 def pick(spec):
@@ -78,15 +82,16 @@ def pick(spec):
 
 
 def setup_model(model):
-    """Point the metadata call at `model`, one try, no second model."""
+    """Point the metadata call at `model`, no second model; one try on Gemini."""
     from src import config, llm
     llm.FALLBACK_MODEL = None
     config.GROQ_FALLBACK = False
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
     config.DRY_RUN = model == "sample"
     config.METADATA_ON_UPLOAD_MODEL = False
-    retrying = llm.generate_retrying
-    llm.generate_retrying = lambda prompt, tries=2, **kw: retrying(prompt, tries=1, **kw)
+    if model != "groq":   # Groq is free: its per-minute cap is waited out
+        retrying = llm.generate_retrying
+        llm.generate_retrying = lambda prompt, tries=2, **kw: retrying(prompt, tries=1, **kw)
     return llm
 
 
@@ -101,7 +106,9 @@ def main(argv=None):
     if cap is not None and len(chosen) > cap:
         raise SystemExit(f"--model {args.model} reads at most {cap} posts a run")
     llm = setup_model(args.model)
-    for n in chosen:
+    for i, n in enumerate(chosen):
+        if args.model == "groq" and i:
+            time.sleep(GROQ_SPACING)
         q, answers = POSTS[n - 1]
         meta = llm.get_metadata(q, answers, style="A", caps=True)
         h = meta.commentary
