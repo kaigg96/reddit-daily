@@ -11,8 +11,8 @@ Since 2026-10-05 a shift works one ranked queue across the company's functions
 function and keeps the sections in the order the shift wrote them.
 
 Source of truth is the shift's own WORKLOG.md entry, so the report cannot
-drift from the handover: if a shift did not write an entry it has nothing to
-report, which the workflow already treats as a failure.
+drift from the handover. A shift that wrote none (which the workflow fails) is
+reported as such, with its trace's account of how it ended.
 
     shift_report.py <worklog> <ledger> <since_sha> [run_url]
 """
@@ -134,11 +134,48 @@ def summary_line(text):
     return " ".join(m.group(1).split()) if m else ""
 
 
-def build(worklog, ledger, since_sha, run_url=""):
-    date, body = latest_entry(worklog)
-    if not date:
-        return "No handover was written, so there is nothing to report."
+def wrote_handover(since_sha, worklog):
+    """Whether this shift added to the WORKLOG, by the workflow's own test. The
+    newest entry may be an earlier shift's: run 39338110057 wrote none, and its
+    email repeated the previous handover as if it were its own. Unknown
+    (not a git checkout, a bad sha) counts as written, as before."""
+    try:
+        log = subprocess.run(["git", "log", f"{since_sha}..HEAD", "--format=%h", "--", worklog],
+                             capture_output=True, text=True)
+        unstaged = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", worklog]).returncode
+    except Exception:
+        return True
+    if log.returncode != 0:
+        return True
+    return bool(log.stdout.strip()) or unstaged != 0
 
+
+def no_handover():
+    """What the owner reads when a shift wrote no handover: how it ended and its
+    last words, from the trace (scripts/shift_trace.py), rather than nothing."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import shift_trace
+    head = shift_trace.summary(shift_trace.TRACE, os.environ.get("GITHUB_RUN_ID", ""))
+    return ["## This shift wrote no handover", "",
+            "Every shift owes one, so the run is marked failed. Nothing below is a "
+            "handover: it is the shift's own record of how it ended. The full trace "
+            f"is in `{shift_trace.TRACE}`.", "",
+            head or "No trace was recorded for this run.", ""]
+
+
+def build(worklog, ledger, since_sha, run_url=""):
+    if since_sha and not wrote_handover(since_sha, worklog):
+        out = no_handover()
+    else:
+        date, body = latest_entry(worklog)
+        if not date:
+            return "No handover was written, so there is nothing to report."
+        out = entry(date, body)
+    return "\n".join(out + footer(ledger, run_url))
+
+
+def entry(date, body):
+    """The report of a shift's WORKLOG entry."""
     out = [f"## {date}", ""]
 
     # 1. The overview, first and short — this is what gets read on a phone.
@@ -176,7 +213,12 @@ def build(worklog, ledger, since_sha, run_url=""):
         narrative = re.sub(r"\*\*Summary:\*\*.+?(?=\n\n|$)", "", narrative, flags=re.S)
         out += ["### Details", "", narrative.strip(),
                 "", "*(This shift did not follow the report template.)*", ""]
+    return out
 
+
+def footer(ledger, run_url):
+    """The run's cost and ready work, and a link to its log."""
+    out = []
     cost = last_cost(ledger)
     if cost:
         # Minutes against the shift's budget, and the ready work it left: the
@@ -204,7 +246,7 @@ def build(worklog, ledger, since_sha, run_url=""):
                    + (f" · review due: {', '.join(due)}" if due else "") + "*")
     if run_url:
         out.append(f"*[Full log]({run_url})*")
-    return "\n".join(out)
+    return out
 
 
 if __name__ == "__main__":
