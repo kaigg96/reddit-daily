@@ -87,6 +87,11 @@ SETUP_SPECIFIC = SETUP_BLURT[:-1] + (
     '     back to childhood?": "Oh, crayons!"); never a stock opener like\n'
     '     "Sounds..." or "Classic":')
 SETUPS = {"blurt": SETUP_BLURT, "specific": SETUP_SPECIFIC}
+# Groq labels the answers ("Retail nightmare", "Free labor": 4 of 27 react,
+# PRD §4). Openers it was told to use came back the same few ways, so this
+# rules out the label's form instead: a spoken fragment, never adjective + noun.
+REACTIONS_SPOKEN = ' Say each as you would out loud: a fragment with a verb\n' \
+    '     or a sound ("Nope, never again", "I\'d cry too"), never an adjective and a noun.'
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -102,7 +107,7 @@ def pick(spec):
     return chosen
 
 
-def setup_model(model, setup="shipped", groq_model=None):
+def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     """Point the metadata call at `model`, no second model; one try on Gemini.
     `setup="blurt"` or `"specific"` swaps in that wording for the shipped one.
     `groq_model` picks Groq's model; Qwen runs with reasoning off, as its free
@@ -110,6 +115,9 @@ def setup_model(model, setup="shipped", groq_model=None):
     from src import config, llm
     if setup in SETUPS:
         llm._TAG_EDITS = [(llm._TAG_EDITS[0][0], SETUPS[setup])] + llm._TAG_EDITS[1:]
+    if reactions == "spoken":
+        old, new = llm._TAG_EDITS[1]
+        llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new + REACTIONS_SPOKEN)] + llm._TAG_EDITS[2:]
     if groq_model:
         config.GROQ_MODEL = groq_model
     if model == "groq" and config.GROQ_MODEL.startswith("qwen"):
@@ -134,6 +142,8 @@ def main(argv=None):
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
     ap.add_argument("--setup", choices=["shipped", *SETUPS], default="shipped",
                     help="the setup's wording: as shipped, or one of SETUPS")
+    ap.add_argument("--reactions", choices=["shipped", "spoken"], default="shipped",
+                    help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
     args = ap.parse_args(argv)
@@ -145,7 +155,7 @@ def main(argv=None):
     # uncapped and with retries, a run could spend 18 of the day's 20.
     if args.model == "groq" and not os.environ.get("GROQ_API_KEY"):
         raise SystemExit("--model groq needs GROQ_API_KEY; refusing before any request")
-    llm = setup_model(args.model, args.setup, args.groq_model)
+    llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
             time.sleep(GROQ_SPACING)

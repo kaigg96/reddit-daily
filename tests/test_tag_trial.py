@@ -49,6 +49,22 @@ def test_a_setup_wording_reaches_the_prompt(monkeypatch, setup, words):
     assert ask.split('"reactions":', 1)[1] == shipped.split('"reactions":', 1)[1]
 
 
+def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
+    from src import config
+    monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    for name in ("FALLBACK_MODEL", "generate_retrying"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    shipped = llm._commentary_ask(3)
+    tt.setup_model("sample", reactions="spoken")
+    ask = llm._commentary_ask(3)
+    assert "never an adjective and a noun" in ask and "adjective and a noun" not in shipped
+    assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+
+
 def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     with pytest.raises(SystemExit, match="GROQ_API_KEY"):
