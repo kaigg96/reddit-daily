@@ -236,8 +236,12 @@ class _BadShape(Exception):
 
 
 def _parse(data, n_comments):
-    """(risk, topic, reason, unsafe) from the reply's JSON object."""
-    risk = data.get("post_risk", "none")
+    """(risk, topic, reason, unsafe) from the reply's JSON object.
+
+    A reply with no `post_risk` at all is a bad shape, not "none": read as a
+    pass it would screen a post that should skip, while skipping even the
+    backstop (TECH_DEBT, 2026-10-09; left by two reviews)."""
+    risk = data.get("post_risk")
     if not isinstance(risk, str):
         raise _BadShape()
     risk = risk.strip().lower()
