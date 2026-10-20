@@ -82,6 +82,8 @@ and more useful than a confident guess.
   - why shifts end early: nothing records how much ready work each shift had.
   - a subscriber benchmark: it changes no decision.
 
+  A second round of six, from the functions no recent shift has worked (distribution, finance, money, audience), put the same item first both ways. Four a day's rule said only to revert if "the 4-week view total falls". That names no comparison, and it contradicts your standing rule that views never trigger a revert, since they swing 27–50% on noise. Before any data, it now reads the first four full weeks against the four before, and a fall is a finding for the review, not a revert. Second both ways: one command printing how far each revenue route is, replacing hand sums dated 5 October; for a later shift.
+
   Mostly fixing; the two tag trials are bets.
 - **Engineering:** the trial tool now takes the new wording and a choice of Groq model, on bet 1's branch. A fresh review found no defect in that, but it did find an older hole: a Groq trial run without Groq's key would quietly spend up to 18 of the day's 20 upload-model requests. It now refuses before any request. All tests pass, and the branch still merges cleanly.
 - **Reliability (fixing):** if the AI's content screen ever replied without its verdict, or with a blank one, the post went through as checked, skipping even the keyword check. It now falls to the keyword check, which spends no request. Two reviews had left this open since 9 October. A fresh review found no defects, all tests pass, and it is merged.
