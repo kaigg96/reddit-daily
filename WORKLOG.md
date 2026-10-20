@@ -85,7 +85,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (nothing until a render is worth watching); #80 (one label: four a day waits for bet 1, music first; needed by about 1 November); #50 (four commands, which unblocks #65); #59 (account checks).
 
 ### Next
-- First: check that this afternoon's upload landed. Then decide whether bet 1's read moves to 4 days before it has data. Every experiment would read three days sooner; reads already under way keep 7.
+- First: check that this afternoon's upload landed. Then decide whether bet 1's read moves to 5 days (the reporting tool's floor) before it has data: two days sooner; reads under way keep 7.
 - Read today's release check: it runs this build, so it shows the upload model's tags for one post and, if a line is dropped, its length.
 - The opening tag on the upload model, using the trial tool after 07:00 UTC and away from uploads. One try this shift (a tease of the answers coming) moved it from 1 of 3 reactions to 2 of 3. But the unchanged reactions also swung from 3 of 3 to 1 of 3 on the same post, so three posts cannot tell two wordings apart. Compare on all nine posts, across two or three shifts' allowance.
 
