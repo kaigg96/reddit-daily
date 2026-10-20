@@ -298,6 +298,42 @@ def test_failure_label_never_carries_the_keyed_url(monkeypatch):
     assert llm.get_metadata("q", ["a"]).failure == "ConnectionError;fallback_ConnectionError"
 
 
+def _quota_429(body):
+    resp = llm.requests.Response()
+    resp.status_code = 429
+    resp._content = body.encode()
+    return llm.requests.HTTPError("429", response=resp)
+
+
+def test_a_429_names_which_cap_it_hit():
+    """A spent day and a per-minute burst need different answers, and a bare
+    http_429 could not tell them apart (the 2026-10-20 release check)."""
+    day = ('{"error": {"code": 429, "details": [{"violations": [{"quotaId": '
+           '"GenerateRequestsPerDayPerProjectPerModel-FreeTier", "quotaValue": "20"}]}]}}')
+    minute = day.replace("PerDay", "PerMinute")
+    both = day.replace("}]}]", '}, {"quotaId": "GenerateRequestsPerMinutePerProjectPerModel"}]}]')
+    groq = '{"error": {"message": "Rate limit reached on tokens per minute (TPM): Limit 8000"}}'
+    assert llm._failure_kind(_quota_429(day)) == "http_429_day"
+    assert llm._failure_kind(_quota_429(minute)) == "http_429_minute"
+    assert llm._failure_kind(_quota_429(both)) == "http_429_day"   # the cap that lasts
+    assert llm._failure_kind(_quota_429(groq)) == "http_429_minute"
+    assert llm._failure_kind(_quota_429("")) == "http_429"
+    assert llm._failure_kind(_quota_429("Too Many Requests")) == "http_429"
+
+
+def test_only_a_429_reads_the_body():
+    resp = llm.requests.Response()
+    resp.status_code = 503
+    resp._content = b'{"quotaId": "PerDay"}'
+    assert llm._failure_kind(llm.requests.HTTPError("503", response=resp)) == "http_503"
+
+
+def test_the_metadata_log_carries_the_cap(monkeypatch):
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    monkeypatch.setattr(llm, "_generate", _raises(_quota_429('"quotaId": "PerDayPerModel"')))
+    assert llm.get_metadata("q", ["a"]).failure == "http_429_day;fallback_http_429_day"
+
+
 def test_the_upload_log_keeps_the_failure_kind():
     from src import log
     assert "meta_failure" in log.FIELDS
