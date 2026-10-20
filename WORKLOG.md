@@ -69,16 +69,16 @@ and more useful than a confident guess.
 
 ### Toward revenue
 - **Nothing directly.** The upload-model trial waits for the 07:00 UTC reset.
-- **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. It shows in the share of plays that become real views, which we already track. The rule now says so, written before any of bet 1's uploads exist.
+- **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. That shows in the share of plays that become real views, which we track; the rule now says so, before any of bet 1's uploads exist.
 - **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day; now an error that outlasts them costs only its own upload. Reviewed fresh (one missing test, added); merged.
 - **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first. Reviewed fresh; merged.
 
 ### Done
 - **Product (a bet):** a second wording for the host's opening tag, naming the "Sounds…" sameness, was tried on both free models and scored blind against the earlier one. It reacted on 7 of 16 against 8, made no sense more often (5 against 1), and repeated other openers. Not kept. The earlier wording stays the one for the upload model, though it once took a side on the privacy post.
-- **General management:** fewer than three items were ready, and both need the AI allowance. A fresh agent proposed eight; two more ranked them in opposite orders. The wording trial came first both ways. The two retention items came second and third both ways. The routes command came fourth and fifth, and was done because time remained. **Dropped:**
-  - proposing to make the 883 old reading videos private now rather than with the rebrand: no new evidence since you tied the two together, and it spends your attention while every route is hundreds of times short.
-  - counting replies to our automatic comment: 7 viewer comments in all, so the answer is already known.
-  - YouTube's definition of a qualifying view: read last shift, and it changes no decision.
+- **General management:** fewer than three items were ready, and both need the AI allowance. A fresh agent proposed eight; two more ranked them, in opposite orders. The wording trial came first both ways. The two retention items came second and third both ways. The routes command, fourth and fifth, was done as time remained. **Dropped:**
+  - making the 883 old reading videos private now, not with the rebrand: no new evidence, and it spends your attention.
+  - replies to our automatic comment: 7 viewer comments in all.
+  - YouTube's qualifying-view definition: read last shift.
 
   A second round of six, from the functions not yet worked, put two quick legal reads top both ways. Neither changes a decision:
   - **Groq's terms** (June 2026) are written for businesses and ban training on what we send, so nothing blocks the planned move there.
@@ -87,6 +87,8 @@ and more useful than a confident guess.
   Below the bar: Reddit's guidance that deleted posts and comments must stop showing. Ours stay in the videos, but your "not yet" on Reddit's terms already covers it. Also below: a weak-topic test (not due until bet 1's read), the name check (before the rebrand is due), and the content screen's one skip.
 
   With time left, the one ready item that could move tonight was the move to Groq, which waits on its host reactions: they come out as labels. A wording that rules out the label's shape (never an adjective and a noun) was tried the same way. Groq's main model reacted on 7 of 27 against 2, possibly chance, and labels were still most tags. Not kept: the move stays blocked on this.
+
+  A third round found nothing to finish in the last 15 minutes that would change a decision. The three running title and subreddit tests are not yet due, and the open code-health items need you or a render.
 
   Mostly fixing; the two wording trials were bets.
 - **Security:** the standing check is clean. No secrets are in the project, the only workflow change was the one you approved tonight, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
