@@ -2474,3 +2474,53 @@ def test_rank_correlation_is_two_sided_and_survives_a_constant():
     assert abs(rho + 1) < 1e-9 and p < 0.01
     rho, p, _ = insights.rank_correlation(_reach(30, lambda i: 0.3, lambda i: 20 + i), "engaged_share", "views")
     assert rho == 0.0 and p == 1.0
+
+
+# --- first-answer length (PRD §4, 2026-10-21) --------------------------------
+
+def _answer_lengths():
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "answer_lengths", root / "scripts" / "answer_lengths.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["answer_lengths"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_answer_log_parse_counts_words_and_needs_an_upload():
+    mod = _answer_lengths()
+    log = ("job\tstep\t2026-10-21T05:00:01.1Z Selected post: Q?\n"
+           "job\tstep\t2026-10-21T05:00:01.2Z   comment 1: one two three\n"
+           "job\tstep\t2026-10-21T05:00:01.3Z   comment 2: four five\n"
+           "job\tstep\t2026-10-21T05:00:01.4Z   comment 3: six\n")
+    assert mod.parse_log(log) is None          # an off slot or dry run uploads nothing
+    video, words = mod.parse_log(log + "job\tstep\t2026-10-21T05:04:00.0Z "
+                                 "Upload complete! Video ID: hTnnhF9DaRQ\n")
+    assert (video, words) == ("hTnnhF9DaRQ", {1: 3, 2: 2, 3: 1})
+
+
+def test_answer_log_parse_keeps_the_first_print_of_each_answer():
+    mod = _answer_lengths()
+    log = ("x\ty\t2026-10-21T05:00:01.2Z   comment 1: a b\n"
+           "x\ty\t2026-10-21T05:00:01.3Z   comment 1: a b c d\n"
+           "x\ty\t2026-10-21T05:04:00.0Z Upload complete! Video ID: AAAAAAAAAAA\n")
+    assert mod.parse_log(log)[1] == {1: 2}
+
+
+def test_attach_answer_lengths_sets_none_where_missing(tmp_path):
+    path = tmp_path / "answer_lengths.csv"
+    path.write_text("video_id,run_id,words_1,words_2,words_3\na,1,12,5,6\nb,2,,4,4\n")
+    vids = [insights.Video(video_id=i, published=None) for i in ("a", "b", "c")]
+    assert insights.attach_answer_lengths(vids, path) == 1
+    assert [v.first_answer_words for v in vids] == [12, None, None]
+    assert insights.attach_answer_lengths(vids, tmp_path / "absent.csv") == 0
+
+
+def test_first_answer_verdict_applies_the_rule_as_written():
+    assert insights.first_answer_verdict(None, None) == "insufficient data"
+    assert insights.first_answer_verdict(-0.3, 0.049).startswith("lead")
+    assert insights.first_answer_verdict(-0.3, 0.05).startswith("noise")
+    assert insights.first_answer_verdict(-0.29, 0.001).startswith("noise")
+    assert insights.first_answer_verdict(0.6, 0.001).startswith("noise")
