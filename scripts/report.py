@@ -629,6 +629,9 @@ def main():
     p.add_argument("--routes", action="store_true",
                    help="how far each revenue route (PLAN §1) is from its bar, on views and "
                         "followers; latest snapshot only")
+    p.add_argument("--opening-reach", action="store_true",
+                   help="R3: do uploads whose plays more often become engaged views earn "
+                        "more views? Rank correlation at ~7 days, its rule pre-committed (PRD §0)")
     p.add_argument("--placebo", action="store_true",
                    help="noise with nothing changed: consecutive batches (how a release "
                         "is judged) vs alternate days in the same weeks (PLAN C9)")
@@ -658,7 +661,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.opening_reach, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -734,6 +737,34 @@ def main():
 
     if args.routes:         # PLAN §1's distances, computed rather than copied
         show_routes()
+        return
+
+    if args.opening_reach:  # R3, read once against its pre-committed rule
+        age = args.at_age or 7
+        load = insights.load_videos_at_age(age)
+        videos = insights.since(load.videos, datetime.date(2026, 10, 5))
+        rho, p_value, n = insights.rank_correlation(videos, "engaged_share", "views")
+        print(f"R3: engaged share against views, uploads since 2026-10-05 read at ~{age} days, "
+              f"10+ views (n={n})")
+        if rho is None:
+            print(f"  insufficient data: under {insights.REACH_MIN_N} uploads; read at the next snapshot")
+            return
+        # Readings span about 4-10 days (weekly snapshots), and views grow with
+        # age: a link that is reading age is not the opening (review, 10-21).
+        for v in videos:
+            v.reading_age = (load.anchor - v.published).total_seconds() / 86400
+        by_age = [insights.rank_correlation(videos, "reading_age", m)[0]
+                  for m in ("views", "engaged_share")]
+        print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        print("  against reading age: views " + ", engaged share ".join(
+            "-" if r is None else f"{r:+.2f}" for r in by_age))
+        if rho >= 0.3 and p_value < 0.05:
+            confounded = all(r is not None and abs(r) >= 0.3 for r in by_age)
+            print("  rho >= 0.3 at p < 0.05: met, " + (
+                "but both track reading age -- confounded; read again on the next snapshot"
+                if confounded else "a backlog candidate with its own rule"))
+        else:
+            print("  rho >= 0.3 at p < 0.05: not met -- noise; the row leaves")
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
