@@ -173,3 +173,19 @@ def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
 def test_the_real_history_reads_without_error_even_in_a_shallow_clone():
     got = b.recently_dropped(limit=3)
     assert len(got) <= 3 and all(bullet for _, bullet in got)
+
+
+def test_done_work_is_listed_too_so_it_is_not_proposed_again():
+    text = ("## 2026-10-19 (09:45) — X\n\n### Toward revenue\n"
+            "- **Bet 2's date.** It needs #77 labelled by about 1 November. More\n"
+            "  detail here.\n\n### Done\n"
+            "- **Strategy:** volume priced. It caps near 6.\n"
+            "- **Considered and dropped:** likes.\n\n### Next\n- Read Sunday's figures.\n")
+    opening = "Bet 2's date. It needs #77 labelled by about 1 November. More detail here."
+    assert b.done_in(text) == [("2026-10-19 (09:45) — X", [
+        opening, "Strategy: volume priced. It caps near 6."])]
+    got = b.recently_dropped(versions=[text], extract=b.done_in)
+    assert got == [("2026-10-19 (09:45) — X", opening + " | Strategy: volume priced. It caps near 6.")]
+    assert b._clip("a" * 10 + " bbbb", 12) == "a" * 10 + " …"
+    assert b.recently_dropped(versions=[text]) == [
+        ("2026-10-19 (09:45) — X", "Considered and dropped: likes.")]
