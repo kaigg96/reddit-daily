@@ -39,7 +39,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C10 | parked: the first read (10-19, `scripts/comments.py`) found 7 viewer comments, all on one heated political upload, so a screened queue would post nothing; reopen when a read shows them on 3+ uploads | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy. |
+| C10 | parked: the first read (10-19, `scripts/comments.py`) found 7 viewer comments, all on one political upload, so a screened queue would post nothing; reopen when a weekly read shows them on 3+ uploads | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The company's working name is Show of Hands, and the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it** (2026-10-09): all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos (10-11); private ones go unmentioned. Renaming is the owner's. Done when the owner has decided. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response; never held. The logins are the owner's. Done when the owner reports a date. |
 
