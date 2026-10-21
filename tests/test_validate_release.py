@@ -152,6 +152,16 @@ def test_a_dropped_host_line_warns_but_passes(monkeypatch):
     assert "- ✅ host reaction 2: Two." in lines
 
 
+def test_a_dropped_setup_may_have_been_a_title(monkeypatch):
+    from src.llm import Commentary
+    lines = []
+    monkeypatch.setattr(vr, "note", lines.append)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    host = Commentary("", ["One.", "Two."], "My hand goes up.")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+    assert "- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)" in lines
+
+
 def test_with_commentary_off_host_lines_are_not_asked_for(monkeypatch):
     fine = MetadataResult("A title", ["a", "b", "c"], "Comment yours!", "gemini")
     assert _metadata(monkeypatch, fine) is True
