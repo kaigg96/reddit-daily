@@ -393,6 +393,20 @@ _TAG_MAX_WORDS = {"setup": 4, "reaction": 4}
 # rare ("characteristically" is 18), and a line dropped for one loses only
 # its own note.
 _RUN_TOGETHER = re.compile(r"[^\W\d_]{19,}")
+# The setup tag is the host line nearly every viewer sees (PRD §4), and on
+# every model and wording tried it came back a title as often as not ("Brutal
+# truth", "The mystery", "Future job apocalypse?"): the weak line the owner
+# turned down (#77). No wording fixed it, so a setup ships only when it reads
+# as a reaction: it exclaims, or opens on a sound. A question mark is not
+# enough, as titles come as questions too. A setup dropped loses only its tag.
+_SOUNDS = frozenset("""ah aha aw ew eek geez ha hah haha hm hmm huh jeez meh
+    nope oh ohh oof ooh oops ouch phew uh ugh um wait welp whoa wow yay yep
+    yeah yikes""".split())
+
+
+def _reads_as_reaction(line):
+    first = re.match(r"[^\W\d_]+", line.strip(" \"'"))
+    return "!" in line or bool(first and first.group().lower() in _SOUNDS)
 
 
 def _commentary_ask(n):
@@ -421,10 +435,12 @@ def _within_cap(line, kind):
 def _usable(line, kind):
     """Within its cap, with a letter in it (a weak reply can echo the shape's
     "...") and no emoji, which the note's font draws as an empty box, nor
-    words run together."""
+    words run together; a setup tag must read as a reaction."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
             and not _RUN_TOGETHER.search(line)
-            and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line))
+            and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line)
+            and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
+                     and not _reads_as_reaction(line)))
 
 
 # The emoji package counts these as emoji, but they are text marks the font draws.
@@ -454,7 +470,8 @@ def _clean_commentary(data, n):
            [("setup", setup, "setup"), ("vote", verdict, "cta")]
            + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]
            if not _usable(line, kind)]
-    print("Commentary: past its length cap, or a placeholder or emoji: " + ", ".join(bad))
+    print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
+          " is not a reaction: " + ", ".join(bad))
     if not config.HOST_TEXT:
         return None
     setup = setup if _usable(setup, "setup") else ""

@@ -38,7 +38,7 @@ METADATA = MetadataResult(
     # Used only while config.COMMENTARY is on (bet 1, #70).
     commentary=Commentary(
         # Tags (config.HOST_TAGS, #77), as the ask now writes them.
-        setup="Harder than it looks.",
+        setup="Oof, deceptively hard.",
         reactions=["Smiling is cardio.",
                    "Boredom, then chaos.",
                    "Twenty tiny bosses."],

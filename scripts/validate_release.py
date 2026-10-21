@@ -222,7 +222,10 @@ def check_metadata():
             def shown(label, line, ships="the rest still ship"):
                 note(f"- ✅ host {label}: {line}" if line
                      else f"- ⚠️ host {label}: dropped, past its cap ({ships})")
-            shown("setup", host.setup)
+            if host.setup:
+                shown("setup", host.setup)
+            else:
+                note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
             for i, line in enumerate(host.reactions, 1):
                 shown(f"reaction {i}", line)
             if not host.verdict:

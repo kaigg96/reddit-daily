@@ -297,7 +297,7 @@ def test_the_free_sample_has_a_note_for_every_answer_it_reads():
 # while the answer is heard. So each note is a tag of 1-3 words, shown on its
 # segment's last spoken words and held through a longer pause.
 
-TAGS = {"setup": "Harder than it looks.", "reactions": ["Smiling is cardio.", "Boredom, then chaos."]}
+TAGS = {"setup": "Oof, deceptively hard.", "reactions": ["Smiling is cardio.", "Boredom, then chaos."]}
 
 
 @pytest.fixture
@@ -341,6 +341,31 @@ def test_a_tag_is_four_words_at_most_and_the_vote_keeps_its_cap(tag_host):
                                       ("Bank statement? Checkmate.", True)])
 def test_words_run_together_drop(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
+
+
+# Setups from the trials (PRD §4): titles, a question-shaped one among them,
+# and reactions.
+@pytest.mark.parametrize("line, ok", [("Brutal truth", False), ("The mystery", False),
+                                      ("Future job apocalypse?", False),
+                                      ("Oh, THIS question.", True), ("Oof, tough one", True),
+                                      ("Lunch delivery?!", True), ('"Ugh, Mondays"', True)])
+def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
+    assert llm._usable(line, "setup") is ok
+    assert llm._usable(line, "reaction")        # the reactions are not held to it
+
+
+def test_a_title_setup_drops_alone(tag_host, monkeypatch, capsys):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS, "setup": "The mystery"}))
+    assert meta.commentary == ("", TAGS["reactions"], HOST["cta"])
+    assert "setup (2 words)" in capsys.readouterr().out
+
+
+def test_a_sentence_setup_is_not_held_to_the_tags_rule(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert llm._usable("Everyone thinks they could do these.", "setup")
 
 
 def test_tags_survive_the_metadata_call_and_a_sentence_drops_alone(tag_host, monkeypatch):
