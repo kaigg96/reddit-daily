@@ -117,8 +117,9 @@ def main(argv=None):
             print(f"{heading[:70]}\n  {bullet[:600]}\n")
         print("DONE in the last ten shifts (each bullet's opening), so "
               "finished work is not proposed again:\n")
-        for heading, bullet in recently_dropped(extract=done_in):
-            print(f"{heading[:70]}\n  {bullet[:900]}\n")
+        for heading, bullets in recently_dropped(extract=done_in):
+            print(heading[:110])
+            print("".join(f"  - {b}\n" for b in bullets.split(" | ")))
         return 0
     counts = {s: 0 for s in STATUSES}
     for label, text, section in sources():
@@ -173,8 +174,13 @@ def done_in(text):
     "Toward revenue" and "Done", dropped lists left out. The 10-21 audit: a
     generator re-proposed bet 2's start date, answered on 10-17 and 10-19, and
     a ranker put it first, because only drops were listed."""
-    out, heading, bullets, section, inside = [], None, [], None, False
+    out, heading, bullets, section, inside, fenced = [], None, [], None, False, False
     for line in text.splitlines() + ["## 0000-00-00 end"]:
+        if line.lstrip().startswith("```"):
+            fenced = not fenced                 # the header's template is no shift
+            continue
+        if fenced:
+            continue
         m, sec = _ENTRY.match(line), _SECTION.match(line)
         if m:
             if heading and bullets:

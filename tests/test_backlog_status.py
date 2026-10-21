@@ -189,3 +189,9 @@ def test_done_work_is_listed_too_so_it_is_not_proposed_again():
     assert b._clip("a" * 10 + " bbbb", 12) == "a" * 10 + " …"
     assert b.recently_dropped(versions=[text]) == [
         ("2026-10-19 (09:45) — X", "Considered and dropped: likes.")]
+
+
+def test_the_worklog_template_in_a_fence_is_not_a_done_entry():
+    text = ("```\n## 2026-10-06 — one line\n### Done\n- **Engineering:** x.\n```\n"
+            "## 2026-10-21 (16:50) — real\n### Done\n- **Data:** y.\n")
+    assert b.done_in(text) == [("2026-10-21 (16:50) — real", ["Data: y."])]
