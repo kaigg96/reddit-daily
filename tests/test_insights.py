@@ -2438,3 +2438,32 @@ def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monk
     history = [v for v in read.load.videos if v.meta.get("format_version") in ("v3", "v4")]
     assert read.floors[Metric.WATCH] == insights.drift_floor(history, Metric.WATCH)
     assert read.floors[Metric.WATCH] != insights.drift_floor(read.before, Metric.WATCH)
+
+
+# --- R3: does the opening decide reach? (PRD §0, 2026-10-21) -----------------
+
+def _reach(n, share, views):
+    return [insights.Video(video_id=str(i), published=None, views=views(i), watch_seconds=10,
+                           engaged_views=share(i) * views(i)) for i in range(n)]
+
+
+def test_rank_correlation_reads_a_monotone_link_and_its_absence():
+    rho, p, n = insights.rank_correlation(_reach(30, lambda i: 0.2 + i / 100, lambda i: 20 + i ** 2), "engaged_share", "views")
+    assert n == 30 and abs(rho - 1) < 1e-9 and p < 0.01
+    rho, p, n = insights.rank_correlation(_reach(30, lambda i: 0.2 + (i * 7 % 30) / 100, lambda i: 20 + i), "engaged_share", "views")
+    assert abs(rho) < 0.3 and p > 0.05
+
+
+def test_rank_correlation_ties_share_a_rank():
+    assert insights._ranks([3, 1, 3, 2]) == [3.5, 1.0, 3.5, 2.0]
+
+
+def test_rank_correlation_refuses_thin_and_unreported_uploads():
+    few = _reach(19, lambda i: 0.3, lambda i: 50)
+    assert insights.rank_correlation(few, "engaged_share", "views") == (None, None, 19)
+    quiet = _reach(30, lambda i: 0.3, lambda i: 5)               # under 10 views each
+    assert insights.rank_correlation(quiet, "engaged_share", "views")[2] == 0
+    unreported = _reach(30, lambda i: 0.3, lambda i: 50)
+    for v in unreported:
+        v.engaged_views = None
+    assert insights.rank_correlation(unreported, "engaged_share", "views")[2] == 0

@@ -2130,6 +2130,53 @@ def engaged_check(snapshot_rows, min_views=20, tolerance=0.10):
 ENGAGED_SHARE_MIN_VIDEOS = 20
 
 
+# R3 (PRD §0, pre-committed 2026-10-21): does the opening decide reach? Under
+# this many uploads the read says insufficient rather than a number.
+REACH_MIN_N = 20
+
+
+def _ranks(values):
+    """1-based ranks, ties sharing their average rank."""
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    ranks = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            ranks[order[k]] = (i + j) / 2 + 1
+        i = j + 1
+    return ranks
+
+
+def _pearson(xs, ys):
+    mx, my = statistics.fmean(xs), statistics.fmean(ys)
+    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    sxx = sum((x - mx) ** 2 for x in xs)
+    syy = sum((y - my) ** 2 for y in ys)
+    return sxy / math.sqrt(sxx * syy) if sxx and syy else 0.0
+
+
+def rank_correlation(videos, x, y, min_views=10, permutations=5000, seed=0):
+    """Spearman's rho between two per-upload metrics, uploads with at least
+    `min_views` and both values reported, and a two-sided permutation p:
+    (rho, p, n). Under REACH_MIN_N uploads, (None, None, n): insufficient.
+    Ranks, so a few hits cannot carry it."""
+    import random
+    pairs = [(getattr(v, x), getattr(v, y)) for v in videos if v.views >= min_views]
+    pairs = [(a, b) for a, b in pairs if a is not None and b is not None]
+    if len(pairs) < REACH_MIN_N:
+        return None, None, len(pairs)
+    rx, ry = _ranks([a for a, _ in pairs]), _ranks([b for _, b in pairs])
+    rho = _pearson(rx, ry)
+    rng, shuffled, hits = random.Random(seed), list(ry), 0
+    for _ in range(permutations):
+        rng.shuffle(shuffled)
+        hits += abs(_pearson(rx, shuffled)) >= abs(rho) - 1e-12
+    return rho, (hits + 1) / (permutations + 1), len(pairs)
+
+
 def engaged_share(snapshot_rows, published_since=None):
     """What share of our views does the Partner Program count? Since
     2025-03-31 `views` counts every play start, while the bar's "qualified
