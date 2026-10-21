@@ -335,38 +335,32 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`integration/preview`, `integration/two-answer-meta-fallback`): the second
   model first, given the main call's reply schema.
 
-- **Audit 2026-10-17 (21:45): the owner's attention is the company's limit,
-  and one of our asks had a defect.** 8 shifts since 10-13 (five more were
-  stopped by the weekly allowance, 10-14 to 10-16), 258 minutes, 23–43 of 60
-  each. Two changes reached the live pipeline (title fixes 20bef55, 2b3c26d);
-  bet 1, built 10-11, is unshipped. 5 of 8 mostly fixed, 1 mostly improved.
-  Every "Better?" said "slightly" or "no"; the scorecard is flat. The owner
-  acted once (#75, 10-15 01:26), approving nothing else. **Ask defect, fixed:**
-  #77's body still said its label approved a rebuild and #74's would ship,
-  while a later comment said one label ships; a re-raise only comments
-  (`escalations.yml`), so the body went stale. Rewritten 10-17 21:42 (D13).
-  **Proposed, for the bundle after #50** (a workflow change, and #77 stays the
-  one ask): a re-raise that changes the ask replaces the body. **Built 10-18** on
-  `process/reraise-replaces-ask` (`escalate.py --replace`, and the filer as a
-  patch in `.github/pending/` that also pins the weekly install below); raise
-  it with `--patch` when #77 is settled, then merge the branch. **Repeats:** of 45
-  candidates dropped, retention curves, likes, the length check's fail-soft and
-  a subscriber test were each dropped by two shifts. `WORKLOG.md`'s budget
-  holds about two entries, so a shift cannot see what the shift before last
-  dropped. Fixed the same night: `backlog_status.py --dropped` lists the last
-  ten shifts' dropped candidates from git, and the below-the-floor message
-  points at it. **Allocation:** distribution and editorial got none;
-  strategy, finance and audience 5 of 800; each has nothing ready (all wait
-  on bet 1 or C5), so fine while the 11-05 monthly runs. **Gates:** the release
-  check caught bet 1's unparseable reply before any merge (10-17), its first
-  catch of a live defect; no reverts. Decisions: D13 re-reviewed; the rest
-  unchanged since 10-13 (D5 strained further: #50 unapplied 12 days).
-  **Carried from 10-13, pending #50:** the shift skill's false "cannot read
-  Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to stop
-  before the handover is pushed. Outward look not repeated (done 10-13).
-  **Before `v8` merges:** read Groq-written uploads apart (`--by meta_source`;
-  titles `--within title_writer!=groq`). **Closes when** #50
-  lands and the bundle is raised, or the next audit.
+- **Audit 2026-10-21: bet 1 waits on a render only the owner's machine can
+  make; otherwise the process is working.** 10 shifts since 10-17, 2–56 of 60
+  minutes (mean 38). Nothing reached viewers; 10 merges, all measurement or
+  reliability. Bet 1's craft moved under D14 (notes became tags, upload-model
+  reactions, the setup gate), each reviewed fresh. Reviews caught real defects
+  (R3's age guard, a tag-trial test of the wrong thing); the release check
+  passed daily; no reverts. Distribution and finance got no time, with nothing
+  ready: fine while the 11-05 monthly runs. **Found:** (1) #77's body went
+  stale a second time (it described notes, and said a label alone ships while
+  its 10-21 comment asked for a render): rewritten 10-21. The fix that ends it
+  is the re-raise below. (2) D13's "owner absent" line was stale and seeded a
+  ship-unless-they-object candidate; re-reviewed. (3) `backlog_status.py
+  --dropped` lists only drops, so the generator re-proposed done work (bet 2's
+  start date, answered 10-17 and 10-19) and a ranker put it first. Proposed:
+  `--dropped` also prints each entry's Done leads. (4) Narrated branch samples
+  (main's code narrating the branch's script) would take the owner's hands off
+  the critical path, but touch secrets handling: for the 11-05 review, not an
+  ask beside #77. Decisions: D13 re-reviewed; the rest unchanged. Outward look
+  not repeated (done 10-13). **Carried, pending #50:** a re-raise that changes
+  the ask replaces the body (built on `process/reraise-replaces-ask`, the filer
+  as a patch in `.github/pending/` with the weekly install's pin below; raise
+  with `--patch` when #77 settles, then merge); the shift skill's false "cannot
+  read Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to
+  stop before the handover is pushed. **Before `v8` merges:** read Groq-written
+  uploads apart (`--by meta_source`; titles `--within title_writer!=groq`).
+  **Closes when** #50 lands and the bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
