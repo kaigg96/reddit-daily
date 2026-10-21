@@ -348,8 +348,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   is the re-raise below. (2) D13's "owner absent" line was stale and seeded a
   ship-unless-they-object candidate; re-reviewed. (3) `backlog_status.py
   --dropped` lists only drops, so the generator re-proposed done work (bet 2's
-  start date, answered 10-17 and 10-19) and a ranker put it first. Proposed:
-  `--dropped` also prints each entry's Done leads. (4) Narrated branch samples
+  start date, answered 10-17 and 10-19) and a ranker put it first. Fixed: `--dropped`
+  also lists each entry's Done openings (reviewed). Left: a shift that re-stamps
+  its time and rewords its headline still lists twice (10-18 08:45/08:50). (4) Narrated branch samples
   (main's code narrating the branch's script) would take the owner's hands off
   the critical path, but touch secrets handling: for the 11-05 review, not an
   ask beside #77. Decisions: D13 re-reviewed; the rest unchanged. Outward look
