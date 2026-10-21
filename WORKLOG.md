@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-21 (09:20) — The host's opening tag can no longer show a title; bet 1 is ready for your narrated render
+
+    Worked (% of the shift): product 40 · gm 15 · strategy 15 · engineering 10 · data 10 · security 5 · reliability 5
+
+**Summary:** Bet 1's opening tag, the host line nearly every viewer sees, came back a title on every model and wording. It now shows only when it reads as a reaction, so bet 1 is ready for the one narrated render you asked for before deciding. Separately, posting more was priced at its ceiling and cannot reach revenue alone. Nothing reached viewers yet.
+
+### Toward revenue
+- **Bet 1 is one step from your decision.** You asked shifts to get the tags to your bar, then bring a narrated render back. The opening tag was the part no wording fixed. It now appears only when it exclaims or opens on a sound ("Oh, THIS question.", "Hmm, tricky"). Otherwise it is left out. A fresh reviewer scored 40 new opening tags blind, from three models and two wordings: every one let through was a reaction, and every title was left out. The cost: the opening tag will appear on only about one video in six to eight. The rest of the host is unchanged, and the upload model's reactions react on about 14 of 18 answers by eye. The command for the render is on #77.
+- **Posting more is not a revenue plan.** Even at the most we could post as things stand, every YouTube route stays at least 70 times short (Strategy, below). That keeps bet 1's per-video change first.
+
+### Done
+- **Product (a bet):** the planned test of the "blurt" wording for the opening tag, on the upload model, six posts (6 of today's 8 allowed AI requests). It reacted on 3 of 6 against 2 of 6 for today's wording, and repeated "Tricky question". Not kept: no wording has fixed the opening tag on any model, so the fix is a check in code instead.
+- **Engineering:** the check, reviewed by a fresh agent. No bugs; its four fixes are in (curly quotes, stretched sounds like "Ohhh", a test that tested the wrong thing). Merged into the release branch, so tomorrow's daily release check prints it on the upload model. The trial tool now prints each opening tag as written, and whether it would show.
+- **Strategy:** how far posting more could take us. The Polly budget as you set it ($3 a month) caps us near 6 uploads a day, three times today's volume. Gemini's daily allowance caps us near 4 unless the AI calls move to Groq. Even at 6 a day, and even if views grew fully with volume, the Partner Program stays about 240 times short and the 500-subscriber tier about 70 times. So posting more cannot reach revenue alone; the gap is in each video. No current plan changes. For the 5 November review: a second step up in volume is not a revenue plan.
+- **General management:** only one or two items were ready, so a fresh agent proposed eight and two more ranked them in opposite orders. The volume ceiling came first both ways (done above). Second and third: a count of what repeats across our last 60 uploads, against YouTube's spam policy. No title opening repeats more than 4 times and six background clips rotate, so the one music track, your task already, stays the only gap. Also second or third: whether pay at the Partner Program's bar covers our costs. Dropped: the subscription's price isn't recorded, and every route is hundreds of times away. Fourth both ways, whether the opening decides reach, now has its read built, reviewed and merged, with its rule fixed before any number. The review caught that reading ages vary from 4 to 10 days, so an age guard was added before anything was read. Read today: 19 uploads, one short of the 20 needed, so it reads again on Sunday's figures. **Dropped:** a published norm for the engaged share (5th both ways), a reach-cut signature for Sunday's figures, an opinion-question test, and moving only the content screen to Groq (needs a sample render and a review). Also checked: the opening-tag check applied to reactions would drop half the good ones on the upload model and all of Groq's main model's, so it is not a route to the Groq move.
+
+  Mostly improving: the opening-tag check and the volume read were bets on what ships and on the plan. The trial-tool fix was a repair.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes since last night, you remain the only collaborator, and the money controls are in place ($0.62 this month, forecast $0.86 of $3).
+- AI use: 6 Gemini requests (upload model); about 90 Groq requests (free; some repeated after two runs collided).
+
+### Blocked
+- **For you, in order:** #77 (one narrated render, command inside; best away from the 05:00 and 17:00–18:30 UTC uploads); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- Read tomorrow's daily release check: its opening-tag line now says whether one was left out.
+- If you render bet 1 and it passes your test, the label on #77 ships it after its daily check.
+- The 26 October weekly read is the first with the per-upload skip. Check how many uploads it marks as failed, then run the opening-reach read once (`--opening-reach`).
+
+### Better?
+- **Than last shift:** Slightly. The one part of bet 1 no wording could fix is now held in code, and bet 1 is in front of you. We also know volume alone cannot get us there. Nothing changed for viewers.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-20 (22:18) — Bet 1's planned check of where viewers leave would have missed the opening, and is fixed before any data; the distance to revenue is now computed, and had drifted
 
     Worked (% of the shift): data 30 · product 25 · gm 15 · monetization 15 · legal 5 · reliability 5 · security 5
@@ -103,51 +136,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly. Bet 1's verdict can no longer be misread at the opening, and the distance to revenue is measured rather than remembered. Nothing changed for viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-20 (16:35) — A new wording made the host's opening tag react on the free models, from none of 17 to 9 of 16; a failed AI request now says whether the day's allowance is gone
-
-    Worked (% of the shift): product 30 · reliability 25 · gm 15 · editorial 10 · engineering 5 · monetization 5 · legal 5 · security 5
-
-**Summary:** The host's opening tag, which nearly every viewer sees, has come out as a title on every model tried. A new wording made it react on about half of the free models' tries, so tomorrow's few requests on the upload model can go straight to it. Separately, failed AI requests now say whether the day's allowance is spent, and that change is live. Nothing reached viewers.
-
-### Toward revenue
-- **A wording for the host's opening tag worth spending tomorrow's AI requests on.** On every model so far the opening tag came out as a title for the question ("Brutal truth"). I asked instead for "the words you would blurt out the moment a friend asked you this question". Both free models then reacted on 9 of 16 tries ("Ouch, right?", "Sounds shady"), against 0 of 17 with today's wording, scored blind in one mixed sheet; a second blind scorer agreed on 32 of the 33. The catch: one model opened most of them with "Sounds…", which is the sameness YouTube's spam policy names. The model uploads use has not tried it yet. The trial tool now runs it with one setting.
-- **A better free model for the host's tags, if we must leave Gemini.** Moving every AI call to Groq would stop Reddit's text being used for training, which Reddit's terms forbid. But Groq's model turned the host's reactions into labels. Groq's other free model, on the same nine posts and scored blind, reacted to 10 of 24 answers against 4 of 27 ("Four hours?", "Sad face"). But none of its opening tags reacted with today's wording, and 2 of its 11 replies had no host lines at all. Neither model meets the bar, which the upload model nearly meets, so nothing switches.
-- **An upload's lost title can now be explained.** When the AI refuses a request for being over its limit, the upload log and the release check now say which limit it hit. If it was the daily allowance, the next upload's title is at risk until the 07:00 UTC reset. If it was the per-minute limit, a short wait would have cleared it. Today's release check was refused on its fifth content-screen case, after this morning's trials. It was the first in eight days of checks, and nothing recorded which limit. Reviewed fresh, no defects; all tests pass; merged.
-
-### Done
-- **Editorial:** about 1 upload in 20 re-asks a question the channel already covered (4 of the last 60, such as "the scariest story you know is true"). Each was a different post with different answers. Exact repeats numbered 4 in 187, none since the 8 October guard. That is not enough to need a new guard before four a day.
-- **General management:** a fresh agent proposed eight candidates, and two more ranked them in opposite orders. The repeat check led both and is done. The Groq model trial came second and third and is done; the opening-tag wording grew out of it. **Dropped:**
-  - a pivot checkpoint: the quarterly planning already judges each bet against its set bar.
-  - whether 7-day watch time predicts later views: third one way, seventh the other, and under 1% of views come from old videos.
-  - the background clip and how many viewers stay: two weeks of data, split across many clips.
-  - pricing Reddit's commercial data deal: you said not yet (#60).
-  - why shifts end early: nothing records how much ready work each shift had.
-  - a subscriber benchmark: it changes no decision.
-
-  A second round of six, from the functions no recent shift has worked (distribution, finance, money, audience), put the same item first both ways. Four a day's rule said only to revert if "the 4-week view total falls". That names no comparison and contradicts your rule that views, which swing 27–50% on noise, never trigger a revert. Before any data, it now compares the first four full weeks with the four before, a fall being a finding, not a revert. Second both ways, for a later shift: one command printing each revenue route's distance.
-
-  Mostly fixing; the two tag trials are bets.
-- **Monetization:** YouTube's eligibility page counts "qualified Shorts views", never saying "engaged" as our plan assumes, and omits the 500-subscriber tier. Unconfirmed, but no decision changes: every route stays hundreds of times short.
-- **Engineering:** the trial tool now takes the new wording and a choice of Groq model, on bet 1's branch. A fresh review found no defect in that, but it did find an older hole: a Groq trial run without Groq's key would quietly spend up to 18 of the day's 20 upload-model requests. It now refuses before any request. All tests pass, and the branch still merges cleanly.
-- **Reliability (fixing):** if the AI's content screen ever replied without its verdict, or with a blank one, the post went through as checked, skipping even the keyword check. It now falls to the keyword check, which spends no request. Two reviews had left this open since 9 October. A fresh review found no defects, all tests pass, and it is merged.
-- **Security:** the standing check is clean. No secrets are in the project, no workflows changed, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
-- AI use: no Gemini (an upload was due); about 55 Groq requests (free).
-
-### Blocked
-- **For you, in order:**
-  - #77: nothing until a render is worth watching.
-  - #80: one label (four a day waits for bet 1, music first), needed by about 1 November.
-  - #50: four commands, which unblocks #65.
-  - #59: the account checks.
-
-### Next
-- First: check that this afternoon's upload landed, and read its log row. If its title fell back, the new label says whether this morning's trials used up the day's allowance.
-- After 07:00 UTC and away from uploads, run the opening tag on the upload model with the new wording against today's, on three posts per shift. Check whether it reacts, and whether every tag opens the same way.
-
-### Better?
-- **Than last shift:** Slightly: the weakest, most-seen part of bet 1 has a lead, and a failure that can cost an upload its title is now visible. Nothing changed what viewers see.
 - **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
