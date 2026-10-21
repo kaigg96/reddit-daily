@@ -2467,3 +2467,10 @@ def test_rank_correlation_refuses_thin_and_unreported_uploads():
     for v in unreported:
         v.engaged_views = None
     assert insights.rank_correlation(unreported, "engaged_share", "views")[2] == 0
+
+
+def test_rank_correlation_is_two_sided_and_survives_a_constant():
+    rho, p, _ = insights.rank_correlation(_reach(30, lambda i: 0.5 - i / 100, lambda i: 20 + i), "engaged_share", "views")
+    assert abs(rho + 1) < 1e-9 and p < 0.01
+    rho, p, _ = insights.rank_correlation(_reach(30, lambda i: 0.3, lambda i: 20 + i), "engaged_share", "views")
+    assert rho == 0.0 and p == 1.0

@@ -748,11 +748,23 @@ def main():
               f"10+ views (n={n})")
         if rho is None:
             print(f"  insufficient data: under {insights.REACH_MIN_N} uploads; read at the next snapshot")
+            return
+        # Readings span about 4-10 days (weekly snapshots), and views grow with
+        # age: a link that is reading age is not the opening (review, 10-21).
+        for v in videos:
+            v.reading_age = (load.anchor - v.published).total_seconds() / 86400
+        by_age = [insights.rank_correlation(videos, "reading_age", m)[0]
+                  for m in ("views", "engaged_share")]
+        print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        print("  against reading age: views " + ", engaged share ".join(
+            "-" if r is None else f"{r:+.2f}" for r in by_age))
+        if rho >= 0.3 and p_value < 0.05:
+            confounded = all(r is not None and abs(r) >= 0.3 for r in by_age)
+            print("  rho >= 0.3 at p < 0.05: met, " + (
+                "but both track reading age -- confounded; read again on the next snapshot"
+                if confounded else "a backlog candidate with its own rule"))
         else:
-            lead = rho >= 0.3 and p_value < 0.05
-            print(f"  Spearman rho {rho:+.2f}, permutation p {p_value:.3f}")
-            print("  rho >= 0.3 at p < 0.05: " + ("met -- a backlog candidate with its own rule"
-                                                  if lead else "not met -- noise; the row leaves"))
+            print("  rho >= 0.3 at p < 0.05: not met -- noise; the row leaves")
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
