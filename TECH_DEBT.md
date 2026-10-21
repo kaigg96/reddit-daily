@@ -185,6 +185,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   is installed) and a render can reuse the last run's narration. Both are
   built on `product/host-tags` (2026-10-20): it imports on 3.10, and
   `REUSE_NARRATION=1` on a dry run buys each line once; closes when it merges.
+  Re-checked 10-21 on `46548ae` under 3.10: 656 tests pass and a `SAMPLE=1`
+  render plays; `google-api-core` warns it will drop 3.10, so rebuild anyway.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
