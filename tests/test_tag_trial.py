@@ -37,7 +37,7 @@ def test_a_setup_wording_reaches_the_prompt(monkeypatch, setup, words):
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
     monkeypatch.setattr(config, "HOST_TAGS", True)
-    for name in ("FALLBACK_MODEL", "generate_retrying"):
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -54,7 +54,7 @@ def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
     monkeypatch.setattr(config, "HOST_TAGS", True)
-    for name in ("FALLBACK_MODEL", "generate_retrying"):
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -69,3 +69,19 @@ def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeyp
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     with pytest.raises(SystemExit, match="GROQ_API_KEY"):
         tt.main(["--model", "groq", "--posts", "1"])
+
+
+def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypatch, capsys):
+    import json
+    import types
+    from src import config
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_TAG_EDITS"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    host = llm.Commentary("The mystery", ["a", "b", "c"], "My vote.")
+    monkeypatch.setattr(llm, "get_metadata", lambda q, a, **k: types.SimpleNamespace(
+        source="sample", commentary=host))
+    tt.main(["--model", "sample", "--posts", "1"])
+    row = json.loads(capsys.readouterr().out)
+    assert row["setup"] == "The mystery" and row["setup_ships"] is False

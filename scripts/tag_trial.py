@@ -124,6 +124,9 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
         post = llm.requests.post
         llm.requests.post = lambda url, json=None, **kw: post(
             url, json=dict(json or {}, reasoning_effort="none"), **kw)
+    # A trial reads the setup as written: the gate that drops one that is not
+    # a reaction would blank it here. main prints the gate's call beside it.
+    llm._reads_as_reaction = lambda line: True
     llm.FALLBACK_MODEL = None
     config.GROQ_FALLBACK = False
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
@@ -155,6 +158,8 @@ def main(argv=None):
     # uncapped and with retries, a run could spend 18 of the day's 20.
     if args.model == "groq" and not os.environ.get("GROQ_API_KEY"):
         raise SystemExit("--model groq needs GROQ_API_KEY; refusing before any request")
+    from src import llm as gated
+    ships = gated._reads_as_reaction
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
@@ -163,7 +168,9 @@ def main(argv=None):
         meta = llm.get_metadata(q, answers, style="A", caps=True)
         h = meta.commentary
         print(json.dumps({"post": n, "source": meta.source,
-                          "setup": h and h.setup, "reactions": h and h.reactions,
+                          "setup": h and h.setup,
+                          "setup_ships": bool(h and h.setup and ships(h.setup)),
+                          "reactions": h and h.reactions,
                           "vote": h and h.verdict}, ensure_ascii=False), flush=True)
 
 
