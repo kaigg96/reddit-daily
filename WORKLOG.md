@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-21 (16:50) — Your bet 1 ask had drifted from the build and now says one thing; its render is checked on your Python; a long first answer costs no watch time
+
+    Worked (% of the shift): gm 45 · data 25 · product 10 · reliability 5 · market 5 · audience 5 · security 5
+
+**Summary:** Nothing reached viewers. The one ask that unblocks revenue (#77) now matches the version you would render and asks one thing, and its render command is checked on your machine's Python. A data read found no reason to read the shortest answer first.
+
+### Toward revenue
+- **#77 says one thing again.** Its opening text still described the 17 October version (sentence notes, old pictures) and said a label alone ships it, while this morning's comment asked you to render first. Rewritten, with no email: render once with the command inside, then label it if a first-time viewer follows the video. This is the second time an ask has drifted; the lasting fix waits on #50.
+- **The render should run on your machine.** It runs Python 3.10, which broke a render once. On the release branch as it stands, all 656 tests pass under 3.10, and a fixed-post render plays (1080×1920, 28 seconds).
+- Nothing else moved toward revenue: every other step waits on that render or on uploads accumulating.
+
+### Done
+- **Data (a bet):** does a long first answer lose viewers before the halfway point, where most leave? Answer lengths for 176 uploads were recovered from the run records, and the rule was fixed before reading. No link (35 uploads; noise), so reading the shortest answer first is not worth trying. Reviewed fresh; merged.
+- **General management (the audit, due after ten shifts):** the ten shifts since 17 October ran 2–56 of 60 minutes. Nothing reached viewers; ten changes merged, all measurement or reliability; bet 1's craft moved on your 19 October feedback. Otherwise the process works: reviews caught real defects, and the daily release check passed. Three fixes. The stale #77 above. The decisions record still said you were absent (you answered #81 the day it opened), and that had seeded a "ship unless you object" idea. And the list of past ideas showed only dropped ones, not finished ones, so the idea generator re-proposed bet 2's start date, worked out twice already. It now shows both (reviewed fresh; merged).
+- **General management (ranking):** nothing was ready, so a fresh agent proposed eight and two more ranked ten in opposite orders. Top both ways: bet 2's start date, already done. Answered on the spot: shock phrases in titles (one borderline, "will surprise you", in about 22 titles since the ban); GitHub's server change (still on the old image today, and nothing found depending on it, so no ask). **Audience:** the viewer-reply item's reopen rule now says "weekly": 17 comments sit on 6 of the last 60 uploads, but a week's read shows only 1 or 2. **Dropped:** shipping bet 1 unless you object by a date (you asked to watch first, and it is already queued for the 5 November review); real narration on test renders (it changes how keys are handled, so for that review, not an ask beside #77); clip-by-clip reach (the standing check holds). **Market:** Groq now offers a free, expressive voice (Orpheus), but it gives no word timings for captions and takes 200 characters a request, and a voice change is yours. Mostly fixing; the first-answer read was a bet.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes since this morning, you remain the only collaborator, and the money controls are in place ($0.62 this month, forecast $0.86 of $3). The content screen's weekly audit: 4 skips since late August, none since 12 September.
+- AI use: no Gemini (an upload was within the hour); one free model list from Groq.
+
+### Blocked
+- **For you, in order:** #77 (one narrated render, command inside, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- Read tomorrow's daily release check. If you render bet 1 and label #77, it ships after that check.
+- 26 October weekly read: the first with the per-upload skip. Check how many uploads it marks as failed, then run the opening-reach read once.
+- 5 November monthly review: real narration on test renders, which would take your hands off bet 1's path; the Orpheus note with it.
+
+### Better?
+- **Than last shift:** Slightly. The ask that unblocks revenue reads one way, and its command is known to run on your machine. Nothing changed for viewers.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, bet 1 (built 11 October) has not shipped, and ten shifts merged only measurement and reliability.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-21 (09:20) — The host's opening tag can no longer show a title; bet 1 is ready for your narrated render
 
     Worked (% of the shift): product 40 · gm 15 · strategy 15 · engineering 10 · data 10 · security 5 · reliability 5
@@ -95,50 +126,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Slightly. The one part of bet 1 no wording could fix is now held in code, and bet 1 is in front of you. We also know volume alone cannot get us there. Nothing changed for viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-20 (22:18) — Bet 1's planned check of where viewers leave would have missed the opening, and is fixed before any data; the distance to revenue is now computed, and had drifted
-
-    Worked (% of the shift): data 30 · product 25 · gm 15 · monetization 15 · legal 5 · reliability 5 · security 5
-
-**Summary:** Nothing reached viewers: the step that would needs AI requests that tomorrow morning's upload shares. Instead, bet 1 will now be judged on the right viewers, and the plan's distance to revenue is computed from our data (the Partner Program is about 720 times short, not 760–880).
-
-### Toward revenue
-- **Nothing directly.** The upload-model trial waits for the 07:00 UTC reset.
-- **Bet 1 will be judged on the right viewers.** Its pre-set rule reads where viewers leave from YouTube's retention figures, and would blame the host's opening tag if the 25% mark fell. Those figures leave out everyone who swipes away. On all 29 recent uploads, as many viewers or more are counted at 10% in as started the video, though only 20–58% of their plays count as real views. So a weak opening would never show there. That shows in the share of plays that become real views, which we track; the rule now says so, before any of bet 1's uploads exist.
-- **One failed request no longer loses a week of that data.** On 19 October a single server error, a third of the way through the weekly read, cost the 23 uploads after it their retention figures. Each upload gets only one reading at a week old. Retries were added that day; now an error that outlasts them costs only its own upload. Reviewed fresh (one missing test, added); merged.
-- **Each revenue route's distance is now one command, and the plan's figures were stale.** Partner Program: about 720 times short on views and 48 on subscribers. New applicants from February: about 1,450. The 500-subscriber tier: about 220. TikTok: about 8 times short on views, but about 33 million views to gain its 10,000 followers at our rate. No decision changes: every route stays hundreds of times short, and bet 1 comes first. Reviewed fresh; merged.
-
-### Done
-- **Product (a bet):** a second wording for the host's opening tag, naming the "Sounds…" sameness, was tried on both free models and scored blind against the earlier one. It reacted on 7 of 16 against 8, made no sense more often (5 against 1), and repeated other openers. Not kept. The earlier wording stays the one for the upload model, though it once took a side on the privacy post.
-- **General management:** fewer than three items were ready, and both need the AI allowance. A fresh agent proposed eight; two more ranked them, in opposite orders. The wording trial came first both ways. The two retention items came second and third both ways. The routes command, fourth and fifth, was done as time remained. **Dropped:**
-  - making the 883 old reading videos private now, not with the rebrand: no new evidence, and it spends your attention.
-  - replies to our automatic comment: 7 viewer comments in all.
-  - YouTube's qualifying-view definition: read last shift.
-
-  A second round of six, from the functions not yet worked, put two quick legal reads top both ways. Neither changes a decision:
-  - **Groq's terms** (June 2026) are written for businesses and ban training on what we send, so nothing blocks the planned move there.
-  - **YouTube's AI-content label** covers realistic depictions of real people, events or scenes. A stock narrator reading text over stock footage is none of these, so it stays unset.
-
-  Below the bar: Reddit's guidance that deleted posts and comments must stop showing. Ours stay in the videos, but your "not yet" on Reddit's terms already covers it. Also below: a weak-topic test (not due until bet 1's read), the name check (before the rebrand is due), and the content screen's one skip.
-
-  With time left, the one ready item that could move tonight was the move to Groq, which waits on its host reactions: they come out as labels. A wording that rules out the label's shape (never an adjective and a noun) was tried the same way. Groq's main model reacted on 7 of 27 against 2, possibly chance, and labels were still most tags. Not kept: the move stays blocked on this.
-
-  A third round found nothing to finish in the last 15 minutes that would change a decision. The three running title and subreddit tests are not yet due, and the open code-health items need you or a render.
-
-  Mostly fixing; the two wording trials were bets.
-- **Security:** the standing check is clean. No secrets are in the project, the only workflow change was the one you approved tonight, you remain the only collaborator, and the money controls are in place ($0.60 this month, forecast $0.81 of $3).
-- AI use: no Gemini; 72 Groq requests (free).
-
-### Blocked
-- **For you, unchanged, in order:** #77 (nothing until a render is worth watching); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- After 07:00 UTC and away from uploads: the host's opening tag on the upload model, with the new wording against today's, three posts. Watch for repeated openings and for taking a side on politics.
-- The 26 October weekly read is the first with the per-upload skip. Check how many uploads it marks as failed.
-
-### Better?
-- **Than last shift:** Slightly. Bet 1's verdict can no longer be misread at the opening, and the distance to revenue is measured rather than remembered. Nothing changed for viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
