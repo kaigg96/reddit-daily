@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-21 (22:45) — Reddit is closing the free access every video starts from: please register our app before 31 October; free access ends by March 2027
+
+    Worked (% of the shift): legal 30 · strategy 25 · gm 20 · market 10 · data 5 · reliability 5 · security 5
+
+**Summary:** Looking for new work turned up a Reddit announcement of 30 September. New requests close on 31 October, apps not registered lose access from 12 January, and free access ends by March 2027. Every video we make starts from that access, so this is now the company's largest risk. You have one new ask (#82), and shifts are pricing other sources for the 5 November review.
+
+### Toward revenue
+- **Our supply now has an end date.** I read two reports of Reddit's announcement first-hand (TechCrunch, and a fuller one quoting Reddit's developer posts). New access requests close on 31 October. Apps not registered lose access from 12 January. Free access ends by March 2027; after that Reddit wants "commercial deals", reported at around $12,000 a month, which is out of reach for us. Nothing in the project had recorded it, three weeks on. Bet 1's host carries over to any source; the readings do not.
+- **#82 asks you to register our app before 31 October,** and to ask Reddit whether a small registered app keeps access after March. Registering is free and needs your Reddit account; Reddit may already have emailed it a reminder. It is quicker than #77 and has a date, so it comes first. Reddit's replacement platform runs no Python and is built for apps inside Reddit, so it cannot carry our source.
+- **Pricing the alternatives is now ready work,** to bring you a proposal at the 5 November review. First reads are under Done.
+
+### Done
+- **Legal and market (a bet):** what could replace Reddit. Stack Exchange's terms allow our use, free. The condition: each video credits and links every author and carries the same open licence. It could supply two a day: 13 of 21 live questions on its workplace site have three or more answers. But those answers run 100 to 360 words against our 12. Its licence lets us shorten them, which Reddit's never did. The free AI model cut six to about 14 words each, accurate but dry advice, and both questions were too long for our titles. So it would be a different show, not a replacement. Writing our own questions and having AI write the answers costs no licence. But on two of our questions it wrote stock jokes and invented a personal story, so those answers could only be presented as the host's own. Hacker News and Mastodon do not allow this use. Also noted: Reddit's rules reportedly now bar apps from showing posts their authors deleted, which our published videos cannot honour. No other service we depend on has a shutdown date; Google keeps the older model our titles use only for regular users, which we are. Bet 1's host needs three short, distinct answers to react to: shortened Stack Exchange answers give that, while AI-written ones would have the host reacting to itself.
+- **Strategy:** the risk register now carries the new risk, rated fatal. The Reddit-terms row also said Groq's no-training tier lands with bet 1; it lands only as a backup (the full move is blocked on its tags), now corrected.
+- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas, drawn from the data, the risk register and the list of past ideas. Two more agents ranked them, in opposite orders, and agreed on the top three. First: whether Reddit grants commercial agreements to small creators at all. That search turned up the dates above. Second: writing down, before bet 1's results, the numbers that would put a change of direction on your agenda. The end of free access now forces that question by March, so it was overtaken. Third: checking that the 26 October read will run. It will: the step that has never run on real data works on today's figures. **Dropped:** the break-even point (it needs the subscription's price); old duplicate uploads (most share a question, not a video); asking you to change the shift schedule (short shifts are ours to fix); whether views are bunching into a few hits (four-week totals read ×0.93, noise); a comment-hold setting (one abusive comment).
+- **Data and reliability:** the scorecard's jump in median views is noise, since four-week totals fell (×0.93). The zero-view recent uploads are the usual reporting lag: every week since July shows 3 to 5. The watched background clip stays under its retirement bar. Bet 1's branch, merged with today's main, passes 694 tests. A run that loses Reddit access fails loudly rather than skipping an upload silently.
+- **Security:** the standing check is clean. No secrets are in the project, no workflow has changed since this afternoon, you remain the only collaborator, and the money controls are in place.
+- Neither a fix nor a change to what ships: a risk found, and the plan changed with it. AI use: no Gemini, no narration; four free Groq requests.
+- **Process:** a change fatal to our supply sat public for three weeks while ten shifts looked for work. The monthly review's outside look should cover the source's developer news. For the 5 November review. Also awkward: waiting on helper agents takes timed pauses, because the tool that watches for them is refused here.
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, before 31 October); #77 (one narrated render, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- Continue pricing sources for the 5 November proposal (ready). Left: Reddit's answer on access after March if you register, and the proposal itself. The 26 October read of whether the opening decides reach also bears on it: if the question carries a video, the source of answers matters less.
+- 26 October weekly read: check how many uploads it marks as failed, then run the opening-reach read once.
+- 5 November monthly review: the source proposal, and narration on test renders.
+
+### Better?
+- **Than last shift:** Yes, in what we know: the company now sees that its supply ends by March 2027, with ten days to be safe on registering. Nothing changed for viewers.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The plan is truer: it now carries a dated, fatal risk it had missed.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-21 (16:31) — Your bet 1 ask had drifted from the build and now says one thing; its render is checked on your Python; a long first answer costs no watch time
 
     Worked (% of the shift): gm 45 · data 25 · product 10 · reliability 5 · market 5 · audience 5 · security 5
@@ -90,41 +123,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. The ask that unblocks revenue reads one way, and its command is known to run on your machine. Nothing changed for viewers.
 - **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, bet 1 (built 11 October) has not shipped, and ten shifts merged only measurement and reliability.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-21 (09:20) — The host's opening tag can no longer show a title; bet 1 is ready for your narrated render
-
-    Worked (% of the shift): product 40 · gm 15 · strategy 15 · engineering 10 · data 10 · security 5 · reliability 5
-
-**Summary:** Bet 1's opening tag, the host line nearly every viewer sees, came back a title on every model and wording. It now shows only when it reads as a reaction, so bet 1 is ready for the one narrated render you asked for before deciding. Separately, posting more was priced at its ceiling and cannot reach revenue alone. Nothing reached viewers yet.
-
-### Toward revenue
-- **Bet 1 is one step from your decision.** You asked shifts to get the tags to your bar, then bring a narrated render back. The opening tag was the part no wording fixed. It now appears only when it exclaims or opens on a sound ("Oh, THIS question.", "Hmm, tricky"). Otherwise it is left out. A fresh reviewer scored 40 new opening tags blind, from three models and two wordings: every one let through was a reaction, and every title was left out. The cost: the opening tag will appear on only about one video in six to eight. The rest of the host is unchanged, and the upload model's reactions react on about 14 of 18 answers by eye. The command for the render is on #77.
-- **Posting more is not a revenue plan.** Even at the most we could post as things stand, every YouTube route stays at least 70 times short (Strategy, below). That keeps bet 1's per-video change first.
-
-### Done
-- **Product (a bet):** the planned test of the "blurt" wording for the opening tag, on the upload model, six posts (6 of today's 8 allowed AI requests). It reacted on 3 of 6 against 2 of 6 for today's wording, and repeated "Tricky question". Not kept: no wording has fixed the opening tag on any model, so the fix is a check in code instead.
-- **Engineering:** the check, reviewed by a fresh agent. No bugs; its four fixes are in (curly quotes, stretched sounds like "Ohhh", a test that tested the wrong thing). Merged into the release branch, so tomorrow's daily release check prints it on the upload model. The trial tool now prints each opening tag as written, and whether it would show.
-- **Strategy:** how far posting more could take us. The Polly budget as you set it ($3 a month) caps us near 6 uploads a day, three times today's volume. Gemini's daily allowance caps us near 4 unless the AI calls move to Groq. Even at 6 a day, and even if views grew fully with volume, the Partner Program stays about 240 times short and the 500-subscriber tier about 70 times. No current plan changes. For the 5 November review: a second step up in volume is not a revenue plan.
-- **General management:** only one or two items were ready, so a fresh agent proposed eight and two more ranked them in opposite orders. The volume ceiling came first both ways (done above). Second and third: a count of what repeats across our last 60 uploads, against YouTube's spam policy. No title opening repeats more than 4 times and six background clips rotate, so the one music track, your task already, stays the only gap. Also second or third: whether pay at the Partner Program's bar covers our costs. Dropped: the subscription's price isn't recorded, and every route is hundreds of times away. Fourth both ways, whether the opening decides reach, now has its read built, reviewed and merged, with its rule fixed before any number. The review caught that reading ages vary from 4 to 10 days, so an age guard was added before anything was read. Read today: 19 uploads, one short of the 20 needed, so it reads again on Sunday's figures. **Dropped:** a published norm for the engaged share (5th both ways), a reach-cut signature for Sunday's figures, an opinion-question test, and moving only the content screen to Groq (needs a sample render and a review). Also checked, for the move to Groq: Groq's third and last chat model labels too (about 3 of 24 reactions react), and the opening-tag check applied to reactions would drop half the good ones on the upload model. So the move is now marked blocked: none of Groq's models writes the host's tags to your bar.
-
-  With nothing ready after that, a second round of five came from the functions the first barely touched. Two were answered on the spot. **Security:** no upload of ours has ever left public. The 18 private videos are the same in every snapshot that records it, and all but one predate July. **Reliability:** failure rates by release cannot be compared, because those columns began during the current release. Dropped: posting hour (tangled with the subreddit test, since each day's two uploads split the subreddits), spacing between uploads (read from a retention figure that leaves out everyone who swipes away), and weeks to the Partner Program (flat, so never).
-
-  Mostly improving: the opening-tag check and the volume read were bets on what ships and on the plan. The trial-tool fix was a repair.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes since last night, you remain the only collaborator, and the money controls are in place ($0.62 this month, forecast $0.86 of $3).
-- AI use: 6 Gemini requests (upload model); about 90 Groq requests (free).
-
-### Blocked
-- **The move to Groq** (the Reddit-terms risk): none of Groq's three chat models writes tags to the bar. It waits on a new model there.
-- **For you, in order:** #77 (one narrated render, command inside; best away from the 05:00 and 17:00–18:30 UTC uploads); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- Nothing is ready: generate and rank new work first.
-- Read tomorrow's daily release check: its opening-tag line now says whether one was left out.
-- If you render bet 1 and it passes your test, the label on #77 ships it after its daily check.
-- The 26 October weekly read is the first with the per-upload skip. Check how many uploads it marks as failed, then run the opening-reach read once (`--opening-reach`).
-
-### Better?
-- **Than last shift:** Slightly. The one part of bet 1 no wording could fix is now held in code, and bet 1 is in front of you. We also know volume alone cannot get us there. Nothing changed for viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, and bet 1, built 11 October, has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
