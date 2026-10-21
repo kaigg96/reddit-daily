@@ -5,6 +5,8 @@ Actions log prints them (`  comment N: …`) and the video it uploaded
 (`Upload complete! Video ID: …`), so this reads those logs and writes word
 counts only — never the answers' text, which is Reddit's — to
 `analysis/answer_lengths.csv`, for `report.py --first-answer` (PRD §4).
+Answers are printed before the duration guard can drop the last, so `words_2`
+and `words_3` may count an answer the video left out; `words_1` never is (review).
 
     venv/bin/python scripts/answer_lengths.py
 
