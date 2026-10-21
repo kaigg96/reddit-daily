@@ -86,6 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - Continue pricing sources for the 5 November proposal (ready). Left: Reddit's answer on access after March if you register, and the proposal itself. The 26 October read of whether the opening decides reach also bears on it: if the question carries a video, the source of answers matters less.
+- If #82 is still open on 28 October, raise it once more with the same key (a comment emails you): after the 31st, registering may need a new request Reddit no longer accepts.
 - 26 October weekly read: check how many uploads it marks as failed, then run the opening-reach read once.
 - 5 November monthly review: the source proposal, and narration on test renders.
 
