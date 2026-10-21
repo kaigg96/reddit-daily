@@ -242,9 +242,9 @@ def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
     assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
 
 
-def test_the_sample_setup_fits_the_text_cap():
+def test_the_sample_setup_would_ship_as_a_tag(tag_host):
     from src import sample
-    assert llm._within_cap(sample.METADATA.commentary.setup, "setup")
+    assert llm._usable(sample.METADATA.commentary.setup, "setup")
 
 
 def test_a_trademark_sign_is_text_not_an_emoji(monkeypatch):

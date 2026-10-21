@@ -72,16 +72,21 @@ def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeyp
 
 
 def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypatch, capsys):
+    """Through the real metadata call, so the gate's bypass is what is tested."""
     import json
-    import types
     from src import config
-    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_TAG_EDITS"):
+    for name in ("FALLBACK_MODEL", "_reads_as_reaction", "_TAG_EDITS"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
-    host = llm.Commentary("The mystery", ["a", "b", "c"], "My vote.")
-    monkeypatch.setattr(llm, "get_metadata", lambda q, a, **k: types.SimpleNamespace(
-        source="sample", commentary=host))
+    for name, on in (("COMMENTARY", True), ("HOST_TEXT", True), ("HOST_TAGS", True),
+                     ("COMMENTARY_ANSWERS", 3)):
+        monkeypatch.setattr(config, name, on)
+    reply = json.dumps({"title": "A title", "keywords": ["a", "b", "c"], "setup": "The mystery",
+                        "reactions": ["Oof.", "Ha, no.", "Wait, what?"],
+                        "cta": "My hand goes up for the first. Which gets your vote?"})
+    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, *a, **k: reply)
     tt.main(["--model", "sample", "--posts", "1"])
-    row = json.loads(capsys.readouterr().out)
+    row = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
     assert row["setup"] == "The mystery" and row["setup_ships"] is False
+    assert row["reactions"] == ["Oof.", "Ha, no.", "Wait, what?"]

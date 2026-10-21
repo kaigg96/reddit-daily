@@ -398,15 +398,20 @@ _RUN_TOGETHER = re.compile(r"[^\W\d_]{19,}")
 # truth", "The mystery", "Future job apocalypse?"): the weak line the owner
 # turned down (#77). No wording fixed it, so a setup ships only when it reads
 # as a reaction: it exclaims, or opens on a sound. A question mark is not
-# enough, as titles come as questions too. A setup dropped loses only its tag.
-_SOUNDS = frozenset("""ah aha aw ew eek geez ha hah haha hm hmm huh jeez meh
-    nope oh ohh oof ooh oops ouch phew uh ugh um wait welp whoa wow yay yep
-    yeah yikes""".split())
+# enough, as titles come as questions too. It reads the form, not the sense:
+# "Oh, brutal truth" ships. A dropped setup loses its tag; with every reaction
+# dropped too, the upload is today's reading, as for any line.
+_SOUNDS = frozenset("""ah aha aw dang damn ew eek gosh geez ha hah haha hm hmm
+    huh jeez meh nope oh oof ooh oops ouch phew uh ugh um wait welp whew whoa
+    woah wow yay yep yeah yikes""".split())
 
 
 def _reads_as_reaction(line):
-    first = re.match(r"[^\W\d_]+", line.strip(" \"'"))
-    return "!" in line or bool(first and first.group().lower() in _SOUNDS)
+    first = re.search(r"[^\W\d_]+", line)
+    # Stretched sounds ("Ohhh", "Hmmm") fold to two letters, then to one.
+    word = first and re.sub(r"(.)\1{2,}", r"\1\1", first.group().lower())
+    return "!" in line or bool(word and (word in _SOUNDS or re.sub(r"(.)\1", r"\1", word) in _SOUNDS
+                                         or re.fullmatch(r"(ha|he)+h?", word)))
 
 
 def _commentary_ask(n):
@@ -479,7 +484,7 @@ def _clean_commentary(data, n):
     verdict = verdict if _usable(verdict, "cta") else ""
     if not (setup or any(reactions)):
         return None
-    print("Commentary: dropped only the long line(s)")
+    print("Commentary: dropped only the line(s) named above")
     return Commentary(setup, reactions, verdict)
 
 
