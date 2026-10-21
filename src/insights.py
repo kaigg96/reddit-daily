@@ -25,6 +25,7 @@ import datetime
 import functools
 import json
 import math
+import os
 import re
 import statistics
 from dataclasses import dataclass, field
@@ -2288,3 +2289,38 @@ def _summed(snapshot_rows, column, published_since):
             continue
         n, views, total = n + 1, views + v, total + x
     return n, views, total
+
+
+# First-answer length (PRD §4, pre-committed 2026-10-21, before any number was
+# read): does a long first answer lose viewers before the halfway point, where
+# the median viewer leaves (~12s of ~23s)? Among `v7` uploads read at ~7 days
+# with 10+ views, Spearman rho between the first answer's word count and
+# watch-seconds: at or below FIRST_ANSWER_LEAD_RHO with p < 0.05 it is a lead,
+# a candidate needing its own rule (read the shortest answer first); else noise.
+# Longer answers make longer videos, which earn more watch-seconds, so the
+# test leans against finding a loss: conservative by design. Read once.
+FIRST_ANSWER_LEAD_RHO = -0.3
+ANSWER_LENGTHS = config.ROOT / "analysis" / "answer_lengths.csv"
+
+
+def attach_answer_lengths(videos, path=ANSWER_LENGTHS):
+    """Set `first_answer_words` on each video from `scripts/answer_lengths.py`'s
+    file (None where its run's log had none). Returns how many were set."""
+    words = {}
+    if os.path.exists(path):
+        with open(path, newline="") as f:
+            for row in csv.DictReader(f):
+                if row.get("words_1", "").isdigit():
+                    words[row["video_id"]] = int(row["words_1"])
+    for v in videos:
+        v.first_answer_words = words.get(v.video_id)
+    return sum(v.first_answer_words is not None for v in videos)
+
+
+def first_answer_verdict(rho, p_value):
+    """The pre-committed rule above, applied as written."""
+    if rho is None:
+        return "insufficient data"
+    if rho <= FIRST_ANSWER_LEAD_RHO and p_value < 0.05:
+        return "lead: a long first answer loses watch time (a candidate, not a change)"
+    return "noise: no loss from a long first answer at this size"

@@ -632,6 +632,10 @@ def main():
     p.add_argument("--opening-reach", action="store_true",
                    help="R3: do uploads whose plays more often become engaged views earn "
                         "more views? Rank correlation at ~7 days, its rule pre-committed (PRD §0)")
+    p.add_argument("--first-answer", action="store_true",
+                   help="does a long first answer lose watch time? v7 uploads at ~7 days, rank "
+                        "correlation, its rule pre-committed (PRD §4); needs "
+                        "scripts/answer_lengths.py's file")
     p.add_argument("--placebo", action="store_true",
                    help="noise with nothing changed: consecutive batches (how a release "
                         "is judged) vs alternate days in the same weeks (PLAN C9)")
@@ -661,7 +665,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -765,6 +769,20 @@ def main():
                 if confounded else "a backlog candidate with its own rule"))
         else:
             print("  rho >= 0.3 at p < 0.05: not met -- noise; the row leaves")
+        return
+
+    if args.first_answer:   # read once against its pre-committed rule (insights)
+        age = args.at_age or 7
+        load = insights.load_videos_at_age(age)
+        videos = [v for v in load.videos if v.meta.get("format_version") == "v7"]
+        have = insights.attach_answer_lengths(videos)
+        rho, p_value, n = insights.rank_correlation(videos, "first_answer_words", "watch_seconds")
+        print(f"First answer's words against watch-seconds, v7 uploads read at ~{age} days, "
+              f"10+ views (n={n}; {have} of {len(videos)} with a length)")
+        if rho is not None:
+            print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        print(f"  rho <= {insights.FIRST_ANSWER_LEAD_RHO} at p < 0.05: "
+              + insights.first_answer_verdict(rho, p_value))
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise
