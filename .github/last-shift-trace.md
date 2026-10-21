@@ -1,104 +1,107 @@
-## Shift trace — run 39630399602
+## Shift trace — run 39685895450
 
-**Ended:** success, is_error false, 197 turns, 33.0 min, stop end_turn; 1 permission denial(s): Monitor. **Tool calls:** 196, 2 failed. Helper agents made 72 more, 3 failed.
+**Ended:** success, is_error false, 200 turns, 25.8 min, stop end_turn. **Tool calls:** 197, 2 failed. Helper agents made 65 more, 5 failed.
 
 **Last message:**
 
-> I'm handing over at 16:31, about 25 minutes early. Two rounds of new ideas (ten, then five) found nothing else worth doing now. The handover entry is committed and pushed to `main`. Nothing reached viewers this shift.
+> I'm handing over at 22:47, about 34 minutes early. The handover entry is committed and pushed to `main`. Nothing reached viewers this shift, but it found the company's biggest risk.
 >
-> **What moved toward revenue**
-> - **The bet 1 ask (#77) says one thing again.** Its opening text, which the owner reads first, still described the 17 October version (sentence notes, old pictures) and said a label alone ships it. This morning's comment asked for a narrated render first. I rewrote the opening and title to match the current build and the render command; editing doesn't send an email.
-> - **The render command should work on the owner's machine.** That machine runs Python 3.10, which broke a render once. On the release branch as it stands, all 656 tests pass under 3.10 and a fixed-post render plays (1080×1920, 28 seconds). I added that line to #77.
+> **Reddit is closing the access every video starts from.** Reddit announced this on 30 September, and nothing in the project had recorded it. I read TechCrunch's report and a fuller one quoting Reddit's developer posts:
+> - **31 October:** Reddit stops accepting new API requests.
+> - **12 January 2027:** apps that haven't registered start losing access. For us that means uploads stop.
+> - **March 2027:** free access ends. After that, Reddit offers "commercial deals" only, reported at about $12,000 a month, which is out of reach.
 >
-> **Other work**
-> - **Data:** I tested whether a long first answer loses viewers, using answer lengths recovered from 176 uploads' run logs. The rule was committed before reading: a lead needs rho ≤ −0.3 at p < 0.05. Result: rho +0.17, p 0.32, 35 uploads, so noise; reading the shortest answer first isn't worth trying. A fresh review found no defects; merged.
-> - **Process audit** (due, ten shifts since 17 October):
->   - Nothing reached viewers in those ten shifts. All ten merges were measurement or reliability, and shifts ran 2–56 of 60 minutes.
->   - Otherwise the process works: reviews caught real defects and the daily release check passed.
->   - Three fixes:
->     - The stale #77.
->     - The decisions record still said the owner was absent; they answered #81 the day it opened. That stale line had prompted a "ship unless you object" idea.
->     - The list of past ideas showed only dropped ones, not finished ones. So the idea generator re-proposed bet 2's start date, already worked out twice, and a ranker put it first. The list now shows both. Its review found a real bug (a length cap hid exactly that case), fi
+> The dates come from news reports; Reddit's own pages block automated reads, so I couldn't check its wording directly.
+>
+> **What I did about it**
+> - **#82 asks the owner to register our app before 31 October** and to ask Reddit whether a small registered app keeps access after March. It's free, needs their Reddit account, and I put it ahead of #77. The issue links both sources.
+> - **The risk is in the plan, rated fatal.** I also corrected a stale line saying Groq's no-training tier ships with bet 1. It only ships as a backup.
+> - **First look at replacements:**
+>   - **Stack Exchange:** its terms allow our use, free, if each video credits and links every author and carries the same open licence. Its answers run 115–360 words against our 12. The free AI model shortened six of them to about 14 words each, accurate but dry advice. That makes it a different show, not a drop-in replacement.
+>   - **AI-written answers to our own questions:** on two of our questions it wrote stock jokes and invented a personal story, so they could only be presented as the host's own takes.
+>   - **Hacker News and Mastodon:** their terms don't allow this use.
+>   - Reddit's replacement platform has no Python and is built for apps that run inside Reddit, so it can't carry our source.
+> - **The rule for the 5 N
 
-### Tool calls (last 80 of 196)
+### Tool calls (last 80 of 197)
 
-117. Bash: gh issue view 77 --json title --jq .title && gh issue edit 77 --title "Bet 1: watch one narrated render of the tag version; one label then …
-118. Bash: head -1 upload_log.csv; venv/bin/python - <<'EOF'
-119. Bash: date -u +%H:%M; git checkout -q -b gm/ask-and-c10 && grep -n "C10" PLAN.md | head -2
-120. Bash: git checkout -q main && git branch -D gm/ask-and-c10 -q && venv/bin/python - <<'EOF'
-121. Bash: git add PLAN.md && git commit -q -m "PLAN C10: its reopen condition reads a weekly comment read (the 30-day count, 17 on 6 of 60 uploads, i…
-122. ✗ Bash: ls /usr/bin/python3* /usr/local/bin/python3* /opt/hostedtoolcache/Python/ 2>/dev/null | head -20; which uv pyenv 2>/dev/null — Exit code 1: /usr/bin/python3
-123. Bash: cd /tmp && rm -rf preview310 && git -C /home/runner/work/reddit-daily/reddit-daily worktree add -q /tmp/preview310 origin/integration/previ…
-124. Bash: cd /tmp/preview310 && grep -n -E "datetime\.UTC|import UTC|tomllib|StrEnum|ExceptionGroup|except\*|typing import .*Self|itertools\.batched|…
-125. Bash: cd /tmp/preview310 && /tmp/v310/bin/python -c "import src.run, src.video, src.llm, src.tts, src.screen, src.config; print('imports ok on', …
-126. Bash: cd /tmp/preview310 && ls requirements*.txt; /tmp/v310/bin/pip install -q pytest $( [ -f requirements-dev.txt ] && echo "-r requirements-dev…
-127. Bash: cd /tmp/preview310 && date -u +%H:%M:%S && SAMPLE=1 DRY_RUN=1 timeout 280 /tmp/v310/bin/python -m src.run > /tmp/sample310.log 2>&1; echo "…
-128. Bash: cd /tmp/preview310 && grep -i -E "assembled|video:|\.mp4|tag|setup|reaction" /tmp/sample310.log | head -10 | cut -c1-180; f=$(ls -t assets/…
-129. Bash: cd /tmp/preview310 && P=/tmp/v310/lib/python3.10/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2; $P -i assets/gen/final_a…
+118. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bl13app0p.output; date -u +%H:%…
+119. Write: /tmp/worklog_entry.md
+120. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bl13app0p.output; date -u +%H:%…
+121. Bash: for k in GROQ_API_KEY GEMINI_API_KEY; do if [ -n "${!k}" ]; then echo "$k set"; else echo "$k unset"; fi; done; [ -f .env ] && grep -c -E "…
+122. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bl13app0p.output; date -u +%H:%…
+123. Bash: cd /tmp && for s in interpersonal workplace parenting skeptics history; do curl -s --compressed "https://api.stackexchange.com/2.3/question…
+124. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bl13app0p.output; date -u +%H:%…
+125. Bash: grep -n -E "GROQ_MODEL|groq.*model|llama|openai/gpt" src/config.py src/llm.py | head -5
+126. Bash: venv/bin/python - <<'EOF'
+127. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bl13app0p.output; date -u +%H:%…
+128. Bash: sleep 100; date -u +%H:%M:%S
+129. Bash: sed -n 140,146p PRD.md | cut -c1-400; grep -n "^## \|^### " PRD.md | sed -n 1,30p | grep -n -E "4\.|Findings"
 130. Bash: venv/bin/python - <<'EOF'
-131. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-132. Bash: git worktree remove --force /tmp/preview310 && rm -rf /tmp/v310 && git worktree list && git status --short
-133. Bash: git add TECH_DEBT.md && git commit -q -m "TECH_DEBT: bet 1's release branch re-checked on Python 3.10 (656 tests, a fixed-post render plays…
-134. Bash: rid=$(gh run list --workflow run-reddit-video.yml --limit 2 --json databaseId --jq '.[1].databaseId'); gh run view $rid --log 2>/dev/null |…
-135. Bash: grep -n "def spearman\|def _spearman\|spearmanr\|def opening_reach\|def _rank" src/insights.py | head; grep -n "opening-reach\|opening_reac…
-136. Bash: grep -n "R3\|opening" src/insights.py | head -12; sed -n 742,760p scripts/report.py
-137. Bash: sed -n 2133,2200p src/insights.py; grep -n "def load_videos_at_age\|class Video\|def since\b\|def since(" src/insights.py | head
-138. Write: /home/runner/work/reddit-daily/reddit-daily/scripts/answer_lengths.py
-139. Bash: git checkout -q -b data/first-answer-length && date -u +%H:%M:%S && timeout 400 venv/bin/python scripts/answer_lengths.py && date -u +%H:%M…
-140. Bash: sed -i 's/COMMENT = re.compile(r"Z {2}comment (\[123\]): (.\*)\$")/COMMENT = re.compile(r"Z\\s+comment ([123]): (.*)$")/' scripts/answer_le…
-141. Bash: sed -n 71,110p src/insights.py | grep -n "video_id\|format_version\|watch_seconds\|fields\|def \|self\." | head -20; grep -n "^ANALYSIS\|^R…
-142. Bash: grep -n "analytics_snapshots.csv\|upload_log.csv\|config.ROOT\|ROOT /" src/insights.py | head -6; grep -n "^ROOT\|^ANALYSIS" src/config.py …
-143. Bash: cat >> src/insights.py <<'EOF'
-144. Bash: sed -n 30,33p src/insights.py; grep -n "Path(" src/insights.py | head -3
-145. Bash: sed -i '2309s/if Path(path).exists():/if os.path.exists(path):/' src/insights.py && sed -i '27a import os' src/insights.py && sed -n 26,30p…
-146. Bash: sed -n 628,636p scripts/report.py; sed -n 660,668p scripts/report.py; sed -n 760,775p scripts/report.py
+131. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add PRD.md PLAN.md && git commit -q -m "C16 first read: Stack Exchange's API allo…
+132. WebSearch: Reddit September 30 2026 announcement "public API" March 2027 registered apps OAuth what changes redditinc
+133. Bash: cd /tmp && curl -sL -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36" -o ppc.html -w "%{http_code} %{size_do…
+134. Bash: date -u +%H:%M && cat > /tmp/esc2.md <<'EOF'
+135. Bash: gh issue view 82 --json body --jq .body > /tmp/b82.md && venv/bin/python - <<'EOF'
+136. Bash: sed -i 's/Do not stop uploads\. #77 (bet 1'"'"'s render) still comes first\./Do not stop uploads. This is quicker than #77 (bet 1'"'"'s ren…
+137. Bash: venv/bin/python - <<'EOF'
+138. Bash: venv/bin/python - <<'EOF'
+139. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add PLAN.md .escalations/ && git commit -q -m "Reddit stops accepting new API req…
+140. WebSearch: Reddit developer registration page "Help keep Reddit the most human place on the internet" register app
+141. Bash: grep -o 'href="[^"]*reddit[^"]*"' /tmp/ppc.html | sort -u | head -30
+142. Bash: gh issue view 82 --json body --jq .body > /tmp/b82.md && venv/bin/python - <<'EOF'
+143. Bash: grep -n -E "^(MODEL|SAMPLE_MODEL|GROQ_MODEL|GROQ_SCREEN_MODEL|POLLY_VOICES|VOICES|.*_MODEL) *=" src/config.py | cut -c1-140; grep -rn -E "V…
+144. Bash: grep -n -E "gemini-[0-9]" src/config.py src/llm.py | cut -c1-160 | head -8
+145. WebFetch: https://ai.google.dev/gemini-api/docs/deprecations
+146. WebFetch: https://console.groq.com/docs/deprecations
 147. Bash: venv/bin/python - <<'EOF'
-148. Bash: ls tests | head -40 | tr '\n' ' '; grep -n "^from\|^import\|sys.path" tests/test_insights.py | head -8; grep -rn "import scripts\|scripts\.…
-149. Bash: sed -n 370,385p tests/test_insights.py; grep -n "^def _video\|^def _v(\|def make_video\|Video(video_id" tests/test_insights.py | head -3
-150. Bash: cat >> tests/test_insights.py <<'EOF'
-151. Bash: git add scripts/answer_lengths.py analysis/answer_lengths.csv src/insights.py scripts/report.py tests/test_insights.py && git commit -q -m …
-152. Bash: venv/bin/python scripts/report.py --first-answer --offline 2>&1 | tail -6
-153. Agent: Review first-answer diff
-154. Bash: grep -n "^### Findings — data reviews" PRD.md
-155. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-156. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-157. Bash: date -u +%H:%M; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -3; venv/bin/python scripts/check_docs.py 2>&1 | tail -3
-158. Bash: git add PRD.md && git commit -q -m "PRD §4: a long first answer costs no measurable watch time (rho +0.17, p 0.32, n=35; noise under its pr…
-159. Bash: grep -n "dropped\|Dropped" scripts/backlog_status.py | head -12; wc -l scripts/backlog_status.py
-160. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/backlog_status.py
-161. Bash: grep -n "Re-reviewed 2026-10-17 21:42 (audit)" DECISIONS.md | head -2; date -u +%H:%M
-162. Bash: git checkout -q main && git pull -q --ff-only && venv/bin/python - <<'EOF'
-163. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-164. Bash: venv/bin/python - <<'EOF'
-165. Bash: git diff TECH_DEBT.md | grep -E "^[-+]" | grep -v -E "^(\+\+\+|---)" | cut -c1-80 | head -8; git diff TECH_DEBT.md | grep -c "^-"; date -u …
-166. Bash: git add DECISIONS.md TECH_DEBT.md && git commit -q -m "Audit 2026-10-21: bet 1 waits on a render only the owner's machine can make; #77's b…
-167. Bash: git checkout -q data/first-answer-length && venv/bin/python - <<'EOF'
-168. Bash: git checkout -q -b gm/dropped-lists-done && grep -n "recently_dropped\|dropped_in" tests/test_backlog_status.py | head -8
-169. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_backlog_status.py
-170. Bash: venv/bin/python - <<'EOF'
-171. Bash: venv/bin/python scripts/backlog_status.py --dropped 2>&1 | sed -n '/^DONE/,$p' | grep -o -i -E ".{0,90}(1 November|bet 2's window|bet 2 nee…
-172. Bash: git show edbdb67:WORKLOG.md | grep -n -i -B3 "1 November" | head -20 | cut -c1-220
-173. Bash: venv/bin/python - <<'EOF'
-174. Bash: git add scripts/backlog_status.py tests/test_backlog_status.py && git commit -q -m "backlog_status --dropped also lists what the last ten s…
-175. Agent: Review dropped-list diff
-176. Bash: git checkout -q main && git pull -q --ff-only && grep -n "^## 2026-10-2" WORKLOG.md
-177. Bash: cat > /tmp/entry.md <<'EOF'
-178. Bash: git add WORKLOG.md && git commit -q -m "Handover (checkpoint): #77's ask rewritten to the current build; render checked on Python 3.10; fir…
-179. Agent: Second-round candidates, neglected functions
-180. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -2; git status --short; date -u +%H:%M
-181. Monitor: sleep 90 && echo waited
-182. Bash: venv/bin/python scripts/report.py --by background_type --at-age 7 --offline 2>&1 | tail -6
-183. Bash: git checkout -q gm/dropped-lists-done && venv/bin/python - <<'EOF'
-184. Bash: git commit -qam "Review: done items print one per line (a 900-character cap hid the case the change was for); the WORKLOG header's fenced t…
-185. Monitor: sleep 120 && echo waited
-186. Bash: git diff HEAD~6 --stat -- WORKLOG.md PLAN.md PRD.md DECISIONS.md TECH_DEBT.md | tail -3; venv/bin/python scripts/context_budget.py --check …
-187. Bash: sleep 60; date -u +%H:%M:%S
-188. Bash: head -3 analysis/channel_stats.csv 2>/dev/null; tail -2 analysis/channel_stats.csv
-189. Bash: date -u +%H:%M:%S; ls -la /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/13c37576-6e6d-4965-b4cd-f5f8ea6e8dd4/su…
-190. Monitor: sleep 75 && echo waited
-191. Bash: grep -c . analysis/traffic_sources.csv; awk -F, '$2=="logged_uploads" && $1=="2026-10-19"' analysis/traffic_sources.csv | head -8
-192. Bash: sleep 45; date -u +%H:%M:%S
+148. Bash: venv/bin/python - <<'EOF'
+149. Bash: venv/bin/python - <<'EOF'
+150. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+151. Bash: venv/bin/python - <<'EOF'
+152. Bash: venv/bin/python - <<'EOF'
+153. Bash: sed -i 's/Left: Reddit'"'"'s reply (#82), the proposal\. Done when a proposal is on the 11-05 review\./Left: Reddit'"'"'s reply (#82). Done…
+154. Bash: git add WORKLOG.md PLAN.md PRD.md && git commit -q -m "Handover: Reddit's free API, our only source, ends by March 2027 (new requests close…
+155. Bash: git pull -q --rebase origin main && git push -q origin main 2>&1 | tail -1; git log --oneline -4; git status --short | head
+156. Bash: git fetch -q origin && git status -sb | head -1; gh issue view 82 --json comments --jq '.comments[-1].body[0:200]'; date -u +%H:%M
+157. WebSearch: YouTube Shorts policy change announced October 2026 monetization reused content AI creators
+158. WebFetch: https://note.com/quiet_page/n/nd1f8081e84c6?hl=en
+159. Bash: venv/bin/python - <<'EOF'
+160. Agent: Second-round candidates after Reddit news
+161. Bash: sleep 120; date -u +%H:%M:%S
+162. Bash: venv/bin/python scripts/backlog_status.py | head -2; date -u +%H:%M:%S
+163. WebSearch: upload CC BY-SA derivative video to YouTube standard license compatible share-alike monetized Creative Commons FAQ
+164. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+165. Bash: git log origin/main --oneline -3; date -u +%H:%M:%S
+166. ✗ Bash: sleep 60; date -u +%H:%M:%S — <tool_use_error>Blocked: sleep 60 followed by: date -u +%H:%M:%S. To wait for a condition, use Monitor with an until-loop (e.g. `until <che…
+167. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+168. Bash: grep -n "Audience & community\|publishing policy" ORG.md | head -3; date -u +%H:%M:%S
+169. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+170. Bash: sed -n 136,150p ORG.md | cut -c1-300; date -u +%H:%M:%S
+171. Bash: git diff origin/main --stat | tail -1; date -u +%H:%M:%S
+172. Bash: venv/bin/python scripts/report.py --by subreddit --at-age 7 --offline --since 2026-10-07 2>&1 | tail -6; date -u +%H:%M:%S
+173. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+174. Bash: grep -n "Stack Exchange could replace" PRD.md | cut -c1-80; grep -c "" PRD.md; date -u +%H:%M:%S
+175. Bash: timeout 200 venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -1; date -u +%H:%M:%S
+176. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+177. Bash: venv/bin/python scripts/escalations.py open 2>&1 | head -20; date -u +%H:%M:%S
+178. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+179. Bash: venv/bin/python scripts/report.py --by voice --at-age 7 --offline --since 2026-10-08 2>&1 | tail -5; date -u +%H:%M:%S
+180. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+181. Bash: tail -3 analysis/screen_log.csv | cut -c1-120; date -u +%H:%M:%S
+182. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/7b7348fc-dba8-41d1-aab6-37ad1a763a2b/tasks/bnps78v0g.output; date -u +%H:%…
+183. Bash: venv/bin/python - <<'EOF'
+184. Bash: venv/bin/python - <<'EOF'
+185. Bash: venv/bin/python - <<'EOF'
+186. Bash: venv/bin/python - <<'EOF'
+187. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add WORKLOG.md PLAN.md PRD.md && git commit -q -m "C16: the 5 November source pro…
+188. Bash: venv/bin/python - <<'EOF'
+189. Bash: venv/bin/python - <<'EOF'
+190. Bash: venv/bin/python - <<'EOF'
+191. Bash: sed -i 's/It resumes on Reddit'"'"'s reply or at that review\./It resumes on Reddit'"'"'s reply or that review./' WORKLOG.md && venv/bin/py…
+192. Bash: venv/bin/python - <<'EOF'
 193. Bash: venv/bin/python - <<'EOF'
 194. Bash: venv/bin/python - <<'EOF'
-195. Bash: date -u +%H:%M
-196. Bash: sed -i 's/^## 2026-10-21 (16:35) — Your bet 1 ask/## 2026-10-21 (16:31) — Your bet 1 ask/; s/So the shift hands over about 20 minutes early…
+195. Bash: sed -i 's/Handed over about 35 minutes early: nothing else was ready\./Handed over about 35 minutes early: nothing else ready./' WORKLOG.md…
+196. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+197. Bash: venv/bin/python - <<'EOF'
