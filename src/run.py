@@ -11,7 +11,8 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, sample, screen, thumbnail, tts, video, youtube
+from . import (config, content, llm, log, sample, screen, stackexchange, thumbnail,
+               tts, video, youtube)
 
 
 def _probe_duration(path):
@@ -187,6 +188,8 @@ def main():
 
     if config.SAMPLE:
         post = sample.POST
+    elif config.SOURCE == "stackexchange":
+        post = stackexchange.select_post(prev_title)
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,
