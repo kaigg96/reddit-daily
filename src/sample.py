@@ -10,6 +10,7 @@ post, the metadata, the narration -- for nothing. Not wired into the run yet.
 import numpy as np
 from moviepy import AudioClip
 
+from . import config, standin
 from .content import PostContent
 from .llm import Commentary, MetadataResult
 
@@ -58,10 +59,17 @@ def silent_marks(text):
     return marks
 
 
-def synthesize(text, out_path):
-    """Write silent narration as long as `text` would take to read; return its
-    marks. Stands in for tts.synthesize_with_marks and never calls Polly."""
+def synthesize(text, out_path, voice=None):
+    """Write narration that never calls Polly; return its marks. Stands in for
+    tts.synthesize_with_marks: the free stand-in voice while
+    config.STAND_IN_VOICE is on, else silence as long as `text` would take to
+    read. A stand-in that fails falls back to silence and says so."""
     marks = silent_marks(text)
+    if config.STAND_IN_VOICE:
+        try:
+            return standin.synthesize(text, out_path, voice, marks)
+        except Exception as e:   # a sample must still render
+            print(f"Stand-in voice FAILED, narrating silently: {type(e).__name__}: {e}")
     duration = max(len(marks), 1) / WORDS_PER_SECOND + 0.3
     silence = lambda t: np.zeros((len(t), 2)) if np.ndim(t) else np.zeros(2)
     clip = AudioClip(silence, duration=duration, fps=44100)

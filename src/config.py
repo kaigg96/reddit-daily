@@ -33,6 +33,12 @@ SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
 SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
 DRY_RUN = SAMPLE or SILENT_NARRATION or \
     os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# STAND_IN_VOICE: a narration that never calls Polly uses a free offline voice
+# (src/standin.py) rather than silence, so a branch render can be judged by ear
+# (#77). On by default for SILENT_NARRATION, the branch renders; off for SAMPLE,
+# whose fixed post only proves a render plays. Uploads never reach it.
+STAND_IN_VOICE = os.environ.get(
+    "STAND_IN_VOICE", "1" if SILENT_NARRATION and not SAMPLE else "").lower() in ("1", "true", "yes")
 # METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
 # the upload model (llm.MODEL): one request from the allowance uploads share,
 # so only for a render the owner judges (#77). The screen stays on the sample

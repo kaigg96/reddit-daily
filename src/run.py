@@ -256,11 +256,14 @@ def main():
     polly = None if silent else tts.make_polly()
     print(f"Narrator voice: {voice}"
           + (f", host voice: {host_voice}" if host and not config.HOST_TEXT else ""))
+    if silent:
+        print("Narration: " + ("stand-in voice (Kokoro), not Polly"
+                               if config.STAND_IN_VOICE else "silent"))
 
     def synth(name, text, kind, speaker=None):
         path = config.GEN / f"{name}.mp3"
         if silent:
-            marks = sample.synthesize(text, path)
+            marks = sample.synthesize(text, path, speaker or voice)
         else:
             marks = tts.synthesize_with_marks(polly, text, speaker or voice, path)
         return video.Segment(kind=kind, text=text, audio_path=str(path), marks=marks)
