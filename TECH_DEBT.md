@@ -446,11 +446,15 @@ a list nobody can read is the same as no list.
   better-profanity counts a straight quote or `*` as part of a word, so
   "'alright fuckers'" passed the post-title filter, and the AI title quoted
   it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
-  ("shit's"). Fixed on `reliability/profanity-quotes` (`_profane`, two fresh
-  reviews; no new flags on 959 old questions). It changes which posts qualify,
-  not the video, so no version bump; it waits only for a sample render, in the
-  slot after #77's. Left: the AI-written title is never screened itself; with
-  its inputs filtered, only the model inventing a swear word reaches it, and a
-  check there would blank the title-style row (a second variable). Live video
-  left as is (retitling would alter a row of #10 and #14). **Closes when** the
-  branch merges.
+  ("shit's"). Nothing screened the AI's own output either: an emoji title
+  shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
+  (edge marks spaced out, each contracted word checked alone; reviewed twice,
+  no new flags on 959 old questions) and a refusal in `llm._clean_str`, so a
+  title, CTA or keyword with a swear word or emoji falls back (refuses exactly
+  those two of 191 shipped titles). It changes which posts and AI lines
+  qualify, not the video, so no version bump; it waits only for a sample
+  render, in the slot after #77's. On `integration/preview` the same refusal
+  reaches the host's lines; check what it drops before bet 1 merges. Left:
+  the library already reads a curly "he’ll" as "hell" (fails safe, rare).
+  Live video left as is (retitling would alter a row of #10 and #14).
+  **Closes when** the branch merges.
