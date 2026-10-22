@@ -6,33 +6,33 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `integration/preview`
-- **Commit:** `0ddaae9`
-- **When:** 2026-10-19T09:45:01Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 18.0 s, audio, no dead air
+- **Branch:** `product/stand-in-voice`
+- **Commit:** `bc97bf2`
+- **When:** 2026-10-22T08:56:07Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 18.4 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39232065017)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39751048212)
 
 What it picked:
 
 ```
-Selected post: What jobs do you think will completely disappear in the next 10 years?
-Slate topics (rank order): money-work|nostalgia|money-work|health-body|other|other|other|other
-Commentary: a host line ran past its length cap, or was a placeholder or emoji
-Commentary: dropped only the long line(s)
-Title style B, caps arm 0: Will your job still exist in ten years?
-Commentary setup: Some of these are coming for us all.
-Commentary reaction 1: The robots are finally taking over the phones.
-Commentary reaction 2: Shirley better start packing her desk right now.
-Commentary reaction 3: Goodbye to whoever is reading my chat prompts.
+Selected post: Can I legally start my will with 'alright fuckers'?
+Slate topics (rank order): humor-absurd|relationships-dating|life-advice|health-body|life-advice|humor-absurd
+Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words), vote (25 words)
+Commentary: dropped only the line(s) named above
+Title style B, caps arm 1: Can YOU legally start your will with an insult?
+Commentary setup: (dropped)
+Commentary reaction 1: Doubtful
+Commentary reaction 2: Extreme
+Commentary reaction 3: Bulletproof
 CTA: Like, subscribe, and comment your answer below!
-Commentary: our own words are 0.421 of the narration, 4 host line(s) shown
-Assembled: 18.0s, bg=pexels_9668945.mp4, music=funk_bg_lower.mp3
-Today's top AskReddit post, asked by u/Alice6918: What jobs do you think will completely disappear in the next 10 years?
+Commentary: our own words are 0.098 of the narration, 3 host line(s) shown
+Assembled: 18.4s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/WinterIsOnReddit: Can I legally start my will with 'alright fuckers'?
 ```
 
 ## Last request
 
-- **Branch:** `integration/preview`
-- **When:** 2026-10-19T09:45:01Z
+- **Branch:** `product/stand-in-voice`
+- **When:** 2026-10-22T08:56:07Z
 - **Outcome:** rendered -- see above
