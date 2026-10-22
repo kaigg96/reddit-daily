@@ -79,9 +79,12 @@ def test_a_render_judged_by_ear_shows_the_upload_models_tags():
     assert _flag(up) == "False"
 
 
-def test_every_package_and_file_the_voice_fetches_is_pinned():
-    assert all("==" in p for p in standin.PACKAGES)
-    assert all(len(digest) == 64 for _, digest in standin.FILES.values())
+def test_every_package_and_file_the_voice_fetches_is_locked_by_hash():
+    import re
+    lines = [l for l in standin.LOCK.read_text().splitlines() if l and not l.startswith("#")]
+    assert len(lines) == 16
+    assert all(re.fullmatch(r"[A-Za-z0-9._-]+==\S+ --hash=sha256:[0-9a-f]{64}", l) for l in lines)
+    assert all(re.fullmatch(r"[0-9a-f]{64}", digest) for _, digest in standin.FILES.values())
 
 
 def test_counts_that_match_by_chance_do_not_place_a_number():
@@ -149,7 +152,7 @@ def test_a_stale_or_half_built_environment_is_built_again(monkeypatch, tmp_path)
     monkeypatch.setattr(standin, "_run", run)
     standin.ensure()
     assert ["-m", "venv"] in ran and ["-m", "pip"] in ran
-    assert (home / "installed.txt").read_text() == "\n".join(standin.PACKAGES)
+    assert (home / "installed.txt").read_text() == standin.LOCK.read_text()
     ran.clear()
     standin.ensure()      # now current: nothing to do
     assert ran == []
@@ -162,7 +165,7 @@ def test_a_model_file_off_its_digest_is_refused_and_not_kept(monkeypatch, tmp_pa
     home = tmp_path / "standin"
     (home / "venv" / "bin").mkdir(parents=True)
     (home / "venv" / "bin" / "python").write_text("")
-    (home / "installed.txt").write_text("\n".join(standin.PACKAGES))
+    (home / "installed.txt").write_text(standin.LOCK.read_text())
     monkeypatch.setattr(standin, "_python", lambda: home / "venv" / "bin" / "python")
     monkeypatch.setattr(standin.urllib.request, "urlopen",
                         lambda url, timeout: io.BytesIO(b"not the model"))

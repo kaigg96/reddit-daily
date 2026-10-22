@@ -24,14 +24,9 @@ from pathlib import Path
 
 from . import config
 
-# The whole environment, pinned as it was first tested (2026-10-22), so a
-# release that morning cannot change what the owner hears.
-PACKAGES = [
-    "kokoro-onnx==0.6.1", "soundfile==0.14.0", "numpy==2.5.4", "onnxruntime==1.31.0",
-    "phonemizer==3.4.0", "espeakng-loader==0.2.4", "attrs==26.1.0", "cffi==2.1.1",
-    "cloudpickle==3.1.2", "dlinfo==2.0.0", "flatbuffers==25.12.19", "joblib==1.6.0",
-    "packaging==26.3", "protobuf==7.36.2", "pycparser==3.11", "typing_extensions==4.16.0",
-]
+# The whole environment, every wheel locked by hash, so neither a release that
+# morning nor a substituted file can change what runs beside the job's keys.
+LOCK = Path(__file__).with_name("standin_requirements.txt")
 RELEASES = "https://github.com/thewh1teagle/kokoro-onnx/releases/download"
 FILES = {
     "kokoro-v1.0.int8.onnx": (f"{RELEASES}/model-files-v1.1/kokoro-v1.0.int8.onnx",
@@ -99,12 +94,13 @@ def ensure():
     home = _home()
     home.mkdir(parents=True, exist_ok=True)
     marker = home / "installed.txt"
-    pins = "\n".join(PACKAGES)
+    pins = LOCK.read_text()
     if not (marker.exists() and marker.read_text() == pins and _python().exists()):
         marker.unlink(missing_ok=True)
         shutil.rmtree(home / "venv", ignore_errors=True)
         _run([sys.executable, "-m", "venv", str(home / "venv")])
-        _run([str(_python()), "-m", "pip", "install", "-q", "--only-binary=:all:", *PACKAGES])
+        _run([str(_python()), "-m", "pip", "install", "-q", "--only-binary=:all:",
+              "--require-hashes", "-r", str(LOCK)])
         marker.write_text(pins)
     for name, (url, digest) in FILES.items():
         path = home / name
