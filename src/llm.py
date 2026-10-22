@@ -368,9 +368,9 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     return MetadataResult(
-        title=_clean_str(data.get("title")),
+        title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
-        cta=_clean_str(data.get("cta")),
+        cta=_clean_published(data.get("cta")),
         source=route,
         failure=prior,
     )
@@ -408,21 +408,26 @@ def _then(prior, failure, route="groq"):
 
 
 def _clean_str(value):
-    """A usable non-empty string, or None. Strips the quoting LLMs add.
-
-    A swear word or emoji refuses the field, which then falls back as if it
-    were missing: the prompt's "no profanity, no emoji" alone let an emoji
-    title ship on 2026-09-01. Checked before the emphasis strip too, which
-    would turn "f**k" into "fk"."""
+    """A usable non-empty string, or None. Strips the quoting LLMs add."""
     if not isinstance(value, str):
         return None
-    raw = value
     value = re.sub(r"[*_`]", "", value)                    # markdown emphasis
     value = re.sub(r"\s+", " ", value).strip().strip('"').strip("'").strip()
-    if value and any(content._profane(v) or content._has_emoji(v) for v in (raw, value)):
+    return value or None
+
+
+def _clean_published(value):
+    """`_clean_str` for the title, closing line and keywords, refusing a swear
+    word or emoji so the field falls back as if it were missing: the prompt's
+    "no profanity, no emoji" alone let an emoji title ship on 2026-09-01.
+    Checked before the emphasis strip too, which would turn "f**k" into "fk".
+    Not for the host's lines: the word list also holds "god", "hell" and
+    "damn", so "Oh god" would be refused as a reaction."""
+    cleaned = _clean_str(value)
+    if cleaned and any(content._profane(v) or content._has_emoji(v) for v in (value, cleaned)):
         print("An AI-written field was refused for a swear word or emoji")  # not echoed: logs are public
         return None
-    return value or None
+    return cleaned
 
 
 def _clean_keywords(value):
@@ -434,7 +439,7 @@ def _clean_keywords(value):
     """
     if not isinstance(value, list):
         return None
-    return [k for k in (_clean_str(v) for v in value) if k]
+    return [k for k in (_clean_published(v) for v in value) if k]
 
 
 # R2.2, weighted by PRD §0 #10: B ("You...") 4 : A 1 : C 1, with A and C kept as

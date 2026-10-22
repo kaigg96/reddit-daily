@@ -70,15 +70,21 @@ from src import llm
     "What the **f**k** is this?",                       # the emphasis strip would hide it
 ])
 def test_an_ai_field_with_a_swear_word_or_emoji_falls_back(text):
-    assert llm._clean_str(text) is None
+    assert llm._clean_published(text) is None
 
 
 def test_a_clean_ai_field_passes_with_its_quotes_stripped():
-    assert llm._clean_str('"Would YOU Pay for This?"') == "Would YOU Pay for This?"
+    assert llm._clean_published('"Would YOU Pay for This?"') == "Would YOU Pay for This?"
 
 
 def test_a_refused_title_ships_the_screened_question_and_claims_no_style():
-    r = llm.resolve_title(llm._clean_str('Could YOUR Will Start with "Alright Fuckers"?'),
+    r = llm.resolve_title(llm._clean_published('Could YOUR Will Start with "Alright Fuckers"?'),
                           "B", fallback="Can I legally start my will with a toast?")
     assert r.title == "Can I legally start my will with a toast?"
     assert (r.style, r.ok) == ("", False)
+
+
+@pytest.mark.parametrize("reaction", ["Oh god", "Hell yes", "Damn, okay"])
+def test_the_hosts_reactions_are_not_held_to_the_word_list(reaction):
+    """The list holds "god", "hell" and "damn"; a host's wince is not swearing."""
+    assert llm._clean_str(reaction) == reaction
