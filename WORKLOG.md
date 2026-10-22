@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-22 (09:30) — Bet 1's samples can now speak without your hands; tonight's shift brings you one on #77. Reddit's deleted-post rule reaches our published videos
+
+    Worked (% of the shift): product 45 · engineering 25 · gm 15 · legal 10 · security 5
+
+**Summary:** You asked on #77 for a narrated render, "or a way to get one". Sample renders can now speak in a free stand-in voice. The first one proved it works, but it was not faithful enough to send you. Tonight's shift renders the corrected version and posts it to #77, so watching it should be all bet 1 needs from you. Separately, Reddit's terms require removing posts their authors delete, which our published videos can only do by being deleted.
+
+### Toward revenue
+- **Bet 1's last step should shrink to watching an 18-second video.** Bet 1 is the only built change aimed at the flat watch time, and nothing about revenue moves until it ships. Unreleased versions rendered silently, because they never hold the keys to the paid voice. Now they speak in a free, open voice that runs on the build machine, at about Polly's pace. This morning's sample rendered and plays with speech throughout. I held it back: its tags came 0.3 seconds late, flattering exactly the timing you objected to, and they came from the weaker free model. Both are fixed. Future spoken samples also take their tags from the model uploads use. A sample can be rendered only once every 12 hours, so the corrected one comes tonight, with the link on #77.
+- Uploads are untouched: they never reach the stand-in, and the paid voice is unchanged.
+
+### Done
+- **Product and engineering (a bet on unblocking bet 1):** the stand-in voice, reviewed by a fresh agent. It found nothing that could touch uploads or spend Polly. It did find four real problems, now fixed. A stalled download could have overrun the render's time limit. A half-installed voice would never have been repaired. The voice's software could see our API keys. And the captions split sentences differently from uploads. One hardening step, locking the downloads by fingerprint, is recorded for before bet 1 ships. A second review of the fixes was running at handover. 669 tests pass.
+- **Legal:** Reddit's rule on deleted posts, read first-hand. It is not new: it has been in Reddit's developer terms since September 2024. Deleted posts and comments must be removed "as soon as possible", and Reddit's help pages say anyone using its content must "stop displaying or using" them. No clause names videos, but it most likely reaches ours, and a video can honour it only by being deleted. That bears on the old videos' fate, which comes to you with the rename. Now in the risk register.
+- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas, and five survived its own filter. Two more agents ranked those, in opposite orders, and agreed on the top three: the stand-in voice (done); a sample of a Stack Exchange question (left for the 5 November review, which the plan already waits on); and the deleted-post read (done). **Dropped:** Reddit's developer fund ($4,000 once, at 5,000 daily users of an app inside Reddit, which we do not have); re-tuning when the host's opening tag shows (it tunes a version you have not approved); and putting bet 1 onto the live branch switched off so the paid voice narrates it (the stand-in does the same without that risk).
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.64 this month, forecast $0.85 of $3).
+- Mostly a bet, not a fix. AI use: one sample render (2–5 Gemini requests); no Polly.
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, before 31 October); #77 (tonight: watch the linked sample, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- **Tonight, after 20:56 UTC:** request a render of the stand-in branch. On a pass that names its current commit, merge it into the release branch and post the sample's link to #77 with the same key,, saying what differs from an upload (the voice only).
+- Narrated samples of a replacement source (5 November review) can now come from the stand-in, with no change to how keys are handled.
+- If #82 is still open on 28 October, raise it once more with the same key.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Yes. Bet 1's last step no longer needs you to run anything, once tonight's sample is posted.
+- **Than ~10 shifts ago:** Slightly. Watch time is still flat at 12 seconds and bet 1 has not shipped, but the step holding it since 19 October is about to be the smallest it can be.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-21 (22:45) — Reddit is closing the free access every video starts from: please register our app before 31 October; free access ends by March 2027
 
     Worked (% of the shift): legal 30 · strategy 25 · gm 20 · market 10 · data 5 · reliability 5 · security 5
@@ -94,35 +125,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes, in what we know: the company now sees that its supply ends by March 2027, with ten days to be safe on registering. Nothing changed for viewers.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The plan is truer: it now carries a dated, fatal risk it had missed.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-21 (16:31) — Your bet 1 ask had drifted from the build and now says one thing; its render is checked on your Python; a long first answer costs no watch time
-
-    Worked (% of the shift): gm 45 · data 25 · product 10 · reliability 5 · market 5 · audience 5 · security 5
-
-**Summary:** Nothing reached viewers. The one ask that unblocks revenue (#77) now matches the version you would render and asks one thing, and its render command is checked on your machine's Python. A data read found no reason to read the shortest answer first.
-
-### Toward revenue
-- **#77 says one thing again.** Its opening text still described the 17 October version (sentence notes, old pictures) and said a label alone ships it, while this morning's comment asked you to render first. Rewritten, with no email: render once with the command inside, then label it if a first-time viewer follows the video. This is the second time an ask has drifted; the lasting fix waits on #50.
-- **The render should run on your machine.** It runs Python 3.10, which broke a render once. On the release branch as it stands, all 656 tests pass under 3.10, and a fixed-post render plays (1080×1920, 28 seconds).
-- Nothing else moved toward revenue: every other step waits on that render or on uploads accumulating.
-
-### Done
-- **Data (a bet):** does a long first answer lose viewers before the halfway point, where most leave? Answer lengths for 176 uploads were recovered from the run records, and the rule was fixed before reading. No link (35 uploads; noise), so reading the shortest answer first is not worth trying. Reviewed fresh; merged.
-- **General management (the audit, due after ten shifts):** the ten shifts since 17 October ran 2–56 of 60 minutes. Nothing reached viewers; ten changes merged, all measurement or reliability; bet 1's craft moved on your 19 October feedback. Otherwise the process works: reviews caught real defects, and the daily release check passed. Three fixes. The stale #77 above. The decisions record still said you were absent (you answered #81 the day it opened), and that had seeded a "ship unless you object" idea. And the list of past ideas showed only dropped ones, not finished ones, so the idea generator re-proposed bet 2's start date, worked out twice already. It now shows both (reviewed fresh; merged).
-- **General management (ranking):** nothing was ready, so a fresh agent proposed eight and two more ranked ten in opposite orders. Top both ways: bet 2's start date, already done. Answered on the spot: shock phrases in titles (one borderline, "will surprise you", in about 22 titles since the ban); GitHub's server change (still on the old image today, and nothing found depending on it, so no ask). **Audience:** the viewer-reply item's reopen rule now says "weekly": 17 comments sit on 6 of the last 60 uploads, but a week's read shows only 1 or 2. **Dropped:** shipping bet 1 unless you object by a date (you asked to watch first, and it is already queued for the 5 November review); real narration on test renders (it changes how keys are handled, so for that review, not an ask beside #77); clip-by-clip reach (the standing check holds). **Market:** Groq now offers a free, expressive voice (Orpheus), but it gives no word timings for captions and takes 200 characters a request, and a voice change is yours. A second round of five, for distribution, finance and monetization (no time in ten shifts), found nothing above the bar. The keywords and the automatic comment come from one shared AI request, so dropping either frees nothing, and neither varies enough to compare: the comment posted on all 86 uploads that record it. Break-even needs the subscription's price, still unrecorded. Reddit publishes no price for its data. And posting days decide nothing, since four a day means every day. So the shift hands over about 25 minutes early. Mostly fixing; the first-answer read was a bet.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes since this morning, you remain the only collaborator, and the money controls are in place ($0.62 this month, forecast $0.86 of $3). The content screen's weekly audit: 4 skips since late August, none since 12 September.
-- AI use: no Gemini (an upload was within the hour); one free model list from Groq.
-
-### Blocked
-- **For you, in order:** #77 (one narrated render, command inside, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- Read tomorrow's daily release check. If you render bet 1 and label #77, it ships after that check.
-- 26 October weekly read: the first with the per-upload skip. Check how many uploads it marks as failed, then run the opening-reach read once.
-- 5 November monthly review: real narration on test renders, which would take your hands off bet 1's path; the Orpheus note with it.
-
-### Better?
-- **Than last shift:** Slightly. The ask that unblocks revenue reads one way, and its command is known to run on your machine. Nothing changed for viewers.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds, bet 1 (built 11 October) has not shipped, and ten shifts merged only measurement and reliability.
 - **Than ~100 shifts ago:** Too early to say.
