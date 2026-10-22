@@ -182,3 +182,16 @@ def test_third_party_code_never_sees_the_jobs_keys(monkeypatch):
     monkeypatch.setenv("REDDIT_CLIENT_SECRET", "secret")
     env = standin._clean_env()
     assert "PATH" in env and not any("secret" == v for v in env.values())
+
+
+def test_only_a_silent_run_reaches_the_stand_in():
+    """What keeps uploads off the stand-in is run.main's gate: the one call
+    into sample.synthesize sits under `if silent:`, and silent means SAMPLE or
+    SILENT_NARRATION, which an upload never sets."""
+    import inspect
+    from src import run
+    source = inspect.getsource(run.main)
+    assert "silent = config.SAMPLE or config.SILENT_NARRATION" in source
+    assert source.count("sample.synthesize(") == 1
+    assert "if silent:\n            marks = sample.synthesize(" in source
+    assert "standin." not in source        # no route around sample.synthesize
