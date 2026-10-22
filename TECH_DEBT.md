@@ -449,12 +449,13 @@ a list nobody can read is the same as no list.
   ("shit's"). Nothing screened the AI's own output either: an emoji title
   shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
   (edge marks spaced out, each contracted word checked alone; reviewed twice,
-  no new flags on 959 old questions) and a refusal in `llm._clean_str`, so a
+  no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
   title, CTA or keyword with a swear word or emoji falls back (refuses exactly
   those two of 191 shipped titles). It changes which posts and AI lines
   qualify, not the video, so no version bump; it waits only for a sample
-  render, in the slot after #77's. On `integration/preview` the same refusal
-  reaches the host's lines; check what it drops before bet 1 merges. Left:
+  render, in the slot after #77's. Host lines keep `_clean_str` (the list
+  holds "god", "hell", "damn"); the CTA, also the host's spoken vote, does
+  not, so a vote with those falls back: read `host_lines` after `v8`. Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare).
   Live video left as is (retitling would alter a row of #10 and #14).
   **Closes when** the branch merges.
