@@ -110,9 +110,13 @@ def ensure():
         path = home / name
         if path.exists() and _digest(path) == digest:
             continue
-        part = path.with_suffix(".part")
+        part = home / f"{name}.part"
+        # The timeout bounds each read, not the whole file: a slow but moving
+        # download is held to the deadline block by block.
         with urllib.request.urlopen(url, timeout=min(60, _left())) as r, open(part, "wb") as f:
-            shutil.copyfileobj(r, f)
+            for block in iter(lambda: r.read(1 << 20), b""):
+                _left()
+                f.write(block)
         if _digest(part) != digest:
             part.unlink()
             raise RuntimeError(f"{name} does not match its pinned digest")

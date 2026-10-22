@@ -85,9 +85,11 @@ def test_every_package_and_file_the_voice_fetches_is_pinned():
 
 
 def test_counts_that_match_by_chance_do_not_place_a_number():
-    """'$5 - worth it.': six tokens, five marks once the dash is dropped, and
-    the voice says 'five dollars' -- equal counts here would misplace words."""
-    marks = sample.silent_marks("I paid $5 worth it.")
+    """'I paid $5 - worth it.': five marks once the dash is dropped, and the
+    voice may say 'five dollars' in five groups too -- equal counts that would
+    put 'dollars' on the wrong word."""
+    marks = sample.silent_marks("I paid $5 - worth it.")
+    assert [m["w"] for m in marks] == ["I", "paid", "$5", "worth", "it"]
     out = standin.word_marks(marks, [0.1, 0.3, 0.6, 0.9, 1.2], 2.0)
     assert [m["t"] for m in out] != [0.1, 0.3, 0.6, 0.9, 1.2]
     assert [m["t"] for m in out] == sorted(m["t"] for m in out)
@@ -169,7 +171,7 @@ def test_a_model_file_off_its_digest_is_refused_and_not_kept(monkeypatch, tmp_pa
         assert False, "a file off its digest must be refused"
     except RuntimeError as e:
         assert "digest" in str(e)
-    assert not any(home.glob("*.onnx*")) and not any(home.glob("*.bin*"))
+    assert not any(p for p in home.iterdir() if p.is_file() and p.name != "installed.txt")
 
 
 def test_third_party_code_never_sees_the_jobs_keys(monkeypatch):

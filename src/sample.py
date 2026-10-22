@@ -51,14 +51,16 @@ METADATA = MetadataResult(
 
 
 def _spoken(c):
-    return unicodedata.category(c)[0] in "LN"
+    """Kept at a word's edge: everything but punctuation, so "$5" and "50%"
+    caption as written while a comma or quote stays outside the word."""
+    return not unicodedata.category(c).startswith("P") or c in "%#&@"
 
 
 def silent_marks(text):
     """Word marks shaped like Polly's: evenly paced, byte offsets into UTF-8.
     As Polly's, a word's text and end leave out the punctuation around it
     (video.group_words reads the byte after the end for a sentence break), and
-    a token of punctuation alone gets no mark."""
+    a token of punctuation alone (a dash) gets no mark."""
     marks, raw, pos = [], text.encode("utf-8"), 0
     for word in text.split():
         pos = raw.index(word.encode("utf-8"), pos)
