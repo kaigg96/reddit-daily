@@ -155,13 +155,6 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The stand-in voice installs by version pins, not hashes (2026-10-22,
-  `product/stand-in-voice`).** Sixteen wheels, versions pinned and wheels
-  only, run in the dry-run job beside the Reddit, Gemini and Groq keys; the
-  keys are withheld from pip and the worker, and the model files are checked
-  by digest. A hash lock (`--require-hashes`) would close the substituted-
-  wheel route. Also untested: run.py's gate that keeps uploads off it. Fix
-  before it reaches `main` with bet 1.
 - **A shift ended after 2 minutes with no handover (run 39338110057,
   2026-10-19; the first in 40+ runs).** 32 turns, no commits, no error; same
   Claude Code (2.1.280) and action as the passing runs, and the budget gate
