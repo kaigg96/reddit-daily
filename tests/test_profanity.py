@@ -55,3 +55,28 @@ def test_the_2026_10_22_post_is_passed_over_for_the_next(monkeypatch):
     post = content.select_post(Reddit(), "")
     assert post.title == clean
     assert post.candidate_rank == 1   # the skipped post never held a rank
+
+
+# --- the AI's own output ------------------------------------------------------
+
+from src import llm
+
+
+@pytest.mark.parametrize("text", [
+    'Could YOUR Will Start with "Alright Fuckers"?',   # 2026-10-22, as shipped
+    "Your Pets' Secret Drama? Tell Us! 🤫",             # 2026-09-01, as shipped
+    "What the **f**k** is this?",                       # the emphasis strip would hide it
+])
+def test_an_ai_field_with_a_swear_word_or_emoji_falls_back(text):
+    assert llm._clean_str(text) is None
+
+
+def test_a_clean_ai_field_passes_with_its_quotes_stripped():
+    assert llm._clean_str('"Would YOU Pay for This?"') == "Would YOU Pay for This?"
+
+
+def test_a_refused_title_ships_the_screened_question_and_claims_no_style():
+    r = llm.resolve_title(llm._clean_str('Could YOUR Will Start with "Alright Fuckers"?'),
+                          "B", fallback="Can I legally start my will with a toast?")
+    assert r.title == "Can I legally start my will with a toast?"
+    assert (r.style, r.ok) == ("", False)

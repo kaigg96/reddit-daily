@@ -9,6 +9,7 @@ import time
 import requests
 
 from . import config  # also ensures .env is loaded for direct imports
+from . import content
 
 
 # gemini-2.5-flash "thinks" by default, and on these prompts that is pure
@@ -407,11 +408,20 @@ def _then(prior, failure, route="groq"):
 
 
 def _clean_str(value):
-    """A usable non-empty string, or None. Strips the quoting LLMs add."""
+    """A usable non-empty string, or None. Strips the quoting LLMs add.
+
+    A swear word or emoji refuses the field, which then falls back as if it
+    were missing: the prompt's "no profanity, no emoji" alone let an emoji
+    title ship on 2026-09-01. Checked before the emphasis strip too, which
+    would turn "f**k" into "fk"."""
     if not isinstance(value, str):
         return None
+    raw = value
     value = re.sub(r"[*_`]", "", value)                    # markdown emphasis
     value = re.sub(r"\s+", " ", value).strip().strip('"').strip("'").strip()
+    if value and any(content._profane(v) or content._has_emoji(v) for v in (raw, value)):
+        print("An AI-written field was refused for a swear word or emoji")  # not echoed: logs are public
+        return None
     return value or None
 
 
