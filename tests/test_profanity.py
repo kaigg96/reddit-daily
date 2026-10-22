@@ -31,6 +31,8 @@ def test_a_quoted_or_emphasised_swear_word_is_caught(text):
 @pytest.mark.parametrize("text", [
     "What's something he'll never admit to his wife?",   # "he ll" reads as "hell"
     "Who're you rooting for this year?",                 # "who re" as "whore"
+    "What does your boss think he'll be great at?",      # "he be" as a slur
+    "Who'll ring the bell, and who's red?",
     "Don't you think the 80's were better?",
     "What's the **genuinely** best pizza, James' or the dogs'?",
     "Rock 'n' roll at 6 o'clock, ma'am",
