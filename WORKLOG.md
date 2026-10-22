@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-22 (09:30) — Bet 1's samples can now speak without your hands; tonight's shift brings you one on #77. Reddit's deleted-post rule reaches our published videos
 
-    Worked (% of the shift): product 45 · engineering 25 · gm 15 · legal 10 · security 5
+    Worked (% of the shift): product 35 · engineering 25 · strategy 15 · gm 10 · legal 10 · security 5
 
 **Summary:** You asked on #77 for a narrated render, "or a way to get one". Sample renders can now speak in a free stand-in voice. The first one proved it works, but it was not faithful enough to send you. Tonight's shift renders the corrected version and posts it to #77, so watching it should be all bet 1 needs from you. Separately, Reddit's terms require removing posts their authors delete, which our published videos can only do by being deleted.
 
@@ -72,18 +72,19 @@ and more useful than a confident guess.
 - Uploads are untouched: they never reach the stand-in, and the paid voice is unchanged.
 
 ### Done
-- **Product and engineering (a bet on unblocking bet 1):** the stand-in voice, reviewed by a fresh agent. It found nothing that could touch uploads or spend Polly. It did find four real problems, now fixed. A stalled download could have overrun the render's time limit. A half-installed voice would never have been repaired. The voice's software could see our API keys. And the captions split sentences differently from uploads. One hardening step, locking the downloads by fingerprint, is recorded for before bet 1 ships. A second review of the fixes was running at handover. 669 tests pass.
+- **Product and engineering (a bet on unblocking bet 1):** the stand-in voice, reviewed by a fresh agent. It found nothing that could touch uploads or spend Polly. It did find four real problems, now fixed. A stalled download could have overrun the render's time limit. A half-installed voice would never have been repaired. The voice's software could see our API keys. And the captions split sentences differently from uploads. A second review of the fixes found three smaller ones, also fixed: a slow download could still overrun, one test could not fail, and captions dropped symbols such as "$". One hardening step, locking the downloads by fingerprint, is recorded for before bet 1 ships. 669 tests pass.
+- **Strategy (a bet, for the 5 November review):** a sample of the Stack Exchange show is built and renders locally: today's top workplace question, three answers each cut to one sentence by the free AI model, credited by name, spoken by the stand-in. As found yesterday, it reads as dry advice, and the host's tags came out as labels ("Smart move", "Realistic"). It renders for you after bet 1's sample, so the review can show it, not describe it.
 - **Legal:** Reddit's rule on deleted posts, read first-hand. It is not new: it has been in Reddit's developer terms since September 2024. Deleted posts and comments must be removed "as soon as possible", and Reddit's help pages say anyone using its content must "stop displaying or using" them. No clause names videos, but it most likely reaches ours, and a video can honour it only by being deleted. That bears on the old videos' fate, which comes to you with the rename. Now in the risk register.
-- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas, and five survived its own filter. Two more agents ranked those, in opposite orders, and agreed on the top three: the stand-in voice (done); a sample of a Stack Exchange question (left for the 5 November review, which the plan already waits on); and the deleted-post read (done). **Dropped:** Reddit's developer fund ($4,000 once, at 5,000 daily users of an app inside Reddit, which we do not have); re-tuning when the host's opening tag shows (it tunes a version you have not approved); and putting bet 1 onto the live branch switched off so the paid voice narrates it (the stand-in does the same without that risk).
+- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas, and five survived its own filter. Two more agents ranked those, in opposite orders, and agreed on the top three: the stand-in voice, the Stack Exchange sample, and the deleted-post read, all three done. **Dropped:** Reddit's developer fund ($4,000 once, at 5,000 daily users of an app inside Reddit, which we do not have); re-tuning when the host's opening tag shows (it tunes a version you have not approved); and putting bet 1 onto the live branch switched off so the paid voice narrates it (the stand-in does the same without that risk).
 - **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.64 this month, forecast $0.85 of $3).
-- Mostly a bet, not a fix. AI use: one sample render (2–5 Gemini requests); no Polly.
+- Mostly bets, not fixes. AI use: one sample render (2–5 Gemini requests), one more Gemini request for the local Stack Exchange render, two free Groq requests; no Polly.
 
 ### Blocked
 - **For you, in order:** #82 (register our Reddit app, before 31 October); #77 (tonight: watch the linked sample, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
 
 ### Next
 - **Tonight, after 20:56 UTC:** request a render of the stand-in branch. On a pass that names its current commit, merge it into the release branch and post the sample's link to #77 with the same key,, saying what differs from an upload (the voice only).
-- Narrated samples of a replacement source (5 November review) can now come from the stand-in, with no change to how keys are handled.
+- The next 12-hour slot after that: render the Stack Exchange sample branch, for the 5 November review.
 - If #82 is still open on 28 October, raise it once more with the same key.
 - 26 October weekly read, then the opening-reach read once.
 
