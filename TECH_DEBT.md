@@ -454,8 +454,11 @@ a list nobody can read is the same as no list.
   those two of 191 shipped titles). It changes which posts and AI lines
   qualify, not the video, so no version bump; it waits only for a sample
   render, in the slot after #77's. Host lines keep `_clean_str` (the list
-  holds "god", "hell", "damn"); the CTA, also the host's spoken vote, does
-  not, so a vote with those falls back: read `host_lines` after `v8`. Left:
+  holds "god", "hell", "damn": "Oh god" is a reaction). **When this meets bet
+  1:** there the closing line is the host's verdict, which `_clean_commentary`
+  builds with `_clean_str` from the same "cta" field, so the guard misses it
+  (third review: a swearing vote still ships). Run the verdict alone through
+  `_clean_published` then. Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare).
   Live video left as is (retitling would alter a row of #10 and #14).
   **Closes when** the branch merges.
