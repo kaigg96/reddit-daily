@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-22 (16:50) — A swear word reached this morning's title; the filter's gap is fixed and waits for one render. Reddit's own page: register by 12 January; free access still ends in March
+
+    Worked (% of the shift): reliability 40 · legal 25 · strategy 15 · gm 15 · security 5
+
+**Summary:** This morning's upload went out titled with a swear word, because our word filter misses words inside quote marks. The fix is built and reviewed, and goes live after one sample render. Reddit's own registration page shows that registering is not a new request, so 12 January is the real deadline. Free access still ends in March whatever we do, which makes the 5 November source choice the real answer.
+
+### Toward revenue
+- **Nothing directly.** The fix protects the channel rather than growing it. The three reads sharpen the 5 November choice of a source after Reddit, the company's one fatal, dated risk.
+
+### Done
+- **Reliability (a fix):** this morning's video went out as "Could YOUR Will Start with "Alright Fuckers"?". Our word filter misses a swear word touching a quote mark or Reddit's bold and italic marks, and the AI title then quoted the post. It was 1 of 191 uploads. The filter on answers shares the gap, and so do contractions ("shit's"). The fix catches all of these and leaves "he'll" and "who're" alone. A fresh review found one miss in my first version (a starred-out word in quotes), now fixed; a second review of that fix is noted in the tracker. On 959 old questions it flags nothing new. It changes which posts qualify, not the video. **I recommend leaving the live video as it is:** retitling it would alter one row of two running title tests, and we earn no ad money it could lose. That is yours to overrule.
+- **Legal (Reddit):** Reddit's own registration page, read first-hand from an archive copy. It is for "existing apps", so 31 October (the end of *new* requests) does not apply to us. Uploads stop from 12 January if we have not registered. It needs the login of the account that owns our app and a personal Reddit account. In Reddit's words, "remaining public API access will end in March 2027", registered or not. #82 now carries the link and these steps.
+- **Legal (Stack Exchange):** its licence fits a Short, on conditions: credit in the description, and the upload left on YouTube's standard licence setting. The cost: anyone could re-upload those videos, even for money, and we could not claim them.
+- **Strategy:** 16 Stack Exchange sites, read for free. Not one recent question has three answers short enough to use as written (30 words or fewer). So every such video needs AI shortening, which is what made yesterday's sample read as dry advice.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas; five survived its filter. Two rankers, in opposite orders, put the same three on top: the filter, Reddit's page and the licence, all done, plus the fourth (the survey). **Dropped:** a sample of the "our own questions" show (not finishable in time, and its render queues behind three others). Also closed #74, as you said on #77.
+- **Reliability (tonight's render):** the stand-in voice branch merges cleanly, and all its tests pass on its own and with live code.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.65 this month, forecast $0.85 of $3).
+- Mostly fixing, plus reads. AI use: no Gemini, Polly or Groq; 18 free Stack Exchange requests.
+- **Process:** one render per 12 hours now queues a live fix behind a sample. Tonight's slot is bet 1's, so the fix waits about a day.
+
+### Blocked
+- **For you, in order:** #82 (register; the exact page is on the issue; by 12 January, sooner is safer); #77 (tonight: watch the sample); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- **Tonight, after 20:56 UTC:** as planned, render the stand-in branch and post it to #77.
+- **The slot after:** render the filter branch; on a pass naming its commit, merge it into the live branch (no version bump). Then the Stack Exchange sample.
+- The 28 October re-raise of #82 can wait: re-raise in early December if it is still open.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Slightly. A live gap in what we publish is closed, pending one render, and #82's step is now exact.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The source decision has firmer facts.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-22 (09:30) — Bet 1's samples can now speak without your hands; tonight's shift brings you one on #77. Reddit's deleted-post rule reaches our published videos
 
     Worked (% of the shift): product 35 · engineering 25 · strategy 15 · gm 10 · legal 10 · security 5
@@ -92,39 +126,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. Bet 1's last step no longer needs you to run anything, once tonight's sample is posted.
 - **Than ~10 shifts ago:** Slightly. Watch time is flat at 12 seconds and bet 1 has not shipped, but the step holding it since 19 October is nearly the smallest it can be.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-21 (22:45) — Reddit is closing the free access every video starts from: please register our app before 31 October; free access ends by March 2027
-
-    Worked (% of the shift): legal 30 · strategy 25 · gm 20 · market 10 · data 5 · reliability 5 · security 5
-
-**Summary:** Looking for new work turned up a Reddit announcement of 30 September. New requests close on 31 October, apps not registered lose access from 12 January, and free access ends by March 2027. Every video we make starts from that access, so this is now the company's largest risk. You have one new ask (#82), and shifts are pricing other sources for the 5 November review.
-
-### Toward revenue
-- **Our supply now has an end date.** I read two reports of Reddit's announcement first-hand (TechCrunch, and a fuller one quoting Reddit's developer posts). New access requests close on 31 October. Apps not registered lose access from 12 January. Free access ends by March 2027; after that Reddit wants "commercial deals", reported at around $12,000 a month, which is out of reach for us. Nothing in the project had recorded it. Bet 1's host carries over to any source; the readings do not.
-- **#82 asks you to register our app before 31 October,** and to ask Reddit whether a small registered app keeps access after March. Registering is free and needs your Reddit account; Reddit may already have emailed it a reminder. It is quicker than #77 and has a date, so it comes first. Reddit's replacement platform lacks Python and serves apps inside Reddit, so it cannot carry our source.
-- **The alternatives are priced in a first pass** (under Done), and the rule for the 5 November proposal is fixed. It resumes on Reddit's reply or that review.
-
-### Done
-- **Legal and market (a bet):** what could replace Reddit. Stack Exchange's terms allow our use, free. The condition: each video credits and links every author and carries the same open licence. It could supply two a day: 13 of 21 live questions on its workplace site have three or more answers. But those answers run 100 to 360 words against our 12. Its licence lets us shorten them, which Reddit's never did. The free AI model cut six to about 14 words each, accurate but dry advice, and both questions were too long for our titles. So it would be a different show, not a replacement. Writing our own questions and having AI write the answers costs no licence. But on two of our questions it wrote stock jokes and invented a personal story, so those answers could only be presented as the host's own. Hacker News and Mastodon do not allow this use. Also noted: Reddit's rules reportedly now bar apps from showing posts their authors deleted, which our published videos cannot honour. No other service we depend on has a shutdown date. Bet 1's host needs three short, distinct answers to react to: shortened Stack Exchange answers give that, while AI-written ones would have the host reacting to itself.
-- **Strategy:** the risk register now carries the new risk, rated fatal. The Reddit-terms row also said Groq's no-training tier lands with bet 1; it lands only as a backup (the full move is blocked on its tags), now corrected.
-- **General management (ranking):** nothing was ready. A fresh agent proposed eight; two more ranked them in opposite orders and agreed on the top three. First: whether Reddit grants commercial agreements to small creators at all. It turned up the dates above. Second: writing down, before bet 1's results, the numbers that would put a change of direction on your agenda. The end of free access now forces that question by March, so it was overtaken. Third: checking that the 26 October read will run. It will: the step that has never run on real data works on today's figures. **Dropped:** the break-even point (it needs the subscription's price); old duplicate uploads (most share a question, not a video); asking you to change the shift schedule (short shifts are ours to fix); whether views are bunching into a few hits (noise); a comment-hold setting (one abusive comment).
-- **General management (second round, after the news):** a fresh agent proposed six more. Taken: the 5 November proposal's rule, fixed now before Reddit replies. If Reddit confirms in writing that our app keeps access after March, stay. Otherwise you watch a narrated sample of each replacement as a first-time viewer, by mid-December, and the one you follow ships by early February. **Dropped:** agents scoring the replacements blind (weaker than your viewing); drafting answers for Reddit's form (we cannot see it); reorganising the code for a second source (before you choose); post titles in our public files (changes nothing); a test that losing Reddit stops a run (it does).
-- **Data and reliability:** the scorecard's jump in median views is noise (four-week totals ×0.93). The zero-view recent uploads are the usual reporting lag: every week since July shows 3 to 5. The watched clip stays under its retirement bar. Bet 1's branch with today's main passes 694 tests. A run that loses Reddit access fails loudly rather than skipping an upload silently.
-- **Security:** the standing check is clean. No secrets are in the project, no workflow has changed since this afternoon, you remain the only collaborator, and the money controls are in place.
-- Neither a fix nor a change to what ships: a risk found. AI use: four free Groq requests. Handed over about 35 minutes early: nothing else ready.
-- **Process:** a change fatal to our supply sat public for three weeks while ten shifts looked for work. The monthly review's outside look should cover the source's developer news. For the 5 November review. Also awkward: waiting on helper agents takes timed pauses, because the tool that watches for them is refused here.
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, before 31 October); #77 (one narrated render, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- The 5 November proposal on sources follows its fixed rule; Reddit's answer on access after March, if you register, decides which branch.
-- If #82 is still open on 28 October, raise it once more with the same key (a comment emails you): after the 31st, registering may need a new request Reddit no longer accepts.
-- 26 October weekly read: check how many uploads it marks as failed, then run the opening-reach read once.
-- 5 November monthly review: the source proposal, and narration on test renders, now needed twice: bet 1 and the replacement samples.
-
-### Better?
-- **Than last shift:** Yes, in what we know: the company now sees that its supply ends by March 2027, with ten days to be safe on registering. Nothing changed for viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The plan is truer: it now carries a dated, fatal risk it had missed.
 - **Than ~100 shifts ago:** Too early to say.

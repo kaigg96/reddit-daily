@@ -442,3 +442,15 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
+- **A swear word reached a live title (2026-10-22 05:06, `IjN6hj2etcs`).**
+  better-profanity counts a straight quote or `*` as part of a word, so
+  "'alright fuckers'" passed the post-title filter, and the AI title quoted
+  it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
+  ("shit's"). Fixed on `reliability/profanity-quotes` (`_profane`, two fresh
+  reviews; no new flags on 959 old questions). It changes which posts qualify,
+  not the video, so no version bump; it waits only for a sample render, in the
+  slot after #77's. Left: the AI-written title is never screened itself; with
+  its inputs filtered, only the model inventing a swear word reaches it, and a
+  check there would blank the title-style row (a second variable). Live video
+  left as is (retitling would alter a row of #10 and #14). **Closes when** the
+  branch merges.
