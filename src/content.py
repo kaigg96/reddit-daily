@@ -80,6 +80,18 @@ def _has_emoji(text):
     return any(emoji.is_emoji(ch) for ch in text)
 
 
+# A quote mark or Reddit's *emphasis* touching a word hides it from the
+# whole-word check: "'alright fuckers'" passed, and on 2026-10-22 an upload
+# went out titled with it. Only marks at a word's edge are spaced out, since
+# splitting "he'll" or "who're" makes "ll" and "re" list words.
+_EDGE_MARKS = re.compile(r"(?<![A-Za-z])['\"`*]+|['\"`*]+(?![A-Za-z])")
+
+
+def _profane(text):
+    return (profanity.contains_profanity(text)
+            or profanity.contains_profanity(_EDGE_MARKS.sub(" ", text)))
+
+
 def _comment_pool(post, limit):
     """Top comments passing the basic filters, larger than NUM_COMMENTS so the
     screen (R4.6) can drop individual answers and still backfill."""
@@ -92,7 +104,7 @@ def _comment_pool(post, limit):
             len(c.body) <= config.MAX_COMMENT_LENGTH
             and c.body not in ("[deleted]", "[removed]")
             and not _has_emoji(c.body)
-            and not profanity.contains_profanity(c.body)
+            and not _profane(c.body)
         )
     ][:limit]
 
@@ -162,7 +174,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             print(f"Already uploaded, not a candidate: {post.title[:60]}")
         if (
             not post.over_18
-            and not profanity.contains_profanity(post.title)
+            and not _profane(post.title)
             and len(post.title) <= config.MAX_TITLE_LENGTH
             and not _has_emoji(post.title)
             and post.title != prev_title
