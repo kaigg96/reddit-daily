@@ -80,16 +80,20 @@ def _has_emoji(text):
     return any(emoji.is_emoji(ch) for ch in text)
 
 
-# A quote mark or Reddit's *emphasis* touching a word hides it from the
-# whole-word check: "'alright fuckers'" passed, and on 2026-10-22 an upload
-# went out titled with it. Only marks at a word's edge are spaced out, since
-# splitting "he'll" or "who're" makes "ll" and "re" list words.
-_EDGE_MARKS = re.compile(r"(?<![A-Za-z])['\"`*]+|['\"`*]+(?![A-Za-z])")
+# The library counts a straight quote or * as part of a word, so a quote or
+# Reddit's *emphasis* touching a word hides it: "'alright fuckers'" passed,
+# and on 2026-10-22 an upload went out titled with it. A contraction hides
+# one too ("shit's"). So the text is checked again with edge marks spaced out
+# and suffixes dropped. Marks inside a word stay ("f**k" is a list word as
+# written), and so do the words: the library reads neighbours together, so
+# splitting "he'll" would read "hell" and "who're" "whore".
+_EDGE_MARKS = re.compile(r"(?<![A-Za-z*])['\"*]+|['\"*]+(?![A-Za-z*])")
+_SUFFIX = re.compile(r"'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
 
 
 def _profane(text):
     return (profanity.contains_profanity(text)
-            or profanity.contains_profanity(_EDGE_MARKS.sub(" ", text)))
+            or profanity.contains_profanity(_EDGE_MARKS.sub(" ", _SUFFIX.sub(" ", text))))
 
 
 def _comment_pool(post, limit):

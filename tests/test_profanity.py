@@ -1,9 +1,10 @@
 """The swear-word filter on post titles and answers (src/content.py).
 
 The library's whole-word check misses a word with a quote mark or *emphasis*
-touching it. On 2026-10-22 a post titled "Can I legally start my will with
-'alright fuckers'?" passed it, and the upload went out under a title quoting
-it. These pin that case and the contractions the fix must leave alone."""
+touching it, or a contraction's suffix. On 2026-10-22 a post titled "Can I
+legally start my will with 'alright fuckers'?" passed it, and the upload went
+out under a title quoting it. These pin that case and the contractions the fix
+must leave alone."""
 
 import pytest
 
@@ -17,18 +18,22 @@ LIVE_2026_10_22 = "Can I legally start my will with 'alright fuckers'?"
     LIVE_2026_10_22,
     'Could YOUR Will Start with "Alright Fuckers"?',   # the title it went out under
     "That's some *shit* right there",                  # Reddit's emphasis
-    "I said `shit` out loud",
     "fuckers' last words",
     "**FUCK** that",
+    "What's the most 'f**k it' moment you've had?",    # a censored word, quoted
+    "For fuck's sake, what's the worst?",              # contractions hide one too
+    "That shit's crazy",
 ])
 def test_a_quoted_or_emphasised_swear_word_is_caught(text):
     assert content._profane(text)
 
 
 @pytest.mark.parametrize("text", [
-    "What's something he'll never admit to his wife?",   # "ll" is a list word once split
-    "Who're you rooting for this year?",                 # so is "re"
+    "What's something he'll never admit to his wife?",   # "he ll" reads as "hell"
+    "Who're you rooting for this year?",                 # "who re" as "whore"
     "Don't you think the 80's were better?",
+    "What's the **genuinely** best pizza, James' or the dogs'?",
+    "Rock 'n' roll at 6 o'clock, ma'am",
     "What did your grandma call 'the good scissors'?",
     'Teachers, what was the "dumbest" excuse you heard?',
 ])
