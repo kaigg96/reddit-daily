@@ -94,7 +94,8 @@ _CONTRACTED = re.compile(r"([A-Za-z*]+)'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
 def _profane(text):
     return (profanity.contains_profanity(text)
             or profanity.contains_profanity(_EDGE_MARKS.sub(" ", text))
-            or any(profanity.contains_profanity(m.group(1)) for m in _CONTRACTED.finditer(text)))
+            or any(profanity.contains_profanity(m.group(1))
+                   for m in _CONTRACTED.finditer(_EDGE_MARKS.sub(" ", text))))
 
 
 def _comment_pool(post, limit):

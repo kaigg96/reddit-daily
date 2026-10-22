@@ -23,6 +23,7 @@ LIVE_2026_10_22 = "Can I legally start my will with 'alright fuckers'?"
     "What's the most 'f**k it' moment you've had?",    # a censored word, quoted
     "For fuck's sake, what's the worst?",              # contractions hide one too
     "That shit's crazy",
+    "That *shit's* crazy, **fuck's** sake",              # emphasis around a contraction
 ])
 def test_a_quoted_or_emphasised_swear_word_is_caught(text):
     assert content._profane(text)
