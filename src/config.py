@@ -45,8 +45,10 @@ STAND_IN_VOICE = os.environ.get(
 # model. On three posts (2026-10-20) the sample model's tags were labels where
 # the upload model's reacted (1 of 9 reactions against 7), so a render that
 # judges the tags must show what an upload would. Uploads use MODEL already.
+# On by default with the stand-in voice: a branch render that speaks exists to
+# be judged by ear, and dry-run.yml allows one such render per 12 hours.
 METADATA_ON_UPLOAD_MODEL = os.environ.get(
-    "METADATA_ON_UPLOAD_MODEL", "").lower() in ("1", "true", "yes")
+    "METADATA_ON_UPLOAD_MODEL", "1" if STAND_IN_VOICE else "").lower() in ("1", "true", "yes")
 # REUSE_NARRATION=1, on a dry run only: narration already bought for the same
 # text and voice is reused from GEN/narration/ rather than billed again, and
 # the narrator is always VOICES[0] so a re-render finds it. For the owner's

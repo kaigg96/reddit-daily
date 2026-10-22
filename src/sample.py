@@ -7,6 +7,8 @@ with production, so samples were rationed to one per 12h and finished changes
 waited on them. This module supplies the three paid inputs -- the screened
 post, the metadata, the narration -- for nothing. Not wired into the run yet.
 """
+import unicodedata
+
 import numpy as np
 from moviepy import AudioClip
 
@@ -48,14 +50,25 @@ METADATA = MetadataResult(
 )
 
 
+def _spoken(c):
+    return unicodedata.category(c)[0] in "LN"
+
+
 def silent_marks(text):
-    """Word marks shaped like Polly's: evenly paced, byte offsets into UTF-8."""
+    """Word marks shaped like Polly's: evenly paced, byte offsets into UTF-8.
+    As Polly's, a word's text and end leave out the punctuation around it
+    (video.group_words reads the byte after the end for a sentence break), and
+    a token of punctuation alone gets no mark."""
     marks, raw, pos = [], text.encode("utf-8"), 0
-    for i, word in enumerate(text.split()):
-        w = word.encode("utf-8")
-        pos = raw.index(w, pos)
-        marks.append({"t": i / WORDS_PER_SECOND, "w": word, "end_offset": pos + len(w)})
-        pos += len(w)
+    for word in text.split():
+        pos = raw.index(word.encode("utf-8"), pos)
+        first = next((i for i, c in enumerate(word) if _spoken(c)), None)
+        if first is not None:
+            last = max(i for i, c in enumerate(word) if _spoken(c))
+            core = word[first:last + 1]
+            end = pos + len(word[:last + 1].encode("utf-8"))
+            marks.append({"t": len(marks) / WORDS_PER_SECOND, "w": core, "end_offset": end})
+        pos += len(word.encode("utf-8"))
     return marks
 
 

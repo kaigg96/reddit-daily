@@ -8,7 +8,9 @@ def test_marks_point_at_each_words_end_in_utf8_bytes():
     text = "Café workers, what's brutal?"
     raw = text.encode("utf-8")
     marks = sample.silent_marks(text)
-    assert [m["w"] for m in marks] == text.split()
+    # As Polly's: no punctuation in a word, so the byte after its end can be.
+    assert [m["w"] for m in marks] == ["Café", "workers", "what's", "brutal"]
+    assert raw[marks[1]["end_offset"]:][:1] == b","
     for m in marks:
         assert raw[:m["end_offset"]].endswith(m["w"].encode("utf-8"))
     assert [m["t"] for m in marks] == sorted(m["t"] for m in marks)
