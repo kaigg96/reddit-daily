@@ -459,6 +459,9 @@ a list nobody can read is the same as no list.
   builds with `_clean_str` from the same "cta" field, so the guard misses it
   (third review: a swearing vote still ships). Run the verdict alone through
   `_clean_published` then. Left:
-  the library already reads a curly "he’ll" as "hell" (fails safe, rare).
+  the library already reads a curly "he’ll" as "hell" (fails safe, rare);
+  YouTube's API refuses "<" and ">" in a title or description and nothing
+  strips them, which would fail the upload and retry the same post (0 of
+  ~2,300 past titles and answers carry one).
   Live video left as is (retitling would alter a row of #10 and #14).
   **Closes when** the branch merges.
