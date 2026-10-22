@@ -78,7 +78,7 @@ and more useful than a confident guess.
 - **General management:** nothing was ready. A fresh agent proposed eight ideas; five survived its filter. Two rankers, in opposite orders, put the same three on top: the filter, Reddit's page and the licence, all done, plus the fourth (the survey). A second round found the unchecked AI words, done above. **Dropped:** a sample of the "our own questions" show (not finishable in time, and its render queues behind three others). Also closed #74, as you said on #77.
 - **Reliability (tonight's render):** the stand-in voice branch merges cleanly, and all its tests pass on its own and with live code.
 - **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.65 this month, forecast $0.85 of $3).
-- Mostly fixing, plus reads. AI use: no Gemini, Polly or Groq; 27 free Stack Exchange requests.
+- Mostly fixing, plus reads. AI use: no Gemini, Polly or Groq; 27 free Stack Exchange requests. Handed over about 15 minutes early: the second round's last idea, titles a stray "<" would make YouTube refuse, has never occurred in 2,300 past texts, so it is recorded rather than built.
 - **Process:** one render per 12 hours now queues a live fix behind a sample. Tonight's slot is bet 1's, so the fix waits about a day.
 
 ### Blocked
