@@ -448,8 +448,8 @@ a list nobody can read is the same as no list.
   it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
   ("shit's"). Nothing screened the AI's own output either: an emoji title
   shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
-  (edge marks spaced out, each contracted word checked alone; reviewed twice,
-  no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
+  (edge marks spaced out, each contracted word checked alone; four reviews,
+  the last clean at `fae20a8`; no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
   title, CTA or keyword with a swear word or emoji falls back (refuses exactly
   those two of 191 shipped titles). It changes which posts and AI lines
   qualify, not the video, so no version bump; it waits only for a sample
