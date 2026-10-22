@@ -189,9 +189,13 @@ def test_only_a_silent_run_reaches_the_stand_in():
     into sample.synthesize sits under `if silent:`, and silent means SAMPLE or
     SILENT_NARRATION, which an upload never sets."""
     import inspect
+    import re
     from src import run
     source = inspect.getsource(run.main)
-    assert "silent = config.SAMPLE or config.SILENT_NARRATION" in source
+    # Assigned once, to exactly this: widened (say, "or STAND_IN_VOICE") or
+    # reassigned, a run that is not a dry run could narrate with the stand-in.
+    assert re.findall(r"^\s*silent\s*=(.*)$", source, re.M) == \
+        [" config.SAMPLE or config.SILENT_NARRATION"]
     assert source.count("sample.synthesize(") == 1
     assert "if silent:\n            marks = sample.synthesize(" in source
     assert "standin." not in source        # no route around sample.synthesize
