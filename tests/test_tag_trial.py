@@ -27,7 +27,7 @@ def test_it_refuses_before_spending(no_calls, argv):
 
 
 def test_every_post_has_three_answers():
-    assert len(tt.POSTS) == 9 and all(len(a) == 3 for _, a in tt.POSTS)
+    assert len(tt.POSTS) == 11 and all(len(a) == 3 for _, a in tt.POSTS)
 
 
 @pytest.mark.parametrize("setup, words", [("blurt", "blurt out the moment a friend asked you"),
@@ -62,6 +62,23 @@ def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
     tt.setup_model("sample", reactions="spoken")
     ask = llm._commentary_ask(3)
     assert "never an adjective and a noun" in ask and "adjective and a noun" not in shipped
+    assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+
+
+def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(monkeypatch):
+    from src import config
+    monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    shipped = llm._commentary_ask(3)
+    tt.setup_model("sample", reactions="ungraded")
+    ask = llm._commentary_ask(3)
+    assert "agreement" in shipped and "agreement" not in ask
+    assert '"Spot on"' in ask and '"Spot on"' not in shipped
     assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
 
 

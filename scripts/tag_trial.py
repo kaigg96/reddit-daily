@@ -1,7 +1,8 @@
 """Read bet 1's host lines (#77) on fixed posts: one metadata request each.
 
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9
-    venv/bin/python scripts/tag_trial.py --model sample        # all nine
+    venv/bin/python scripts/tag_trial.py --model sample        # all eleven
+    venv/bin/python scripts/tag_trial.py --model upload --posts 10,11 --reactions ungraded
     venv/bin/python scripts/tag_trial.py --model groq
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
     venv/bin/python scripts/tag_trial.py --model groq --setup specific
@@ -20,7 +21,8 @@ capped too.
 The questions are real (upload_log.csv, October 2026); the answers are
 written in Reddit's voice, as scripts/replay_screen.py does, because Reddit
 refuses the runner shifts use. 2, 3, 6 and 7 carry answers that are only a
-name, which drift to labels; 1 and 5 are politics.
+name, which drift to labels; 1 and 5 are politics; 10 and 11 are personal
+advice, where answers get graded rather than reacted to.
 """
 import argparse
 import json
@@ -67,6 +69,17 @@ POSTS = [
      ["Coffee. The donuts get you in the door, the coffee pays the rent.",
       "Most of them are family run and the whole family works there for free.",
       "Cops."]),
+    # Personal advice: the upload model graded all three answers of the
+    # 2026-10-23 sample ("Direct hit", "Spot on", "Deep insight"). 10's are
+    # that post's real answers; its first leans on a body the viewer never sees.
+    ("Why does my obese friend act like this?",
+     ["I guarantee that a local women's shelter will gladly take all of it off your hands",
+      "She seems in denial of her weight and also very performative about it at the same time. How exhausting.",
+      "She's projecting her insecurities onto you."]),
+    ("How do I make Jehovah's Witnesses leave us alone?",
+     ["Answer the door in a towel. Worked for my dad for twenty years.",
+      "Just say \"we're not interested, please put us on your do not call list.\" They actually keep one.",
+      "Invite them in and try to sell them a timeshare."]),
 ]
 UPLOAD_CAP = 3
 SAMPLE_CAP = len(POSTS)
@@ -92,6 +105,11 @@ SETUPS = {"blurt": SETUP_BLURT, "specific": SETUP_SPECIFIC}
 # rules out the label's form instead: a spoken fragment, never adjective + noun.
 REACTIONS_SPOKEN = ' Say each as you would out loud: a fragment with a verb\n' \
     '     or a sound ("Nope, never again", "I\'d cry too"), never an adjective and a noun.'
+# The 2026-10-23 sample graded every answer of a personal-advice post ("Spot
+# on", "Deep insight"), which the shipped list's "agreement" invites. This
+# drops agreement and names grading. Unread on any model.
+REACTIONS_UNGRADED = '\n     Never grade the answer: "Spot on", "Deep insight" and "Direct hit" are\n' \
+    '     verdicts, not reactions.'
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -118,6 +136,11 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     if reactions == "spoken":
         old, new = llm._TAG_EDITS[1]
         llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new + REACTIONS_SPOKEN)] + llm._TAG_EDITS[2:]
+    if reactions == "ungraded":
+        old, new = llm._TAG_EDITS[1]
+        assert "surprise, agreement," in new, "the shipped reactions' wording moved"
+        new = new.replace("surprise, agreement,", "surprise,") + REACTIONS_UNGRADED
+        llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new)] + llm._TAG_EDITS[2:]
     if groq_model:
         config.GROQ_MODEL = groq_model
     if model == "groq" and config.GROQ_MODEL.startswith("qwen"):
@@ -145,8 +168,9 @@ def main(argv=None):
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
     ap.add_argument("--setup", choices=["shipped", *SETUPS], default="shipped",
                     help="the setup's wording: as shipped, or one of SETUPS")
-    ap.add_argument("--reactions", choices=["shipped", "spoken"], default="shipped",
-                    help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN")
+    ap.add_argument("--reactions", choices=["shipped", "spoken", "ungraded"], default="shipped",
+                    help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN "
+                         "or REACTIONS_UNGRADED")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
     args = ap.parse_args(argv)
