@@ -20,7 +20,7 @@ capped too.
 
 The questions are real (upload_log.csv, October 2026); the answers are
 written in Reddit's voice, as scripts/replay_screen.py does, because Reddit
-refuses the runner shifts use. 2, 3, 6 and 7 carry answers that are only a
+refuses the runner shifts use (10's are real, from the 10-23 sample's log). 2, 3, 6 and 7 carry answers that are only a
 name, which drift to labels; 1 and 5 are politics; 10 and 11 are personal
 advice, where answers get graded rather than reacted to.
 """

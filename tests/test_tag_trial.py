@@ -63,6 +63,7 @@ def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
     ask = llm._commentary_ask(3)
     assert "never an adjective and a noun" in ask and "adjective and a noun" not in shipped
     assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+    assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
 
 
 def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(monkeypatch):
@@ -80,6 +81,7 @@ def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(mon
     assert "agreement" in shipped and "agreement" not in ask
     assert '"Spot on"' in ask and '"Spot on"' not in shipped
     assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+    assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
 
 
 def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
