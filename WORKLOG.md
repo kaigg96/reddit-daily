@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-23 (22:55) — Bet 1's first spoken sample plays, but its host tags praised the answers instead of reacting, so I held it back from you; a reworded prompt shows promise
+
+    Worked (% of the shift): product 40 · reliability 25 · data 15 · gm 15 · security 5
+
+**Summary:** Sample videos now speak on the build machine, and tonight's played end to end. But on tonight's post the host's three tags praised the answers ("Spot on", "Deep insight") instead of reacting to them, the weakness you flagged on 19 October. So I did not ask you to watch it. A reworded prompt fixed that post on a first try, and needs a wider check before you see a new sample.
+
+### Toward revenue
+- **Bet 1 is closer, not shipped.** Every route to revenue needs bet 1, and its last gate is you watching a narrated sample. Tonight's sample showed a gap the trials had missed. On personal advice questions ("Why does my friend act like this?"), about one upload in eight, the host grades the answers. Showing you that would have cost you a viewing to repeat your own feedback.
+
+### Done
+- **Product (a bet):** the free stand-in voice rendered on the build machine. It passed every check and is now on the release branch, so future samples speak. Your own render command is unchanged by it. The tags were "Direct hit", "Spot on" and "Deep insight", all verdicts. The first answer also only made sense with the post's body, which viewers never see. None of the nine trial posts was a personal advice question; two now are. If you want to see it anyway, the sample stays on tonight's render page for 14 days. It is not an ask.
+- **Product (the fix, a bet):** the reworded prompt drops "agreement" from the reactions it invites and names grading as a verdict. On the upload model, one request per post: tonight's post went from 0 of 3 reactions to 2 of 3 ("Wait, what?", "Oof, direct"). A second advice post scored 2 of 3 either way. A direction, not a rate; it stays out of the release until it holds on the other nine posts.
+- **Reliability (a fix, built on bet 1):** the swear-word filter now also covers the host's vote and its on-screen tags. They spare "Oh god" and "Hell no" but refuse "Holy shit". This was the gap a review found yesterday where the filter fix meets bet 1. Reviewed; it joins the release after the filter's own render.
+- **Data (a research question):** is the flat 12 seconds hiding gains at the opening? Our watch-time figure leaves out most viewers who swipe away early, so I added seconds watched per play start, swipe-aways included, and fixed the rule before reading. Across all uploads it rose from 3.7 to 5.3 seconds. Among longer videos it was flat, and the rule needed both, so **it is not a finding**: the rise may come from the mix of lengths. Reviewed and merged as a diagnostic. It never decides a revert.
+- **Data:** bet 1's revert check measures total watch time in a way that runs about 2.5× YouTube's own minutes. Recounted from minutes, no past keep-or-revert decision changes, so no change is proposed.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas and six survived. Two rankers, in opposite orders, put the same three on top: the watch-time read and the revert check (done above), then the swear-word gap (done). **Dropped:** whether any Shorts money comes before the Partner Program (the plan already answers it); amending the rule for staying on Reddit (your #60 call covers it); a dependency audit (run: Pillow's known flaws grew, still unreachable as we never open outside images).
+- **Process:** three scheduled shifts were skipped from last night to this afternoon because the week's shift allowance ran out a day before Friday's reset. The guard worked as designed, but it is why last night's planned render waited a day.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.68 this month, forecast $0.98 of $3).
+- Mostly bets, with one fix. AI use: one sample render (one upload-model request), three upload-model requests for the tag trial; no Polly.
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
+
+### Next
+- **After about 10:17 UTC tomorrow:** render the swear-word filter branch; on a pass naming its commit, merge it into the live branch (no version bump). Then fold the vote-and-tags guard into the release branch.
+- **The tag check:** the reworded prompt on the other nine trial posts, upload model. The daily release check and both uploads share its allowance, so about three requests a day fit safely; it spans a few days. If it reacts at least as often as before (14 of 18, 21 October), fold it into the release, render, and post that sample to #77.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Slightly. Samples speak without you, and a tag weakness reaching about one upload in eight was found before shipping, not after.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-22 (16:50) — A swear word reached this morning's title; the filter's gap is fixed and waits for one render. Reddit's own page: register by 12 January; free access still ends in March
 
     Worked (% of the shift): reliability 40 · legal 25 · strategy 15 · gm 15 · security 5
@@ -93,37 +126,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. A live gap in what we publish is closed, pending one render, and #82's step is now exact.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The source decision has firmer facts.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-22 (09:30) — Bet 1's samples can now speak without your hands; tonight's shift brings you one on #77. Reddit's deleted-post rule reaches our published videos
-
-    Worked (% of the shift): product 35 · engineering 25 · strategy 15 · gm 10 · legal 10 · security 5
-
-**Summary:** You asked on #77 for a narrated render, "or a way to get one". Sample renders can now speak in a free stand-in voice. The first one proved it works, but it was not faithful enough to send you. Tonight's shift renders the corrected version and posts it to #77, so watching it should be all bet 1 needs from you. Separately, Reddit's terms require removing posts their authors delete, which our published videos can only do by being deleted.
-
-### Toward revenue
-- **Bet 1's last step should shrink to watching an 18-second video.** Unreleased versions rendered silently, because they never hold the keys to the paid voice. Now they speak in a free voice that runs on the build machine, at Polly's pace. This morning's sample rendered and plays with speech throughout. I held it back: its tags came 0.3 seconds late, flattering exactly the timing you objected to, and they came from the weaker free model. Both are fixed. Future spoken samples also take their tags from the model uploads use. A sample can be rendered only once every 12 hours, so the corrected one comes tonight, with the link on #77.
-- Uploads never reach the stand-in; their paid voice is unchanged.
-
-### Done
-- **Product and engineering (a bet on unblocking bet 1):** the stand-in voice, reviewed by a fresh agent. It found nothing that could touch uploads or spend Polly. It did find four real problems, now fixed. A stalled download could have overrun the render's time limit. A half-installed voice would never have been repaired. The voice's software could see our API keys. And the captions split sentences differently from uploads. A second review of the fixes found three smaller ones, also fixed: a slow download could still overrun, one test could not fail, and captions dropped symbols such as "$". Also done, as it advised: downloads locked by fingerprint, and a test that uploads cannot reach the voice.
-- **Strategy (a bet, for the 5 November review):** a sample of the Stack Exchange show is built and renders locally: today's top workplace question, three answers each cut to one sentence by the free AI model, credited by name, spoken by the stand-in. As found yesterday, it reads as dry advice, and the host's tags came out as labels ("Smart move", "Realistic"). It renders after bet 1's sample, so the review can show it.
-- **Legal:** Reddit's rule on deleted posts, read first-hand. It is not new: it has been in Reddit's developer terms since September 2024. Deleted posts and comments must be removed "as soon as possible", and Reddit's help pages say anyone using its content must "stop displaying or using" them. No clause names videos, but it most likely reaches ours, and a video can honour it only by being deleted. That bears on the old videos' fate, which comes to you with the rename.
-- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas, and five survived its own filter. Two more agents ranked those, in opposite orders, and agreed on the top three: the stand-in voice, the Stack Exchange sample, and the deleted-post read, all three done. **Dropped:** Reddit's developer fund ($4,000 once, at 5,000 daily users of an app inside Reddit, which we do not have); re-tuning when the host's opening tag shows (it tunes a version you have not approved); and putting bet 1 onto the live branch switched off so the paid voice narrates it (the stand-in does the same without that risk).
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.64 this month, forecast $0.85 of $3).
-- **Process:** with one render per 12 hours, a flaw the review caught became a half-day wait for your sample. Reviewing before requesting would have avoided it.
-- Mostly bets. AI use: one sample render (2–5 Gemini requests), one local Gemini request, two Groq; no Polly. Handed over ~15 minutes early: a last round found nothing finishable (the clip rule, its closest, was read 10-21).
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, before 31 October); #77 (tonight: watch the linked sample, then one label); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- **Tonight, after 20:56 UTC:** request a render of the stand-in branch. On a pass that names its current commit, merge it into the release branch and post the sample's link to #77 with the same key, saying what differs from an upload (the voice only).
-- The next 12-hour slot after that: render the Stack Exchange sample branch, for the 5 November review.
-- If #82 is still open on 28 October, raise it once more with the same key.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Yes. Bet 1's last step no longer needs you to run anything, once tonight's sample is posted.
-- **Than ~10 shifts ago:** Slightly. Watch time is flat at 12 seconds and bet 1 has not shipped, but the step holding it since 19 October is nearly the smallest it can be.
 - **Than ~100 shifts ago:** Too early to say.
