@@ -492,22 +492,25 @@ def _clean_commentary(data, n):
     reactions = [_clean_str(r) for r in reactions]
     if not (setup and verdict and all(reactions)):
         return None
-    if (_usable(setup, "setup") and _usable(verdict, "cta")
+    # The vote is published (the pinned comment, and narrated), so it gets the
+    # title's guard; the tags keep `_clean_str`, as "Oh god" is a reaction.
+    vote_ok = _usable(verdict, "cta") and _clean_published(data.get("cta")) is not None
+    if (_usable(setup, "setup") and vote_ok
             and all(_usable(r, "reaction") for r in reactions)):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
     # trial posts (2026-10-20) and nothing said by how much.
-    bad = [f"{name} ({len(line.split())} words)" for name, line, kind in
-           [("setup", setup, "setup"), ("vote", verdict, "cta")]
-           + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]
-           if not _usable(line, kind)]
+    bad = [f"{name} ({len(line.split())} words)" for name, line, ok in
+           [("setup", setup, _usable(setup, "setup")), ("vote", verdict, vote_ok)]
+           + [(f"reaction {i}", r, _usable(r, "reaction")) for i, r in enumerate(reactions, 1)]
+           if not ok]
     print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
           " is not a reaction: " + ", ".join(bad))
     if not config.HOST_TEXT:
         return None
     setup = setup if _usable(setup, "setup") else ""
     reactions = [r if _usable(r, "reaction") else "" for r in reactions]
-    verdict = verdict if _usable(verdict, "cta") else ""
+    verdict = verdict if vote_ok else ""
     if not (setup or any(reactions)):
         return None
     print("Commentary: dropped only the line(s) named above")
