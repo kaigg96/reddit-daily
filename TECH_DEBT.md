@@ -461,10 +461,12 @@ a list nobody can read is the same as no list.
   (third review: a swearing vote still ships). Built 10-23 on
   `reliability/profanity-on-v8` (the filter stacked on the release, the vote
   through `_clean_published`, a refused vote blanked alone; reviewed): it joins
-  `integration/preview` after the filter's own render passes. Its review left
-  two: the on-screen tags still pass a swear word ("Holy shit" ships, "f**k"
-  shows as "fk"), wanting a list without god/hell/damn; and a swearing vote
-  in voiced mode (dormant) drops the whole host, untested. Left:
+  `integration/preview` after the filter's own render passes. The tags now
+  refuse a swear word too, on the list less god/hell/damn (reviewed; "OMG"
+  and "Holy crap" drop as tags). Left from those reviews: stretched spellings
+  ("Fuuuck", "sh!t") pass every list, titles included, as the library does
+  not fold repeats; a swearing vote in voiced mode (dormant) is untested.
+  Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare);
   YouTube's API refuses "<" and ">" in a title or description and nothing
   strips them, which would fail the upload and retry the same post (0 of
