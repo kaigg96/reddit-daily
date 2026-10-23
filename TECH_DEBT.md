@@ -465,7 +465,8 @@ a list nobody can read is the same as no list.
   refuse a swear word too, on the list less god/hell/damn (reviewed; "OMG"
   and "Holy crap" drop as tags). Left from those reviews: stretched spellings
   ("Fuuuck", "sh!t") pass every list, titles included, as the library does
-  not fold repeats; a swearing vote in voiced mode (dormant) is untested.
+  not fold repeats (folding would newly flag 0 of 1,417 logged titles and
+  lines, so not built); a swearing vote in voiced mode (dormant) is untested.
   Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare);
   YouTube's API refuses "<" and ">" in a title or description and nothing
