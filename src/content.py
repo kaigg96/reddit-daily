@@ -14,9 +14,10 @@ from . import config
 
 profanity.load_censor_words()
 # The host's tags are reactions, where "Oh god" and "Hell no" are fine: the
-# same list without the three mild words that double as exclamations.
+# same list without the mild words that double as exclamations ("OMG" too,
+# since "Oh my god" passes).
 TAG_CENSOR = Profanity()
-TAG_CENSOR.load_censor_words(whitelist_words=["god", "hell", "damn"])
+TAG_CENSOR.load_censor_words(whitelist_words=["god", "hell", "damn", "omg"])
 
 
 @dataclass

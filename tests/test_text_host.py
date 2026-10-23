@@ -198,7 +198,7 @@ def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
 
 
 def test_a_reaction_may_say_oh_god(monkeypatch):
-    for tag in ("Oh god", "Hell no", "Damn right"):
+    for tag in ("Oh god", "Hell no", "Damn right", "OMG, no"):
         host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
         assert host.reactions[0] == tag and host.verdict == HOST["cta"]
 
