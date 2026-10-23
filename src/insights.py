@@ -25,6 +25,7 @@ import datetime
 import functools
 import json
 import math
+import os
 import re
 import statistics
 from dataclasses import dataclass, field
@@ -671,14 +672,23 @@ def _ranks(xs):
     return r
 
 
-def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH):
+def early_read_stability(early_days=3, late_days=7, metric=Metric.WATCH,
+                         tolerance_days=None):
     """(n, Spearman rho) between each upload's early and late reading.
 
     Research row R3: if the early reading ranks uploads as the late one does,
     a release can be judged sooner. Within tolerance one weekly snapshot can
     match both ages, which would correlate a reading with itself; a pair is
-    kept only when its two readings came from different snapshots."""
-    early, late = load_videos_at_age(early_days), load_videos_at_age(late_days)
+    kept only when its two readings came from different snapshots.
+
+    At the default tolerance the ages are labels, not readings: snapshots are
+    weekly, so "3 against 7" paired readings 2-3 days old with ones 9-10 days
+    old (2026-10-20). Pass a tolerance under a day, and ages a week apart
+    (d against d + 7), to read what the ages say."""
+    if tolerance_days is None:
+        tolerance_days = AGE_MATCH_TOLERANCE_DAYS
+    early = load_videos_at_age(early_days, tolerance_days)
+    late = load_videos_at_age(late_days, tolerance_days)
     if not early.videos or not late.videos:
         return 0, None
     e = {v.video_id: v for v in early.videos}
@@ -2142,6 +2152,53 @@ def engaged_check(snapshot_rows, min_views=20, tolerance=0.10):
 ENGAGED_SHARE_MIN_VIDEOS = 20
 
 
+# R3 (PRD §0, pre-committed 2026-10-21): does the opening decide reach? Under
+# this many uploads the read says insufficient rather than a number.
+REACH_MIN_N = 20
+
+
+def _ranks(values):
+    """1-based ranks, ties sharing their average rank."""
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    ranks = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            ranks[order[k]] = (i + j) / 2 + 1
+        i = j + 1
+    return ranks
+
+
+def _pearson(xs, ys):
+    mx, my = statistics.fmean(xs), statistics.fmean(ys)
+    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    sxx = sum((x - mx) ** 2 for x in xs)
+    syy = sum((y - my) ** 2 for y in ys)
+    return sxy / math.sqrt(sxx * syy) if sxx and syy else 0.0
+
+
+def rank_correlation(videos, x, y, min_views=10, permutations=5000, seed=0):
+    """Spearman's rho between two per-upload metrics, uploads with at least
+    `min_views` and both values reported, and a two-sided permutation p:
+    (rho, p, n). Under REACH_MIN_N uploads, (None, None, n): insufficient.
+    Ranks, so a few hits cannot carry it."""
+    import random
+    pairs = [(getattr(v, x), getattr(v, y)) for v in videos if v.views >= min_views]
+    pairs = [(a, b) for a, b in pairs if a is not None and b is not None]
+    if len(pairs) < REACH_MIN_N:
+        return None, None, len(pairs)
+    rx, ry = _ranks([a for a, _ in pairs]), _ranks([b for _, b in pairs])
+    rho = _pearson(rx, ry)
+    rng, shuffled, hits = random.Random(seed), list(ry), 0
+    for _ in range(permutations):
+        rng.shuffle(shuffled)
+        hits += abs(_pearson(rx, shuffled)) >= abs(rho) - 1e-12
+    return rho, (hits + 1) / (permutations + 1), len(pairs)
+
+
 def engaged_share(snapshot_rows, published_since=None):
     """What share of our views does the Partner Program count? Since
     2025-03-31 `views` counts every play start, while the bar's "qualified
@@ -2170,6 +2227,44 @@ def subscriber_rate(snapshot_rows, published_since=None):
     if n < ENGAGED_SHARE_MIN_VIDEOS or not views:
         return n, views, subs, None
     return n, views, subs, subs / views * 1000
+
+
+# Each revenue route's bar, as PLAN §1 sources and dates it: (route, views
+# needed in its window, window in days, engaged views only, followers needed,
+# on YouTube). The distances are computed by `route_distances`, so PLAN's
+# figures come from `report.py --routes` rather than being copied by hand.
+ROUTES = (
+    ("Partner Program (Shorts)", 10_000_000, 90, True, 1_000, True),
+    ("Partner Program, applying from 2027-02-01", 20_000_000, 90, True, 1_000, True),
+    ("500-subscriber tier (fan funding, Shopping)", 3_000_000, 90, True, 500, True),
+    ("TikTok Creator Rewards", 100_000, 30, False, 10_000, False),
+)
+
+
+def route_distances(play_starts_per_90, engaged_share, subscribers, subs_per_1000,
+                    routes=ROUTES):
+    """How many times short of each route's bar we are, on each half.
+
+    Views: the bar against our rate over its window, in engaged views where
+    the route counts only those. Followers: the bar against today's count
+    (none on a platform we are not on), and the views it would take to gain
+    the rest at our subscriber rate. A figure is None when its input is
+    (`engaged_share` under its minimum, say). One dict per route."""
+    out = []
+    for name, need, days, engaged_only, followers, on_youtube in routes:
+        ours = play_starts_per_90 * days / 90
+        if engaged_only:
+            ours = None if engaged_share is None else ours * engaged_share
+        have = subscribers if on_youtube else 0
+        gap = max(followers - have, 0)
+        out.append({
+            "route": name, "views_needed": need, "days": days, "engaged_only": engaged_only,
+            "views_ours": ours, "views_short": need / ours if ours else None,
+            "followers_needed": followers, "followers_ours": have,
+            "followers_short": followers / have if have else None,
+            "views_to_follow": gap / subs_per_1000 * 1000 if subs_per_1000 else None,
+        })
+    return out
 
 
 def poisson_interval(k, conf=0.95):
@@ -2215,3 +2310,38 @@ def _summed(snapshot_rows, column, published_since):
             continue
         n, views, total = n + 1, views + v, total + x
     return n, views, total
+
+
+# First-answer length (PRD §4, pre-committed 2026-10-21, before any number was
+# read): does a long first answer lose viewers before the halfway point, where
+# the median viewer leaves (~12s of ~23s)? Among `v7` uploads read at ~7 days
+# with 10+ views, Spearman rho between the first answer's word count and
+# watch-seconds: at or below FIRST_ANSWER_LEAD_RHO with p < 0.05 it is a lead,
+# a candidate needing its own rule (read the shortest answer first); else noise.
+# Longer answers make longer videos, which earn more watch-seconds, so the
+# test leans against finding a loss: conservative by design. Read once.
+FIRST_ANSWER_LEAD_RHO = -0.3
+ANSWER_LENGTHS = config.ROOT / "analysis" / "answer_lengths.csv"
+
+
+def attach_answer_lengths(videos, path=ANSWER_LENGTHS):
+    """Set `first_answer_words` on each video from `scripts/answer_lengths.py`'s
+    file (None where its run's log had none). Returns how many were set."""
+    words = {}
+    if os.path.exists(path):
+        with open(path, newline="") as f:
+            for row in csv.DictReader(f):
+                if row.get("words_1", "").isdigit():
+                    words[row["video_id"]] = int(row["words_1"])
+    for v in videos:
+        v.first_answer_words = words.get(v.video_id)
+    return sum(v.first_answer_words is not None for v in videos)
+
+
+def first_answer_verdict(rho, p_value):
+    """The pre-committed rule above, applied as written."""
+    if rho is None:
+        return "insufficient data"
+    if rho <= FIRST_ANSWER_LEAD_RHO and p_value < 0.05:
+        return "lead: a long first answer loses watch time (a candidate, not a change)"
+    return "noise: no loss from a long first answer at this size"

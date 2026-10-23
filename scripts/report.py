@@ -15,6 +15,7 @@ Usage:
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
+  venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -414,6 +415,45 @@ def show_scorecard(args):
         print(f"    - {n}")
 
 
+def show_routes():
+    """Each revenue route's distance, from the latest snapshot: views at our
+    90-day rate (engaged share where the route counts only those), followers
+    against today's count and in the views it would take at our rate."""
+    import csv as _csv
+    from src import config
+    with open(config.ANALYTICS_SNAPSHOTS) as f:
+        rows = list(_csv.DictReader(f))
+    latest = max(r["snapshot_date"] for r in rows if r.get("engaged_views"))
+    snap = [r for r in rows if r["snapshot_date"] == latest]
+    cut = (datetime.datetime.fromisoformat(latest).replace(tzinfo=datetime.timezone.utc)
+           - datetime.timedelta(days=90))
+    *_, share = insights.engaged_share(snap, cut)
+    *_, rate = insights.subscriber_rate(snap, cut)
+    gained = insights.views_gained(_snapshot_metric_rows("views"))[-13:]
+    days = sum(d for _, _, d in gained)
+    per_90 = sum(g for _, g, _ in gained) * 90 / days if days else 0
+    with open(config.CHANNEL_LOG) as f:
+        subs = int([r for r in _csv.DictReader(f) if r["subscribers"]][-1]["subscribers"])
+    pct = f"{share:.0%}" if share is not None else "unknown (too few videos)"
+    print(f"Revenue routes: ~{per_90:,.0f} play starts per 90 days (over {days} days "
+          f"of snapshots), {subs} subscribers; from snapshot {latest}, {pct} engaged and "
+          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else "rate unknown")
+          + "\n")
+    fmt = lambda x: "-" if x is None else "met" if x <= 1 else f"~{x:,.0f}x short"
+    for d in insights.route_distances(per_90, share, subs, rate):
+        unit = "engaged views" if d["engaged_only"] else "views"
+        ours = f"{d['views_ours']:,.0f}" if d["views_ours"] is not None else "?"
+        follow = (f"; ~{d['views_to_follow'] / 1e6:,.1f}M views at our rate"
+                  if d["views_to_follow"] is not None else "")
+        print(f"  {d['route']}\n"
+              f"    views      {d['views_needed']:>11,} {unit} in {d['days']} days; ours ~{ours}"
+              f"  {fmt(d['views_short'])}\n"
+              f"    followers  {d['followers_needed']:>11,}; ours {d['followers_ours']}"
+              f"  {fmt(d['followers_short'])}{follow}")
+    print("\n  Bars and their sources: PLAN.md §1 (insights.ROUTES). A route pays only"
+          "\n  when both halves are met; the larger distance binds.")
+
+
 def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
@@ -588,6 +628,16 @@ def main():
     p.add_argument("--engaged-share", action="store_true",
                    help="share of views the Partner Program counts (engaged / all play "
                         "starts), all videos and the last 90 days; latest snapshot only")
+    p.add_argument("--routes", action="store_true",
+                   help="how far each revenue route (PLAN §1) is from its bar, on views and "
+                        "followers; latest snapshot only")
+    p.add_argument("--opening-reach", action="store_true",
+                   help="R3: do uploads whose plays more often become engaged views earn "
+                        "more views? Rank correlation at ~7 days, its rule pre-committed (PRD §0)")
+    p.add_argument("--first-answer", action="store_true",
+                   help="does a long first answer lose watch time? v7 uploads at ~7 days, rank "
+                        "correlation, its rule pre-committed (PRD §4); needs "
+                        "scripts/answer_lengths.py's file")
     p.add_argument("--placebo", action="store_true",
                    help="noise with nothing changed: consecutive batches (how a release "
                         "is judged) vs alternate days in the same weeks (PLAN C9)")
@@ -617,7 +667,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -689,6 +739,52 @@ def main():
                 verdict = f"{rate:.2f} (95%: {lo:.2f}-{hi:.2f})"
             print(f"  {label:32} n={n:<5} views {views:>8,}  gained {subs:>6,}  per 1,000 {verdict}")
         print("\n  A follower bar is this far away in views: followers needed / rate x 1,000.")
+        return
+
+    if args.routes:         # PLAN §1's distances, computed rather than copied
+        show_routes()
+        return
+
+    if args.opening_reach:  # R3, read once against its pre-committed rule
+        age = args.at_age or 7
+        load = insights.load_videos_at_age(age)
+        videos = insights.since(load.videos, datetime.date(2026, 10, 5))
+        rho, p_value, n = insights.rank_correlation(videos, "engaged_share", "views")
+        print(f"R3: engaged share against views, uploads since 2026-10-05 read at ~{age} days, "
+              f"10+ views (n={n})")
+        if rho is None:
+            print(f"  insufficient data: under {insights.REACH_MIN_N} uploads; read at the next snapshot")
+            return
+        # Readings span about 4-10 days (weekly snapshots), and views grow with
+        # age: a link that is reading age is not the opening (review, 10-21).
+        for v in videos:
+            v.reading_age = (load.anchor - v.published).total_seconds() / 86400
+        by_age = [insights.rank_correlation(videos, "reading_age", m)[0]
+                  for m in ("views", "engaged_share")]
+        print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        print("  against reading age: views " + ", engaged share ".join(
+            "-" if r is None else f"{r:+.2f}" for r in by_age))
+        if rho >= 0.3 and p_value < 0.05:
+            confounded = all(r is not None and abs(r) >= 0.3 for r in by_age)
+            print("  rho >= 0.3 at p < 0.05: met, " + (
+                "but both track reading age -- confounded; read again on the next snapshot"
+                if confounded else "a backlog candidate with its own rule"))
+        else:
+            print("  rho >= 0.3 at p < 0.05: not met -- noise; the row leaves")
+        return
+
+    if args.first_answer:   # read once against its pre-committed rule (insights)
+        age = args.at_age or 7
+        load = insights.load_videos_at_age(age)
+        videos = [v for v in load.videos if v.meta.get("format_version") == "v7"]
+        have = insights.attach_answer_lengths(videos)
+        rho, p_value, n = insights.rank_correlation(videos, "first_answer_words", "watch_seconds")
+        print(f"First answer's words against watch-seconds, v7 uploads read at ~{age} days, "
+              f"10+ views (n={n}; {have} of {len(videos)} with a length)")
+        if rho is not None:
+            print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        print(f"  rho <= {insights.FIRST_ANSWER_LEAD_RHO} at p < 0.05: "
+              + insights.first_answer_verdict(rho, p_value))
         return
 
     if args.placebo:        # nothing switched: what each test design reads as noise

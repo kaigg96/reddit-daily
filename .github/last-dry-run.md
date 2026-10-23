@@ -6,39 +6,33 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `product/host-three-answers`
-- **Commit:** `2e26595`
-- **When:** 2026-10-17T14:27:52Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 33.0 s, audio, no dead air
+- **Branch:** `product/stand-in-voice`
+- **Commit:** `bc97bf2`
+- **When:** 2026-10-22T08:56:07Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 18.4 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39040582950)
-
-Failed soft (the video still passed):
-
-```
-Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
-tags:        ['NoStupidQuestions', 'Shorts', 'Reddit', 'Top NoStupidQuestions Post', 'Trending NoStupidQuestions', 'failed domestications', 'animals humans tried to domesticate', 'domesticated foxes experiment', 'squirrels as pets history', 'did cats domesticate us', 'unsuccessful animal breeding', 'colonial america pets', 'why foxes cant be pets', 'wild animal attempts', 'reddit failed domestications']
-Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
-```
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39751048212)
 
 What it picked:
 
 ```
-Selected post: What animals have humans made a significant, but failed, attempt at domesticating?
-Slate topics (rank order): other|relationships-dating|dark-morbid|politics-news|humor-absurd
-Title style C, caps arm 1: 3 Animals We TRIED To Tame
-Commentary setup: Nature always finds a way to ruin human plans.
-Commentary reaction 1: Accidental dogs do not count as a successful harvest.
-Commentary reaction 2: Rabies cabinets sound like a terrible colonial trend.
-Commentary reaction 3: Truth has rarely been spoken so lazily.
-CTA: I raise my hand for cats domesticating us because it is too true. Which gets your vote?
-Commentary: our own words are 0.434 of the narration, 5 host line(s) shown
-Assembled: 33.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/-chibcha-: What animals have humans made a significant, but failed, attempt at domesticating?
+Selected post: Can I legally start my will with 'alright fuckers'?
+Slate topics (rank order): humor-absurd|relationships-dating|life-advice|health-body|life-advice|humor-absurd
+Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words), vote (25 words)
+Commentary: dropped only the line(s) named above
+Title style B, caps arm 1: Can YOU legally start your will with an insult?
+Commentary setup: (dropped)
+Commentary reaction 1: Doubtful
+Commentary reaction 2: Extreme
+Commentary reaction 3: Bulletproof
+CTA: Like, subscribe, and comment your answer below!
+Commentary: our own words are 0.098 of the narration, 3 host line(s) shown
+Assembled: 18.4s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/WinterIsOnReddit: Can I legally start my will with 'alright fuckers'?
 ```
 
 ## Last request
 
-- **Branch:** `product/host-three-answers`
-- **When:** 2026-10-17T14:27:52Z
+- **Branch:** `product/stand-in-voice`
+- **When:** 2026-10-22T08:56:07Z
 - **Outcome:** rendered -- see above
