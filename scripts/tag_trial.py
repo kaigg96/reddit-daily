@@ -108,7 +108,8 @@ REACTIONS_SPOKEN = ' Say each as you would out loud: a fragment with a verb\n' \
 # The 2026-10-23 sample graded every answer of a personal-advice post ("Spot
 # on", "Deep insight"), which the shipped list's "agreement" invites. This
 # drops agreement and names grading. Upload model, one request each
-# (10-23): post 10 reacted on 3 of 3 ("Wait, what?", "Oof, direct") against
+# (10-23): post 10 reacted on 2 of 3 ("Wait, what?", "Oof, direct"; "Insecurity
+# much?" echoes its answer) against
 # the sample's 0; 11 on 2 of 3 both ways ("The smart way" against "Polite,
 # effective"). Unread on 1-9, so a regression there is unmeasured.
 REACTIONS_UNGRADED = '\n     Never grade the answer: "Spot on", "Deep insight" and "Direct hit" are\n' \
