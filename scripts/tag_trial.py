@@ -111,7 +111,9 @@ REACTIONS_SPOKEN = ' Say each as you would out loud: a fragment with a verb\n' \
 # (10-23): post 10 reacted on 2 of 3 ("Wait, what?", "Oof, direct"; "Insecurity
 # much?" echoes its answer) against
 # the sample's 0; 11 on 2 of 3 both ways ("The smart way" against "Polite,
-# effective"). Unread on 1-9, so a regression there is unmeasured.
+# effective"). Unread on 1-9, so a regression there is unmeasured. Groq
+# (gpt-oss-120b, same posts): labels either way ("Classic projection" against
+# "so true", "classic"), so it does not help #13.
 REACTIONS_UNGRADED = '\n     Never grade the answer: "Spot on", "Deep insight" and "Direct hit" are\n' \
     '     verdicts, not reactions.'
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
