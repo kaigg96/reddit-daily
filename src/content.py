@@ -8,11 +8,15 @@ from dataclasses import dataclass
 
 import emoji
 import praw
-from better_profanity import profanity
+from better_profanity import Profanity, profanity
 
 from . import config
 
 profanity.load_censor_words()
+# The host's tags are reactions, where "Oh god" and "Hell no" are fine: the
+# same list without the three mild words that double as exclamations.
+TAG_CENSOR = Profanity()
+TAG_CENSOR.load_censor_words(whitelist_words=["god", "hell", "damn"])
 
 
 @dataclass
@@ -107,10 +111,10 @@ _EDGE_MARKS = re.compile(r"(?<![A-Za-z*])['\"*]+|['\"*]+(?![A-Za-z*])")
 _CONTRACTED = re.compile(r"([A-Za-z*]+)'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
 
 
-def _profane(text):
-    return (profanity.contains_profanity(text)
-            or profanity.contains_profanity(_EDGE_MARKS.sub(" ", text))
-            or any(profanity.contains_profanity(m.group(1))
+def _profane(text, censor=profanity):
+    return (censor.contains_profanity(text)
+            or censor.contains_profanity(_EDGE_MARKS.sub(" ", text))
+            or any(censor.contains_profanity(m.group(1))
                    for m in _CONTRACTED.finditer(_EDGE_MARKS.sub(" ", text))))
 
 

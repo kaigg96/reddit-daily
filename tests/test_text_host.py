@@ -188,9 +188,19 @@ def test_a_swearing_vote_is_logged_as_one_not_as_long(monkeypatch, capsys):
         "vote (a swear word or emoji)", "")
 
 
+@pytest.mark.parametrize("tag", ["Holy shit", "F**k me", "WTF"])
+def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
+    """The tags are on screen, so they may not swear either (the vote guard's
+    review, 10-23), on a list that spares god, hell and damn."""
+    host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+    assert host.reactions == ["", HOST["reactions"][1]] and host.verdict == HOST["cta"]
+    assert "reaction 1 (a swear word or emoji)" in capsys.readouterr().out
+
+
 def test_a_reaction_may_say_oh_god(monkeypatch):
-    host = _text_metadata(monkeypatch, reactions=["Oh god", HOST["reactions"][1]])
-    assert host.reactions[0] == "Oh god" and host.verdict == HOST["cta"]
+    for tag in ("Oh god", "Hell no", "Damn right"):
+        host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+        assert host.reactions[0] == tag and host.verdict == HOST["cta"]
 
 
 def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):

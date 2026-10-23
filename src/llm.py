@@ -486,32 +486,38 @@ def _clean_commentary(data, n):
     (2026-10-13). Its note is left blank, and a long vote leaves the generic
     closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
-    reactions = data.get("reactions")
-    if not isinstance(reactions, list) or len(reactions) != n:
+    raw_reactions = data.get("reactions")
+    if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
         return None
-    reactions = [_clean_str(r) for r in reactions]
+    reactions = [_clean_str(r) for r in raw_reactions]
     if not (setup and verdict and all(reactions)):
         return None
-    # The vote is published (the pinned comment, and narrated), so it gets the
-    # title's guard; the tags keep `_clean_str`, as "Oh god" is a reaction.
+    # Every line is published, so none may swear. The vote (the pinned comment,
+    # and narrated) gets the title's guard; the tags a list that spares "Oh god".
+    # Raw and cleaned both: the emphasis strip turns "f**k" into "fk".
+    def tag_swore(raw, line):
+        return any(content._profane(t, content.TAG_CENSOR) for t in (raw, line))
     vote_swore = _clean_published(data.get("cta")) is None
     vote_ok = _usable(verdict, "cta") and not vote_swore
-    if (_usable(setup, "setup") and vote_ok
-            and all(_usable(r, "reaction") for r in reactions)):
+    setup_swore = tag_swore(data.get("setup"), setup)
+    setup_ok = _usable(setup, "setup") and not setup_swore
+    swore = [tag_swore(raw, r) for raw, r in zip(raw_reactions, reactions)]
+    ok = [_usable(r, "reaction") and not s for r, s in zip(reactions, swore)]
+    if setup_ok and vote_ok and all(ok):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
     # trial posts (2026-10-20) and nothing said by how much.
-    bad = [f"{name} ({len(line.split())} words)" for name, line, ok in
-           [("setup", setup, _usable(setup, "setup")),
-            ("vote", verdict, vote_ok or vote_swore)]
-           + [(f"reaction {i}", r, _usable(r, "reaction")) for i, r in enumerate(reactions, 1)]
-           if not ok] + (["vote (a swear word or emoji)"] if vote_swore else [])
+    named = ([("setup", setup, setup_ok, setup_swore), ("vote", verdict, vote_ok, vote_swore)]
+             + [(f"reaction {i}", r, k, s)
+                for i, (r, k, s) in enumerate(zip(reactions, ok, swore), 1)])
+    bad = [f"{name} (a swear word or emoji)" if sw else f"{name} ({len(line.split())} words)"
+           for name, line, fine, sw in named if not fine]
     print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
           " is not a reaction: " + ", ".join(bad))
     if not config.HOST_TEXT:
         return None
-    setup = setup if _usable(setup, "setup") else ""
-    reactions = [r if _usable(r, "reaction") else "" for r in reactions]
+    setup = setup if setup_ok else ""
+    reactions = [r if k else "" for r, k in zip(reactions, ok)]
     verdict = verdict if vote_ok else ""
     if not (setup or any(reactions)):
         return None
