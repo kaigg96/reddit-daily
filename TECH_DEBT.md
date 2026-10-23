@@ -462,8 +462,8 @@ a list nobody can read is the same as no list.
   `reliability/profanity-on-v8` (the filter stacked on the release, the vote
   through `_clean_published`, a refused vote blanked alone; reviewed): it joins
   `integration/preview` after the filter's own render passes. The tags now
-  refuse a swear word too, on the list less god/hell/damn (reviewed; "OMG"
-  and "Holy crap" drop as tags). Left from those reviews: stretched spellings
+  refuse a swear word too, on the list less god/hell/damn/omg (reviewed;
+  "Holy crap" drops as a tag). Left from those reviews: stretched spellings
   ("Fuuuck", "sh!t") pass every list, titles included, as the library does
   not fold repeats (folding would newly flag 0 of 1,417 logged titles and
   lines, so not built); a swearing vote in voiced mode (dormant) is untested.
