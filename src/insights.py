@@ -61,6 +61,8 @@ class Metric:
     ENGAGED_SHARE = "engaged_share"  # engagedViews / views: the share the Partner Program counts
     ENGAGED_VIEWS = "engaged_views"  # the count the Partner Program's 10M bar is in (PLAN §1)
     WATCH_FINE = "watch_seconds_fine"  # diagnostic: watch-seconds to a fraction; rules stay on WATCH
+    WATCH_PER_START = "watch_per_start"  # diagnostic: seconds watched per play start, swipe-aways in
+    WATCH_TOTAL = "watch_total_s"  # diagnostic: estimated minutes x 60, TOTAL as YouTube counts it
     # Share of views still watching at 10..100% of the video (weekly snapshot
     # from 2026-10-19, uploads under 30 days old; above 1 means replays).
     # Diagnostics for where viewers leave (PRD §0, "Retention points"), never a trigger.
@@ -111,6 +113,24 @@ class Video:
         if self.engaged_views is None:
             return None
         return self.engaged_views / self.views if self.views else 0.0
+
+    @property
+    def watch_total_s(self):
+        """Estimated minutes x 60: total watch time as YouTube reports it.
+        `total_watch_s` (views x watch-seconds, the trigger #39 asked for) runs
+        ~2.5x this, by a factor that moves with the share of plays past the
+        opening. A diagnostic, never a trigger (#18)."""
+        return self.est_minutes * 60
+
+    @property
+    def watch_per_start(self):
+        """Estimated minutes x 60 / views: seconds watched per play start, the
+        swipe-aways included. Watch-seconds is not that: est_minutes x 60 runs
+        ~0.4 of views x watch-seconds (`implied_engaged`), so it leaves out most
+        of the plays that end at the opening, which `v7` and `v8` change.
+        Minutes come whole, so a low-view upload reads coarsely. A diagnostic,
+        never a trigger (#18)."""
+        return self.est_minutes * 60 / self.views if self.views else 0.0
 
     @property
     def watch_seconds_fine(self):
