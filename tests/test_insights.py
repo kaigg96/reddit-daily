@@ -2349,6 +2349,14 @@ def test_per_start_trajectory_rows_divide_minutes_by_the_same_rows_views(tmp_pat
         ("a", "2026-10-12", 5.0), ("a", "2026-10-19", 3.0)]
 
 
+def test_a_trajectory_can_keep_zero_readings():
+    pub = datetime.datetime(2026, 10, 5, tzinfo=datetime.timezone.utc)
+    rows = [{"video_id": str(i), "published": pub, "snapshot": pub + datetime.timedelta(days=7),
+             "value": v} for i, v in enumerate([0, 0, 0, 4, 5, 6, 7, 8])]
+    assert insights.trajectory(rows)[0][1:] == (5, 6)
+    assert insights.trajectory(rows, keep_zero=True)[0][1:] == (8, 4.5)
+
+
 def test_watch_per_start_counts_the_swipe_aways_watch_seconds_leaves_out():
     v = insights.Video(video_id="x", published=None, views=100,
                        watch_seconds=12, est_minutes=8)

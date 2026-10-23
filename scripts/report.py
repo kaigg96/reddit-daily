@@ -242,7 +242,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
 def _per_start_rows(path=None):
     """`_snapshot_metric_rows` in seconds watched per play start: estimated
     minutes x 60 / views, from the same snapshot row (`Video.watch_per_start`).
-    A row with no views is left out, as zero-view uploads are counted apart."""
+    A row with no views is left out, as zero-view uploads are counted apart.
+    Minutes come whole (rounded down, it seems), so a low-view upload reads
+    low by arithmetic alone: ~30s / views. `--min-views` on a comparison."""
     views = {(r["video_id"], r["snapshot"]): r["value"]
              for r in _snapshot_metric_rows("views", path)}
     return [dict(r, value=r["value"] * 60 / views[(r["video_id"], r["snapshot"])])
@@ -468,13 +470,18 @@ def show_trajectory(args):
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
     if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START):
-        print(f"--trajectory reads watch-seconds, views or engaged_views, not {args.metric}")
+        print(f"--trajectory reads watch-seconds (whole, fine or per play start), views or "
+              f"engaged_views, not {args.metric}")
         return
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
-    series = insights.trajectory(rows, at_age=args.at_age or 7)
+    # Minutes come whole, so an upload under ~30 views reads 0 per play start:
+    # a reading (its zero-view rows are already out), kept so the weakest
+    # uploads do not drop from their week's median (review, 10-23).
+    series = insights.trajectory(rows, at_age=args.at_age or 7,
+                                 keep_zero=args.metric == Metric.WATCH_PER_START)
     if not series:
         print("not enough comparable history yet")
         return

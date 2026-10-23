@@ -1010,7 +1010,7 @@ TRAJECTORY_MIN_N = 5       # periods thinner than this are not reported
 TRAJECTORY_HALF = 3        # periods per half when comparing then-vs-now
 
 
-def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
+def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, keep_zero=False):
     """Median metric per publish-week, every upload read at the same age.
 
     Answers the one question no other surface here answers: **is the channel
@@ -1024,7 +1024,8 @@ def trajectory(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4):
     old alongside a September one. Returns [(period, n, median)] oldest first.
     """
     buckets = {}
-    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance):
+    # keep_zero: for rows whose zero is a reading, not a missing report.
+    for value, pub in _read_at_age(snapshot_rows, at_age, tolerance, keep_zero=keep_zero):
         buckets.setdefault(pub.strftime("%G-W%V"), []).append(value)
     return [(period, len(v), median(v))
             for period, v in sorted(buckets.items())
