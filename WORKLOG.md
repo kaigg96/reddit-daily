@@ -79,7 +79,7 @@ and more useful than a confident guess.
 - **General management:** nothing was ready. A fresh agent proposed eight ideas and six survived. Two rankers, in opposite orders, put the same three on top: the watch-time read and the revert check (done above), then the swear-word gap (done). **Dropped:** whether any Shorts money comes before the Partner Program (the plan already answers it); amending the rule for staying on Reddit (your #60 call covers it); a dependency audit (run: Pillow's known flaws grew, still unreachable as we never open outside images).
 - **Process:** three scheduled shifts were skipped from last night to this afternoon because the week's shift allowance ran out a day before Friday's reset. The guard worked as designed, but it is why last night's planned render waited a day.
 - **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.68 this month, forecast $0.98 of $3).
-- Mostly bets, with one fix. AI use: one sample render (one upload-model request), three upload-model requests for the tag trial; no Polly.
+- Mostly bets, with one fix. AI use: one sample render (one upload-model request), three upload-model requests for the tag trial, four free Groq requests (the reworded prompt does not help the backup AI); no Polly. #77's description of the release branch is corrected, without an email.
 
 ### Blocked
 - **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
