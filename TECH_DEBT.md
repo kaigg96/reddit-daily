@@ -457,8 +457,10 @@ a list nobody can read is the same as no list.
   holds "god", "hell", "damn": "Oh god" is a reaction). **When this meets bet
   1:** there the closing line is the host's verdict, which `_clean_commentary`
   builds with `_clean_str` from the same "cta" field, so the guard misses it
-  (third review: a swearing vote still ships). Run the verdict alone through
-  `_clean_published` then. Left:
+  (third review: a swearing vote still ships). Built 10-23 on
+  `reliability/profanity-on-v8` (the filter stacked on the release, the vote
+  through `_clean_published`, a refused vote blanked alone): it joins
+  `integration/preview` after the filter's own render passes. Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare);
   YouTube's API refuses "<" and ">" in a title or description and nothing
   strips them, which would fail the upload and retry the same post (0 of
