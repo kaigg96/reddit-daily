@@ -390,7 +390,8 @@ a list nobody can read is the same as no list.
 
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
-  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+).
+  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 64
+  rows on 10-23, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
@@ -459,8 +460,11 @@ a list nobody can read is the same as no list.
   builds with `_clean_str` from the same "cta" field, so the guard misses it
   (third review: a swearing vote still ships). Built 10-23 on
   `reliability/profanity-on-v8` (the filter stacked on the release, the vote
-  through `_clean_published`, a refused vote blanked alone): it joins
-  `integration/preview` after the filter's own render passes. Left:
+  through `_clean_published`, a refused vote blanked alone; reviewed): it joins
+  `integration/preview` after the filter's own render passes. Its review left
+  two: the on-screen tags still pass a swear word ("Holy shit" ships, "f**k"
+  shows as "fk"), wanting a list without god/hell/damn; and a swearing vote
+  in voiced mode (dormant) drops the whole host, untested. Left:
   the library already reads a curly "he’ll" as "hell" (fails safe, rare);
   YouTube's API refuses "<" and ">" in a title or description and nothing
   strips them, which would fail the upload and retry the same post (0 of
