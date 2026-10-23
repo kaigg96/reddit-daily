@@ -148,7 +148,8 @@ def test_a_dropped_host_line_warns_but_passes(monkeypatch):
     host = Commentary("An angle.", ["", "Two."], "")
     assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
     assert "- ⚠️ host reaction 1: dropped, past its cap (the rest still ship)" in lines
-    assert "- ⚠️ host vote: dropped, past its cap (the usual closing line ships)" in lines
+    assert ("- ⚠️ host vote: dropped, past its cap or a swear word"
+            " (the usual closing line ships)") in lines
     assert "- ✅ host reaction 2: Two." in lines
 
 

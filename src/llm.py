@@ -494,16 +494,18 @@ def _clean_commentary(data, n):
         return None
     # The vote is published (the pinned comment, and narrated), so it gets the
     # title's guard; the tags keep `_clean_str`, as "Oh god" is a reaction.
-    vote_ok = _usable(verdict, "cta") and _clean_published(data.get("cta")) is not None
+    vote_swore = _clean_published(data.get("cta")) is None
+    vote_ok = _usable(verdict, "cta") and not vote_swore
     if (_usable(setup, "setup") and vote_ok
             and all(_usable(r, "reaction") for r in reactions)):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
     # trial posts (2026-10-20) and nothing said by how much.
     bad = [f"{name} ({len(line.split())} words)" for name, line, ok in
-           [("setup", setup, _usable(setup, "setup")), ("vote", verdict, vote_ok)]
+           [("setup", setup, _usable(setup, "setup")),
+            ("vote", verdict, vote_ok or vote_swore)]
            + [(f"reaction {i}", r, _usable(r, "reaction")) for i, r in enumerate(reactions, 1)]
-           if not ok]
+           if not ok] + (["vote (a swear word or emoji)"] if vote_swore else [])
     print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
           " is not a reaction: " + ", ".join(bad))
     if not config.HOST_TEXT:

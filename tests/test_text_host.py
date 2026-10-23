@@ -181,6 +181,13 @@ def test_a_swearing_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch
     assert host.verdict == "" and run.closing_line(None, host) is None
 
 
+def test_a_swearing_vote_is_logged_as_one_not_as_long(monkeypatch, capsys):
+    _text_metadata(monkeypatch, cta="Raising my hand for the shelter one, damn right.")
+    out = capsys.readouterr().out
+    assert "vote (a swear word or emoji)" in out and "vote (" not in out.replace(
+        "vote (a swear word or emoji)", "")
+
+
 def test_a_reaction_may_say_oh_god(monkeypatch):
     host = _text_metadata(monkeypatch, reactions=["Oh god", HOST["reactions"][1]])
     assert host.reactions[0] == "Oh god" and host.verdict == HOST["cta"]
