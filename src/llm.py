@@ -459,7 +459,8 @@ _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great
                       r"true that|exactly this|can confirm|correct answer|mic drop|hell ye(s|ah)|amen|"
                       r"truth bomb)\b|"
                       r"(true|exactly|facts|correct|accurate|absolutely|dead on|right on|so right|based|"
-                      r"(is|are|'s|'re|damn|dead|quite) right|100\s*(%|percent))\W*$|"
+                      r"(?<!not )(?<!n't )(is|are|'s|'re|thats|damn|darn|dang|dead|quite|exactly|"
+                      r"absolutely|totally|always|too|about|100\s*(%|percent)) right|100\s*(%|percent))\W*$|"
                       r"^(totally\s+)?nailed\W*$|^truth\W*$)", re.I)   # "Got nailed" is a wince
 
 

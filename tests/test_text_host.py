@@ -425,8 +425,11 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       # Release check, 10-24: naming the answer right agrees.
                                       ("Plastic crack is right", False), ("That's right", False),
                                       ("He’s right!", False), ("Damn right", False), ("Truth.", False),
-                                      ("That's not right!", True), ("Is he right?", True),
-                                      ("Right in the wallet", True), ("Ouch, right?!", True),
+                                      ("Exactly right", False), ("Sounds about right", False),
+                                      ("Thats right", False), ("100% right", False),
+                                      ("That's not right!", True), ("Not quite right", True),
+                                      ("Isn't exactly right", True), ("Right in the wallet", True),
+                                      ("Serves you right", True), ("Alright, alright", True),
                                       ("Truth hurts", True), ("Copyright drama", True)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
