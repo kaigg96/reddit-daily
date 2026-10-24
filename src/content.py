@@ -100,7 +100,8 @@ def sentence_case(text):
 def _has_emoji(text):
     # Listed whole, not per character: a flag or keycap is two code points,
     # neither an emoji alone (an answer shown on screen carried 🇺🇸; 10-24).
-    return bool(emoji.emoji_list(text))
+    # The old per-character check stays too, for a malformed sequence.
+    return bool(emoji.emoji_list(text)) or any(emoji.is_emoji(ch) for ch in text)
 
 
 # The library counts a straight quote or * as part of a word, so a quote or
