@@ -168,7 +168,8 @@ def check_metadata():
             meta = llm.get_metadata(q, comments, style="A", caps=True)
     finally:
         print(log.getvalue(), end="")
-    dropped = [ln for ln in log.getvalue().splitlines() if ln.startswith("Commentary: past")]
+    dropped = [ln for ln in log.getvalue().splitlines()
+               if ln.startswith("Commentary: past") or ", as written: " in ln]
 
     if meta.source == "error":
         # Deliberately not retried, for the same reason check_screen doesn't:

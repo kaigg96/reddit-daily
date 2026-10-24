@@ -212,8 +212,12 @@ def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "vote (23 words), reaction 2 (13 words)" in out
     assert "setup (" not in out and "reaction 1 (" not in out
-    # What each said, so a release check shows whether a filter was right.
-    assert f'; as written: vote "{"word " * 16}", reaction 2 "{" ".join(["word"] * 13)}"' in out
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right, on a line the dry run's report reads as the AI's words.
+    said = f'Commentary reaction 2, as written: "{" ".join(["word"] * 13)}"'
+    assert said in out.splitlines() and "vote, as written" not in out
+    from scripts import dry_run
+    assert dry_run.ECHOES_CONTENT.match(said) and dry_run.PICKED.match(said)
 
 
 def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):
