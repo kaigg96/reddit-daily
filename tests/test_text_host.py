@@ -372,7 +372,8 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       ("Who said it?", True), ("Exactly zero", True),
                                       ("Polite but pointless", True), ("Not fair!", True),
                                       ("Brutal truth", True), ("Validate this?!", True),
-                                      ("Preacher energy", True), ("Agreeable, sure", True)])
+                                      ("Preacher energy", True), ("Agreeable, sure", True),
+                                      ("Goood point", False), ("Ain’t that the truth", False)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
     assert llm._grades(line) is not ok      # the verdict check, not a cap, decides

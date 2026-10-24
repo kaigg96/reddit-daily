@@ -425,14 +425,17 @@ def _reads_as_reaction(line):
 # is a reaction ("Is that true?!", "Spot on?").
 _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
                       r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
-                      r"not wrong|agreed?|that tracks|valid|preach|bingo|(that's|ain't) the truth|"
+                      r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
                       r"(good|great|solid|sound|wise) (advice|call|words))\b|"
                       r"(true|exactly|facts|correct|accurate)\W*$)", re.I)
 
 
 def _grades(line):
-    # Stretched words ("Truuue") fold first, as in _reads_as_reaction.
-    return "?" not in line and bool(_VERDICT.search(re.sub(r"(.)\1{2,}", r"\1", line)))
+    # Stretched words fold first, to two letters and to one, as in
+    # _reads_as_reaction: "Truuue" is "true", "Goood point" is "good point".
+    line = line.replace("\u2019", "'")
+    return "?" not in line and any(_VERDICT.search(re.sub(r"(.)\1{2,}", fold, line))
+                                   for fold in (r"\1\1", r"\1"))
 
 
 def _commentary_ask(n):

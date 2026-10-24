@@ -27,7 +27,6 @@ advice, where answers get graded rather than reacted to.
 import argparse
 import json
 import os
-import re
 import sys
 import time
 
