@@ -3,6 +3,7 @@
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9
     venv/bin/python scripts/tag_trial.py --model sample        # all eleven
     venv/bin/python scripts/tag_trial.py --model upload --posts 10,11 --reactions ungraded
+    venv/bin/python scripts/tag_trial.py --model upload --posts 1,5,10 --reactions react-only
     venv/bin/python scripts/tag_trial.py --model groq
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
     venv/bin/python scripts/tag_trial.py --model groq --setup specific
@@ -116,6 +117,11 @@ REACTIONS_SPOKEN = ' Say each as you would out loud: a fragment with a verb\n' \
 # "so true", "classic"), so it does not help #13.
 REACTIONS_UNGRADED = '\n     Never grade the answer: "Spot on", "Deep insight" and "Direct hit" are\n' \
     '     verdicts, not reactions.'
+# On 1, 3 and 5 (10-24, upload model) ungraded did worse: 4 of 9 reacted and
+# 3 still graded ("Ah, makes sense", "Good point"), as if naming verdicts
+# primed them. React-only drops agreement and names none: the vote alone takes
+# a side. Unread; read it on the upload model, a few posts a day.
+REACTIONS_REACT_ONLY = '\n     Only the vote takes a side: a tag reacts, and never judges the answer.'
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -142,6 +148,11 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     if reactions == "spoken":
         old, new = llm._TAG_EDITS[1]
         llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new + REACTIONS_SPOKEN)] + llm._TAG_EDITS[2:]
+    if reactions == "react-only":
+        old, new = llm._TAG_EDITS[1]
+        assert "surprise, agreement," in new, "the shipped reactions' wording moved"
+        new = new.replace("surprise, agreement,", "surprise,") + REACTIONS_REACT_ONLY
+        llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new)] + llm._TAG_EDITS[2:]
     if reactions == "ungraded":
         old, new = llm._TAG_EDITS[1]
         assert "surprise, agreement," in new, "the shipped reactions' wording moved"
@@ -176,9 +187,10 @@ def main(argv=None):
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
     ap.add_argument("--setup", choices=["shipped", *SETUPS], default="shipped",
                     help="the setup's wording: as shipped, or one of SETUPS")
-    ap.add_argument("--reactions", choices=["shipped", "spoken", "ungraded"], default="shipped",
-                    help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN "
-                         "or REACTIONS_UNGRADED")
+    ap.add_argument("--reactions", choices=["shipped", "spoken", "ungraded", "react-only"],
+                    default="shipped",
+                    help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN, "
+                         "REACTIONS_UNGRADED or REACTIONS_REACT_ONLY")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
     args = ap.parse_args(argv)

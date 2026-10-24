@@ -84,6 +84,24 @@ def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(mon
     assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
 
 
+def test_react_only_drops_agreement_names_no_verdict_and_changes_the_reactions_only(monkeypatch):
+    from src import config
+    monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    shipped = llm._commentary_ask(3)
+    tt.setup_model("sample", reactions="react-only")
+    ask = llm._commentary_ask(3)
+    assert "agreement" in shipped and "agreement" not in ask
+    assert "Only the vote takes a side" in ask and '"Spot on"' not in ask
+    assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+    assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
+
+
 def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     with pytest.raises(SystemExit, match="GROQ_API_KEY"):
