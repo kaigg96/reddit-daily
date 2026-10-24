@@ -81,7 +81,7 @@ and more useful than a confident guess.
 - **General management:** closed the record of the shift that ended after 2 minutes on 19 October. Its condition was ten shifts with the new trace: all ran 26–56 minutes and handed over (three short runs on the 22nd and 23rd were the weekly allowance guard, as designed).
 - **Reliability and security:** both uploads landed today. The standing check is clean: no secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
 - Mostly fixes, plus one measurement. The channel reads flat (12 seconds for six periods); bet 1 is the item that changes what we ship. AI use: none (no upload-model, Groq or Polly requests, no render).
-- **Process:** side branches lived in separate copies of the project while agents read the main one, so the trap the last two shifts hit did not recur.
+- **Process:** side branches lived in separate copies of the project while agents read the main one, so the trap the last two shifts hit did not recur. Handed over about 20 minutes early: a last look found nothing above the bar (a length cap on the sample report, rarely reached; an unreadable AI reply echoed to the public log, low harm; more agreeing wordings, none yet seen).
 
 ### Blocked
 - **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
