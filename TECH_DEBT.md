@@ -155,20 +155,6 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **A shift ended after 2 minutes with no handover (run 39338110057,
-  2026-10-19; the first in 40+ runs).** 32 turns, no commits, no error; same
-  Claude Code (2.1.280) and action as the passing runs, and the budget gate
-  returns GO in CI. Cause unknown: the transcript was hidden. Likeliest, it
-  found every queue item waiting on the owner and ended without §10's entry.
-  **Visibility (owner, 2026-10-20):** `scripts/shift_trace.py` writes how a
-  shift ended (with an error result's reasons), its last message and its tool
-  calls, redacted, to `.github/last-shift-trace.md`; the emailed report now says
-  when a shift wrote no handover, with the trace's head. The workflow step that
-  runs it is the owner's to approve (its escalation, 2026-10-20). Not new, from
-  its review: a WORKLOG commit someone else pushes during a shift counts as that
-  shift's handover, in the workflow's check and the report alike. **Closes
-  when** the step is live and ten more shifts pass, or a repeat is root-caused
-  from its trace.
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
@@ -229,7 +215,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   fallbacks in 180 uploads. **The verdict-tag filter (`_VERDICT`, 10-24)**
   reads stock forms only; left by its third review: "Nobody's right" and
   "Truth..." drop, "Oof, truth", "Ur right" and "Bulletproof" (a 10-22 render)
-  ship. Widen only on a tag seen in a release check or render.
+  ship, as do probes ("Solid point", "Can't argue", "Best answer"). Widen only
+  on a tag seen in a release check or render. **Whole-branch review (10-24, on
+  `a05b300`): no blockers**; its fixes (an empty line drops alone, flag emoji in
+  tags) are on the branch. Left: `content._has_emoji` (titles, vote) misses
+  flags and keycaps on `main` too (in 2 of ~1,000 past videos' text, one an
+  answer shown on screen; 0 in the upload log); `_excerpt` prints an unparseable reply raw to
+  the public log, where `_clean_published` never echoes a refused field.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
@@ -357,6 +349,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   owner carries `pip install -r requirements.txt` there, with a test that
   fails any workflow `pip install` naming a package.
 
+- **#14's arms are held in code (arm 0 10-16, arm 1 10-24); left by the
+  second's review:** the source includes the top comments, so one in capitals
+  exempts common words ("YOU") and either arm can still leak; "OMG" is not an
+  acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
+  you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
+  when** #14 is read (~11-23).
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in

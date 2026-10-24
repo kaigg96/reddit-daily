@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-24 (22:30) — Bet 1's release passed a full review with no blockers; its tag filter now also drops tags that call an answer right
+
+    Worked (% of the shift): product 30 · engineering 25 · gm 25 · data 10 · reliability 5 · security 5
+
+**Summary:** Everything bet 1 changes passed its first full review since 13 October with no blockers, which clears one of the steps between your approval and the merge; its two small findings are fixed. Today's release check showed a host tag agreeing with its answer ("Plastic crack is right"), and the filter now drops that kind too, before tomorrow morning's sample for you.
+
+### Toward revenue
+- **Bet 1 is closer.** Every route to revenue needs bet 1. Its last gate is you watching a sample whose tags react rather than grade or agree, and the merge after that needs a full review, now done. One more way of agreeing is stopped in code before that render, and a blank line can no longer cost an upload its whole host.
+
+### Done
+- **Engineering (a check, then two fixes, on the release):** a fresh review of everything bet 1 changes. **No blockers**: uploads, the live record files, the Polly budget and the test-mode guard all check out. It found one thing worth fixing: one blank host line cost every host line, so the upload went out as a plain reading; now only the blank line drops. Flag emoji also slipped past the emoji check (they would show as empty boxes); now caught.
+- **Product (a fix, on the release):** "Plastic crack is right" agrees with the answer, which on a politics thread takes a side, and the afternoon's filter let it through. Tags that call an answer right ("That's right", "Exactly right", "Sounds about right") and "Truth" on its own now drop; after "not" they ship, as doubt ("Not quite right"). It drops none of the 30 tags from past release checks and renders, or of 204 short quoted phrases in our records. A fresh review found one wrongly dropped kind of doubt and a few missed forms; fixed. Rare edge cases are recorded, not chased.
+- **Product (measurement, on the release):** when a filter drops a tag, the log now shows what the tag said, not only its length. For four days the release check has said only that the opening tag dropped, so nobody could tell whether the filter was right; tomorrow's will show it. Its review caught two faults (cutting a long line could create a slur; a tag like "Failed attempt" would read as a failed render); both fixed.
+- **General management (a fix, live):** the tool that shows the idea generator what earlier shifts dropped had been blind since 20 October: shifts began listing drops inside another bullet, and it only read bullets that opened with them, so any round since could re-propose a rejected idea. It now reads both, whole. Its review found it could mistake ordinary text for a drop list; fixed before it went live.
+- **Reliability (a check):** the release passes all its tests on Python 3.10, the version on your machine (last checked 21 October), and a silent sample renders there (1080×1920, 28 seconds).
+- **Data (a fix, live):** the capitals test's one-word arm shipped two capitalised words today ("Which Halloween costume will YOU see the MOST?"), 1 of its 11 titles. It is now held to one in code, as the no-capitals arm has been since 16 October. Titles only, so no render or version change; reviewed, no blockers.
+- **General management:** nothing was ready. I found the tag myself; a fresh agent proposed four ideas, one of them the same tag. Two rankers, in opposite orders, agreed: the full review first, a note for tomorrow's sample second, the tool fix third, closing an old record last. All done. A second round found the Python check and the capitals leak, both done. **Dropped:** code to stop two alike tags in one video (no repeat on record); tags that echo the answer with a laugh (still a reaction); refreshing the bet 1 issue's description (tomorrow's sample comment replaces it); the functions with no recent time (two rounds found nothing, and no new figures arrive before the 26th).
+- **General management:** closed the record of the shift that ended after 2 minutes on 19 October. Its condition was ten shifts with the new trace: all ran 26–56 minutes and handed over (three short runs on the 22nd and 23rd were the weekly allowance guard, as designed).
+- **Reliability and security:** both uploads landed today. The standing check is clean: no secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
+- Mostly fixes, plus one measurement. The channel reads flat (12 seconds for six periods); bet 1 is the item that changes what we ship. AI use: none (no upload-model, Groq or Polly requests, no render).
+- **Process:** side branches lived in separate copies of the project while agents read the main one, so the trap the last two shifts hit did not recur.
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
+
+### Next
+- **The first shift after about 07:30 UTC:** read the 08:17 release check (it now shows what each filter dropped), then render the release branch and, if its tags react rather than grade, post the sample to #77. If the sample's question leans on a post body the viewer never sees (first-person or advice, as on 23 October), say so in that comment, so the host is judged and not the post; render again only if a tag fails the bar.
+- The trial wording that drops "agreement" from what the prompt asks for, on about three trial posts with the upload model's allowance, after the 07:00 reset.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Yes, slightly. The full review the merge needs is done with no blockers, and two more ways a tag could fail are stopped before the render you will watch. Nothing reached viewers.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-24 (15:30) — The swear-word fix is live; bet 1's host now also drops tags that agree with an answer, and its sample waits only for tomorrow's render slot
 
     Worked (% of the shift): reliability 30 · product 35 · gm 25 · security 10
@@ -91,38 +126,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Yes, slightly. A live defect seen once in 191 uploads is closed, and bet 1's tags have one more failure stopped in code before the render you will watch.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-24 (08:50) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
-
-    Worked (% of the shift): product 50 · data 20 · gm 15 · legal 5 · reliability 5 · security 5
-
-**Summary:** The weakness that held bet 1's sample back from you, tags that grade the answers ("Spot on", "Good point"), is not confined to advice posts, and rewording the prompt made it worse. A filter now drops the stock kind of grading tag before it reaches the screen; it waits for one sample render, and catches about 7 of every 12.
-
-### Toward revenue
-- **Bet 1 is one render closer.** Every route to revenue needs bet 1, and its last gate is you watching a sample whose tags react rather than grade. Last night's sample was held back for grading. The filter stops the stock verdicts, so the next sample should repeat your 19 October feedback far less, though not never.
-
-### Done
-- **Product (a bet, read and not kept):** last night's reworded prompt on three more trial posts, on the model uploads use, one request each. About 4 of 9 tags reacted, against about 21 of 27 for the shipped wording. Three still graded the answer ("Ah, makes sense" on a politics answer, "Sad but true", "Good point"). So grading is a general habit, and naming it in the prompt does not stop it. Not read on the other six posts: even a perfect score there would leave it only one tag ahead of what ships.
-- **Product (a fix, on a branch beside the release):** a check that drops a host tag that grades its answer, leaving that answer untagged. It was built from the 9 verdicts on record. It drops none of the 27 reactions or 15 labels on record. On 62 tags it had not seen, scored blind by a fresh agent, it dropped 7, all verdicts. It let 5 of 12 verdicts through, in new wordings ("Actually helpful", "Too honest"). It also drops "Ouch, true", half a wince. A question counts as doubt, a reaction, so it ships ("Is that true?!"). A fresh review found 8 kinds of reaction it wrongly dropped and a dozen verdicts it missed. A second review found two more. All are fixed.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas and four survived. Two rankers, in opposite orders, put the same two on top: the filter (done) and whether the free AI could judge tags by meaning, catching what a word list misses. **Dropped:** a sample of the "our own questions" show (cannot be watched until a render, and it waits behind bet 1's); another prompt rewording (it would spend today's last safe AI requests, and the last rewording failed; it is built for tomorrow instead); asking for three opening tags in one request and showing the first that reacts (it changes what the AI returns, so not in the time left; the opening tag shows on only about 1 upload in 6–8).
-- **Data (a research question, answered no):** can the free AI judge tags? The bar was set before reading: agree with the blind scores on 90% of tags and pass no verdict. It agreed on 36 of 62, and called 7 of 12 verdicts reactions, including "Sad but true" and "Direct hit", which the filter catches. The second free model's answer could not be lined up with the tags. So the filter stays, and nothing replaces it.
-- **Legal (a finding, for the 5 November review):** a second round of ideas, aimed at the functions no recent shift has worked, found one. A data file in the project keeps our videos' titles and their Reddit answers, as read from YouTube, longer than the 30 days YouTube allows for anything but statistics. It is our own published text, so the risk is low. Removing it rewrites production data, which is your call, so it is recorded with a recommendation (keep the numbers, drop the text) rather than raised now.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.69 this month, forecast $0.86 of $3).
-- **Process:** the idea generator first read an out-of-date list of past drops, because the working copy was on a side branch, where that list is older. It noticed and read the live copy itself; a shift asking for ideas from a branch should point it there.
-- Mostly a fix, plus two reads. AI use: three requests on the upload model, 26 free Groq requests; no Polly, no render (the next render slot opens at 10:17). Handed over about 15 minutes early: the second round's one survivor is recorded, and nothing else could finish in the time left without the AI allowance tomorrow's 05:00 upload needs, or the render slot.
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
-
-### Next
-- **After 10:17 UTC:** as planned, render the swear-word filter branch and, on a pass naming its commit, merge it into the live branch (no version bump). It still merges cleanly into today's live code, tests passing.
-- **The render slot after:** render the branch that already combines the tag filter with the vote-and-tags swear guard (all tests pass; a local silent render completes), and post the sample to #77 if its tags react. Then fold it into the release branch.
-- The shipped prompt still lists "agreement" among the reactions it asks for. A trial wording without it, which names no verdicts and leaves taking sides to the vote, is ready to run. Read it on about three trial posts a day with the upload model's allowance before folding it in.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Yes, slightly. More than half of the defect that held the sample back is now stopped in code rather than left to the prompt, tested on every tag on record and 62 it had not seen.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
