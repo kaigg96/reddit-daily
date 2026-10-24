@@ -4,27 +4,27 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `2e26595`
-- **When:** 2026-10-18T12:36:55Z
+- **Commit:** `46548ae`
+- **When:** 2026-10-22T13:46:28Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39127928723)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/39789632579)
 
 ## What the gates said
 
-## Release validation
-
-Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared with production).
+…(truncated)…
+most 8 requests (Gemini's 20/day cap is shared with production).
 
 ### Gate 1 — merged metadata prompt
 
-- ✅ `title`: What hobby will cost YOU a fortune?
-- ✅ `keywords`: expensive hobbies, hobbies that cost too much, photography expensive, warhammer price, ski
-- ✅ `cta`: I'm raising my hand for Warhammer: 'plastic crack' is too accurate! Which one gets your vo
-- ✅ host setup: I bet a lot of these used to be affordable.
-- ✅ host reaction 1: My wallet just screamed in terror.
-- ✅ host reaction 2: Plastic crack is the perfect name!
-- ✅ host reaction 3: My knees also can't afford that price tag now.
+- ✅ `title`: What hobbies will cost YOU a fortune?
+- ✅ `keywords`: expensive hobbies, hobbies for rich, costly pastimes, hobbies to avoid, luxury hobbies
+- ✅ `cta`: I raise my hand for skiing. Two hundred dollars for a lift ticket is just wild. Which one 
+- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)
+- ✅ host reaction 1: Ouch, that's steep
+- ✅ host reaction 2: Plastic crack, ha!
+- ✅ host reaction 3: Daylight robbery!
+- ⚠️ Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words)
 
 ### Gate 2 — R4.6 screen replay
 

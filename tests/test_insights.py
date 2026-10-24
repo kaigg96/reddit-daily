@@ -1020,6 +1020,10 @@ def test_an_early_read_is_never_correlated_with_itself(tmp_path, monkeypatch):
     _write_series(tmp_path, monkeypatch, uploads, snaps)
     n, rho = insights.early_read_stability(3, 7)
     assert n == 6 and rho == pytest.approx(1.0)
+    # The pairs above are really 2 against 9 days; a tight tolerance says so.
+    assert insights.early_read_stability(3, 7, tolerance_days=0.6)[0] == 0
+    n, rho = insights.early_read_stability(2, 9, tolerance_days=0.6)
+    assert n == 6 and rho == pytest.approx(1.0)
 
 
 def test_total_watch_is_views_times_watch_seconds():
@@ -1920,6 +1924,21 @@ def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
     assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
 
 
+def test_route_distances_count_engaged_views_where_the_route_does():
+    from src import insights as _ins
+    routes = (("YPP", 10_000_000, 90, True, 1_000, True),
+              ("TikTok", 100_000, 30, False, 10_000, False))
+    ypp, tiktok = _ins.route_distances(36_000, 0.25, 20, 0.5, routes)
+    assert ypp["views_ours"] == 9_000 and abs(ypp["views_short"] - 10_000_000 / 9_000) < 1e-9
+    assert ypp["followers_short"] == 50 and ypp["views_to_follow"] == 1_960_000
+    assert tiktok["views_ours"] == 12_000             # a 30-day window, every play start
+    assert tiktok["followers_ours"] == 0 and tiktok["followers_short"] is None
+    assert tiktok["views_to_follow"] == 20_000_000
+    thin, _ = _ins.route_distances(36_000, None, 20, None, routes)
+    assert thin["views_ours"] is None and thin["views_short"] is None
+    assert thin["views_to_follow"] is None
+
+
 def test_poisson_interval_matches_the_exact_tables():
     from src import insights as _ins
     lo, hi = _ins.poisson_interval(11)
@@ -2428,3 +2447,89 @@ def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monk
     history = [v for v in read.load.videos if v.meta.get("format_version") in ("v3", "v4")]
     assert read.floors[Metric.WATCH] == insights.drift_floor(history, Metric.WATCH)
     assert read.floors[Metric.WATCH] != insights.drift_floor(read.before, Metric.WATCH)
+
+
+# --- R3: does the opening decide reach? (PRD §0, 2026-10-21) -----------------
+
+def _reach(n, share, views):
+    return [insights.Video(video_id=str(i), published=None, views=views(i), watch_seconds=10,
+                           engaged_views=share(i) * views(i)) for i in range(n)]
+
+
+def test_rank_correlation_reads_a_monotone_link_and_its_absence():
+    rho, p, n = insights.rank_correlation(_reach(30, lambda i: 0.2 + i / 100, lambda i: 20 + i ** 2), "engaged_share", "views")
+    assert n == 30 and abs(rho - 1) < 1e-9 and p < 0.01
+    rho, p, n = insights.rank_correlation(_reach(30, lambda i: 0.2 + (i * 7 % 30) / 100, lambda i: 20 + i), "engaged_share", "views")
+    assert abs(rho) < 0.3 and p > 0.05
+
+
+def test_rank_correlation_ties_share_a_rank():
+    assert insights._ranks([3, 1, 3, 2]) == [3.5, 1.0, 3.5, 2.0]
+
+
+def test_rank_correlation_refuses_thin_and_unreported_uploads():
+    few = _reach(19, lambda i: 0.3, lambda i: 50)
+    assert insights.rank_correlation(few, "engaged_share", "views") == (None, None, 19)
+    quiet = _reach(30, lambda i: 0.3, lambda i: 5)               # under 10 views each
+    assert insights.rank_correlation(quiet, "engaged_share", "views")[2] == 0
+    unreported = _reach(30, lambda i: 0.3, lambda i: 50)
+    for v in unreported:
+        v.engaged_views = None
+    assert insights.rank_correlation(unreported, "engaged_share", "views")[2] == 0
+
+
+def test_rank_correlation_is_two_sided_and_survives_a_constant():
+    rho, p, _ = insights.rank_correlation(_reach(30, lambda i: 0.5 - i / 100, lambda i: 20 + i), "engaged_share", "views")
+    assert abs(rho + 1) < 1e-9 and p < 0.01
+    rho, p, _ = insights.rank_correlation(_reach(30, lambda i: 0.3, lambda i: 20 + i), "engaged_share", "views")
+    assert rho == 0.0 and p == 1.0
+
+
+# --- first-answer length (PRD §4, 2026-10-21) --------------------------------
+
+def _answer_lengths():
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "answer_lengths", root / "scripts" / "answer_lengths.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["answer_lengths"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_answer_log_parse_counts_words_and_needs_an_upload():
+    mod = _answer_lengths()
+    log = ("job\tstep\t2026-10-21T05:00:01.1Z Selected post: Q?\n"
+           "job\tstep\t2026-10-21T05:00:01.2Z   comment 1: one two three\n"
+           "job\tstep\t2026-10-21T05:00:01.3Z   comment 2: four five\n"
+           "job\tstep\t2026-10-21T05:00:01.4Z   comment 3: six\n")
+    assert mod.parse_log(log) is None          # an off slot or dry run uploads nothing
+    video, words = mod.parse_log(log + "job\tstep\t2026-10-21T05:04:00.0Z "
+                                 "Upload complete! Video ID: hTnnhF9DaRQ\n")
+    assert (video, words) == ("hTnnhF9DaRQ", {1: 3, 2: 2, 3: 1})
+
+
+def test_answer_log_parse_keeps_the_first_print_of_each_answer():
+    mod = _answer_lengths()
+    log = ("x\ty\t2026-10-21T05:00:01.2Z   comment 1: a b\n"
+           "x\ty\t2026-10-21T05:00:01.3Z   comment 1: a b c d\n"
+           "x\ty\t2026-10-21T05:04:00.0Z Upload complete! Video ID: AAAAAAAAAAA\n")
+    assert mod.parse_log(log)[1] == {1: 2}
+
+
+def test_attach_answer_lengths_sets_none_where_missing(tmp_path):
+    path = tmp_path / "answer_lengths.csv"
+    path.write_text("video_id,run_id,words_1,words_2,words_3\na,1,12,5,6\nb,2,,4,4\n")
+    vids = [insights.Video(video_id=i, published=None) for i in ("a", "b", "c")]
+    assert insights.attach_answer_lengths(vids, path) == 1
+    assert [v.first_answer_words for v in vids] == [12, None, None]
+    assert insights.attach_answer_lengths(vids, tmp_path / "absent.csv") == 0
+
+
+def test_first_answer_verdict_applies_the_rule_as_written():
+    assert insights.first_answer_verdict(None, None) == "insufficient data"
+    assert insights.first_answer_verdict(-0.3, 0.049).startswith("lead")
+    assert insights.first_answer_verdict(-0.3, 0.05).startswith("noise")
+    assert insights.first_answer_verdict(-0.29, 0.001).startswith("noise")
+    assert insights.first_answer_verdict(0.6, 0.001).startswith("noise")

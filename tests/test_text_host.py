@@ -171,6 +171,38 @@ def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
     assert run.own_words_share(segs) == f"{notes / total:.3f}"
 
 
+@pytest.mark.parametrize("vote", ["Raising my hand for the shelter one, damn right. YOUR vote?",
+                                  "Raising my hand for the f**k off one. YOUR vote?"])
+def test_a_swearing_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch, vote):
+    """The vote is published, so it is held to the title's guard (10-22's swear
+    word in a live title); the notes keep theirs, where "Oh god" is a reaction."""
+    host = _text_metadata(monkeypatch, cta=vote)
+    assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
+    assert host.verdict == "" and run.closing_line(None, host) is None
+
+
+def test_a_swearing_vote_is_logged_as_one_not_as_long(monkeypatch, capsys):
+    _text_metadata(monkeypatch, cta="Raising my hand for the shelter one, damn right.")
+    out = capsys.readouterr().out
+    assert "vote (a swear word or emoji)" in out and "vote (" not in out.replace(
+        "vote (a swear word or emoji)", "")
+
+
+@pytest.mark.parametrize("tag", ["Holy shit", "F**k me", "WTF"])
+def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
+    """The tags are on screen, so they may not swear either (the vote guard's
+    review, 10-23), on a list that spares god, hell and damn."""
+    host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+    assert host.reactions == ["", HOST["reactions"][1]] and host.verdict == HOST["cta"]
+    assert "reaction 1 (a swear word or emoji)" in capsys.readouterr().out
+
+
+def test_a_reaction_may_say_oh_god(monkeypatch):
+    for tag in ("Oh god", "Hell no", "Damn right", "OMG, no"):
+        host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+        assert host.reactions[0] == tag and host.verdict == HOST["cta"]
+
+
 def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
     """Which line ran long, and by how much: the vote's drops were counted,
     never measured (2026-10-20)."""

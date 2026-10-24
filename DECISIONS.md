@@ -31,6 +31,25 @@ revisit trigger.
 
 ---
 
+## D14 · 2026-10-19 · Audience first; the owner gives a viewer's feedback, shifts own the craft
+
+The owner, in a session on 10-19 (recorded on #77): the likely first step to
+money is an audience, which opens routes beyond YouTube views. Meeting
+YouTube's monetization rules (reused content, our own words' share) is worth
+pursuing but is **not the deciding test** for a format today; the owner doubts
+YouTube checks a channel this size. So a format change is judged first on
+whether a first-time viewer follows it and keeps watching; own-words share is
+reported, never a gate. Separate: the spam policy (#80) risks strikes and
+termination, not pay, and binds at any size.
+Same session, on weak host tags: "I gave you the feedback, this is your (or
+rather, the shifts) job to figure out what constitutes good reactions, how to
+generate, test, etc." The owner reacts as a viewer; defining the bar, building
+and testing are the shifts'. Bring back a result to watch, not a craft choice.
+**Alternatives:** keep YouTube's rules as bet 1's done-when (the owner
+declined it as a gate). **Assumptions:** (1) monetization review comes only
+when we apply; (2) audience is the binding step (21 subscribers, §1).
+**Revisit** before applying to any paid programme, or at 1,000 subscribers.
+
 ## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
 
 The owner on #67, after the unused-time alarm emailed them three times:
@@ -52,6 +71,7 @@ change label-only. So the handover leads with #50's four commands.
 **Re-reviewed 2026-10-13 (audit):** (1) false for now: #74 and #75 have waited ~2 days, the owner's last close was 10-11, and #74 needs a watch, not only a label. The trigger fires 10-14 10:49. **Evidence for whoever reads it (10-13 night):** the owner's labels, closes and comments since 09-20 fall on 15 of 24 days, with gaps of up to 76 hours (10-01 to 10-05); the current gap began 10-11 21:17, when #74 still said "after Monday's read" and #75 did not exist. A three-day wait is inside their rhythm, so check whether the ask's form is the cause before changing it.
 **Re-reviewed 2026-10-14 15:55 — trigger fired; the form is not the cause.** #74 has waited 3.2 days, but nothing of the owner's has moved since 10-11 21:17 (67 hours, inside their 76-hour longest gap): #75, a plain label, waits just as long. So it is absence, not the ask's shape; no re-ask (#74 was re-raised twice on 10-13). Revisit after 10-15 01:17, when the gap passes their longest; even then, change the ask only if they act on other issues while #74 sits.
 **Re-reviewed 2026-10-17 21:42 (audit) — that condition was met, unnoticed.** On 10-15 01:26 the owner labelled #75 three hours after #77 opened, and passed over #77. Its body then said a label approved a rebuild and #74's label would ship it; a later comment said one label on #77 ships it. A re-raise only comments (`escalations.yml`), so the body, read first, went stale, and a label on it was ambiguous consent to go live. Rewritten as one ask (no email). The owner has been absent since; the 76-hour gap passes 10-18 05:26. (1) false for now, whatever the ask's form: #75, a plain label, waited three days too; #74 six, #77 three.
+**Re-reviewed 2026-10-21 (audit) — (1) holds again.** The owner answered #81, a label, the day it opened (10-20), and gave #77 a session on 10-19 (D14). #77 now waits on hands, a narrated render only their machine can make (branch code never holds the Polly keys); #80, a label, is due by 11-01. Ten shifts ran 2–56 of 60 minutes (mean 38) with nothing ready: the hands-only remainder, not absence, is the cause. 10-17's "absent" line went stale and seeded a ship-unless-they-object candidate this shift; a stale assumption steers generation.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 

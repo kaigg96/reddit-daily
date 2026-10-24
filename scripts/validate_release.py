@@ -227,9 +227,10 @@ def check_metadata():
             else:
                 note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
             for i, line in enumerate(host.reactions, 1):
-                shown(f"reaction {i}", line, why="past its cap or grading its answer")
-            if not host.verdict:
-                shown("vote", "", "the usual closing line ships")
+                shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
+            if not host.verdict:   # a swear word now drops it too (the run log says which)
+                note("- ⚠️ host vote: dropped, past its cap or a swear word"
+                     " (the usual closing line ships)")
         for line in dropped:
             note(f"- ⚠️ {line}")
     note("")
