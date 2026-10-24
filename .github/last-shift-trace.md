@@ -1,102 +1,96 @@
-## Shift trace — run 40076805430
+## Shift trace — run 40102980077
 
-**Ended:** success, is_error false, 272 turns, 40.7 min, stop end_turn; 3 permission denial(s): Bash, Monitor. **Tool calls:** 271, 4 failed. Helper agents made 107 more, 2 failed.
+**Ended:** success, is_error false, 112 turns, 39.1 min, stop end_turn; 1 permission denial(s): Monitor. **Tool calls:** 109, 2 failed. Helper agents made 57 more, 0 failed.
 
 **Last message:**
 
-> The handover is committed and pushed; I stopped at 08:48, about 19 minutes early. Two rounds of idea generation turned up nothing else that could finish in the time left without the AI allowance tomorrow's 05:00 upload needs, or the next render slot.
+> The swear-word fix is live on `main`, and bet 1's sample now waits only for tomorrow's render slot. The handover is committed and pushed. I'm stopping at 15:13, about 20 minutes early, because nothing was ready and a second round of ideas found nothing worth doing.
 >
-> The main result: the problem holding bet 1's sample back is mostly handled in code now, but it still needs one render before you see it.
->
-> - **Reworded prompt not kept.** Last night's new wording for the host's tags did worse on three more trial posts. About 4 of 9 tags reacted, against about 21 of 27 for the current wording. Three tags still graded the answer ("Ah, makes sense", "Sad but true", "Good point"). So grading isn't limited to advice posts, and telling the AI not to do it doesn't stop it.
-> - **Grading filter built.** It removes a host tag that grades its answer, leaving that answer untagged.
->   - It removes none of the 27 reactions on record.
->   - On 62 tags it hadn't seen, scored blind by a fresh agent, it removed 7, all of them verdicts. It let 5 of 12 verdicts through, because it only knows stock phrases ("Actually helpful", "Too honest" slip past).
->   - Two fresh reviews found problems, and all are fixed.
->   - It also removes "Ouch, true", which is half a wince.
-> - **Sample branch ready.** A branch now combines the filter with last night's swear-word guard for the host's lines. All 781 tests pass on it, and a local silent render completes. That's the render for #77.
-> - **Free AI can't judge tags.** I set the bar before reading: agree with the blind scores on 90% of tags. Groq agreed on only 36 of 62, and it called "Sad but true" and "Direct hit" reactions. The word filter stays.
-> - **Legal finding.** A data file in the public project keeps our videos' titles and their Reddit answers, as read from YouTube, longer than YouTube's 30-day limit for anything but statistics. The risk is low because it's our own published text. Fixing it means rewriting production data, which is your call, so I recorded it for the 5 Nove
+> **What happened**
+> - **Swear-word filter (live):** its sample render passed on the branch's current commit (the video plays, 27 seconds). A fresh check found no problems from merging it with today's code, so I merged it into `main`. It catches a swear word next to a quote mark or inside a contraction, like Thursday's "Alright Fuckers" title. It also makes an AI-written title, closing line or keyword containing a swear word or emoji fall back to a safe one. It doesn't change the video itself, so no version change.
+> - **Bet 1's tags (on the release branch):** the political tags on record that agree with an answer were already caught by the filter, but there are only two or three of them. Testing common ways of agreeing showed about 20 that still got through ("Well put", "You're right", "Amen", "Hell yes"). On a politics post those take a side. They're now dropped as well. A fresh review found two real reactions the change would have wrongly dropped ("100% chaos", "Got nailed"); both are fixed. None of the 55 tags on record from past checks and renders is newly dropped.
+> - **Release branch:** the branch the owner's own render instructions on #77 point at now holds both tag filters and the swear guard for the host's vote and tags. So does the branch the next sample renders from. #77's description now says so; I edited it, so no email went out.
+> - **Ideas:** in the first round, two independent rankers in opposite orders both put the political-tags check near the top, and it's done. I dropped draft answers for the Reddit registration form (#82): the form's questions were never recorded, so the answers would be guesses, and it would be a fourth email on that issue in four days. The second round, aimed at the functi
 
-### Tool calls (last 80 of 271)
+### Tool calls (last 80 of 109)
 
-192. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; cd /tmp/main-wt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytes…
-193. Bash: venv/bin/python scripts/money_check.py 2>&1 | tail -2
-194. ListAgents: 
-195. Bash: venv/bin/python -m pytest tests/test_text_host.py tests/test_tag_trial.py tests/test_validate_release.py -q -p no:cacheprovider 2>&1 | tail…
-196. Bash: git log --oneline origin/integration/preview -1; git rev-list --count origin/integration/preview..origin/release/bet1-sample
-197. Monitor: sleep 90; echo "ninety seconds passed"
-198. Bash: cd /tmp/main-wt && grep -c "release/bet1-sample" PRD.md WORKLOG.md
-199. ListAgents: 
-200. Bash: venv/bin/python scripts/escalations.py approved 2>&1 | head -3; date -u +%H:%M:%S
-201. Bash: gh issue view 65 --json body,comments --jq '.body[0:1800], (.comments[] | .author.login + ": " + .body[0:500])' 2>&1 | head -60
-202. ListAgents: 
-203. Bash: date -u +%H:%M:%S
-204. Bash: git diff origin/integration/preview origin/release/bet1-sample --stat -- src/ | tail -3
-205. Monitor: sleep 120; echo "two more minutes passed"
-206. Bash: git diff origin/integration/preview origin/release/bet1-sample --stat -- src/ | head -4
-207. ListAgents: 
-208. Bash: git log --oneline origin/main..origin/reliability/profanity-quotes | wc -l; git log -1 --format=%cd --date=iso origin/reliability/profanity…
-209. Monitor: sleep 120; echo "another two minutes passed"
-210. Bash: date -u +%H:%M:%S
-211. Bash: cd /tmp/main-wt && sed -n '/^## Open items/,$p' TECH_DEBT.md | grep -n "^- \*\*\|^- " | cut -c1-170 | head -30
-212. Bash: cd /tmp/main-wt && sed -n '/^## Open items/,$p' TECH_DEBT.md | sed -n '20,38p;186,213p'
-213. Bash: git merge-base --is-ancestor origin/product/host-tags origin/integration/preview && echo "host-tags IS in preview" || echo "host-tags not i…
-214. Bash: cd /tmp/main-wt && python3 - <<'EOF'
-215. ListAgents: 
-216. Bash: date -u +%H:%M:%S
-217. Monitor: sleep 180; echo "three minutes passed"
-218. Bash: cd /tmp/main-wt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/test_check_docs.py tests/test_context_budget…
-219. ListAgents: 
-220. Bash: git log -1 --format='%h %s' origin/strategy/se-sample; date -u +%H:%M:%S
-221. Bash: git show origin/release/bet1-sample:src/config.py | grep -n "STAND_IN_VOICE = \|SILENT_NARRATION =" | head -3
-222. ListAgents: 
-223. Bash: git show origin/release/bet1-sample:.github/workflows/dry-run.yml 2>/dev/null | grep -n "STAND_IN\|SILENT_NARRATION" | head -3; grep -n "ST…
-224. Monitor: sleep 120; echo "waited two minutes"
-225. Bash: date -u +%H:%M:%S
-226. Bash: git grep -n "METADATA_ON_UPLOAD_MODEL\|STAND_IN_VOICE" origin/release/bet1-sample -- src/config.py | head -4
-227. ListAgents: 
-228. Bash: timeout 100 venv/bin/python -m pytest tests/ -q -p no:randomly 2>&1 | tail -1; date -u +%H:%M:%S
-229. Bash: cd /tmp/main-wt && timeout 100 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:…
-230. ListAgents: 
-231. Bash: git log -3 --format='%h %ad %s' --date=format:%H:%M origin/main
-232. Monitor: sleep 180; echo "waited three minutes"
-233. Bash: venv/bin/python -c "
-234. Bash: date -u +%H:%M:%S
-235. ListAgents: 
-236. Bash: git status --short | wc -l; git branch --show-current
-237. Monitor: sleep 120; echo "two minutes waited"
-238. Bash: timeout 60 venv/bin/python -m pytest tests/test_commentary.py -q 2>&1 | tail -1; date -u +%H:%M:%S
-239. ListAgents: 
-240. Bash: cd /tmp/main-wt && git fetch -q && git status -sb | head -1
-241. Bash: date -u +%H:%M:%S
-242. Monitor: sleep 230; echo "four minutes waited"
-243. Bash: timeout 120 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:%M:%S
-244. ListAgents: 
-245. Bash: cd /tmp/main-wt && timeout 60 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/check_docs.py 2>&1 | head -4; date -u +%H…
-246. Monitor: sleep 180; echo "three more minutes waited"
-247. Bash: timeout 120 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:%M:%S
-248. ListAgents: 
-249. Bash: cd /tmp/main-wt && timeout 100 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:…
-250. Bash: timeout 120 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:%M:%S
-251. ListAgents: 
-252. SendMessage: content, message, recipient, summary, to, type
-253. Monitor: sleep 120; echo "two minutes for wrap-up"
-254. Bash: cd /tmp/main-wt && timeout 100 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:…
-255. Bash: cd /tmp/main-wt && head -1 analysis/channel_videos.csv | cut -c1-300; wc -l analysis/channel_videos.csv; git log -1 --format='%ad %s' --dat…
-256. Bash: cd /tmp/main-wt && tail -5 TECH_DEBT.md
-257. Bash: cd /tmp/main-wt && cat >> TECH_DEBT.md <<'EOF'
-258. Bash: cd /tmp/main-wt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "OVER|TOTAL…
-259. Bash: cd /tmp/main-wt && sed -n '/^## Open items/,$p' TECH_DEBT.md | grep -n "^- \*\*\|Closes when\|closes when" | cut -c1-150
-260. Bash: cd /tmp/main-wt && sed -n '/^## Open items/,$p' TECH_DEBT.md | sed -n '1,19p;276,296p'
-261. Bash: cd /tmp/main-wt && git log --reverse --format='%ad %h' --date=iso origin/main --grep='^Record shift trace' | head -2; git log --format='%ad…
-262. Bash: cd /tmp/main-wt && sed -n '/^## Open items/,$p' TECH_DEBT.md | sed -n '217,242p'
-263. Bash: cd /tmp/main-wt && grep -n "def credit_name" -A16 src/content.py | head -24; grep -n "C15" PLAN.md DECISIONS.md | head -3
-264. Bash: cd /tmp/main-wt && grep -n "_NAME_WORDS" -B6 src/content.py | head -14
-265. Bash: cd /tmp/main-wt && python3 - <<'EOF'
-266. Bash: cd /tmp/main-wt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; git add TECH_DEBT.md && …
-267. Bash: cd /tmp/main-wt && python3 - <<'EOF'
-268. Bash: cd /tmp/main-wt && python3 - <<'EOF'
-269. Bash: cd /tmp/main-wt && python3 - <<'EOF'
-270. Bash: cd /tmp/main-wt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; git add WORKLOG.md && gi…
-271. Bash: git worktree remove /tmp/main-wt && git checkout -q main && git pull -q --ff-only && git status -sb | head -1 && git log --oneline -1 && gi…
+30. Bash: until git fetch -q origin 2>/dev/null; git show origin/main:.github/last-dry-run.md 2>/dev/null | grep -q "profanity-quotes"; do sleep 30; …
+31. Bash: git worktree add -q /tmp/ip -b tmp/ip-fold origin/integration/preview && cd /tmp/ip && git merge --no-edit -q origin/reliability/profanity-…
+32. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+33. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && gh run list --workflow dry-run.yml -L 2 2>&1 | head -4
+34. ✗ Monitor: cd /home/runner/work/reddit-daily/reddit-daily && while true; do s=$(gh run view 40103205395 --json status,conclusion --jq '.status+" "+.co… — Contains case_statement
+35. Bash: until [ "$(gh run view 40103205395 --json status --jq .status 2>/dev/null)" = "completed" ]; do sleep 20; done; gh run view 40103205395 --j…
+36. Bash: sed -n '/^## 2026-10-23 (22:55)/,/^### Blocked/p' WORKLOG.md | head -30
+37. Bash: until [ "$(gh run view 40103205395 --json status --jq .status 2>/dev/null)" = "completed" ]; do sleep 15; done; gh run view 40103205395 --j…
+38. Bash: git fetch -q origin && git show origin/main:.github/last-dry-run.md | sed -n 8,45p
+39. Bash: git pull -q --ff-only && git merge --no-ff -q origin/reliability/profanity-quotes -m "Merge reliability/profanity-quotes: a swear word at a…
+40. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+41. Bash: cd /tmp/ip && git log --oneline -1 && git push -q origin tmp/ip-fold:integration/preview && cd /home/runner/work/reddit-daily/reddit-daily …
+42. Bash: date -u +%H:%M; venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | head -8; sleep 20; gh run list --branch main -L 4 --json name…
+43. Bash: until [ "$(gh run list --branch main -L 6 --json name,status,headSha --jq '[.[] | select(.headSha|startswith("ba63ea0")) | select(.status!=…
+44. Bash: date -u +%H:%M
+45. Bash: gh issue list --state open --limit 20 --json number,title,updatedAt --jq '.[] | "\(.number) \(.updatedAt[0:16]) \(.title[0:90])"'
+46. ✗ Bash: sleep 90; date -u +%H:%M — <tool_use_error>Blocked: sleep 90 followed by: date -u +%H:%M. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>…
+47. Bash: grep -n -i -E "verdict|grading|react" PRD.md | sed -n 1,40p | cut -c1-260
+48. Bash: git show origin/release/bet1-sample --stat --format="" | head -3; git grep -n -i "Actually helpful\|Too honest" origin/release/bet1-sample …
+49. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+50. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+51. Bash: sed -n 68,80p .github/workflows/dry-run.yml
+52. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+53. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+54. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+55. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|TOTAL|over|budget" | head -5
+56. Bash: grep -n "^## 20" WORKLOG.md; wc -l WORKLOG.md
+57. Bash: python3 - <<'EOF'
+58. Bash: git add WORKLOG.md && git commit -q -m "Handover draft: the swear-word filter is live; bet 1's sample branch is current and waits for the n…
+59. Bash: gh issue view 77 --json body --jq .body | head -40
+60. Bash: gh issue view 77 --json comments --jq '.comments[-3:][] | "\(.createdAt[0:16]) \(.author.login): \(.body[0:700])\n---"'
+61. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && git diff --stat origin/integration/preview origin/release/bet1-sample -- …
+62. Bash: git diff origin/integration/preview origin/release/bet1-sample -- scripts/validate_release.py src/llm.py | head -90
+63. Bash: git merge-base --is-ancestor origin/integration/preview origin/release/bet1-sample && echo "preview is ancestor of bet1-sample"; git log --…
+64. Bash: f=/tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/6b9a853e-b8ed-445d-b9e5-e3e4637e1871/tasks/aedf674ae43ec422a.output; until […
+65. Bash: grep -n "bet1-sample\|integration/preview" PRD.md PLAN.md TECH_DEBT.md | cut -c1-200
+66. Read: /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/6b9a853e-b8ed-445d-b9e5-e3e4637e1871/tasks/bvsrsvwh5.output
+67. Bash: gh run list --branch main -L 5 --json name,status,conclusion,headSha --jq '.[] | "\(.name) \(.status) \(.conclusion) \(.headSha[0:7])"'; da…
+68. Bash: gh run list --workflow run-reddit-video.yml -L 3 --json createdAt,conclusion,headSha --jq '.[] | "\(.createdAt) \(.conclusion) \(.headSha[0…
+69. Bash: until [ $(date -u +%H%M) -ge 1450 ]; do sleep 10; done; date -u +%H:%M
+70. Bash: until [ $(date -u +%H%M) -ge 1449 ]; do sleep 10; done; date -u +%H:%M
+71. Agent: Rank candidates forward order
+72. Agent: Rank candidates reversed order
+73. Bash: git ls-tree -r --name-only origin/release/bet1-sample | grep -i -E "tag|trial|commentary" | head -20
+74. Bash: git show origin/release/bet1-sample:tests/test_text_host.py | grep -n -i -E "verdict|grades|_REACTIONS|reactions on record|ON_RECORD|politi…
+75. Bash: git show origin/release/bet1-sample:tests/test_text_host.py | sed -n 385,412p
+76. Bash: gh issue view 82 --json body,comments --jq '.body[0:2500], (.comments[] | .createdAt[0:16] + " " + .body[0:600])'
+77. Bash: gh issue view 82 --json comments --jq '.comments[-1].body' | sed -n 1,60p
+78. Bash: until [ $(date -u +%H%M) -ge 1453 ]; do sleep 10; done; date -u +%H:%M
+79. Bash: for f in .github/last-release-validation.md .github/last-dry-run.md; do for c in $(git log --all --format=%h -- $f); do git show $c:$f 2>/d…
+80. Bash: grep -E "reaction [0-9]|Selected post|✅ .title" /tmp/tags_raw.txt | sed -E 's/^[0-9a-f]+ //' | awk '!seen[$0]++' | head -80
+81. Bash: sed -n 127,133p PRD.md | grep -o -i -E "politic[^.]*\.|\"[^\"]{2,30}\"" | head -60 | tr '\n' ' '
+82. Bash: git worktree add -q /tmp/b1 origin/release/bet1-sample 2>&1 | tail -1; cd /tmp/b1 && /home/runner/work/reddit-daily/reddit-daily/venv/bin/p…
+83. Bash: grep -o -E ".{300}Finally, honesty.{200}" PRD.md | head -2; grep -o -E ".{250}Math checks out.{150}" PRD.md | head -1
+84. Bash: cd /tmp/b1 && git checkout -q -b product/verdict-agreement && grep -n "_VERDICT = re.compile" -A5 src/llm.py
+85. Bash: cd /tmp/b1 && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
+86. Bash: cd /tmp/b1 && grep -E "reaction [0-9]: " /tmp/tags_raw.txt | sed -E 's/.*reaction [0-9]: //' | sort -u > /tmp/rec_tags.txt; wc -l < /tmp/re…
+87. Bash: cd /tmp/b1 && git add -A src/llm.py tests/test_text_host.py && git commit -q -m "Verdict tags: plain agreement grades too (\"Well put\", \"…
+88. Agent: Review verdict filter extension
+89. Bash: sed -n 45p PRD.md | cut -c1-420; sed -n 15p PRD.md | cut -c1-60
+90. Bash: grep -n -o -E "\*\*Tags grade personal-advice answers.{0,1600}" PRD.md | cut -c1-1700
+91. Bash: grep -o -E "So a grading tag now drops alone.{0,1500}" PRD.md | cut -c1-1500; venv/bin/python scripts/context_budget.py --check 2>&1 | grep…
+92. Bash: python3 - <<'EOF'
+93. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && git diff --stat
+94. Bash: gh issue view 77 --json body --jq .body > /tmp/77_body.md && python3 - <<'EOF'
+95. Bash: until [ $(date -u +%H%M) -ge 1503 ]; do sleep 10; done; date -u +%H:%M
+96. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG" | head -2; git -C /tmp/b1 log --oneline -1
+97. Bash: until [ $(date -u +%H%M) -ge 1502 ]; do sleep 10; done; date -u +%H:%M
+98. Bash: cd /tmp/b1 && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
+99. Bash: cd /tmp/b1 && git add src/llm.py tests/test_text_host.py && git commit -q -m "Verdict tags, review: \"100%\" counts only at a tag's end (\"…
+100. Bash: git worktree remove /tmp/b1 && python3 - <<'EOF'
+101. Bash: python3 - <<'EOF'
+102. Bash: python3 - <<'EOF'
+103. Bash: git add PRD.md WORKLOG.md && git commit -q -m "PRD #15 and handover: agreeing tags drop too (product/verdict-agreement, reviewed, two findi…
+104. Agent: Second-round candidate generation
+105. Bash: git log --since="2026-10-24 00:00" --oneline --grep="health" | head -3; venv/bin/python scripts/context_budget.py --health 2>&1 | tail -15;…
+106. Bash: git fetch -q && git merge-tree --write-tree origin/main origin/integration/preview >/dev/null && echo "release merges into main cleanly"; d…
+107. Bash: until [ $(date -u +%H%M) -ge 1512 ]; do sleep 10; done; date -u +%H:%M
+108. Bash: python3 - <<'EOF'
+109. Bash: sed -i 's/Handed over about 15 minutes early for that reason\./Handed over about 20 minutes early for that reason./' WORKLOG.md && git add …
