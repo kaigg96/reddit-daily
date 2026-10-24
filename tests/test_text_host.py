@@ -278,11 +278,13 @@ def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
 
 @pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂", "Wow 🇺🇸", "1️⃣ wow",
                                   "", "   ", None])
-def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
+def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, capsys, junk):
     """A flag or keycap is two code points, neither an emoji alone; and an
     empty line drops alone, as a long one does (whole-branch review, 10-24)."""
     host = _text_metadata(monkeypatch, reactions=[junk, HOST["reactions"][1]])
     assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
+    said = [ln for ln in capsys.readouterr().out.splitlines() if "as written" in ln]
+    assert said == ([f'Commentary reaction 1, as written: "{junk}"'] if junk == "..." else [])
 
 
 @pytest.mark.parametrize("line", [{"setup": ""}, {"cta": None}, {"cta": "  "}])
