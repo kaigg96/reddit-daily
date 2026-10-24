@@ -155,7 +155,7 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
             url, json=dict(json or {}, reasoning_effort="none"), **kw)
     # A trial reads the setup as written: the gate that drops one that is not
     # a reaction would blank it here. main prints the gate's call beside it.
-    # So for the reactions and the gate that drops a grading tag.
+    # Likewise the check that drops a grading tag: main prints its call too.
     llm._reads_as_reaction = lambda line: True
     llm._grades = lambda line: False
     llm.FALLBACK_MODEL = None
