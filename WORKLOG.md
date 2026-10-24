@@ -83,7 +83,7 @@ and more useful than a confident guess.
 
 ### Next
 - **After 10:17 UTC:** as planned, render the swear-word filter branch and, on a pass naming its commit, merge it into the live branch (no version bump).
-- **The render slot after:** fold the tag filter and the vote-and-tags swear guard into the release branch, render it, and post the sample to #77 if its tags react.
+- **The render slot after:** render the branch that already combines the tag filter with the vote-and-tags swear guard (all tests pass; a local silent render completes), and post the sample to #77 if its tags react. Then fold it into the release branch.
 - The shipped prompt still lists "agreement" among the reactions it asks for. Removing it alone is untested. Read it on the trial posts with the next day's AI allowance before folding it in.
 - 26 October weekly read, then the opening-reach read once.
 
