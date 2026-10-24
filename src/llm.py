@@ -449,7 +449,8 @@ def _reads_as_reaction(line):
 # verdicts only: "Yeah, right" and "Bold move" ship. A one-word verdict counts
 # only at the tag's end ("True crime" ships), and a question is doubt, which
 # is a reaction ("Is that true?!", "Spot on?"). Plain agreement grades too
-# ("Well put", "You're right", "Amen"): on politics it takes a side (10-24).
+# ("Well put", "You're right", "Amen"): on politics it takes a side (10-24),
+# as does naming the answer right ("Plastic crack is right", a release check).
 _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
                       r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
                       r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
@@ -458,8 +459,8 @@ _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great
                       r"true that|exactly this|can confirm|correct answer|mic drop|hell ye(s|ah)|amen|"
                       r"truth bomb)\b|"
                       r"(true|exactly|facts|correct|accurate|absolutely|dead on|right on|so right|based|"
-                      r"100\s*(%|percent))\W*$|"
-                      r"^(totally\s+)?nailed\W*$)", re.I)   # "Got nailed" is a wince
+                      r"(is|are|'s|'re|damn|dead|quite) right|100\s*(%|percent))\W*$|"
+                      r"^(totally\s+)?nailed\W*$|^truth\W*$)", re.I)   # "Got nailed" is a wince
 
 
 def _grades(line):

@@ -421,7 +421,13 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       ("Facts, 100%", False), ("100 percent", False), ("Totally nailed", False),
                                       ("Hell yeah", False), ("Based", False), ("Truth bomb", False),
                                       ("100% chaos", True), ("100% relatable", True), ("Got nailed", True),
-                                      ("Ouch, nailed", True), ("Based on nothing", True), ("Based on what?", True)])
+                                      ("Ouch, nailed", True), ("Based on nothing", True), ("Based on what?", True),
+                                      # Release check, 10-24: naming the answer right agrees.
+                                      ("Plastic crack is right", False), ("That's right", False),
+                                      ("He’s right!", False), ("Damn right", False), ("Truth.", False),
+                                      ("That's not right!", True), ("Is he right?", True),
+                                      ("Right in the wallet", True), ("Ouch, right?!", True),
+                                      ("Truth hurts", True), ("Copyright drama", True)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
     assert llm._grades(line) is not ok      # the verdict check, not a cap, decides
