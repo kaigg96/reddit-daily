@@ -61,31 +61,35 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-24 (15:30) — The swear-word fix is live, and bet 1's sample branch is ready for the next render slot
+## 2026-10-24 (15:30) — The swear-word fix is live; bet 1's host now also drops tags that agree with an answer, and its sample waits only for tomorrow's render slot
 
-    Worked (% of the shift): reliability 45 · product 20 · gm 25 · security 10
+    Worked (% of the shift): reliability 30 · product 35 · gm 25 · security 10
 
-**Summary:** The fix that stops a swear word reaching a title, like Thursday's "Alright Fuckers", passed its sample render and now runs on every upload. Bet 1's sample branch is brought up to date and waits only for the next render slot, tomorrow morning.
+**Summary:** The fix that stops a swear word reaching a title, like Thursday's "Alright Fuckers", passed its sample render and now runs on every upload. Bet 1's host now also leaves out tags that simply agree with an answer ("Well put", "Amen"), which on politics would take a side; its sample waits only for tomorrow morning's render slot.
 
 ### Toward revenue
-- **Indirectly.** The swear-word fix protects the channel rather than growing it: a sworn title risks the advertiser-friendliness the Partner Program checks. Bet 1, which every route to revenue needs, is one render from your inbox; the next slot the shift rules allow opens about 07:30 tomorrow.
+- **Bet 1 is a little closer.** Every route to revenue needs it, and its last gate is you watching a sample whose tags react rather than grade. The filter now catches agreement as well as stock praise, so the next sample is less likely to be held back, or to repeat your 19 October feedback. The next render slot the shift rules allow opens about 07:30 tomorrow.
+- The swear-word fix protects the channel rather than growing it: a sworn title risks the advertiser-friendliness the Partner Program checks.
 
 ### Done
 - **Reliability (a fix, live):** the swear-word filter now catches a word next to a quote mark or inside a contraction, and an AI-written title, closing line or keyword with a swear word or emoji falls back to a safe one. It passed its sample render, four earlier reviews and a fresh check of how it meets today's code. It changes which posts and lines qualify, not the video, so no version change and no effect on the running tests.
-- **Product:** the same guard for bet 1's spoken vote and on-screen tags is now on the release branch, so it ships with bet 1. The sample branch (that plus the grading-tag filter) takes today's code cleanly, all tests passing.
+- **Product (a fix, on the release):** a check (the pre-set test was whether any political-agreement tag on record gets past the filter). The two or three on record ("Math checks out", "Ah, makes sense") were already caught. But that record is thin, and about 20 common ways of agreeing were not ("Well put", "You're right", "Amen", "Hell yes"), so those now drop too. None of the 55 tags on record from past checks and renders newly drops. A fresh review found two reactions it would have wrongly dropped ("100% chaos", "Got nailed"); both fixed.
+- **Product:** the release branch now carries both tag filters and the swear-word guard for the host's vote and tags. So your own render command on #77, tomorrow's automatic release check and the next sample all use them. The issue's description says so (edited, no email).
+- **General management:** nothing was ready. A fresh agent read the evidence and proposed eight ideas; two survived, and I added one. Two rankers, in opposite orders: the political-tags check came first and second; moving the filter onto the release branch second and third (both done). **Dropped:** draft answers for your Reddit registration (ranked first by one ranker, but the form's questions were never recorded, so the answers would be guesses, and it would be a fourth email on that issue in four days); restating bet 1's dose rule (accepted on 21 October); an early read of the capitals test (the report refuses it, 1 upload against 6); two other networks as sources (authors keep their rights, as with Mastodon); a related-video link (your Studio, and a new variable mid-test); affiliate links (not clickable on Shorts).
 - **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
-- Mostly a fix. AI use: one sample render (its own test allowance); no Polly.
+- Mostly fixes. AI use: one sample render (its own test allowance); no Polly, no other AI requests.
+- **Process:** I switched branches in the shared working copy while the idea generator was reading from it, the same trap the last shift noted. Work on side branches belongs in a separate copy while an agent reads.
 
 ### Blocked
 - **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
 
 ### Next
-- **The first shift after about 07:30 UTC:** render bet 1's sample branch and, if its tags react rather than grade, post it to #77. The 12-hour limit lifts at 02:40, but its tags spend one upload-model request, so the rule of waiting for the 07:00 reset and an hour clear of the 06:23 run applies until #65 lands.
-- The trial wording that drops "agreement" from the reactions it asks for: read it on about three trial posts with the upload model's allowance, after the 07:00 reset.
+- **The first shift after about 07:30 UTC:** render the release branch and, if its tags react rather than grade, post the sample to #77. The 12-hour limit lifts at about 02:40, but its tags also spend one upload-model request, so the rule of waiting for the 07:00 reset and an hour clear of a scheduled run applies until #65 lands. Read tomorrow's 08:17 release check first: it shows the filtered tags on a fixed post.
+- The trial wording that drops "agreement" from the reactions the prompt asks for: read it on about three trial posts with the upload model's allowance, after the 07:00 reset.
 - 26 October weekly read, then the opening-reach read once.
 
 ### Better?
-- **Than last shift:** Yes, slightly. A live defect seen once in 191 uploads is closed, and bet 1's sample no longer needs any preparation before its render.
+- **Than last shift:** Yes, slightly. A live defect seen once in 191 uploads is closed, and bet 1's tags have one more failure stopped in code before the render you will watch.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
