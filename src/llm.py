@@ -503,7 +503,9 @@ def _usable(line, kind):
     tag must not grade its answer."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
             and not _RUN_TOGETHER.search(line)
-            and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line)
+            # Listed whole, not per character: a flag or keycap is two code
+            # points, neither an emoji alone ("Wow 🇺🇸" passed; review, 10-24).
+            and not any(e["emoji"] not in _TEXT_SYMBOLS for e in emoji.emoji_list(line))
             and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
                      and not _reads_as_reaction(line))
             and not (kind == "reaction" and config.HOST_TEXT and config.HOST_TAGS
@@ -526,14 +528,18 @@ def _clean_commentary(data, n):
     if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
         return None
     reactions = [_clean_str(r) for r in raw_reactions]
-    if not (setup and verdict and all(reactions)):
+    if not (setup and verdict and all(reactions)) and not config.HOST_TEXT:
         return None
+    # Shown as text, an empty line drops alone, as a long one does: one blank
+    # tag cost every host line (whole-branch review, 10-24).
+    setup, verdict, reactions = setup or "", verdict or "", [r or "" for r in reactions]
     # Every line is published, so none may swear. The vote (the pinned comment,
     # and narrated) gets the title's guard; the tags a list that spares "Oh god".
     # Raw and cleaned both: the emphasis strip turns "f**k" into "fk".
     def tag_swore(raw, line):
-        return any(content._profane(t, content.TAG_CENSOR) for t in (raw, line))
-    vote_swore = _clean_published(data.get("cta")) is None
+        return any(content._profane(t, content.TAG_CENSOR) for t in (raw, line)
+                   if isinstance(t, str) and t.strip())
+    vote_swore = bool(verdict) and _clean_published(data.get("cta")) is None
     vote_ok = _usable(verdict, "cta") and not vote_swore
     setup_swore = tag_swore(data.get("setup"), setup)
     setup_ok = _usable(setup, "setup") and not setup_swore

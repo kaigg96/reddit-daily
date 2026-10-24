@@ -268,10 +268,22 @@ def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     assert run.host_lines_shown(segs) == 1     # setup, last answer and its line, the vote
 
 
-@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂"])
+@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂", "Wow 🇺🇸", "1️⃣ wow",
+                                  "", "   ", None])
 def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
+    """A flag or keycap is two code points, neither an emoji alone; and an
+    empty line drops alone, as a long one does (whole-branch review, 10-24)."""
     host = _text_metadata(monkeypatch, reactions=[junk, HOST["reactions"][1]])
     assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
+
+
+@pytest.mark.parametrize("line", [{"setup": ""}, {"cta": None}, {"cta": "  "}])
+def test_an_empty_setup_or_vote_drops_alone(monkeypatch, capsys, line):
+    host = _text_metadata(monkeypatch, **line)
+    assert host.reactions == HOST["reactions"]
+    want = ("", HOST["cta"]) if "setup" in line else (HOST["setup"], "")
+    assert (host.setup, host.verdict) == want
+    assert "a swear word" not in capsys.readouterr().out    # empty is not swearing
 
 
 def test_the_sample_setup_would_ship_as_a_tag(tag_host):
