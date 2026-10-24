@@ -187,6 +187,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `REUSE_NARRATION=1` on a dry run buys each line once; closes when it merges.
   Re-checked 10-21 on `46548ae` under 3.10: 656 tests pass and a `SAMPLE=1`
   render plays; `google-api-core` warns it will drop 3.10, so rebuild anyway.
+  **Off the critical path since 10-23:** branch samples speak in the free
+  stand-in voice on CI (`integration/preview`), so #77 no longer needs this
+  machine. Both fixes are on `integration/preview`; closes when `v8` merges.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
