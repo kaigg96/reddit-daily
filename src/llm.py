@@ -548,8 +548,13 @@ def _clean_commentary(data, n):
                 for i, (r, k, s) in enumerate(zip(reactions, ok, swore), 1)])
     bad = [f"{name} (a swear word or emoji)" if sw else f"{name} ({len(line.split())} words)"
            for name, line, fine, sw in named if not fine]
+    # And what it said, so a release check shows whether a filter dropped a
+    # reaction: four checks running only said "setup (2 words)" (10-24). A
+    # swear word stays out of the public log.
+    said = [f'{name} "{line[:80]}"' for name, line, fine, sw in named if not (fine or sw)]
     print("Commentary: past its length cap, a placeholder or emoji, a setup that"
-          " is not a reaction, or a tag that grades: " + ", ".join(bad))
+          " is not a reaction, or a tag that grades: " + ", ".join(bad)
+          + ("; as written: " + ", ".join(said) if said else ""))
     if not config.HOST_TEXT:
         return None
     setup = setup if setup_ok else ""
