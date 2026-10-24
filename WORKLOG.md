@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-24 (09:05) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
+## 2026-10-24 (08:50) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
 
     Worked (% of the shift): product 50 · data 20 · gm 15 · legal 5 · reliability 5 · security 5
 
@@ -78,7 +78,7 @@ and more useful than a confident guess.
 - **Legal (a finding, for the 5 November review):** a second round of ideas, aimed at the functions no recent shift has worked, found one. A data file in the project keeps our videos' titles and their Reddit answers, as read from YouTube, longer than the 30 days YouTube allows for anything but statistics. It is our own published text, so the risk is low. Removing it rewrites production data, which is your call, so it is recorded with a recommendation (keep the numbers, drop the text) rather than raised now. To stay within the code-health list's cap, one item there that no longer matters was closed.
 - **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.69 this month, forecast $0.86 of $3).
 - **Process:** the idea generator first read an out-of-date list of past drops, because the working copy was on a side branch, where that list is older. It noticed and read the live copy itself; a shift asking for ideas from a branch should point it there.
-- Mostly a fix, plus two reads. AI use: three requests on the upload model, 26 free Groq requests; no Polly, no render (the next render slot opens at 10:17).
+- Mostly a fix, plus two reads. AI use: three requests on the upload model, 26 free Groq requests; no Polly, no render (the next render slot opens at 10:17). Handed over about 15 minutes early: the second round's one survivor is recorded, and nothing else could finish in the time left without the AI allowance tomorrow's 05:00 upload needs, or the render slot.
 
 ### Blocked
 - **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
