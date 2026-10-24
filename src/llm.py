@@ -414,6 +414,18 @@ def _reads_as_reaction(line):
                                          or re.fullmatch(r"(ha|he)+h?", word)))
 
 
+# A reaction tag that grades the answer tells the viewer it is right: a side
+# on a politics thread, a verdict on any other (the owner's bar, PRD §4). The
+# upload model graded every answer of the first spoken sample ("Spot on",
+# "Direct hit", "Deep insight", 10-23), and told never to grade, still did on
+# 3 of 9 (10-24: "Ah, makes sense", "Sad but true", "Good point"). No wording
+# fixed it, so a grading tag is dropped, as a title setup is. It reads stock
+# verdicts only: "Yeah, right" and "Bold move" ship.
+_VERDICT = re.compile(r"\b(spot on|direct hit|deep insight|(good|fair|great|valid) point|"
+                      r"makes sense|true|checks out|nailed it|well said|said it|"
+                      r"exactly|facts|correct|accurate|agreed)\b", re.I)
+
+
 def _commentary_ask(n):
     """The host's instructions, for a voiced host or a text-only one."""
     ask = _COMMENTARY_ASK
@@ -440,12 +452,15 @@ def _within_cap(line, kind):
 def _usable(line, kind):
     """Within its cap, with a letter in it (a weak reply can echo the shape's
     "...") and no emoji, which the note's font draws as an empty box, nor
-    words run together; a setup tag must read as a reaction."""
+    words run together; a setup tag must read as a reaction, and a reaction
+    tag must not grade its answer."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
             and not _RUN_TOGETHER.search(line)
             and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line)
             and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
-                     and not _reads_as_reaction(line)))
+                     and not _reads_as_reaction(line))
+            and not (kind == "reaction" and config.HOST_TEXT and config.HOST_TAGS
+                     and _VERDICT.search(line)))
 
 
 # The emoji package counts these as emoji, but they are text marks the font draws.
@@ -475,8 +490,8 @@ def _clean_commentary(data, n):
            [("setup", setup, "setup"), ("vote", verdict, "cta")]
            + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]
            if not _usable(line, kind)]
-    print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
-          " is not a reaction: " + ", ".join(bad))
+    print("Commentary: past its length cap, a placeholder or emoji, a setup that"
+          " is not a reaction, or a tag that grades: " + ", ".join(bad))
     if not config.HOST_TEXT:
         return None
     setup = setup if _usable(setup, "setup") else ""

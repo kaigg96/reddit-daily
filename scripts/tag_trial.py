@@ -27,6 +27,7 @@ advice, where answers get graded rather than reacted to.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 
@@ -155,7 +156,9 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
             url, json=dict(json or {}, reasoning_effort="none"), **kw)
     # A trial reads the setup as written: the gate that drops one that is not
     # a reaction would blank it here. main prints the gate's call beside it.
+    # So for the reactions and the gate that drops a grading tag.
     llm._reads_as_reaction = lambda line: True
+    llm._VERDICT = re.compile(r"(?!)")
     llm.FALLBACK_MODEL = None
     config.GROQ_FALLBACK = False
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
@@ -189,7 +192,7 @@ def main(argv=None):
     if args.model == "groq" and not os.environ.get("GROQ_API_KEY"):
         raise SystemExit("--model groq needs GROQ_API_KEY; refusing before any request")
     from src import llm as gated
-    ships = gated._reads_as_reaction
+    ships, grades = gated._reads_as_reaction, gated._VERDICT.search
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
@@ -201,6 +204,7 @@ def main(argv=None):
                           "setup": h and h.setup,
                           "setup_ships": bool(h and h.setup and ships(h.setup)),
                           "reactions": h and h.reactions,
+                          "reactions_ship": h and [bool(r) and not grades(r) for r in h.reactions],
                           "vote": h and h.verdict}, ensure_ascii=False), flush=True)
 
 

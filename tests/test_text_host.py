@@ -354,6 +354,35 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
     assert llm._usable(line, "reaction")        # the reactions are not held to it
 
 
+# Reaction tags from the trials (PRD §4): the upload model's verdicts, and
+# reactions a check for stock verdicts must leave alone.
+@pytest.mark.parametrize("line, ok", [("Spot on", False), ("Direct hit", False),
+                                      ("Deep insight", False), ("Ah, makes sense", False),
+                                      ("Sad but true", False), ("Good point", False),
+                                      ("Math checks out", False), ("Finally said it", False),
+                                      ("Wait, what?", True), ("Oof, direct", True),
+                                      ("Good riddance", True), ("Too relatable", True),
+                                      ("Yikes, awkward", True), ("Bold move", True),
+                                      ("Charging to print?!", True), ("Yeah, right", True)])
+def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
+    assert llm._usable(line, "reaction") is ok
+
+
+def test_only_tags_are_held_to_the_verdict_rule(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert llm._usable("That makes sense, sadly.", "reaction")
+
+
+def test_a_grading_tag_drops_alone(tag_host, monkeypatch, capsys):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS,
+                                                 "reactions": ["Spot on", TAGS["reactions"][1]]}))
+    assert meta.commentary == (TAGS["setup"], ["", TAGS["reactions"][1]], HOST["cta"])
+    assert "a tag that grades: reaction 1 (2 words)" in capsys.readouterr().out
+
+
 def test_a_title_setup_drops_alone(tag_host, monkeypatch, capsys):
     import json
     from tests.test_commentary import _metadata

@@ -219,15 +219,15 @@ def check_metadata():
         else:
             # A line past its cap now drops alone (#15), so the upload keeps a
             # host; warn, so the verdict file still shows the prompt overran.
-            def shown(label, line, ships="the rest still ship"):
+            def shown(label, line, ships="the rest still ship", why="past its cap"):
                 note(f"- ✅ host {label}: {line}" if line
-                     else f"- ⚠️ host {label}: dropped, past its cap ({ships})")
+                     else f"- ⚠️ host {label}: dropped, {why} ({ships})")
             if host.setup:
                 shown("setup", host.setup)
             else:
                 note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
             for i, line in enumerate(host.reactions, 1):
-                shown(f"reaction {i}", line)
+                shown(f"reaction {i}", line, why="past its cap or grading its answer")
             if not host.verdict:
                 shown("vote", "", "the usual closing line ships")
         for line in dropped:
