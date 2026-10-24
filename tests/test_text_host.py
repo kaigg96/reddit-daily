@@ -416,7 +416,12 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       ("Bang on", False), ("Correct answer", False),
                                       ("Absolutely not!", True), ("Dead on arrival", True),
                                       ("Right on cue", True), ("So right-wing?!", True), ("Hard truth", True),
-                                      ("Too real", True), ("Oh yes, THIS", True), ("Hell no", True)])
+                                      ("Too real", True), ("Oh yes, THIS", True), ("Hell no", True),
+                                      # Review: a tag opening on "100%" reacts; "nailed" can wince.
+                                      ("Facts, 100%", False), ("100 percent", False), ("Totally nailed", False),
+                                      ("Hell yeah", False), ("Based", False), ("Truth bomb", False),
+                                      ("100% chaos", True), ("100% relatable", True), ("Got nailed", True),
+                                      ("Ouch, nailed", True), ("Based on nothing", True), ("Based on what?", True)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
     assert llm._grades(line) is not ok      # the verdict check, not a cap, decides

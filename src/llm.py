@@ -455,9 +455,11 @@ _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great
                       r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
                       r"(good|great|solid|sound|wise) (advice|call|words)|"
                       r"(well|perfectly|nicely) put|on point|bang on|(you'?re|you are) right|"
-                      r"true that|exactly this|can confirm|correct answer|mic drop|hell yes|amen)\b|"
-                      r"(true|exactly|facts|correct|accurate|absolutely|nailed|dead on|right on|so right)\W*$|"
-                      r"100\s*%)", re.I)
+                      r"true that|exactly this|can confirm|correct answer|mic drop|hell ye(s|ah)|amen|"
+                      r"truth bomb)\b|"
+                      r"(true|exactly|facts|correct|accurate|absolutely|dead on|right on|so right|based|"
+                      r"100\s*(%|percent))\W*$|"
+                      r"^(totally\s+)?nailed\W*$)", re.I)   # "Got nailed" is a wince
 
 
 def _grades(line):
