@@ -459,7 +459,8 @@ _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great
 def _grades(line):
     # Stretched words fold first, to two letters and to one, as in
     # _reads_as_reaction: "Truuue" is "true", "Goood point" is "good point".
-    line = line.replace("\u2019", "'")
+    # Groq writes "spot\u2011on" with a non-breaking hyphen (10-24).
+    line = re.sub("[\u2010\u2011\u2013]", "-", line.replace("\u2019", "'"))
     return "?" not in line and any(_VERDICT.search(re.sub(r"(.)\1{2,}", fold, line))
                                    for fold in (r"\1\1", r"\1"))
 
