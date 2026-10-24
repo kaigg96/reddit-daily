@@ -448,12 +448,16 @@ def _reads_as_reaction(line):
 # fixed it, so a grading tag is dropped, as a title setup is. It reads stock
 # verdicts only: "Yeah, right" and "Bold move" ship. A one-word verdict counts
 # only at the tag's end ("True crime" ships), and a question is doubt, which
-# is a reaction ("Is that true?!", "Spot on?").
+# is a reaction ("Is that true?!", "Spot on?"). Plain agreement grades too
+# ("Well put", "You're right", "Amen"): on politics it takes a side (10-24).
 _VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
                       r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
                       r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
-                      r"(good|great|solid|sound|wise) (advice|call|words))\b|"
-                      r"(true|exactly|facts|correct|accurate)\W*$)", re.I)
+                      r"(good|great|solid|sound|wise) (advice|call|words)|"
+                      r"(well|perfectly|nicely) put|on point|bang on|(you'?re|you are) right|"
+                      r"true that|exactly this|can confirm|correct answer|mic drop|hell yes|amen)\b|"
+                      r"(true|exactly|facts|correct|accurate|absolutely|nailed|dead on|right on|so right)\W*$|"
+                      r"100\s*%)", re.I)
 
 
 def _grades(line):

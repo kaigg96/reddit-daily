@@ -405,7 +405,18 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       ("Polite but pointless", True), ("Not fair!", True),
                                       ("Brutal truth", True), ("Validate this?!", True),
                                       ("Preacher energy", True), ("Agreeable, sure", True),
-                                      ("Goood point", False), ("Spot\u2011on", False), ("Ain’t that the truth", False)])
+                                      ("Goood point", False), ("Spot\u2011on", False), ("Ain’t that the truth", False),
+                                      # 10-24: plain agreement, which on politics takes a
+                                      # side; a phrase's other sense still ships.
+                                      ("Well put", False), ("On point", False), ("You're right", False),
+                                      ("Amen", False), ("Hell yes", False), ("100%", False),
+                                      ("True that", False), ("Exactly this", False), ("Can confirm", False),
+                                      ("Mic drop", False), ("Absolutely!", False), ("Nailed", False),
+                                      ("Dead on", False), ("Right on", False), ("So right", False),
+                                      ("Bang on", False), ("Correct answer", False),
+                                      ("Absolutely not!", True), ("Dead on arrival", True),
+                                      ("Right on cue", True), ("So right-wing?!", True), ("Hard truth", True),
+                                      ("Too real", True), ("Oh yes, THIS", True), ("Hell no", True)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
     assert llm._grades(line) is not ok      # the verdict check, not a cap, decides
