@@ -169,28 +169,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   shift's handover, in the workflow's check and the report alike. **Closes
   when** the step is live and ten more shifts pass, or a repeat is root-caused
   from its trace.
-- **The owner's machine cannot run bet 1's build, and only it can narrate a
-  sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
-  `src/llm.py` on `integration/preview` uses an f-string with nested quotes
-  (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there
-  (that f-string rewritten for 3.10 on `product/host-tags`, 2026-10-20).
-  That night's renders used a throwaway 3.12 venv. Its git (2.37) also fails
-  `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38;
-  skipped below 2.38 since 2026-10-20). It
-  matters because CI samples are silent (branch code never holds the Polly
-  keys) and the owner judges format changes with narration (#77): a narrated
-  sample is a local run. Also: there is no way to re-render from saved
-  narration, so each timing tweak costs a Polly run (CLAUDE.md §1 asks for
-  reuse). **Closes when** the venv is rebuilt on 3.12 (`/usr/local/bin/python3.12`
-  is installed) and a render can reuse the last run's narration. Both are
-  built on `product/host-tags` (2026-10-20): it imports on 3.10, and
-  `REUSE_NARRATION=1` on a dry run buys each line once; closes when it merges.
-  Re-checked 10-21 on `46548ae` under 3.10: 656 tests pass and a `SAMPLE=1`
-  render plays; `google-api-core` warns it will drop 3.10, so rebuild anyway.
-  **Off the critical path since 10-23:** branch samples speak in the free
-  stand-in voice on CI (`integration/preview`), so #77 no longer needs this
-  machine. Both fixes are on `integration/preview`; closes when `v8` merges.
-
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
