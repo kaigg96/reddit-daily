@@ -226,7 +226,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   its closing line would ship. Left: a repair records no `meta_failure`, so only stdout
   counts it; the prompt lists `comments[:3]` while the schema follows
   `COMMENTARY_ANSWERS` (harmless at 3). The screen's JSON is unchanged: 3
-  fallbacks in 180 uploads.
+  fallbacks in 180 uploads. **The verdict-tag filter (`_VERDICT`, 10-24)**
+  reads stock forms only; left by its third review: "Nobody's right" and
+  "Truth..." drop, "Oof, truth", "Ur right" and "Bulletproof" (a 10-22 render)
+  ship. Widen only on a tag seen in a release check or render.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
