@@ -477,3 +477,16 @@ a list nobody can read is the same as no list.
   ~2,300 past titles and answers carry one).
   Live video left as is (retitling would alter a row of #10 and #14).
   **Closes when** the branch merges.
+
+- **The repo keeps YouTube API text past YouTube's 30-day limit (found
+  2026-10-24, Legal).** `analysis/channel_videos.csv` (`scripts/analyze_channel.py`,
+  a one-off, last run 09-11) holds 1,309 uploads' titles, questions and
+  answers as read from the Data API, public in this repo and its history.
+  YouTube's developer policy III.E.4 lets a client keep non-statistics API
+  data 30 days, then refresh or delete it; statistics may stay. The text is
+  our own published videos', so the risk is low, but an API-terms breach puts
+  at risk the access every upload needs. `analysis/topics_cache.json` holds
+  ~1,000 question titles (from Reddit, not the API). Not fixed: dropping the
+  text columns rewrites production data (CLAUDE.md §4), and history is the
+  owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
+  the text columns at HEAD, leave history. **Closes when** decided there.
