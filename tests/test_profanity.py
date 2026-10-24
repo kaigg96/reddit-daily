@@ -69,9 +69,18 @@ from src import llm
     'Could YOUR Will Start with "Alright Fuckers"?',   # 2026-10-22, as shipped
     "Your Pets' Secret Drama? Tell Us! 🤫",             # 2026-09-01, as shipped
     "What the **f**k** is this?",                       # the emphasis strip would hide it
+    "TREASON: When Is a President Too Far? 🇺🇸",        # a flag is two code points
+    "Pick 1️⃣ or 2️⃣?",                                   # so is a keycap
 ])
 def test_an_ai_field_with_a_swear_word_or_emoji_falls_back(text):
     assert llm._clean_published(text) is None
+
+
+def test_a_reddit_answer_with_a_flag_counts_as_emoji_and_plain_marks_do_not():
+    from src import content
+    assert content._has_emoji("Delete social media 🇺🇸 stop spending")
+    for plain in ("Top 10 #1 pick :) <3", "Reddit™ and © marks", ""):
+        assert content._has_emoji(plain) is ("™" in plain), plain
 
 
 def test_a_clean_ai_field_passes_with_its_quotes_stripped():
