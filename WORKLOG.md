@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-24 (09:05) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
+
+    Worked (% of the shift): product 55 · data 20 · gm 15 · reliability 5 · security 5
+
+**Summary:** The weakness that held bet 1's sample back from you, tags that grade the answers ("Spot on", "Good point"), is not confined to advice posts, and rewording the prompt made it worse. A filter now drops the stock kind of grading tag before it reaches the screen; it waits for one sample render, and catches about 7 of every 12.
+
+### Toward revenue
+- **Bet 1 is one render closer.** Every route to revenue needs bet 1, and its last gate is you watching a sample whose tags react rather than grade. Last night's sample was held back for grading. The filter stops the stock verdicts, so the next sample should repeat your 19 October feedback far less, though not never.
+
+### Done
+- **Product (a bet, read and not kept):** last night's reworded prompt on three more trial posts, on the model uploads use, one request each. About 4 of 9 tags reacted, against about 21 of 27 for the shipped wording. Three still graded the answer ("Ah, makes sense" on a politics answer, "Sad but true", "Good point"). So grading is a general habit, and naming it in the prompt does not stop it. Not read on the other six posts: even a perfect score there would leave it only one tag ahead of what ships.
+- **Product (a fix, on a branch beside the release):** a check that drops a host tag that grades its answer, leaving that answer untagged. It was built from the 9 verdicts on record. It drops none of the 27 reactions or 15 labels on record. On 62 tags it had not seen, scored blind by a fresh agent, it dropped 7, all verdicts. It let 5 of 12 verdicts through, in new wordings ("Actually helpful", "Too honest"). It also drops "Ouch, true", half a wince. A question counts as doubt, a reaction, so it ships ("Is that true?!"). A fresh review found 8 kinds of reaction it wrongly dropped and a dozen verdicts it missed. A second review found two more. All are fixed.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas and four survived. Two rankers, in opposite orders, put the same two on top: the filter (done) and whether the free AI could judge tags by meaning, catching what a word list misses. **Dropped:** a sample of the "our own questions" show (cannot be watched until a render, and it waits behind bet 1's); another prompt rewording (it would spend today's last safe AI requests, and the last rewording failed).
+- **Data (a research question, answered no):** can the free AI judge tags? The bar was set before reading: agree with the blind scores on 90% of tags and pass no verdict. It agreed on 36 of 62, and called 7 of 12 verdicts reactions, including "Sad but true" and "Direct hit", which the word check catches. The second free model's answer could not be lined up with the tags. So the word check stays, and nothing replaces it.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.69 this month, forecast $0.86 of $3).
+- Mostly a fix, plus one read. AI use: three requests on the upload model, 26 free Groq requests; no Polly, no render (the next render slot opens at 10:17).
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
+
+### Next
+- **After 10:17 UTC:** as planned, render the swear-word filter branch and, on a pass naming its commit, merge it into the live branch (no version bump).
+- **The render slot after:** fold the tag filter and the vote-and-tags swear guard into the release branch, render it, and post the sample to #77 if its tags react.
+- The shipped prompt still lists "agreement" among the reactions it asks for. Removing it alone is untested. Read it on the trial posts with the next day's AI allowance before folding it in.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Yes, slightly. Most of the defect that held the sample back is now stopped in code rather than left to the prompt, tested on every tag on record and 62 it had not seen.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-23 (22:55) — Bet 1's first spoken sample plays, but its host tags praised the answers instead of reacting, so I held it back from you; a reworded prompt shows promise
 
     Worked (% of the shift): product 40 · reliability 25 · data 15 · gm 15 · security 5
@@ -93,38 +124,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly. Samples speak without you, and a tag weakness reaching about one upload in eight was found before shipping, not after.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-22 (16:50) — A swear word reached this morning's title; the filter's gap is fixed and waits for one render. Reddit's own page: register by 12 January; free access still ends in March
-
-    Worked (% of the shift): reliability 40 · legal 25 · strategy 15 · gm 15 · security 5
-
-**Summary:** This morning's upload went out titled with a swear word, because our word filter misses words inside quote marks. The fix is built and reviewed, and goes live after one sample render. Reddit's own registration page shows that registering is not a new request, so 12 January is the real deadline. Free access still ends in March whatever we do, which makes the 5 November source choice the real answer.
-
-### Toward revenue
-- **Nothing directly.** The fix protects the channel rather than growing it. The three reads sharpen the 5 November choice of a source after Reddit, the company's one fatal, dated risk.
-
-### Done
-- **Reliability (a fix):** this morning's video went out as "Could YOUR Will Start with "Alright Fuckers"?". Our word filter misses a swear word touching a quote mark or Reddit's bold and italic marks, and the AI title then quoted the post. It was 1 of 191 uploads. The filter on answers shares the gap, and so do contractions ("shit's"). Nothing checked the AI's own words either: an emoji title shipped on 1 September. The fix catches all of these: an AI title with a swear word or emoji now falls back to the screened question, and a closing line to our standard one. It leaves "he'll" and "who're" alone. Fresh reviews found three misses and two over-catches; a fourth found nothing more. All are fixed but one, which lives in bet 1's unreleased code and is recorded for when the two meet. On 959 old questions it flags nothing new. It changes which posts and AI lines qualify, not the video. **I recommend leaving the live video as it is:** retitling it would alter one row of two running title tests, and we earn no ad money it could lose. That is yours to overrule.
-- **Legal (Reddit):** Reddit's own registration page, read first-hand from an archive copy. It is for "existing apps", so 31 October (the end of *new* requests) does not apply to us. Uploads stop from 12 January if we have not registered. It needs the login of the account that owns our app and a personal Reddit account. In Reddit's words, "remaining public API access will end in March 2027", registered or not. #82 now carries the link and these steps.
-- **Legal (Stack Exchange):** its licence fits a Short, on conditions: credit in the description, and the upload left on YouTube's standard licence setting. The cost: anyone could re-upload those videos, even for money, and we could not claim them.
-- **Strategy:** 16 Stack Exchange sites, read for free. Not one recent question has three answers short enough to use as written (30 words or fewer). So every such video needs AI shortening, which is what made yesterday's sample read as dry advice.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas; five survived its filter. Two rankers, in opposite orders, put the same three on top: the filter, Reddit's page and the licence, all done, plus the fourth (the survey). A second round found the unchecked AI words, done above. **Dropped:** a sample of the "our own questions" show (not finishable in time, and its render queues behind three others). Also closed #74, as you said on #77.
-- **Reliability (tonight's render):** the stand-in voice branch merges cleanly, and all its tests pass on its own and with live code.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.65 this month, forecast $0.85 of $3).
-- Mostly fixing, plus reads. AI use: no Gemini, Polly or Groq; 27 free Stack Exchange requests. Handed over about 15 minutes early: the second round's last idea, titles a stray "<" would make YouTube refuse, has never occurred in 2,300 past texts, so it is recorded rather than built.
-- **Process:** one render per 12 hours now queues a live fix behind a sample. Tonight's slot is bet 1's, so the fix waits about a day.
-
-### Blocked
-- **For you, in order:** #82 (register; the exact page is on the issue; by 12 January, sooner is safer); #77 (tonight: watch the sample); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
-
-### Next
-- **Tonight, after 20:56 UTC:** as planned, render the stand-in branch and post it to #77.
-- **The slot after:** render the filter branch; on a pass naming its commit, merge it into the live branch (no version bump). Then the Stack Exchange sample.
-- The 28 October re-raise of #82 can wait: re-raise in early December if it is still open.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Slightly. A live gap in what we publish is closed, pending one render, and #82's step is now exact.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. The source decision has firmer facts.
 - **Than ~100 shifts ago:** Too early to say.
