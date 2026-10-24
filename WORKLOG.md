@@ -61,6 +61,34 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-24 (15:30) — The swear-word fix is live, and bet 1's sample branch is ready for the next render slot
+
+    Worked (% of the shift): reliability 45 · product 20 · gm 25 · security 10
+
+**Summary:** The fix that stops a swear word reaching a title, like Thursday's "Alright Fuckers", passed its sample render and now runs on every upload. Bet 1's sample branch is brought up to date and waits only for the next render slot, tomorrow morning.
+
+### Toward revenue
+- **Indirectly.** The swear-word fix protects the channel rather than growing it: a sworn title risks the advertiser-friendliness the Partner Program checks. Bet 1, which every route to revenue needs, is one render from your inbox; the next slot the shift rules allow opens about 07:30 tomorrow.
+
+### Done
+- **Reliability (a fix, live):** the swear-word filter now catches a word next to a quote mark or inside a contraction, and an AI-written title, closing line or keyword with a swear word or emoji falls back to a safe one. It passed its sample render, four earlier reviews and a fresh check of how it meets today's code. It changes which posts and lines qualify, not the video, so no version change and no effect on the running tests.
+- **Product:** the same guard for bet 1's spoken vote and on-screen tags is now on the release branch, so it ships with bet 1. The sample branch (that plus the grading-tag filter) takes today's code cleanly, all tests passing.
+- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
+- Mostly a fix. AI use: one sample render (its own test allowance); no Polly.
+
+### Blocked
+- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
+
+### Next
+- **The first shift after about 07:30 UTC:** render bet 1's sample branch and, if its tags react rather than grade, post it to #77. The 12-hour limit lifts at 02:40, but its tags spend one upload-model request, so the rule of waiting for the 07:00 reset and an hour clear of the 06:23 run applies until #65 lands.
+- The trial wording that drops "agreement" from the reactions it asks for: read it on about three trial posts with the upload model's allowance, after the 07:00 reset.
+- 26 October weekly read, then the opening-reach read once.
+
+### Better?
+- **Than last shift:** Yes, slightly. A live defect seen once in 191 uploads is closed, and bet 1's sample no longer needs any preparation before its render.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-24 (08:50) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
 
     Worked (% of the shift): product 50 · data 20 · gm 15 · legal 5 · reliability 5 · security 5
@@ -91,39 +119,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Yes, slightly. More than half of the defect that held the sample back is now stopped in code rather than left to the prompt, tested on every tag on record and 62 it had not seen.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-23 (22:55) — Bet 1's first spoken sample plays, but its host tags praised the answers instead of reacting, so I held it back from you; a reworded prompt shows promise
-
-    Worked (% of the shift): product 40 · reliability 25 · data 15 · gm 15 · security 5
-
-**Summary:** Sample videos now speak on the build machine, and tonight's played end to end. But on tonight's post the host's three tags praised the answers ("Spot on", "Deep insight") instead of reacting to them, the weakness you flagged on 19 October. So I did not ask you to watch it. A reworded prompt fixed that post on a first try, and needs a wider check before you see a new sample.
-
-### Toward revenue
-- **Bet 1 is closer, not shipped.** Every route to revenue needs bet 1, and its last gate is you watching a narrated sample. Tonight's sample showed a gap the trials had missed. On personal advice questions ("Why does my friend act like this?"), about one upload in eight, the host grades the answers. Showing you that would have cost you a viewing to repeat your own feedback.
-
-### Done
-- **Product (a bet):** the free stand-in voice rendered on the build machine. It passed every check and is now on the release branch, so future samples speak. Your own render command is unchanged by it. The tags were "Direct hit", "Spot on" and "Deep insight", all verdicts. The first answer also only made sense with the post's body, which viewers never see. None of the nine trial posts was a personal advice question; two now are. If you want to see it anyway, the sample stays on tonight's render page for 14 days (https://github.com/kaigg96/reddit-daily/actions/runs/40032165271). It is not an ask.
-- **Product (the fix, a bet):** the reworded prompt drops "agreement" from the reactions it invites and names grading as a verdict. On the upload model, one request per post: tonight's post went from 0 of 3 reactions to 2 of 3 ("Wait, what?", "Oof, direct"). A second advice post scored 2 of 3 either way. A direction, not a rate; it stays out of the release until it holds on the other nine posts.
-- **Reliability (a fix, built on bet 1):** the swear-word filter now also covers the host's vote and its on-screen tags. They spare "Oh god", "Hell no" and "OMG" but refuse "Holy shit". This was the gap a review found yesterday where the filter fix meets bet 1. Reviewed; it joins the release after the filter's own render.
-- **Data (a research question):** is the flat 12 seconds hiding gains at the opening? Our watch-time figure leaves out most viewers who swipe away early, so I added seconds watched per play start, swipe-aways included, and fixed the rule before reading. Across all uploads it rose from 3.7 to 5.3 seconds. Among longer videos it was flat, and the rule needed both, so **it is not a finding**: the rise may come from the mix of lengths. Reviewed and merged as a diagnostic. It never decides a revert.
-- **Data:** bet 1's revert check measures total watch time in a way that runs about 2.5× YouTube's own minutes. Recounted from minutes, no past keep-or-revert decision changes, so no change is proposed.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas and six survived. Two rankers, in opposite orders, put the same three on top: the watch-time read and the revert check (done above), then the swear-word gap (done). **Dropped:** whether any Shorts money comes before the Partner Program (the plan already answers it); amending the rule for staying on Reddit (your #60 call covers it); a dependency audit (run: Pillow's known flaws grew, still unreachable as we never open outside images).
-- **General management (second round):** the three running tests were checked against their own sizes, and none is due: the title-style test has 13 and 5 uploads of the 15 and 8 it needs, the subreddit test 7 and 9 of 15 each, the capitals test almost none. No uploads are newly buried. Handed over about 25 minutes early: nothing else was finishable without the AI allowance, which the 05:00 upload needs, or the next render slot.
-- **Process:** three scheduled shifts were skipped from last night to this afternoon because the week's shift allowance ran out a day before Friday's reset. The guard worked as designed, but it is why last night's planned render waited a day.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.68 this month, forecast $0.98 of $3).
-- Mostly bets, with one fix. AI use: one sample render (one upload-model request), three upload-model requests for the tag trial, four free Groq requests (the reworded prompt does not help the backup AI); no Polly. #77's description of the release branch is corrected, without an email.
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
-
-### Next
-- **After about 10:17 UTC tomorrow:** render the swear-word filter branch; on a pass naming its commit, merge it into the live branch (no version bump). Then fold the vote-and-tags guard into the release branch.
-- **The tag check:** the reworded prompt on the other nine trial posts, upload model. The daily release check and both uploads share its allowance, so about three requests a day fit safely; it spans a few days. If it reacts at least as often as before (14 of 18, 21 October), fold it into the release, render, and post that sample to #77.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Slightly. Samples speak without you, and a tag weakness reaching about one upload in eight was found before shipping, not after.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
