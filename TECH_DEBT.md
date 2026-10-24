@@ -169,25 +169,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   shift's handover, in the workflow's check and the report alike. **Closes
   when** the step is live and ten more shifts pass, or a repeat is root-caused
   from its trace.
-- **The owner's machine cannot run bet 1's build, and only it can narrate a
-  sample (2026-10-19).** Its `venv` is Python 3.10; CI runs 3.12, and
-  `src/llm.py` on `integration/preview` uses an f-string with nested quotes
-  (3.12+), so `DRY_RUN=1 venv/bin/python -m src.run` fails to import there
-  (that f-string rewritten for 3.10 on `product/host-tags`, 2026-10-20).
-  That night's renders used a throwaway 3.12 venv. Its git (2.37) also fails
-  `test_check_docs`'s two merge-tree tests (`--write-tree` needs 2.38;
-  skipped below 2.38 since 2026-10-20). It
-  matters because CI samples are silent (branch code never holds the Polly
-  keys) and the owner judges format changes with narration (#77): a narrated
-  sample is a local run. Also: there is no way to re-render from saved
-  narration, so each timing tweak costs a Polly run (CLAUDE.md §1 asks for
-  reuse). **Closes when** the venv is rebuilt on 3.12 (`/usr/local/bin/python3.12`
-  is installed) and a render can reuse the last run's narration. Both are
-  built on `product/host-tags` (2026-10-20): it imports on 3.10, and
-  `REUSE_NARRATION=1` on a dry run buys each line once; closes when it merges.
-  Re-checked 10-21 on `46548ae` under 3.10: 656 tests pass and a `SAMPLE=1`
-  render plays; `google-api-core` warns it will drop 3.10, so rebuild anyway.
-
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
@@ -390,7 +371,8 @@ a list nobody can read is the same as no list.
 
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
-  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+).
+  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 64
+  rows on 10-23, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
@@ -442,3 +424,47 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
+- **A swear word reached a live title (2026-10-22 05:06, `IjN6hj2etcs`).**
+  better-profanity counts a straight quote or `*` as part of a word, so
+  "'alright fuckers'" passed the post-title filter, and the AI title quoted
+  it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
+  ("shit's"). Nothing screened the AI's own output either: an emoji title
+  shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
+  (edge marks spaced out, each contracted word checked alone; four reviews,
+  the last clean at `fae20a8`; no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
+  title, CTA or keyword with a swear word or emoji falls back (refuses exactly
+  those two of 191 shipped titles). It changes which posts and AI lines
+  qualify, not the video, so no version bump; it waits only for a sample
+  render, in the slot after #77's. Host lines keep `_clean_str` (the list
+  holds "god", "hell", "damn": "Oh god" is a reaction). **When this meets bet
+  1:** there the closing line is the host's verdict, which `_clean_commentary`
+  builds with `_clean_str` from the same "cta" field, so the guard misses it
+  (third review: a swearing vote still ships). Built 10-23 on
+  `reliability/profanity-on-v8` (the filter stacked on the release, the vote
+  through `_clean_published`, a refused vote blanked alone; reviewed): it joins
+  `integration/preview` after the filter's own render passes. The tags now
+  refuse a swear word too, on the list less god/hell/damn/omg (reviewed;
+  "Holy crap" drops as a tag). Left from those reviews: stretched spellings
+  ("Fuuuck", "sh!t") pass every list, titles included, as the library does
+  not fold repeats (folding would newly flag 0 of 1,417 logged titles and
+  lines, so not built); a swearing vote in voiced mode (dormant) is untested.
+  Left:
+  the library already reads a curly "he’ll" as "hell" (fails safe, rare);
+  YouTube's API refuses "<" and ">" in a title or description and nothing
+  strips them, which would fail the upload and retry the same post (0 of
+  ~2,300 past titles and answers carry one).
+  Live video left as is (retitling would alter a row of #10 and #14).
+  **Closes when** the branch merges.
+
+- **The repo keeps YouTube API text past YouTube's 30-day limit (found
+  2026-10-24, Legal).** `analysis/channel_videos.csv` (`scripts/analyze_channel.py`,
+  a one-off, last run 09-11) holds 1,309 uploads' titles, questions and
+  answers as read from the Data API, public in this repo and its history.
+  YouTube's developer policy III.E.4 lets a client keep non-statistics API
+  data 30 days, then refresh or delete it; statistics may stay. The text is
+  our own published videos', so the risk is low, but an API-terms breach puts
+  at risk the access every upload needs. `analysis/topics_cache.json` holds
+  ~1,000 question titles (from Reddit, not the API). Not fixed: dropping the
+  text columns rewrites production data (CLAUDE.md §4), and history is the
+  owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
+  the text columns at HEAD, leave history. **Closes when** decided there.

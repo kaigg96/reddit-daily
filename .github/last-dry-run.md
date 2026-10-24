@@ -7,32 +7,32 @@ a PASS that names the branch's current commit.
 ## Last render
 
 - **Branch:** `product/stand-in-voice`
-- **Commit:** `bc97bf2`
-- **When:** 2026-10-22T08:56:07Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 18.4 s, audio, no dead air
+- **Commit:** `9cd1022`
+- **When:** 2026-10-23T22:16:54Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 29.9 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/39751048212)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/40032165271)
 
 What it picked:
 
 ```
-Selected post: Can I legally start my will with 'alright fuckers'?
-Slate topics (rank order): humor-absurd|relationships-dating|life-advice|health-body|life-advice|humor-absurd
-Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words), vote (25 words)
+Selected post: Why does my obese friend act like this?
+Slate topics (rank order): health-body|nostalgia|politics-news|politics-news|other|other
+Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words)
 Commentary: dropped only the line(s) named above
-Title style B, caps arm 1: Can YOU legally start your will with an insult?
+Title style C, caps arm 1: 3 Answers That REALLY Nail It for Your Obese Friend
 Commentary setup: (dropped)
-Commentary reaction 1: Doubtful
-Commentary reaction 2: Extreme
-Commentary reaction 3: Bulletproof
-CTA: Like, subscribe, and comment your answer below!
-Commentary: our own words are 0.098 of the narration, 3 host line(s) shown
-Assembled: 18.4s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/WinterIsOnReddit: Can I legally start my will with 'alright fuckers'?
+Commentary reaction 1: Direct hit
+Commentary reaction 2: Spot on
+Commentary reaction 3: Deep insight
+CTA: I'm raising my hand for 'She's projecting her insecurities onto you.' It explains SO much. Which one gets YOUR vote?
+Commentary: our own words are 0.352 of the narration, 4 host line(s) shown
+Assembled: 29.9s, bg=pexels_15168364.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/OkMedia1290: Why does my obese friend act like this?
 ```
 
 ## Last request
 
 - **Branch:** `product/stand-in-voice`
-- **When:** 2026-10-22T08:56:07Z
+- **When:** 2026-10-23T22:16:54Z
 - **Outcome:** rendered -- see above

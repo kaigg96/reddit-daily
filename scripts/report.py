@@ -239,6 +239,19 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
         print(vote)
 
 
+def _per_start_rows(path=None):
+    """`_snapshot_metric_rows` in seconds watched per play start: estimated
+    minutes x 60 / views, from the same snapshot row (`Video.watch_per_start`).
+    A row with no views is left out, as zero-view uploads are counted apart.
+    Minutes come whole (rounded down, it seems), so a low-view upload reads
+    low by arithmetic alone: ~30s / views. `--min-views` on a comparison."""
+    views = {(r["video_id"], r["snapshot"]): r["value"]
+             for r in _snapshot_metric_rows("views", path)}
+    return [dict(r, value=r["value"] * 60 / views[(r["video_id"], r["snapshot"])])
+            for r in _snapshot_metric_rows("est_minutes_watched", path)
+            if views.get((r["video_id"], r["snapshot"]))]
+
+
 def _fine_watch_rows(path=None, log_rows=None):
     """`_snapshot_metric_rows` in fractional watch-seconds: percentage viewed x
     the upload's logged length (`Video.watch_seconds_fine`). An upload with no
@@ -456,19 +469,28 @@ def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
-    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE):
-        print(f"--trajectory reads watch-seconds, views or engaged_views, not {args.metric}")
+    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START):
+        print(f"--trajectory reads watch-seconds (whole, fine or per play start), views or "
+              f"engaged_views, not {args.metric}")
         return
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
+            else _per_start_rows() if args.metric == Metric.WATCH_PER_START
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
-    series = insights.trajectory(rows, at_age=args.at_age or 7)
+    # Minutes come whole, so an upload under ~30 views reads 0 per play start:
+    # a reading (its zero-view rows are already out), kept so the weakest
+    # uploads do not drop from their week's median (review, 10-23).
+    series = insights.trajectory(rows, at_age=args.at_age or 7,
+                                 keep_zero=args.metric == Metric.WATCH_PER_START)
     if not series:
         print("not enough comparable history yet")
         return
     fine = (" (percentage viewed x length, to a fraction; logged uploads only; a diagnostic:"
             " pre-committed rules read whole seconds)" if args.metric == Metric.WATCH_FINE else "")
-    print(f"Median watch-seconds{fine}, every upload read at ~{args.at_age or 7} days old\n")
+    name = ("seconds watched per play start (estimated minutes x 60 / views, swipe-aways"
+            " included; a diagnostic, never a trigger)"
+            if args.metric == Metric.WATCH_PER_START else f"watch-seconds{fine}")
+    print(f"Median {name}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
         print(f"  {period:10} {n:>4} {med:>7.1f}s")
@@ -651,7 +673,8 @@ def main():
     p.add_argument("--metric", default=Metric.WATCH,
                    choices=[Metric.WATCH, Metric.VIEWS, Metric.PCT, Metric.LIKES, Metric.COMMENTS,
                             Metric.TOTAL, Metric.ENGAGED, Metric.ENGAGED_SHARE,
-                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE, *Metric.RETENTION])
+                            Metric.ENGAGED_VIEWS, Metric.WATCH_FINE, Metric.WATCH_PER_START,
+                            Metric.WATCH_TOTAL, *Metric.RETENTION])
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
@@ -672,7 +695,7 @@ def main():
         sys.exit("--min-views applies to --compare only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
                                                   Metric.ENGAGED_SHARE, Metric.WATCH_FINE,
-                                                  *Metric.RETENTION):
+                                                  Metric.WATCH_PER_START, *Metric.RETENTION):
         # Per-play ratios only. A count (views, likes, total watch time) rises
         # with views, so leaving out the uploads with few would hide the very
         # effect it measures, such as a change that gets fewer uploads seen.

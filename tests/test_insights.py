@@ -2332,6 +2332,39 @@ def test_fine_watch_trajectory_rows_scale_by_logged_length(tmp_path):
     assert [(r["video_id"], r["value"]) for r in rows] == [("a", 10.5)]
 
 
+def test_per_start_trajectory_rows_divide_minutes_by_the_same_rows_views(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    snap = tmp_path / "snap.csv"
+    snap.write_text("snapshot_date,video_id,published_at,views,est_minutes_watched\n"
+                    "2026-10-12,a,2026-10-05T06:00:00Z,120,10\n"
+                    "2026-10-19,a,2026-10-05T06:00:00Z,240,12\n"
+                    "2026-10-12,b,2026-10-05T18:00:00Z,0,0\n")
+    rows = report._per_start_rows(snap)
+    assert sorted((r["video_id"], str(r["snapshot"].date()), r["value"]) for r in rows) == [
+        ("a", "2026-10-12", 5.0), ("a", "2026-10-19", 3.0)]
+
+
+def test_a_trajectory_can_keep_zero_readings():
+    pub = datetime.datetime(2026, 10, 5, tzinfo=datetime.timezone.utc)
+    rows = [{"video_id": str(i), "published": pub, "snapshot": pub + datetime.timedelta(days=7),
+             "value": v} for i, v in enumerate([0, 0, 0, 4, 5, 6, 7, 8])]
+    assert insights.trajectory(rows)[0][1:] == (5, 6)
+    assert insights.trajectory(rows, keep_zero=True)[0][1:] == (8, 4.5)
+
+
+def test_watch_per_start_counts_the_swipe_aways_watch_seconds_leaves_out():
+    v = insights.Video(video_id="x", published=None, views=100,
+                       watch_seconds=12, est_minutes=8)
+    assert v.watch_per_start == 4.8 and v.get(insights.Metric.WATCH_PER_START) == 4.8
+    assert v.get(insights.Metric.WATCH_TOTAL) == 480 and v.total_watch_s == 1200
+    assert insights.Video(video_id="y", published=None).watch_per_start == 0.0
+
+
 def _vote_read(release, before, n=None):
     from types import SimpleNamespace
     head = SimpleNamespace(a=SimpleNamespace(n=len(release) if n is None else n,
