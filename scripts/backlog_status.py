@@ -143,18 +143,16 @@ def main(argv=None):
 
 
 _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
-_DROPPED = re.compile(r"^- \*\*[^*]*\bdropped\b", re.I)
-# Since 10-20 a shift lists its drops inside its General management bullet
-# ("… two survived. **Dropped:** …"), which the opening match never saw, so the
-# generator was shown nothing newer than 10-20 (found 10-24).
-_DROPPED_INSIDE = re.compile(r"\*\*[^*]*\bdropped\b[^*]*\*\*", re.I)
+# A short bold label ("**Dropped:**", "**Ranked and dropped**"), anywhere in a
+# bullet: since 10-20 a shift lists its drops inside its General management
+# bullet, and a match only at the opening showed the generator nothing newer
+# (found 10-24). Short, so a bold headline that says "dropped" is not one.
+_DROPPED = re.compile(r"(?<!\S)\*\*(?:\w+\s+){0,3}dropped(?:\s+\w+){0,2}:?\*\*", re.I)
 
 
 def _dropped_part(bullet):
     """The dropped list a bullet holds, from its label on, or None."""
-    if _DROPPED.match(bullet):
-        return bullet[2:].replace("**", "").strip()
-    m = _DROPPED_INSIDE.search(bullet)
+    m = _DROPPED.search(bullet)
     return bullet[m.start():].replace("**", "").strip() if m else None
 
 
@@ -203,7 +201,7 @@ def done_in(text):
         elif sec:
             section, inside = sec.group(1), False
         elif (heading and section in _DONE_SECTIONS and line.startswith("- ")
-              and not _DROPPED.match(line)):
+              and not _DROPPED.match(line, 2)):          # one that opens on its label
             bullets.append(line[2:].replace("**", "").strip())
             inside = True
         elif inside and line.startswith("  ") and line.strip():

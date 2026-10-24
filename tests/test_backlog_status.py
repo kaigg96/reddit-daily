@@ -169,11 +169,17 @@ def test_drops_listed_inside_a_bullet_are_read_from_their_label_on():
     text = ("## 2026-10-24 (15:30) — X\n\n### Done\n"
             "- **General management:** nothing was ready. Two survived. **Dropped:** draft\n"
             "  answers (the form's questions were never recorded); affiliate links.\n"
-            "- **Product:** the filter dropped nothing new.\n"
+            "- **Product:** the filter dropped nothing new. **Also:** x.\n"
+            "- **The vote no longer gets dropped for running long.** A fix.\n"
+            "- **Dropped after ranking** (eight): likes.\n"
             "- **Data:** read it. **Considered and dropped:** a subscriber rate.\n")
     assert b.dropped_in(text) == [("2026-10-24 (15:30) — X", [
         "Dropped: draft answers (the form's questions were never recorded); affiliate links.",
+        "Dropped after ranking (eight): likes.",
         "Considered and dropped: a subscriber rate."])]
+    done = b.done_in(text)[0][1]       # a headline saying "dropped" is done work
+    assert any(d.startswith("The vote no longer") for d in done)
+    assert not any(d.startswith("Dropped after") for d in done)
 
 
 def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
