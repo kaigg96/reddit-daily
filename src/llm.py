@@ -469,8 +469,8 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     # quote) ships the fallback, so it must not claim a style.
     cleaned = sanitize_title(generated, "", max_len)
     ok = bool(cleaned)
-    if ok and caps is False:
-        cleaned = drop_emphasis_caps(cleaned, source)
+    if ok and caps is not None:
+        cleaned = drop_emphasis_caps(cleaned, source, spare=1 if caps else 0)
     return TitleResult(
         title=sentence_case(cleaned) if ok else sanitize_title(None, fallback, max_len),
         style=style if ok else "",
@@ -481,15 +481,17 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
 _CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:['’][A-Za-z]+)?\b")
 
 
-def drop_emphasis_caps(title, source=""):
-    """Hold PRD §0 #14's no-capitals arm to its word; the prompt alone leaked.
+def drop_emphasis_caps(title, source="", spare=0):
+    """Hold PRD §0 #14's arms to their word; the prompt alone leaked.
 
-    1 of the arm's 9 titles from 10-10 to 10-16 shipped a word in capitals
-    ("What's YOUR unforgetable deathbed confession?"): the other arm's
+    1 of the no-capitals arm's 9 titles from 10-10 to 10-16 shipped a word in
+    capitals ("What's YOUR unforgetable deathbed confession?"): the other arm's
     treatment, which shrinks the lead the test has to show. A word in capitals
     stays when it is a known acronym or the Reddit text writes it in capitals
     ("ICU nurses"); any other takes the case of the words around it. Emphasis
     copied from the Reddit text ("I was SO angry") passes as written there.
+    The one-word arm keeps its first (`spare=1`): on 10-24 it shipped "Which
+    Halloween costume will YOU see the MOST?", 1 of its 11 titles since 10-10.
     """
     keep = config.TITLE_ACRONYMS | set(re.findall(r"\b([A-Z]{2,})s?\b", source))
     # Title Case when three in four words after the first are capitalised; a
@@ -497,10 +499,14 @@ def drop_emphasis_caps(title, source=""):
     words = [w for w in re.findall(r"[A-Za-z][\w'’]*", title)
              if not _CAPS_WORD.fullmatch(w)][1:]
     titled = bool(words) and sum(w[0].isupper() for w in words) * 4 >= len(words) * 3
+    spared = []
 
     def recase(m):
         word = m.group(0)
         if re.split("['’]", word)[0] in keep:
+            return word
+        if len(spared) < spare:
+            spared.append(word)
             return word
         starts = re.search(r"(^[\d\W]*|[.?!:]\s+\W*)$", title[:m.start()]) is not None
         return word.capitalize() if titled or starts else word.lower()

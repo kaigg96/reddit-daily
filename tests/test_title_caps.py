@@ -24,12 +24,32 @@ def test_the_no_capitals_arm_drops_emphasis_capitals():
 
 
 def test_the_capitals_arm_and_an_unset_arm_keep_the_title_as_written():
-    """Only arm 0 is held to no capitals; arm 1 asks for one, and a caller
-    with no arm (the release check, old callers) changes nothing."""
+    """Arm 1 asks for one word in capitals, and a caller with no arm (the
+    release check, old callers) changes nothing."""
     for caps in (True, None):
         r = llm.resolve_title("Who's REALLY to blame?", style="B", fallback="Raw?",
                               caps=caps)
         assert r.title == "Who's REALLY to blame?"
+    r = llm.resolve_title("Which costume will YOU see the MOST?", style="B", fallback="Raw?")
+    assert r.title == "Which costume will YOU see the MOST?"
+
+
+def test_the_capitals_arm_keeps_only_its_first_word_in_capitals():
+    """Arm 1 shipped "Which Halloween costume will YOU see the MOST?" on
+    10-24, two words where its rule says one; acronyms and the Reddit text's
+    own capitals do not count."""
+    source = "What's the worst thing an ICU nurse heard? I was SO angry"
+    cases = {
+        "Which Halloween costume will YOU see the MOST?":
+            "Which Halloween costume will YOU see the most?",
+        "Do YOU trust the FBI? REALLY?": "Do YOU trust the FBI? Really?",
+        "I was SO angry, would YOU be?": "I was SO angry, would YOU be?",
+        "What ICU nurses NEVER say": "What ICU nurses NEVER say",
+        "3 ANSWERS: what would YOU do?": "3 ANSWERS: what would you do?",
+    }
+    for generated, shipped in cases.items():
+        r = llm.resolve_title(generated, style="B", fallback="Raw?", caps=True, source=source)
+        assert (r.title, r.style, r.ok) == (shipped, "B", True), generated
 
 
 def test_a_failed_title_ships_the_reddit_question_untouched_in_either_arm():
