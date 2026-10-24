@@ -420,10 +420,19 @@ def _reads_as_reaction(line):
 # "Direct hit", "Deep insight", 10-23), and told never to grade, still did on
 # 3 of 9 (10-24: "Ah, makes sense", "Sad but true", "Good point"). No wording
 # fixed it, so a grading tag is dropped, as a title setup is. It reads stock
-# verdicts only: "Yeah, right" and "Bold move" ship.
-_VERDICT = re.compile(r"\b(spot on|direct hit|deep insight|(good|fair|great|valid) point|"
-                      r"makes sense|true|checks out|nailed it|well said|said it|"
-                      r"exactly|facts|correct|accurate|agreed)\b", re.I)
+# verdicts only: "Yeah, right" and "Bold move" ship. A one-word verdict counts
+# only at the tag's end ("True crime" ships), and a question is doubt, which
+# is a reaction ("Is that true?!", "Spot on?").
+_VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
+                      r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
+                      r"not wrong|agreed?|that tracks|valid|preach|bingo|(that's|ain't) the truth|"
+                      r"(good|great|solid|sound|wise) (advice|call|words))\b|"
+                      r"(true|exactly|facts|correct|accurate)\W*$)", re.I)
+
+
+def _grades(line):
+    # Stretched words ("Truuue") fold first, as in _reads_as_reaction.
+    return "?" not in line and bool(_VERDICT.search(re.sub(r"(.)\1{2,}", r"\1", line)))
 
 
 def _commentary_ask(n):
@@ -460,7 +469,7 @@ def _usable(line, kind):
             and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
                      and not _reads_as_reaction(line))
             and not (kind == "reaction" and config.HOST_TEXT and config.HOST_TAGS
-                     and _VERDICT.search(line)))
+                     and _grades(line)))
 
 
 # The emoji package counts these as emoji, but they are text marks the font draws.

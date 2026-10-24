@@ -363,9 +363,19 @@ def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
                                       ("Wait, what?", True), ("Oof, direct", True),
                                       ("Good riddance", True), ("Too relatable", True),
                                       ("Yikes, awkward", True), ("Bold move", True),
-                                      ("Charging to print?!", True), ("Yeah, right", True)])
+                                      ("Charging to print?!", True), ("Yeah, right", True),
+                                      # Review, 10-24: forms the first list missed, and
+                                      # doubt or a word's other sense it wrongly dropped.
+                                      ("Spot-on", False), ("Nails it", False), ("Truuue", False),
+                                      ("Great advice", False), ("So true", False), ("Agreed!", False),
+                                      ("Is that true?!", True), ("True crime?!", True),
+                                      ("Who said it?", True), ("Exactly zero", True),
+                                      ("Polite but pointless", True), ("Not fair!", True),
+                                      ("Brutal truth", True), ("Validate this?!", True),
+                                      ("Preacher energy", True), ("Agreeable, sure", True)])
 def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
     assert llm._usable(line, "reaction") is ok
+    assert llm._grades(line) is not ok      # the verdict check, not a cap, decides
 
 
 def test_only_tags_are_held_to_the_verdict_rule(monkeypatch):

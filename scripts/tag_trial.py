@@ -158,7 +158,7 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     # a reaction would blank it here. main prints the gate's call beside it.
     # So for the reactions and the gate that drops a grading tag.
     llm._reads_as_reaction = lambda line: True
-    llm._VERDICT = re.compile(r"(?!)")
+    llm._grades = lambda line: False
     llm.FALLBACK_MODEL = None
     config.GROQ_FALLBACK = False
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
@@ -192,7 +192,7 @@ def main(argv=None):
     if args.model == "groq" and not os.environ.get("GROQ_API_KEY"):
         raise SystemExit("--model groq needs GROQ_API_KEY; refusing before any request")
     from src import llm as gated
-    ships, grades = gated._reads_as_reaction, gated._VERDICT.search
+    ships, grades = gated._reads_as_reaction, gated._grades
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:

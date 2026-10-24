@@ -37,7 +37,7 @@ def test_a_setup_wording_reaches_the_prompt(monkeypatch, setup, words):
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
     monkeypatch.setattr(config, "HOST_TAGS", True)
-    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_VERDICT"):
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -54,7 +54,7 @@ def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
     monkeypatch.setattr(config, "HOST_TAGS", True)
-    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_VERDICT"):
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -71,7 +71,7 @@ def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(mon
     monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
     monkeypatch.setattr(config, "HOST_TEXT", True)
     monkeypatch.setattr(config, "HOST_TAGS", True)
-    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_VERDICT"):
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -94,7 +94,7 @@ def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypat
     """Through the real metadata call, so the gate's bypass is what is tested."""
     import json
     from src import config
-    for name in ("FALLBACK_MODEL", "_reads_as_reaction", "_VERDICT", "_TAG_EDITS"):
+    for name in ("FALLBACK_MODEL", "_reads_as_reaction", "_grades", "_TAG_EDITS"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
