@@ -114,7 +114,7 @@ def main(argv=None):
         return 0
     if "--dropped" in argv:
         for heading, bullet in recently_dropped():
-            print(f"{heading[:70]}\n  {bullet[:600]}\n")
+            print(f"{heading[:70]}\n  {bullet}\n")   # cut, a drop is re-proposed
         print("DONE in the last ten shifts (each bullet's opening), so "
               "finished work is not proposed again:\n")
         for heading, bullets in recently_dropped(extract=done_in):
@@ -144,24 +144,38 @@ def main(argv=None):
 
 _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
 _DROPPED = re.compile(r"^- \*\*[^*]*\bdropped\b", re.I)
+# Since 10-20 a shift lists its drops inside its General management bullet
+# ("… two survived. **Dropped:** …"), which the opening match never saw, so the
+# generator was shown nothing newer than 10-20 (found 10-24).
+_DROPPED_INSIDE = re.compile(r"\*\*[^*]*\bdropped\b[^*]*\*\*", re.I)
+
+
+def _dropped_part(bullet):
+    """The dropped list a bullet holds, from its label on, or None."""
+    if _DROPPED.match(bullet):
+        return bullet[2:].replace("**", "").strip()
+    m = _DROPPED_INSIDE.search(bullet)
+    return bullet[m.start():].replace("**", "").strip() if m else None
 
 
 def dropped_in(text):
     """(entry heading, [dropped bullets]) for each WORKLOG entry that has any."""
-    out, heading, bullets, inside = [], None, [], False
+    out, heading, bullets, bullet = [], None, [], None
     for line in text.splitlines() + ["## 0000-00-00 end"]:
+        if bullet is not None and line.startswith("  ") and line.strip():
+            bullet += " " + line.strip()        # the bullet wrapped onto more lines
+            continue
+        part = bullet and _dropped_part(bullet)
+        if part:
+            bullets.append(part)
+        bullet = None                           # any other line ends it
         m = _ENTRY.match(line)
         if m:
             if heading and bullets:
                 out.append((heading, bullets))
-            heading, bullets, inside = m.group(1).strip(), [], False
-        elif heading and _DROPPED.match(line):
-            bullets.append(line[2:].replace("**", "").strip())
-            inside = True
-        elif inside and line.startswith("  ") and line.strip():
-            bullets[-1] += " " + line.strip()   # the bullet wrapped onto more lines
-        else:
-            inside = False                      # any other line ends it
+            heading, bullets = m.group(1).strip(), []
+        elif heading and line.startswith("- "):
+            bullet = line
     return out
 
 

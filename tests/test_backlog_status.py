@@ -163,6 +163,19 @@ def test_indented_lines_of_a_later_bullet_stay_out_of_the_dropped_one():
     assert b.dropped_in(text) == [("2026-10-17 (08:00) — X", ["Considered and dropped: a."])]
 
 
+def test_drops_listed_inside_a_bullet_are_read_from_their_label_on():
+    """Since 10-20 drops sit inside the General management bullet, which the
+    opening match missed, so nothing newer than 10-20 was listed (10-24)."""
+    text = ("## 2026-10-24 (15:30) — X\n\n### Done\n"
+            "- **General management:** nothing was ready. Two survived. **Dropped:** draft\n"
+            "  answers (the form's questions were never recorded); affiliate links.\n"
+            "- **Product:** the filter dropped nothing new.\n"
+            "- **Data:** read it. **Considered and dropped:** a subscriber rate.\n")
+    assert b.dropped_in(text) == [("2026-10-24 (15:30) — X", [
+        "Dropped: draft answers (the form's questions were never recorded); affiliate links.",
+        "Considered and dropped: a subscriber rate."])]
+
+
 def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
     def v(time, headline):
         return f"## 2026-10-17 ({time}) — {headline}\n- **Considered and dropped:** a.\n"
