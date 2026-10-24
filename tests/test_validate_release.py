@@ -201,6 +201,7 @@ def test_the_verdict_names_a_dropped_host_line_and_its_length(monkeypatch):
 
     def get_metadata(*a, **k):
         print("Commentary: past its length cap, or a placeholder or emoji: vote (23 words)")
+        print('Commentary setup, as written: "Wallet pain"')
         return meta
     monkeypatch.setattr("src.config.COMMENTARY", True)
     monkeypatch.setattr("src.llm.get_metadata", get_metadata)
@@ -209,6 +210,7 @@ def test_the_verdict_names_a_dropped_host_line_and_its_length(monkeypatch):
     monkeypatch.setattr(vr, "SUMMARY", [])
     vr.check_metadata()
     assert any("vote (23 words)" in line for line in vr.SUMMARY)
+    assert any('setup, as written: "Wallet pain"' in line for line in vr.SUMMARY)
 
 
 def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):

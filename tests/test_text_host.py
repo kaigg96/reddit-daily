@@ -194,7 +194,9 @@ def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
     review, 10-23), on a list that spares god, hell and damn."""
     host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
     assert host.reactions == ["", HOST["reactions"][1]] and host.verdict == HOST["cta"]
-    assert "reaction 1 (a swear word or emoji)" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "reaction 1 (a swear word or emoji)" in out
+    assert tag not in out and "as written" not in out   # the public log never repeats it
 
 
 def test_a_reaction_may_say_oh_god(monkeypatch):
@@ -210,6 +212,12 @@ def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "vote (23 words), reaction 2 (13 words)" in out
     assert "setup (" not in out and "reaction 1 (" not in out
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right, on a line the dry run's report reads as the AI's words.
+    said = f'Commentary reaction 2, as written: "{" ".join(["word"] * 13)}"'
+    assert said in out.splitlines() and "vote, as written" not in out
+    from scripts import dry_run
+    assert dry_run.ECHOES_CONTENT.match(said) and dry_run.PICKED.match(said)
 
 
 def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):

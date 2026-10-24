@@ -556,6 +556,14 @@ def _clean_commentary(data, n):
            for name, line, fine, sw in named if not fine]
     print("Commentary: past its length cap, a placeholder or emoji, a setup that"
           " is not a reaction, or a tag that grades: " + ", ".join(bad))
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right: four checks running said only "setup (2 words)" (10-24). Whole, as
+    # checked (a cut word can read as a slur), on a line the dry run's report
+    # reads as the AI's words, not a failure ("Failed attempt"). A swear word
+    # stays out of the public log, and the vote, dropped for its length.
+    for name, line, fine, sw in named:
+        if line and not (fine or sw or name == "vote"):
+            print(f'Commentary {name}, as written: "{line}"')
     if not config.HOST_TEXT:
         return None
     setup = setup if setup_ok else ""
