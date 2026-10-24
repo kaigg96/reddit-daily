@@ -424,37 +424,21 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
-- **A swear word reached a live title (2026-10-22 05:06, `IjN6hj2etcs`).**
-  better-profanity counts a straight quote or `*` as part of a word, so
-  "'alright fuckers'" passed the post-title filter, and the AI title quoted
-  it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
-  ("shit's"). Nothing screened the AI's own output either: an emoji title
-  shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
-  (edge marks spaced out, each contracted word checked alone; four reviews,
-  the last clean at `fae20a8`; no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
-  title, CTA or keyword with a swear word or emoji falls back (refuses exactly
-  those two of 191 shipped titles). It changes which posts and AI lines
-  qualify, not the video, so no version bump; it waits only for a sample
-  render, in the slot after #77's. Host lines keep `_clean_str` (the list
-  holds "god", "hell", "damn": "Oh god" is a reaction). **When this meets bet
-  1:** there the closing line is the host's verdict, which `_clean_commentary`
-  builds with `_clean_str` from the same "cta" field, so the guard misses it
-  (third review: a swearing vote still ships). Built 10-23 on
-  `reliability/profanity-on-v8` (the filter stacked on the release, the vote
-  through `_clean_published`, a refused vote blanked alone; reviewed): it joins
-  `integration/preview` after the filter's own render passes. The tags now
-  refuse a swear word too, on the list less god/hell/damn/omg (reviewed;
-  "Holy crap" drops as a tag). Left from those reviews: stretched spellings
-  ("Fuuuck", "sh!t") pass every list, titles included, as the library does
-  not fold repeats (folding would newly flag 0 of 1,417 logged titles and
-  lines, so not built); a swearing vote in voiced mode (dormant) is untested.
-  Left:
-  the library already reads a curly "he’ll" as "hell" (fails safe, rare);
-  YouTube's API refuses "<" and ">" in a title or description and nothing
-  strips them, which would fail the upload and retry the same post (0 of
-  ~2,300 past titles and answers carry one).
-  Live video left as is (retitling would alter a row of #10 and #14).
-  **Closes when** the branch merges.
+- **Swear-word gaps the filter fix left (merged 2026-10-24).** The fix for
+  "'alright fuckers'" reaching a live title (2026-10-22, `IjN6hj2etcs`) is on
+  `main` (dry run PASS at `58e0b2b`): `_profane` spaces out edge marks and
+  checks each contracted word, and `llm._clean_published` makes a title, CTA
+  or keyword with a swear word or emoji fall back. Bet 1's vote and tags get
+  the same guard on `integration/preview` (from `reliability/profanity-on-v8`),
+  so it ships with `v8`. Left from four reviews, not built: stretched spellings
+  ("Fuuuck", "sh!t") pass every list, as the library does not fold repeats
+  (folding would newly flag 0 of 1,417 logged titles and lines); a swearing
+  vote in voiced mode (dormant) is untested; the library reads a curly "he’ll"
+  as "hell" (fails safe, rare); YouTube's API refuses "<" and ">" in a title
+  or description and nothing strips them, which would fail the upload and
+  retry the same post (0 of ~2,300 past titles and answers). Live video left
+  as is (retitling would alter a row of #10 and #14). **Closes when** `v8`
+  ships and none of these has occurred in its first 20 uploads.
 
 - **The repo keeps YouTube API text past YouTube's 30-day limit (found
   2026-10-24, Legal).** `analysis/channel_videos.csv` (`scripts/analyze_channel.py`,
