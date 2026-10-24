@@ -218,10 +218,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   ship, as do probes ("Solid point", "Can't argue", "Best answer"). Widen only
   on a tag seen in a release check or render. **Whole-branch review (10-24, on
   `a05b300`): no blockers**; its fixes (an empty line drops alone, flag emoji in
-  tags) are on the branch. Left: `content._has_emoji` (titles, vote) misses
-  flags and keycaps on `main` too (in 2 of ~1,000 past videos' text, one an
-  answer shown on screen; 0 in the upload log); `_excerpt` prints an unparseable reply raw to
-  the public log, where `_clean_published` never echoes a refused field.
+  tags) are on the branch, as is the same fix for titles, the vote and answers
+  (`content._has_emoji`; 2 of ~1,000 past videos' text, one an answer shown on
+  screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
+  unparseable reply raw to the public log, where `_clean_published` never
+  echoes a refused field.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
