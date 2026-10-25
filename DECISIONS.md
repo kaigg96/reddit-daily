@@ -409,8 +409,8 @@ gracefully when a session ends mid-task.
 **What went wrong:** the primary assumption was false within two hours — the
 statusLine payload exposes `rate_limits.five_hour` and `.seven_day`. The
 decision was never revisited, and it took the owner asking "why did you choose
-this?" to surface it. The secondary reason survived and now shapes D3's ceiling
-rule; the primary did not.
+this?" to surface it. The secondary reason survived into D3's ceiling rule
+(itself superseded by D12); the primary did not.
 
 **The lesson this file encodes:** record the assumption, not just the
 conclusion. A conclusion cannot tell you when it has expired.
