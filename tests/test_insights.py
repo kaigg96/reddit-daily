@@ -2069,6 +2069,18 @@ def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch
     assert "`v7`: NO VERDICT" in line
 
 
+def test_each_committed_release_cut_names_a_logged_field_and_value():
+    """A misspelt cut would filter every upload out, and the digest would print
+    NO VERDICT rather than fail (review, 2026-10-25)."""
+    import csv as _csv
+    from src import config, log
+    rows = list(_csv.DictReader(open(config.UPLOAD_LOG)))
+    for version, spec in insights.RELEASE_WITHIN.items():
+        key, value, _ = insights._parse_spec(spec)
+        assert key in log.FIELDS, (version, spec)
+        assert any(r.get(key) == value for r in rows), (version, spec)
+
+
 def test_slate_firing_counts_a_weak_top_with_a_strong_candidate_in_the_top_three():
     rows = [{"slate_topics": "money-work|other|nostalgia|x"},       # fires
             {"slate_topics": "money-work|other|other|nostalgia"},   # strong at 4th: no
