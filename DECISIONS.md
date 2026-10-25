@@ -49,6 +49,7 @@ and testing are the shifts'. Bring back a result to watch, not a craft choice.
 declined it as a gate). **Assumptions:** (1) monetization review comes only
 when we apply; (2) audience is the binding step (21 subscribers, §1).
 **Revisit** before applying to any paid programme, or at 1,000 subscribers.
+**Re-reviewed 2026-10-25 (audit):** holds; (2) unchanged (21 subscribers). Stale beside it: D9's and D10's 10-13 lines call YouTube's review bet 1's real gate, which D14 declined; PLAN §1 still rates Audience "none" (11-05 monthly).
 
 ## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
 
@@ -72,6 +73,7 @@ change label-only. So the handover leads with #50's four commands.
 **Re-reviewed 2026-10-14 15:55 — trigger fired; the form is not the cause.** #74 has waited 3.2 days, but nothing of the owner's has moved since 10-11 21:17 (67 hours, inside their 76-hour longest gap): #75, a plain label, waits just as long. So it is absence, not the ask's shape; no re-ask (#74 was re-raised twice on 10-13). Revisit after 10-15 01:17, when the gap passes their longest; even then, change the ask only if they act on other issues while #74 sits.
 **Re-reviewed 2026-10-17 21:42 (audit) — that condition was met, unnoticed.** On 10-15 01:26 the owner labelled #75 three hours after #77 opened, and passed over #77. Its body then said a label approved a rebuild and #74's label would ship it; a later comment said one label on #77 ships it. A re-raise only comments (`escalations.yml`), so the body, read first, went stale, and a label on it was ambiguous consent to go live. Rewritten as one ask (no email). The owner has been absent since; the 76-hour gap passes 10-18 05:26. (1) false for now, whatever the ask's form: #75, a plain label, waited three days too; #74 six, #77 three.
 **Re-reviewed 2026-10-21 (audit) — (1) holds again.** The owner answered #81, a label, the day it opened (10-20), and gave #77 a session on 10-19 (D14). #77 now waits on hands, a narrated render only their machine can make (branch code never holds the Polly keys); #80, a label, is due by 11-01. Ten shifts ran 2–56 of 60 minutes (mean 38) with nothing ready: the hands-only remainder, not absence, is the cause. 10-17's "absent" line went stale and seeded a ship-unless-they-object candidate this shift; a stale assumption steers generation.
+**Re-reviewed 2026-10-25 (audit) — trigger fired; absence, not hands.** #77 has been a label since 10-25 08:33 (the stand-in voice took the render off the owner's machine, 10-23), so 10-21's "hands" cause is gone. But #80, a label, has waited 5.6 days, and nothing of the owner's has moved since 10-20 21:12 (~4.5 days, past their 76-hour longest gap). (1) is false for now; no re-ask, since re-raising to an absent owner only adds email. #77's title and body asked for a local render after the ask became a label; both rewritten 10-25 (an edit sends no email). Nine shifts ran 26–43 of 60 minutes, every one with nothing ready.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
@@ -371,6 +373,7 @@ day. The weak link is the apply step after approval. Of the last three
 approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
 #50's could not be read. Each failure costs the owner another round trip.
 **Re-reviewed 2026-10-13 (audit):** (1) strained: two shifts held back a rule fix to spare the owner's queue, and no skill change can land until #50 is applied (8 days).
+**Re-reviewed 2026-10-25 (audit) — trigger fired.** #50 approved 10-05 and unapplied 20 days; #65 behind it 17. Its cost is now visible: the shift skill and the backlog skill say the ready floor is 3, `backlog_status.py` says 5, and the skill's "cannot read Actions logs" is false (`gh run view --log` works). Workflow-file patches never needed #50 (`apply-approved.yml` lands them on a label). For the 11-05 monthly: one bundled skill change, not more asks to an absent owner.
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 

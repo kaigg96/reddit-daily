@@ -312,33 +312,47 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`integration/preview`, `integration/two-answer-meta-fallback`): the second
   model first, given the main call's reply schema.
 
-- **Audit 2026-10-21: bet 1 waits on a render only the owner's machine can
-  make; otherwise the process is working.** 10 shifts since 10-17, 2–56 of 60
-  minutes (mean 38). Nothing reached viewers; 10 merges, all measurement or
-  reliability. Bet 1's craft moved under D14 (notes became tags, upload-model
-  reactions, the setup gate), each reviewed fresh. Reviews caught real defects
-  (R3's age guard, a tag-trial test of the wrong thing); the release check
-  passed daily; no reverts. Distribution and finance got no time, with nothing
-  ready: fine while the 11-05 monthly runs. **Found:** (1) #77's body went
-  stale a second time (it described notes, and said a label alone ships while
-  its 10-21 comment asked for a render): rewritten 10-21. The fix that ends it
-  is the re-raise below. (2) D13's "owner absent" line was stale and seeded a
-  ship-unless-they-object candidate; re-reviewed. (3) `backlog_status.py
-  --dropped` lists only drops, so the generator re-proposed done work (bet 2's
-  start date, answered 10-17 and 10-19) and a ranker put it first. Fixed: `--dropped`
-  also lists each entry's Done openings (reviewed). Left: a shift that re-stamps
-  its time and rewords its headline still lists twice (10-18 08:45/08:50). (4) Narrated branch samples
-  (main's code narrating the branch's script) would take the owner's hands off
-  the critical path, but touch secrets handling: for the 11-05 review, not an
-  ask beside #77. Decisions: D13 re-reviewed; the rest unchanged. Outward look
-  not repeated (done 10-13). **Carried, pending #50:** a re-raise that changes
-  the ask replaces the body (built on `process/reraise-replaces-ask`, the filer
-  as a patch in `.github/pending/` with the weekly install's pin below; raise
-  with `--patch` when #77 settles, then merge); the shift skill's false "cannot
-  read Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to
-  stop before the handover is pushed. **Before `v8` merges:** read Groq-written
-  uploads apart (`--by meta_source`; titles `--within title_writer!=groq`).
-  **Closes when** #50 lands and the bundle is raised, or the next audit.
+- **Audit 2026-10-25: the process is working at the margin; the owner's
+  queue binds, and shifts fill the wait with small fixes.** Nine shifts since
+  10-21, 26–43 of 60 minutes (mean ~38), every one with nothing ready and
+  every one handed over. Nothing reached viewers (`v7` since 09-25); bet 1's
+  spoken sample is on #77. Gates caught real defects (two held samples, a
+  slur from truncation, a blank line dropping every host line); no reverts,
+  no attribution trailers, one dry run per shift at most, every render
+  clear of uploads. **Found:** (1) the owner has been silent since 10-20
+  21:12, past their longest gap, with #77 and #80 plain labels (D13
+  re-reviewed: absence). #77's title and body still asked for a local
+  render after the ask became a label (third drift); #82's title gave
+  31 October, not 12 January. Both rewritten by edit, no email. (2) Four
+  functions (distribution, monetization, editorial, finance) have had no
+  time in ~19 shifts; for the 11-05 monthly. (3) All nine "Than last shift"
+  answers say better while the trajectory is flat: self-grading, as the
+  template warns. Answer for viewers first. (4) Six of nine shifts were
+  "mostly fixes", many of them tag word lists on the unreleased branch,
+  grown three times (grading, agreeing, "is right"). (5) `context_budget.py
+  --allocation` counts a re-stamped entry twice (10-24 08:50/09:05) and
+  drops another, the same re-stamp gap as `--dropped`. (6) Break-even was
+  dropped four times as "needs your subscription price" and never asked.
+  (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,
+  `integration/two-answer-meta-fallback`, `product/host-line-fallback`);
+  18 are contained in `integration/preview` and go when `v8` merges. Not
+  deleted: unmerged work. **Decisions:** D13, D5, D14 re-reviewed; the rest
+  stand at 10-13 (D7 is due a compression to a line, D10 to a stub).
+  **Outward look (docs re-read 10-25):** a skill's frontmatter can now carry
+  `hooks:`, keeping a hook under protected `.claude/skills/**` rather than
+  the unprotected `.claude/settings.json`; `` !`cmd` `` injection could
+  pre-load the orientation commands. Rejected: auto mode (the shift job holds
+  no upload secrets; the classifier could block the handover push), a
+  compaction hook (no shift is known to compact; measure first). The audit
+  skill's three "not yet tried" were all decided 10-09; its text is stale.
+  The Stop hook is dropped: every traced shift after the 10-19 two-minute one handed over.
+  **Carried, for one bundled proposal at the 11-05 monthly (not raised now,
+  to keep #77 the owner's only ask):** the re-raise that replaces an issue's
+  body (`process/reraise-replaces-ask`, with the weekly install's pin; a
+  workflow patch, so a label lands it without #50); in the shift skill, the
+  false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
+  #65's sentence; the audit skill's stale "not yet tried". **Closes when**
+  that bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
