@@ -81,7 +81,7 @@ and more useful than a confident guess.
 - **Dropped:** which uploads gain subscribers (gains are zero on almost every upload, 21 ever, so nothing can be told apart); the Stack Exchange spoken sample (this afternoon's upload runs about 16:00, inside the hour a render must avoid); a hook that stops a shift ending before its handover (every traced shift since 19 October handed over); deleting four abandoned side branches (unmerged work; recorded instead).
 - **Reliability and security:** yesterday's two uploads and this morning's landed; the last six runs succeeded. The standing check is clean: no secrets in the project, no workflow changes, you the only collaborator; money controls in place ($0.73 this month, forecast $0.87 of $3).
 - Mostly process and fixes; the break-even and the name check are new information. AI use: no upload-model, Groq or Polly requests, no render.
-- **Process:** shifts cannot edit the rule files (refused again today), so the bundle will reach you as exact text, as #65 did.
+- **Process:** shifts cannot edit the rule files (refused again today), so the bundle will reach you as exact text, as #65 did. Handed over about 20 minutes early: the second round's other ideas fell below the bar (above), and the next real item, the Stack Exchange sample, cannot render until this evening.
 
 ### Blocked
 - **For you, in order:** #77 (watch the sample in its 25 October comment; one label ships bet 1); #82 (register our Reddit app by 12 January; sooner is safer); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
