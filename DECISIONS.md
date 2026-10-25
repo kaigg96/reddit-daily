@@ -113,6 +113,7 @@ unowned:
 (1 or 2 false); proposals from outside evidence are mostly declined or pile up
 unanswered (4 false); or the cadences push shifts past the reserve (3 false).
 **Re-reviewed 2026-10-13 (audit):** holds. Market and Monetization did their first work (10-13); Audience is still none, blocked on #75, so a finding at the 11-05 monthly.
+**Re-reviewed 2026-10-25 (audit):** holds. Stale beside it: the coverage table (PLAN §1, last set 10-05) still rates Audience "none" though D14 made audience the binding step; distribution and finance had no time in 20 shifts (`--allocation`). Both for the 11-05 monthly.
 
 ## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
 
@@ -163,6 +164,7 @@ the floor makes that wait visible, which is its job. The response is to shape
 asks as labels (#70 splits bet 1 out of #55). Revisit if shifts still end early
 once #70 is answered.
 **Re-reviewed 2026-10-13 (audit) — trigger fired:** after #70 closed, two shifts ran 26 and 25 of 60 minutes (shift-usage.csv); both ready items wait on #74. Carried by D13.
+**Re-reviewed 2026-10-25 (audit) — trigger fired again:** nine shifts, every one with ready 0, ran 26–43 of 60 minutes. Its floor is 5 in `backlog_status.py` but 3 in the shift and backlog skills (and was in PRD §0, now pointing at the tool); assumption 3's "a floor of 3" is stale. The cause is D13's, not supply's: the work above the bar waits on the owner.
 
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
@@ -231,6 +233,7 @@ four. Any release judged during it needs its floor re-measured on uploads at
 the new cadence, not borrowed from the 2-a-day era.
 **Re-reviewed 2026-10-13 (audit):** (b) at risk: `v8` is read on AskReddit alone (~1 a day under #3), so its 20 uploads take ~20 days and four a day (#4) could land mid-bake.
 **2026-10-18:** the floor still reads the whole era, but the comparison now reads the release replaced, at 20+ uploads: `v7` read +20% over the pool, so `v8` could have fallen ~17% below it and passed.
+**Re-reviewed 2026-10-25 (audit):** holds; still two uploads a day, and four a day waits on bet 1 (#80).
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
@@ -298,6 +301,7 @@ which name what went wrong with Gemini: exploit and subordinate, never elevate.
 **Revisit when:** `/backlog` produces candidates that all look alike (1 false),
 or `WORKLOG` shows the method skipped (2 false).
 **Re-reviewed 2026-10-13 (audit):** holds; the last three shifts ranked forward and reversed.
+**Re-reviewed 2026-10-25 (audit):** holds; every shift since 10-21 ranked forward and reversed.
 
 ## D7 · 2026-09-21 · Slack goes to research, not back to the clock — **absorbed by D11 and the shift skill**
 
@@ -366,6 +370,7 @@ the word budget decides. 3 is strained for `TECH_DEBT.md`: 24 of 25, and its
 largest item runs past 500 words, so items grow rather than count. Shorter
 entries would come from the template, which is what the owner reads. Left as is.
 **Re-reviewed 2026-10-13 (audit):** the count fell to 21 of 25, but items grow instead (the Groq item runs ~500 words); (3) still strained.
+**Re-reviewed 2026-10-25 (audit):** (3) worse: TECH_DEBT sits at 25 of 25 with items up to ~785 words, and WORKLOG's word budget holds two entries. Closure happened this audit (the 10-21 item resolved into this one), but item length is unbounded.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
@@ -391,6 +396,7 @@ a bad release survives more than a few days (2); or the escalation rate looks
 wrong in either direction — trivia means too tight, silence means shifts are
 deciding what they shouldn't (3).
 **Re-reviewed 2026-10-13 (audit):** holds; a sample and a fresh review caught bet 1's dropped host lines before merge.
+**Re-reviewed 2026-10-25 (audit):** holds; gates caught real defects (two held samples, a truncation slur, a blank line dropping the host). Its text omits two later gates: the fresh-context review (CLAUDE.md §3) and the publishing-policy exception (§4).
 
 ## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3**
 
