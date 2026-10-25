@@ -51,7 +51,7 @@
 
 #### Research questions (answerable from data we already have)
 
-The source of ready work that never waits on a sample video or costs money. When fewer than 3 items above are `ready`, add questions here (`/backlog` §1); each result becomes a finding (§4), a new question, or a backlog item, and **the row is removed once answered** (a test fails a push that leaves one).
+The source of ready work that never waits on a sample video or costs money. Below the ready floor `backlog_status.py` prints, add questions here (`/backlog` §1); each result becomes a finding (§4), a new question, or a backlog item, and **the row is removed once answered** (a test fails a push that leaves one).
 
 | # | Status | Question | Test |
 |---|---|---|---|
