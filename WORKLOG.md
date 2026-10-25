@@ -75,26 +75,26 @@ and more useful than a confident guess.
 - **Product (bet 1, the sample):** rendered on the build machine in the free stand-in voice, with tags from the model real uploads use: 30 seconds, no faults, each tag in the pause after its answer. The opening tag ("My money's on…") was not a reaction, so it was left out as designed. Our own words are 17% of what is read (long answers); reported, never a gate. Posted to #77 with frames, the video, and this morning's upload of the same post.
 - **Product (a measurement, set before it ships):** bet 1's answer to YouTube's spam rule (#80) is that the host makes each video different, but stock tags like "Oof" could repeat across videos. Fixed now: a tag on 5 or more of the first 20 uploads means a check against recent uploads' tags comes next. The three samples so far repeat none.
 - **Strategy and data (a correction):** the record said each upload needs about 28,000 views at four a day, counting plays; the bar counts engaged views (37% of plays), so it is about 75,000. Corrected in both plans.
-- **Data (a pre-mortem of bet 1's first two weeks: one fix, live, and three corrections):** a fresh agent assumed bet 1's read went wrong and found four causes, all confirmed. (1) The Monday report and the shifts' command would have judged bet 1 across both subreddits, though its rule reads AskReddit only and the mix shifts with it (70% before, about half after). Both now read AskReddit; reviewed, no blockers, live, no video change. (2) Bet 1's videos run ~2 seconds longer by design, which alone would trip its two warning signs; both now allow for length, worked out from the old version's data alone. (3) Own words' share no longer sets the next step (your 19 October call). (4) The live tags get read by eye at the 6th upload, not first at the 20th.
+- **Data (a pre-mortem of bet 1's first two weeks: one fix, live, and three corrections):** a fresh agent assumed bet 1's read went wrong and found four causes, all confirmed. (1) The Monday report and the shifts' command would have judged bet 1 across both subreddits, though its rule reads AskReddit only and the mix shifts with it (70% before, about half after). Both now read AskReddit, with a test against misspelling; reviewed twice, no blockers, live, no video change. (2) Bet 1's videos run ~2 seconds longer by design, which alone would trip its two warning signs; both now allow for length, worked out from the old version's data alone. (3) Own words' share no longer sets the next step (your 19 October call). (4) The live tags get read by eye at the 6th upload, not first at the 20th.
 - **Data (a research question, "cannot tell"):** do some topics keep more viewers past the opening? Only one topic has 8 uploads at a common age, so the report refuses; that is the answer.
 - **General management:** nothing was ready. A fresh agent proposed eight ideas; two failed the filters (upload hour, already read as the time slot; counting deleted Reddit sources, which Reddit refuses our build machine). Two rankers, in opposite orders, put the same two first: the per-upload need (done) and a Partner Program readiness list (dropped: those gates bite only when we apply, about 720 times away). Third on both, the topic read (done). A second round, the pre-mortem above, found the rest. **Dropped:** a within-day pairing test (answered 5 October); a scan for paid text-only channels (done 18 October); generated music (your task, and AI music needs disclosure); the prompt trial without "agreement" (changing the prompt now would change what you are judging on #77).
 - **Reliability and security:** both uploads landed today. The standing check is clean (no secrets, no workflow changes, you the only collaborator); money controls in place ($0.71 this month, forecast $0.86 of $3).
 - Mostly fixes and measurement; the sample is the bet. AI use: one sample render, clear of both uploads; no Polly.
-- **Process:** the "08:17" release check runs at 12:40–13:45 (GitHub starts every schedule here 4–5 hours late), so a morning shift cannot read it first, as the last handover asked; the render went ahead without it. The answer-length tool ignores a request for its usage and runs, appending rows; reverted.
+- **Process:** the "08:17" release check runs at 12:40–13:45 (GitHub starts every schedule here 4–5 hours late), so a morning shift cannot read it first, as the last handover asked; the render went ahead without it. The answer-length tool ignores a request for its usage and runs, appending rows; reverted. Handed over ~15 minutes early: what was left fell below the bar (a tool listing live tags, which one command does; that usage fix).
 
 ### Blocked
 - **For you, in order:** #77 (watch the sample; one label ships bet 1); #82 (register our Reddit app, by 12 January); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
 
 ### Next
 - **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit, then update the plans. The next upload is the first of the new version.
-- **If you comment instead:** fix it and render again (next slot about 20:30 today).
-- The Stack Exchange spoken sample, at a render slot bet 1 does not need.
-- 26 October weekly read, then the opening-reach read once.
+- **If you comment instead:** fix it and render again (next slot ~20:30).
+- The Stack Exchange spoken sample, in a free render slot.
+- 26 October weekly read, then the opening-reach read.
 - The audit comes due at about ten shifts since 21 October; this was the ninth.
 
 ### Better?
 - **Than last shift:** Yes. A sample whose tags meet your bar is in front of you, where last shift's was still being filtered, and bet 1's verdict can no longer be read on the wrong cut.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. But bet 1 now waits on one label rather than on your machine.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped, though it now waits on one label, not your machine.
 - **Than ~100 shifts ago:** Too early to say.
 
 ## 2026-10-24 (22:30) — Bet 1's release passed a full review with no blockers; its tag filter now also drops tags that call an answer right
