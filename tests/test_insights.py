@@ -2053,6 +2053,22 @@ def test_the_digest_line_reads_each_release_at_its_committed_size(tmp_path, monk
         insights.release_digest_line(rows))
 
 
+def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch):
+    """Bet 1's rule reads `v8` inside AskReddit (#15); the Monday digest read it
+    pooled across subreddits, so its verdict would also judge the mix."""
+    seen = {}
+
+    def fake_read(version, key="format_version", target_age=None, within_spec=None):
+        seen[version] = within_spec
+
+    monkeypatch.setattr(insights, "release_read", fake_read)
+    rows = [{"format_version": v} for v in ("v7", "v8")]
+    line = insights.release_digest_line(rows)
+    assert seen == {"v8": "subreddit=AskReddit", "v7": None}
+    assert "`v8` (within subreddit=AskReddit): NO VERDICT" in line
+    assert "`v7`: NO VERDICT" in line
+
+
 def test_slate_firing_counts_a_weak_top_with_a_strong_candidate_in_the_top_three():
     rows = [{"slate_topics": "money-work|other|nostalgia|x"},       # fires
             {"slate_topics": "money-work|other|other|nostalgia"},   # strong at 4th: no
