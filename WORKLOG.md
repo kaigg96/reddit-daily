@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-25 (08:25) — Bet 1's spoken sample met the bar and is on #77; one label from you ships it
+
+    Worked (% of the shift): product 40 · gm 25 · data 15 · strategy 10 · reliability 5 · security 5
+
+**Summary:** This morning's sample of bet 1 spoke, and all three host tags reacted to their answers ("Oof", "No way", "Uh oh"), none grading or agreeing. It is posted on #77 with frames and the video, so one label from you is all that stands before it ships. Separately, a wrong number in our revenue record is corrected: each upload would need about 70 times our best upload's views, not about 27.
+
+### Toward revenue
+- **Bet 1 is one label from shipping.** Every route to revenue needs it. It is the first sample brought to you since your 19 October feedback, and its tags meet the bar you set then. It is the same post as this morning's real upload, so you can compare the two.
+- **The revenue gap is sharper.** The Partner Program counts engaged views, so at four a day every upload would need about 75,000 plays, about 70 times our best upload ever. No hit rate closes that, so the gap is how far each video reaches. That is for the 5 November review.
+
+### Done
+- **Product (bet 1, the sample):** the release branch rendered on the build machine. It spoke in the free stand-in voice, and its tags came from the model real uploads use. 30 seconds, no faults. Each tag shows in the pause after its answer. The opening tag came back "My money's on…", which is not a reaction, so it was left out as designed. Our own words are 17% of what is read, because the answers are long; that is reported, never a gate. Posted to #77 with four frames, the video, and a link to this morning's upload of the same post.
+- **Product (a measurement, set up before it ships):** the case that bet 1 answers YouTube's spam rule (#80) rests on the host making each video different. Short stock tags like "Oof" could repeat across videos, which is the sameness that rule names. The test is fixed now, before any upload: if any tag shows on 5 or more of the first 20 uploads, a check against recent uploads' tags comes next. The three sample videos so far repeat none.
+- **Strategy and data (a correction):** the record said each upload needs about 28,000 views at four a day. That counted plays, but the bar counts engaged views (37% of plays). Corrected in the product plan and the company risk list.
+- **Data (a research question, answered "cannot tell"):** do some topics get more viewers past the opening? Only one topic has 8 uploads at a common age, so the report refuses the comparison. That refusal is the answer.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas. Two failed the filters: upload hour (already read, null, as the time slot), and counting Reddit sources since deleted (Reddit refuses our build machine). Two rankers, in opposite orders, put the same two first: the per-upload need (done) and a Partner Program readiness list. I dropped the list, because those gates only bite when we apply, about 720 times away (your 19 October call). Third on both was the topic read (done). **Dropped:** a within-day pairing test (answered 5 October); a scan for paid text-only channels (done 18 October); generated music (your task, and AI music needs disclosure); the prompt trial without "agreement" (changing the prompt now would change what you are judging on #77).
+- **Reliability and security:** both uploads landed today. The standing check is clean: no secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.71 this month, forecast $0.86 of $3).
+- Mostly measurement; the sample is the bet. AI use: one sample render (a few upload-model requests, after the 07:00 reset and clear of both uploads); no Polly.
+- **Process:** the "08:17" release check actually runs at 12:40–13:45, because GitHub starts every schedule here 4–5 hours late. So a morning shift cannot read it first, as the last handover asked, and the render went ahead without it. Separately, the tool that collects answer lengths ignores a request for its usage and runs anyway, appending rows; I reverted it.
+
+### Blocked
+- **For you, in order:** #77 (watch the sample; one label ships bet 1); #82 (register our Reddit app, by 12 January); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
+
+### Next
+- **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit, then update the plans. The next upload is the first of the new version.
+- **If you comment instead:** fix what you name and render again. The next render slot opens about 20:30 today.
+- The Stack Exchange spoken sample, at the first render slot bet 1 does not need, for the 5 November review.
+- 26 October weekly read, then the opening-reach read once.
+- The audit comes due at about ten shifts since 21 October; this was the ninth.
+
+### Better?
+- **Than last shift:** Yes. A sample whose tags meet your bar is in front of you, where last shift's was still being filtered.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. But bet 1 now waits on one label rather than on your machine.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-24 (22:30) — Bet 1's release passed a full review with no blockers; its tag filter now also drops tags that call an answer right
 
     Worked (% of the shift): product 30 · engineering 25 · gm 25 · data 10 · reliability 5 · security 5
@@ -93,38 +128,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** Yes, slightly. The full review the merge needs is done with no blockers, and two more ways a tag could fail are stopped before the render you will watch. Nothing reached viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-24 (15:30) — The swear-word fix is live; bet 1's host now also drops tags that agree with an answer, and its sample waits only for tomorrow's render slot
-
-    Worked (% of the shift): reliability 30 · product 35 · gm 25 · security 10
-
-**Summary:** The fix that stops a swear word reaching a title, like Thursday's "Alright Fuckers", passed its sample render and now runs on every upload. Bet 1's host now also leaves out tags that simply agree with an answer ("Well put", "Amen"), which on politics would take a side; its sample waits only for tomorrow morning's render slot.
-
-### Toward revenue
-- **Bet 1 is a little closer.** Every route to revenue needs it, and its last gate is you watching a sample whose tags react rather than grade. The filter now catches agreement as well as stock praise, so the next sample is less likely to be held back, or to repeat your 19 October feedback. The next render slot the shift rules allow opens about 07:30 tomorrow.
-- The swear-word fix protects the channel rather than growing it: a sworn title risks the advertiser-friendliness the Partner Program checks.
-
-### Done
-- **Reliability (a fix, live):** the swear-word filter now catches a word next to a quote mark or inside a contraction, and an AI-written title, closing line or keyword with a swear word or emoji falls back to a safe one. It passed its sample render, four earlier reviews and a fresh check of how it meets today's code. It changes which posts and lines qualify, not the video, so no version change and no effect on the running tests.
-- **Product (a fix, on the release):** a check (the pre-set test was whether any political-agreement tag on record gets past the filter). The two or three on record ("Math checks out", "Ah, makes sense") were already caught. But that record is thin, and about 20 common ways of agreeing were not ("Well put", "You're right", "Amen", "Hell yes"), so those now drop too. None of the 55 tags on record from past checks and renders newly drops. A fresh review found two reactions it would have wrongly dropped ("100% chaos", "Got nailed"); both fixed.
-- **Product:** the release branch now carries both tag filters and the swear-word guard for the host's vote and tags. So your own render command on #77, tomorrow's automatic release check and the next sample all use them. The issue's description says so (edited, no email).
-- **General management:** nothing was ready. A fresh agent read the evidence and proposed eight ideas; two survived, and I added one. Two rankers, in opposite orders: the political-tags check came first and second; moving the filter onto the release branch second and third (both done). **Dropped:** draft answers for your Reddit registration (ranked first by one ranker, but the form's questions were never recorded, so the answers would be guesses, and it would be a fourth email on that issue in four days); restating bet 1's dose rule (accepted on 21 October); an early read of the capitals test (the report refuses it, 1 upload against 6); two other networks as sources (authors keep their rights, as with Mastodon); a related-video link (your Studio, and a new variable mid-test); affiliate links (not clickable on Shorts).
-- **General management (second round, aimed at the functions with no recent time):** five ideas, none above the bar. The views needed to cover the AI subscription (its price is written nowhere here, so it needs you, and changes nothing while every route is hundreds of times short); search's trend (1.6–2.2% a week, already answered); a subscriber rate (21 subscribers, too few); what the top tenth of uploads share (it would read the running subreddit test early); a check of the working name (waits for bet 1). One fact for the 5 November review: "revenue above costs" has no cost figure to aim at. Handed over about 20 minutes early for that reason.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
-- Mostly fixes. AI use: one sample render (its own test allowance); no Polly, no other AI requests.
-- **Process:** I switched branches in the shared working copy while the idea generator was reading from it, the same trap the last shift noted. Work on side branches belongs in a separate copy while an agent reads.
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
-
-### Next
-- **The first shift after about 07:30 UTC:** render the release branch and, if its tags react rather than grade, post the sample to #77. The 12-hour limit lifts at about 02:40, but its tags also spend one upload-model request, so the rule of waiting for the 07:00 reset and an hour clear of a scheduled run applies until #65 lands. Read tomorrow's 08:17 release check first: it shows the filtered tags on a fixed post.
-- The trial wording that drops "agreement" from the reactions the prompt asks for: read it on about three trial posts with the upload model's allowance, after the 07:00 reset.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Yes, slightly. A live defect seen once in 191 uploads is closed, and bet 1's tags have one more failure stopped in code before the render you will watch.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
