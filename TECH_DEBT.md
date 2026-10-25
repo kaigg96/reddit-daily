@@ -323,16 +323,17 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   21:12, past their longest gap, with #77 and #80 plain labels (D13
   re-reviewed: absence). #77's title and body still asked for a local
   render after the ask became a label (third drift); #82's title gave
-  31 October, not 12 January. Both rewritten by edit, no email. (2) Four
-  functions (distribution, monetization, editorial, finance) have had no
-  time in ~19 shifts; for the 11-05 monthly. (3) All nine "Than last shift"
+  31 October, not 12 January. Both rewritten by edit, no email. (2) Distribution
+  and finance had no time in 20 shifts, monetization and editorial none
+  since 10-21; for the 11-05 monthly (finance's break-even done 10-25). (3) All nine "Than last shift"
   answers say better while the trajectory is flat: self-grading, as the
   template warns. Answer for viewers first. (4) Six of nine shifts were
   "mostly fixes", many of them tag word lists on the unreleased branch,
   grown three times (grading, agreeing, "is right"). (5) `context_budget.py
-  --allocation` counts a re-stamped entry twice (10-24 08:50/09:05) and
-  drops another, the same re-stamp gap as `--dropped`. (6) Break-even was
-  dropped four times as "needs your subscription price" and never asked.
+  --allocation` counted a re-stamped entry twice (10-24 08:50/09:05) and its
+  40-commit window fell short of ten shifts (fixed on `gm/allocation-restamp`). (6) Break-even was
+  dropped four times as "needs your subscription price"; bounded on public
+  prices instead (PLAN §1, 10-25).
   (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,
   `integration/two-answer-meta-fallback`, `product/host-line-fallback`);
   18 are contained in `integration/preview` and go when `v8` merges. Not
