@@ -63,36 +63,38 @@ and more useful than a confident guess.
 
 ## 2026-10-25 (08:25) — Bet 1's spoken sample met the bar and is on #77; one label from you ships it
 
-    Worked (% of the shift): product 40 · gm 25 · data 15 · strategy 10 · reliability 5 · security 5
+    Worked (% of the shift): product 30 · data 25 · gm 20 · strategy 10 · engineering 5 · reliability 5 · security 5
 
-**Summary:** This morning's sample of bet 1 spoke, and all three host tags reacted to their answers ("Oof", "No way", "Uh oh"), none grading or agreeing. It is posted on #77 with frames and the video, so one label from you is all that stands before it ships. Separately, a wrong number in our revenue record is corrected: each upload would need about 70 times our best upload's views, not about 27.
+**Summary:** Bet 1's spoken sample, whose three host tags all react ("Oof", "No way", "Uh oh"), is on #77, so one label from you ships it. A check of how its first two weeks could go wrong found three ways its verdict would have been misread, all fixed before any upload.
 
 ### Toward revenue
-- **Bet 1 is one label from shipping.** Every route to revenue needs it. It is the first sample brought to you since your 19 October feedback, and its tags meet the bar you set then. It is the same post as this morning's real upload, so you can compare the two.
-- **The revenue gap is sharper.** The Partner Program counts engaged views, so at four a day every upload would need about 75,000 plays, about 70 times our best upload ever. No hit rate closes that, so the gap is how far each video reaches. That is for the 5 November review.
+- **Bet 1 is one label from shipping.** Every route to revenue needs it, and this is the first sample since your 19 October feedback whose tags meet your bar.
+- **The revenue gap is sharper.** At four a day every upload would need about 75,000 plays, about 70 times our best ever, so no hit rate closes it: the gap is each video's reach. For the 5 November review.
 
 ### Done
-- **Product (bet 1, the sample):** the release branch rendered on the build machine. It spoke in the free stand-in voice, and its tags came from the model real uploads use. 30 seconds, no faults. Each tag shows in the pause after its answer. The opening tag came back "My money's on…", which is not a reaction, so it was left out as designed. Our own words are 17% of what is read, because the answers are long; that is reported, never a gate. Posted to #77 with four frames, the video, and a link to this morning's upload of the same post.
-- **Product (a measurement, set up before it ships):** the case that bet 1 answers YouTube's spam rule (#80) rests on the host making each video different. Short stock tags like "Oof" could repeat across videos, which is the sameness that rule names. The test is fixed now, before any upload: if any tag shows on 5 or more of the first 20 uploads, a check against recent uploads' tags comes next. The three sample videos so far repeat none.
-- **Strategy and data (a correction):** the record said each upload needs about 28,000 views at four a day. That counted plays, but the bar counts engaged views (37% of plays). Corrected in the product plan and the company risk list.
-- **Data (a research question, answered "cannot tell"):** do some topics get more viewers past the opening? Only one topic has 8 uploads at a common age, so the report refuses the comparison. That refusal is the answer.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas. Two failed the filters: upload hour (already read, null, as the time slot), and counting Reddit sources since deleted (Reddit refuses our build machine). Two rankers, in opposite orders, put the same two first: the per-upload need (done) and a Partner Program readiness list. I dropped the list, because those gates only bite when we apply, about 720 times away (your 19 October call). Third on both was the topic read (done). **Dropped:** a within-day pairing test (answered 5 October); a scan for paid text-only channels (done 18 October); generated music (your task, and AI music needs disclosure); the prompt trial without "agreement" (changing the prompt now would change what you are judging on #77).
-- **Reliability and security:** both uploads landed today. The standing check is clean: no secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.71 this month, forecast $0.86 of $3).
-- Mostly measurement; the sample is the bet. AI use: one sample render (a few upload-model requests, after the 07:00 reset and clear of both uploads); no Polly.
-- **Process:** the "08:17" release check actually runs at 12:40–13:45, because GitHub starts every schedule here 4–5 hours late. So a morning shift cannot read it first, as the last handover asked, and the render went ahead without it. Separately, the tool that collects answer lengths ignores a request for its usage and runs anyway, appending rows; I reverted it.
+- **Product (bet 1, the sample):** rendered on the build machine in the free stand-in voice, with tags from the model real uploads use: 30 seconds, no faults, each tag in the pause after its answer. The opening tag ("My money's on…") was not a reaction, so it was left out as designed. Our own words are 17% of what is read (long answers); reported, never a gate. Posted to #77 with frames, the video, and this morning's upload of the same post.
+- **Product (a measurement, set before it ships):** bet 1's answer to YouTube's spam rule (#80) is that the host makes each video different, but stock tags like "Oof" could repeat across videos. Fixed now: a tag on 5 or more of the first 20 uploads means a check against recent uploads' tags comes next. The three samples so far repeat none.
+- **Strategy and data (a correction):** the record said each upload needs about 28,000 views at four a day, counting plays; the bar counts engaged views (37% of plays), so it is about 75,000. Corrected in both plans.
+- **Data (a pre-mortem of bet 1's first two weeks: one fix, live, and three corrections):** a fresh agent assumed bet 1's read went wrong and found four causes, all confirmed. (1) The Monday report and the shifts' command would have judged bet 1 across both subreddits, though its rule reads AskReddit only and the mix shifts with it (70% before, about half after). Both now read AskReddit; reviewed, no blockers, live, no video change. (2) Bet 1's videos run ~2 seconds longer by design, which alone would trip a warning sign; both signs now allow for length. (3) Own words' share no longer sets the next step (your 19 October call). (4) The live tags get read by eye at the 6th upload, not first at the 20th.
+- **Data (a research question, "cannot tell"):** do some topics keep more viewers past the opening? Only one topic has 8 uploads at a common age, so the report refuses; that is the answer.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas; two failed the filters (upload hour, already read as the time slot; counting deleted Reddit sources, which Reddit refuses our build machine). Two rankers, in opposite orders, put the same two first: the per-upload need (done) and a Partner Program readiness list (dropped: those gates bite only when we apply, about 720 times away). Third on both, the topic read (done). A second round, the pre-mortem above, found the rest. **Dropped:** a within-day pairing test (answered 5 October); a scan for paid text-only channels (done 18 October); generated music (your task, and AI music needs disclosure); the prompt trial without "agreement" (changing the prompt now would change what you are judging on #77).
+- **Reliability and security:** both uploads landed today. The standing check is clean (no secrets, no workflow changes, you the only collaborator); money controls in place ($0.71 this month, forecast $0.86 of $3).
+- Mostly fixes and measurement; the sample is the bet. AI use: one sample render, clear of both uploads; no Polly.
+- **Process:** the "08:17" release check runs at 12:40–13:45 (GitHub starts every schedule here 4–5 hours late), so a morning shift cannot read it first, as the last handover asked; the render went ahead without it. The answer-length tool ignores a request for its usage and runs, appending rows; reverted.
 
 ### Blocked
 - **For you, in order:** #77 (watch the sample; one label ships bet 1); #82 (register our Reddit app, by 12 January); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks).
 
 ### Next
 - **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit, then update the plans. The next upload is the first of the new version.
-- **If you comment instead:** fix what you name and render again. The next render slot opens about 20:30 today.
-- The Stack Exchange spoken sample, at the first render slot bet 1 does not need, for the 5 November review.
+- **If you comment instead:** fix it and render again (next slot about 20:30 today).
+- The Stack Exchange spoken sample, at a render slot bet 1 does not need.
 - 26 October weekly read, then the opening-reach read once.
+- Before bet 1's read: restate the line for where viewers leave, from the old version's data alone, allowing for the longer video (the plan says how).
 - The audit comes due at about ten shifts since 21 October; this was the ninth.
 
 ### Better?
-- **Than last shift:** Yes. A sample whose tags meet your bar is in front of you, where last shift's was still being filtered.
+- **Than last shift:** Yes. A sample whose tags meet your bar is in front of you, where last shift's was still being filtered, and bet 1's verdict can no longer be read on the wrong cut.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. But bet 1 now waits on one label rather than on your machine.
 - **Than ~100 shifts ago:** Too early to say.
 
