@@ -332,8 +332,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   grown three times (grading, agreeing, "is right"). (5) `context_budget.py
   --allocation` counted a re-stamped entry twice (10-24 08:50/09:05) and its
   40-commit window fell short of ten shifts: fixed and merged 10-25
-  (reviewed). Left, in it and `--dropped`: a re-stamp that also rewords the
-  headline (10-18 08:45/08:50) or crosses midnight still counts twice. (6) Break-even was
+  (reviewed). A re-stamp that also rewords its headline now links by its
+  summary (10-18, merged 10-25, reviewed). Left: `--dropped` still lists that
+  one twice, and a re-stamp across midnight counts twice in both. (6) Break-even was
   dropped four times as "needs your subscription price"; bounded on public
   prices instead (PLAN §1, 10-25).
   (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,

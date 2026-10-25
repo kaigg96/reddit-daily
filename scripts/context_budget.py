@@ -307,7 +307,7 @@ def worklog_history(commits=200):
 
 def _summaries(raw):
     """{full heading: its Summary's first 100 characters}. A shift that changed
-    both its time and its headline (10-18 08:45, then 08:50) kept its summary."""
+    both its time and its headline (10-18 08:50, then 08:45) kept its summary."""
     raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
     out = {}
     for block in raw.split("\n## ")[1:]:

@@ -69,7 +69,7 @@ def test_two_shifts_on_one_day_stay_two():
 
 
 def test_a_restamp_that_also_rewords_is_counted_once_by_its_summary():
-    """10-18 08:45 became 08:50 with a reworded headline; the summary stayed."""
+    """10-18 08:50 became 08:45 with a reworded headline; the summary stayed."""
     def entry(stamp, headline, summary):
         return _entry(stamp, headline, "gm 100") + f"\n**Summary:** {summary}\n"
     current = "# Work log\n" + _entry("2026-10-19 (09:50)", "newest", "product 100")
