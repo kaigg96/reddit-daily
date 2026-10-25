@@ -305,6 +305,18 @@ def worklog_history(commits=200):
     return merge_versions(texts)
 
 
+def _summaries(raw):
+    """{full heading: its Summary's first 100 characters}. A shift that changed
+    both its time and its headline (10-18 08:45, then 08:50) kept its summary."""
+    raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
+    out = {}
+    for block in raw.split("\n## ")[1:]:
+        m = re.search(r"\*\*Summary:\*\*\s*(.{1,100})", block)
+        if m:
+            out[block.split("\n")[0].strip()] = m.group(1).strip()
+    return out
+
+
 def merge_versions(texts):
     """One allocation entry per shift across WORKLOG versions, current first.
 
@@ -315,10 +327,13 @@ def merge_versions(texts):
     audit found it counted twice, pushing another shift out of the window."""
     seen, oldest, links = {}, None, set()
     for i, text in enumerate(texts):            # current file first, so its edits win
+        summaries = _summaries(text)
         for heading, row in allocation_entries(text, full_heading=True):
             key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", heading).group(0)
             headline = heading.split("—", 1)[1].strip() if "—" in heading else ""
-            mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set())
+            summary = summaries.get(heading, "")
+            mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set()) \
+                | ({("s", key[:10], summary)} if summary else set())
             restamped = key not in seen and bool(mine & links)
             links |= mine
             if restamped:
