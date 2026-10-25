@@ -199,6 +199,7 @@ lifted until then.
 asked for so Reddit posts stop reaching a free tier that trains on them (#62):
 *"Not approved to spend money on this, find another solution."*
 **Re-reviewed 2026-10-13 (audit):** (1) holds for longer: new applicants need 20M Shorts views from 1 Feb 2027 (PLAN §1). (2) in doubt: text-only commentary may fail YouTube's review, and a spoken host needs spend or the owner's voice.
+**Re-reviewed 2026-10-25 (audit):** holds; revenue $0. (2)'s doubt about YouTube's review no longer steers bet 1 (D14). The Partner Program bar is about break-even, not profit, on any plan above Pro (PLAN §1, 10-25).
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
@@ -266,6 +267,7 @@ read (§0 #8) is the evidence; re-review then. The 3-point `zero_rate` margin
 breaches today on 2.4% → 5.6% (n=42 vs 36), which the scorecard itself calls
 weather at this size.
 **Re-reviewed 2026-10-13 (audit):** (2) weakened: `v7` raised watch-seconds 20% while the engaged share stayed 0.34–0.36 (PRD #8), and bet 1's real gate, YouTube's review, has no metric.
+**Re-reviewed 2026-10-25 (audit):** "bet 1's real gate, YouTube's review" is superseded: the owner made a first-time viewer the test (D14, 10-19). The typed metrics stand; the revenue bar counts engaged views (PLAN §1).
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
