@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-25 (15:40) — The audit found shifts waiting on you, not short of ideas; #77 now asks only for a label
+
+    Worked (% of the shift): gm 55 · product 10 · finance 10 · engineering 10 · editorial 5 · reliability 5 · security 5
+
+**Summary:** This shift ran the process audit that comes due every ten shifts. Every shift since 21 October ended early with nothing ready, because what is worth doing waits on you, and nothing has moved on your side since 20 October. The issue that ships bet 1 still asked you to render a video yourself; it now asks only for a label on a sample you can watch in the browser.
+
+### Toward revenue
+- **Bet 1's ask is smaller.** #77's title and description asked for a render on your machine, though this morning's comment links a spoken sample you can watch in the browser. Both now lead with that sample; the local render is optional. Editing sends no email. Every route to revenue needs bet 1.
+- **Break-even, priced for the first time.** It had been dropped four times as "needs your subscription price". It does not: on Pro ($20 a month), reaching the Partner Program bar covers our costs at any reported ad rate; on Max ($100 or more), only in the upper half of the reported range, and at the lowest rate it takes three to six times the bar. So the bar is roughly break-even, not profit. For the 5 November review.
+
+### Done
+- **General management (the audit):** nine shifts since 21 October ran 26–43 of 60 minutes. All handed over, none had anything ready, and nothing reached viewers. Checks caught real faults before release (two samples held back, a slur created by cutting a line, a blank line that dropped the whole host). There were no reverts and no rule broken. **Found:** (1) two plain-label asks wait (#77, #80) while nothing of yours has moved, so no re-asks, which would only add email; (2) distribution and finance had no time in twenty shifts, monetization and editorial none since 21 October (for 5 November); (3) all nine shifts called themselves better than the last while watch time stayed flat: the self-grading the report's template warns about, so this entry answers for viewers first; (4) six of nine were mostly fixes, many of them word lists for bet 1's tag filter, grown three times. Five decisions re-tested, one compressed, two superseded findings shortened. Rule fixes that need your approval are bundled for one ask at the 5 November review, not sent now: the ready-work floor (3 in the rules, 5 in the code), a false line saying shifts cannot read run logs, and your approved #65 sentence.
+- **Product:** #82's title said to register by 31 October; the date that binds us is 12 January. Corrected, no email.
+- **Engineering (a fix, live):** the tool that shows where each shift's time went counted one shift twice and stopped short of ten shifts back. Fixed, reviewed by a fresh agent (no blockers), merged; no video change.
+- **Editorial (a check):** the working name "Show of Hands" belongs to an English folk duo active since 1986, with its own YouTube channel, so a rename proposal cannot assume it. Recorded on the brand item.
+- **Dropped:** which uploads gain subscribers (gains are zero on almost every upload, 21 ever, so nothing can be told apart); the Stack Exchange spoken sample (this afternoon's upload runs about 16:00, inside the hour a render must avoid); a hook that stops a shift ending before its handover (every traced shift since 19 October handed over); deleting four abandoned side branches (unmerged work; recorded instead).
+- **Reliability and security:** yesterday's two uploads and this morning's landed; the last six runs succeeded. The standing check is clean: no secrets in the project, no workflow changes, you the only collaborator; money controls in place ($0.73 this month, forecast $0.87 of $3).
+- Mostly process and fixes; the break-even and the name check are new information. AI use: no upload-model, Groq or Polly requests, no render.
+- **Process:** shifts cannot edit the rule files (refused again today), so the bundle will reach you as exact text, as #65 did.
+
+### Blocked
+- **For you, in order:** #77 (watch the sample in its 25 October comment; one label ships bet 1); #82 (register our Reddit app by 12 January; sooner is safer); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
+
+### Next
+- **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit, then update the plans.
+- The Stack Exchange spoken sample, in the first render slot clear of an upload (after about 17:30 UTC).
+- The 26 October weekly review, then the opening-reach read once the snapshot lands.
+- The 5 November monthly: raise the rule bundle as one ask with its exact text; give distribution and finance their turn.
+
+### Better?
+- **Than last shift:** No for viewers; nothing new reached them. Slightly for the company: bet 1's ask is one label, and break-even is known.
+- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds and bet 1 has not shipped, though its ask shrank from a session on your machine to one label.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-25 (08:25) — Bet 1's spoken sample met the bar and is on #77; one label from you ships it
 
     Worked (% of the shift): product 30 · data 25 · gm 20 · strategy 10 · engineering 5 · reliability 5 · security 5
@@ -95,39 +129,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Yes. A sample whose tags meet your bar is in front of you, where last shift's was still being filtered, and bet 1's verdict can no longer be read on the wrong cut.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped, though it now waits on one label, not your machine.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-24 (22:30) — Bet 1's release passed a full review with no blockers; its tag filter now also drops tags that call an answer right
-
-    Worked (% of the shift): product 30 · engineering 25 · gm 25 · data 10 · reliability 5 · security 5
-
-**Summary:** Everything bet 1 changes passed its first full review since 13 October with no blockers, which clears one of the steps between your approval and the merge; its two small findings are fixed. Today's release check showed a host tag agreeing with its answer ("Plastic crack is right"), and the filter now drops that kind too, before tomorrow morning's sample for you.
-
-### Toward revenue
-- **Bet 1 is closer.** Every route to revenue needs bet 1. Its last gate is you watching a sample whose tags react rather than grade or agree, and the merge after that needs a full review, now done. One more way of agreeing is stopped in code before that render, and a blank line can no longer cost an upload its whole host.
-
-### Done
-- **Engineering (a check, then two fixes, on the release):** a fresh review of everything bet 1 changes. **No blockers**: uploads, the live record files, the Polly budget and the test-mode guard all check out. It found one thing worth fixing: one blank host line cost every host line, so the upload went out as a plain reading; now only the blank line drops. Flag emoji also slipped past the emoji check (they would show as empty boxes); now caught in tags, and in titles and on-screen answers too (one past answer carried a flag).
-- **Product (a fix, on the release):** "Plastic crack is right" agrees with the answer, which on a politics thread takes a side, and the afternoon's filter let it through. Tags that call an answer right ("That's right", "Exactly right", "Sounds about right") and "Truth" on its own now drop; after "not" they ship, as doubt ("Not quite right"). It drops none of the 30 tags from past release checks and renders, or of 204 short quoted phrases in our records. A fresh review found one wrongly dropped kind of doubt and a few missed forms; fixed. Rare edge cases are recorded, not chased.
-- **Product (measurement, on the release):** when a filter drops a tag, the log now shows what the tag said, not only its length. For four days the release check has said only that the opening tag dropped, so nobody could tell whether the filter was right; tomorrow's will show it. Its review caught two faults (cutting a long line could create a slur; a tag like "Failed attempt" would read as a failed render); both fixed.
-- **General management (a fix, live):** the tool that shows the idea generator what earlier shifts dropped had been blind since 20 October: shifts began listing drops inside another bullet, and it only read bullets that opened with them, so any round since could re-propose a rejected idea. It now reads both, whole. Its review found it could mistake ordinary text for a drop list; fixed before it went live.
-- **Reliability (a check):** the release passes all its tests on Python 3.10, the version on your machine (last checked 21 October), and a silent sample renders there (1080×1920, 28 seconds).
-- **Data (a fix, live):** the capitals test's one-word arm shipped two capitalised words today ("Which Halloween costume will YOU see the MOST?"), 1 of its 11 titles. It is now held to one in code, as the no-capitals arm has been since 16 October. Titles only, so no render or version change; reviewed, no blockers.
-- **General management:** nothing was ready. I found the tag myself; a fresh agent proposed four ideas, one of them the same tag. Two rankers, in opposite orders, agreed: the full review first, a note for tomorrow's sample second, the tool fix third, closing an old record last. All done. A second round found the Python check and the capitals leak, both done. **Dropped:** code to stop two alike tags in one video (no repeat on record); tags that echo the answer with a laugh (still a reaction); refreshing the bet 1 issue's description (tomorrow's sample comment replaces it); the functions with no recent time (two rounds found nothing, and no new figures arrive before the 26th).
-- **General management:** closed the record of the shift that ended after 2 minutes on 19 October. Its condition was ten shifts with the new trace: all ran 26–56 minutes and handed over (three short runs on the 22nd and 23rd were the weekly allowance guard, as designed).
-- **Reliability and security:** both uploads landed today. The standing check is clean: no secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.70 this month, forecast $0.86 of $3).
-- Mostly fixes, plus one measurement. The channel reads flat (12 seconds for six periods); bet 1 is the item that changes what we ship. AI use: none (no upload-model, Groq or Polly requests, no render).
-- **Process:** side branches lived in separate copies of the project while agents read the main one, so the trap the last two shifts hit did not recur. Handed over about 20 minutes early: a last look found nothing above the bar (a length cap on the sample report, rarely reached; an unreadable AI reply echoed to the public log, low harm; more agreeing wordings, none yet seen).
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
-
-### Next
-- **The first shift after about 07:30 UTC:** read the 08:17 release check (it now shows what each filter dropped), then render the release branch and, if its tags react rather than grade, post the sample to #77. If the sample's question leans on a post body the viewer never sees (first-person or advice, as on 23 October), say so in that comment, so the host is judged and not the post; render again only if a tag fails the bar.
-- The trial wording that drops "agreement" from what the prompt asks for, on about three trial posts with the upload model's allowance, after the 07:00 reset.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Yes, slightly. The full review the merge needs is done with no blockers, and two more ways a tag could fail are stopped before the render you will watch. Nothing reached viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.

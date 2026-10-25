@@ -339,7 +339,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,
   `integration/two-answer-meta-fallback`, `product/host-line-fallback`);
   18 are contained in `integration/preview` and go when `v8` merges. Not
-  deleted: unmerged work. **Decisions:** D13, D5, D14 re-reviewed; the rest
+  deleted: unmerged work. **Decisions:** D13, D5, D14, D9, D10 re-reviewed; the rest
   stand at 10-13 (D7 compressed to a stub; D10 is due one).
   **Outward look (docs re-read 10-25):** a skill's frontmatter can now carry
   `hooks:`, keeping a hook under protected `.claude/skills/**` rather than
