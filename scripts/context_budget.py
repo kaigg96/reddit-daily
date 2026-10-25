@@ -256,8 +256,9 @@ FUNCTIONS = ["strategy", "gm", "market", "audience", "distribution", "monetizati
              "finance", "legal", "security"]
 
 
-def allocation_entries(raw):
+def allocation_entries(raw, full_heading=False):
     """(heading, {function or old lane: % of the shift}) per entry, newest first.
+    The heading is cut to 28 characters unless `full_heading`.
 
     Fenced blocks are dropped first: the header's template is itself an entry,
     and until 2026-09-29 it was read as the newest shift."""
@@ -279,11 +280,12 @@ def allocation_entries(raw):
                 hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
                 if hit:
                     row[hit.group(1)] = int(hit.group(3))
-        entries.append((block.split("\n")[0].strip()[:28], row))
+        heading = block.split("\n")[0].strip()
+        entries.append((heading if full_heading else heading[:28], row))
     return entries
 
 
-def worklog_history(commits=40):
+def worklog_history(commits=200):
     """allocation_entries over WORKLOG.md now and in its recent commits, one
     per heading, newest first. The log keeps ~10 entries; older ones are still
     in git history (shift.yml checks out in full)."""
@@ -300,17 +302,35 @@ def worklog_history(commits=40):
                                         capture_output=True, text=True).stdout)
     except (OSError, subprocess.CalledProcessError):
         pass                                    # no git: the current file is all there is
-    # Keyed on the date and time: a shift may reword its headline or even its
-    # time, so only entries older than the current file's oldest were dropped.
-    seen, oldest = {}, None
+    return merge_versions(texts)
+
+
+def merge_versions(texts):
+    """One allocation entry per shift across WORKLOG versions, current first.
+
+    Keyed on the date and time: a shift may reword its headline or even its
+    time, so only entries older than the current file's oldest were dropped.
+    A shift that re-stamps its time keeping its headline (10-24 09:05, then
+    08:50) is one shift, as in `backlog_status.recently_dropped`; the 10-25
+    audit found it counted twice, pushing another shift out of the window."""
+    seen, oldest, links = {}, None, set()
     for i, text in enumerate(texts):            # current file first, so its edits win
-        for label, row in allocation_entries(text):
-            key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", label).group(0)
+        for heading, row in allocation_entries(text, full_heading=True):
+            key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", heading).group(0)
+            headline = heading.split("—", 1)[1].strip() if "—" in heading else ""
+            mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set())
+            restamped = key not in seen and bool(mine & links)
+            links |= mine
+            if restamped:
+                continue
             if i == 0 or oldest is None or key < oldest:
-                seen.setdefault(key, (label, row))
+                seen.setdefault(key, (heading[:28], row))
         if i == 0 and seen:
             oldest = min(seen)
     return [seen[k] for k in sorted(seen, reverse=True)]
+
+
+ALLOCATION_SHIFTS = 20
 
 
 def allocation_history():
@@ -318,8 +338,10 @@ def allocation_history():
 
     A function that never gets time is not by itself a problem -- the reviews
     give every function its turn (cadence.py) -- but a function with ready work
-    in the queue that never gets time is a ranking problem worth reading for."""
-    entries = worklog_history()
+    in the queue that never gets time is a ranking problem worth reading for.
+    The newest ALLOCATION_SHIFTS: two audits' worth, so "never worked" names a
+    window an audit can compare, whatever depth of git history it reads."""
+    entries = worklog_history()[:ALLOCATION_SHIFTS]
     if not entries:
         print("\nno time records in WORKLOG.md yet")
         return
