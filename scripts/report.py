@@ -207,6 +207,10 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     defaults to the release's pre-committed size (`RELEASE_MIN_UPLOADS`)."""
     if min_uploads is None:
         min_uploads = insights.RELEASE_MIN_UPLOADS.get(version, insights.MIN_COHORT)
+    if within_spec is None:
+        within_spec = insights.RELEASE_WITHIN.get(version)
+        if within_spec:
+            print(f"(the cut {version}'s rule commits to, insights.RELEASE_WITHIN)")
     read = insights.release_read(version, key, target_age, within_spec)
     if read is None:
         sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")

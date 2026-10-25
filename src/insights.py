@@ -899,6 +899,12 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 # that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20).
 RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
 
+# Each release's pre-committed cut (PRD §0), read when no --within is given.
+# Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was
+# 42 of 60 AskReddit and `v8` will be about half, so a pooled read would
+# judge the subreddit mix as well as the host (pre-mortem, 2026-10-25).
+RELEASE_WITHIN = {"v8": "subreddit=AskReddit"}
+
 
 @dataclass
 class ReleaseRead:
@@ -957,13 +963,14 @@ def release_digest_line(log_rows, target_age=None):
     target_age = AGE_MATCH_TARGET_DAYS if target_age is None else target_age
     parts = []
     for version in latest_releases(log_rows):
-        read = release_read(version, target_age=target_age)
+        cut = RELEASE_WITHIN.get(version)
+        read = release_read(version, target_age=target_age, within_spec=cut)
         if read is None:
             verdict = f"NO VERDICT — no upload has a snapshot at ~{target_age:g} days old"
         else:
             verdict = release_verdict(read.comparisons, read.floors, read.triggers,
                                       RELEASE_MIN_UPLOADS.get(version, MIN_COHORT))
-        parts.append(f"`{version}`: {verdict}")
+        parts.append(f"`{version}`" + (f" (within {cut})" if cut else "") + f": {verdict}")
     return (f"**Release checks** (auto-revert, every upload read at ~{target_age:g} days) — "
             + (" · ".join(parts) if parts else "no release logged"))
 
