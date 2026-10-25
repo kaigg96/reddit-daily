@@ -238,7 +238,7 @@ def main():
     # Bet 1 (#70): the host's lines, or today's video if any is missing. The
     # flag is blank while bet 1 is off, as title_caps is when no arm applied.
     host = meta.commentary if config.COMMENTARY else None
-    if host and config.SOURCE == "own":
+    if config.SOURCE == "own" and not config.SAMPLE and config.COMMENTARY:
         host = ownquestions.as_host(host)
     commentary_ok = int(host is not None) if config.COMMENTARY else ""
     if config.COMMENTARY and not host:

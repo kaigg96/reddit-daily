@@ -46,7 +46,7 @@ STAND_IN_VOICE = os.environ.get(
 SOURCE = os.environ.get("SOURCE", "own" if SILENT_NARRATION and not SAMPLE else "reddit")
 # Each answer's on-screen label. The host's own takes say so: nobody else wrote
 # them, so they must never pass for a real person's answer (PRD §4).
-ANSWER_LABEL = "TAKE" if SOURCE == "own" else "ANSWER"
+ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
 # METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
 # the upload model (llm.MODEL): one request from the allowance uploads share,
 # so only for a render the owner judges (#77). The screen stays on the sample

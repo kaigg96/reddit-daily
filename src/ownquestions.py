@@ -15,6 +15,7 @@ import re
 
 from . import config, llm
 from .content import Answer, PostContent
+from .llm import Commentary
 
 PROMPT = (
     "You host a YouTube Shorts show that asks one everyday question and gives "
@@ -24,15 +25,21 @@ PROMPT = (
     "sentence, at most 12 words, ending in a question mark. Not about news, "
     "politics, religion, health, sex or a named person or brand.\n"
     "- Three takes that genuinely disagree with each other, each ONE sentence "
-    "of at most 18 words, plain and spoken, with a clear opinion.\n"
-    "- The takes are your opinions, never experiences: no story about yourself, "
-    "a job, a family, or anything that happened to you. No jokes built on a "
-    "comparison (\"X is like Y\").\n"
+    "of at most 18 words, plain and spoken, stating a stance.\n"
+    "- A take is a stance, never a person: no character (\"As a parent\"), no "
+    "story or anything that happened, and no \"I\", \"me\", \"my\", \"we\" or "
+    "\"our\" (three takes in the first person would read as three people). No "
+    "jokes built on a comparison (\"X is like Y\").\n"
     "Reply with only JSON: {\"question\": \"...\", \"takes\": [\"...\", \"...\", \"...\"]}")
 
-# A take that tells a story about the teller would be an invented person.
-_STORY = re.compile(r"\b(my (boss|wife|husband|mom|mum|dad|kids?|son|daughter|job|"
-                    r"friend|partner|ex)|when i was|i once|once i|years ago)\b", re.I)
+# A take about its teller would be an invented person: a story ("My boss
+# once…"), or a first-person preference, which across three contradicting
+# takes reads as three people ("Coffee fuels my focus" beside "I skip
+# stimulants", a trial reply, 2026-10-25).
+# "I'm" and "I’ve" match on their "I". A character ("As a parent") or a time
+# that happened ("Growing up", "Last week") is a story too.
+_STORY = re.compile(r"\b(i|me|my|mine|myself|we|our|us)\b|^as an? |\bgrowing up\b|"
+                    r"\b(last|one) (week|month|year|time)\b", re.I)
 
 
 def _usable(question, takes):
@@ -56,11 +63,30 @@ def parse(reply):
     return data["question"].strip(), [t.strip() for t in data["takes"]]
 
 
+SCHEMA = {"type": "OBJECT", "properties": {
+    "question": {"type": "STRING"},
+    "takes": {"type": "ARRAY", "items": {"type": "STRING"}, "minItems": 3, "maxItems": 3}},
+    "required": ["question", "takes"], "propertyOrdering": ["question", "takes"]}
+
+
 def select_post(prev_title=""):
-    """Today's question and three takes, written in one request."""
-    episode = parse(llm.generate_retrying(PROMPT, model=llm.MODEL))
-    if not episode or episode[0] == prev_title:
-        raise RuntimeError("the episode request gave no usable question and three takes")
+    """Today's question and three takes: one request on the upload model, as
+    the show would make it, and one free Groq request if that reply is refused,
+    since a failed episode costs the branch's one render in 12 hours."""
+    for route in ("upload model", "groq"):
+        try:
+            reply = (llm.generate_retrying(PROMPT, model=llm.MODEL, schema=SCHEMA)
+                     if route == "upload model" else llm._generate_groq(PROMPT))
+        except Exception as e:   # noqa: BLE001 -- the other route may still answer
+            print(f"Own question: the {route} failed ({type(e).__name__})")
+            continue
+        episode = parse(reply)
+        if episode and episode[0] != prev_title:
+            print(f"Own question: written on the {route}")
+            break
+        print(f"Own question: the {route}'s reply was refused: {reply[:300]!r}")
+    else:
+        raise RuntimeError("neither route gave a usable question and three takes")
     question, takes = episode
     return PostContent(subreddit="", title=question, shortlink="",
                        comments=[Answer(t, "") for t in takes],
@@ -71,8 +97,11 @@ def select_post(prev_title=""):
 OWN_SETUP = "Three takes. All mine."
 
 
-def as_host(host):
+def as_host(host, n=config.COMMENTARY_ANSWERS):
     """The host's lines for its own takes: it says over the question that the
     takes are its own, and reacts to none of them (reacting to its own words
-    would be talking to itself). The vote stays: it is the closing line."""
+    would be talking to itself). The vote stays: it is the closing line. With
+    no host lines at all (the metadata call failed), the note still shows."""
+    if host is None:
+        return Commentary(OWN_SETUP, [""] * n, "")
     return host._replace(setup=OWN_SETUP, reactions=[""] * len(host.reactions))
