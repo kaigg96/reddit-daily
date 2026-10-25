@@ -44,3 +44,25 @@ def test_every_function_in_org_md_is_known():
     import re
     org = open(os.path.join(os.path.dirname(__file__), "..", "ORG.md")).read()
     assert len(re.findall(r"^#### ", org, re.M)) == len(context_budget.FUNCTIONS) == 14
+
+
+def _entry(stamp, headline, worked):
+    return f"\n## {stamp} — {headline}\n\n    Worked (% of the shift): {worked}\n"
+
+
+def test_a_restamped_shift_is_counted_once():
+    """10-24's shift was stamped 09:05, then 08:50 with the same headline; the
+    10-25 audit found --allocation counting it twice."""
+    current = "# Work log\n" + _entry("2026-10-25 (08:25)", "newest", "product 100")
+    newer = current + _entry("2026-10-24 (08:50)", "Rewording made it worse", "gm 100")
+    older = current + _entry("2026-10-24 (09:05)", "Rewording made it worse", "gm 100") \
+        + _entry("2026-10-23 (22:55)", "a different shift", "data 100")
+    labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
+    assert labels == ["2026-10-25 (08:25)", "2026-10-24 (08:50)", "2026-10-23 (22:55)"]
+
+
+def test_two_shifts_on_one_day_stay_two():
+    current = "# Work log\n" + _entry("2026-10-25 (08:25)", "newest", "product 100")
+    old = current + _entry("2026-10-24 (22:30)", "evening", "gm 100") \
+        + _entry("2026-10-24 (15:30)", "afternoon", "gm 100")
+    assert len(context_budget.merge_versions([current, old])) == 3
