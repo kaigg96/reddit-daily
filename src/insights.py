@@ -902,7 +902,8 @@ RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
 # Each release's pre-committed cut (PRD §0), read when no --within is given.
 # Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was
 # 42 of 60 AskReddit and `v8` will be about half, so a pooled read would
-# judge the subreddit mix as well as the host (pre-mortem, 2026-10-25).
+# judge the subreddit mix as well as the host (pre-mortem, 2026-10-25). The
+# rule says "while #3 runs": revisit this entry when #3 is read.
 RELEASE_WITHIN = {"v8": "subreddit=AskReddit"}
 
 

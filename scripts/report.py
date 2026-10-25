@@ -886,7 +886,8 @@ def main():
         # (2026-10-09, before #8's read).
         if args.metric not in (Metric.WATCH, Metric.VIEWS, Metric.TOTAL):
             age = insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age
-            within = f" --within {args.within}" if args.within else ""
+            cut = args.within or insights.RELEASE_WITHIN.get(args.release)
+            within = f" --within {cut}" if cut else ""
             sys.exit(f"--release judges watch-seconds by its rule (views and total "
                      f"watch time beside it) and does not read --metric {args.metric}. "
                      f"Read it per release instead: --by {args.release_key} --metric "
