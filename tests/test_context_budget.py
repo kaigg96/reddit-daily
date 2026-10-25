@@ -66,3 +66,15 @@ def test_two_shifts_on_one_day_stay_two():
     old = current + _entry("2026-10-24 (22:30)", "evening", "gm 100") \
         + _entry("2026-10-24 (15:30)", "afternoon", "gm 100")
     assert len(context_budget.merge_versions([current, old])) == 3
+
+
+def test_a_restamp_that_also_rewords_is_counted_once_by_its_summary():
+    """10-18 08:45 became 08:50 with a reworded headline; the summary stayed."""
+    def entry(stamp, headline, summary):
+        return _entry(stamp, headline, "gm 100") + f"\n**Summary:** {summary}\n"
+    current = "# Work log\n" + _entry("2026-10-19 (09:50)", "newest", "product 100")
+    newer = current + entry("2026-10-18 (08:50)", "Bet 1 still waits, reworded", "Nothing reached viewers.")
+    older = current + entry("2026-10-18 (08:45)", "Bet 1 still waits", "Nothing reached viewers.") \
+        + entry("2026-10-18 (14:35)", "another shift", "Something else happened.")
+    labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
+    assert labels == ["2026-10-19 (09:50)", "2026-10-18 (14:35)", "2026-10-18 (08:50)"]
