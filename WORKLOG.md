@@ -89,6 +89,7 @@ and more useful than a confident guess.
 - The Stack Exchange spoken sample, in the first render slot clear of an upload (after about 17:30 UTC).
 - The 26 October weekly review, then the opening-reach read once the snapshot lands.
 - The 5 November monthly: raise the rule bundle as one ask with its exact text; give distribution and finance their turn.
+- **About 2 November, if #80 is still unanswered:** the plan you approved turns on four a day after the subreddit read, while #80 asks it to wait for bet 1 (the spam rule's risk is the channel itself). Recommend holding: going ahead is the riskier action, and one label from you starts it.
 
 ### Better?
 - **Than last shift:** No for viewers; nothing new reached them. Slightly for the company: bet 1's ask is one label, and break-even is known.
