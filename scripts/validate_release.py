@@ -168,7 +168,8 @@ def check_metadata():
             meta = llm.get_metadata(q, comments, style="A", caps=True)
     finally:
         print(log.getvalue(), end="")
-    dropped = [ln for ln in log.getvalue().splitlines() if ln.startswith("Commentary: past")]
+    dropped = [ln for ln in log.getvalue().splitlines()
+               if ln.startswith("Commentary: past") or ", as written: " in ln]
 
     if meta.source == "error":
         # Deliberately not retried, for the same reason check_screen doesn't:
@@ -219,17 +220,18 @@ def check_metadata():
         else:
             # A line past its cap now drops alone (#15), so the upload keeps a
             # host; warn, so the verdict file still shows the prompt overran.
-            def shown(label, line, ships="the rest still ship"):
+            def shown(label, line, ships="the rest still ship", why="past its cap"):
                 note(f"- ✅ host {label}: {line}" if line
-                     else f"- ⚠️ host {label}: dropped, past its cap ({ships})")
+                     else f"- ⚠️ host {label}: dropped, {why} ({ships})")
             if host.setup:
                 shown("setup", host.setup)
             else:
                 note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
             for i, line in enumerate(host.reactions, 1):
-                shown(f"reaction {i}", line)
-            if not host.verdict:
-                shown("vote", "", "the usual closing line ships")
+                shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
+            if not host.verdict:   # a swear word now drops it too (the run log says which)
+                note("- ⚠️ host vote: dropped, past its cap or a swear word"
+                     " (the usual closing line ships)")
         for line in dropped:
             note(f"- ⚠️ {line}")
     note("")

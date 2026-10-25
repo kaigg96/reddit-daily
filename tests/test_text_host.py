@@ -171,6 +171,40 @@ def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
     assert run.own_words_share(segs) == f"{notes / total:.3f}"
 
 
+@pytest.mark.parametrize("vote", ["Raising my hand for the shelter one, damn right. YOUR vote?",
+                                  "Raising my hand for the f**k off one. YOUR vote?"])
+def test_a_swearing_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch, vote):
+    """The vote is published, so it is held to the title's guard (10-22's swear
+    word in a live title); the notes keep theirs, where "Oh god" is a reaction."""
+    host = _text_metadata(monkeypatch, cta=vote)
+    assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
+    assert host.verdict == "" and run.closing_line(None, host) is None
+
+
+def test_a_swearing_vote_is_logged_as_one_not_as_long(monkeypatch, capsys):
+    _text_metadata(monkeypatch, cta="Raising my hand for the shelter one, damn right.")
+    out = capsys.readouterr().out
+    assert "vote (a swear word or emoji)" in out and "vote (" not in out.replace(
+        "vote (a swear word or emoji)", "")
+
+
+@pytest.mark.parametrize("tag", ["Holy shit", "F**k me", "WTF"])
+def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
+    """The tags are on screen, so they may not swear either (the vote guard's
+    review, 10-23), on a list that spares god, hell and damn."""
+    host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+    assert host.reactions == ["", HOST["reactions"][1]] and host.verdict == HOST["cta"]
+    out = capsys.readouterr().out
+    assert "reaction 1 (a swear word or emoji)" in out
+    assert tag not in out and "as written" not in out   # the public log never repeats it
+
+
+def test_a_reaction_may_say_oh_god(monkeypatch):
+    for tag in ("Oh god", "Hell no", "Damn right", "OMG, no"):
+        host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+        assert host.reactions[0] == tag and host.verdict == HOST["cta"]
+
+
 def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
     """Which line ran long, and by how much: the vote's drops were counted,
     never measured (2026-10-20)."""
@@ -178,6 +212,12 @@ def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "vote (23 words), reaction 2 (13 words)" in out
     assert "setup (" not in out and "reaction 1 (" not in out
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right, on a line the dry run's report reads as the AI's words.
+    said = f'Commentary reaction 2, as written: "{" ".join(["word"] * 13)}"'
+    assert said in out.splitlines() and "vote, as written" not in out
+    from scripts import dry_run
+    assert dry_run.ECHOES_CONTENT.match(said) and dry_run.PICKED.match(said)
 
 
 def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):
@@ -236,10 +276,24 @@ def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     assert run.host_lines_shown(segs) == 1     # setup, last answer and its line, the vote
 
 
-@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂"])
-def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
+@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂", "Wow 🇺🇸", "1️⃣ wow",
+                                  "", "   ", None])
+def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, capsys, junk):
+    """A flag or keycap is two code points, neither an emoji alone; and an
+    empty line drops alone, as a long one does (whole-branch review, 10-24)."""
     host = _text_metadata(monkeypatch, reactions=[junk, HOST["reactions"][1]])
     assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
+    said = [ln for ln in capsys.readouterr().out.splitlines() if "as written" in ln]
+    assert said == ([f'Commentary reaction 1, as written: "{junk}"'] if junk == "..." else [])
+
+
+@pytest.mark.parametrize("line", [{"setup": ""}, {"cta": None}, {"cta": "  "}])
+def test_an_empty_setup_or_vote_drops_alone(monkeypatch, capsys, line):
+    host = _text_metadata(monkeypatch, **line)
+    assert host.reactions == HOST["reactions"]
+    want = ("", HOST["cta"]) if "setup" in line else (HOST["setup"], "")
+    assert (host.setup, host.verdict) == want
+    assert "a swear word" not in capsys.readouterr().out    # empty is not swearing
 
 
 def test_the_sample_setup_would_ship_as_a_tag(tag_host):
@@ -352,6 +406,71 @@ def test_words_run_together_drop(tag_host, line, ok):
 def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
     assert llm._usable(line, "setup") is ok
     assert llm._usable(line, "reaction")        # the reactions are not held to it
+
+
+# Reaction tags from the trials (PRD §4): the upload model's verdicts, and
+# reactions a check for stock verdicts must leave alone.
+@pytest.mark.parametrize("line, ok", [("Spot on", False), ("Direct hit", False),
+                                      ("Deep insight", False), ("Ah, makes sense", False),
+                                      ("Sad but true", False), ("Good point", False),
+                                      ("Math checks out", False), ("Finally said it", False),
+                                      ("Wait, what?", True), ("Oof, direct", True),
+                                      ("Good riddance", True), ("Too relatable", True),
+                                      ("Yikes, awkward", True), ("Bold move", True),
+                                      ("Charging to print?!", True), ("Yeah, right", True),
+                                      # Review, 10-24: forms the first list missed, and
+                                      # doubt or a word's other sense it wrongly dropped.
+                                      ("Spot-on", False), ("Nails it", False), ("Truuue", False),
+                                      ("Great advice", False), ("So true", False), ("Agreed!", False),
+                                      ("Is that true?!", True), ("True crime?!", True),
+                                      ("Who said it?", True), ("Exactly zero", True),
+                                      ("Polite but pointless", True), ("Not fair!", True),
+                                      ("Brutal truth", True), ("Validate this?!", True),
+                                      ("Preacher energy", True), ("Agreeable, sure", True),
+                                      ("Goood point", False), ("Spot\u2011on", False), ("Ain’t that the truth", False),
+                                      # 10-24: plain agreement, which on politics takes a
+                                      # side; a phrase's other sense still ships.
+                                      ("Well put", False), ("On point", False), ("You're right", False),
+                                      ("Amen", False), ("Hell yes", False), ("100%", False),
+                                      ("True that", False), ("Exactly this", False), ("Can confirm", False),
+                                      ("Mic drop", False), ("Absolutely!", False), ("Nailed", False),
+                                      ("Dead on", False), ("Right on", False), ("So right", False),
+                                      ("Bang on", False), ("Correct answer", False),
+                                      ("Absolutely not!", True), ("Dead on arrival", True),
+                                      ("Right on cue", True), ("So right-wing?!", True), ("Hard truth", True),
+                                      ("Too real", True), ("Oh yes, THIS", True), ("Hell no", True),
+                                      # Review: a tag opening on "100%" reacts; "nailed" can wince.
+                                      ("Facts, 100%", False), ("100 percent", False), ("Totally nailed", False),
+                                      ("Hell yeah", False), ("Based", False), ("Truth bomb", False),
+                                      ("100% chaos", True), ("100% relatable", True), ("Got nailed", True),
+                                      ("Ouch, nailed", True), ("Based on nothing", True), ("Based on what?", True),
+                                      # Release check, 10-24: naming the answer right agrees.
+                                      ("Plastic crack is right", False), ("That's right", False),
+                                      ("He’s right!", False), ("Damn right", False), ("Truth.", False),
+                                      ("Exactly right", False), ("Sounds about right", False),
+                                      ("Thats right", False), ("100% right", False),
+                                      ("That's not right!", True), ("Not quite right", True),
+                                      ("Isn't exactly right", True), ("Right in the wallet", True),
+                                      ("Serves you right", True), ("Alright, alright", True),
+                                      ("Truth hurts", True), ("Copyright drama", True)])
+def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
+    assert llm._usable(line, "reaction") is ok
+    assert llm._grades(line) is not ok      # the verdict check, not a cap, decides
+
+
+def test_only_tags_are_held_to_the_verdict_rule(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert llm._usable("That makes sense, sadly.", "reaction")
+
+
+def test_a_grading_tag_drops_alone(tag_host, monkeypatch, capsys):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS,
+                                                 "reactions": ["Spot on", TAGS["reactions"][1]]}))
+    assert meta.commentary == (TAGS["setup"], ["", TAGS["reactions"][1]], HOST["cta"])
+    assert "a tag that grades: reaction 1 (2 words)" in capsys.readouterr().out
 
 
 def test_a_title_setup_drops_alone(tag_host, monkeypatch, capsys):

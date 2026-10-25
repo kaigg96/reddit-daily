@@ -10,6 +10,7 @@ import emoji
 import requests
 
 from . import config  # also ensures .env is loaded for direct imports
+from . import content
 
 
 # gemini-2.5-flash "thinks" by default, and on these prompts that is pure
@@ -172,6 +173,8 @@ def generate_retrying(prompt, tries=2, **kw):
     2026-09-11: a verification pass retried 429s and burned ~40 requests to
     make 8 useful calls. The exception is Groq's per-minute cap, which its
     retry-after header tells apart from its daily one (`_groq_rate_wait`).
+    The log's `http_429_day` / `_minute` says which cap each 429 hit; a
+    Gemini `_minute` would be the evidence to revisit this rule.
 
     Timeouts and 503s are genuinely transient and are retried once. The budget
     is tight enough that `tries` is deliberately 2, not 3; a 503 waits
@@ -238,8 +241,9 @@ _STYLE_GUIDANCE = {
 # -- one is "could not check", the other is "do not merge". Defaulted so the
 # upload path, which only ever reads the three content fields, is untouched.
 #
-# `failure` says WHY the fields came back empty: `http_429` (the shared daily
-# cap), another `http_<status>`, `timeout`, `no_json`, `bad_json`. Blank when
+# `failure` says WHY the fields came back empty: `http_429` (a cap; `_day` or
+# `_minute` when the body names which), another `http_<status>`, `timeout`,
+# `no_json`, `bad_json`. Blank when
 # Gemini answered with JSON. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
@@ -258,10 +262,32 @@ def _failure_kind(exc):
     HTTPError's message embeds the keyed URL."""
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.HTTPError) and response is not None:
-        return f"http_{response.status_code}"
+        kind = f"http_{response.status_code}"
+        return kind + _quota_window(response) if response.status_code == 429 else kind
     if isinstance(exc, requests.Timeout):
         return "timeout"
     return type(exc).__name__
+
+
+def _quota_window(response):
+    """"_day" or "_minute": which cap a 429's body names, "" when it names none.
+
+    A bare `http_429` could not say whether the day's 20 requests were spent
+    (the next upload loses its title) or a burst hit a per-minute cap (a wait
+    would have cleared it). The 2026-10-20 13:34 release check 429'd on its
+    fifth screen case after a shift's trials, and nothing recorded which.
+    Gemini's body names its quotaId (`GenerateRequestsPerDayPerProjectPerModel`),
+    Groq's message its window ("tokens per minute"). Only the label is kept,
+    never the body. A day cap wins when both are named: it is the one that
+    lasts."""
+    try:
+        body = response.text
+    except Exception:
+        return ""
+    flat = re.sub(r"[\s_-]", "", body).lower() if isinstance(body, str) else ""
+    if "perday" in flat:
+        return "_day"
+    return "_minute" if "perminute" in flat else ""
 
 
 _CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
@@ -414,6 +440,39 @@ def _reads_as_reaction(line):
                                          or re.fullmatch(r"(ha|he)+h?", word)))
 
 
+# A reaction tag that grades the answer tells the viewer it is right: a side
+# on a politics thread, a verdict on any other (the owner's bar, PRD §4). The
+# upload model graded every answer of the first spoken sample ("Spot on",
+# "Direct hit", "Deep insight", 10-23), and told never to grade, still did on
+# 3 of 9 (10-24: "Ah, makes sense", "Sad but true", "Good point"). No wording
+# fixed it, so a grading tag is dropped, as a title setup is. It reads stock
+# verdicts only: "Yeah, right" and "Bold move" ship. A one-word verdict counts
+# only at the tag's end ("True crime" ships), and a question is doubt, which
+# is a reaction ("Is that true?!", "Spot on?"). Plain agreement grades too
+# ("Well put", "You're right", "Amen"): on politics it takes a side (10-24),
+# as does naming the answer right ("Plastic crack is right", a release check).
+_VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
+                      r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
+                      r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
+                      r"(good|great|solid|sound|wise) (advice|call|words)|"
+                      r"(well|perfectly|nicely) put|on point|bang on|(you'?re|you are) right|"
+                      r"true that|exactly this|can confirm|correct answer|mic drop|hell ye(s|ah)|amen|"
+                      r"truth bomb)\b|"
+                      r"(true|exactly|facts|correct|accurate|absolutely|dead on|right on|so right|based|"
+                      r"(?<!not )(?<!n't )(is|are|'s|'re|thats|damn|darn|dang|dead|quite|exactly|"
+                      r"absolutely|totally|always|too|about|100\s*(%|percent)) right|100\s*(%|percent))\W*$|"
+                      r"^(totally\s+)?nailed\W*$|^truth\W*$)", re.I)   # "Got nailed" is a wince
+
+
+def _grades(line):
+    # Stretched words fold first, to two letters and to one, as in
+    # _reads_as_reaction: "Truuue" is "true", "Goood point" is "good point".
+    # Groq writes "spot\u2011on" with a non-breaking hyphen (10-24).
+    line = re.sub("[\u2010\u2011\u2013]", "-", line.replace("\u2019", "'"))
+    return "?" not in line and any(_VERDICT.search(re.sub(r"(.)\1{2,}", fold, line))
+                                   for fold in (r"\1\1", r"\1"))
+
+
 def _commentary_ask(n):
     """The host's instructions, for a voiced host or a text-only one."""
     ask = _COMMENTARY_ASK
@@ -440,12 +499,17 @@ def _within_cap(line, kind):
 def _usable(line, kind):
     """Within its cap, with a letter in it (a weak reply can echo the shape's
     "...") and no emoji, which the note's font draws as an empty box, nor
-    words run together; a setup tag must read as a reaction."""
+    words run together; a setup tag must read as a reaction, and a reaction
+    tag must not grade its answer."""
     return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
             and not _RUN_TOGETHER.search(line)
-            and not any(emoji.is_emoji(ch) and ch not in _TEXT_SYMBOLS for ch in line)
+            # Listed whole, not per character: a flag or keycap is two code
+            # points, neither an emoji alone ("Wow 🇺🇸" passed; review, 10-24).
+            and not any(e["emoji"] not in _TEXT_SYMBOLS for e in emoji.emoji_list(line))
             and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
-                     and not _reads_as_reaction(line)))
+                     and not _reads_as_reaction(line))
+            and not (kind == "reaction" and config.HOST_TEXT and config.HOST_TAGS
+                     and _grades(line)))
 
 
 # The emoji package counts these as emoji, but they are text marks the font draws.
@@ -460,28 +524,52 @@ def _clean_commentary(data, n):
     (2026-10-13). Its note is left blank, and a long vote leaves the generic
     closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
-    reactions = data.get("reactions")
-    if not isinstance(reactions, list) or len(reactions) != n:
+    raw_reactions = data.get("reactions")
+    if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
         return None
-    reactions = [_clean_str(r) for r in reactions]
-    if not (setup and verdict and all(reactions)):
+    reactions = [_clean_str(r) for r in raw_reactions]
+    if not (setup and verdict and all(reactions)) and not config.HOST_TEXT:
         return None
-    if (_usable(setup, "setup") and _usable(verdict, "cta")
-            and all(_usable(r, "reaction") for r in reactions)):
+    # Shown as text, an empty line drops alone, as a long one does: one blank
+    # tag cost every host line (whole-branch review, 10-24).
+    setup, verdict, reactions = setup or "", verdict or "", [r or "" for r in reactions]
+    # Every line is published, so none may swear. The vote (the pinned comment,
+    # and narrated) gets the title's guard; the tags a list that spares "Oh god".
+    # Raw and cleaned both: the emphasis strip turns "f**k" into "fk".
+    def tag_swore(raw, line):
+        return any(content._profane(t, content.TAG_CENSOR) for t in (raw, line)
+                   if isinstance(t, str) and t.strip())
+    vote_swore = bool(verdict) and _clean_published(data.get("cta")) is None
+    vote_ok = _usable(verdict, "cta") and not vote_swore
+    setup_swore = tag_swore(data.get("setup"), setup)
+    setup_ok = _usable(setup, "setup") and not setup_swore
+    swore = [tag_swore(raw, r) for raw, r in zip(raw_reactions, reactions)]
+    ok = [_usable(r, "reaction") and not s for r, s in zip(reactions, swore)]
+    if setup_ok and vote_ok and all(ok):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
     # trial posts (2026-10-20) and nothing said by how much.
-    bad = [f"{name} ({len(line.split())} words)" for name, line, kind in
-           [("setup", setup, "setup"), ("vote", verdict, "cta")]
-           + [(f"reaction {i}", r, "reaction") for i, r in enumerate(reactions, 1)]
-           if not _usable(line, kind)]
-    print("Commentary: past its length cap, a placeholder or emoji, or a setup that"
-          " is not a reaction: " + ", ".join(bad))
+    named = ([("setup", setup, setup_ok, setup_swore), ("vote", verdict, vote_ok, vote_swore)]
+             + [(f"reaction {i}", r, k, s)
+                for i, (r, k, s) in enumerate(zip(reactions, ok, swore), 1)])
+    bad = [f"{name} (a swear word or emoji)" if sw else f"{name} ({len(line.split())} words)"
+           for name, line, fine, sw in named if not fine]
+    print("Commentary: past its length cap, a placeholder or emoji, a setup that"
+          " is not a reaction, or a tag that grades: " + ", ".join(bad))
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right: four checks running said only "setup (2 words)" (10-24). Whole, as
+    # checked (a cut word can read as a slur), on a line the dry run's report
+    # reads as the AI's words, not a failure ("Failed attempt"). A swear word or
+    # emoji stays out of the public log, as the title's do, and the vote,
+    # dropped for its length.
+    for name, line, fine, sw in named:
+        if line and not (fine or sw or name == "vote" or emoji.emoji_list(line)):
+            print(f'Commentary {name}, as written: "{line}"')
     if not config.HOST_TEXT:
         return None
-    setup = setup if _usable(setup, "setup") else ""
-    reactions = [r if _usable(r, "reaction") else "" for r in reactions]
-    verdict = verdict if _usable(verdict, "cta") else ""
+    setup = setup if setup_ok else ""
+    reactions = [r if k else "" for r, k in zip(reactions, ok)]
+    verdict = verdict if vote_ok else ""
     if not (setup or any(reactions)):
         return None
     print("Commentary: dropped only the line(s) named above")
@@ -628,9 +716,9 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     return MetadataResult(
-        title=_clean_str(data.get("title")),
+        title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
-        cta=_clean_str(data.get("cta")),
+        cta=_clean_published(data.get("cta")),
         source=route,
         failure=prior,
         commentary=_clean_commentary(data, len(comments)) if commentary else None,
@@ -707,6 +795,20 @@ def _clean_str(value):
     return value or None
 
 
+def _clean_published(value):
+    """`_clean_str` for the title, closing line and keywords, refusing a swear
+    word or emoji so the field falls back as if it were missing: the prompt's
+    "no profanity, no emoji" alone let an emoji title ship on 2026-09-01.
+    Checked before the emphasis strip too, which would turn "f**k" into "fk".
+    Not for the host's lines: the word list also holds "god", "hell" and
+    "damn", so "Oh god" would be refused as a reaction."""
+    cleaned = _clean_str(value)
+    if cleaned and any(content._profane(v) or content._has_emoji(v) for v in (value, cleaned)):
+        print("An AI-written field was refused for a swear word or emoji")  # not echoed: logs are public
+        return None
+    return cleaned
+
+
 def _clean_keywords(value):
     """A list of non-empty keyword strings, or None if the field was absent.
 
@@ -716,7 +818,7 @@ def _clean_keywords(value):
     """
     if not isinstance(value, list):
         return None
-    return [k for k in (_clean_str(v) for v in value) if k]
+    return [k for k in (_clean_published(v) for v in value) if k]
 
 
 # R2.2, weighted by PRD §0 #10: B ("You...") 4 : A 1 : C 1, with A and C kept as

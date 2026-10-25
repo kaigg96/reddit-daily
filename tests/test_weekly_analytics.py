@@ -179,6 +179,20 @@ def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
                      "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]
 
 
+def test_the_channels_own_comments_are_left_out(tmp_path):
+    """Each upload's closing question is ours (15 of 22 rows on 10-19)."""
+    def by(author, cid):
+        t = _thread(cid, "2026-10-10T01:00:00Z", "text")
+        t["snippet"]["channelId"] = "UCours"
+        t["snippet"]["topLevelComment"]["snippet"]["authorChannelId"] = {"value": author}
+        return t
+    p = tmp_path / "comments.csv"
+    yt = _FakeComments([by("UCours", "own"), by("UCviewer", "viewer"),
+                        _thread("unknown", "2026-10-10T01:00:00Z", "no ids")])
+    assert wa.snapshot_comments(yt, "2026-10-12", ["v1"], p) == 2
+    assert [line.split(",")[2] for line in p.read_text().splitlines()[1:]] == ["viewer", "unknown"]
+
+
 class _FakeSubsAnalytics(_FakeAnalytics):
     """Serves subscribersGained (as 2) unless told to refuse it."""
 
@@ -248,8 +262,8 @@ def test_the_live_header_extends_by_two_columns_in_one_run(tmp_path):
 class _FakeRetention:
     """The audience-retention report: one video per query, a row per percent."""
 
-    def __init__(self, refuse=False, rows=None):
-        self.refuse, self.rows, self.videos = refuse, rows, []
+    def __init__(self, refuse=False, rows=None, fail=()):
+        self.refuse, self.rows, self.videos, self.fail = refuse, rows, [], fail
 
     def reports(self):
         return self
@@ -259,9 +273,12 @@ class _FakeRetention:
         self.videos.append(kw["filters"].removeprefix("video=="))
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        self.num_retries = num_retries
         if self.refuse:
             raise RuntimeError("HttpError 403: Forbidden")
+        if self.videos[-1] in self.fail:
+            raise _ServerError(self.fail[self.videos[-1]])
         rows = self.rows if self.rows is not None else [
             [i / 100, 1.2 - i / 100] for i in range(1, 101)]
         return {"columnHeaders": [{"name": "elapsedVideoTimeRatio"},
@@ -305,6 +322,62 @@ def test_a_refused_retention_report_costs_one_query_and_its_column_only():
     assert ya.videos == ["new"]
     assert stats["new"]["views"] == 9
     assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
+
+
+def test_a_server_error_is_retried_by_the_client_first():
+    """10-19: one HTTP 500 cost 23 uploads their points. The client retries a
+    5xx itself when asked; a refusal (403 above) still stops at once."""
+    ya = _FakeRetention()
+    wa.fetch_retention(ya, "new", "2026-10-19")
+    assert ya.num_retries == wa.RETENTION_RETRIES >= 1
+
+
+class _ServerError(Exception):
+    """googleapiclient's HttpError as add_retention sees it: a status on resp."""
+
+    def __init__(self, status):
+        super().__init__(f"<HttpError {status}>")
+        self.resp = type("Resp", (), {"status": status})()
+
+
+def _recent(n):
+    ids = [f"v{i}" for i in range(n)]
+    return ids, [(v, "2026-10-15T04:43:55Z", "public") for v in ids], {v: {} for v in ids}
+
+
+def test_a_server_error_past_its_retries_costs_its_own_upload_only():
+    """10-19: an HTTP 500 on the 33rd query marked all 23 uploads after it."""
+    ids, videos, stats = _recent(4)
+    ya = _FakeRetention(fail={"v1": 500})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids
+    assert stats["v1"]["watch_ratio_10"].startswith("refused: _ServerError: <HttpError 500>")
+    assert [stats[v]["watch_ratio_10"] for v in ("v0", "v2", "v3")] == [1.1] * 3
+
+
+def test_only_server_errors_in_a_row_count_toward_stopping():
+    ids, videos, stats = _recent(5)
+    ya = _FakeRetention(fail={"v0": 500, "v2": 500, "v3": 500})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids and stats["v4"]["watch_ratio_10"] == 1.1
+
+
+def test_server_errors_in_a_row_stop_the_loop_as_a_refusal_does():
+    ids, videos, stats = _recent(6)
+    down = {v: 503 for v in ids[1:1 + wa.RETENTION_SERVER_ERRORS]}
+    ya = _FakeRetention(fail=down)
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids[:1 + wa.RETENTION_SERVER_ERRORS]
+    assert stats["v0"]["watch_ratio_10"] == 1.1
+    assert all(stats[v]["watch_ratio_10"].startswith("refused:") for v in ids[1:])
+
+
+def test_a_client_error_still_stops_at_once():
+    ids, videos, stats = _recent(3)
+    ya = _FakeRetention(fail={"v0": 403})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ["v0"]
+    assert all(stats[v]["watch_ratio_10"].startswith("refused:") for v in ids)
 
 
 def test_retention_columns_extend_the_live_header_as_a_pure_append():

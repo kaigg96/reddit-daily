@@ -155,6 +155,20 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **A shift ended after 2 minutes with no handover (run 39338110057,
+  2026-10-19; the first in 40+ runs).** 32 turns, no commits, no error; same
+  Claude Code (2.1.280) and action as the passing runs, and the budget gate
+  returns GO in CI. Cause unknown: the transcript was hidden. Likeliest, it
+  found every queue item waiting on the owner and ended without §10's entry.
+  **Visibility (owner, 2026-10-20):** `scripts/shift_trace.py` writes how a
+  shift ended (with an error result's reasons), its last message and its tool
+  calls, redacted, to `.github/last-shift-trace.md`; the emailed report now says
+  when a shift wrote no handover, with the trace's head. The workflow step that
+  runs it is the owner's to approve (its escalation, 2026-10-20). Not new, from
+  its review: a WORKLOG commit someone else pushes during a shift counts as that
+  shift's handover, in the workflow's check and the report alike. **Closes
+  when** the step is live and ten more shifts pass, or a repeat is root-caused
+  from its trace.
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
@@ -236,17 +250,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   is written first, so a fault there cannot repeat an upload. **At the switch, keep
   `MAX_SCREENED_CANDIDATES` at 4:** PRD §2's cut to 2 was the free route for
   Gemini's worst case, which `v8`'s Groq fallback now answers, so the cut
-  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising: weekly median 4.3–4.6h (W36–W38),
-  5.5h (W40), 5.9h (W41), 6.5h (W42 so far, n=3), so at four a day the median
-  run lands after the next slot's cron time. Runs are safe (`run_slot` takes
-  the day from the cron line); the digest is what misreads. **Closes when** the switch goes to four.
-
-- **The screen passes a reply that omits `post_risk` as no risk (2026-10-09,
-  left by two reviews; the crash fix around it merged 2026-10-10).** The
-  fallback model shares `SAMPLE_MODEL`'s allowance with the slate call and
-  every sample, up to 4 requests a run. **Closes when** a replay case shows
-  an omitted `post_risk` on a post that should skip, or the screen's parsing
-  is next changed (2026-10-11's failure-label change left it).
+  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is not rising: weekly median 4.3–4.6h (W36–W38),
+  5.5h (W40), 5.9h (W41), then 4.6h over W42's 14 uploads (10-19; 6.5h was its
+  first 3), so the median run still lands before the next slot; the worst
+  (8.9h) does not. Runs are safe (`run_slot` takes
+  the day from the cron line); the digest is what misreads. **If #4 goes
+  before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
+  `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
+  (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
+  `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
@@ -295,39 +307,42 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   in the shell (on `main` too; fixed on `reliability/run-slot-log`, after `v8`). **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
+  **Since 10-18 the metadata call tries Gemini's second model before Groq**,
+  as the screen has since 10-09: two 503s 30s apart cost the 16:02 upload
+  its title, keywords and CTA (third since 10-01, all 503s). Its answer logs
+  a `meta_failure` beside fields logged ok and counts as `gemini` in
+  `title_writer`; the release check switches it off. Both bet 1 branches
+  conflicted with it in `get_metadata`'s failure branch and are pre-resolved
+  (`integration/preview`, `integration/two-answer-meta-fallback`): the second
+  model first, given the main call's reply schema.
 
-- **Audit 2026-10-17 (21:45): the owner's attention is the company's limit,
-  and one of our asks had a defect.** 8 shifts since 10-13 (five more were
-  stopped by the weekly allowance, 10-14 to 10-16), 258 minutes, 23–43 of 60
-  each. Two changes reached the live pipeline (title fixes 20bef55, 2b3c26d);
-  bet 1, built 10-11, is unshipped. 5 of 8 mostly fixed, 1 mostly improved.
-  Every "Better?" said "slightly" or "no"; the scorecard is flat. The owner
-  acted once (#75, 10-15 01:26), approving nothing else. **Ask defect, fixed:**
-  #77's body still said its label approved a rebuild and #74's would ship,
-  while a later comment said one label ships; a re-raise only comments
-  (`escalations.yml`), so the body went stale. Rewritten 10-17 21:42 (D13).
-  **Proposed, for the bundle after #50** (a workflow change, and #77 stays the
-  one ask): a re-raise that changes the ask replaces the body. **Built 10-18** on
-  `process/reraise-replaces-ask` (`escalate.py --replace`, and the filer as a
-  patch in `.github/pending/` that also pins the weekly install below); raise
-  it with `--patch` when #77 is settled, then merge the branch. **Repeats:** of 45
-  candidates dropped, retention curves, likes, the length check's fail-soft and
-  a subscriber test were each dropped by two shifts. `WORKLOG.md`'s budget
-  holds about two entries, so a shift cannot see what the shift before last
-  dropped. Fixed the same night: `backlog_status.py --dropped` lists the last
-  ten shifts' dropped candidates from git, and the below-the-floor message
-  points at it. **Allocation:** distribution and editorial got none;
-  strategy, finance and audience 5 of 800; each has nothing ready (all wait
-  on bet 1 or C5), so fine while the 11-05 monthly runs. **Gates:** the release
-  check caught bet 1's unparseable reply before any merge (10-17), its first
-  catch of a live defect; no reverts. Decisions: D13 re-reviewed; the rest
-  unchanged since 10-13 (D5 strained further: #50 unapplied 12 days).
-  **Carried from 10-13, pending #50:** the shift skill's false "cannot read
-  Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to stop
-  before the handover is pushed. Outward look not repeated (done 10-13).
-  **Before `v8` merges:** read Groq-written uploads apart (`--by meta_source`;
-  titles `--within title_writer!=groq`). **Closes when** #50
-  lands and the bundle is raised, or the next audit.
+- **Audit 2026-10-21: bet 1 waits on a render only the owner's machine can
+  make; otherwise the process is working.** 10 shifts since 10-17, 2–56 of 60
+  minutes (mean 38). Nothing reached viewers; 10 merges, all measurement or
+  reliability. Bet 1's craft moved under D14 (notes became tags, upload-model
+  reactions, the setup gate), each reviewed fresh. Reviews caught real defects
+  (R3's age guard, a tag-trial test of the wrong thing); the release check
+  passed daily; no reverts. Distribution and finance got no time, with nothing
+  ready: fine while the 11-05 monthly runs. **Found:** (1) #77's body went
+  stale a second time (it described notes, and said a label alone ships while
+  its 10-21 comment asked for a render): rewritten 10-21. The fix that ends it
+  is the re-raise below. (2) D13's "owner absent" line was stale and seeded a
+  ship-unless-they-object candidate; re-reviewed. (3) `backlog_status.py
+  --dropped` lists only drops, so the generator re-proposed done work (bet 2's
+  start date, answered 10-17 and 10-19) and a ranker put it first. Fixed: `--dropped`
+  also lists each entry's Done openings (reviewed). Left: a shift that re-stamps
+  its time and rewords its headline still lists twice (10-18 08:45/08:50). (4) Narrated branch samples
+  (main's code narrating the branch's script) would take the owner's hands off
+  the critical path, but touch secrets handling: for the 11-05 review, not an
+  ask beside #77. Decisions: D13 re-reviewed; the rest unchanged. Outward look
+  not repeated (done 10-13). **Carried, pending #50:** a re-raise that changes
+  the ask replaces the body (built on `process/reraise-replaces-ask`, the filer
+  as a patch in `.github/pending/` with the weekly install's pin below; raise
+  with `--patch` when #77 settles, then merge); the shift skill's false "cannot
+  read Actions logs" (`gh run view <id> --log` works); a Stop hook refusing to
+  stop before the handover is pushed. **Before `v8` merges:** read Groq-written
+  uploads apart (`--by meta_source`; titles `--within title_writer!=groq`).
+  **Closes when** #50 lands and the bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
@@ -356,7 +371,8 @@ a list nobody can read is the same as no list.
 
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
-  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+).
+  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 64
+  rows on 10-23, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
@@ -380,6 +396,12 @@ a list nobody can read is the same as no list.
   **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
   0 differ, so the render is deterministic and **the override is a video
   change** — its own release with a real sample, after `v7`'s read.
+  **The runner image moves (2026-10-19):** `ubuntu-latest` becomes 26.04
+  between 10-19 and 11-19 (GitHub changelog, 09-17). Checked: no workflow
+  installs a system package or calls a system tool; `setup-python` has 3.12
+  for 26.04; ffmpeg and fonts ship with the repo's packages and assets. If
+  an upload fails in that window, suspect the image first; the fix is
+  `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
   rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
@@ -402,3 +424,47 @@ a list nobody can read is the same as no list.
   approval cannot outlive the work it approved; require every cited issue to be
   approved; move protected-file changes to the fingerprinted route. Found
   2026-09-24.
+- **A swear word reached a live title (2026-10-22 05:06, `IjN6hj2etcs`).**
+  better-profanity counts a straight quote or `*` as part of a word, so
+  "'alright fuckers'" passed the post-title filter, and the AI title quoted
+  it. 1 of 191 uploads; the answer filter shares the gap, as do contractions
+  ("shit's"). Nothing screened the AI's own output either: an emoji title
+  shipped 2026-09-01. Fixed on `reliability/profanity-quotes`: `_profane`
+  (edge marks spaced out, each contracted word checked alone; four reviews,
+  the last clean at `fae20a8`; no new flags on 959 old questions) and a refusal in `llm._clean_published`, so a
+  title, CTA or keyword with a swear word or emoji falls back (refuses exactly
+  those two of 191 shipped titles). It changes which posts and AI lines
+  qualify, not the video, so no version bump; it waits only for a sample
+  render, in the slot after #77's. Host lines keep `_clean_str` (the list
+  holds "god", "hell", "damn": "Oh god" is a reaction). **When this meets bet
+  1:** there the closing line is the host's verdict, which `_clean_commentary`
+  builds with `_clean_str` from the same "cta" field, so the guard misses it
+  (third review: a swearing vote still ships). Built 10-23 on
+  `reliability/profanity-on-v8` (the filter stacked on the release, the vote
+  through `_clean_published`, a refused vote blanked alone; reviewed): it joins
+  `integration/preview` after the filter's own render passes. The tags now
+  refuse a swear word too, on the list less god/hell/damn/omg (reviewed;
+  "Holy crap" drops as a tag). Left from those reviews: stretched spellings
+  ("Fuuuck", "sh!t") pass every list, titles included, as the library does
+  not fold repeats (folding would newly flag 0 of 1,417 logged titles and
+  lines, so not built); a swearing vote in voiced mode (dormant) is untested.
+  Left:
+  the library already reads a curly "he’ll" as "hell" (fails safe, rare);
+  YouTube's API refuses "<" and ">" in a title or description and nothing
+  strips them, which would fail the upload and retry the same post (0 of
+  ~2,300 past titles and answers carry one).
+  Live video left as is (retitling would alter a row of #10 and #14).
+  **Closes when** the branch merges.
+
+- **The repo keeps YouTube API text past YouTube's 30-day limit (found
+  2026-10-24, Legal).** `analysis/channel_videos.csv` (`scripts/analyze_channel.py`,
+  a one-off, last run 09-11) holds 1,309 uploads' titles, questions and
+  answers as read from the Data API, public in this repo and its history.
+  YouTube's developer policy III.E.4 lets a client keep non-statistics API
+  data 30 days, then refresh or delete it; statistics may stay. The text is
+  our own published videos', so the risk is low, but an API-terms breach puts
+  at risk the access every upload needs. `analysis/topics_cache.json` holds
+  ~1,000 question titles (from Reddit, not the API). Not fixed: dropping the
+  text columns rewrites production data (CLAUDE.md §4), and history is the
+  owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
+  the text columns at HEAD, leave history. **Closes when** decided there.

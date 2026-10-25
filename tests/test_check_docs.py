@@ -3,6 +3,8 @@ here is not harmless: the fix a shift reaches for is deleting the citation."""
 import os
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts import check_docs as c
@@ -60,6 +62,21 @@ def _repo(tmp_path):
     return git
 
 
+def _git_version():
+    import re
+    import subprocess
+    out = subprocess.run(["git", "--version"], capture_output=True, text=True).stdout
+    m = re.search(r"(\d+)\.(\d+)", out)
+    return tuple(map(int, m.groups())) if m else (0, 0)
+
+
+# `merge-tree --write-tree` arrived in git 2.38; the owner's machine has 2.37,
+# where the check itself answers "unknown" and these two would fail (TECH_DEBT).
+needs_merge_tree = pytest.mark.skipif(
+    _git_version() < (2, 38), reason="git merge-tree --write-tree needs git 2.38")
+
+
+@needs_merge_tree
 def test_a_release_branch_that_merges_cleanly_passes(tmp_path):
     git = _repo(tmp_path)
     (tmp_path / "g.txt").write_text("other\n")
@@ -68,6 +85,7 @@ def test_a_release_branch_that_merges_cleanly_passes(tmp_path):
     assert ok is True, why
 
 
+@needs_merge_tree
 def test_a_release_branch_that_conflicts_with_main_is_caught(tmp_path):
     """10-14: main's own work conflicted with bet 1's branch in one test file."""
     git = _repo(tmp_path)

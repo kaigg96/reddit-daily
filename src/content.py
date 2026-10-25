@@ -8,11 +8,16 @@ from dataclasses import dataclass
 
 import emoji
 import praw
-from better_profanity import profanity
+from better_profanity import Profanity, profanity
 
 from . import config
 
 profanity.load_censor_words()
+# The host's tags are reactions, where "Oh god" and "Hell no" are fine: the
+# same list without the mild words that double as exclamations ("OMG" too,
+# since "Oh my god" passes).
+TAG_CENSOR = Profanity()
+TAG_CENSOR.load_censor_words(whitelist_words=["god", "hell", "damn", "omg"])
 
 
 @dataclass
@@ -93,7 +98,28 @@ def sentence_case(text):
 
 
 def _has_emoji(text):
-    return any(emoji.is_emoji(ch) for ch in text)
+    # Listed whole, not per character: a flag or keycap is two code points,
+    # neither an emoji alone (an answer shown on screen carried 🇺🇸; 10-24).
+    # The old per-character check stays too, for a malformed sequence.
+    return bool(emoji.emoji_list(text)) or any(emoji.is_emoji(ch) for ch in text)
+
+
+# The library counts a straight quote or * as part of a word, so a quote or
+# Reddit's *emphasis* touching a word hides it: "'alright fuckers'" passed,
+# and on 2026-10-22 an upload went out titled with it. A contraction hides
+# one too ("shit's"). So the text is checked again with edge marks spaced out,
+# and each contracted word alone. Marks inside a word stay ("f**k" is a list
+# word as written), and words are never split in place: the library reads
+# neighbours together, so "he ll" reads "hell" and "he be" a slur.
+_EDGE_MARKS = re.compile(r"(?<![A-Za-z*])['\"*]+|['\"*]+(?![A-Za-z*])")
+_CONTRACTED = re.compile(r"([A-Za-z*]+)'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
+
+
+def _profane(text, censor=profanity):
+    return (censor.contains_profanity(text)
+            or censor.contains_profanity(_EDGE_MARKS.sub(" ", text))
+            or any(censor.contains_profanity(m.group(1))
+                   for m in _CONTRACTED.finditer(_EDGE_MARKS.sub(" ", text))))
 
 
 def _comment_pool(post, limit):
@@ -108,7 +134,7 @@ def _comment_pool(post, limit):
             len(c.body) <= config.MAX_COMMENT_LENGTH
             and c.body not in ("[deleted]", "[removed]")
             and not _has_emoji(c.body)
-            and not profanity.contains_profanity(c.body)
+            and not _profane(c.body)
         )
     ][:limit]
 
@@ -206,7 +232,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             print(f"Already uploaded, not a candidate: {post.title[:60]}")
         if (
             not post.over_18
-            and not profanity.contains_profanity(post.title)
+            and not _profane(post.title)
             and len(post.title) <= config.MAX_TITLE_LENGTH
             and not _has_emoji(post.title)
             and post.title != prev_title
