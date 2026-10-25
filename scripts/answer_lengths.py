@@ -13,6 +13,7 @@ and `words_3` may count an answer the video left out; `words_1` never is (review
 Read-only against GitHub (`gh run view --log`); logs expire after ~90 days,
 so rows already in the file are kept and only new uploads are added.
 """
+import argparse
 import concurrent.futures
 import csv
 import json
@@ -48,7 +49,11 @@ def _log(run_id):
     return run_id, out.stdout if out.returncode == 0 else ""
 
 
-def main():
+def main(argv=None):
+    # No options, but --help must print this and stop: it ran the whole
+    # collection and appended rows when asked for usage (2026-10-25).
+    argparse.ArgumentParser(description=__doc__,
+                            formatter_class=argparse.RawDescriptionHelpFormatter).parse_args(argv)
     rows = {}
     if OUT.exists():
         rows = {r["video_id"]: r for r in csv.DictReader(OUT.open())}

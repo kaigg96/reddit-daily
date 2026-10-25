@@ -2557,6 +2557,17 @@ def test_answer_log_parse_counts_words_and_needs_an_upload():
     assert (video, words) == ("hTnnhF9DaRQ", {1: 3, 2: 2, 3: 1})
 
 
+def test_answer_lengths_help_prints_usage_and_reads_nothing(monkeypatch, capsys):
+    """Asking for usage ran the whole collection and appended rows (2026-10-25)."""
+    import pytest
+    mod = _answer_lengths()
+    monkeypatch.setattr(mod.subprocess, "run", lambda *a, **k: pytest.fail("ran gh"))
+    with pytest.raises(SystemExit) as exit_:
+        mod.main(["--help"])
+    assert exit_.value.code == 0
+    assert "answer_lengths.csv" in capsys.readouterr().out
+
+
 def test_answer_log_parse_keeps_the_first_print_of_each_answer():
     mod = _answer_lengths()
     log = ("x\ty\t2026-10-21T05:00:01.2Z   comment 1: a b\n"
