@@ -331,7 +331,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   "mostly fixes", many of them tag word lists on the unreleased branch,
   grown three times (grading, agreeing, "is right"). (5) `context_budget.py
   --allocation` counted a re-stamped entry twice (10-24 08:50/09:05) and its
-  40-commit window fell short of ten shifts (fixed on `gm/allocation-restamp`). (6) Break-even was
+  40-commit window fell short of ten shifts: fixed and merged 10-25
+  (reviewed). Left, in it and `--dropped`: a re-stamp that also rewords the
+  headline (10-18 08:45/08:50) or crosses midnight still counts twice. (6) Break-even was
   dropped four times as "needs your subscription price"; bounded on public
   prices instead (PLAN §1, 10-25).
   (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,
@@ -352,7 +354,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   body (`process/reraise-replaces-ask`, with the weekly install's pin; a
   workflow patch, so a label lands it without #50); in the shift skill, the
   false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
-  #65's sentence; the audit skill's stale "not yet tried". **Closes when**
+  #65's sentence; the audit skill's stale "not yet tried". A shift cannot
+  write skill files (refused 10-25), so the issue carries the exact text, as
+  #65 did. **Closes when**
   that bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
