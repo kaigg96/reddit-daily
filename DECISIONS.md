@@ -297,52 +297,13 @@ which name what went wrong with Gemini: exploit and subordinate, never elevate.
 or `WORKLOG` shows the method skipped (2 false).
 **Re-reviewed 2026-10-13 (audit):** holds; the last three shifts ranked forward and reversed.
 
-## D7 · 2026-09-21 · Slack goes to PM and research, not back to the clock
+## D7 · 2026-09-21 · Slack goes to research, not back to the clock — **absorbed by D11 and the shift skill**
 
-A shift whose maintenance and feature lanes are thin becomes a
-PM-and-research shift, not a short one. Research has no percentage ceiling;
-its output is governed by the value bar instead.
-
-**Alternatives:** the previous rule — research capped at ~25% and unused budget
-not redistributed — which contradicted itself. Capping research while also
-refusing to redistribute meant a shift with an empty feature lane simply ended
-with half its time unspent, which is the wasted capacity this whole workflow
-exists to prevent.
-
-**Why:** the owner's point is that there is always work — a backlog to
-populate, decision rules to check, documentation to verify, questions about how
-channels like this grow. A percentage cap was the wrong instrument for the real
-worry, which is busywork. The value bar is the right one: a hypothesis with a
-proposed test and no new documents.
-
-**Assumptions:**
-1. PM and research genuinely always have work above the value bar.
-2. The value bar is strong enough to stop research becoming padding without a
-   numeric cap.
-
-**Revisit when:** `WORKLOG` shows research producing findings nobody acts on,
-or shifts spending heavily on research while the backlog stays empty (2 false);
-or shifts still ending early with time unspent (1 false).
-
-**Re-reviewed 2026-09-25 — trigger fired.** Two shifts ended early with time
-unspent (8 of ~25 minutes on 09-24, 7 on 09-25), the second despite being told
-its exact deadline. Assumption 1 is under strain rather than false: both shifts
-did real work, then judged every lane done. The limiter was upstream — shipping
-waits on rationed sample videos — and D10 makes such constraints PM and
-research problems. The first response -- seeding the sample-video ration as PM's top item -- the
-owner called a bandaid the same evening: it refills the queue once. The
-durable response is D11.
-
-**Re-reviewed 2026-10-06:** the trigger's shape for 2 appeared: about a third
-of a shift went on research while the ready count stayed at 0. It was not
-padding. Both questions (PRD R4, R5) had decision rules fixed before the data
-and tied to bet 2, and both were answered. If the next shifts' research again
-changes no rule, 2 is false.
-
-**Re-reviewed 2026-10-09 (audit):** 1 is false for now, for the reason under D11:
-the work above the bar waits on the owner's hands. 2 holds. This shift's research
-(commentary drafts, PRD §4) changed a proposal (#70) rather than padding.
-**Re-reviewed 2026-10-13 (audit):** (1) still false (D11's evidence); (2) holds: the 10-13 market read changed #74.
+A thin shift becomes a research shift, with no percentage cap; the value bar,
+not a ceiling, stops padding. Its rule now lives in `/shift` §3 and §7, and its
+evidence under D11 and D13: assumption 1 ("research always has work above the
+bar") has been false since 10-09, because that work waits on the owner.
+Compressed by the 2026-10-25 audit; full text and re-reviews in git (`8f71e60`).
 
 ## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
 
