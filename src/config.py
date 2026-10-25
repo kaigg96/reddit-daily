@@ -39,10 +39,14 @@ DRY_RUN = SAMPLE or SILENT_NARRATION or \
 # whose fixed post only proves a render plays. Uploads never reach it.
 STAND_IN_VOICE = os.environ.get(
     "STAND_IN_VOICE", "1" if SILENT_NARRATION and not SAMPLE else "").lower() in ("1", "true", "yes")
-# SOURCE: where the post comes from. This branch (strategy/se-sample, PLAN C16)
-# exists to render one narrated sample of a Stack Exchange show for the
-# 5 November review, so its branch renders default to it. Never merged.
-SOURCE = os.environ.get("SOURCE", "stackexchange" if SILENT_NARRATION and not SAMPLE else "reddit")
+# SOURCE: where the post comes from. This branch (strategy/own-questions-sample,
+# PLAN C16) exists to render one narrated sample of our own question with the
+# host's own takes for the 5 November review, so its branch renders default to
+# it ("stackexchange" renders the other sample). Never merged.
+SOURCE = os.environ.get("SOURCE", "own" if SILENT_NARRATION and not SAMPLE else "reddit")
+# Each answer's on-screen label. The host's own takes say so: nobody else wrote
+# them, so they must never pass for a real person's answer (PRD §4).
+ANSWER_LABEL = "TAKE" if SOURCE == "own" else "ANSWER"
 # METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
 # the upload model (llm.MODEL): one request from the allowance uploads share,
 # so only for a render the owner judges (#77). The screen stays on the sample

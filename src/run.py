@@ -11,8 +11,8 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import (config, content, llm, log, sample, screen, stackexchange, thumbnail,
-               tts, video, youtube)
+from . import (config, content, llm, log, ownquestions, sample, screen, stackexchange,
+               thumbnail, tts, video, youtube)
 
 
 def _probe_duration(path):
@@ -190,6 +190,8 @@ def main():
         post = sample.POST
     elif config.SOURCE == "stackexchange":
         post = stackexchange.select_post(prev_title)
+    elif config.SOURCE == "own":
+        post = ownquestions.select_post(prev_title)
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,
@@ -236,6 +238,8 @@ def main():
     # Bet 1 (#70): the host's lines, or today's video if any is missing. The
     # flag is blank while bet 1 is off, as title_caps is when no arm applied.
     host = meta.commentary if config.COMMENTARY else None
+    if host and config.SOURCE == "own":
+        host = ownquestions.as_host(host)
     commentary_ok = int(host is not None) if config.COMMENTARY else ""
     if config.COMMENTARY and not host:
         print("Commentary: no usable host lines -- shipping today's reading")
