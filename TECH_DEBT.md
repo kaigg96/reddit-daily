@@ -307,10 +307,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   as the screen has since 10-09: two 503s 30s apart cost the 16:02 upload
   its title, keywords and CTA (third since 10-01, all 503s). Its answer logs
   a `meta_failure` beside fields logged ok and counts as `gemini` in
-  `title_writer`; the release check switches it off. Both bet 1 branches
-  conflicted with it in `get_metadata`'s failure branch and are pre-resolved
-  (`integration/preview`, `integration/two-answer-meta-fallback`): the second
-  model first, given the main call's reply schema.
+  `title_writer`; the release check switches it off. Bet 1's branch
+  conflicted with it in `get_metadata`'s failure branch and is pre-resolved
+  (`integration/preview`): the second model first, given the main call's
+  reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
 
 - **Audit 2026-10-25: the process is working at the margin; the owner's
   queue binds, and shifts fill the wait with small fixes.** Nine shifts since
