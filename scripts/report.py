@@ -891,9 +891,10 @@ def main():
             # commits to, and v8's avg % viewed and retention points read long
             # videos since 10-07, not AskReddit (PRD §0 #15; review, 2026-10-26).
             verdict_cut = insights.RELEASE_WITHIN.get(args.release)
-            note = (f", inside the cut this metric's rule commits to (PRD §0); the "
-                    f"verdict's own cut, {verdict_cut}, is not it"
-                    if verdict_cut and not args.within else "")
+            note = ("; add the --within and --since this metric's own rule names "
+                    "in PRD §0, if it has one")
+            if verdict_cut:
+                note += f" ({verdict_cut} is the watch-seconds verdict's cut)"
             sys.exit(f"--release judges watch-seconds by its rule (views and total "
                      f"watch time beside it) and does not read --metric {args.metric}. "
                      f"Read it per release instead: --by {args.release_key} --metric "

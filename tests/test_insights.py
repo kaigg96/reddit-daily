@@ -2274,17 +2274,21 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
     assert "--by format_version --metric engaged_share --at-age 7" in str(exc.value)
     assert not called
     # v8's verdict reads AskReddit, but its avg % viewed is committed to long
-    # videos: the redirect must not hand a diagnostic the verdict's cut.
-    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v8", "--offline",
+    # videos since 10-07: the redirect must not hand a diagnostic the
+    # verdict's cut, and keeps a --within the reader gave.
+    monkeypatch.setattr(report.insights, "RELEASE_WITHIN", {"v9": "subreddit=AskReddit"})
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v9", "--offline",
                                       "--metric", "avg_view_pct"])
     with pytest.raises(SystemExit) as exc:
         report.main()
-    assert "--within" not in str(exc.value) and "PRD §0" in str(exc.value)
-    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v8", "--offline", "--metric",
+    assert "--at-age 7; add the --within and --since" in str(exc.value)
+    assert "(subreddit=AskReddit is the watch-seconds verdict's cut)" in str(exc.value)
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v9", "--offline", "--metric",
                                       "avg_view_pct", "--within", "video_length=long"])
     with pytest.raises(SystemExit) as exc:
         report.main()
-    assert str(exc.value).endswith("--at-age 7 --within video_length=long")
+    assert "--at-age 7 --within video_length=long; add the --within and --since" \
+        in str(exc.value)
     for extra in ([], ["--metric", "views"]):   # views is printed beside the rule
         monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"] + extra)
         report.main()
