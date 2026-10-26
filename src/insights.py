@@ -786,17 +786,21 @@ def render_own_words(log_rows, version, key="format_version"):
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
 
 
-def render_host_lines(log_rows, version, key="format_version"):
+def render_host_lines(log_rows, version, key="format_version", ids=None):
     """Bet 1's dose beside its verdict: of the release's uploads logging
     `host_lines`, how many showed every host line, some (a line too long
     or a setup that is not a reaction dropped alone, or the duration guard cut
     one) or none. Never a trigger: it
-    says how much of the change the verdict measured. Whole is a note per
-    answer read, the setup and the vote. Empty when nothing logs a count."""
+    says how much of the change the verdict measured, so `ids` limits it to
+    the verdict's uploads (its cut and age; PRD §4, pre-committed 2026-10-26).
+    Whole is a note per answer read, the setup and the vote. Empty when
+    nothing logs a count."""
     whole = config.COMMENTARY_ANSWERS + 2
     counts = []
     for r in log_rows:
         n = (r.get("host_lines") or "").strip()
+        if ids is not None and r.get("video_id") not in ids:
+            continue
         if r.get(key) == version and n.isdecimal():
             counts.append(int(n))
     if not counts:

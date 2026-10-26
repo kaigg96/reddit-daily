@@ -2311,6 +2311,12 @@ def test_host_lines_report_the_dose_of_the_release(monkeypatch):
     line = insights.render_host_lines(rows, "v8")
     assert line.endswith("all 4 on 2 of 5 uploads, some on 2, none on 1")
     assert insights.render_host_lines([{"format_version": "v7", "host_lines": ""}], "v7") == ""
+    # The dose rule counts the uploads the verdict read, not every v8 row
+    # (PRD §4, pre-committed 2026-10-26): another subreddit's, or one too young.
+    rows = [{"format_version": "v8", "host_lines": n, "video_id": i}
+            for n, i in (("4", "a"), ("4", "b"), ("1", "c"), ("0", "d"))]
+    line = insights.render_host_lines(rows, "v8", ids={"a", "c"})
+    assert line.endswith("all 4 on 1 of 2 uploads, some on 1, none on 0")
 
 
 def test_fine_watch_seconds_is_percentage_viewed_times_length():
