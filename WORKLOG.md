@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-26 (23:55) — The guard against shock-bait titles is live; Snapchat and X priced, and neither pays for a reading
+
+    Worked (% of the shift): reliability 25 · gm 25 · monetization 15 · data 15 · security 10 · product 5 · legal 5
+
+**Summary:** The check that refuses shock-bait titles passed its sample video and is live from tomorrow morning's upload. Snapchat's and X's creator programmes are now priced: both pay only for original work, so bet 1 (#77, waiting on your label) still comes first on every route.
+
+### Toward revenue
+- **A spam-policy risk is now handled in code.** YouTube refuses content "designed to shock or surprise viewers". A title like "Animals' chilling genius will surprise you" is now replaced by the plain Reddit question before upload. Questions such as "What surprised you most?" still pass. This protects the channel; it does not grow it.
+- **Two more routes priced, and neither is nearer.** Snapchat invites creators with 50,000 followers and 15,000 hours watched a month. At our YouTube rate we would have about 37 hours, roughly 400 times short. It also asks for "original" videos of 30 seconds or more; ours run about 21. X now pays only Premium subscribers with 500 verified followers and half a million verified views in 90 days. It excludes "content reuploaded from other platforms". Neither pays for a reading.
+- **Bet 1 can still ship the day you label #77.** Combined with tonight's change, all 862 automated checks pass, and its titles go through the new guard.
+
+### Done
+- **Reliability and legal (a fix):** the title guard's sample video passed (23 seconds, playable), and the guard merged. Its title, "The most brutal betrayal stories EVER told on Reddit", passed the guard, as it should. Videos look the same.
+- **Monetization (a bet-3 read):** the pricing above, now in the company plan. Snapchat's figures are from its own help page. X's help page refused us, so its figures come from a 3 September report that quotes it.
+- **Reliability:** both of today's uploads landed. The afternoon one was published at 18:46, after GitHub's usual queue delay.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.75 this month, forecast $0.88 of $3).
+- **General management:** after the merge nothing was ready. A fresh agent proposed eight ideas and six survived its filter. Two rankers, in opposite orders, put the route pricing third both ways and a break-even-per-upload figure first or second. That figure would repeat the plan's 25 October break-even, which neither ranker had seen. **Dropped:** whether shock titles were buried more (11 titles, and the answer changes nothing now that the guard is live); a likes measure for bet 1 (it already exists); rewriting the upload description beside bet 1 (the product plan puts it after bet 1); pricing video production for paying clients (speculative, no evidence). A second round, aimed at the 2 and 5 November decisions, found the two rule fixes below. **Dropped from it:** pinning how the tests count uploads (both counts pass by 2 November); bet 2's targets in the views report (its baseline completes on 2 November); one combined email about #77, #80 and #82 (another email); a re-raise date for #82 (escalations already re-raise); the voice read (complete as written); the account-security risk (only your checks move it).
+- **Data (a fix, before any bet 1 upload):** bet 1's verdict is now read on AskReddit uploads for as long as two subreddits rotate. The old wording tied it to the subreddit test, which is read on 2 November, before bet 1 can be. Today's format ran on AskReddit alone until 7 October, so a read across both subreddits would credit bet 1 with the mix.
+- **Product (a default while #80 is open):** four uploads a day now waits for bet 1 until you answer #80, which recommends exactly that. The plan held both that proposal and "four a day first if bet 1 is late", and the 2 November read could have set off either. Waiting is the reversible side and spends nothing; if you want four a day on time regardless, say so on #80.
+- One fix that reached the live pipeline (the guard), two rule fixes and one read for bet 3; nothing viewers see changed. AI use: one sample render (its own allowance); no Polly, no upload-model requests.
+- **Process:** the first request for the sample video reached GitHub but got a server error, and no render started. A second request started it within seconds; if no render starts within a minute, request again.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #82 (register our Reddit app by 12 January); #80 (no longer urgent: four a day waits for your answer); #59 (the account checks); #50 and #65 (your hands, on the rule files).
+
+### Next
+- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. Both still combine cleanly with everything live (checked tonight). The next render slot opens at 11:14 UTC on 27 October.
+- **2 November snapshot:** the views rule first: if the week is low again (two low weeks running), treat it as YouTube's reach cut and tell you that day. Then the title-style test if it has its eighth video, the subreddit test, and the voice question.
+
+### Better?
+- **Than last shift:** Slightly: a policy risk that leaked once is now refused in code, and bet 3's route list is complete for the platforms that pay creators. Nothing changes what viewers watch.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-26 (18:12) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
 
     Worked (% of the shift): data 25 · product 15 · gm 15 · legal 10 · strategy 10 · reliability 10 · distribution 5 · market 5 · security 5
@@ -97,37 +131,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: one clip that hid videos is gone, and the Reddit replacement decision has both its samples. Nothing larger reached viewers.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, views had their lowest week on record, and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-26 (09:55) — Bet 1 can go live the day you label it; the own-questions sample renders now, and carries a policy cost
-
-    Worked (% of the shift): engineering 35 · gm 20 · strategy 15 · reliability 10 · legal 10 · data 5 · security 5
-
-**Summary:** Bet 1 was combined with today's live code in a trial copy: no conflicts, and every check passes, so your label on #77 can reach viewers the same day. The "our own questions" sample could not render before 09:54 (one render per 12 hours) and is queued now; YouTube's spam rules weigh against that show.
-
-### Toward revenue
-- **Bet 1 can ship the day you label #77.** Every route to revenue needs it, and it must ship by about 30 October to 6 November for the doubling test to run as planned. The release was combined with everything live since it was built, in a copy never pushed: no conflicts, all 857 automated checks pass, and none reached the internet or spent AI requests. Bet 1 itself is unchanged, so the sample you are judging is what ships.
-- **A cost on one of the two Reddit replacements.** YouTube's spam page (read today) gives as its example of mass production "the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script". The own-questions show is a wholly AI-written script over our one music track: two of those three traits, where the Reddit and Stack Exchange shows have one. If you pick it on 5 November, it should ship only with more music and a check that its videos differ, as #80 asks of four a day.
-
-### Done
-- **Engineering (a check, for bet 1):** the trial above. The only live change it picks up that touches the video is the 24 October rule holding the capitals test's titles to their arm, and it lands where bet 1 writes titles. At merge, the product plan's live-format line becomes v8. A fresh review of the combination found nothing on the upload path, and two faults in how our reporting tool reads bet 1's results. One, already live, would have pointed a later shift at the wrong group of videos for two of bet 1's pre-set checks: fixed, reviewed, merged (a fix; no video change). The other exists only once bet 1 merges: it would count bet 1's on-screen lines over uploads its verdict never reads. Which uploads that count covers is now set in advance, before any bet 1 upload, and its fix is built, reviewed and waiting beside bet 1, to merge right after it.
-- **Strategy:** asked for the own-questions render at 08:56; refused, as last night's Stack Exchange render (21:53) holds the slot for 12 hours. Re-queued at 09:54; it renders after this shift.
-- **Legal (a check):** the spam-policy reading above, recorded with the source comparison for 5 November.
-- **General management:** one item was ready. A fresh agent proposed eight ideas, five survived; two rankers, in opposite orders, put the same one first (the bet 1 trial) and said nothing else cleared the bar. A second round aimed at the functions with no time in twenty shifts (distribution, audience, monetization, finance) found one, the policy cost above. **Dropped:** a one-page comparison of the replacements (mostly written, and the review packet writes it); drafting the rule bundle for 5 November early (nothing gained); the Stack Exchange licence credit on its sample (never published); counting advice-style questions (any change waits weeks for bet 1's read); a warning before a render request is refused (the refusal came in 20 seconds); a traffic-source report (search is flat at 2–3%, which changes nothing).
-- **Reliability:** this morning's upload and both of yesterday's landed. This morning the title model failed twice ("overloaded") and the backup model wrote the title, keywords and closing line: the first live rescue by the 18 October fix. The capitals test holds since its 24 October fix (one capitalised word on every such title). GitHub has not yet moved our uploads to its new server image (due by 19 November).
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.74 this month, forecast $0.88 of $3).
-- Mostly checks, and one fix to the reporting tool; nothing viewers see changed. AI use: none from the upload allowance (the render after this shift uses the free sample model); no Polly.
-- **Process:** last night's handover said to render "after 07:00", but the 12-hour limit held the slot until 09:54. A handover naming a render should give the time the limit allows.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1, the same day); #82 (register our Reddit app by 12 January); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **Read the own-questions render** (verdict about 10:05) into the source comparison for 5 November. The next automated render is not before about 22:00.
-- **Today's weekly snapshot** (it has landed between 11:20 and 13:50 for five weeks): the weekly review, the opening-reach read, and the title-style test, whose sample is now large enough (19 "You…" titles against 8 others reach 7 days old).
-- **If #77 is labelled:** merge the release branch (still at its tested commit), then the dose-count fix beside it, set the live format to v8 in the product plan, and close #77.
-
-### Better?
-- **Than last shift:** Slightly: bet 1 is shown to merge with today's live code, so a label reaches viewers the same day. Nothing new reached viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. For the Reddit deadline, both replacements are built, one rendered, and one now has a known policy cost.
 - **Than ~100 shifts ago:** Too early to say.
