@@ -229,8 +229,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
   uploads the verdict never read. Own words do so by design (#70's
   done-when is every upload); the dose does not (PRD §4, pre-committed
-  10-26). Narrow the dose line to `read.release` on `v8`'s first read,
-  before applying #15's dose rule; not on the branch before #77 is decided.
+  10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
+  reviewed, its fix in; 858 pass over `main`): the verdict's first 20 by date
+  (`insights.dose_ids`). Merge it right after `v8`. Left: no test drives
+  `report.release()` with `host_lines`, so the call's `ids=` is unpinned.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
