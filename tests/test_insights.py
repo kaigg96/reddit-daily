@@ -2320,6 +2320,32 @@ def test_host_lines_report_the_dose_of_the_release(monkeypatch):
     assert "the verdict's first uploads" in line
 
 
+def test_the_release_read_passes_the_dose_the_verdicts_uploads(monkeypatch, tmp_path, capsys):
+    """`report.py --release` must hand the dose line the verdict's uploads,
+    not the log's every row nor the baseline's (PRD §4, 2026-10-26)."""
+    import types
+    from scripts import report
+    log = tmp_path / "upload_log.csv"
+    log.write_text("video_id,format_version,host_lines,own_words_share\n"
+                   "a,v8,5,0.6\nb,v8,0,0.6\nc,v8,0,0.6\n")
+    monkeypatch.setattr(insights.config, "UPLOAD_LOG", str(log))
+    monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 3)   # whole: 5
+    def vid(i, d):
+        return Video(i, NOW, views=10, watch_seconds=10.0,
+                     true_published=NOW + d * datetime.timedelta(days=1))
+    read = types.SimpleNamespace(release=[vid("a", 0)], before=[vid("c", -9)], unset=0, later=0,
+                                 comparisons=[], floors={}, triggers=(),
+                                 load=types.SimpleNamespace(caveats=lambda: []))
+    monkeypatch.setattr(insights, "release_read", lambda *a, **k: read)
+    for name in ("render_release", "render_duration", "render_within_length",
+                 "render_without_near_zero", "render_vote_diagnostics"):
+        monkeypatch.setattr(insights, name, lambda *a, **k: "")
+    report.release("v8", "format_version", 7, min_uploads=20)
+    out = capsys.readouterr().out
+    assert "all 5 on 1 of 1 uploads" in out          # the verdict's one upload
+    assert "3 uploads" in out                        # own words: every upload
+
+
 def test_the_dose_counts_the_verdicts_first_uploads_by_date():
     """A weekly snapshot adds a week of uploads at once, so the read jumps
     past 20; the rule counts the first 20 by upload date (PRD §4, 10-26)."""
