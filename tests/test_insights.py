@@ -1866,6 +1866,14 @@ def test_views_gained_by_age_splits_the_catalogue_from_recent_uploads():
     assert insights.views_gained(rows) == [(d(9, 8), 61, 7)]
 
 
+def test_two_week_rate_pools_each_snapshot_with_the_one_before():
+    rows = [("a", 0, 700, 7), ("b", 0, 70, 7), ("c", 5, 1400, 7), ("d", 0, 0, 0)]
+    # (700 + 70) / 14 = 55; (70 + 1400) / 14 = 105; the old column is ignored
+    assert insights.two_week_rate(rows) == [None, 55.0, 105.0, 200.0]
+    assert insights.two_week_rate(rows[:1]) == [None]
+    assert insights.two_week_rate([]) == []
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),

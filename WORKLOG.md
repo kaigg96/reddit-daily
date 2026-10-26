@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-26 (18:15) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
+
+    Worked (% of the shift): data 35 · product 20 · gm 15 · strategy 10 · reliability 10 · market 5 · security 5
+
+**Summary:** The weekly review retired a second background clip under a rule set in advance, and recorded the second sample for the Reddit replacement decision. Views fell about fourfold this week, but they have swung low and high every week for two months, so a rule set today reads next Monday's figures before anyone acts.
+
+### Toward revenue
+- **A small step for viewers.** The retired clip left 6 of its 21 videos at 5 views or fewer, against about 1 in 20 for the other clips. It no longer appears. Its watch time per view was normal, so YouTube was not showing those videos; viewers were not leaving them.
+- **The views drop, read carefully.** The Shorts feed sent 363 views this week, against 1,243 to 2,902 in the three weeks before. YouTube's announced cut for "unoriginal" channels would look like this. But the feed has alternated low and high every week since early September, and two-week totals are steady. If next Monday is low again (two low weeks running, for the first time), the next shift treats it as a reach cut and tells you that day. Bet 1 (#77) is the response either way. I queued an email to you about this, then withdrew it before it went out once I saw the alternation.
+
+### Done
+- **Data:** the opening-reach question reads as noise: how many viewers get past a video's opening does not predict its views. Closed. A new question, set before its data: is the weekly alternation real viewers or how YouTube's figures arrive? Read on 16 November.
+- **Product (a fix, under a rule set 6 October):** the clip retirement above, after a fresh review (one miscount fixed) and a test video. Not yet due: the title-style test (one video short) and the subreddit test (three short).
+- **Strategy:** the "our own questions" sample plays, at 18.8 seconds. Its question was bland again ("What's the best way to relax after a long day?"). Both replacement samples are now recorded for the 5 November review.
+- **Reliability:** all 15 uploads since last Monday landed with titles. This afternoon's upload had not started by 18:10: GitHub's queue is running it over 5 hours late. It has landed as late as 18:48 before.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.75 this month, forecast $0.88 of $3). The dependency scan shows the same two known libraries (66 advisories), still unreachable.
+- **Market:** YouTube still gives no start date for the reach cut, and outside reports say Studio has no page that would show one.
+- **Audience:** one viewer comment this week, so the reply pipeline stays parked.
+- **General management:** after the review nothing was ready. I proposed nine ideas; two separate rankers, in opposite orders, put the same one first: a two-week column in our views report, so one low week is not misread again. Built, reviewed and merged (a fix; nothing viewers see). I also refreshed the plan's distance to revenue: 757 times short of the Partner Program's views bar (720 last week), 22 subscribers. **Dropped:** recording when YouTube's figures actually run to (the new question says first whether timing is the cause); a tool to read bet 1's host lines (premature until you label it); new background clips (they would wait weeks for bet 1's read); a one-page re-pitch of bet 1 (#77 already asks, and it would spend your attention); a missed-upload alert (one miss in 72 days, and shifts check three times a day); drafting the 5 November review now (Monday's figures would redraft it); splitting this week's low by test group (it reads experiments early, on too few videos).
+- One change viewers see (the clip); the rest were reads and records. AI use: none from the upload allowance; no Polly.
+- **Process:** I nearly emailed you about a single week's low. The weekly review reads views on its scorecard, which compares three-week groups, and nothing showed the weekly alternation. Views are now recorded to be read over two weeks or longer.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #82 (register our Reddit app by 12 January); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
+
+### Next
+- **2 November snapshot:** the views rule above, first; then the title-style test if it has its eighth video, the subreddit test, and the voice question.
+- **If this afternoon's upload has not landed** by the next shift, that is an incident: the next scheduled upload is about 05:00.
+- **If #77 is labelled:** merge as this morning's handover says.
+
+### Better?
+- **Than last shift:** Slightly: one clip that hid videos is gone, and the Reddit replacement decision has both its samples. Nothing larger reached viewers.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, views had their lowest week on record, and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-26 (09:55) — Bet 1 can go live the day you label it; the own-questions sample renders now, and carries a policy cost
 
     Worked (% of the shift): engineering 35 · gm 20 · strategy 15 · reliability 10 · legal 10 · data 5 · security 5
@@ -92,39 +127,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: bet 1 is shown to merge with today's live code, so a label reaches viewers the same day. Nothing new reached viewers.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. For the Reddit deadline, both replacements are built, one rendered, and one now has a known policy cost.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-25 (22:45) — The Stack Exchange sample shows the host grading advice; the own-questions sample is built for the 5 November choice
-
-    Worked (% of the shift): strategy 40 · engineering 20 · gm 10 · editorial 5 · market 5 · data 5 · finance 5 · reliability 5 · security 5
-
-**Summary:** The Stack Exchange version of the show was rendered tonight. The "our own questions" version is built and reviewed, and renders next shift. So the 5 November review can weigh both replacements for Reddit as planned. Nothing reached viewers; bet 1 still waits on your label on #77.
-
-### Toward revenue
-- **Nothing directly.** Reddit's free access, our only source, ends in March, and these two samples are how you will pick a replacement. Tonight's finding bears on it: on Stack Exchange's advice questions the host praised the answers ("Smart move", "Nice framing") instead of reacting to them, as it did on Reddit's advice threads on 23 October. On that show the host would need a different job.
-
-### Done
-- **Strategy (the Stack Exchange sample):** brought up to date with bet 1's release, then rendered once, clear of both uploads. It plays (37.5 seconds against our usual ~21), with three shortened workplace answers, dry and all in the first person. The host's tags were praise or labels that the filter's stock list misses. I did not grow that list again: the audit flagged its growth, and this is not live.
-- **Strategy and engineering (the "our own questions" sample, a bet):** built on a side branch, never merged. One AI request writes a question and three takes. Each take is labelled "TAKE 1/3" on screen, under the host's note "Three takes. All mine.", so nobody mistakes them for real people's answers. The host reacts to none of its own takes. A fresh review found no blockers and nothing touching live uploads; I fixed its main points (the note now shows even if the AI's other lines fail, a rejected reply gets one free retry instead of wasting the day's render, and takes cannot speak as a character or in the first person). On the free AI models, 7 of 7 trial episodes were usable, all plain stances and all bland ("What is the best way to spend a rainy Sunday?").
-- **General management:** nothing was ready. A fresh agent proposed eight ideas and six survived. Two rankers, in opposite orders, put the same three on top: the own-questions sample, the voice cost and the outside checks (all done). **Dropped:** making a refused render request retry itself (a workflow change for a case that has not happened); keeping raw AI replies out of public build logs (it would touch bet 1's release branch while #77 is pending).
-- **Finance (a check):** a Stack Exchange video narrates about as many characters as ours (485 against ~455), so no budget change.
-- **Market and legal (a check):** Reddit's dates are unchanged; its new $1,000 migration bounty is for apps moved inside Reddit, which ours cannot be. YouTube still gives no start date for cutting reach to unoriginal channels, but says channels that turn original get reach re-evaluated, so bet 1 could win reach back.
-- **Data (set ahead):** if bet 1 merges after 6 November, the doubling test (bet 2) keeps its window and bar, and says how many weeks ran at four a day; with fewer than two, four a day gets its own read, set in January.
-- **Reliability and security:** this morning's and this afternoon's uploads landed. The standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.73 this month, forecast $0.87 of $3).
-- **Editorial (a fix, from a second round aimed at neglected functions):** your music task said "anytime", though it must wait for bet 1's read or it changes two things at once; and adding tracks would replace today's track, not add to it. Both are now in the task. **Dropped:** collecting viewers' countries, ages and search terms weekly (it changes no decision, as found on 14 October); free public-domain music (it would replace today's track mid-read, YouTube's claim system flags such tracks, and nobody here can listen); declaring English audio and auto-dubbing (both change every upload mid-read; dubbing is your setting).
-- Mostly bets and checks; no live code changed. AI use: one sample render, seven free-model trial requests; no Polly.
-- **Process:** handed over about 30 minutes early. The one ready item, the next sample's render, waits for the 12-hour render limit, and two rounds of ideas left nothing above the bar.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #82 (register our Reddit app by 12 January); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **Render the own-questions sample** after 07:00 UTC (the one render that shift), and record it beside the Stack Exchange one for 5 November.
-- **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit.
-- The 26 October weekly review, then the opening-reach read once the snapshot lands.
-- The 5 November monthly: both samples; the rule bundle as one ask; distribution and finance get their turn.
-
-### Better?
-- **Than last shift:** Slightly, for the company: the source decision now has both its samples (one rendered, one ready), and a real finding about the host on advice. Nothing new for viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. For the Reddit deadline, both replacement candidates are built and one can be watched; ten shifts ago neither existed.
 - **Than ~100 shifts ago:** Too early to say.
