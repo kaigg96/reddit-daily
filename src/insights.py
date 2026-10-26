@@ -1165,11 +1165,12 @@ def views_gained_by_age(snapshot_rows, old_days=60):
 
 
 def two_week_rate(rows):
-    """Per-day rate of `views_gained_by_age`'s recent column over each snapshot
-    and the one before it, aligned with `rows` (None for the first).
+    """Per-day rate of `views_gained_by_age`'s recent column over each interval
+    and the one before it, aligned with `rows` (None for the first). Two weekly
+    snapshots make two weeks; a skipped snapshot makes it longer.
 
     Weekly gains alternated low and high for eight snapshots running (PRD §4,
-    2026-10-26) while two-week totals held steady, so a single week's low is
+    2026-10-26) while two-week totals were steadier, so a single week's low is
     read against this before it is called a drop."""
     out = [None]
     for (_, _, r0, d0), (_, _, r1, d1) in zip(rows, rows[1:]):
