@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-26 (18:15) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
 
-    Worked (% of the shift): data 35 · product 20 · gm 15 · strategy 10 · reliability 10 · market 5 · security 5
+    Worked (% of the shift): data 30 · product 20 · gm 15 · strategy 10 · reliability 10 · distribution 5 · market 5 · security 5
 
 **Summary:** The weekly review retired a second background clip under a rule set in advance, and recorded the second sample for the Reddit replacement decision. Views fell about fourfold this week, but they have swung low and high every week for two months, so a rule set today reads next Monday's figures before anyone acts.
 
