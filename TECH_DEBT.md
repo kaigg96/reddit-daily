@@ -222,7 +222,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`content._has_emoji`; 2 of ~1,000 past videos' text, one an answer shown on
   screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
   unparseable reply raw to the public log, where `_clean_published` never
-  echoes a refused field.
+  echoes a refused field. **Merge rehearsed 10-26** (local, over `main`
+  `5e96eb2`): no conflicts, 857 pass, no network. Its review's one gap: the
+  dose and own-words lines under `--release v8` (`render_host_lines`,
+  `report.py` ~233) count every `v8` row, any age or subreddit, while the
+  verdict reads AskReddit at 7 days, so "all lines on N of M" can name
+  uploads the verdict never read. Fix on `v8`'s first read, before applying
+  #15's dose rule; not on the branch while #77 is pending.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
