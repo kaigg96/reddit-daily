@@ -886,12 +886,19 @@ def main():
         # (2026-10-09, before #8's read).
         if args.metric not in (Metric.WATCH, Metric.VIEWS, Metric.TOTAL):
             age = insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age
-            cut = args.within or insights.RELEASE_WITHIN.get(args.release)
-            within = f" --within {cut}" if cut else ""
+            within = f" --within {args.within}" if args.within else ""
+            # Not the verdict's cut: a diagnostic reads the cut its own rule
+            # commits to, and v8's avg % viewed and retention points read long
+            # videos since 10-07, not AskReddit (PRD §0 #15; review, 2026-10-26).
+            verdict_cut = insights.RELEASE_WITHIN.get(args.release)
+            note = ("; add the --within and --since this metric's own rule names "
+                    "in PRD §0, if it has one")
+            if verdict_cut:
+                note += f" ({verdict_cut} is the watch-seconds verdict's cut)"
             sys.exit(f"--release judges watch-seconds by its rule (views and total "
                      f"watch time beside it) and does not read --metric {args.metric}. "
                      f"Read it per release instead: --by {args.release_key} --metric "
-                     f"{args.metric} --at-age {age:g}{within}")
+                     f"{args.metric} --at-age {age:g}{within}{note}")
         release(args.release, args.release_key,
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
                 args.min_uploads, args.within)
