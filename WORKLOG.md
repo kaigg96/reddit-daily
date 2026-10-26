@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-26 (18:15) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
+## 2026-10-26 (18:12) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
 
     Worked (% of the shift): data 25 · product 15 · gm 15 · legal 10 · strategy 10 · reliability 10 · distribution 5 · market 5 · security 5
 
@@ -77,7 +77,7 @@ and more useful than a confident guess.
 - **Data:** the opening-reach question reads as noise: how many viewers get past a video's opening does not predict its views. Closed. A new question, set before its data: is the weekly alternation real viewers or how YouTube's figures arrive? Read on 16 November.
 - **Product (a fix, under a rule set 6 October):** the clip retirement above, after a fresh review (one miscount fixed) and a test video. Not yet due: the title-style test (one video short) and the subreddit test (three short on one side).
 - **Strategy:** the "our own questions" sample plays, at 18.8 seconds. Its question was bland again ("What's the best way to relax after a long day?"). Both replacement samples are now recorded for the 5 November review.
-- **Reliability:** all 15 uploads since last Monday landed with titles. This afternoon's upload had not started by 17:56: GitHub's queue is running it over 5 hours late. It has landed as late as 18:48 before.
+- **Reliability:** all 15 uploads since last Monday landed with titles. This afternoon's upload had not started by 18:10: GitHub's queue is running it nearly 6 hours late. It has landed as late as 18:48 before.
 - **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.75 this month, forecast $0.88 of $3). The dependency scan shows the same two known libraries (66 advisories), still unreachable.
 - **Market:** YouTube still gives no start date for the reach cut, and outside reports say Studio has no page that would show one.
 - **Audience:** one viewer comment this week, so the reply pipeline stays parked.
