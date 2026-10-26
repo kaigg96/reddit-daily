@@ -404,8 +404,8 @@ a list nobody can read is the same as no list.
 
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
-  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 64
-  rows on 10-23, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
+  `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 66
+  rows on 10-26, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip

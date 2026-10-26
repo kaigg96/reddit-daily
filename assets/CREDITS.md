@@ -13,7 +13,7 @@ Every media asset committed to this repo must be listed here with its source and
 | `broll/pexels_9668945.mp4` | https://www.pexels.com/video/9668945/ | Pexels License |
 | `broll/pexels_12488544.mp4` | https://www.pexels.com/video/12488544/ | Pexels License |
 | `broll/pexels_15022349.mp4` | https://www.pexels.com/video/15022349/ | Pexels License |
-| `broll/pexels_15168364.mp4` | https://www.pexels.com/video/15168364/ | Pexels License |
+| `broll_retired/pexels_15168364.mp4` | https://www.pexels.com/video/15168364/ | Pexels License — retired 2026-10-26: 6 of 21 uploads using it sat at ≤5 views (p=0.003 under the 0.0071 bar, PRD §0 #11) |
 | `broll_retired/pexels_16482908.mp4` | https://www.pexels.com/video/16482908/ | Pexels License — retired 2026-09-28: 8 of 16 uploads using it sat at ≤5 views |
 | `music/` | *(empty — optional: add more Audio Library tracks for variety)* | Record each track here |
 
@@ -27,4 +27,4 @@ Re-read before applying to any programme.
 | Amazon Polly | narration | Polly FAQ: "As between you and AWS, your Polly output belongs to you"; replay "The service does not restrict this" |
 | Gemini API (free tier) | titles, CTA, host lines, screen | Gemini API Additional Terms (modified 2026-04-28): "Google won't claim ownership over that content"; no clause bars commercial use of Unpaid Services. EEA/CH/UK: paid only when "making API Clients available to users" there; our client is not offered to anyone |
 | Groq (fallback, `v8`) | the same, on Gemini failure | Groq Services Agreement (2026-06-22) §8.1: "Customer retains all Intellectual Property Rights in Customer Data (including in Inputs and Outputs)" |
-| Pexels clips | backgrounds | Pexels License: free, commercial use allowed; "Identifiable people may not appear in a bad light". All six live clips are abstract (ink, smoke, fog, fire, a roof), checked one frame each: a new clip with people needs this read against dark topics |
+| Pexels clips | backgrounds | Pexels License: free, commercial use allowed; "Identifiable people may not appear in a bad light". All five live clips are abstract (ink, smoke, fog, fire, a roof), checked one frame each: a new clip with people needs this read against dark topics |

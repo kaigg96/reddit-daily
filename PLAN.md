@@ -37,9 +37,9 @@ Everything outside the channel product (PRD §0), with the same statuses;
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C10 | parked: 7 viewer comments on 10-19, all on one upload (`scripts/comments.py`); reopen when a weekly read shows them on 3+ | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy. |
+| C10 | parked: comments on one upload a week (7 on 10-19, 1 on 10-26) (`scripts/comments.py`); reopen when a weekly read shows them on 3+ | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it** (2026-10-09): all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos (10-11); private ones go unmentioned. Renaming is the owner's. Done when the owner has decided. |
-| C16 | ready: read the `strategy/own-questions-sample` render (queued 10-26 09:54) into PRD §4 | Strategy | **A source after Reddit** | All bets assume Reddit (§4). Stack Exchange's 10-25 sample: its host graded the advice. Our own questions carry the host's takes (PRD §4). Done when both samples are on the 11-05 review. |
+| C16 | blocked: the 11-05 review (both samples in PRD §4) | Strategy | **A source after Reddit** | All bets assume Reddit (§4). Done when both samples are on the 11-05 review. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response; never held; the owner's logins. Done when the owner reports a date. |
 
 ## 4. Risks
@@ -61,7 +61,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | 2026-10-19 |
+| Weekly | 2026-10-26 |
 | Monthly | 2026-10-05 |
 | Quarterly prep | 2026-10-05 |
 | Quarterly planning | 2026-10-10 |
