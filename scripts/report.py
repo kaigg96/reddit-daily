@@ -226,9 +226,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     from src import config
     with open(config.UPLOAD_LOG) as f:
         rows = list(csv.DictReader(f))
-    # Own words count every upload (#70's done-when); the dose, only those
-    # the verdict read (PRD §4, 2026-10-26).
-    read_ids = {v.video_id for v in read.release}
+    # Own words count every upload (#70's done-when); the dose, the first
+    # uploads the verdict read (PRD §4, 2026-10-26).
+    read_ids = insights.dose_ids(read.release, min_uploads)
     for line in (insights.render_own_words(rows, version, key),
                  insights.render_host_lines(rows, version, key, ids=read_ids)):
         if line:

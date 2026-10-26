@@ -786,6 +786,14 @@ def render_own_words(log_rows, version, key="format_version"):
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
 
 
+def dose_ids(release_videos, n):
+    """The uploads bet 1's dose rule counts: the first `n` by upload date of
+    those its verdict read (PRD §4, pre-committed 2026-10-26). Weekly
+    snapshots add a week of uploads at a time, so the read jumps past `n`."""
+    first = sorted(release_videos, key=lambda v: v.true_published or v.published)[:n]
+    return {v.video_id for v in first}
+
+
 def render_host_lines(log_rows, version, key="format_version", ids=None):
     """Bet 1's dose beside its verdict: of the release's uploads logging
     `host_lines`, how many showed every host line, some (a line too long
@@ -807,7 +815,8 @@ def render_host_lines(log_rows, version, key="format_version", ids=None):
         return ""
     full = sum(1 for n in counts if n >= whole)
     none = sum(1 for n in counts if n == 0)
-    return (f"host lines shown (the dose, never a trigger): all {whole} on {full} of "
+    which = "" if ids is None else ", the verdict's first uploads"
+    return (f"host lines shown (the dose, never a trigger{which}): all {whole} on {full} of "
             f"{len(counts)} uploads, some on {len(counts) - full - none}, none on {none}")
 
 

@@ -2317,6 +2317,17 @@ def test_host_lines_report_the_dose_of_the_release(monkeypatch):
             for n, i in (("4", "a"), ("4", "b"), ("1", "c"), ("0", "d"))]
     line = insights.render_host_lines(rows, "v8", ids={"a", "c"})
     assert line.endswith("all 4 on 1 of 2 uploads, some on 1, none on 0")
+    assert "the verdict's first uploads" in line
+
+
+def test_the_dose_counts_the_verdicts_first_uploads_by_date():
+    """A weekly snapshot adds a week of uploads at once, so the read jumps
+    past 20; the rule counts the first 20 by upload date (PRD §4, 10-26)."""
+    day = datetime.timedelta(days=1)
+    vids = [Video(f"v{i}", NOW, views=10, watch_seconds=10.0, true_published=NOW - i * day)
+            for i in range(5)]
+    assert insights.dose_ids(vids, 3) == {"v4", "v3", "v2"}
+    assert insights.dose_ids(vids[:2], 3) == {"v0", "v1"}
 
 
 def test_fine_watch_seconds_is_percentage_viewed_times_length():
