@@ -564,9 +564,10 @@ def show_catalogue(args):
         print("fewer than two snapshots: no answer")
         return
     print("Views gained per day between snapshots, by each video's age at the earlier one\n")
-    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8}")
-    for snap, old, recent, days in rows:
-        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f}")
+    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8} {'recent, 2 wks':>14}")
+    for (snap, old, recent, days), two in zip(rows, insights.two_week_rate(rows)):
+        two = "" if two is None else f"{two:.0f}"
+        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f} {two:>14}")
     old = sum(o for _, o, _, _ in rows)
     total = old + sum(r for _, _, r, _ in rows)
     if not total:
@@ -576,7 +577,8 @@ def show_catalogue(args):
           "\n  uploads, so a step in its column at the same snapshot as one in the"
           "\n  recent column is the channel's distribution; a column in single digits"
           "\n  is too small to show one. Neither column is age-matched: judge uploads"
-          "\n  with --trajectory.")
+          "\n  with --trajectory. Weekly gains have alternated low and high, so read a"
+          "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
 def show_concentration(args):

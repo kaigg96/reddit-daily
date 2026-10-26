@@ -1164,6 +1164,19 @@ def views_gained_by_age(snapshot_rows, old_days=60):
     return out
 
 
+def two_week_rate(rows):
+    """Per-day rate of `views_gained_by_age`'s recent column over each snapshot
+    and the one before it, aligned with `rows` (None for the first).
+
+    Weekly gains alternated low and high for eight snapshots running (PRD §4,
+    2026-10-26) while two-week totals held steady, so a single week's low is
+    read against this before it is called a drop."""
+    out = [None]
+    for (_, _, r0, d0), (_, _, r1, d1) in zip(rows, rows[1:]):
+        out.append((r0 + r1) / (d0 + d1) if d0 + d1 else None)
+    return out[:len(rows)]
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 
