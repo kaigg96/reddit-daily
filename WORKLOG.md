@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-26 (09:55) — Bet 1 can go live the day you label it; the own-questions sample renders now, and carries a policy cost
+
+    Worked (% of the shift): engineering 25 · gm 25 · strategy 20 · reliability 15 · legal 10 · security 5
+
+**Summary:** Bet 1 was combined with today's live code in a trial copy: no conflicts, and every check passes, so your label on #77 can reach viewers the same day. The "our own questions" sample could not render before 09:54 (one render per 12 hours) and is queued now; YouTube's spam rules weigh against that show.
+
+### Toward revenue
+- **Bet 1 can ship the day you label #77.** Every route to revenue needs it, and it must ship by about 30 October to 6 November for the doubling test to run as planned. The release was combined with everything live since it was built, in a copy never pushed: no conflicts, all 857 automated checks pass, and none reached the internet or spent AI requests. Bet 1 itself is unchanged, so the sample you are judging is what ships.
+- **A cost on one of the two Reddit replacements.** YouTube's spam page (read today) gives as its example of mass production "the exact same background music and repetitive AI generated imagery across many videos, with each video reading out an AI-generated script". The own-questions show is a wholly AI-written script over our one music track: two of those three traits, where the Reddit and Stack Exchange shows have one. If you pick it on 5 November, it should ship only with more music and a check that its videos differ, as #80 asks of four a day.
+
+### Done
+- **Engineering (a check, for bet 1):** the trial above. The only live change it picks up that touches the video is the 24 October rule holding the capitals test's titles to their arm, and it lands where bet 1 writes titles. At merge, the product plan's live-format line becomes v8; nothing else needs care.
+- **Strategy:** asked for the own-questions render at 08:56; refused, as last night's Stack Exchange render (21:53) holds the slot for 12 hours. Re-queued at 09:54; it renders after this shift.
+- **Legal (a check):** the spam-policy reading above, recorded with the source comparison for 5 November.
+- **General management:** one item was ready. A fresh agent proposed eight ideas, five survived; two rankers, in opposite orders, put the same one first (the bet 1 trial) and said nothing else cleared the bar. A second round aimed at the functions with no time in twenty shifts (distribution, audience, monetization, finance) found one, the policy cost above. **Dropped:** a one-page comparison of the replacements (mostly written, and the review packet writes it); drafting the rule bundle for 5 November early (nothing gained); the Stack Exchange licence credit on its sample (never published); counting advice-style questions (any change waits weeks for bet 1's read); a warning before a render request is refused (the refusal came in 20 seconds); a traffic-source report (search is flat at 2–3%, which changes nothing).
+- **Reliability:** this morning's upload and both of yesterday's landed. This morning the title model failed twice ("overloaded") and the backup model wrote the title, keywords and closing line: the first live rescue by the 18 October fix. The capitals test holds since its 24 October fix (one capitalised word on every such title). GitHub has not yet moved our uploads to its new server image (due by 19 November).
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.74 this month, forecast $0.88 of $3).
+- Mostly checks; no live code changed. AI use: none from the upload allowance (the render after this shift uses the free sample model); no Polly.
+- **Process:** last night's handover said to render "after 07:00", but the 12-hour limit held the slot until 09:54. A handover naming a render should give the time the limit allows.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1, the same day); #82 (register our Reddit app by 12 January); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
+
+### Next
+- **Read the own-questions render** (verdict about 10:05) into the source comparison for 5 November. The next automated render is not before about 22:00.
+- **Today's weekly snapshot** (it has landed between 11:20 and 13:50 for five weeks): the weekly review, the opening-reach read, and the title-style test, whose sample is now large enough (19 "You…" titles against 8 others reach 7 days old).
+- **If #77 is labelled:** merge the release branch (still at its tested commit), set the live format to v8 in the product plan, and close #77.
+
+### Better?
+- **Than last shift:** Slightly: bet 1 is shown to merge with today's live code, so a label reaches viewers the same day. Nothing new reached viewers.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. For the Reddit deadline, both replacements are built, one rendered, and one now has a known policy cost.
+- **Than ~100 shifts ago:** Too early to say.
+
 ## 2026-10-25 (22:45) — The Stack Exchange sample shows the host grading advice; the own-questions sample is built for the 5 November choice
 
     Worked (% of the shift): strategy 40 · engineering 20 · gm 10 · editorial 5 · market 5 · data 5 · finance 5 · reliability 5 · security 5
@@ -94,41 +127,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly, for the company: the source decision now has both its samples (one rendered, one ready), and a real finding about the host on advice. Nothing new for viewers.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped. For the Reddit deadline, both replacement candidates are built and one can be watched; ten shifts ago neither existed.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-25 (15:40) — The audit found shifts waiting on you, not short of ideas; #77 now asks only for a label
-
-    Worked (% of the shift): gm 50 · product 10 · finance 10 · engineering 10 · strategy 5 · editorial 5 · reliability 5 · security 5
-
-**Summary:** This shift ran the process audit that comes due every ten shifts. Every shift since 21 October ended early with nothing ready, because what is worth doing waits on you, and nothing has moved on your side since 20 October. The issue that ships bet 1 still asked you to render a video yourself; it now asks only for a label on a sample you can watch in the browser.
-
-### Toward revenue
-- **Bet 1's ask is smaller.** #77's title and description asked for a render on your machine, though this morning's comment links a spoken sample you can watch in the browser. Both now lead with that sample; the local render is optional. Editing sends no email.
-- **Break-even, priced for the first time.** It had been dropped four times as "needs your subscription price". It does not: on Pro ($20 a month), reaching the Partner Program bar covers our costs at any reported ad rate; on Max ($100 or more), only in the upper half of the reported range, and at the lowest rate it takes three to six times the bar. So the bar is roughly break-even, not profit. For the 5 November review.
-- **#77 has a date.** Doubling weekly views (bet 2) is judged over the quarter's last four weeks, from 30 November, and four uploads a day starts only once bet 1 has run 24–31 days. So bet 1 must ship by about 30 October to 6 November for that test to run as planned; each week later costs it one of its four weeks. Four a day fits the voice budget: about $1.80 a month of $3.
-
-### Done
-- **General management (the audit):** nine shifts since 21 October ran 26–43 of 60 minutes. All handed over, none had anything ready, and nothing reached viewers. Checks caught real faults before release (two samples held back, a slur created by cutting a line, a blank line that dropped the whole host). There were no reverts and no rule broken. **Found:** (1) two plain-label asks wait (#77, #80) while nothing of yours has moved, so no re-asks, which would only add email; (2) distribution and finance had no time in twenty shifts, monetization and editorial none since 21 October (for 5 November); (3) all nine shifts called themselves better than the last while watch time stayed flat: the self-grading the report's template warns about, so this entry answers for viewers first; (4) six of nine were mostly fixes, many of them word lists for bet 1's tag filter, grown three times. Every decision re-tested (two triggers had fired, on your queue and the ready floor), one compressed, two superseded findings shortened. Rule fixes that need your approval are bundled for one ask at the 5 November review, not sent now: the ready-work floor (3 in the rules, 5 in the code), a false line saying shifts cannot read run logs, and your approved #65 sentence.
-- **Product:** #82's title said to register by 31 October; the date that binds us is 12 January. Corrected, no email.
-- **Engineering (a fix, live):** the tool that shows where each shift's time went counted two re-dated shifts twice and stopped short of ten shifts back. Fixed in two steps, each reviewed by a fresh agent (no blockers), merged; no video change.
-- **Editorial (a check):** the working name "Show of Hands" belongs to an English folk duo active since 1986, with its own YouTube channel, so a rename proposal cannot assume it. Recorded on the brand item.
-- **General management (a second round of ideas):** a fresh agent proposed eight, five survived; two rankers, in opposite orders, put the same two first, the date above and the voice cost (both done). Dropped: the content screen's standing check (tomorrow's weekly review), a description line saying what the host adds (it ships only after bet 1 is kept), and a likes test (likes earn nothing, and the counts are thin).
-- **Dropped:** which uploads gain subscribers (gains are zero on almost every upload, 21 ever, so nothing can be told apart); the Stack Exchange spoken sample (this afternoon's upload runs about 16:00, inside the hour a render must avoid); a hook that stops a shift ending before its handover (every traced shift since 19 October handed over); deleting four abandoned side branches (unmerged work; recorded instead).
-- **Reliability and security:** yesterday's two uploads and this morning's landed; the last six runs succeeded. The standing check is clean: no secrets in the project, no workflow changes, you the only collaborator; money controls in place ($0.73 this month, forecast $0.87 of $3).
-- Mostly process and fixes; break-even, the date and the name check are new. AI use: no upload-model, Groq or Polly requests, no render.
-- **Process:** shifts cannot edit the rule files (refused again today), so the bundle will reach you as exact text, as #65 did. Handed over about 20 minutes early: the second round's other ideas fell below the bar (above), and the next real item, the Stack Exchange sample, cannot render until this evening.
-
-### Blocked
-- **For you, in order:** #77 (watch the sample in its 25 October comment; one label ships bet 1); #82 (register our Reddit app by 12 January; sooner is safer); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **If #77 is labelled:** merge the release branch once that day's release check passes on its current commit, then update the plans.
-- The Stack Exchange spoken sample, in the first render slot clear of an upload (after about 17:30 UTC).
-- The 26 October weekly review, then the opening-reach read once the snapshot lands.
-- The 5 November monthly: raise the rule bundle as one ask with its exact text; give distribution and finance their turn.
-- **About 2 November, if #80 is still unanswered:** the plan you approved turns on four a day after the subreddit read, while #80 asks it to wait for bet 1 (the spam rule's risk is the channel itself). Recommend holding: going ahead is the riskier action, and one label from you starts it.
-
-### Better?
-- **Than last shift:** No for viewers; nothing new reached them. Slightly for the company: bet 1's ask is one label, and break-even is known.
-- **Than ~10 shifts ago:** No: watch time is flat at 12 seconds and bet 1 has not shipped, though its ask shrank from a session on your machine to one label.
 - **Than ~100 shifts ago:** Too early to say.
