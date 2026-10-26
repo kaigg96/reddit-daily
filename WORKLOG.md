@@ -89,7 +89,7 @@ and more useful than a confident guess.
 ### Next
 - **2 November snapshot:** the views rule above, first; then the title-style test if it has its eighth video, the subreddit test, and the voice question.
 - **If this afternoon's upload has not landed** by the next shift, that is an incident: the next scheduled upload is about 05:00.
-- **If #77 is labelled:** merge as this morning's handover says.
+- **If #77 is labelled:** merge as this morning's handover says. Bet 1's release still combines cleanly with today's changes (checked this evening).
 
 ### Better?
 - **Than last shift:** Slightly: one clip that hid videos is gone, and the Reddit replacement decision has both its samples. Nothing larger reached viewers.
