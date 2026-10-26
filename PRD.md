@@ -29,7 +29,7 @@
 | Item | Status | Req | Decision rule |
 |---|---|---|---|
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
-| **Refuse shock-phrase titles in code** (spam policy, PLAN §4) | ready: dry-run `reliability/shock-title-guard` (reviewed 10-26) from 21:58 UTC; merge on PASS | R2.2 | The prompt's ban leaked on 10-20 ("…chilling genius will surprise you"). Such a title falls back like a failed one (style blank), as #14's caps hold does; no bump. Ships after no false refusal on logged titles, a fresh review, a dry run PASS. |
+| ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (spam policy, PLAN §4) | done: merged after dry run PASS at `9103351` | R2.2 | The prompt's ban leaked on 10-20 ("…chilling genius will surprise you"). Such a title falls back like a failed one (style blank), as #14's caps hold does; no bump. Would have refused 11 of 199 logged titles, all shock bait. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call, always a dry run; it proves a **render** change only. Other paths need `dry_run.py request` (Gemini calls on `SAMPLE_MODEL`'s free tier). |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10/25/50/75/100% (`watch_ratio_*`), swipe-aways excluded (§4); `report.py --metric` reads it. **Never a trigger.** |
 
