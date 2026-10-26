@@ -5,27 +5,23 @@ needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
 - **Commit:** `ec2f077`
-- **When:** 2026-10-25T13:11:42Z
+- **When:** 2026-10-26T15:11:19Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/40196381838)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/40346607576)
 
 ## What the gates said
 
 …(truncated)…
-duction).
-
-### Gate 1 — merged metadata prompt
-
-- ✅ `title`: What hobby will BREAK your bank?
-- ✅ `keywords`: expensive hobbies, hobbies too expensive, costly pastimes, hobbies to avoid, luxury hobbie
-- ✅ `cta`: I'm raising my hand for skiing; two hundred dollars for a lift ticket is just wild. Which 
+s, costly pastimes, hobbies too expensive, photography cost, warhammer exp
+- ✅ `cta`: I raise my hand for "Skiing": two hundred dollars for a lift ticket is just wild. Which on
 - ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)
-- ✅ host reaction 1: Oof
-- ✅ host reaction 2: Plastic crack
-- ✅ host reaction 3: Two hundred dollars!?
-- ⚠️ Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (4 words)
-- ⚠️ Commentary setup, as written: "I know this one"
+- ✅ host reaction 1: Ouch
+- ✅ host reaction 2: For real
+- ⚠️ host reaction 3: dropped, past its cap, grading its answer or a swear word (the rest still ship)
+- ⚠️ Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (3 words), reaction 3 (2 words)
+- ⚠️ Commentary setup, as written: "I feel this"
+- ⚠️ Commentary reaction 3, as written: "Hard agree"
 
 ### Gate 2 — R4.6 screen replay
 
