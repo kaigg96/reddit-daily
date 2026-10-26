@@ -227,8 +227,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
-  uploads the verdict never read. Fix on `v8`'s first read, before applying
-  #15's dose rule; not on the branch while #77 is pending.
+  uploads the verdict never read. Own words do so by design (#70's
+  done-when is every upload); the dose does not (PRD §4, pre-committed
+  10-26). Narrow the dose line to `read.release` on `v8`'s first read,
+  before applying #15's dose rule; not on the branch before #77 is decided.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
