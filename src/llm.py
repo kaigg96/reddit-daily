@@ -468,6 +468,9 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     # ok follows the cleaned title: a reply that cleans to nothing (a lone
     # quote) ships the fallback, so it must not claim a style.
     cleaned = sanitize_title(generated, "", max_len)
+    if cleaned and _shock_bait(cleaned, source):
+        print("Title fallback: a shock phrase was refused")  # not echoed, as swear words
+        cleaned = ""
     ok = bool(cleaned)
     if ok and caps is not None:
         cleaned = drop_emphasis_caps(cleaned, source, spare=1 if caps else 0)
@@ -477,6 +480,25 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
         ok=ok,
     )
 
+
+# The prompt bans shock phrases, since YouTube refuses content "designed to
+# shock or surprise viewers for the sole purpose of getting views" (PLAN.md §4),
+# but one shipped on 2026-10-20 ("Animals' chilling genius will surprise you").
+# Narrow on purpose: it refuses a title that sells its content as shocking,
+# not one asking what shocked or surprised you, nor a word the asker used. A
+# refused title ships as a failed one (title_ok 0 with meta_failure blank).
+_SHOCK_PHRASE = re.compile(
+    r"\b(?:shock(?:ing|ingly)|(?:will|['’]ll)\s+shock\s+you|you['’]ll\s+be\s+shocked"
+    r"|(?:won['’]?t|will\s+not)\s+believe|unbelievabl[ey]|never\s+guess|insane(?:ly)?"
+    r"|chilling|surprise\s+you|surprising(?:ly)?|jaw[-\s\u2010-\u2015]?dropping"
+    r"|mind[-\s\u2010-\u2015]?blowing|blow\s+your\s+mind)\b", re.I)
+
+
+def _shock_bait(title, source=""):
+    """A shock phrase in `title` that the Reddit text did not already use:
+    refusing the asker's own word ships the same word in the raw question."""
+    said = source.lower()
+    return any(m.group(0).lower() not in said for m in _SHOCK_PHRASE.finditer(title))
 
 _CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:['’][A-Za-z]+)?\b")
 

@@ -216,6 +216,64 @@ def test_resolve_title_treats_whitespace_only_as_a_failure():
     assert r.ok is False
 
 
+def test_a_shock_phrase_title_ships_as_a_failed_one():
+    """The prompt's ban leaked on 2026-10-20; the title falls back and claims
+    no style, so it is evidence about neither #10's nor #14's arms."""
+    for title in ("Animals' chilling genius will surprise you",
+                  "You WON'T Believe These Rare Possessions!",
+                  "3 Shocking Answers: Friends for Life?",
+                  "3 Surprising Answers: How Dating a Pro Athlete Went",
+                  "This is jaw-dropping", "Mind blowing facts", "An INSANE story"):
+        r = llm.resolve_title(title, style="B", fallback="Raw?", caps=True)
+        assert (r.title, r.style, r.ok) == ("Raw?", "", False), title
+
+
+def test_a_title_near_a_shock_phrase_still_ships():
+    for title in ("What surprised YOU most about moving abroad?",
+                  "What World War II fact SHOCKED you?", "Which Dumb Death Shocks YOU Most?",
+                  "Culture shock: what hit you hardest?",
+                  "Would YOU believe a stranger?", "Chill pills that work?",
+                  "Shockwave? No, a sonic boom"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+EXPECTED_REFUSED = [
+    "Did YOU know THESE chilling 9/11 facts?",
+    "3 Surprising Answers: How Dating a Pro Athlete Went",
+    "You'll Never Guess These Harder-Than-You-Think Degrees!",
+    "3 Shocking Answers: Homeschooling Parents Who Barely Passed High School?",
+    "Divorce Horrors: Lawyers Reveal Their Shocking Cases",
+    "You Won't Believe What We Miss From The 2000s!",
+    "You WON'T Believe These Rare Possessions!",
+    "3 Shocking Answers: Friends for Life?",
+    "You Won't Believe WHY Asia Has Almost No Homeless!",
+    "Early Risers: The SHOCKING Truth Behind Waking Up Early",
+    "Animals' chilling genius will surprise you",
+]
+
+
+def test_a_shock_word_the_asker_used_is_not_refused():
+    r = llm.resolve_title("The most SHOCKING Epstein detail?", style="B", fallback="Raw?",
+                          source="What is the most shocking detail in the Epstein files?")
+    assert r.ok and r.style == "B"
+    for title in ("This will shock you", "You'll be shocked", "You'll never guess",
+                  "Unbelievable answers", "Mind\u2011blowing facts"):
+        assert not llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+def test_the_logged_titles_it_refuses_are_the_known_shock_ones():
+    """False refusals checked by eye on 2026-10-26; widening the pattern must
+    re-check them, so this names the set rather than counting it."""
+    import csv
+    from src import config
+    with open(config.UPLOAD_LOG, encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r["timestamp_utc"] < "2026-10-26T12"]
+    refused = sorted(r["video_title"] for r in rows
+                     if llm._shock_bait(r["video_title"], r["post_title"]))
+    assert len(rows) == 199
+    assert refused == sorted(EXPECTED_REFUSED)
+
+
 def test_an_all_lower_case_title_ships_in_sentence_case():
     """PRD §0 #14: the no-capitals arm came back with no capitals at all."""
     cases = {
