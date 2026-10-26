@@ -468,6 +468,9 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     # ok follows the cleaned title: a reply that cleans to nothing (a lone
     # quote) ships the fallback, so it must not claim a style.
     cleaned = sanitize_title(generated, "", max_len)
+    if cleaned and _SHOCK_PHRASE.search(cleaned):
+        print("A generated title was refused for a shock phrase")  # not echoed, as swear words
+        cleaned = ""
     ok = bool(cleaned)
     if ok and caps is not None:
         cleaned = drop_emphasis_caps(cleaned, source, spare=1 if caps else 0)
@@ -477,6 +480,17 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
         ok=ok,
     )
 
+
+# The prompt bans shock phrases, since YouTube refuses content "designed to
+# shock or surprise viewers for the sole purpose of getting views" (PLAN.md §4),
+# but one shipped on 2026-10-20 ("Animals' chilling genius will surprise you").
+# Narrow on purpose: it refuses a title that sells its content as shocking,
+# never one asking what shocked or surprised you. Across the 199 titles logged
+# to 10-26 it matches 10, all shock titles. A refused title ships as a failed one.
+_SHOCK_PHRASE = re.compile(
+    r"\b(?:shock(?:ing|ingly)|(?:won['’]?t|will\s+not)\s+believe|insane(?:ly)?"
+    r"|chilling|surprise\s+you|surprising(?:ly)?|jaw[-\s]?dropping|mind[-\s]?blowing"
+    r"|blow\s+your\s+mind)\b", re.I)
 
 _CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:['’][A-Za-z]+)?\b")
 

@@ -216,6 +216,39 @@ def test_resolve_title_treats_whitespace_only_as_a_failure():
     assert r.ok is False
 
 
+def test_a_shock_phrase_title_ships_as_a_failed_one():
+    """The prompt's ban leaked on 2026-10-20; the title falls back and claims
+    no style, so it is evidence about neither #10's nor #14's arms."""
+    for title in ("Animals' chilling genius will surprise you",
+                  "You WON'T Believe These Rare Possessions!",
+                  "3 Shocking Answers: Friends for Life?",
+                  "3 Surprising Answers: How Dating a Pro Athlete Went",
+                  "This is jaw-dropping", "Mind blowing facts", "An INSANE story"):
+        r = llm.resolve_title(title, style="B", fallback="Raw?", caps=True)
+        assert (r.title, r.style, r.ok) == ("Raw?", "", False), title
+
+
+def test_a_title_near_a_shock_phrase_still_ships():
+    for title in ("What surprised YOU most about moving abroad?",
+                  "What World War II fact SHOCKED you?", "Which Dumb Death Shocks YOU Most?",
+                  "Culture shock: what hit you hardest?",
+                  "Would YOU believe a stranger?", "Chill pills that work?",
+                  "Shockwave? No, a sonic boom"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+def test_no_logged_title_is_refused_but_the_shock_ones():
+    import csv
+    from src import config
+    # The log is append-only, so the titles up to the day this was built stay fixed.
+    rows = [r for r in csv.DictReader(open(config.UPLOAD_LOG, encoding="utf-8"))
+            if r["timestamp_utc"] < "2026-10-26T12"]
+    refused = [r["video_title"] for r in rows if llm._SHOCK_PHRASE.search(r["video_title"])]
+    assert len(rows) == 199 and len(refused) == 10
+    assert all(any(w in t.lower() for w in ("shock", "believe", "chilling", "surpris"))
+               for t in refused)
+
+
 def test_an_all_lower_case_title_ships_in_sentence_case():
     """PRD §0 #14: the no-capitals arm came back with no capitals at all."""
     cases = {
