@@ -1,98 +1,102 @@
-## Shift trace — run 40237124781
+## Shift trace — run 40295591465
 
-**Ended:** success, is_error false, 177 turns, 28.5 min, stop end_turn; 1 permission denial(s): Bash. **Tool calls:** 176, 4 failed. Helper agents made 66 more, 0 failed.
+**Ended:** success, is_error false, 155 turns, 61.3 min, stop end_turn. **Tool calls:** 153, 0 failed. Helper agents made 138 more, 2 failed.
 
 **Last message:**
 
-> I've committed and pushed the handover at 22:16, about 30 minutes early. Two rounds of new ideas left nothing worth doing, and the only ready item, the next sample render, is blocked until tomorrow by the one-render-per-12-hours limit.
+> I ran the shift. The handover is pushed. The render job picked up the own-questions request at 09:54 and was still running after two minutes, well past the ~20 seconds a refusal takes, so it got past the 12-hour limit. Its verdict should land around 10:05, after this shift.
 >
-> **What happened**
-> - **Stack Exchange sample (one of the two possible replacements for Reddit):** I updated it to bet 1's current release and rendered it once, clear of both uploads. It plays (37.5 s, against our usual ~21 s). The finding for the 5 November review: on advice questions the host praised the answers ("Smart move", "Nice framing", "Adjust mindset") instead of reacting to them, the same failure seen on Reddit's advice threads. I didn't add these to the tag filter's word list, because the audit warned about that list growing and this isn't live content. The video can be downloaded until 8 November; judging it later means rendering it again.
-> - **"Our own questions" sample (the other replacement):** built on a side branch that is never merged. One AI request writes a question and three takes. Each take is labelled "TAKE n/3" under the note "Three takes. All mine." so nobody mistakes them for real people's answers, and the host doesn't react to its own takes. A fresh review found no blockers and nothing that touches live uploads; I fixed its main points. 858 tests pass. It rendered locally (silent, with stand-in AI replies), and 7 of 7 trial episodes on the free AI models were usable, though all bland. It hasn't been rendered with real AI output yet; that's the next shift's job.
-> - **Smaller items:**
->   - **Music task:** your instructions said "anytime", but the task has to wait for bet 1's read, and adding tracks would replace today's track rather than add to it. The task now says both.
->   - **Late merge:** I wrote down in advance how the doubling test (bet 2) is judged if bet 1 merges after 6 November.
->   - **Outside news:** Reddit's dates are unchanged. YouTube still gives no start date for its reach cut on unoriginal channels,
+> **What moved the company toward revenue:** bet 1 can now ship the day the owner labels #77.
+> - I merged it with everything live since it was built, in a local copy I never pushed. There were no conflicts and all 857 tests passed. I also checked the tests make no network calls even though the shell has live AI keys, so they spent nothing.
+> - A fresh review of the combination found nothing on the upload path. Titles are held to their capitals-test arm on every route.
+> - The release branch is untouched, so the sample the owner is judging is still what ships.
+>
+> **Done:**
+> - **Reporting fix on main:** the review found the report tool would have pointed a later shift at the wrong group of videos for two of bet 1's pre-set checks. Fixed, reviewed, merged. No video change.
+> - **Bet 1's dose rule:** it now counts the first 20 uploads the verdict actually reads, settled before any bet 1 upload exists. The matching fix is built and reviewed on its own branch, to merge right after bet 1.
+> - **A cost on one Reddit replacement:** YouTube's spam page names "the exact same background music… with each video reading out an AI-generated script" as mass production. The own-questions show has two of those traits; today's show and Stack Exchange's have one. I recorded this for the 5 November review.
+> - **Reliability:** both of yesterday's uploads and this morning's landed. This morning the backup AI model wrote the title, keywords and closing line after two "overloaded" errors, the first live rescue by the 18 October fix. The capitals test's arms are holding since the 24 October fix.
+> - **Security:** standing check clean; money controls in place ($0.74 this month, forecast $0.88 of $3). No Polly, no upload-allowance AI reques
 
-### Tool calls (last 80 of 176)
+### Tool calls (last 80 of 153)
 
-97. Bash: sed -n 123p PRD.md; grep -n "^| 14 \|^| 4 \|^| 10 " PRD.md | cut -c1-900
-98. Bash: python3 - <<'EOF'
-99. Bash: sed -n 40,100p .github/workflows/dry-run.yml; grep -n "12 hours\|refus\|def pending" -A3 scripts/dry_run.py | head -40
-100. Bash: sed -n 55,65p PRD.md | cut -c1-700; grep -n "R1.6" PRD.md | cut -c1-400 | head -5; ls assets/music/ assets/*.enc 2>/dev/null
-101. Bash: sed -n 332,350p PRD.md | cut -c1-600; grep -n -i "music" src/config.py src/video.py | head -12
-102. Bash: date -u +%H:%M
-103. ✗ Bash: for v in GEMINI_API_KEY GROQ_API_KEY AWS_POLLY_ACCESS_KEY; do [ -n "${!v}" ] && echo "$v set" || echo "$v unset"; done; ls .env 2>/dev/null — Exit code 2: GEMINI_API_KEY set
-104. Bash: cd /tmp/ownq && cat > /tmp/ownq_trial.py <<'EOF'
-105. Bash: cd /tmp/ownq && python3 - <<'EOF'
-106. Bash: cd /tmp/ownq && python3 - <<'EOF'
-107. Bash: cd /tmp/ownq && sed -n 40,80p src/ownquestions.py; grep -n "COMMENTARY_ANSWERS =" src/config.py
-108. Bash: cd /tmp/ownq && python3 - <<'EOF'
-109. Bash: cd /tmp/ownq && cat > /tmp/ownq_trial2.py <<'EOF'
-110. Bash: cd /tmp/ownq && sed -i 's/^llm.get_metadata = lambda \*a, \*\*kw: sample.METADATA$/llm.get_metadata = lambda *a, **kw: sample.METADATA._rep…
-111. Read: /tmp/ownq_note2.png
-112. Bash: cd /tmp/ownq && git add -A src tests && git commit -q -F - <<'EOF'
-113. Bash: python3 - <<'EOF'
-114. Bash: python3 - <<'EOF'
-115. Bash: python3 - <<'EOF'
-116. Agent: Second-round candidate generation
-117. Bash: git pull -q --ff-only; git status --short; ls .dry-run-requests/ 2>/dev/null; grep -n "^## 2026-10-25 (08:25)" WORKLOG.md; wc -l WORKLOG.md
-118. Write: /tmp/worklog_entry.md
-119. Bash: date -u +%H:%M; git log --since="20 hours ago" --oneline | grep -i -c "health" ; venv/bin/python scripts/context_budget.py --help 2>&1 | gr…
-120. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -25; git status --short
-121. Bash: git -C /tmp/se-sample status --short | head -3; git worktree remove /tmp/se-sample && git worktree list
-122. Bash: git fetch -q origin && git log -1 --format='%h %ci' origin/integration/preview && git merge-base --is-ancestor origin/integration/preview o…
-123. Bash: date -u +%H:%M
-124. Bash: gh run view 40237322778 --log 2>&1 | head -3 | cut -c1-160; echo "exit: $?"
-125. Bash: sed -n '/^## Open items/,/^## /p' TECH_DEBT.md | grep -n "^- \*\*" | cut -c1-170
-126. Bash: wc -w /tmp/worklog_entry.md && sed -n 101,135p WORKLOG.md | wc -w
-127. Bash: cd /tmp && python3 - <<'EOF'
-128. Bash: date -u; python3 - <<'EOF'
-129. Bash: python3 - <<'EOF'
-130. Bash: venv/bin/python scripts/escalations.py open 2>&1 | head -20
-131. Bash: tail -1 analysis/analytics_snapshots.csv | cut -c1-60; git log -1 --format='%ci %s' -- analysis/analytics_snapshots.csv
-132. Bash: cd /tmp/ownq && git diff f597d0b -- src/run.py src/config.py src/video.py
-133. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && venv/bin/python scripts/report.py --help 2>&1 | grep -E "^\s+--" | head -…
-134. ListAgents: 
-135. Bash: python3 - <<'EOF'
-136. Bash: python3 - <<'EOF'
-137. Bash: timeout 600 venv/bin/python -m pytest -q 2>&1 | tail -2; venv/bin/python scripts/check_docs.py 2>&1 | tail -3
-138. ListAgents: 
-139. Bash: git fetch -q origin && git log --oneline HEAD..origin/main | head -5; git status -sb | head -2
-140. ToolSearch: select:Monitor
-141. Bash: venv/bin/python scripts/backlog_status.py --dropped 2>&1 | head -3 | cut -c1-300; venv/bin/python scripts/context_budget.py --allocation 2>…
-142. ListAgents: 
-143. Bash: sleep 75; date -u +%H:%M
-144. Bash: git diff 19730c7 HEAD -- PRD.md | grep "^+" | cut -c1-50 ; git diff 19730c7 HEAD -- PRD.md | grep -o "The Stack Exchange sample (2026-10-25…
-145. Bash: python3 - <<'EOF'
-146. ListAgents: 
-147. Bash: date -u +%H:%M:%S
-148. ✗ Bash: ls /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/memory/ 2>&1; cat /home/runner/.claude/projects/-home-runner-w… — Exit code 1
-149. Bash: git diff --stat; date -u +%H:%M:%S
-150. Read: /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/c900bd9f-b598-4340-af09-4f0f713dcf9d/tasks/bfsqr1s0i.output
-151. ListAgents: 
-152. Bash: timeout 120 venv/bin/python scripts/report.py --trajectory --metric views --offline 2>&1 | tail -8
-153. Bash: date -u +%H:%M:%S
-154. Bash: cd /tmp/ownq && sed -n 627,700p src/llm.py | grep -n -i "reddit\|comment\|answer\|cta\|vote" | head -20
-155. ListAgents: 
-156. Bash: F=/tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/c900bd9f-b598-4340-af09-4f0f713dcf9d/tasks/a636cac0bb43c73b3.output; ls -la …
-157. Bash: F=/tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/c900bd9f-b598-4340-af09-4f0f713dcf9d/tasks/a636cac0bb43c73b3.output; timeout…
-158. Bash: sed -n 115,130p src/video.py; cat scripts/seal_assets.sh | head -30
-159. Bash: sed -n 13,66p PRD.md | awk '{print NR+12": "length($0)}' | sort -t: -k2 -n -r | head -5; sed -n 60,63p PRD.md
-160. Bash: sed -n 45p PRD.md
-161. Bash: python3 - <<'EOF'
-162. Bash: python3 - <<'EOF'
-163. Bash: git add PRD.md && git commit -q -F - <<'EOF'
-164. Bash: cd /tmp/ownq && sed -n '/^def _commentary_ask/,/^def _within_cap/p' src/llm.py | head -14; grep -n "HOUSE_VOTE_RULE\s*=" -A4 src/config.py …
-165. Bash: cd /tmp/ownq && grep -n "_COMMENTARY_ASK = " -A 30 src/llm.py | grep -i -n "vote\|cta\|redditor\|answer" | head -12
-166. Bash: grep -n "retention-days\|upload-artifact" .github/workflows/dry-run.yml; gh api repos/kaigg96/reddit-daily/actions/runs/40237322778/artifac…
-167. Bash: python3 - <<'EOF'
-168. Bash: python3 - <<'EOF'
-169. Bash: python3 - <<'EOF'
-170. Bash: python3 - <<'EOF'
-171. Bash: python3 - <<'EOF'
-172. Bash: python3 - <<'EOF'
-173. Bash: python3 - <<'EOF'
-174. Bash: git -C /tmp/ownq status --short | head; git -C /tmp/ownq log origin/strategy/own-questions-sample -1 --format=%h; git worktree remove /tmp/…
-175. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -1 && git add WORKLOG.md && git commit -q -m "Handover: the Stack Exchange sample shows t…
-176. Bash: git log origin/main --since="2 hours ago" --format=%B | grep -i -c "co-authored\|generated with"; git log origin/strategy/own-questions-sam…
+74. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+75. Bash: gh run view 40272046821 --log 2>/dev/null | grep -m3 -iE "Image: |Version: [0-9]{8}|Operating System" ; gh run view 40212432361 --log 2>/de…
+76. Agent: Second-round candidates, neglected functions
+77. Bash: date -u +%H:%M; grep -n -i "own-questions\|own questions" PRD.md | cut -c1-220 | head; grep -n -i "AI script\|mass-produc" PRD.md PLAN.md D…
+78. Bash: sed -n 147p PRD.md | fold -w 250 | head -40
+79. ToolSearch: select:WebFetch
+80. WebFetch: https://support.google.com/youtube/answer/2801973?hl=en
+81. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+82. Bash: git diff --stat && git diff PRD.md | grep "^[+-]" | cut -c1-150 && venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD|TO…
+83. Bash: git add PRD.md && git commit -q -m "PRD §4 (C16): the own-questions show shares two of the three traits in YouTube's spam-policy example of…
+84. Bash: git log origin/main --format="%ad %h" --date=iso -1 2496c91; venv/bin/python - <<'EOF'
+85. Bash: grep -n "^| C16" PLAN.md | cut -c1-120
+86. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
+87. Bash: venv/bin/python - <<'EOF'
+88. Bash: venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -2; venv/bin/python scripts/shift_report.py --help 2>&1 | head -5; venv…
+89. Bash: sed -n 1,25p scripts/shift_report.py | head -25; grep -n "^def build" -A6 scripts/shift_report.py
+90. Bash: venv/bin/python scripts/shift_report.py WORKLOG.md .github/shift-usage.csv "" 2>&1 | head -20
+91. Bash: git add WORKLOG.md PLAN.md && git commit -q -m "Handover: bet 1 merges cleanly with today's live code (rehearsed, unpushed, 857 tests green…
+92. Agent: Review v8 merge interactions
+93. Bash: date -u +%H:%M; sed -n 880,900p scripts/report.py; grep -n "def render_host_lines\|def host_line\|RELEASE_WITHIN" scripts/report.py src/ins…
+94. Bash: git show 0c56a8d --stat | tail -4; git show 0c56a8d -- tests/ | head -60
+95. Bash: grep -n "does not read --metric\|Read it per release" tests/*.py | head; grep -n "avg_view_pct\|video_length=long" PRD.md | cut -c1-160 | h…
+96. Bash: git checkout -q -b data/release-metric-redirect-cut origin/main && grep -n "def test.*release\|import report\|from scripts import report\|d…
+97. Bash: grep -ln "report\.main\|scripts.report\|from scripts import report\|report.py" tests/*.py | head; grep -n "def main" scripts/report.py; gre…
+98. Bash: grep -n "scripts.report\|report\.main\|sys.argv\|subprocess" tests/test_insights.py | head -10
+99. Bash: sed -n 2255,2310p tests/test_insights.py
+100. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
+101. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
+102. Bash: venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -2; venv/bin/python scripts/report.py --offline --release v8 --metric a…
+103. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "report.py --release: a diagnostic metric's redirect no longer hands i…
+104. Agent: Fresh review of redirect fix
+105. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
+106. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
+107. Bash: grep -n "^from src import\|^import insights\|insights" scripts/report.py | head -3; sed -n 886,902p scripts/report.py
+108. Bash: venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -1; cp scripts/report.py /tmp/report_new.py && git show origin/main:scr…
+109. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "report.py --release redirect, review: the note no longer says the ver…
+110. Bash: git worktree remove --force .claude/worktrees/agent-ad0138c3269818e84 && git branch -D -q review/v8-merge worktree-agent-ad0138c3269818e84 …
+111. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+112. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+113. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "TECH_DEBT|within|over"; git add TECH_DEBT.md && git commit -q -m "TECH_DE…
+114. Bash: venv/bin/python - <<'EOF'
+115. Bash: git show origin/integration/preview:scripts/report.py | sed -n 195,250p
+116. Bash: git show origin/integration/preview:src/insights.py > /tmp/ins_v8.py; grep -n "def release_read\|class ReleaseRead\|release=\|def render_ho…
+117. Bash: sed -n 755,830p /tmp/ins_v8.py; sed -n 925,990p /tmp/ins_v8.py
+118. Bash: date -u +%H:%M; grep -n "pre-committed 2026-10-25\|pre-committed 10-25\|Sameness" PRD.md | cut -c1-200 | head
+119. Bash: grep -n -i "sameness\|length netting\|tag reads" PRD.md | cut -c1-260 | head
+120. Bash: grep -n "2026-10-25" PRD.md | cut -c1-200 | sed -n 1,12p
+121. Bash: grep -n -i "netting\|netted\|nets " PRD.md | cut -c1-220 | head -5
+122. Bash: sed -n 133p PRD.md | fold -w 300 | tail -8
+123. Bash: venv/bin/python - <<'EOF'
+124. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -B1 -A2 -i stale | head
+125. Bash: git stash -q && venv/bin/python scripts/check_docs.py 2>&1 | grep -i stale; git stash pop -q && git diff | grep "^+" | grep -o "#[0-9]*[^0-…
+126. Bash: grep -n "def .*issue\|OPEN_WORDS\|still open\|FILES\|DOCS =" scripts/check_docs.py | head -12
+127. Bash: sed -n 80,125p scripts/check_docs.py
+128. Bash: venv/bin/python - <<'EOF'
+129. Bash: sed -i 's/before applying #15'"'"'s dose rule; not on the branch while #77 is pending\./before applying #15'"'"'s dose rule; not on the bra…
+130. Bash: venv/bin/python - <<'EOF'
+131. Bash: git checkout -q -b data/v8-dose-verdict-uploads origin/integration/preview && grep -n "render_host_lines" tests/test_insights.py | head -5 …
+132. Bash: sed -n 2300,2320p tests/test_insights.py; grep -n "def release(" -A 3 scripts/report.py | head; grep -n "release_read\b\|def release_cohort…
+133. Bash: venv/bin/python - <<'EOF'
+134. Bash: grep -rn "render_host_lines" --include=*.py . | grep -v "^./tests\|worktrees" ; venv/bin/python scripts/report.py --offline --release v7 2>…
+135. Bash: git add -A src/insights.py scripts/report.py tests/test_insights.py && git commit -q -m "v8's dose line counts only the uploads its verdict…
+136. Agent: Fresh review of dose-line branch
+137. Bash: sed -n 70,95p src/insights.py | grep -n "published\|class Video\|def " ; grep -n "RELEASE_MIN_UPLOADS =" -A2 src/insights.py
+138. Bash: venv/bin/python - <<'EOF'
+139. Bash: git add src/insights.py scripts/report.py tests/test_insights.py && git commit -q -m "v8 dose, review: count the first 20 by upload date of…
+140. Bash: venv/bin/python - <<'EOF'
+141. Bash: git add TECH_DEBT.md WORKLOG.md && git commit -q -m "TECH_DEBT and handover: bet 1's dose-count fix is built and reviewed on data/v8-dose-v…
+142. Bash: git checkout -q data/v8-dose-verdict-uploads && sed -n 214,236p scripts/report.py
+143. Bash: venv/bin/python - <<'EOF'
+144. Bash: venv/bin/python - <<'EOF'
+145. Bash: git add tests/test_insights.py && git commit -q -m "v8 dose, review: a test drives report.release() and pins that the dose line gets the ve…
+146. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -E "STALE|No stale"; git add TECH_DEBT.md && git commit -q -m "TECH_DEBT: the v8 dose fix…
+147. Bash: venv/bin/python - <<'EOF'
+148. Bash: T=$(date -u -d "2026-10-26T09:54:05Z" +%s); until [ "$(date -u +%s)" -ge "$T" ]; do sleep 20; done; date -u +%H:%M:%S
+149. Bash: date -u +%H:%M:%S
+150. Bash: T=$(date -u -d "2026-10-26T09:54:05Z" +%s); until [ "$(date -u +%s)" -ge "$T" ]; do sleep 15; done; date -u +%H:%M:%S
+151. Bash: T=$(date -u -d "2026-10-26T09:54:05Z" +%s); until [ "$(date -u +%s)" -ge "$T" ]; do sleep 5; done; date -u +%H:%M:%S
+152. Bash: git pull -q --ff-only origin main && venv/bin/python scripts/dry_run.py request strategy/own-questions-sample && git add .dry-run-requests/…
+153. Bash: for i in $(seq 1 12); do git fetch -q origin; if git log origin/main -1 --format=%s | grep -q "Record dry-run verdict"; then break; fi; gh …
