@@ -237,16 +237,41 @@ def test_a_title_near_a_shock_phrase_still_ships():
         assert llm.resolve_title(title, style="A", fallback="Raw?").ok, title
 
 
-def test_no_logged_title_is_refused_but_the_shock_ones():
+EXPECTED_REFUSED = [
+    "Did YOU know THESE chilling 9/11 facts?",
+    "3 Surprising Answers: How Dating a Pro Athlete Went",
+    "You'll Never Guess These Harder-Than-You-Think Degrees!",
+    "3 Shocking Answers: Homeschooling Parents Who Barely Passed High School?",
+    "Divorce Horrors: Lawyers Reveal Their Shocking Cases",
+    "You Won't Believe What We Miss From The 2000s!",
+    "You WON'T Believe These Rare Possessions!",
+    "3 Shocking Answers: Friends for Life?",
+    "You Won't Believe WHY Asia Has Almost No Homeless!",
+    "Early Risers: The SHOCKING Truth Behind Waking Up Early",
+    "Animals' chilling genius will surprise you",
+]
+
+
+def test_a_shock_word_the_asker_used_is_not_refused():
+    r = llm.resolve_title("The most SHOCKING Epstein detail?", style="B", fallback="Raw?",
+                          source="What is the most shocking detail in the Epstein files?")
+    assert r.ok and r.style == "B"
+    for title in ("This will shock you", "You'll be shocked", "You'll never guess",
+                  "Unbelievable answers", "Mind\u2011blowing facts"):
+        assert not llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+def test_the_logged_titles_it_refuses_are_the_known_shock_ones():
+    """False refusals checked by eye on 2026-10-26; widening the pattern must
+    re-check them, so this names the set rather than counting it."""
     import csv
     from src import config
-    # The log is append-only, so the titles up to the day this was built stay fixed.
-    rows = [r for r in csv.DictReader(open(config.UPLOAD_LOG, encoding="utf-8"))
-            if r["timestamp_utc"] < "2026-10-26T12"]
-    refused = [r["video_title"] for r in rows if llm._SHOCK_PHRASE.search(r["video_title"])]
-    assert len(rows) == 199 and len(refused) == 10
-    assert all(any(w in t.lower() for w in ("shock", "believe", "chilling", "surpris"))
-               for t in refused)
+    with open(config.UPLOAD_LOG, encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r["timestamp_utc"] < "2026-10-26T12"]
+    refused = sorted(r["video_title"] for r in rows
+                     if llm._shock_bait(r["video_title"], r["post_title"]))
+    assert len(rows) == 199
+    assert refused == sorted(EXPECTED_REFUSED)
 
 
 def test_an_all_lower_case_title_ships_in_sentence_case():
