@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-26 (09:55) — Bet 1 can go live the day you label it; the own-questions sample renders now, and carries a policy cost
 
-    Worked (% of the shift): engineering 25 · gm 25 · strategy 20 · reliability 15 · legal 10 · security 5
+    Worked (% of the shift): engineering 35 · gm 20 · strategy 15 · reliability 10 · legal 10 · data 5 · security 5
 
 **Summary:** Bet 1 was combined with today's live code in a trial copy: no conflicts, and every check passes, so your label on #77 can reach viewers the same day. The "our own questions" sample could not render before 09:54 (one render per 12 hours) and is queued now; YouTube's spam rules weigh against that show.
 
