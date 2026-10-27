@@ -83,7 +83,11 @@ ORIENT = {
     # Added 2026-10-05 with the company reframe (D12): the company's goal, its
     # queue outside the channel product, its risks and the review dates. Read
     # at shift start, like PRD §0, so it is budgeted like it.
-    "PLAN.md": 1300,
+    # 1300 -> 1400 on 2026-10-27: the queue gained the process's own work,
+    # the friction log and the experiment-process review (D15). PLAN sat at
+    # 1300/1300 with every row accurate and none closable; shifts trimmed it
+    # twice on 10-26 just to stay under (friction G15).
+    "PLAN.md": 1400,
     ".claude/skills/pickup/SKILL.md": 700,
 }
 
