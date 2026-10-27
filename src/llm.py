@@ -28,8 +28,10 @@ _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
 MODEL = "gemini-2.5-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
-# with its own allowance, so a sample never spends the requests the next
-# upload needs -- the 07:00 window also pays for the following 05:00 upload.
+# with its own allowance, so a sample never spends MODEL's requests, which the
+# next upload needs -- the 07:00 window also pays for the following 05:00
+# upload. Since 2026-10-18 that allowance is not production-free: the upload's
+# one-try fallback (FALLBACK_MODEL, below) and the slate call draw on it too.
 # Release validation does not set DRY_RUN, so it still tests MODEL.
 SAMPLE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 "no longer available to new users" (2026-09-26)
 # One try on this model once MODEL has failed, for the screen and the metadata
