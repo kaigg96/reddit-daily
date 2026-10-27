@@ -49,7 +49,7 @@ answer; an invented one is worse. The weekly review groups the rows, queues
 the groups with most leverage (recurrence × minutes × functions hit, against
 cost) in the one ranked queue, and records each resolution. Any function may
 fix another's friction. General management owns it. Built as `PLAN.md` C17;
-the spec is `scripts/friction.py`'s docstring on `gm/friction-log`.
+the spec is `scripts/friction.py`'s docstring (live 2026-10-27, #84).
 
 **Alternatives.** Notes in the work log (tried; stopped unnoticed). One entry
 per shift (gets summarized away). A ticketing system (premature; GitHub issues
