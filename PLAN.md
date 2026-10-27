@@ -42,7 +42,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 | C16 | blocked: the 11-05 review (both samples in PRD §4) | Strategy | **A source after Reddit** | All bets assume Reddit (§4). Done when both samples are on the 11-05 review. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response; never held. Done when the owner reports a date. |
 | C17 | blocked: the owner's label on #84 (built and reviewed 10-27) | GM | **Friction log** (D15) | On the label: merge `gm/friction-log` with `Approved-In: #84`, setting `friction.py`'s `START` (a full UTC timestamp) in that commit. Then `baking` until D15's read. |
-| C18 | blocked: the owner's label on the experiment-ledger issue (raised 10-27) | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments` live 10-27 (1 of 7 keeps credited). On the label: merge `process/experiments-quarterly-read` with `Approved-In`. Done when quarterly prep reads it. |
+| C18 | blocked: the owner's label on #85 | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments` live 10-27 (1 of 7 keeps credited). On the label: merge `process/experiments-quarterly-read` with `Approved-In`. Done when quarterly prep reads it. |
 
 ## 4. Risks
 
