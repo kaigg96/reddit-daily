@@ -473,6 +473,23 @@ def health(raise_issues=False):
             "Find why shifts are not taking the due review (cadence.py "
             "puts it ahead of the queue) and fix that."))
 
+    # D15 (a): the work log's friction notes stopped on 10-08 and no one
+    # noticed for three weeks. This is the owner's, not SHIFT_OWNED: a silent
+    # stop is the failure it exists to catch.
+    import friction
+    silent = friction.silent_run(ledger=LEDGER)
+    if silent >= friction.SILENT_RUN:
+        problems.append((
+            "process-friction-silent",
+            "Shifts have stopped logging friction",
+            f"The last {silent} completed shifts logged no row in the friction "
+            f"log (friction.py gaps). DECISIONS.md D15 says {friction.SILENT_RUN} "
+            "silent shifts in a row come to you: the work log's friction notes "
+            "stopped the same way on 10-08 and went unnoticed for three weeks.",
+            "Find why shifts stopped calling friction.py add (the shift skill "
+            "asks for a row as each item finishes) and fix that; the weekly "
+            "review reads D15's rule if the cause is the rule itself."))
+
     if not problems:
         print("\nPROCESS HEALTH: ok")
         return []
