@@ -6,6 +6,12 @@ from googleapiclient.discovery import build
 
 from .youtube import _authenticate
 
+# Tries after a 5xx, 429, rate-limit 403 or dropped connection, with the
+# client's own backoff (under 2s, then 4s). The weekly snapshot lists ~22
+# pages of uploads before any figure is read; one server error on any page
+# would lose that week's snapshot, which no later run can recover.
+SERVER_RETRIES = 2
+
 
 def median(xs):
     """Re-exported from insights so there is one implementation of record."""
@@ -28,7 +34,8 @@ def list_uploaded_videos(yt, part="contentDetails"):
     their `part` requested (contentDetails.videoId/videoPublishedAt is always
     present, snippet.title if part includes "snippet").
     """
-    channel = yt.channels().list(mine=True, part="contentDetails").execute()
+    channel = yt.channels().list(mine=True, part="contentDetails").execute(
+        num_retries=SERVER_RETRIES)
     playlist_id = channel["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
 
     items, page = [], None
@@ -36,7 +43,7 @@ def list_uploaded_videos(yt, part="contentDetails"):
         kwargs = {"pageToken": page} if page else {}
         resp = yt.playlistItems().list(
             part=part, playlistId=playlist_id, maxResults=50, **kwargs
-        ).execute()
+        ).execute(num_retries=SERVER_RETRIES)
         items += resp["items"]
         page = resp.get("nextPageToken")
         if not page:
