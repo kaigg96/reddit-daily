@@ -191,7 +191,8 @@ class _FakeComments:
     def list(self, **kwargs):
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES
         return {"items": self.items}
 
 

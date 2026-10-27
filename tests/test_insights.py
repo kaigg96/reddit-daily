@@ -207,6 +207,24 @@ def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
     assert "edge" in [v["id"] for v in got["cold_spell"]]
 
 
+def test_the_digests_channel_call_retries_a_server_error(monkeypatch):
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    monkeypatch.setattr(wd.analytics, "list_uploaded_videos", lambda yt, part: [])
+
+    class YT:
+        def channels(self): return self
+        def list(self, **kw): return self
+        def execute(self, num_retries=0):
+            self.num_retries = num_retries
+            return {"items": [{"statistics": {"subscriberCount": "22"}}]}
+
+    yt = YT()
+    assert wd.fetch_channel(yt)[0] == 22
+    assert yt.num_retries == wd.analytics.SERVER_RETRIES >= 1
+
+
 def test_the_digest_names_columns_the_snapshot_could_not_collect():
     """10-26: subscribers were refused on every row and the digest said
     "Analytics data: current"."""

@@ -55,6 +55,7 @@ def fetch_video_details(yt, video_ids, part="snippet,statistics,contentDetails")
     """Batched videos().list — chunks of 50 (the API's per-call id limit)."""
     details = []
     for i in range(0, len(video_ids), 50):
-        resp = yt.videos().list(part=part, id=",".join(video_ids[i:i + 50]), maxResults=50).execute()
+        resp = yt.videos().list(part=part, id=",".join(video_ids[i:i + 50]),
+                                maxResults=50).execute(num_retries=SERVER_RETRIES)
         details += resp["items"]
     return details
