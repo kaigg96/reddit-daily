@@ -477,7 +477,12 @@ def health(raise_issues=False):
     # noticed for three weeks. This is the owner's, not SHIFT_OWNED: a silent
     # stop is the failure it exists to catch.
     import friction
-    silent = friction.silent_run(ledger=LEDGER)
+    try:
+        silent = friction.silent_run(ledger=LEDGER)
+    except (ValueError, UnicodeDecodeError, csv.Error) as err:
+        # A bad byte in the log must not cost the other checks their run.
+        print(f"\nFRICTION CHECK FAILED, not read today: {err}")
+        silent = 0
     if silent >= friction.SILENT_RUN:
         problems.append((
             "process-friction-silent",

@@ -5,6 +5,7 @@ stop reaches the owner."""
 import csv
 import datetime as dt
 import os
+import re
 import sys
 
 import pytest
@@ -44,8 +45,8 @@ def groups_file(tmp_path, groups=(("G1", "open", "", ""),)):
     return str(p)
 
 
-def ledger(tmp_path, shifts):
-    p = tmp_path / "usage.csv"
+def ledger(tmp_path, shifts, name="usage.csv"):
+    p = tmp_path / name
     p.write_text(LEDGER_HEADER + "".join(
         f"{end.isoformat()},{rid},m,e,50,{mins},1.0,{err}\n"
         for end, mins, rid, err in shifts))
@@ -74,7 +75,8 @@ def test_evaluate_quotes_the_rule_before_any_number(tmp_path, capsys, started):
     fr.evaluate(rows=[row(1, t(2))], groups=[], ledger=ledger(tmp_path, []), now=t(3))
     out = capsys.readouterr().out
     assert fr.rule_text() in out
-    assert out.index("**Decision rule**") < out.index("START:") < out.index("(a) ")
+    first_check = re.search(r"\n  \(a\) [A-Z]", out).start()
+    assert out.index("**Decision rule**") < out.index("\nSTART: ") < first_check
 
 
 # ---------------------------------------------------------------- add
@@ -128,12 +130,24 @@ def test_the_seed_files_parse_and_use_only_known_values():
 
 # ---------------------------------------------------------------- the window
 
-def test_nothing_is_read_before_start(tmp_path):
+def test_nothing_is_read_before_start(monkeypatch):
     # Unset until the landing commit: no read, no alarm.
-    assert fr.START is None or fr._start() is not None
     if fr.START is None:
         assert fr.window(fr.load()) == []
         assert fr.gaps(ledger=cb.LEDGER) == []
+    # Set, at any landing time, the seed stays out: every seed row is
+    # "backfill", so the 10-27 one is out even if it landed that morning.
+    monkeypatch.setattr(fr, "START", fr.START or "2026-10-27T09:00:00+00:00")
+    seed = [r for r in fr.load() if int(r["id"][1:]) <= 26]
+    assert seed and all(r["run_id"] == "backfill" for r in seed)
+    assert not set(r["id"] for r in fr.window(fr.load())) & set(r["id"] for r in seed)
+
+
+def test_a_bare_date_start_is_refused(monkeypatch):
+    # "2026-10-27" would read as midnight and let that day's rows in.
+    monkeypatch.setattr(fr, "START", "2026-10-27")
+    with pytest.raises(ValueError):
+        fr.window(fr.load())
 
 
 def test_the_backfill_and_rows_before_start_stay_out(started):
@@ -147,15 +161,17 @@ def test_the_backfill_and_rows_before_start_stay_out(started):
 def test_gaps_match_rows_to_shifts_by_time_or_run(tmp_path, started):
     led = ledger(tmp_path, [
         (t(1, 9), 30, "100", 0),        # before START: not counted
-        (t(2, 10), 60, "200", 0),       # row at 09:05 is inside [08:55, 10:05]
-        (t(3, 10), 60, "300", 0),       # row at 10:06 is just outside
+        (t(2, 10), 60, "200", 0),       # row at 08:56: inside [08:55, 10:05] by the slack
+        (t(3, 10), 60, "300", 0),       # row at 10:06: just outside
         (t(4, 10), 60, "400", 0),       # matched by run id
         (t(5, 10), 60, "500", 1),       # a failed run: not a shift
     ])
-    rows = [row(1, t(2, 9, 5), run_id="local"), row(2, t(3, 10, 6), run_id="local"),
-            row(3, t(9), run_id="400")]
+    rows = [row(1, t(2, 8, 56), run_id="local"), row(2, t(3, 10, 6), run_id="local"),
+            row(3, t(9), run_id="400"), row(4, t(6, 10, 4), run_id="local")]
+    led2 = ledger(tmp_path, [(t(6, 10), 60, "600", 0)], "usage2.csv")  # row at 10:04: after the end, by the slack
     assert [(s["run_id"], s["logged"]) for s in fr.gaps(rows, led)] == \
         [("200", True), ("300", False), ("400", True)]
+    assert [s["logged"] for s in fr.gaps(rows, led2)] == [True]
 
 
 def test_three_silent_shifts_reach_the_owner(tmp_path, monkeypatch, started):
@@ -247,8 +263,8 @@ def test_not_yet_without_a_fix_14_days_old(tmp_path, started):
 
 
 def test_keep_when_two_fixes_shipped_and_one_held(tmp_path, started):
-    # Every shift logs; a quarter "none"; G1 had 4 rows before its 11-08 fix
-    # and none after; fix rows are 2 of 16.
+    # Every shift logs; a quarter "none"; G1 had 3 rows before its 11-08 fix
+    # and none after; fix rows are 2 of 17.
     shifts = [(t(1, 12) + dt.timedelta(days=d), 40, str(d), 0) for d in range(0, 30, 2)]
     rows = []
     for i, (end, _, rid, _) in enumerate(shifts):
@@ -308,10 +324,34 @@ def test_too_many_none_rows_fail_b_and_point_at_writing(tmp_path, started):
 
 def test_a_stale_ungrouped_row_fails_d(tmp_path, started):
     rows = [row(1, t(2)), row(2, t(10), category="none")]
-    _, by = verdict_of(tmp_path, rows, [], t(12), [])
+    _, by = verdict_of(tmp_path, rows, [], t(9, 20), [])   # 7 days 8 hours
     assert by["d"] == "fail"
-    _, by = verdict_of(tmp_path, rows, [], t(8), [])
+    _, by = verdict_of(tmp_path, rows, [], t(9, 12), [])   # exactly 7 days
     assert by["d"] == "pass"
+
+
+def test_only_the_guardrail_failing_says_so(started):
+    results = [(k, "", "", "", "pass") for k in "abdef"] + \
+        [("c", "", "", "", "judge"), ("g", "", "", "", "fail"), ("h", "", "", "", "judge")]
+    v, why = fr.verdict(results)
+    assert v == "change" and "guardrail (g)" in why and "processed" not in why
+
+
+def test_a_collection_failure_shows_before_the_monthly_read(started):
+    results = [(k, "", "", "", "pass") for k in "bdg"] + [("a", "", "", "", "fail")] + \
+        [(k, "", "", "", "not yet") for k in "ef"] + \
+        [(k, "", "", "", "judge") for k in "ch"]
+    v, why = fr.verdict(results)
+    assert v == "not yet" and "failing now: (a)" in why
+
+
+def test_a_bad_byte_in_the_log_does_not_stop_the_other_checks(tmp_path, monkeypatch, capsys, started):
+    bad = tmp_path / "f.csv"
+    bad.write_bytes(b"id,timestamp_utc\nF1,\xff\xfe\n")
+    monkeypatch.setattr(fr, "LOG", str(bad))
+    monkeypatch.setattr(cb, "LEDGER", ledger(tmp_path, [(t(2), 50, "1", 0)]))
+    cb.health()
+    assert "FRICTION CHECK FAILED" in capsys.readouterr().out
 
 
 def test_fix_rows_over_a_third_trip_the_guardrail(tmp_path, capsys, started):

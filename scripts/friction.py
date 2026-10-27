@@ -30,7 +30,8 @@ abandoned.
 FILES
 
 .github/friction.csv, append-only, one row per item:
-    id            F1, F2, ...
+    id            F1, F2, ... (the next after the file's highest, so two
+                  branches appending both write it: renumber on merge)
     timestamp_utc when `add` ran
     run_id        GITHUB_RUN_ID, else "local"; "backfill" for the seed rows
     function      an ORG.md short name (strategy, gm, market, audience,
@@ -108,8 +109,9 @@ CATEGORIES = ["docs", "access", "allowance", "owner", "tool", "rules",
               "rederived", "mistake", "none"]
 STATUSES = ["open", "queued", "fixed", "wontfix", "parked"]
 
-# The moment this landed on main, in UTC. The landing commit sets it; every
-# row before it, the 2026-10-27 seed included, stays out of every evaluation.
+# The moment this landed on main, as a full UTC timestamp, e.g.
+# "2026-10-29T09:30:00+00:00". The landing commit sets it; every row before
+# it, the 2026-10-27 seed included, stays out of every evaluation.
 START = None
 
 # D15's thresholds. test_friction checks D15 states each of these, so a
@@ -183,7 +185,13 @@ def _date(s):
 
 
 def _start():
-    return _ts(START) if START else None
+    """START as a datetime. A bare date would read as midnight and let that
+    day's rows in, the 2026-10-27 seed among them, so it is refused."""
+    if not START:
+        return None
+    if "T" not in START:
+        raise ValueError(f"friction.py START {START!r} needs a time, in UTC")
+    return _ts(START)
 
 
 def _now(now=None):
@@ -370,8 +378,8 @@ def report(rows=None, groups=None, now=None):
     for r in ungrouped:
         t = _ts(r.get("timestamp_utc"))
         age = f"{(now - t).days}d" if t else "?"
-        print(f"  {r['id']:>4} {age:>4} {r['function']:<12} {r['category']:<9} "
-              f"{r['hardest']}")
+        print(f"  {r.get('id') or '?':>4} {age:>4} {r.get('function') or '?':<12} "
+              f"{r.get('category') or '?':<9} {r.get('hardest') or ''}")
     nones = sum(1 for r in rows if not r.get("group") and r.get("category") == "none")
     if nones:
         print(f"  (+{nones} 'none' rows, which need no group)")
@@ -446,7 +454,7 @@ def checks(rows=None, groups=None, ledger=None, now=None):
                 "rows printed below", "most", "judge"))
 
     stale = [r for r in win if not r.get("group") and r.get("category") != "none"
-             and (now - _ts(r["timestamp_utc"])).days > UNGROUPED_DAYS]
+             and now - _ts(r["timestamp_utc"]) > dt.timedelta(days=UNGROUPED_DAYS)]
     out.append(("d", f"rows ungrouped after {UNGROUPED_DAYS} days",
                 f"{len(stale)}" + (f" ({', '.join(r['id'] for r in stale)})" if stale else ""),
                 "0", ("pass" if not stale else "fail") if win else "not yet"))
@@ -492,23 +500,38 @@ def checks(rows=None, groups=None, ledger=None, now=None):
 
 
 def verdict(results, rows=None, groups=None, now=None):
-    """D15's verdict from the checks: keep, change, stop or not yet."""
+    """D15's verdict from the checks: keep, change or not yet. Stop is named
+    inside change's reason, because it turns on the last monthly read, which
+    D15 records and these rows do not."""
     by = {c[0]: c[4] for c in results}
     start = _start()
     if not start:
         return "not yet", "START is not set: friction.py has not landed on main"
-    if by["e"] == "not yet" or by["f"] == "not yet":
-        return "not yet", (f"under {RESULTS_DAYS} days since START, or no fix "
-                           f"{RECUR_DAYS} days old")
     failed = [k for k, v in by.items() if v == "fail"]
+    if by["e"] == "not yet" or by["f"] == "not yet":
+        why = (f"under {RESULTS_DAYS} days since START, or no fix "
+               f"{RECUR_DAYS} days old")
+        if failed:
+            # D15 reads collection daily and processing weekly: a failure
+            # there is acted on now, before the monthly verdict.
+            why += ("; failing now: " + ", ".join(f"({k})" for k in failed)
+                    + ", for the weekly review to act on")
+        return "not yet", why
     if not failed:
         return "keep", ("every measured check passes; confirm (c) and (h) "
                         "by judgement before recording it")
+    parts = []
     if any(k in failed for k in "abc"):
-        why = "(a)-(c) failed: change how rows are written"
-    else:
-        why = "(d)-(f) failed with (a)-(c) passing: change how rows are processed"
+        parts.append("(a)-(c) failed: change how rows are written")
+    elif any(k in failed for k in "def"):
+        parts.append("(d)-(f) failed with (a)-(c) passing: change how rows "
+                     "are processed")
+    if "g" in failed:
+        parts.append("guardrail (g) tripped: friction work is capped at one "
+                     "item a shift until the next read")
+    why = "; ".join(parts)
     if any(k in failed for k in "ef"):
+        # Stop needs the last monthly read's record, which lives in D15.
         why += ("; if (e)-(f) also failed at the last monthly read after a "
                 "change, the verdict is stop")
     return "change", why + " (a process change: CLAUDE.md §4)"
@@ -539,7 +562,8 @@ def evaluate(rows=None, groups=None, ledger=None, now=None, seed=None,
         print(f"\n(c) {len(pick)} random rows: does most name a specific doc, "
               "tool, rule or allowance?")
         for r in pick:
-            print(f"  {r['id']:>4} {r['category']:<9} {r['hardest']}")
+            print(f"  {r.get('id') or '?':>4} {r.get('category') or '?':<9} "
+                  f"{r.get('hardest') or ''}")
     if any(c[0] == "g" and c[4] == "fail" for c in results):
         print("\nGUARDRAIL tripped: friction work is capped at one item a shift "
               "until the next read.")
