@@ -315,7 +315,8 @@ def test_second_weekly_append_extends_the_file_without_a_repeated_header():
         """Mimics the one report shape R4.7 queries."""
         def reports(self): return self
         def query(self, **kw): self.kw = kw; return self
-        def execute(self):
+        def execute(self, num_retries=0):
+            assert num_retries == wa.SERVER_RETRIES
             return {"columnHeaders": [{"name": "insightTrafficSourceType"},
                                       {"name": "views"},
                                       {"name": "estimatedMinutesWatched"}],
