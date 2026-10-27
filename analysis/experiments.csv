@@ -4,7 +4,7 @@ R1.9,narration rate +~10%,release,avg_view_pct; views,2026-07-27,,,drop,,,,,"PRD
 v2-v4,overhaul v2–v4 (v4 vs v1),release,views,,,2026-08-23,recorded,~6× (166 vs 28),52 vs 76,,,PRD §4 Review 2 item 5
 b-roll-avgpct,"b-roll library, retention",release,avg_view_pct,,,2026-08-23,noise,65.5% vs 64.9%,,,,PRD §4 Review 2 item 6
 R4.4-gate,topic prior survives format change,observational,rho,2026-09-09,,2026-09-11,keep,rho +0.79 (+0.66 to +0.79),10 buckets,,,PRD §4 2026-09-11; PRD §4 2026-09-09
-v5,suppression-risk screen,release,watch_seconds,2026-09-19,,2026-09-21,keep,,,,,"PRD §0 Shipped; git 8a5f70e, b405b94, 264375e"
+v5,suppression-risk screen,release,watch_seconds,2026-09-19,,2026-09-21,keep,,,,,"PRD §0 Shipped; git 8a5f70e, b405b94, 264375e; re-read 2026-10-27 (report.py --release v5 --offline): watch-seconds +20% (12.0 vs 10.0, n=51 vs 57), limit 11% -- a later read, not the rule's, so effect stays blank"
 b-roll-views,"b-roll library, first release read",release,views,2026-09-19,,2026-09-21,revert,−39%,,38%,,"git b405b94, 264375e; overruled by #18 (b303b37)"
 b-roll,b-roll library (R1.3),release,watch_seconds,2026-09-22,,2026-09-24,keep,+22%,,11%,,"PRD §0 Shipped; git b405b94, b303b37"
 R2.2,title style A/B/C rotation,coin,watch_seconds,,,2026-09-22,noise,A +11% vs rest,119,12%,,PRD §4 2026-09-22
