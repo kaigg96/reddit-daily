@@ -111,9 +111,11 @@ the checkable claims; judgement covers the rest. Record decisions in
 `DECISIONS.md` with their assumptions. Chase closure: `TECH_DEBT.md` at its
 cap, branches unmerged. **Is a constraint costing more than it buys?** Three
 workarounds for one 🔄, or one blocking planned work, means `/backlog` §3.
-**The workflow itself is always in scope:** if something was awkward *this
-shift* — a rule that didn't fit, state you had to re-derive, a gate you worked
-around — record it in `WORKLOG.md`. Process changes are proposals (§5).
+**Log friction as each item finishes**, not at the end — a merge, an answered
+question, an escalation, a candidate dropped, an attempt abandoned:
+`scripts/friction.py add` (D15). Its hardest part, what would have helped,
+minutes lost. "None" is a real answer; an invented one is worse than none.
+Process changes are proposals (§5).
 
 ## 5. Authorization (owner, 2026-09-19)
 
