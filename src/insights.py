@@ -2251,6 +2251,18 @@ def subscriber_rate(snapshot_rows, published_since=None):
     return n, views, subs, subs / views * 1000
 
 
+def refused(snapshot_rows, column):
+    """Why a snapshot's `column` was not collected, as weekly_analytics writes
+    it ("refused: ..."), or None. A refused column leaves a cohort as empty as
+    a thin one, but the data exists and the query failed: on 2026-10-26 an
+    HTTP 500 left subscribers on 0 of 1,082 rows, and the reports said
+    "insufficient data", which a shift takes as the answer (CLAUDE.md §6)."""
+    for r in snapshot_rows:
+        if str(r.get(column) or "").startswith("refused:"):
+            return r[column]
+    return None
+
+
 # Each revenue route's bar, as PLAN §1 sources and dates it: (route, views
 # needed in its window, window in days, engaged views only, followers needed,
 # on YouTube). The distances are computed by `route_distances`, so PLAN's
