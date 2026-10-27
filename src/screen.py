@@ -349,7 +349,8 @@ def classify_slate(titles):
 
     Titles only, no comments, which is what makes one request enough. It runs
     on config.SLATE_MODEL, whose free allowance is separate from the model
-    titles and the screen use. Never retried. Returns a list the length of
+    titles and the screen use first (their one-try fallback shares it, since
+    2026-10-18). Never retried. Returns a list the length of
     `titles` ("" where the answer was not a known topic), None for an empty
     slate, and raises SlateFailed on any failure so the log records why: the
     first two live runs logged nothing and the reason only reached the console.

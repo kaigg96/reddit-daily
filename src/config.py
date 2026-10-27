@@ -85,7 +85,8 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # ships. It runs on a different model from every other call here because the
 # free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel), so it spends that model's
-# allowance, never the one titles and the screen share. $0 either way (#22).
+# allowance, not the one titles and the screen share -- though their one-try
+# fallback (llm.FALLBACK_MODEL) is this model, since 2026-10-18. $0 either way (#22).
 SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since at least 2026-09-25
 
 # Who answers every AI call. Gemini's free tier may train on what we send,
