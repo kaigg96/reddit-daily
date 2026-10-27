@@ -49,8 +49,7 @@ RETENTION_POINTS = (10, 25, 50, 75, 100)
 RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
 RETENTION_MAX_AGE_DAYS = 30
 # Tries after a 5xx, 429, rate-limit 403 or dropped connection, with the
-# client's own backoff (under 2s, then 4s), for every query this job makes
-# but comments (caught per video, so a failure costs one video's). On
+# client's own backoff (under 2s, then 4s), for every query this job makes. On
 # 2026-10-19 one HTTP 500 stopped the retention loop and cost 23 uploads their
 # points; on 10-26 one cost every upload its subscribers. Each upload's 7-day
 # reading comes from one snapshot, so a lost week is lost; a 5xx on the main
@@ -423,7 +422,8 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
     for vid in video_ids:
         try:  # comments disabled on one video must not cost the rest
             resp = yt.commentThreads().list(part="snippet", videoId=vid, maxResults=100,
-                                            order="time", textFormat="plainText").execute()
+                                            order="time", textFormat="plainText"
+                                            ).execute(num_retries=SERVER_RETRIES)
         except Exception as e:
             print(f"  comments for {vid} unavailable ({type(e).__name__})")
             continue

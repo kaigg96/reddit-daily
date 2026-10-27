@@ -29,7 +29,8 @@ ZERO_VIEW_DAYS = 3  # logged uploads older than this with 0 views get flagged
 
 
 def fetch_channel(yt):
-    ch = yt.channels().list(mine=True, part="statistics").execute()["items"][0]
+    ch = yt.channels().list(mine=True, part="statistics").execute(
+        num_retries=analytics.SERVER_RETRIES)["items"][0]
     subs = int(ch["statistics"]["subscriberCount"])
     items = analytics.list_uploaded_videos(yt, part="snippet,contentDetails,status")
     videos = [
