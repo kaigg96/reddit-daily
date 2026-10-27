@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-27 (09:55) — Both process items you queued last night are built and wait only on your labels; our test record shows "keep" rarely meant "it worked"
+
+    Worked (% of the shift): gm 40 · data 35 · legal 15 · security 5 · reliability 5
+
+**Summary:** The friction log is built and reviewed, and lands when you label #84. The experiment ledger is live: of 7 changes we kept, only 1 measured a gain beyond what its test could tell from noise. Nothing viewers see changed, and nothing moved revenue directly.
+
+### Toward revenue
+- **Nothing directly.** Every change that viewers would see still waits on #77 or #80. The channel is flat, so I say plainly that no work today changed what we ship.
+- **What the ledger shows, for judging bets.** Of 7 keeps, 1 measured a gain bigger than its test's limit: the background-clip library, +22% against 11%. The product plan already declines to credit opening on the question (+20%), because its lead was mostly longer videos. One keep was inside its limit, and four had no limit recorded. The only "revert" a rule ever gave was overruled by a rule written the next day. So a "keep" has meant "no harm seen", not "it worked". Bet 1's own read can detect a change of about 12% in watch time per view, and views would need about 55%.
+- **The 5 November source decision has two more facts.** Stack Exchange's terms bar nothing about running its posts through AI. Opinion polls are a possible third source: Pew's terms allow commercial reuse with credit, and YouGov's do not. A poll gives the crowd's answer as percentages, not quotable answers, so it would be a different show. It is a lead, with no sample.
+
+### Done
+- **General management (built to your spec):** the friction log. A shift logs what made each finished item hard, the weekly review groups the entries, and your rule judges it at the first monthly read. Three silent shifts in a row email you. A fresh review found two real bugs and some weaker spots; all fixed, and 637 checks pass. It lands the day you label #84.
+- **Data (a bet on the process):** the experiment ledger and a report that reads it. It holds 60 test rules from the product plan and history: when each was set, due and read, and what it found. Of 39 reads, only 9 had a due date (8 on time). Three releases were judged by rules written after they shipped. A fresh review caught that I had credited opening on the question, which the plan says not to; fixed before it went live. **#85** asks you to approve two lines that make the quarterly planning read it and keep it current.
+- **Legal (for the 5 November review):** the terms reads above, from archived copies where the live pages gave a script nothing.
+- **Reliability:** both of yesterday's uploads and this morning's landed. Bet 1's release still combines cleanly with everything live, and all 870 checks pass together.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.75 this month, forecast $0.88 of $3).
+- **General management:** with nothing else ready, a fresh agent proposed six ideas; the two that cleared the bar are the terms reads above. **Dropped:** a trial giving the Stack Exchange host another job (over 20 minutes, and the last two rewordings made things worse); fixing the own-questions show's bland questions (the same, and it shares two of three spam-policy traits); stripping angle brackets from titles (never seen in about 2,300 titles, and it touches code bet 1's release changes); naming bet 3's pilot route (changes nothing until bet 1 keeps).
+- One release merged (the ledger, analysis only); nothing viewers see changed. AI use: none from the upload allowance; no Polly; no render.
+- **Process:** I switched the shared copy of the project to another branch while a reviewer was reading the friction-log branch. I switched back within a minute and moved my other work to separate copies. Using separate copies from the start avoids this. I wrote both proposals' rule wording on branches with a script; nothing reaches the rules without your label.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #84 (one label lands the friction log); #85 (one label adds the ledger to quarterly planning); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 and #65 (your hands, on the rule files).
+
+### Next
+- **If #84 is labelled:** merge the friction-log branch with the approval line, setting its start time in the same commit (the plan's row says how). **If #85:** merge its proposal branch the same way.
+- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question. Record each read in the ledger too.
+- **If #77 is labelled:** as the last handover says.
+
+### Better?
+- **Than last shift:** Unclear for revenue. The process can now see its own record, and it says our "keeps" were mostly not evidence of a gain. That matters before bet 2 is judged.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-26 (23:38) — The guard against shock-bait titles is live; Snapchat and X priced, and neither pays for a reading
 
     Worked (% of the shift): reliability 25 · gm 25 · monetization 15 · data 15 · security 10 · product 5 · legal 5
@@ -93,42 +129,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Slightly: a policy risk that leaked once is now refused in code, and bet 3's route list is complete for the platforms that pay creators. Nothing changes what viewers watch.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-26 (18:12) — Weekly review: views fell fourfold, inside a pattern of alternating weeks; a background clip that buried videos is retired
-
-    Worked (% of the shift): data 25 · product 15 · gm 15 · legal 10 · strategy 10 · reliability 10 · distribution 5 · market 5 · security 5
-
-**Summary:** The weekly review retired a background clip that hid videos, recorded the second Reddit-replacement sample, and built a check against shock-bait titles (live after its sample video). Views fell fourfold this week, but they have alternated low and high weekly for two months, so a rule set today reads next Monday's figures before anyone acts.
-
-### Toward revenue
-- **A small step for viewers.** The retired clip left 6 of its 21 videos at 5 views or fewer, against about 1 in 20 for the other clips. It no longer appears. Its watch time per view was normal, so YouTube was not showing those videos; viewers were not leaving them.
-- **The views drop, read carefully.** The Shorts feed sent 363 views this week, against 1,243 to 2,902 in the three weeks before. YouTube's announced cut for "unoriginal" channels would look like this. But the feed has alternated low and high every week since early September, and two-week totals are much steadier. If next Monday is low again (two low weeks running, for the first time), the next shift treats it as a reach cut and tells you that day. Bet 1 (#77) is the response either way. I queued an email to you about this, then withdrew it before it went out once I saw the alternation.
-- **A guard on the spam-policy risk, built, not yet live.** YouTube's rules refuse content "designed to shock or surprise viewers"; our instructions to the AI ban such titles, but "Animals' chilling genius will surprise you" went out on 20 October. Titles like that are now refused in code and replaced by the plain Reddit question; questions like "What surprised you most?" still pass. It goes live after a sample video, which the 12-hour limit allows from 22:00 tonight.
-
-### Done
-- **Legal and engineering (a fix, from a second round of ideas aimed at the quieter functions):** the title guard above. Of our 199 published titles it would have refused 11, all shock titles. A fresh review found gaps (missed wordings; a word the asker used); all fixed. It combines cleanly with bet 1.
-- **Data:** the opening-reach question reads as noise: how many viewers get past a video's opening does not predict its views. Closed. A new question, set before its data: is the weekly alternation real viewers or how YouTube's figures arrive? Read on 16 November.
-- **Product (a fix, under a rule set 6 October):** the clip retirement above, after a fresh review (one miscount fixed) and a test video. Not yet due: the title-style test (one video short) and the subreddit test (three short on one side).
-- **Strategy:** the "our own questions" sample plays, at 18.8 seconds. Its question was bland again ("What's the best way to relax after a long day?"). Both replacement samples are now recorded for the 5 November review.
-- **Reliability:** all 15 uploads since last Monday landed with titles. This afternoon's upload had not started by 18:10: GitHub's queue is running it nearly 6 hours late. It has landed as late as 18:48 before.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.75 this month, forecast $0.88 of $3). The dependency scan shows the same two known libraries (66 advisories), still unreachable.
-- **Market:** YouTube still gives no start date for the reach cut, and outside reports say Studio has no page that would show one.
-- **Audience:** one viewer comment this week, so the reply pipeline stays parked.
-- **General management:** after the review nothing was ready. I proposed nine ideas; two separate rankers, in opposite orders, put the same one first: a two-week column in our views report, so one low week is not misread again. Built, reviewed and merged (a fix; nothing viewers see). I also refreshed the plan's distance to revenue: 757 times short of the Partner Program's views bar (720 last week), 22 subscribers. **Dropped:** recording when YouTube's figures actually run to (the new question says first whether timing is the cause); a tool to read bet 1's host lines (premature until you label it); new background clips (they would wait weeks for bet 1's read); a one-page re-pitch of bet 1 (#77 already asks, and it would spend your attention); checking whether similar channels' views fell this week (the stats site refused us; channel pages show lifetime totals); a missed-upload alert (one miss in 72 days, and shifts check three times a day); drafting the 5 November review now (Monday's figures would redraft it); splitting this week's low by test group (it reads experiments early, on too few videos).
-- One change viewers see today (the clip), one waiting on its sample video (the title guard); the rest were reads and records. AI use: none from the upload allowance; no Polly.
-- **Process:** I nearly emailed you about a single week's low. The weekly review reads views on a scorecard of three-week groups, and nothing showed the weekly alternation. Our views report now prints a two-week figure beside each week, with a note to read lows against it.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #82 (register our Reddit app by 12 January); #80 (one label, by about 1 November); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **The title guard:** ask for its sample video from 21:58 UTC, and merge it if that passes.
-- **2 November snapshot:** the views rule above, first; then the title-style test if it has its eighth video, the subreddit test, and the voice question.
-- **If this afternoon's upload has not landed** by the next shift, that is an incident: the next scheduled upload is about 05:00.
-- **If #77 is labelled:** merge as this morning's handover says. Bet 1's release still combines cleanly with today's changes (checked this evening).
-
-### Better?
-- **Than last shift:** Slightly: one clip that hid videos is gone, and the Reddit replacement decision has both its samples. Nothing larger reached viewers.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, views had their lowest week on record, and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
