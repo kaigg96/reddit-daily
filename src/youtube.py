@@ -16,9 +16,13 @@ from googleapiclient.http import MediaFileUpload
 # client first asks the server how much arrived ("bytes */N"), seeks the file
 # there, and returns the finished video if the upload had completed, so a
 # retry cannot make a second video. The client's own num_retries is unsafe
-# here: with chunksize=-1 it resends the spent file object, an empty body.
+# here: with chunksize=-1 it resent the spent file object, an empty body.
 # Without any retry, one transient error cost the run its upload.
 UPLOAD_RETRIES = 3
+# Meant to fit a whole Short in one request (check a render's size before merging), but finite: with chunksize=-1
+# googleapiclient 2.158 computes a resumed range wrongly (size - progress - 1
+# as the end), so a retry after a partial upload ends in a 400 (review).
+UPLOAD_CHUNK = 100 * 1024 * 1024
 _RETRIABLE_STATUS = (429, 500, 502, 503, 504)
 
 
@@ -65,7 +69,8 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
             "selfDeclaredMadeForKids": False,
         },
     }
-    media = MediaFileUpload(str(file_path), chunksize=-1, resumable=True, mimetype="video/mp4")
+    media = MediaFileUpload(str(file_path), chunksize=UPLOAD_CHUNK, resumable=True,
+                            mimetype="video/mp4")
     request = youtube.videos().insert(part=",".join(body.keys()), body=body, media_body=media)
     try:
         response = None
