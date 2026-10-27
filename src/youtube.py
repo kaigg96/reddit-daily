@@ -1,6 +1,7 @@
 """YouTube upload. Callers are responsible for the DRY_RUN gate."""
 
 import os
+import time
 
 from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 
@@ -9,6 +10,31 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+
+# Retries of the video upload after a 5xx, 429 or dropped connection, as in
+# YouTube's own upload sample: the caller calls next_chunk() again, and the
+# client first asks the server how much arrived ("bytes */N"), seeks the file
+# there, and returns the finished video if the upload had completed, so a
+# retry cannot make a second video. The client's own num_retries is unsafe
+# here: with chunksize=-1 it resends the spent file object, an empty body.
+# Without any retry, one transient error cost the run its upload.
+UPLOAD_RETRIES = 3
+_RETRIABLE_STATUS = (429, 500, 502, 503, 504)
+
+
+def _next_chunk_retrying(request, sleep=time.sleep):
+    """request.next_chunk(), retried UPLOAD_RETRIES times on a transient error."""
+    for attempt in range(UPLOAD_RETRIES + 1):
+        try:
+            return request.next_chunk()
+        except (HttpError, OSError) as e:
+            status = getattr(getattr(e, "resp", None), "status", None)
+            transient = not isinstance(e, HttpError) or int(status or 0) in _RETRIABLE_STATUS
+            if not transient or attempt == UPLOAD_RETRIES:
+                raise
+            print(f"Upload: {type(e).__name__} {status or ''}; retry {attempt + 1} "
+                  f"of {UPLOAD_RETRIES}")
+            sleep(2 ** attempt)
 
 
 def _authenticate():
@@ -44,7 +70,7 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
     try:
         response = None
         while response is None:
-            status, response = request.next_chunk()
+            status, response = _next_chunk_retrying(request)
             if status:
                 print(f"Uploading... {int(status.progress() * 100)}%")
         print(f"Upload complete! Video ID: {response['id']}")
