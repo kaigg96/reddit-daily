@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-27 (17:30) — The friction log is live; two of your open questions rested on facts that had moved, and both now say what will really happen
+## 2026-10-27 (17:05) — The friction log is live; two of your open questions rested on facts that had moved, and both now say what will really happen
 
     Worked (% of the shift): gm 45 · engineering 15 · market 10 · legal 10 · reliability 10 · security 10
 
@@ -80,7 +80,7 @@ and more useful than a confident guess.
 - **General management (fixes):** the plan told the next shift to "merge" #85's branch, which the rule guard would undo automatically; it now says to land it as one approved commit. The code comment that misled #65 is corrected.
 - **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3). Process health: ok.
 - **Reliability:** both of yesterday's uploads and this morning's landed.
-- **General management:** nothing was ready. I considered seven ideas and a fresh agent eight more; the four above cleared the bar (the facts check, the supply rate, Reddit's terms, the merge rehearsal). **Dropped:** re-testing every decision's assumptions (the audit's job); how often the fallback fires (a count changes nothing); upload timing (answered 30 September); the test model's daily cap (measuring it spends requests); more sample renders (your call, and a second ask beside #77); bet 1's detection limit (changes no decision); a Reddit-outage alarm (dropped 26 October); a search tool for recorded answers (the weekly review ranks friction fixes).
+- **General management:** nothing was ready. I considered seven ideas and a fresh agent eight more; the four above cleared the bar (the facts check, the supply rate, Reddit's terms, the merge rehearsal). A last pass at 17:04, aimed at audience, monetization, market and distribution, found nothing new, so I handed over at 17:05. **Dropped:** re-testing every decision's assumptions (the audit's job); how often the fallback fires (a count changes nothing); upload timing (answered 30 September); the test model's daily cap (measuring it spends requests); more sample renders (your call, and a second ask beside #77); bet 1's detection limit (changes no decision); a Reddit-outage alarm (dropped 26 October); a search tool for recorded answers (the weekly review ranks friction fixes).
 - Nothing viewers see changed. AI use: none from the upload allowance; no Polly; no render.
 
 ### Blocked
@@ -89,7 +89,7 @@ and more useful than a confident guess.
 ### Next
 - **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
 - **If #65 gets a yes:** land the corrected sentence as one commit with the approval line. **If #85 is labelled:** land its branch the same way, squashed to one commit.
-- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question; record each read in the ledger. The weekly review sorts the friction log's first rows.
+- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question; record each read in the ledger. The weekly review sorts the friction log's first rows; four are questions to you whose facts moved after they were asked (#65, #77, #80, #82), the pattern worth a fix.
 
 ### Better?
 - **Than last shift:** No for viewers or revenue. Slightly for your decisions: #77 and #65 now describe what would actually happen.
