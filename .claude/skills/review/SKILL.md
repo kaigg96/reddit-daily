@@ -45,6 +45,8 @@ Due when there is a snapshot no weekly review has read.
    Dependency advisories. `money_check.py` was clean every day?
 6. **General management.** Every Status in both trackers true; re-rank the
    ready queue on the path to revenue (`/backlog` §2); close what finished.
+   **The friction log** (D15): `friction.py report`. Group every new row,
+   queue the groups worth fixing with their counts, record each resolution.
 
 ## Monthly — the business review
 
@@ -87,6 +89,8 @@ it carries these sections, in this order, in plain language:
 7. **General management.** Update the function coverage in `PLAN.md` §1. A
    function still at "none" after its first monthly review is a finding (D12).
    A function with ready work that kept losing the ranking, likewise.
+   D15's rule when `friction.py evaluate` says it is due: quoted before any
+   number, applied as written; a change or stop goes to the owner.
 8. **Proposals for you.** Each one escalated with evidence, a reversible first
    step and its cost, and listed in the entry.
 
