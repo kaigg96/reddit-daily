@@ -42,7 +42,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 | C16 | blocked: the 11-05 review (both samples in PRD §4) | Strategy | **A source after Reddit** | All bets assume Reddit (§4). Done when both samples are on the 11-05 review. |
 | C14 | blocked: the owner's seven checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response; never held. Done when the owner reports a date. |
 | C17 | baking: live 10-27 16:40 UTC (#84); D15's first read is due 11-24, at that monthly review | GM | **Friction log** (D15) | Rows: `friction.py add`; grouped weekly. Done when D15's read says keep, change or stop. |
-| C18 | baking: wording live 10-27 (#85); first read at the next quarterly prep (~2027-01-05) | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments` live 10-27 (1 of 7 keeps credited); the review and backlog skills now read and update it. Done when quarterly prep reads it and proposes the process's own rule. |
+| C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments` (1 of 7 keeps credited); the review and backlog skills read and update it. Done when quarterly prep reads it and proposes the process's own rule. |
 
 ## 4. Risks
 

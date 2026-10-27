@@ -40,3 +40,4 @@ F38,2026-10-27T17:01:49+00:00,40542945992,security,"Add the Groq key to the owne
 F39,2026-10-27T17:02:15+00:00,40542945992,gm,Correct #80's aged reasons by edit,done,,none,,,0,
 F40,2026-10-27T17:02:50+00:00,40542945992,legal,Correct #82's body: 31 October does not apply (existing apps),done,,rederived,The issue body kept a deadline two later comments corrected; I had to read every comment to know which date was true,Corrections edit the body in place rather than only appending a comment,3,
 F41,2026-10-27T17:03:21+00:00,40542945992,gm,Put #77's fallback-tag disclosure in its approval list (by edit),done,,none,,,0,
+F42,2026-10-27T22:59:13+00:00,40598596188,gm,Land #85 (experiment ledger wording) as one approved commit,done,,none,Checking whether #65's label still covered its corrected sentence (it does not: no reply since the correction),PLAN's C18 row already said how to land it,0,
