@@ -2367,3 +2367,122 @@ def first_answer_verdict(rho, p_value):
     if rho <= FIRST_ANSWER_LEAD_RHO and p_value < 0.05:
         return "lead: a long first answer loses watch time (a candidate, not a change)"
     return "noise: no loss from a long first answer at this size"
+
+
+# The experiment ledger (PLAN.md C18, D15's pattern): every pre-committed
+# rule, when it was set, due and read, and what it found. D15 generalized the
+# friction log's lesson: a standing process needs an outcome recorded each
+# time it runs, a scheduled read, and a rule set in advance. The experiment
+# process had rules but no record of itself, so whether it can tell a change
+# that works from one that does not was never asked. A read is on time within
+# a week of its due date, the snapshot's cadence.
+EXPERIMENTS = config.ROOT / "analysis" / "experiments.csv"
+LEDGER_GRACE_DAYS = 7
+DECIDED = ("keep", "revert", "drop", "retired")
+
+
+def load_experiments(path=EXPERIMENTS):
+    if not os.path.exists(path):
+        return []
+    with open(path, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def _ledger_date(value):
+    try:
+        return datetime.date.fromisoformat((value or "").strip())
+    except ValueError:
+        return None
+
+
+def _percent(value):
+    """|x| from '+20%', '−12%', '~18%'; None when the cell is not a percentage."""
+    m = re.search(r"(\d+(?:\.\d+)?)\s*%", (value or "").replace("−", "-"))
+    return float(m.group(1)) if m else None
+
+
+def experiment_ledger(rows, today):
+    """What the ledger says about the experiment process itself.
+
+    Returns counts and lists: reads on time, late, and overdue; verdicts; and
+    the keeps whose effect cleared the detection limit printed beside them
+    (credited) against those that did not -- a keep inside the limit is the
+    absence of a detected harm, never evidence the change worked (§4,
+    2026-09-21). `upcoming` is each unread rule's smallest detectable effect
+    and when it is due."""
+    out = {"total": len(rows), "read": [], "on_time": [], "late": [],
+           "overdue": [], "pending": [], "closed_unread": [], "undated": [],
+           "verdicts": {},
+           "credited": [], "not_credited": [], "unmeasured_keeps": [],
+           "upcoming": [], "set_to_read_days": []}
+    for r in rows:
+        due, read, rule_set = (_ledger_date(r.get(k)) for k in ("due", "read", "rule_set"))
+        verdict = (r.get("verdict") or "").strip() or "pending"
+        out["verdicts"][verdict] = out["verdicts"].get(verdict, 0) + 1
+        if read:
+            out["read"].append(r)
+            if rule_set:
+                out["set_to_read_days"].append((read - rule_set).days)
+            if due:
+                late = (read - due).days > LEDGER_GRACE_DAYS
+                out["late" if late else "on_time"].append(r)
+            else:
+                out["undated"].append(r)
+        elif verdict != "pending":
+            out["closed_unread"].append(r)      # dropped before any read
+        else:
+            out["pending"].append(r)
+            if due and (today - due).days > LEDGER_GRACE_DAYS:
+                out["overdue"].append(r)
+            out["upcoming"].append((r.get("id"), r.get("detectable") or "?",
+                                    due.isoformat() if due else "?"))
+        if verdict == "keep":
+            effect, limit = _percent(r.get("effect")), _percent(r.get("detectable"))
+            if effect is None or limit is None:
+                out["unmeasured_keeps"].append(r)
+            elif effect > limit:
+                out["credited"].append(r)
+            else:
+                out["not_credited"].append(r)
+    return out
+
+
+def render_experiment_ledger(summary):
+    """The ledger read as text, for `report.py --experiments`."""
+    s = summary
+    if not s["total"]:
+        return "No experiment ledger (analysis/experiments.csv)."
+    dated = len(s["on_time"]) + len(s["late"])
+    lines = [f"EXPERIMENT LEDGER — {s['total']} pre-committed rules, "
+             f"{len(s['read'])} read, {len(s['pending'])} not yet, "
+             f"{len(s['closed_unread'])} closed without a read",
+             "  verdicts: " + ", ".join(f"{k} {v}" for k, v in sorted(s["verdicts"].items())),
+             f"  reads with a due date: {len(s['on_time'])} of {dated} on time "
+             f"(within {LEDGER_GRACE_DAYS} days); {len(s['undated'])} read with none set"]
+    if s["late"]:
+        lines.append("    late: " + ", ".join(r["id"] for r in s["late"]))
+    if s["overdue"]:
+        lines.append("  OVERDUE, unread past their due date: "
+                     + ", ".join(r["id"] for r in s["overdue"]))
+    if s["set_to_read_days"]:
+        lines.append(f"  rule set to read: median "
+                     f"{statistics.median(s['set_to_read_days']):g} days")
+    keeps = len(s["credited"]) + len(s["not_credited"]) + len(s["unmeasured_keeps"])
+    lines.append(f"  keeps: {keeps}; effect beyond the limit printed beside it: "
+                 f"{len(s['credited'])}; inside it: {len(s['not_credited'])}; "
+                 f"no limit recorded: {len(s['unmeasured_keeps'])}")
+    lines.append("    (a keep inside its limit is no detected harm, not a "
+                 "measured gain)")
+    reverts = [r["id"] for r in s["read"] if (r.get("verdict") or "").strip() == "revert"]
+    if reverts:
+        lines.append(f"  reverts: {len(reverts)} ({', '.join(reverts)}); "
+                     "the source column says whether each stood")
+    elif keeps:
+        lines.append("  no rule has ever reverted a change: the ledger cannot yet "
+                     "show the rules would catch one that hurt")
+    if s["upcoming"]:
+        lines.append("  next reads (smallest detectable effect, due; '?' = "
+                     "not recorded, or due on an upload count):")
+        lines += [f"    {i}: {d}, {due}" for i, d, due in
+                  sorted(s["upcoming"], key=lambda x: (x[2] == "?", x[2]))]
+    return "\n".join(lines)

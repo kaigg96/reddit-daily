@@ -673,6 +673,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--experiments", action="store_true",
+                   help="the experiment ledger: rules read on time, keeps credited, "
+                        "what is due next (PLAN C18)")
     p.add_argument("--concentration", action="store_true",
                    help="share of 7-day views the top 10%% of uploads earn: "
                         "are views a hit-rate problem? (PRD R4)")
@@ -694,7 +697,8 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
+             args.experiments)
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -716,6 +720,11 @@ def main():
         sys.exit(f"--at-age {args.at_age:g} is under {insights.MIN_AGE_DAYS} days, where "
                  f"Analytics has not yet reported many uploads; read at "
                  f"{insights.MIN_AGE_DAYS} or later.")
+
+    if args.experiments:    # the ledger of rules, not the analytics
+        print(insights.render_experiment_ledger(
+            insights.experiment_ledger(insights.load_experiments(), now.date())))
+        return
 
     if args.scorecard:     # many metrics; no single one can judge this channel
         show_scorecard(args)
