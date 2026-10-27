@@ -104,6 +104,16 @@ def traffic_mix(scope="channel_7d"):
         for r in rows if r["snapshot_date"] == latest_date)
 
 
+def refused_columns(rows):
+    """{column: how many rows} for each column the snapshot step could not
+    collect. It writes "refused: ..." in place of a value (no shift can read
+    the Actions log); on 2026-10-26 that was the subscribers of all 1,037
+    videos with stats, while the digest still said the data was current."""
+    counts = Counter(k for r in rows for k, v in r.items()
+                     if str(v or "").startswith("refused:"))
+    return dict(sorted(counts.items()))
+
+
 def humanize(n):
     return f"{n / 1_000_000:.1f}M" if n >= 1_000_000 else (f"{n / 1000:.1f}K" if n >= 1000 else str(n))
 
@@ -191,6 +201,9 @@ def main():
         soft.append(f"{len(non_public)} upload(s) not public")
     if no_music:
         soft.append(f"{len(no_music)} upload(s) rendered without music")
+    refused = refused_columns(latest.values())
+    if refused:
+        soft.append("snapshot did not collect " + ", ".join(refused))
 
     date_label = f"{now:%b} {now.day}"
     if hard:
@@ -232,6 +245,9 @@ def main():
     else:
         diff = "clean"
     freshness = "current" if snap_age <= 8 else f"**{snap_age} days stale**"
+    if refused:
+        freshness += " · **not collected:** " + ", ".join(
+            f"{col} on {n} video{'s' if n > 1 else ''}" for col, n in refused.items())
 
     lines = [status, ""]
     lines.append(f"**Pipeline health** — Cadence: {cadence} · Log↔channel diff: {diff} · "

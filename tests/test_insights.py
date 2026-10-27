@@ -207,6 +207,20 @@ def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
     assert "edge" in [v["id"] for v in got["cold_spell"]]
 
 
+def test_the_digest_names_columns_the_snapshot_could_not_collect():
+    """10-26: subscribers were refused on every row and the digest said
+    "Analytics data: current"."""
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    why = "refused: HttpError: <HttpError 500>"
+    rows = [{"views": "3", "subs_gained": why, "watch_ratio_10": ""},
+            {"views": "4", "subs_gained": why, "watch_ratio_10": why},
+            {"views": "5", "subs_gained": "1", "watch_ratio_10": "0.9"}]
+    assert wd.refused_columns(rows) == {"subs_gained": 2, "watch_ratio_10": 1}
+    assert wd.refused_columns(rows[2:]) == {}
+
+
 # --- publish drift (2026-09-07: 4.5h drift ran unnoticed for 10 days) --------
 
 def test_publish_drift_is_measured_forward_from_the_latest_slot_across_midnight():
