@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-27 (23:25) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
+
+    Worked (% of the shift): data 30 · reliability 25 · gm 20 · legal 10 · strategy 10 · security 5
+
+**Summary:** The experiment-ledger wording you approved (#85) is live. Last Monday YouTube's reporting service failed once and the weekly figures lost nearly every video's subscriber count without anyone noticing; that can no longer pass silently, and a repeat on 2 November, when four test reads are due, is now retried. Nothing viewers see changed, and nothing moved revenue directly.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Protecting the evidence.** Every bet is judged on the Monday figures, and a week that is lost cannot be fetched again later. On 26 October one "internal error" from YouTube cost every video its subscriber count; a repeat on the main request would have lost the whole week, including the four reads due on 2 November. Each request now tries up to three times before giving up.
+- **One more fact for 5 November.** AI use does not decide between the replacement sources at two uploads a day: Reddit and Stack Exchange need 2–5 requests per video, our own questions 2–3, under the 20-a-day allowance. At four a day, Reddit and Stack Exchange reach the allowance on a bad day.
+
+### Done
+- **General management (your decision, #85):** the two lines landed as one approved commit at about 23:00 UTC; #85 is closed. The quarterly preparation now quotes the ledger before proposing any bet's rule, and every rule set or read updates its row. First read at the next quarterly preparation, in early January.
+- **Reliability (a fix, live):** the weekly figures' requests to YouTube now retry a server error, as one kind already did after 19 October. A fresh review found no bugs and two wording points, both fixed. I also checked the three libraries that job installs without fixed versions: their newest releases work, so they are not a risk for Monday unless a new one ships first.
+- **Data (three fixes, live):** the reports said "insufficient data" about subscribers when the truth was "YouTube refused the request". Our rules tell a shift to accept a report's refusal as the answer, so a failed collection would have read as too few videos. They now say it was not collected. Your Monday check-in said "ran clean" that day too; its title and health line now name any figure YouTube refused. The test comparisons dropped a refused figure silently too, so a thin result could be a failed one; each such read now warns, and today notes 11 videos whose subscriber figure was refused. Fresh reviews found no bugs in any of the three; their wording points are fixed. To confirm the warning on real data I ran the voice question's command filtered to its warnings, so none of its result was seen early.
+- **Legal (for #82):** Reddit's pages refuse automated reads, so I recorded the questions on Reddit's API request form from an archived copy (November 2025) in #82's description, by edit, which sends no email. One choice there is yours: whether to apply as a "developer" or a "commercial developer", which asks for a monthly data budget. I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them, as you decided on 10 October.
+- **General management:** #65 stays open. Your label predates the corrected sentence on it, and there has been no reply since, so I did not land it; a "yes" there lands it.
+- **Reliability:** both of today's uploads landed. Bet 1's release still combines cleanly with everything live.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
+- **General management:** nothing was ready. A fresh agent proposed eight ideas and found the refused subscriber counts. Two rankers, in opposite orders, put the same three first: the retries, the library check, the Reddit form. **Dropped:** a topic test chosen after seeing the data (both rankers put it last); counting deleted Reddit posts (Reddit refuses our build machine, as found before); why likes per 100 views rose (under one like per video); handing over early (three items cleared the bar).
+- Five fixes and two findings. AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January; the form's questions are now on it); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
+
+### Next
+- **2 November snapshot:** check first that the Monday check-in names no figure YouTube refused, and read each test's warnings before its verdict; the voice question reads engaged views. Then the views rule, the subreddit test, the title-style test and the voice question; all should have enough videos (20 a side; 27 against 14; 21 and 17), counted from the upload log without reading any result. Record each read in the ledger.
+- **If #77 is labelled:** as the 17:05 handover says. **If #65 gets a yes:** land the corrected sentence as one commit with the approval line.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. Yes for the evidence: a one-off YouTube error can no longer quietly cost a week of test data, and a failed collection no longer reads as "too few videos".
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-27 (17:05) — The friction log is live; two of your open questions rested on facts that had moved, and both now say what will really happen
 
     Worked (% of the shift): gm 45 · engineering 15 · market 10 · legal 10 · reliability 10 · security 10
@@ -97,37 +133,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** Too early to say.
 
 ---
-
-## 2026-10-27 (09:55) — Both process items you queued last night are built and wait only on your labels; our test record shows "keep" rarely meant "it worked"
-
-    Worked (% of the shift): gm 40 · data 35 · legal 15 · security 5 · reliability 5
-
-**Summary:** The friction log is built and reviewed, and lands when you label #84. The experiment ledger is live: of 7 changes we kept, only 1 measured a gain beyond what its test could tell from noise. Nothing viewers see changed, and nothing moved revenue directly.
-
-### Toward revenue
-- **Nothing directly.** Every change that viewers would see still waits on #77 or #80. The channel is flat, so I say plainly that no work today changed what we ship.
-- **What the ledger shows, for judging bets.** Of 7 keeps, 1 measured a gain bigger than its test's limit: the background-clip library, +22% against 11%. The product plan already declines to credit opening on the question (+20%), because its lead was mostly longer videos. One keep was inside its limit, and four had no limit recorded. The only "revert" a rule ever gave was overruled by a rule written the next day. So a "keep" has meant "no harm seen", not "it worked". Bet 1's own read can detect a change of about 12% in watch time per view, and views would need about 55%.
-- **The 5 November source decision has two more facts.** Stack Exchange's terms bar nothing about running its posts through AI. Opinion polls are a possible third source: Pew's terms allow commercial reuse with credit, and YouGov's do not. A poll gives the crowd's answer as percentages, not quotable answers, so it would be a different show. It is a lead, with no sample.
-
-### Done
-- **General management (built to your spec):** the friction log. A shift logs what made each finished item hard, the weekly review groups the entries, and your rule judges it at the first monthly read. Three silent shifts in a row email you. A fresh review found two real bugs and some weaker spots; all fixed, and 637 checks pass. It lands the day you label #84.
-- **Data (a bet on the process):** the experiment ledger and a report that reads it. It holds 60 test rules from the product plan and history: when each was set, due and read, and what it found. Of 39 reads, only 9 had a due date (8 on time). Three releases were judged by rules written after they shipped. A fresh review caught that I had credited opening on the question, which the plan says not to; fixed before it went live. **#85** asks you to approve two lines that make the quarterly planning read it and keep it current.
-- **Legal (for the 5 November review):** the terms reads above, from archived copies where the live pages gave a script nothing.
-- **Reliability:** both of yesterday's uploads and this morning's landed. Bet 1's release still combines cleanly with everything live, and all 870 checks pass together.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.75 this month, forecast $0.88 of $3).
-- **General management:** with nothing else ready, a fresh agent proposed six ideas; the two that cleared the bar are the terms reads above. **Dropped:** a trial giving the Stack Exchange host another job (over 20 minutes, and the last two rewordings made things worse); fixing the own-questions show's bland questions (the same, and it shares two of three spam-policy traits); stripping angle brackets from titles (never seen in about 2,300 titles, and it touches code bet 1's release changes); naming bet 3's pilot route (changes nothing until bet 1 keeps). A second round at 09:30 found nothing above the bar: closing two engaged-share rules (never a trigger), the voice read's limit (dropped yesterday), the title test's eighth video (the 2 November read checks it), the reach-cut measure's timing (overlaps a drop, pays off only if fragile), and Christmas inside bet 2's window (no December history to judge it). So I handed over at 09:35 with nothing ready.
-- One release merged (the ledger, analysis only); nothing viewers see changed. AI use: none from the upload allowance; no Polly; no render.
-- **Process:** I switched the shared copy of the project to another branch while a reviewer was reading the friction-log branch. I switched back within a minute and moved my other work to separate copies. Using separate copies from the start avoids this. I wrote both proposals' rule wording on branches with a script; nothing reaches the rules without your label.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #84 (one label lands the friction log); #85 (one label adds the ledger to quarterly planning); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **If #84 is labelled:** merge the friction-log branch with the approval line, setting its start time in the same commit (the plan's row says how). **If #85:** merge its proposal branch the same way.
-- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question. Record each read in the ledger too.
-- **If #77 is labelled:** as the last handover says.
-
-### Better?
-- **Than last shift:** Unclear for revenue. The process can now see its own record, and it says our "keeps" were mostly not evidence of a gain. That matters before bet 2 is judged.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
