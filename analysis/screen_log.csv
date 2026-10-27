@@ -18,3 +18,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-10-07T06:09:22+00:00,AskReddit,What is the scariest story you know is 100% true?,drop_comments,unsafe_comments,"Question is broad, inviting general scary stories",gemini,1
 2026-10-16T16:48:04+00:00,AskReddit,Nurses and doctors- what’s a deathbed confession you’ll never forget?,drop_comments,unsafe_comments,"Question is about general confessions, not specific banned topics",gemini,1
 2026-10-22T17:21:22+00:00,AskReddit,"What was the last straw for you to say, ""Yep I'm getting a divorce""?",drop_comments,unsafe_comments,"Question is about personal divorce experiences, not flagged topics",gemini,1
+2026-10-27T18:07:08+00:00,NoStupidQuestions,Should I report someone for violating their parole?,drop_comments,unsafe_comments,,gemini,2
