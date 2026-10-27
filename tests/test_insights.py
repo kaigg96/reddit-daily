@@ -1933,6 +1933,17 @@ def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
     assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
 
 
+def test_a_refused_column_is_told_apart_from_a_thin_one():
+    """10-26: an HTTP 500 left subscribers on no row; "insufficient data"
+    would be read as the answer rather than as a failed collection."""
+    from src import insights as _ins
+    why = "refused: HttpError: <HttpError 500 ... Internal error encountered.>"
+    rows = [{"views": "10", "subs_gained": why}] * 30 + [{"views": "10", "subs_gained": ""}]
+    assert _ins.subscriber_rate(rows)[3] is None
+    assert _ins.refused(rows, "subs_gained") == why
+    assert _ins.refused([{"views": "10", "subs_gained": "2"}, {"views": "1"}], "subs_gained") is None
+
+
 def test_route_distances_count_engaged_views_where_the_route_does():
     from src import insights as _ins
     routes = (("YPP", 10_000_000, 90, True, 1_000, True),

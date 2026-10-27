@@ -449,10 +449,14 @@ def show_routes():
     per_90 = sum(g for _, g, _ in gained) * 90 / days if days else 0
     with open(config.CHANNEL_LOG) as f:
         subs = int([r for r in _csv.DictReader(f) if r["subscribers"]][-1]["subscribers"])
-    pct = f"{share:.0%}" if share is not None else "unknown (too few videos)"
+    pct = (f"{share:.0%}" if share is not None else
+           "engaged share not collected (the API refused it)"
+           if insights.refused(snap, "engaged_views") else "unknown (too few videos)")
     print(f"Revenue routes: ~{per_90:,.0f} play starts per 90 days (over {days} days "
           f"of snapshots), {subs} subscribers; from snapshot {latest}, {pct} engaged and "
-          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else "rate unknown")
+          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else
+             "subscriber rate not collected (the API refused it)"
+             if insights.refused(snap, "subs_gained") else "rate unknown")
           + "\n")
     fmt = lambda x: "-" if x is None else "met" if x <= 1 else f"~{x:,.0f}x short"
     for d in insights.route_distances(per_90, share, subs, rate):
@@ -761,6 +765,8 @@ def main():
         for label, since in (("all videos", None), ("published in the last 90 days", cut)):
             n, views, engaged, share = insights.engaged_share(rows, since)
             verdict = (f"{share:.0%}" if share is not None else
+                       "not collected: the API refused it (engaged_views says why)"
+                       if insights.refused(rows, "engaged_views") else
                        f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)")
             print(f"  {label:32} n={n:<5} views {views:>8,}  engaged {engaged:>8,}  share {verdict}")
         print("\n  The Partner Program's 10M bar counts qualified (engaged) views, so a"
@@ -768,7 +774,9 @@ def main():
         print("\nSubscribers gained per 1,000 views, same snapshot")
         for label, since in (("all videos", None), ("published in the last 90 days", cut)):
             n, views, subs, rate = insights.subscriber_rate(rows, since)
-            if rate is None:
+            if rate is None and insights.refused(rows, "subs_gained"):
+                verdict = "not collected: the API refused it (subs_gained says why)"
+            elif rate is None:
                 verdict = f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)"
             else:
                 lo, hi = (x / views * 1000 for x in insights.poisson_interval(subs))
