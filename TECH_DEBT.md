@@ -232,7 +232,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`.
+  after `v8`. **Rehearsed again 10-27** over `main` `4efb08d`: both merge
+  cleanly, 900 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
+  (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
+  the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
+  since 10-18 took that path (10-26 05:05, `meta_failure=http_503`). The
+  release check sets `FALLBACK_MODEL = None`, so it never sees it. If the
+  owner asks on #77, drop host tags when the route is not `gemini`.
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
