@@ -137,8 +137,30 @@ class _FakeYT:
         assert kwargs == {"mine": True, "part": "statistics"}
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES >= 1   # R4 reads this row weekly
         return {"items": [{"statistics": self.stats}]}
+
+
+def test_the_upload_listing_retries_a_server_error():
+    """~22 pages before any figure: one 5xx on any page lost the snapshot."""
+    from src import analytics
+
+    class Listing:
+        def __init__(self): self.retries, self.pages = [], iter([{"items": [1], "nextPageToken": "p"},
+                                                                 {"items": [2]}])
+        def channels(self): self.kind = "channel"; return self
+        def playlistItems(self): self.kind = "page"; return self
+        def list(self, **kw): return self
+        def execute(self, num_retries=0):
+            self.retries.append(num_retries)
+            if self.kind == "channel":
+                return {"items": [{"contentDetails": {"relatedPlaylists": {"uploads": "UU"}}}]}
+            return next(self.pages)
+
+    yt = Listing()
+    assert analytics.list_uploaded_videos(yt) == [1, 2]
+    assert yt.retries == [analytics.SERVER_RETRIES] * 3 and analytics.SERVER_RETRIES >= 1
 
 
 def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):

@@ -49,12 +49,13 @@ RETENTION_POINTS = (10, 25, 50, 75, 100)
 RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
 RETENTION_MAX_AGE_DAYS = 30
 # Tries after a 5xx, 429, rate-limit 403 or dropped connection, with the
-# client's own backoff (under 2s, then 4s), for every Analytics query. On
+# client's own backoff (under 2s, then 4s), for every query this job makes
+# but comments (caught per video, so a failure costs one video's). On
 # 2026-10-19 one HTTP 500 stopped the retention loop and cost 23 uploads their
 # points; on 10-26 one cost every upload its subscribers. Each upload's 7-day
 # reading comes from one snapshot, so a lost week is lost; a 5xx on the main
 # query's fallback (no engaged views) loses the whole snapshot.
-SERVER_RETRIES = 2
+SERVER_RETRIES = analytics.SERVER_RETRIES
 # A 5xx that outlasts those retries costs its own upload only, as the 10-19 one
 # was the 33rd of 55 queries and those before it answered; this many in a row
 # means the report is down, so the rest wait for next week's run.
@@ -388,7 +389,8 @@ def snapshot_channel(yt, today, path=None):
     exact below 1,000 -- the threshold that matters.
     """
     path = path or CHANNEL_OUT
-    stats = yt.channels().list(mine=True, part="statistics").execute()["items"][0]["statistics"]
+    stats = yt.channels().list(mine=True, part="statistics").execute(
+        num_retries=SERVER_RETRIES)["items"][0]["statistics"]
     is_new = not path.exists()
     path.parent.mkdir(exist_ok=True)
     with open(path, "a", newline="") as f:
