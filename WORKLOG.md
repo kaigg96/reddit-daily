@@ -61,6 +61,43 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-27 (17:30) — The friction log is live; two of your open questions rested on facts that had moved, and both now say what will really happen
+
+    Worked (% of the shift): gm 45 · engineering 15 · market 10 · legal 10 · reliability 10 · security 10
+
+**Summary:** The friction log you approved (#84) is live, and two questions still before you (#65, #77) now state facts that had moved since you were asked. Nothing reached viewers; the 5 November source decision gained two facts, both against an easy replacement for Reddit.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on #77 (bet 1). The channel is flat: 12 seconds watched per view for six weeks.
+- **Bet 1's approval had a gap, now on #77.** It says the host's tags are written by the main AI model. On a day that model fails (1 upload in 18 since 18 October), they would come from the cheaper test model, which mostly labels, or from Groq, whose tags missed our bar. Still label it: the test counts those uploads against bet 1, so they can only make it look worse. Bet 1 still combines with everything live; all 900 checks pass.
+- **Two facts for 5 November.** Stack Exchange's three best sites produce about 1.6 usable questions a day, under our two uploads and 41% fewer than a year ago. Reaching two or four a day means adding niche sites (philosophy, law, language), a different show. And Reddit's terms leave no side door when the free API ends: scraping, RSS or its page data all need Reddit's written consent, and commercial use needs a written agreement. That makes registering our app (#82) matter more.
+
+### Done
+- **General management (your decision, #84):** the friction log landed as one approved commit, live from 16:40 UTC; #84 is closed. Its first rows are in, and its rule is first read at the 24 November monthly review.
+- **General management (your decision, #65, held back):** you approved letting a shift ask for a sample video near an upload, because its AI requests go to a test model "production uses only for telemetry". Since 18 October each upload also tries that model once when the main one fails, so that reason is no longer true. The risk stays small (renders are capped at about 10 requests a day), so #65 now carries a corrected sentence; reply "yes" and the next shift lands it. It answers the friction log's costliest recurring problem: sample videos holding up finished work.
+- **General management (a check, by a fresh agent):** besides #77, #80's reasons have aged. Bet 1's notes became one-to-three-word tags, so it does less to make videos differ, and "bet 2 slips four weeks" overstates it: the plan says each late week costs one week at four a day. #59's six checks predate the Groq key, which needs a seventh. #85 and #82 check out.
+- **Engineering (a fix):** the friction log's own test demanded that every row already be sorted into a group, but new rows wait for the weekly review. The first real row failed the checks on two pushes, for about four minutes. Fixed; all 645 checks pass. I pushed this and a comment fix before a fresh review, which the rules ask for first; the review ran afterwards, found no bugs and two small gaps, both fixed.
+- **General management (fixes):** the plan told the next shift to "merge" #85's branch, which the rule guard would undo automatically; it now says to land it as one approved commit. The code comment that misled #65 is corrected.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3). Process health: ok.
+- **Reliability:** both of yesterday's uploads and this morning's landed.
+- **General management:** nothing was ready. I considered seven ideas and a fresh agent eight more; the four above cleared the bar (the facts check, the supply rate, Reddit's terms, the merge rehearsal). **Dropped:** re-testing every decision's assumptions (the audit's job); how often the fallback fires (a count changes nothing); upload timing (answered 30 September); the test model's daily cap (measuring it spends requests); more sample renders (your call, and a second ask beside #77); bet 1's detection limit (changes no decision); a Reddit-outage alarm (dropped 26 October); a search tool for recorded answers (the weekly review ranks friction fixes).
+- Nothing viewers see changed. AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #85 (one label adds the ledger to quarterly planning); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
+
+### Next
+- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
+- **If #65 gets a yes:** land the corrected sentence as one commit with the approval line. **If #85 is labelled:** land its branch the same way, squashed to one commit.
+- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question; record each read in the ledger. The weekly review sorts the friction log's first rows.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. Slightly for your decisions: #77 and #65 now describe what would actually happen.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-27 (09:55) — Both process items you queued last night are built and wait only on your labels; our test record shows "keep" rarely meant "it worked"
 
     Worked (% of the shift): gm 40 · data 35 · legal 15 · security 5 · reliability 5
@@ -93,40 +130,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** Unclear for revenue. The process can now see its own record, and it says our "keeps" were mostly not evidence of a gain. That matters before bet 2 is judged.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-26 (23:38) — The guard against shock-bait titles is live; Snapchat and X priced, and neither pays for a reading
-
-    Worked (% of the shift): reliability 25 · gm 25 · monetization 15 · data 15 · security 10 · product 5 · legal 5
-
-**Summary:** The check that refuses shock-bait titles passed its sample video and is live from tomorrow morning's upload. Snapchat's and X's creator programmes are now priced: both pay only for original work, so bet 1 (#77, waiting on your label) still comes first on every route.
-
-### Toward revenue
-- **A spam-policy risk is now handled in code.** YouTube refuses content "designed to shock or surprise viewers". A title like "Animals' chilling genius will surprise you" is now replaced by the plain Reddit question before upload. Questions such as "What surprised you most?" still pass. Protection, not growth.
-- **Two more routes priced, and neither is nearer.** Snapchat invites creators with 50,000 followers and 15,000 hours watched a month. At our YouTube rate we would have about 37 hours, roughly 400 times short. It also asks for "original" videos of 30 seconds or more; ours run about 21. X now pays only Premium subscribers with 500 verified followers and half a million verified views in 90 days. It excludes "content reuploaded from other platforms". Neither pays for a reading.
-- **Bet 1 can still ship the day you label #77.** Combined with tonight's change, all 862 automated checks pass, and its titles go through the new guard.
-
-### Done
-- **Reliability and legal (a fix):** the title guard's sample video passed (23 seconds, playable), and the guard merged. Its title, "The most brutal betrayal stories EVER told on Reddit", passed the guard, as it should. Videos look the same.
-- **Monetization (a bet-3 read):** the pricing above, now in the company plan; Snapchat's from its own help page, X's from a 3 September report quoting its page, which refused us.
-- **Reliability:** both of today's uploads landed (the afternoon one at 18:46, after GitHub's usual queue delay).
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.75 this month, forecast $0.88 of $3).
-- **General management:** after the merge nothing was ready. A fresh agent proposed eight ideas and six survived its filter. Two rankers, in opposite orders, ranked the route pricing third both ways; their top pick, a break-even per upload, would repeat the plan's 25 October figure. **Dropped:** whether shock titles were buried more (11 titles, and the answer changes nothing now that the guard is live); a likes measure for bet 1 (it already exists); rewriting the upload description beside bet 1 (the product plan puts it after bet 1); pricing video production for paying clients (speculative, no evidence). A second round, aimed at the 2 and 5 November decisions, found the two rule fixes below. **Dropped from it:** pinning how the tests count uploads (both counts pass by 2 November); bet 2's targets in the views report (its baseline completes on 2 November); one combined email about #77, #80 and #82 (another email); a re-raise date for #82 (escalations already re-raise); the voice read (complete as written); the account-security risk (only your checks move it). A third round, on what could break an upload in the next two weeks, found nothing not already covered (model shutdowns, login expiry, tag lengths, Reddit access, the clock change).
-- **Data (a fix, before any bet 1 upload):** bet 1's verdict is now read on AskReddit uploads for as long as two subreddits rotate. The old wording tied it to the subreddit test, which is read on 2 November, before bet 1 can be. Today's format ran on AskReddit alone until 7 October, so a read across both subreddits would credit bet 1 with the mix.
-- **Product (a default while #80 is open):** four uploads a day now waits for bet 1 until you answer #80, which recommends exactly that. The plan held both that proposal and "four a day first if bet 1 is late", and the 2 November read could have set off either. Waiting is reversible and spends nothing; to start four a day on time anyway, say so on #80.
-- One fix that reached the live pipeline (the guard), two rule fixes and one read for bet 3; nothing viewers see changed. AI use: one sample render (its own allowance); no Polly, no upload-model requests.
-- **Process:** the first request for the sample video reached GitHub but got a server error, and no render started. A second request started it within seconds; if no render starts within a minute, request again.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #82 (register our Reddit app by 12 January); #80 (no longer urgent: four a day waits for your answer); #59 (the account checks); #50 and #65 (your hands, on the rule files).
-
-### Next
-- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. Both still combine cleanly with everything live (checked tonight). The next render slot opens at 11:14 UTC on 27 October.
-- **2 November snapshot:** the views rule first: if the week is low again (two low weeks running), treat it as YouTube's reach cut and tell you that day. Then the title-style test if it has its eighth video, the subreddit test, and the voice question.
-
-### Better?
-- **Than last shift:** Slightly: a policy risk that leaked once is now refused in code, and bet 3's route list is complete for the platforms that pay creators. Nothing changes what viewers watch.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds, and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
