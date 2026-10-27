@@ -82,7 +82,8 @@ class _FakeAnalytics:
         self._ids = kw["filters"].removeprefix("video==").split(",")
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        self.num_retries = num_retries
         if (self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics
                 and not (self.only_beside_all and len(self._metrics) == 2)):
             raise RuntimeError("HttpError 400: Unknown identifier (engagedViews)")
@@ -97,6 +98,14 @@ def test_engaged_views_are_collected_when_served():
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert stats["a"][wa.ENGAGED_METRIC] == 3 and stats["a"]["views"] == 9
     assert len(ya.calls) == 1
+
+
+def test_the_snapshot_queries_retry_a_server_error():
+    """10-26: one HTTP 500 cost every upload its subscribers; on the main
+    query it would have cost the whole week's snapshot."""
+    ya = _FakeAnalytics(refuse_engaged=False)
+    wa.fetch_stats(ya, ["a"], "2026-11-02", f"views,{wa.SUBS_METRIC}")
+    assert ya.num_retries == wa.SERVER_RETRIES >= 1
 
 
 def test_a_refused_metric_costs_the_column_not_the_snapshot():
@@ -200,10 +209,10 @@ class _FakeSubsAnalytics(_FakeAnalytics):
         super().__init__(refuse_engaged=False)
         self.refuse_subs = refuse_subs
 
-    def execute(self):
+    def execute(self, num_retries=0):
         if self.refuse_subs and wa.SUBS_METRIC in self._metrics:
             raise RuntimeError("HttpError 400: Unknown identifier (subscribersGained)")
-        resp = super().execute()
+        resp = super().execute(num_retries)
         if wa.SUBS_METRIC in self._metrics:
             i = self._metrics.index(wa.SUBS_METRIC) + 1
             for row in resp["rows"]:
@@ -329,7 +338,7 @@ def test_a_server_error_is_retried_by_the_client_first():
     5xx itself when asked; a refusal (403 above) still stops at once."""
     ya = _FakeRetention()
     wa.fetch_retention(ya, "new", "2026-10-19")
-    assert ya.num_retries == wa.RETENTION_RETRIES >= 1
+    assert ya.num_retries == wa.SERVER_RETRIES >= 1
 
 
 class _ServerError(Exception):

@@ -48,10 +48,12 @@ OUT = config.ANALYTICS_SNAPSHOTS
 RETENTION_POINTS = (10, 25, 50, 75, 100)
 RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
 RETENTION_MAX_AGE_DAYS = 30
-# Tries after a 5xx or 429, with the client's own backoff (under 2s, then 4s).
-# On 2026-10-19 one HTTP 500 stopped the loop and cost 23 uploads their points;
-# each upload's 7-day reading comes from one snapshot, so a lost week is lost.
-RETENTION_RETRIES = 2
+# Tries after a 5xx or 429, with the client's own backoff (under 2s, then 4s),
+# for every Analytics query. On 2026-10-19 one HTTP 500 stopped the retention
+# loop and cost 23 uploads their points; on 10-26 one cost every upload its
+# subscribers. Each upload's 7-day reading comes from one snapshot, so a lost
+# week is lost, and a 5xx on the main query would lose the whole snapshot.
+SERVER_RETRIES = 2
 # A 5xx that outlasts those retries costs its own upload only, as the 10-19 one
 # was the 33rd of 55 queries and those before it answered; this many in a row
 # means the report is down, so the rest wait for next week's run.
@@ -108,7 +110,7 @@ def fetch_stats(ya, video_ids, end_date, metrics=METRICS):
             filters="video==" + ",".join(chunk),
             maxResults=len(chunk),
             sort="-views",
-        ).execute()
+        ).execute(num_retries=SERVER_RETRIES)
         columns = [h["name"] for h in resp.get("columnHeaders", [])]
         for row in resp.get("rows", []):
             d = dict(zip(columns, row))
@@ -179,7 +181,7 @@ def fetch_retention(ya, video_id, end_date):
         metrics="audienceWatchRatio",
         dimensions="elapsedVideoTimeRatio",
         filters=f"video=={video_id}",
-    ).execute(num_retries=RETENTION_RETRIES)
+    ).execute(num_retries=SERVER_RETRIES)
     columns = [h["name"] for h in resp.get("columnHeaders", [])]
     at, ratio = columns.index("elapsedVideoTimeRatio"), columns.index("audienceWatchRatio")
     rows = [(float(r[at]), float(r[ratio])) for r in resp.get("rows", [])]
@@ -201,7 +203,7 @@ def add_retention(ya, stats, videos, today):
     Fail-soft, as subscribers are: the first refusal stops the loop, so a
     report the channel cannot have costs one query, and its reason goes in the
     first column of every upload left, because no shift can read the log. A
-    server error is retried first (RETENTION_RETRIES); one that outlasts the
+    server error is retried first (SERVER_RETRIES); one that outlasts the
     retries marks its own upload and the loop goes on, unless it is the
     RETENTION_SERVER_ERRORS-th in a row, which reads as a refusal."""
     cutoff = (datetime.date.fromisoformat(today)
@@ -317,7 +319,7 @@ def fetch_traffic(ya, start_date, end_date, video_ids=None):
             dimensions="insightTrafficSourceType",
             sort="-views",
             **kwargs,
-        ).execute()
+        ).execute(num_retries=SERVER_RETRIES)
         columns = [h["name"] for h in resp.get("columnHeaders", [])]
         for row in resp.get("rows", []):
             d = dict(zip(columns, row))
