@@ -101,7 +101,9 @@ it carries these sections, in this order, in plain language:
 **Prep** (due once per quarter): draft **at most three bets** for the quarter.
 Each one needs a line on how it moves the company toward revenue, the evidence
 for it, its first reversible step, and the decision rule that will say whether
-it worked. Draw on the latest monthly review. Escalate them in one issue —
+it worked. Draw on the latest monthly review, and on the **experiment ledger**
+(`report.py --experiments`, PLAN C18): quote what it says about reads on time
+and keeps beyond their limits before proposing any bet's rule. Escalate them in one issue —
 `--key quarterly-planning-<YYYY>-Q<n>` — asking the owner to hold the planning
 session, and update the "Quarterly prep" row.
 
