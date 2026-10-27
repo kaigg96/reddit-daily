@@ -31,6 +31,66 @@ revisit trigger.
 
 ---
 
+## D15 · 2026-10-27 · Every finished item logs its hardest part, read weekly, judged by a rule set now
+
+The owner, in session (2026-10-27): shifts struggle to find engineering work,
+and progress stalls without the owner. Shifts did write "Friction:" notes in
+the work log, about 18 distinct ones from 09-25 to 10-07, several recurring
+(the render allowance on 3 days; answered questions re-asked on 3 shifts;
+plans written after starting on 3). From 10-08, none: the log is the owner's
+email, with no slot for them, a word budget, and its oldest entries deleted,
+so no one could count a recurrence.
+
+**Decision.** Every finished item (a merge, an answered question, an
+escalation, a candidate dropped, an attempt abandoned) logs one row in
+`.github/friction.csv`: its function, outcome, category from a fixed list, the
+hardest part, what would have helped, and minutes lost. "None" is a valid
+answer; an invented one is worse. The weekly review groups the rows, queues
+the groups with most leverage (recurrence × minutes × functions hit, against
+cost) in the one ranked queue, and records each resolution. Any function may
+fix another's friction. General management owns it. Built as `PLAN.md` C17;
+the spec is `scripts/friction.py`'s docstring on `gm/friction-log`.
+
+**Alternatives.** Notes in the work log (tried; stopped unnoticed). One entry
+per shift (gets summarized away). A ticketing system (premature; GitHub issues
+are the step up past ~100 open groups).
+
+**Assumptions.** Agents can name what slowed them, though not friction they
+do not notice (re-deriving recorded state feels like ordinary work). Ranked in
+the one queue, friction fixes will not crowd out bets (guardrail g). Logging
+costs about a minute an item.
+
+**Decision rule** (pre-committed 2026-10-27, before any row; START is the day
+`scripts/friction.py` lands; quote this before any number):
+- *Collection*, daily (`context_budget.py --health`) and at the first weekly
+  review after START: (a) 80%+ of shifts log a row, and three silent shifts in
+  a row escalate to the owner; (b) "none" is 5–80% of rows; (c) of 10 random
+  rows, most name a specific doc, tool, rule or allowance.
+- *Processing*, each weekly review: (d) no row older than 7 days ungrouped.
+- *Results*, at the first monthly review 28+ days after START: (e) 2+ groups
+  fixed by a shipped change; (f) 1+ group with 3+ rows before its fix logs at
+  most 1 row in the 14 days after. Minutes lost is reported, never decisive.
+- *Guardrails*, every read: (g) rows that fix a group are at most a third of
+  the window's rows; (h) a week's processing takes about 20 minutes at most.
+- **Keep** if all pass. **Change** if any fail: (a)–(c) point at how rows are
+  written, (d)–(f) with (a)–(c) passing at how they are processed. **Stop** if
+  (e)–(f) still fail at the monthly read after one change: remove the rule and
+  the check, keep the data. **Not yet** under 28 days, or with no fix 14 days
+  old. A guardrail trip caps friction work at one item a shift until the next
+  read. Keep needs nothing from the owner; change and stop are process changes
+  (`CLAUDE.md` §4).
+- The thresholds are first guesses. A read may change one only for the next
+  read, recorded here, never to rescue its own verdict.
+
+**Generalized** (same session): every standing process needs an outcome
+recorded each time it runs, a scheduled read, and a keep/change/stop rule set
+in advance; `/audit` checks for all three. The experiment process has none of
+them yet (`PLAN.md` C18).
+
+**Revisit:** at the rule's read, and at each `/audit`.
+
+---
+
 ## D14 · 2026-10-19 · Audience first; the owner gives a viewer's feedback, shifts own the craft
 
 The owner, in a session on 10-19 (recorded on #77): the likely first step to
