@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-27 (23:35) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
+## 2026-10-27 (23:45) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
 
     Worked (% of the shift): reliability 30 · data 25 · gm 20 · legal 10 · strategy 10 · security 5
 
@@ -70,24 +70,26 @@ and more useful than a confident guess.
 ### Toward revenue
 - **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
 - **Protecting the evidence.** Every bet is judged on the Monday figures, and a lost week cannot be fetched later. On 26 October one "internal error" from YouTube cost nearly every video its subscriber count; on the first requests it would have cost the whole week, including the four reads due on 2 November. Each request now tries up to three times.
-- **One more fact for 5 November.** AI use does not decide between the replacement sources at two uploads a day: Reddit and Stack Exchange need 2–5 requests per video, our own questions 2–3, under the 20-a-day allowance. At four a day, Reddit and Stack Exchange reach the allowance on a bad day.
+- **One more fact for 5 November.** AI use does not decide between replacement sources at two a day (2–5 requests per video for Reddit and Stack Exchange, 2–3 for our own questions, against 20 a day); at four, the first two reach the cap on a bad day.
 
 ### Done
-- **General management (your decision, #85):** the two lines landed as one approved commit at about 23:00 UTC; #85 is closed. The quarterly preparation now quotes the ledger before proposing any bet's rule, and every rule set or read updates its row. First read at the next quarterly preparation, in early January.
+- **General management (your decision, #85):** landed as one approved commit at 23:00 UTC; #85 is closed. Quarterly preparation now quotes the ledger before proposing any bet's rule, and every rule set or read updates its row; first read in early January.
 - **Reliability (three fixes, live):** every request the Monday jobs make to YouTube now retries a server error, as one kind already did after 19 October, including the 22-page list of our videos that comes before any figure, and your check-in's own requests. Fresh reviews found no bugs; each found a request still left out, now covered. The three libraries that job installs without fixed versions work at their newest releases, so are no risk for Monday unless one ships first.
-- **Data (three fixes, live):** the reports said "insufficient data" about subscribers when the truth was "YouTube refused the request". Our rules tell a shift to accept a report's refusal as the answer, so a failed collection would have read as too few videos. They now say it was not collected. Your Monday check-in said "ran clean" that day too; its title and health line now name any figure YouTube refused. The test comparisons dropped a refused figure silently too, so a thin result could be a failed one; each such read now warns, and today notes 11 videos whose subscriber figure was refused. Fresh reviews found no bugs in any of the three; their wording points are fixed. To confirm the warning on real data I ran the voice question's command filtered to its warnings, so none of its result was seen early.
-- **Legal (for #82):** Reddit's pages refuse automated reads, so I recorded the questions on Reddit's API request form from an archived copy (November 2025) in #82's description, by edit, which sends no email. One choice there is yours: whether to apply as a "developer" or a "commercial developer", which asks for a monthly data budget. I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them, as you decided on 10 October. A news check of Reddit's and YouTube's rules found nothing new since our last reads; Reddit's $1,000 migration bounty (register by 30 November) is for community tools, not us.
-- **General management:** #65 stays open. Your label predates the corrected sentence on it, and there has been no reply since, so I did not land it; a "yes" there lands it.
+- **Reliability (built, not merged):** the upload itself has no retry, so one passing YouTube error loses that run's video. Two reviews each caught a flaw in the library's own retry; the branch now resumes as YouTube's example does, which cannot make a second video. Not merged at 23:40, just before a scheduled upload.
+- **Data (three fixes, live):** the reports said "insufficient data" about subscribers when the truth was "YouTube refused the request". Our rules tell a shift to accept a report's refusal as the answer, so a failed collection would have read as too few videos. They now say it was not collected. Your Monday check-in, which said "ran clean" that day, now names any refused figure. Test reads dropped a refused figure silently too; each now warns (today: 11 videos' subscriber figures). Fresh reviews found no bugs. To check the warning I ran the voice question's command filtered to warnings only, so none of its result was seen early.
+- **Legal (for #82):** its description now lists the questions on Reddit's API request form, from an archived copy (Reddit refuses automated reads); editing sends no email. One choice is yours: "developer" or "commercial developer", which asks for a monthly data budget. I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them, as you decided on 10 October. A news check of Reddit's and YouTube's rules found nothing new; Reddit's $1,000 migration bounty is for community tools, not us.
+- **General management:** #65 stays open: your label predates its corrected sentence and has no reply since; a "yes" lands it.
 - **Reliability:** both of today's uploads landed. Bet 1's release still combines cleanly with everything live.
 - **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
-- **General management:** nothing was ready. A fresh agent proposed eight ideas, finding the refused subscriber counts; two rankers, in opposite orders, put the same three first. **Dropped:** a topic test chosen after seeing the data (both rankers put it last); counting deleted Reddit posts (Reddit refuses our build machine, as found before); why likes per 100 views rose (under one like per video); handing over early (three items cleared the bar).
-- Seven fixes and two findings. AI use: none from the upload allowance; no Polly; no render.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas, finding the refused subscriber counts; two rankers, in opposite orders, put the same three first. **Dropped:** a topic test chosen after seeing the data (both rankers last); counting deleted Reddit posts (Reddit refuses our build machine); why likes per 100 views rose (under one like per video).
+- Six fixes live, one built, two findings. AI use: none from the upload allowance; no Polly; no render.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January; the form's questions are now on it); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
 
 ### Next
 - **2 November snapshot:** check first that the Monday check-in names no figure YouTube refused, and read each test's warnings before its verdict; the voice question reads engaged views. Then the views rule, the subreddit test, the title-style test and the voice question; all should have enough videos (20 a side; 27 against 14; 21 and 17), counted from the upload log without reading any result. Record each read in the ledger.
+- **The upload retry** (its branch's last commit): a fresh review of that commit, a check that a render fits its 100 MB request, then merge early in a shift and watch the next upload land.
 - **If #77 is labelled:** as the 17:05 handover says. **If #65 gets a yes:** land the corrected sentence as one commit with the approval line.
 
 ### Better?
