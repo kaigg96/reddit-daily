@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-27 (23:30) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
+## 2026-10-27 (23:35) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
 
     Worked (% of the shift): reliability 30 · data 25 · gm 20 · legal 10 · strategy 10 · security 5
 
@@ -74,14 +74,14 @@ and more useful than a confident guess.
 
 ### Done
 - **General management (your decision, #85):** the two lines landed as one approved commit at about 23:00 UTC; #85 is closed. The quarterly preparation now quotes the ledger before proposing any bet's rule, and every rule set or read updates its row. First read at the next quarterly preparation, in early January.
-- **Reliability (two fixes, live):** every request the Monday job makes to YouTube now retries a server error, as one kind already did after 19 October, including the 22-page list of our videos that comes before any figure; comments aside, which fail one video at a time. Fresh reviews found no bugs, only wording points, all fixed. I also checked the three libraries that job installs without fixed versions: their newest releases work, so they are not a risk for Monday unless a new one ships first.
+- **Reliability (three fixes, live):** every request the Monday jobs make to YouTube now retries a server error, as one kind already did after 19 October, including the 22-page list of our videos that comes before any figure, and your check-in's own requests. Fresh reviews found no bugs; each found a request still left out, now covered. I also checked the three libraries that job installs without fixed versions: their newest releases work, so they are not a risk for Monday unless a new one ships first.
 - **Data (three fixes, live):** the reports said "insufficient data" about subscribers when the truth was "YouTube refused the request". Our rules tell a shift to accept a report's refusal as the answer, so a failed collection would have read as too few videos. They now say it was not collected. Your Monday check-in said "ran clean" that day too; its title and health line now name any figure YouTube refused. The test comparisons dropped a refused figure silently too, so a thin result could be a failed one; each such read now warns, and today notes 11 videos whose subscriber figure was refused. Fresh reviews found no bugs in any of the three; their wording points are fixed. To confirm the warning on real data I ran the voice question's command filtered to its warnings, so none of its result was seen early.
 - **Legal (for #82):** Reddit's pages refuse automated reads, so I recorded the questions on Reddit's API request form from an archived copy (November 2025) in #82's description, by edit, which sends no email. One choice there is yours: whether to apply as a "developer" or a "commercial developer", which asks for a monthly data budget. I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them, as you decided on 10 October.
 - **General management:** #65 stays open. Your label predates the corrected sentence on it, and there has been no reply since, so I did not land it; a "yes" there lands it.
 - **Reliability:** both of today's uploads landed. Bet 1's release still combines cleanly with everything live.
 - **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
 - **General management:** nothing was ready. A fresh agent proposed eight ideas and found the refused subscriber counts. Two rankers, in opposite orders, put the same three first: the retries, the library check, the Reddit form. **Dropped:** a topic test chosen after seeing the data (both rankers put it last); counting deleted Reddit posts (Reddit refuses our build machine, as found before); why likes per 100 views rose (under one like per video); handing over early (three items cleared the bar).
-- Six fixes and two findings. AI use: none from the upload allowance; no Polly; no render.
+- Seven fixes and two findings. AI use: none from the upload allowance; no Polly; no render.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January; the form's questions are now on it); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
