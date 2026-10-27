@@ -35,7 +35,7 @@ R4-concentration,views earned by a few hits,observational,top10_share,2026-10-06
 R5-hits,logged traits predict hits,observational,hit_rate,2026-10-06,,2026-10-06,recorded,lowest p 0.10,15 hits of 150,bar p 0.007,,"PRD §4 2026-10-06; git 343cdd3, 32a5bfb"
 #11-15168364,retire clip pexels_15168364,retire,buried_rate,2026-10-06,,2026-10-26,retired,6 of 21 at ≤5 views (p=0.003),21,bar p 0.0071,,PRD §0 #11; PRD §4 2026-10-26; git 0554ef7
 v7-long,v7 credit within long videos,release,watch_seconds,2026-10-07,2026-10-12,2026-10-12,noise,+8%,17,13%,,PRD §0 Shipped; PRD §4 2026-10-07; git 0dbd473
-#4,posting volume 2 → 4/day,release,watch_seconds,2026-10-07,,,pending,,,,,PRD §0 #4; git 48fe1a4
+#4,posting volume 2 → 4/day,release,watch_seconds,2026-10-07,,,pending,,,"~13% (release check drift floor, 2026-10-27 data)",,PRD §0 #4; git 48fe1a4
 #13,move AI calls to Groq,release,watch_seconds; title fallbacks,2026-10-08,,,pending,,≥20 uploads (rule),bar titles fall back on ≥4 of first 20,,PRD §0 #13; git 726e312
 title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120% (median 179 vs 81.5),65/68,,,PRD §4 2026-10-09
 #3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,,pending,,≥15 each (rule),~18%,,PRD §0 #3; git 7a7a8fe
@@ -43,7 +43,7 @@ title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120%
 #14,"one capitalised word, randomized",coin,views; watch_seconds,2026-10-10,2026-11-23,,pending,,30 per arm (rule),~82% views; ~16% watch_seconds,,PRD §0 #14; git 518bdf7
 R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-10-10,,2026-10-10,keep,31% to 18% at 15 a side,newest 90,bar ≥⅓ narrower,,"PRD §4 2026-10-10; git d9ee9b3, 3f81022"
 R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,recorded,4 of 25 at ≤5 views (p=0.049),25,bar p 0.0125,,PRD §4 2026-10-12; git c0860b2
-#15,bet 1 / v8 host tags,release,watch_seconds,2026-10-10,,,pending,,≥20 uploads (rule),,,PRD §0 #15; git 6badebb
+#15,bet 1 / v8 host tags,release,watch_seconds,2026-10-10,,,pending,,≥20 uploads (rule),"~12% (release check drift floor within AskReddit, 2026-10-27 data)",,PRD §0 #15; git 6badebb
 #8-v8,"engaged share, v8 vs v7",release,engaged_share,2026-10-12,,,pending,,,,,PRD §0 #8
 #8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,,,pending,,,,,PRD §0 #8; git c41807d
 R2-lead,voice engaged-share lead (1 of 10 reads),coin,engaged_share,,,2026-10-14,lead,0.44 vs 0.29,12/13,25%,,PRD §4 2026-10-06 (2026-10-14)
