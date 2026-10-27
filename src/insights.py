@@ -2378,7 +2378,6 @@ def first_answer_verdict(rho, p_value):
 # a week of its due date, the snapshot's cadence.
 EXPERIMENTS = config.ROOT / "analysis" / "experiments.csv"
 LEDGER_GRACE_DAYS = 7
-DECIDED = ("keep", "revert", "drop", "retired")
 
 
 def load_experiments(path=EXPERIMENTS):
@@ -2396,9 +2395,14 @@ def _ledger_date(value):
 
 
 def _percent(value):
-    """|x| from '+20%', '−12%', '~18%'; None when the cell is not a percentage."""
-    m = re.search(r"(\d+(?:\.\d+)?)\s*%", (value or "").replace("−", "-"))
-    return float(m.group(1)) if m else None
+    """The signed first percentage in a cell: '+20% (12.0 vs 10.0)' -> 20,
+    '−39%' -> -39, '~18%' -> 18. None when there is none, or when the cell is
+    a decision threshold ('bar ...') rather than a measured effect or limit."""
+    value = (value or "").strip().replace("−", "-")
+    if value.startswith("bar"):
+        return None
+    m = re.search(r"(-?)\s*(\d+(?:\.\d+)?)\s*%", value)
+    return (-1 if m.group(1) else 1) * float(m.group(2)) if m else None
 
 
 def experiment_ledger(rows, today):
@@ -2437,10 +2441,15 @@ def experiment_ledger(rows, today):
             out["upcoming"].append((r.get("id"), r.get("detectable") or "?",
                                     due.isoformat() if due else "?"))
         if verdict == "keep":
+            # The record's own call wins (v7: "Not credited", its lead was
+            # mostly length); otherwise a gain beyond the limit printed beside it.
+            said = (r.get("credited") or "").strip()
             effect, limit = _percent(r.get("effect")), _percent(r.get("detectable"))
-            if effect is None or limit is None:
+            if said in ("yes", "no"):
+                out["credited" if said == "yes" else "not_credited"].append(r)
+            elif effect is None or limit is None:
                 out["unmeasured_keeps"].append(r)
-            elif effect > limit:
+            elif effect > abs(limit):
                 out["credited"].append(r)
             else:
                 out["not_credited"].append(r)
@@ -2469,8 +2478,9 @@ def render_experiment_ledger(summary):
                      f"{statistics.median(s['set_to_read_days']):g} days")
     keeps = len(s["credited"]) + len(s["not_credited"]) + len(s["unmeasured_keeps"])
     lines.append(f"  keeps: {keeps}; effect beyond the limit printed beside it: "
-                 f"{len(s['credited'])}; inside it: {len(s['not_credited'])}; "
-                 f"no limit recorded: {len(s['unmeasured_keeps'])}")
+                 f"{len(s['credited'])}; inside it, or not credited by the record: "
+                 f"{len(s['not_credited'])}; no percentage limit recorded: "
+                 f"{len(s['unmeasured_keeps'])}")
     lines.append("    (a keep inside its limit is no detected harm, not a "
                  "measured gain)")
     reverts = [r["id"] for r in s["read"] if (r.get("verdict") or "").strip() == "revert"]

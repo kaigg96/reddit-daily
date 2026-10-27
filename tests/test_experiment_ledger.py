@@ -11,14 +11,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src import insights
 
 FIELDS = ["id", "item", "kind", "metric", "rule_set", "due", "read", "verdict",
-          "effect", "n", "detectable", "source"]
+          "effect", "n", "detectable", "credited", "source"]
 TODAY = datetime.date(2026, 10, 27)
 
 
-def rule(i, due="", read="", verdict="", effect="", detectable="", rule_set="2026-10-01"):
+def rule(i, due="", read="", verdict="", effect="", detectable="", rule_set="2026-10-01",
+         credited=""):
     return {"id": i, "item": "x", "kind": "release", "metric": "watch_seconds",
             "rule_set": rule_set, "due": due, "read": read, "verdict": verdict,
-            "effect": effect, "n": "", "detectable": detectable, "source": ""}
+            "effect": effect, "n": "", "detectable": detectable, "credited": credited,
+            "source": ""}
 
 
 def test_on_time_late_and_overdue_reads():
@@ -81,8 +83,7 @@ def test_no_ledger_says_so(tmp_path):
 
 def test_the_backfilled_ledger_parses():
     rows = insights.load_experiments()
-    if not rows:
-        return                                  # written by the C18 backfill
+    assert rows, "analysis/experiments.csv is the C18 backfill"
     assert list(rows[0]) == FIELDS
     for r in rows:
         for k in ("rule_set", "due", "read"):
@@ -91,5 +92,33 @@ def test_the_backfilled_ledger_parses():
                                 "parked", "retired", "pending"), r["id"]
         assert r["kind"] in ("release", "coin", "observational", "retire"), r["id"]
         assert not (r["read"] and r["verdict"] == "pending"), r["id"]
+        assert r["credited"] in ("", "yes", "no"), r["id"]
     ids = [r["id"] for r in rows]
     assert len(ids) == len(set(ids))
+
+
+def test_the_records_own_credit_call_and_real_cells():
+    # v7's +20% beat its 13% limit, but the record says "Not credited": its
+    # lead was mostly length. A loss is never a gain, and a "bar" is a
+    # threshold, not a detection limit.
+    s = insights.experiment_ledger([
+        rule("v7", read="2026-10-12", verdict="keep", effect="+20% (12.0 vs 10.0)",
+             detectable="13%", credited="no"),
+        rule("b-roll", read="2026-09-24", verdict="keep", effect="+22%", detectable="11%"),
+        rule("neg", read="2026-10-01", verdict="keep", effect="−15%", detectable="12%"),
+        rule("bar", read="2026-10-01", verdict="keep", effect="31% to 18% at 15 a side",
+             detectable="bar ≥90% agreement"),
+    ], TODAY)
+    assert [r["id"] for r in s["credited"]] == ["b-roll"]
+    assert [r["id"] for r in s["not_credited"]] == ["v7", "neg"]
+    assert [r["id"] for r in s["unmeasured_keeps"]] == ["bar"]
+    assert insights._percent("~82% views; ~16% watch_seconds") == 82
+    assert insights._percent("−39%") == -39
+
+
+def test_a_read_seven_days_late_is_on_time_and_eight_is_late():
+    s = insights.experiment_ledger([
+        rule("a", due="2026-10-05", read="2026-10-12", verdict="noise"),
+        rule("b", due="2026-10-05", read="2026-10-13", verdict="noise"),
+    ], TODAY)
+    assert [r["id"] for r in s["on_time"]] == ["a"] and [r["id"] for r in s["late"]] == ["b"]

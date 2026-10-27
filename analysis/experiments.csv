@@ -1,61 +1,61 @@
-id,item,kind,metric,rule_set,due,read,verdict,effect,n,detectable,source
-R1.8,short format (~14–16s),release,avg_view_pct,2026-07-27,,,drop,,,bar avg-%-viewed ≥65%,"PRD §4 Review 2 (2026-08-23); git 6cad6a6, ef165db"
-R1.9,narration rate +~10%,release,avg_view_pct; views,2026-07-27,,,drop,,,,"PRD §4 Review 2 (2026-08-23); git 6cad6a6, ef165db"
-v2-v4,overhaul v2–v4 (v4 vs v1),release,views,,,2026-08-23,recorded,~6× (166 vs 28),52 vs 76,,PRD §4 Review 2 item 5
-b-roll-avgpct,"b-roll library, retention",release,avg_view_pct,,,2026-08-23,noise,65.5% vs 64.9%,,,PRD §4 Review 2 item 6
-R4.4-gate,topic prior survives format change,observational,rho,2026-09-09,,2026-09-11,keep,rho +0.79 (+0.66 to +0.79),10 buckets,,PRD §4 2026-09-11; PRD §4 2026-09-09
-v5,suppression-risk screen,release,watch_seconds,2026-09-19,,2026-09-21,keep,,,,"PRD §0 Shipped; git 8a5f70e, b405b94, 264375e"
-b-roll-views,"b-roll library, first release read",release,views,2026-09-19,,2026-09-21,revert,−39%,,38%,"git b405b94, 264375e; overruled by #18 (b303b37)"
-b-roll,b-roll library (R1.3),release,watch_seconds,2026-09-22,,2026-09-24,keep,+22%,,11%,"PRD §0 Shipped; git b405b94, b303b37"
-R2.2,title style A/B/C rotation,coin,watch_seconds,,,2026-09-22,noise,A +11% vs rest,119,12%,PRD §4 2026-09-22
-v7,opens on the question,release,watch_seconds,2026-09-22,2026-10-12,2026-10-12,keep,+20% (12.0 vs 10.0),24 vs 132,13%,"PRD §0 Shipped; PRD §4 2026-10-12; git 0c55cca, 0dbd473"
-#2,topic/hook candidate ranker,release,watch_seconds,2026-09-22,,2026-10-07,parked,,5 of 20 runs fired,13% (~50% lead per firing),PRD §0 #2; PRD §4 2026-10-07; git 59ff29d
-v6,"cost guardrails, screen retiering",release,watch_seconds,2026-09-22,2026-10-05,2026-10-06,keep,+10%,10 vs 122,12%,PRD §0 Shipped; git eb20dd2
-#8,"engaged share, v6 vs v7",release,engaged_share,2026-09-23,,2026-10-12,noise,0.36 vs 0.34,10/12,,"PRD §0 #8; git 1baf7db, 0dbd473"
-#6,upload slot (time of day),coin,watch_seconds,2026-09-25,,2026-09-25,drop,+5–10% morning,≈58 each,~12%,"PRD §4 2026-09-25; git 350ab61, 34c7723"
-R2-question-length,question length,observational,watch_seconds,2026-09-25,,2026-09-25,drop,+22% pooled; −5% to +9% within length halves,57/60,~12%,"PRD §4 2026-09-25; git 350ab61, 34c7723, 5b86b6e"
-R3-early-read,3-day reading predicts 7-day,observational,rho,2026-09-25,,2026-09-25,drop,rho 0.22,69,bar rho ≥0.8,"PRD §4 2026-09-25; git 34c7723, 759a0f0"
-R2-release-length,past releases shifted video length,observational,duration_s,2026-09-25,,2026-09-25,keep,b-roll 21.1s vs 19.3s; v5/v6 20.4s vs 20.3s,,bar ≥1s shift,"PRD §4 2026-09-25; git 5b86b6e, 75467c2"
-R2-total-watch,length trades watch-seconds for views,observational,total_watch_s,2026-09-25,,2026-09-25,recorded,"+3% at 7d, −13% at 14d",,,"PRD §4 2026-09-25; git 2a3a775, 2339170"
-#9,loop the ending into the opening,observational,replays,2026-09-25,,2026-09-25,drop,3/110 over 100% viewed,110,,PRD §4 2026-09-25; git 9c50fd8
-R1,dark-morbid topic lead,observational,watch_seconds,2026-09-25,2026-09-28,2026-10-19,recorded,+8% (13.0 vs 12.0),12,25%,"PRD §4 2026-09-25 (re-read 2026-10-19); git 350ab61, 96ea668"
-R2-failed-title,failed (raw) title,observational,watch_seconds,2026-09-26,2026-09-28,2026-09-28,noise,11.0 vs 10.0,11 vs 120,,"PRD §4 2026-09-28; git facbf59, 3a95fa9"
-#11-16482908,retire clip pexels_16482908,retire,buried_rate,,,2026-09-28,retired,8 of 16 at ≤5 views vs 3 of 62,16 vs 62,,PRD §0 #11; PRD §4 2026-09-28; git 0f02637
-R2.2-B,title style B views lead,coin,views,,,2026-09-28,lead,+47% at 7 days,42 vs 87,,PRD §0 #10; PRD §4 2026-09-22 (revised 2026-09-28)
-R2-minutes,minutes column encodes engaged views,observational,engaged_views,2026-09-29,2026-10-05,2026-10-05,drop,"median ratio 1.26, 13% within 10%",830,,"git d9d17f8, eea2845"
-slot-age-matched,"upload slot, age-matched by era",coin,watch_seconds,,,2026-09-30,noise,"+10% pooled (11.0 vs 10.0); v4 +17%, v5 −12%",v4 28 vs 29; v5 25 vs 26,~1.0s,PRD §4 2026-09-30
-question-person,questions addressing 'you',observational,watch_seconds,,,2026-10-03,noise,+5%,74 vs 57,,PRD §4 2026-09-25 (2026-10-03)
-R4-clip-reuse,clip buried once reused,observational,buried_rate,2026-10-04,,2026-10-04,noise,1/24 vs 3/37 (p=1.0),24 vs 37,,"PRD §4 2026-09-28 (R4, 2026-10-04); git 988b63a, 4065404"
-title-length,title length (raw-title mechanism),observational,views,,,2026-10-04,noise,+16% (132 vs 114),63 vs 57,,PRD §4 2026-09-28 (2026-10-04)
-R3-voice-burial,narrator voice and burial,coin,buried_rate,2026-10-04,2026-10-05,2026-10-12,recorded,Stephen 5/16 vs Danielle 2/22 (p=0.13),16 vs 22,,"PRD §4 2026-10-12; git 988b63a, 0dbd473"
-placebo,alternate-day test split,observational,watch_seconds,,,2026-10-05,drop,12% (alternate days) vs 13% (consecutive batches),150,,PRD §4 2026-10-05
-bet-2,double weekly views (bet 2),release,views,2026-10-05,2026-12-27,,pending,,W49–W52 vs W36–W39 (rule),"bar 16,600 views",PLAN §2; PRD §4 2026-10-25; git 788ba37
-#7,voiced host (two-voice reaction),release,watch_seconds,2026-10-05,,,drop,,≥20 uploads (rule),,"git 7a0c197, 6badebb (owner #71, 2026-10-10)"
-R4-concentration,views earned by a few hits,observational,top10_share,2026-10-06,,2026-10-06,recorded,42%,169,bar ≤30% broad / ≥50% hit-driven,"PRD §4 2026-10-06; git ca4a37b, cb3b18c"
-R5-hits,logged traits predict hits,observational,hit_rate,2026-10-06,,2026-10-06,recorded,lowest p 0.10,15 hits of 150,bar p 0.007,"PRD §4 2026-10-06; git 343cdd3, 32a5bfb"
-#11-15168364,retire clip pexels_15168364,retire,buried_rate,2026-10-06,,2026-10-26,retired,6 of 21 at ≤5 views (p=0.003),21,bar p 0.0071,PRD §0 #11; PRD §4 2026-10-26; git 0554ef7
-v7-long,v7 credit within long videos,release,watch_seconds,2026-10-07,2026-10-12,2026-10-12,noise,+8%,17,13%,PRD §0 Shipped; PRD §4 2026-10-07; git 0dbd473
-#4,posting volume 2 → 4/day,release,watch_seconds,2026-10-07,,,pending,,,,PRD §0 #4; git 48fe1a4
-#13,move AI calls to Groq,release,watch_seconds; title fallbacks,2026-10-08,,,pending,,≥20 uploads (rule),bar titles fall back on ≥4 of first 20,PRD §0 #13; git 726e312
-title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120% (median 179 vs 81.5),65/68,,PRD §4 2026-10-09
-#3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,,pending,,≥15 each (rule),~18%,PRD §0 #3; git 7a7a8fe
-#10,title style B weighting,coin,watch_seconds,2026-10-10,,,pending,,≥15 B and ≥8 others (rule),~30%,PRD §0 #10; git 3b9929d
-#14,"one capitalised word, randomized",coin,views; watch_seconds,2026-10-10,2026-11-23,,pending,,30 per arm (rule),~82% views; ~16% watch_seconds,PRD §0 #14; git 518bdf7
-R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-10-10,,2026-10-10,keep,31% to 18% at 15 a side,newest 90,bar ≥⅓ narrower,"PRD §4 2026-10-10; git d9ee9b3, 3f81022"
-R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,recorded,4 of 25 at ≤5 views (p=0.049),25,bar p 0.0125,PRD §4 2026-10-12; git c0860b2
-#15,bet 1 / v8 host tags,release,watch_seconds,2026-10-10,,,pending,,≥20 uploads (rule),,PRD §0 #15; git 6badebb
-#8-v8,"engaged share, v8 vs v7",release,engaged_share,2026-10-12,,,pending,,,,PRD §0 #8
-#8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,,,pending,,,,PRD §0 #8; git c41807d
-R2-lead,voice engaged-share lead (1 of 10 reads),coin,engaged_share,,,2026-10-14,lead,0.44 vs 0.29,12/13,25%,PRD §4 2026-10-06 (2026-10-14)
-R2,Stephen's voice and engaged share,coin,engaged_share,2026-10-14,2026-11-02,,pending,,≥12 each (rule),,PRD §0 R2; git ccada12
-#15-avgpct,"v8 avg % viewed, long videos",release,avg_view_pct,2026-10-17,,,pending,,,bar 5 points lower,PRD §0 #15; git 1d55ba2
-#15-where,v8 retention points,release,watch_ratio_25/50/75,2026-10-17,,,pending,,8 a side (rule),bar 0.05 lower,PRD §0 #15; git 990cbbd
-#15-dose,v8 host-line dose,release,host_lines,2026-10-17,,,pending,,first 20 (rule),bar all lines on fewer than 15 of 20,PRD §0 #15; git bbbfd0c
-#4-views,four a day's views,release,views,2026-10-20,,,pending,,first 4 full weeks vs prior 4 (rule),×2,PRD §0 #4; git f00a81c
-first-answer,first answer length,observational,rho,2026-10-21,,2026-10-21,noise,"rho +0.17, p 0.32",35,bar rho ≤ −0.3 at p < 0.05,PRD §4 2026-10-21; git 508f253
-R3,opening decides reach,observational,rho,2026-10-21,2026-10-26,2026-10-26,noise,"rho −0.04, p 0.83",29,bar rho ≥ 0.3 at p < 0.05,PRD §4 2026-10-26; git e916c60
-groq-judge,Groq judges host tags,observational,agreement,2026-10-24,,2026-10-24,drop,36 of 62 agreed; 7 of 12 verdicts passed,62,"bar ≥90% agreement, no verdict passed",PRD §4 2026-10-23 (10-24); git cb63ad0
-#15-sameness,v8 tags repeat across videos,release,repeated_tags,2026-10-25,,,pending,,first 20 (rule),bar a tag on 5+ of 20,PRD §4 2026-10-23 (10-25); git 276f081
-#15-tags-eye,v8 tags by eye,release,verdict_or_label_tags,2026-10-25,,,pending,,"first 6 uploads, 18 tags (rule)",bar 3 or more,PRD §4 2026-10-23 (10-25); git bf0c76e
-R4,weekly view swings: viewers or data,observational,weekly_views,2026-10-26,2026-11-16,,pending,,10-12 to 11-16 (rule),,PRD §0 R4; PRD §4 2026-10-26; git 42ffd08
-reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,,pending,,,bar under 150 a day,PRD §4 2026-10-26
+id,item,kind,metric,rule_set,due,read,verdict,effect,n,detectable,credited,source
+R1.8,short format (~14–16s),release,avg_view_pct,2026-07-27,,,drop,,,bar avg-%-viewed ≥65%,,"PRD §4 Review 2 (2026-08-23); git 6cad6a6, ef165db"
+R1.9,narration rate +~10%,release,avg_view_pct; views,2026-07-27,,,drop,,,,,"PRD §4 Review 2 (2026-08-23); git 6cad6a6, ef165db"
+v2-v4,overhaul v2–v4 (v4 vs v1),release,views,,,2026-08-23,recorded,~6× (166 vs 28),52 vs 76,,,PRD §4 Review 2 item 5
+b-roll-avgpct,"b-roll library, retention",release,avg_view_pct,,,2026-08-23,noise,65.5% vs 64.9%,,,,PRD §4 Review 2 item 6
+R4.4-gate,topic prior survives format change,observational,rho,2026-09-09,,2026-09-11,keep,rho +0.79 (+0.66 to +0.79),10 buckets,,,PRD §4 2026-09-11; PRD §4 2026-09-09
+v5,suppression-risk screen,release,watch_seconds,2026-09-19,,2026-09-21,keep,,,,,"PRD §0 Shipped; git 8a5f70e, b405b94, 264375e"
+b-roll-views,"b-roll library, first release read",release,views,2026-09-19,,2026-09-21,revert,−39%,,38%,,"git b405b94, 264375e; overruled by #18 (b303b37)"
+b-roll,b-roll library (R1.3),release,watch_seconds,2026-09-22,,2026-09-24,keep,+22%,,11%,,"PRD §0 Shipped; git b405b94, b303b37"
+R2.2,title style A/B/C rotation,coin,watch_seconds,,,2026-09-22,noise,A +11% vs rest,119,12%,,PRD §4 2026-09-22
+v7,opens on the question,release,watch_seconds,2026-09-22,2026-10-12,2026-10-12,keep,+20% (12.0 vs 10.0),24 vs 132,13%,no,"PRD §0 Shipped; PRD §4 2026-10-12; git 0c55cca, 0dbd473"
+#2,topic/hook candidate ranker,release,watch_seconds,2026-09-22,,2026-10-07,parked,,5 of 20 runs fired,13% (~50% lead per firing),,PRD §0 #2; PRD §4 2026-10-07; git 59ff29d
+v6,"cost guardrails, screen retiering",release,watch_seconds,2026-09-22,2026-10-05,2026-10-06,keep,+10%,10 vs 122,12%,,PRD §0 Shipped; git eb20dd2
+#8,"engaged share, v6 vs v7",release,engaged_share,2026-09-23,,2026-10-12,noise,0.36 vs 0.34,10/12,,,"PRD §0 #8; git 1baf7db, 0dbd473"
+#6,upload slot (time of day),coin,watch_seconds,2026-09-25,,2026-09-25,drop,+5–10% morning,≈58 each,~12%,,"PRD §4 2026-09-25; git 350ab61, 34c7723"
+R2-question-length,question length,observational,watch_seconds,2026-09-25,,2026-09-25,drop,+22% pooled; −5% to +9% within length halves,57/60,~12%,,"PRD §4 2026-09-25; git 350ab61, 34c7723, 5b86b6e"
+R3-early-read,3-day reading predicts 7-day,observational,rho,2026-09-25,,2026-09-25,drop,rho 0.22,69,bar rho ≥0.8,,"PRD §4 2026-09-25; git 34c7723, 759a0f0"
+R2-release-length,past releases shifted video length,observational,duration_s,2026-09-25,,2026-09-25,keep,b-roll 21.1s vs 19.3s; v5/v6 20.4s vs 20.3s,,bar ≥1s shift,,"PRD §4 2026-09-25; git 5b86b6e, 75467c2"
+R2-total-watch,length trades watch-seconds for views,observational,total_watch_s,2026-09-25,,2026-09-25,recorded,"+3% at 7d, −13% at 14d",,,,"PRD §4 2026-09-25; git 2a3a775, 2339170"
+#9,loop the ending into the opening,observational,replays,2026-09-25,,2026-09-25,drop,3/110 over 100% viewed,110,,,PRD §4 2026-09-25; git 9c50fd8
+R1,dark-morbid topic lead,observational,watch_seconds,2026-09-25,2026-09-28,2026-10-19,recorded,+8% (13.0 vs 12.0),12,25%,,"PRD §4 2026-09-25 (re-read 2026-10-19); git 350ab61, 96ea668"
+R2-failed-title,failed (raw) title,observational,watch_seconds,2026-09-26,2026-09-28,2026-09-28,noise,11.0 vs 10.0,11 vs 120,,,"PRD §4 2026-09-28; git facbf59, 3a95fa9"
+#11-16482908,retire clip pexels_16482908,retire,buried_rate,,,2026-09-28,retired,8 of 16 at ≤5 views vs 3 of 62,16 vs 62,,,PRD §0 #11; PRD §4 2026-09-28; git 0f02637
+R2.2-B,title style B views lead,coin,views,,,2026-09-28,lead,+47% at 7 days,42 vs 87,,,PRD §0 #10; PRD §4 2026-09-22 (revised 2026-09-28)
+R2-minutes,minutes column encodes engaged views,observational,engaged_views,2026-09-29,2026-10-05,2026-10-05,drop,"median ratio 1.26, 13% within 10%",830,,,"git d9d17f8, eea2845"
+slot-age-matched,"upload slot, age-matched by era",coin,watch_seconds,,,2026-09-30,noise,"+10% pooled (11.0 vs 10.0); v4 +17%, v5 −12%",v4 28 vs 29; v5 25 vs 26,~1.0s,,PRD §4 2026-09-30
+question-person,questions addressing 'you',observational,watch_seconds,,,2026-10-03,noise,+5%,74 vs 57,,,PRD §4 2026-09-25 (2026-10-03)
+R4-clip-reuse,clip buried once reused,observational,buried_rate,2026-10-04,,2026-10-04,noise,1/24 vs 3/37 (p=1.0),24 vs 37,,,"PRD §4 2026-09-28 (R4, 2026-10-04); git 988b63a, 4065404"
+title-length,title length (raw-title mechanism),observational,views,,,2026-10-04,noise,+16% (132 vs 114),63 vs 57,,,PRD §4 2026-09-28 (2026-10-04)
+R3-voice-burial,narrator voice and burial,coin,buried_rate,2026-10-04,2026-10-05,2026-10-12,recorded,Stephen 5/16 vs Danielle 2/22 (p=0.13),16 vs 22,,,"PRD §4 2026-10-12; git 988b63a, 0dbd473"
+placebo,alternate-day test split,observational,watch_seconds,,,2026-10-05,drop,12% (alternate days) vs 13% (consecutive batches),150,,,PRD §4 2026-10-05
+bet-2,double weekly views (bet 2),release,views,2026-10-05,2026-12-27,,pending,,W49–W52 vs W36–W39 (rule),"bar 16,600 views",,PLAN §2; PRD §4 2026-10-25; git 788ba37
+#7,voiced host (two-voice reaction),release,watch_seconds,2026-10-05,,,drop,,≥20 uploads (rule),,,"git 7a0c197, 6badebb (owner #71, 2026-10-10)"
+R4-concentration,views earned by a few hits,observational,top10_share,2026-10-06,,2026-10-06,recorded,42%,169,bar ≤30% broad / ≥50% hit-driven,,"PRD §4 2026-10-06; git ca4a37b, cb3b18c"
+R5-hits,logged traits predict hits,observational,hit_rate,2026-10-06,,2026-10-06,recorded,lowest p 0.10,15 hits of 150,bar p 0.007,,"PRD §4 2026-10-06; git 343cdd3, 32a5bfb"
+#11-15168364,retire clip pexels_15168364,retire,buried_rate,2026-10-06,,2026-10-26,retired,6 of 21 at ≤5 views (p=0.003),21,bar p 0.0071,,PRD §0 #11; PRD §4 2026-10-26; git 0554ef7
+v7-long,v7 credit within long videos,release,watch_seconds,2026-10-07,2026-10-12,2026-10-12,noise,+8%,17,13%,,PRD §0 Shipped; PRD §4 2026-10-07; git 0dbd473
+#4,posting volume 2 → 4/day,release,watch_seconds,2026-10-07,,,pending,,,,,PRD §0 #4; git 48fe1a4
+#13,move AI calls to Groq,release,watch_seconds; title fallbacks,2026-10-08,,,pending,,≥20 uploads (rule),bar titles fall back on ≥4 of first 20,,PRD §0 #13; git 726e312
+title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120% (median 179 vs 81.5),65/68,,,PRD §4 2026-10-09
+#3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,,pending,,≥15 each (rule),~18%,,PRD §0 #3; git 7a7a8fe
+#10,title style B weighting,coin,watch_seconds,2026-10-10,,,pending,,≥15 B and ≥8 others (rule),~30%,,PRD §0 #10; git 3b9929d
+#14,"one capitalised word, randomized",coin,views; watch_seconds,2026-10-10,2026-11-23,,pending,,30 per arm (rule),~82% views; ~16% watch_seconds,,PRD §0 #14; git 518bdf7
+R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-10-10,,2026-10-10,keep,31% to 18% at 15 a side,newest 90,bar ≥⅓ narrower,,"PRD §4 2026-10-10; git d9ee9b3, 3f81022"
+R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,recorded,4 of 25 at ≤5 views (p=0.049),25,bar p 0.0125,,PRD §4 2026-10-12; git c0860b2
+#15,bet 1 / v8 host tags,release,watch_seconds,2026-10-10,,,pending,,≥20 uploads (rule),,,PRD §0 #15; git 6badebb
+#8-v8,"engaged share, v8 vs v7",release,engaged_share,2026-10-12,,,pending,,,,,PRD §0 #8
+#8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,,,pending,,,,,PRD §0 #8; git c41807d
+R2-lead,voice engaged-share lead (1 of 10 reads),coin,engaged_share,,,2026-10-14,lead,0.44 vs 0.29,12/13,25%,,PRD §4 2026-10-06 (2026-10-14)
+R2,Stephen's voice and engaged share,coin,engaged_share,2026-10-14,2026-11-02,,pending,,≥12 each (rule),,,PRD §0 R2; git ccada12
+#15-avgpct,"v8 avg % viewed, long videos",release,avg_view_pct,2026-10-17,,,pending,,,bar 5 points lower,,PRD §0 #15; git 1d55ba2
+#15-where,v8 retention points,release,watch_ratio_25/50/75,2026-10-17,,,pending,,8 a side (rule),bar 0.05 lower,,PRD §0 #15; git 990cbbd
+#15-dose,v8 host-line dose,release,host_lines,2026-10-17,,,pending,,first 20 (rule),bar all lines on fewer than 15 of 20,,PRD §0 #15; git bbbfd0c
+#4-views,four a day's views,release,views,2026-10-20,,,pending,,first 4 full weeks vs prior 4 (rule),×2,,PRD §0 #4; git f00a81c
+first-answer,first answer length,observational,rho,2026-10-21,,2026-10-21,noise,"rho +0.17, p 0.32",35,bar rho ≤ −0.3 at p < 0.05,,PRD §4 2026-10-21; git 508f253
+R3,opening decides reach,observational,rho,2026-10-21,2026-10-26,2026-10-26,noise,"rho −0.04, p 0.83",29,bar rho ≥ 0.3 at p < 0.05,,PRD §4 2026-10-26; git e916c60
+groq-judge,Groq judges host tags,observational,agreement,2026-10-24,,2026-10-24,drop,36 of 62 agreed; 7 of 12 verdicts passed,62,"bar ≥90% agreement, no verdict passed",,PRD §4 2026-10-23 (10-24); git cb63ad0
+#15-sameness,v8 tags repeat across videos,release,repeated_tags,2026-10-25,,,pending,,first 20 (rule),bar a tag on 5+ of 20,,PRD §4 2026-10-23 (10-25); git 276f081
+#15-tags-eye,v8 tags by eye,release,verdict_or_label_tags,2026-10-25,,,pending,,"first 6 uploads, 18 tags (rule)",bar 3 or more,,PRD §4 2026-10-23 (10-25); git bf0c76e
+R4,weekly view swings: viewers or data,observational,weekly_views,2026-10-26,2026-11-16,,pending,,10-12 to 11-16 (rule),,,PRD §0 R4; PRD §4 2026-10-26; git 42ffd08
+reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,,pending,,,bar under 150 a day,,PRD §4 2026-10-26
