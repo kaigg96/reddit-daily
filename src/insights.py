@@ -28,6 +28,7 @@ import math
 import os
 import re
 import statistics
+from collections import Counter
 from dataclasses import dataclass, field
 
 from . import config
@@ -1840,6 +1841,7 @@ class AgeMatchedLoad:
     no_coverage: list = field(default_factory=list)  # old, but no snapshot at that age
     non_public: list = field(default_factory=list)   # zero-view and privatised: excluded
     privacy_known: bool = False                      # a snapshot recorded privacy
+    refused: dict = field(default_factory=dict)      # column -> uploads it was refused for
 
     def caveats(self):
         if not self.videos:
@@ -1854,6 +1856,11 @@ class AgeMatchedLoad:
             out.append(f"{len(self.no_coverage)} older upload(s) have no snapshot at that "
                        f"age (they predate the weekly series) — excluded")
         out.append(_privacy_caveat(self.non_public, self.privacy_known))
+        for col, n in self.refused.items():
+            # 10-26: subscribers refused on every row; a read of that metric
+            # would otherwise say "insufficient data" and be taken as the answer.
+            out.append(f"{n} upload(s) had {col} refused by the API at that age — "
+                       f"missing from any read of it, a failed collection, not thin data")
         return out
 
 
@@ -1900,6 +1907,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
     rows = _read_upload_log()
 
     videos, not_yet, no_coverage, non_public = [], [], [], []
+    refused = Counter()
     for row in rows:
         published = _parse_ts(row["timestamp_utc"])
         best = None
@@ -1920,6 +1928,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
         if _privatised_zero(row["video_id"], float(s.get("views") or 0), privacy):
             non_public.append(row["video_id"])
             continue
+        refused.update(k for k, v in s.items() if str(v or "").startswith("refused:"))
         meta = _with_derived_dimensions(row)
         videos.append(Video(
             video_id=row["video_id"],
@@ -1937,7 +1946,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         ))
     return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
-                          non_public, bool(privacy))
+                          non_public, bool(privacy), dict(sorted(refused.items())))
 
 
 # ---------------------------------------------------------------- zero-view analysis

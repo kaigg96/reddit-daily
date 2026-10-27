@@ -717,6 +717,22 @@ def _era(prefix, start_day, n, fv, views, watch, snapshot_gap=7):
     return uploads, snaps
 
 
+def test_a_refused_metric_at_that_age_is_a_caveat_not_thin_data(tmp_path, monkeypatch):
+    """10-26: subscribers refused on every row read as "insufficient data"."""
+    from src import config
+    uploads, snaps = _era("v", 0, 3, "v7", 100, 12.0)
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    snap = config.ANALYTICS_SNAPSHOTS
+    rows = snap.read_text().splitlines()
+    why = "refused: HttpError: <HttpError 500>"
+    snap.write_text("\n".join([rows[0] + ",subs_gained"]
+                              + [r + ("," + why if i else ",2") for i, r in enumerate(rows[1:])]) + "\n")
+    load = insights.load_videos_at_age()
+    assert load.refused == {"subs_gained": 2}
+    assert any("2 upload(s) had subs_gained refused" in c for c in load.caveats())
+    assert [v.subs_gained for v in load.videos] == [2.0, None, None]
+
+
 def _two_eras(tmp_path, monkeypatch, new_views=200, new_watch=10.0,
               old_views=200, old_watch=10.0, n=10):
     old_u, old_s = _era("old", 0, n, "v4", old_views, old_watch)
