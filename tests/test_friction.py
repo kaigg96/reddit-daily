@@ -124,7 +124,9 @@ def test_the_seed_files_parse_and_use_only_known_values():
     for r in rows:
         assert list(r) == fr.FIELDS
         assert r["function"] in fr.FUNCTIONS and r["category"] in fr.CATEGORIES
-        assert r["outcome"] in fr.OUTCOMES and r["group"] in known
+        # A live row stays ungrouped until the weekly review sorts it.
+        assert r["outcome"] in fr.OUTCOMES and r["group"] in known | {""}
+        assert r["fixes"] in known | {""}
     assert all(g["status"] in fr.STATUSES for g in groups)
 
 
