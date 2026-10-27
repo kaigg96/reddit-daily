@@ -1,102 +1,104 @@
-## Shift trace — run 40417499091
+## Shift trace — run 40477395631
 
-**Ended:** success, is_error false, 145 turns, 29.0 min, stop end_turn; 3 permission denial(s): Monitor. **Tool calls:** 142, 5 failed. Helper agents made 93 more, 2 failed.
+**Ended:** success, is_error false, 138 turns, 32.3 min, stop end_turn. **Tool calls:** 137, 1 failed. Helper agents made 136 more, 5 failed.
 
 **Last message:**
 
-> The guard that refuses shock-bait titles is live on main, and tomorrow's ~05:00 upload is the first to use it. The handover entry is committed and pushed, and the working copy is clean. I'm stopping at 23:37, about 30 minutes early: nothing is ready, and three rounds of ideas found nothing more worth doing.
+> The handover is committed and pushed, and the shift ends at 09:32. That is 27 minutes early, because nothing is ready: the two items you queued last night are built and now wait only on your labels. Two rounds of new ideas (11 in total) gave two quick terms checks, which I did; the rest weren't worth their cost.
 >
-> **Done this shift:**
-> - **Title guard (a fix):** the first request for its sample video got a GitHub server error and no render started, so I sent it again. That render passed on the branch's current commit (23 seconds, playable). All 609 tests pass, and the guardrail checks are green on every push tonight. Titles like "Animals' chilling genius will surprise you" are now swapped for the plain Reddit question, while "What surprised you most?" still passes.
-> - **Bet 1 is still ready the day the owner labels #77:** combined with tonight's change, all 862 tests pass. The counting fix built beside it also merges cleanly, and bet 1's titles go through the new guard.
-> - **Monetization:**
->   - **Snapchat**, from its own help page: 50,000 followers and 15,000 hours watched every 28 days. We'd have about 37 hours, roughly 400 times short. It also requires "original" videos of at least 30 seconds; ours run about 21.
->   - **X:** its help page refused us, so these figures come from a report quoting it. It requires a paid Premium plan, 500 verified followers and 500,000 verified views in 90 days, and it excludes reuploaded content.
->   - Neither pays for a reading, so bet 1 still comes first on every route.
-> - **Two rule fixes before the 2 November read:**
->   - Bet 1's verdict is now read on AskReddit uploads for as long as both subreddits rotate. The old wording could have stopped that at the subreddit test's read, and the current format ran on AskReddit alone until 7 October.
->   - Four uploads a day now waits for bet 1 until the owner answers #80, which recommends exactly that. The plan had held two rules that conflicted.
-> - **Standing checks:** both of today's uploads landed. No secr
+> **Done this shift**
+> - **Friction log (C17):** built to your spec. A fresh review found two real bugs and some weaker spots, all fixed. All 637 tests pass. It lands when you label **#84**, and the plan's row says how.
+> - **Experiment ledger (C18):** live on main. It records 60 test rules from the product plan and git history.
+>   - Of 7 changes we kept, only 1 measured a gain bigger than its test's detection limit: the background-clip library, +22% against 11%.
+>   - The reviewer caught that I had first credited "opening on the question". The product plan says not to credit it, because its gain was mostly longer videos. Fixed before it went live.
+>   - The one time a rule said "revert", it was replaced by a rule written the next day.
+>   - Of 39 tests read, only 9 had a due date set.
+>   - Bet 1's own test can detect a change of about 12% in watch time per view; views would need to move about 55%.
+>   - **#85** asks you to approve two lines of process wording: quarterly planning reads the ledger, and each test updates its row.
+> - **For the 5 November source decision:** Stack Exchange's terms don't restrict running its posts through AI. Pew's poll results may be reused commercially with credit; YouGov's may not. Polls give percentages, not quotable answers, so they would be a different show.
+> - **Checks:** today's and yesterday's uploads all landed, and money controls are clean ($0.75 this month). Bet 1's release still combines with everything live: 870 tests pass together.
+>
+> **I worked around one thing.** The two proposed process-file changes were written on a branch by a script. Nothing reaches the rules without your label. Separately, I briefly switched the shared checkou
 
-### Tool calls (last 80 of 142)
+### Tool calls (last 80 of 137)
 
-63. Bash: sed -n 384,404p TECH_DEBT.md; echo ....; sed -n 460,500p TECH_DEBT.md
-64. Bash: gh issue list --state open -L 15 --json number,title,labels,updatedAt --jq '.[] | "#\(.number) [\(.labels|map(.name)|join(","))] \(.updated…
-65. Bash: f=/tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/tasks/ad63dae198bd51dc6.output; ls -la …
-66. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents/agent-ad63dae198…
-67. Agent: Rank candidates (forward order)
-68. Agent: Rank candidates (reversed order)
-69. Bash: grep -n "title_hype" src/insights.py | head -20; grep -n "title_hype" tests/*.py | head -5
-70. Bash: sed -n 1525,1615p src/insights.py; sed -n 845,875p tests/test_insights.py
-71. Bash: sed -n 1,40p src/insights.py | grep -n "import"; sed -n 1,30p src/llm.py | grep -n "import"; venv/bin/python scripts/report.py --help 2>&1 …
-72. Bash: date -u +%H:%M; f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents;…
-73. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents; end=$(( $(date …
-74. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents; end=$(( $(date …
-75. Bash: venv/bin/python scripts/report.py --routes 2>&1 | tail -40
-76. Bash: grep -n "Break-even\|break-even" PLAN.md PRD.md DECISIONS.md | head -5; date -u +%T
-77. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents; ls -la --time-s…
-78. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents; ls -la --time-s…
-79. Bash: grep -n "^ROUTES" -A40 src/insights.py | head -60
-80. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents; end=$(( $(date …
-81. ToolSearch: select:WebSearch,WebFetch
-82. WebSearch: Snapchat Unified Monetization Program eligibility requirements followers views 2026
-83. WebSearch: X Creator Revenue Sharing eligibility requirements impressions verified followers 2026
-84. WebFetch: https://help.snapchat.com/hc/en-us/articles/26889035829140
-85. WebSearch: X "Original Content Rewards" eligibility help.x.com
-86. WebFetch: https://x.com/XCreators/article/2085835082166653393
-87. WebFetch: https://newsroom.snap.com/snapchat-new-creator-monetization
-88. WebSearch: site:help.snapchat.com Monetization Program eligibility followers view time
-89. WebFetch: https://www.netinfluencer.com/x-details-eligibility-rules-for-new-original-content-rewards-program/
-90. WebFetch: https://help.snapchat.com/hc/en-us/articles/14669003687444-About-Snapchat-s-Monetization-Program
-91. WebFetch: https://help.x.com/en/using-x/original-content-rewards
-92. Bash: venv/bin/python scripts/report.py --trajectory --metric watch_total_s 2>&1 | tail -14; date -u +%H:%M
-93. Bash: grep -n "watch_total_s\|total_watch_s\|minutes_watched\|estimatedMinutes" src/insights.py | head -15; head -1 analysis/analytics_snapshots.…
-94. Bash: sed -n 2140,2200p src/insights.py
-95. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
-96. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | tail -3 && venv/bin/python scripts/check_docs.py 2>&1 | tail -3 && git add PLAN.md…
-97. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | head -40
-98. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
-99. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
-100. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PLAN|TOTAL|Over"
-101. Bash: grep -c "the owner's logins" PLAN.md; grep -c "nearest on paper (subscribers bind, ~45×) but out of scope" PLAN.md; grep -c "music variety …
-102. Bash: python3 - <<'EOF'
-103. Bash: git add PLAN.md && git commit -q -m "PLAN: back within its word budget after the route pricing
-104. Bash: grep -n "open items\|def.*tech_debt\|TECH_DEBT" scripts/context_budget.py | head -10; grep -n "^## \|^### " TECH_DEBT.md | head -20
-105. Bash: sed -n 215,225p scripts/context_budget.py; grep -n '^- \*\*' TECH_DEBT.md | awk -F: '{print $1": "substr($0, index($0,$2), 110)}' | head -30
-106. Agent: Second-round candidate generation
-107. Write: /tmp/worklog_draft.md
-108. Bash: sed -i 's/treat it as YouTube.s reach cut and tell the owner that day/treat it as YouTube'"'"'s reach cut and tell you that day/' /tmp/work…
-109. Bash: awk '/^## 2026-10-26 \(09:55\)/{f=1} f' WORKLOG.md | sed -n '/### Blocked/,$p'
-110. Bash: grep -n "v8-dose-verdict-uploads\|integration/preview" PRD.md | cut -c1-220 | head -5; git log --oneline -1 origin/data/v8-dose-verdict-upl…
-111. Bash: grep -rn "dose-verdict\|dose-count\|dose fix" PRD.md TECH_DEBT.md PLAN.md | cut -c1-200
-112. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview) && git merge-tree --write-tree --merge-base origin/integration/prev…
-113. Edit: /tmp/worklog_draft.md
-114. Bash: date -u +%H:%M:%S; d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagen…
-115. Bash: git log --since="2026-10-26 00:00" --format='%h %ci %s' | grep -i "health\|escalat" | head; ls .escalations 2>/dev/null | tail -5; grep -n …
-116. Bash: sed -n 419,430p scripts/context_budget.py; sed -n 480,510p scripts/context_budget.py
-117. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | sed -n '/HEALTH\|health\|PROCESS/,$p' | head -30; git status --short
-118. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents/agent-a75bb6a76b…
-119. Bash: grep -n "while #3 runs" PRD.md | cut -c1-80; sed -n 492p PRD.md | cut -c1-900
-120. Bash: grep -o 'read `--within subreddit=AskReddit` while #3 runs (restated 10-12; against `v7` alone 10-18; both pre-upload)' PRD.md | wc -l
-121. Bash: python3 - <<'EOF'
-122. Bash: grep -n "^| 7 \|^| ~~7~~" PRD.md | cut -c1-200; git diff PRD.md | grep "^[-+]" | cut -c1-260
-123. Bash: python3 -c "
-124. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -3 && git add PRD.md && git commit -q -m "PRD: bet 1 is read within AskReddit while subre…
-125. Bash: gh issue view 80 --json body,comments --jq '.body[0:1800], (.comments | length), (.comments[-1].body[0:600] // "")'
-126. Bash: python3 - <<'EOF'
-127. Bash: git add PRD.md && git commit -q -m "PRD §0 #4: four a day waits for v8 until #80 is answered
-128. Bash: grep -rn -i "server image\|runner image\|ubuntu-2[46]\|ubuntu-latest" TECH_DEBT.md PRD.md PLAN.md WORKLOG.md | cut -c1-260 | head -10; grep…
-129. Bash: sed -n 405,438p TECH_DEBT.md
-130. Bash: grep -n "meta_failure" src/run.py | head -10; grep -n "def _clean_published" -A25 src/llm.py | grep -n "print\|return" | head
-131. Bash: cd /tmp && python3 - <<'EOF'
-132. Bash: python3 - <<'EOF'
-133. Bash: python3 - <<'EOF'
-134. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -2 && git add WORKLOG.md && git commit -q -m "Handover: the shock-title guard is live; Sn…
-135. Agent: Third-round reliability candidates
-136. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/f608881c-a393-4cb2-ac3a-351c0fe4eed3/subagents/agent-a903d10d3b…
-137. Bash: python3 - <<'EOF'
-138. Bash: python3 - <<'EOF'
-139. Bash: sed -i 's/ It protects, not grows, the channel\./ Protection, not growth./' WORKLOG.md && grep -c "Protection, not growth." WORKLOG.md && v…
-140. Bash: sed -i 's/^## 2026-10-26 (23:55) —/## 2026-10-26 (23:38) —/' WORKLOG.md && git add WORKLOG.md && git commit -q -m "Handover: a third round …
-141. Bash: gh run list -L 8 --json headSha,name,status,conclusion,event --jq '.[] | "\(.headSha[0:7]) \(.event) \(.name) \(.status) \(.conclusion)"'; …
-142. Bash: git worktree prune && git worktree list && git status --short | head
+58. Bash: cat /home/runner/work/reddit-daily/reddit-daily/.escalations/*.md 2>/dev/null | head -5; ls /home/runner/work/reddit-daily/reddit-daily/.es…
+59. Write: /tmp/c18-escalation.md
+60. Edit: /tmp/c18-escalation.md
+61. Bash: date -u +%H:%M; ls -la /tmp/c18/analysis/experiments.csv 2>&1 | tail -1
+62. ToolSearch: select:Monitor
+63. Bash: for i in $(seq 1 600); do [ -s /tmp/c18/analysis/experiments.csv ] && { echo "ledger written"; exit 0; }; sleep 1; done; echo "no ledger af…
+64. Bash: git branch --show-current && python3 - <<'EOF'
+65. Bash: python3 - <<'EOF'
+66. Bash: venv/bin/python -m pytest tests/test_friction.py -q 2>&1 | grep -E "^FAILED|Error|assert" | head -10
+67. Bash: python3 - <<'EOF'
+68. Bash: date -u +%H:%M && venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A scripts/friction.py scripts/context_budget.py tests/test…
+69. Edit: /tmp/mainwt/PLAN.md
+70. Bash: date -u +%H:%M; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/9efea07e-bae8-4133-9a33-3c9ecdd19323/tasks/bbt5pykt6.outpu…
+71. Agent: Generate ranked candidate work
+72. Bash: cd /tmp/mainwt && git commit -q -am "PLAN C17: built and reviewed on gm/friction-log; waits only on #84's label" && git push -q origin HEAD…
+73. Bash: for i in $(seq 1 240); do [ -s /tmp/c18/analysis/experiments.csv ] && { echo "ledger written"; date -u +%H:%M; exit 0; }; sleep 1; done; ec…
+74. Read: /tmp/mainwt/WORKLOG.md
+75. Bash: for i in $(seq 1 240); do [ -s /tmp/c18/analysis/experiments.csv ] && { echo "ledger written"; date -u +%H:%M; exit 0; }; sleep 1; done; ec…
+76. Bash: cd /tmp/c18 && wc -l analysis/experiments.csv && cut -c1-220 analysis/experiments.csv
+77. Bash: cd /tmp/c18 && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/report.py --experiments; /home/runner/work/reddit-daily/…
+78. Bash: cd /tmp/c18 && python3 - <<'EOF'
+79. Bash: cd /tmp/c18 && python3 - <<'EOF'
+80. Bash: cd /tmp/c18 && git add analysis/experiments.csv src/insights.py scripts/report.py tests/test_experiment_ledger.py && git commit -q -m "C18:…
+81. Agent: Fresh review of C18 ledger diff
+82. Edit: /tmp/c18-escalation.md
+83. Edit: /tmp/c18-escalation.md
+84. Bash: date -u +%H:%M
+85. Edit: /tmp/mainwt/WORKLOG.md
+86. Bash: cd /tmp/mainwt && date -u +%H:%M && venv=/home/runner/work/reddit-daily/reddit-daily/venv/bin/python; $venv scripts/context_budget.py 2>&1 …
+87. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+88. Bash: date -u +%H:%M
+89. Bash: for i in $(seq 1 120); do sleep 1; done; date -u +%H:%M
+90. Bash: cd /tmp/c18 && sed -n 214p PRD.md | cut -c1-700; grep -n "b-roll \*\*keep\*\*\|watch-seconds +22%" PRD.md | cut -c1-300
+91. Bash: cd /tmp/c18 && grep -n "b-roll" PRD.md | grep -i "length\|longer\|credit" | cut -c1-400 | head -5
+92. Bash: cd /tmp/c18 && python3 - <<'EOF'
+93. Bash: cd /tmp/c18 && V=/home/runner/work/reddit-daily/reddit-daily/venv/bin/python; $V -m pytest tests/ -q 2>&1 | tail -1 && git add -A analysis/…
+94. Bash: git log --oneline -2 data/experiments-ledger && git push -q origin data/experiments-ledger 2>&1 | tail -1; cd /tmp/mainwt && git merge -q -…
+95. Bash: cd /tmp/mainwt && git push -q origin HEAD:main 2>&1 | tail -1; git log --oneline -1 origin/main; date -u +%H:%M
+96. Bash: cd /tmp && python3 - <<'EOF'
+97. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+98. Bash: cd /tmp/mainwt && git add PLAN.md .escalations/ && git commit -q -m "C18 blocked on its escalation: the ledger is live; the quarterly-read …
+99. Bash: cd /tmp && for u in "https://stackoverflow.com/legal/api-terms-of-use" "https://stackoverflow.com/legal/terms-of-service/public"; do echo "…
+100. Bash: cd /tmp && curl -sL --max-time 25 -A "Mozilla/5.0" "https://web.archive.org/web/2026/https://stackoverflow.com/legal/api-terms-of-use" -o a…
+101. Bash: cd /tmp && python3 - <<'EOF'
+102. Bash: cd /tmp && grep -o 'href="[^"]*[Rr]esponsible[^"]*"' api.html | head -3; grep -o 'href="[^"]*ai[-_]policy[^"]*"' api.html | head -3
+103. Bash: cd /tmp && curl -sL --max-time 25 -A "Mozilla/5.0" "https://web.archive.org/web/2026/https://policies.stackoverflow.co/company/consolidated…
+104. Bash: cd /tmp/mainwt && grep -n "Stack Exchange could replace Reddit" PRD.md | cut -c1-20 && awk 'NR==148' PRD.md | fold -w 2000 | head -5
+105. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+106. Bash: cd /tmp/mainwt && git add PRD.md && git commit -q -m "PRD §4: Stack Exchange's terms bar no AI processing (API terms archived 2026-07-07, s…
+107. Bash: cd /tmp/mainwt && git fetch -q origin && git log --oneline HEAD..origin/main && git rebase -q --autostash origin/main && git push -q origin…
+108. Bash: cd /tmp/mainwt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/escalations.py open 2>&1 | grep -E "^\s+#[0-9]+" | he…
+109. Bash: cd /tmp && for u in "https://www.pewresearch.org/about/terms-and-conditions/" "https://today.yougov.com/about/terms" ; do echo "=== $u"; cu…
+110. Bash: cd /tmp && python3 - <<'EOF'
+111. Bash: cd /tmp && curl -sL --max-time 25 -A "Mozilla/5.0" "https://web.archive.org/web/2026/https://yougov.co.uk/about/public-data-license" -o pdl…
+112. Bash: cd /tmp && curl -sL --max-time 25 -A "Mozilla/5.0 (X11; Linux x86_64)" "https://www.pewresearch.org/about/terms-and-conditions/" -o pew.htm…
+113. Bash: cd /tmp && python3 - <<'EOF'
+114. Bash: cd /tmp/mainwt && date -u +%H:%M && python3 - <<'EOF'
+115. Bash: cd /tmp/mainwt && grep -n "strips them\|&lt;\|\"<\"\|angle" TECH_DEBT.md | cut -c1-700 | head -5
+116. Bash: cd /tmp/mainwt && sed -n 460,480p TECH_DEBT.md && grep -n "def .*title\|def _clean\|def sanitize\|MAX_TITLE\|def build_description\|descrip…
+117. Bash: cd /tmp/mainwt && timeout 120 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/report.py --release v7 --offline 2>&1 | g…
+118. Bash: cd /tmp/mainwt && sed -n '/^def release_read/,/^def latest_releases/p' src/insights.py | head -30
+119. Bash: cd /tmp/mainwt && timeout 120 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF' 2>&1 | tail -6
+120. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+121. Bash: cd /tmp/mainwt && git log --all --format='%h %ad %s' --date=short --grep="#65" | head -8; git log -p -S"#65" --format='%h %s' -- WORKLOG.md…
+122. Bash: cd /tmp/mainwt && V=/home/runner/work/reddit-daily/reddit-daily/venv/bin/python; $V scripts/check_docs.py 2>&1 | tail -9; $V scripts/contex…
+123. Bash: cd /tmp/mainwt && git fetch -q origin && git merge-tree --write-tree origin/main origin/integration/preview >/dev/null && echo "integration…
+124. Bash: git worktree add -q --detach /tmp/combo origin/main && cd /tmp/combo && git merge -q --no-edit origin/integration/preview 2>&1 | tail -1; /…
+125. Bash: cd /tmp && git -C /home/runner/work/reddit-daily/reddit-daily worktree remove --force /tmp/combo; curl -sL --max-time 25 -A "Mozilla/5.0" "…
+126. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+127. Bash: cd /tmp/mainwt && timeout 120 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/report.py --release v5 --offline 2>&1 | g…
+128. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+129. Agent: Second round of candidate work
+130. Read: /tmp/mainwt/WORKLOG.md
+131. Bash: cd /tmp/mainwt && python3 - <<'EOF'
+132. Bash: cd /tmp/mainwt && sed -i 's/ SECOND_ROUND$//' WORKLOG.md && grep -c "SECOND_ROUND\|GENERATION_RESULT\|RESULT_C18\|ESCALATION_C18" WORKLOG.m…
+133. Bash: for i in $(seq 1 150); do sleep 1; done; date -u +%H:%M
+134. Bash: cd /tmp/mainwt && git pull -q --rebase origin main 2>&1 | tail -1; python3 - <<'EOF'
+135. Bash: git status --short | head -5; git checkout -q main && git pull -q --ff-only origin main && for w in /tmp/c18 /tmp/c18p /tmp/mainwt /tmp/mai…
+136. Bash: for w in /tmp/c18 /tmp/c18p /tmp/mainwt /tmp/mainck; do git worktree remove --force "$w" 2>/dev/null; done; git worktree prune; git checkou…
+137. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -1; git fetch -q origin; …
