@@ -231,43 +231,9 @@ once #70 is answered.
 **Re-reviewed 2026-10-25 (audit) — trigger fired again:** nine shifts, every one with ready 0, ran 26–43 of 60 minutes. Its floor is 5 in `backlog_status.py` but 3 in the shift and backlog skills (and was in PRD §0, now pointing at the tool); assumption 3's "a floor of 3" is stale. The cause is D13's, not supply's: the work above the bar waits on the owner.
 **Re-reviewed 2026-10-28 (audit):** (1) false: 0 ready against a floor of 5, for every shift since 10-25 that did not inherit work; (3) false: the shift skill says 3, the tool 5 (in the 11-05 bundle). The cause is D13's.
 
-## D10 · 2026-09-25 · No new spending until the channel earns money
+## D10 · 2026-09-25 · No new spending until the channel earns money — **graduated 2026-10-28**
 
-The owner's ruling, when asked to let sample videos cost ~$1.80/month more:
-*"spending money is not on the table until the channel is actually earning
-money somehow, but pretty much anything else is on the table - as such you may
-need to get creative."* PRD §5 no. 1 moves from 🔄 to 🔒.
-
-**Alternatives:** judging each small spend on its merits, which is how the
-question arose — a dollar or two for faster shipping is easy to justify alone,
-and the sum of such justifications is the bill.
-
-**Why:** the channel earns nothing, so every cost is a pure loss until it does.
-The ruling is not "work around this once"; it redirects effort. A constraint
-that cannot be bought away has to be designed away, and that is what the PM and
-research lanes are for.
-
-**Assumptions:**
-1. The channel does not yet earn revenue.
-2. Creative, free routes exist for the constraints that matter (the first test:
-   PRD §0, "Make sample videos free").
-
-**Revisit when:** the channel earns money (1 false) — then spending proposals
-reopen, sized against revenue.
-
-**Re-reviewed 2026-10-06:** assumption 1 still holds (revenue $0). The drafted
-bets (#55) each ask for a little Polly spend: bet 1 about 6 cents a month, bet 2
-1–2 cents per extra upload. The packet asks for it explicitly, so the owner's
-answer there re-decides this ruling for those items. No shift may read it as
-lifted until then.
-**Re-reviewed 2026-10-14 (named most due by the 10-13 audit):** holds. (1) revenue is still $0, and YouTube's bar doubling for new applicants on 1 February 2027 pushes "earning" further out, so this binds longer than first thought. The owner applied it both ways since: bet 2's narration spend approved with the bet (#72), Gemini's paid tier refused (#62, "find another solution"). (2) holds: the free answers keep coming (Groq for #62, samples on a separate free allowance). Revisit as written.
-
-**Re-reviewed 2026-10-08:** still holds. The owner declined Gemini's paid tier,
-asked for so Reddit posts stop reaching a free tier that trains on them (#62):
-*"Not approved to spend money on this, find another solution."*
-**Re-reviewed 2026-10-13 (audit):** (1) holds for longer: new applicants need 20M Shorts views from 1 Feb 2027 (PLAN §1). (2) in doubt: text-only commentary may fail YouTube's review, and a spoken host needs spend or the owner's voice.
-**Re-reviewed 2026-10-25 (audit):** holds; revenue $0. (2)'s doubt about YouTube's review no longer steers bet 1 (D14). The Partner Program bar is about break-even, not profit, on any plan above Pro (PLAN §1, 10-25).
-**Re-reviewed 2026-10-28 (audit):** holds: revenue $0, and free routes keep turning up (the stand-in voice, Groq). Its one-line stub, due since 10-25, is still owed.
+Held at every re-review (10-06 to 10-28, three audits); the owner has since applied it both ways (bet 2's narration approved, #72; Gemini's paid tier refused, #62). The ruling and its quote live in `PRD.md` §5 no. 1 (🔒) and `CLAUDE.md` §4; revisit when revenue is above $0. Full text: git.
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
