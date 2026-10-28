@@ -1,103 +1,105 @@
-## Shift trace — run 40598596188
+## Shift trace — run 40665975760
 
-**Ended:** success, is_error false, 217 turns, 45.6 min, stop end_turn. **Tool calls:** 215, 3 failed. Helper agents made 101 more, 1 failed.
+**Ended:** success, is_error false, 228 turns, 35.1 min, stop end_turn. **Tool calls:** 225, 2 failed. Helper agents made 117 more, 3 failed.
 
 **Last message:**
 
-> The final handover was pushed at 23:43 and main is clean, so the shift ends here with 14 minutes to spare. Both uploads landed today and the AWS spending controls are in place ($0.78 spent this month of the $3 budget). I made no requests to the main AI model, ran no paid speech generation (Polly) and rendered no videos.
+> I handed over at 10:16, about 23 minutes early, because nothing above the bar was left after two rounds of ideas (13 candidates). Everything is merged, pushed and recorded, and all 681 checks pass on `main`.
 >
-> **Done and live:**
-> - **#85 landed.** You approved it at 21:20; it went in as one approved commit and the issue is closed. Quarterly planning now quotes the experiment ledger before proposing any bet's rule.
-> - **A silent data loss, found and fixed.** On 26 October YouTube returned one "internal error" and the Monday figures lost the subscriber count for 1,037 of 1,082 videos. Nobody noticed, because the reports said "insufficient data" and your Monday check-in said "ran clean". Three things changed:
->   - Every request the Monday jobs make now retries a server error. This protects the 2 November snapshot, where four test reads are due.
->   - The reports and the Monday check-in now say "not collected" instead of "insufficient data" or "ran clean".
->   - The test reads now warn when a figure they use was refused.
+> **What moved:** nothing viewers see changed, and nothing moved revenue directly. Bet 1 still waits on the owner's label on #77, and the channel is flat at 12 seconds watched per view. The shift's work protects the upload and the evidence.
 >
->   Fresh reviews found no bugs in any of these. 651 tests pass.
-> - **#82 (Reddit registration):** the issue's description now lists the questions on Reddit's API request form, taken from an archived copy. I edited the description, so it sent you no email. One choice there is yours: register as a "developer" or a "commercial developer". I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them.
-> - **For the 5 November review:** AI request limits don't decide between the replacement sources at two uploads a day.
+> **Live on `main`:**
+> - **Upload retry:** one passing error from YouTube no longer loses that run's video. A fresh review ran the real upload library against a scripted fake server. It found two kinds of dropped connection the retry still missed; both are now covered, and the tests run the real library. Merged at 09:48, eight hours before the next upload.
+> - **After the video is live:** the thumbnail, caption and comment calls can no longer crash the run, and neither can writing the upload log. Before, a crash there skipped recording the post, so a later run could have uploaded it again. The first version of the log fix could itself have saved a half-written row; the review caught it, and it's fixed and re-checked.
+> - **Coin-flip tests:** a new `report.py --balance` check compares which subreddits each side of the voice test (2 November) and the one-capital-word title test (about 23 November) drew from. It reads only who got which side, never a result. Both gaps are within chance (p 0.13 and 0.22). A rule set today, before either read, says what happens if a gap is too big.
 >
-> **Built but not merged:** the live upload has no retry, so one passing YouTube error loses that run's video. Two reviews each caught a flaw in the library's built-in retry. The branch now uses YouTube's own resume method, which cannot create a second video. I
+> **Checks:**
+> - Bet 1's release still combines cleanly with all of today's changes; 933 checks pass together.
+> - A free sample render of today's code plays: 24.5 seconds, 1080×1920, with audio.
+> - Security is clean: no secrets tracked, no workflow changes, the owner the only collaborator. Money controls are in place: $0.78 spent this month of $3.
+> - No voice-synthesis (Polly) or Gemini requests were spent, and no sample render was requested.
+>
+> **Dropped, with reaso
 
-### Tool calls (last 80 of 215)
+### Tool calls (last 80 of 225)
 
-136. Bash: python3 - <<'EOF'
-137. Bash: python3 - <<'EOF'
-138. Bash: grep -n "def load_videos_at_age\|def _optional_float\|class Load\|anchor=\|return Load\|def _video_from" src/insights.py | head; grep -n "d…
-139. Bash: sed -n 1860,1960p src/insights.py
-140. Bash: grep -n "class AgeMatchedLoad" -A25 src/insights.py | head -40; grep -n "no_coverage\|non_public" scripts/report.py | head
-141. Bash: git worktree add -q -b data/refused-caveat /tmp/wt-caveat origin/main && cd /tmp/wt-caveat && ln -s /home/runner/work/reddit-daily/reddit-d…
-142. Bash: cd /tmp/wt-caveat && sed -n 1856,1858p src/insights.py | cat -A | cut -c1-120
-143. Bash: cd /tmp/wt-caveat && python3 - <<'EOF'
-144. Bash: cd /tmp/wt-caveat && grep -n "Counter\|^import\|^from" src/insights.py | head -20; grep -n "def _era\|def _write_series" -A16 tests/test_in…
-145. Bash: cd /tmp/wt-caveat && python3 - <<'EOF'
-146. Bash: cd /tmp/wt-caveat && git add -A src tests && git commit -q -F - <<'EOF'
-147. Agent: Review at-age refused caveat diff
-148. Bash: git add .github/friction.csv && git commit -q -m "Friction row: refused-column fixes" && git push -q origin main; git log --oneline -1; dat…
-149. Bash: git status --short; venv/bin/python scripts/context_budget.py --health 2>&1 | tail -8
-150. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ce1b5961-b255-427c-8d7f-ad16f25da980/subagents/agent-a659c24b7e…
-151. Bash: cd /tmp/wt-caveat && git commit -q --amend -F - <<'EOF'
-152. Bash: venv/bin/python scripts/friction.py add --function data --task "Age-matched reads warn when a metric was refused at that age" --outcome don…
-153. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | head -15
-154. Bash: grep -n "#60" WORKLOG.md | cut -c1-120; python3 - <<'EOF'
-155. Bash: timeout 200 venv/bin/python -m pytest -q 2>&1 | tail -1 && git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover: #85 lande…
-156. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | grep -o -E "\*\*Closes when\*\*[^.]*\.|Closes when[^.]*\." | cut -c1-220
-157. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | grep -n -i -E "closes|close it|until|once " | cut -c1-200 | head -30
-158. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | sed -n 215,250p
-159. Bash: grep -n "def list_uploaded_videos" -A30 src/analytics.py | grep -n "execute\|retr" ; grep -n "execute(" src/analytics.py scripts/weekly_ana…
-160. Bash: grep -rn "list_uploaded_videos\|from src import.*analytics\|from . import.*analytics\|import analytics" src scripts --include=*.py | grep -…
-161. Bash: grep -rn "playlistItems\|list_uploaded_videos\|fetch_video_details\|snapshot_channel\|_FakeYT\b" tests/*.py | cut -c1-150 | head -12
-162. Bash: git worktree add -q -b reliability/listing-retries /tmp/wt-list origin/main && cd /tmp/wt-list && ln -s /home/runner/work/reddit-daily/redd…
-163. Bash: cd /tmp/wt-list && python3 - <<'EOF'
-164. Bash: cd /tmp/wt-list && python3 - <<'EOF'
-165. Agent: Review listing-retries diff
-166. Bash: cd /tmp/wt-list && /tmp/wa-venv/bin/python -m pytest -q tests/test_weekly_analytics.py 2>&1 | tail -1
-167. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ce1b5961-b255-427c-8d7f-ad16f25da980/subagents/agent-a65b569698…
-168. Bash: cd /tmp/wt-list && python3 - <<'EOF'
-169. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Snapshot's upload listing and channel totals retry server errors" --…
-170. Bash: git worktree add -q -b reliability/digest-comments-retries /tmp/wt-dc origin/main && cd /tmp/wt-dc && ln -s /home/runner/work/reddit-daily/…
-171. Bash: cd /tmp/wt-dc && python3 - <<'EOF'
-172. Bash: cd /tmp/wt-dc && git add -A scripts tests && git commit -q -F - <<'EOF'
-173. Agent: Review digest/comments retry diff
-174. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ce1b5961-b255-427c-8d7f-ad16f25da980/subagents/agent-a137312f96…
-175. Bash: cd /tmp/wt-dc && python3 - <<'EOF'
-176. Bash: venv/bin/python scripts/friction.py add --function reliability --task "The check-in's own calls and comment threads retry server errors" --…
-177. ToolSearch: select:WebSearch
-178. WebSearch: Reddit API app registration deadline January 12 2027 developers
-179. WebSearch: Reddit Data API public access ending March 2027 update October 2026
-180. ToolSearch: select:WebFetch
-181. WebFetch: https://www.how2shout.com/news/reddit-rss-public-api-shutdown-dates.html
-182. WebFetch: https://www.digitalapplied.com/blog/reddit-api-rss-shutdown-ai-tools-deadlines
-183. WebSearch: YouTube Partner Program Shorts monetization policy change October 2026
-184. Bash: python3 - <<'EOF'
-185. Bash: python3 - <<'EOF'
-186. Bash: python3 - <<'EOF'
-187. Bash: venv/bin/python scripts/friction.py add --function market --task "News check: Reddit's API dates and YouTube's monetization rules since our…
-188. Bash: venv/bin/python scripts/friction.py add --function market --task "News check: Reddit's API dates and YouTube's monetization rules since our…
-189. Bash: grep -n "execute\|next_chunk\|num_retries\|retry\|Retr" src/youtube.py | head -20
-190. Bash: sed -n 25,105p src/youtube.py; grep -n "youtube\.\(upload\|post\|set\|comment\)" src/run.py | head
-191. Bash: grep -rn "upload_video\|next_chunk" tests/*.py | head -5; git worktree add -q -b reliability/upload-retries /tmp/wt-up origin/main && cd /t…
-192. Bash: cd /tmp/wt-up && python3 - <<'EOF'
-193. Bash: cd /tmp/wt-up && git add -A src tests && git commit -q -F - <<'EOF'
-194. Agent: Review live upload retry diff
-195. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ce1b5961-b255-427c-8d7f-ad16f25da980/subagents/agent-ab2847245d…
-196. Bash: cd /tmp/wt-up && VP=$(venv/bin/python -c "import googleapiclient.http as h; print(h.__file__)") && grep -n "_in_error_state" $VP | head; gr…
-197. Bash: cd /tmp/wt-up && VP=$(venv/bin/python -c "import googleapiclient.http as h; print(h.__file__)") && sed -n 1020,1040p $VP && sed -n 1075,109…
-198. Bash: cd /tmp/wt-up && git checkout -q origin/main -- src/youtube.py && python3 - <<'EOF'
-199. Bash: cd /tmp/wt-up && git add -A src tests && git commit -q --amend -F - <<'EOF'
-200. Agent: Review revised upload retry
-201. Bash: python3 - <<'EOF'
-202. Bash: grep -n "Fresh reviews found no bugs" WORKLOG.md | cut -c1-80; grep -n "Reliability (three fixes" WORKLOG.md | cut -c1-60; sed -n '/Reliabi…
-203. Bash: python3 - <<'EOF'
-204. Bash: python3 - <<'EOF'
-205. Bash: python3 - <<'EOF'
-206. Bash: python3 - <<'EOF'
-207. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ce1b5961-b255-427c-8d7f-ad16f25da980/subagents/agent-a53909edab…
-208. Bash: cd /tmp/wt-up && python3 - <<'EOF'
-209. Bash: cd /tmp/wt-up && grep -n -i "bitrate\|preset\|crf" src/video.py | head -5
-210. Bash: cd /tmp/wt-up && sed -i 's/^# One request for any Short (ours are a few MB), but finite: with chunksize=-1$/# Meant to fit a whole Short in…
+146. Bash: venv/bin/python scripts/friction.py add --function data --task "Balance check before two coin reads" --outcome done --category rules --hard…
+147. Bash: cd /tmp/la && python3 - <<'EOF'
+148. Bash: cd /tmp/la && git checkout -q src/run.py && python3 - <<'EOF'
+149. Bash: cd /tmp/la && git commit -qam wip && git merge-tree --write-tree origin/integration/preview HEAD >/dev/null && echo "merges cleanly with be…
+150. Bash: cd /tmp/la && git reset -q --soft HEAD~1 && git checkout -q HEAD -- src/run.py && git diff origin/main...origin/integration/preview --stat …
+151. Bash: cd /tmp/la && git diff origin/main...origin/integration/preview -- src/log.py 2>/dev/null | head -40
+152. Bash: cd /tmp/la && python3 - <<'EOF'
+153. Bash: cd /tmp/la && git diff HEAD --stat && cat > tests/test_upload_log.py <<'EOF'
+154. Bash: cd /tmp/la && sed -i 's/^from src import config, log$/from src import log/' tests/test_upload_log.py && python3 - <<'EOF'
+155. Agent: Review log-append safety branch
+156. Bash: git fetch -q origin && git merge-tree --write-tree origin/integration/preview origin/main >/dev/null && echo "bet 1 still merges cleanly wi…
+157. Bash: git worktree add -q --detach /tmp/combo origin/integration/preview && cd /tmp/combo && git -c user.email=x@x -c user.name=x merge -q --no-e…
+158. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+159. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+160. Bash: python3 - <<'EOF'
+161. Bash: python3 - <<'EOF'
+162. Bash: git add WORKLOG.md .github/friction.csv && git commit -qm "Handover (10:35): upload retry and post-upload fail-soft live; balance check liv…
+163. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -iE "stale|found|fail|warn" | head -5; venv/bin/python scripts/backlog_status.py 2>&1 | h…
+164. Read: /tmp/la/src/log.py
+165. Bash: cd /tmp/la && python3 - <<'EOF'
+166. Bash: cd /tmp/la && PY=/home/runner/work/reddit-daily/reddit-daily/venv/bin/python; cp src/log.py /tmp/log_new.py; git show HEAD:src/log.py > src…
+167. Bash: cd /tmp/la && git commit -qam "Upload log, review: a failed append is cut back to the file's size before it; a failed migration leaves no .…
+168. SendMessage: content, message, recipient, summary, to, type
+169. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && git status --short | head -3
+170. Agent: Second candidate round, other functions
+171. Bash: venv/bin/python scripts/statusline.py --budget 2>&1 | head -2; date -u +%H:%M
+172. Bash: venv/bin/python scripts/friction.py gaps 2>&1 | tail -4
+173. Bash: git log -1 --format='%h %s' origin/integration/preview; gh run list --workflow validate-release.yml -L 1 --json createdAt,conclusion --jq '…
+174. Bash: sed -n 122p PRD.md | fold -w 200 | head -8
+175. Bash: git fetch -q origin && git log --oneline -1 origin/main && date -u +%H:%M
+176. Grep: /home/runner/work/reddit-daily/reddit-daily/README.md
+177. Bash: date -u +%H:%M:%S
+178. Bash: git fetch -q origin && git merge -q --no-ff origin/reliability/log-append-safe -m "Merge reliability/log-append-safe: writing the upload lo…
+179. Bash: python3 - <<'EOF'
+180. Bash: git add WORKLOG.md .github/friction.csv && git commit -qm "Handover: log-append safety merged and live" && git pull -q --rebase origin main…
+181. Bash: git branch -r --merged origin/main | grep -E "upload-retries|post-upload|assignment-balance|log-append"
+182. Bash: date -u +%H:%M:%S
+183. Bash: venv/bin/python scripts/report.py --experiments 2>&1 | tail -15
+184. Bash: venv/bin/python -m pytest tests/ -q -p no:randomly 2>&1 | tail -1; date -u +%H:%M:%S
+185. Monitor: sleep 100; echo "waited 100s"
+186. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | grep -E "TECH_DEBT|DECISIONS|WORKLOG.md \(|PROCESS|problem|- "
+187. Bash: git log --oneline origin/main -8
+188. Bash: gh run list --workflow guardrails.yml -L 3 --json headSha,conclusion,status --jq '.[] | [.headSha[0:7],.status,.conclusion] | @tsv' 2>&1
+189. Bash: gh run list --branch main -L 12 --json workflowName,headSha,conclusion,status --jq '.[] | [.workflowName,.headSha[0:7],.status,.conclusion]…
+190. Bash: date -u +%H:%M:%S
+191. Bash: grep -nE "^\| \*\*(Audience|Monetization|Market|Distribution|Editorial|Finance)" ORG.md | cut -c1-220 | head -8
+192. Bash: grep -nE "^#+ .*(Audience|Monetization|Market intelligence|Distribution)" ORG.md | head -6
+193. Read: /home/runner/work/reddit-daily/reddit-daily/ORG.md
+194. Bash: venv/bin/python scripts/report.py --offline --routes 2>&1 | tail -8
+195. Bash: date -u +%H:%M:%S
+196. Bash: venv/bin/python scripts/report.py --balance voice --by subreddit --since 2026-10-08 --until 2026-10-26 2>&1 | sed -n 3,6p
+197. Bash: date -u +%H:%M:%S
+198. Bash: cd /tmp && for p in google-api-python-client google-auth google-auth-httplib2; do /home/runner/work/reddit-daily/reddit-daily/venv/bin/pyth…
+199. Bash: date -u +%H:%M:%S
+200. Bash: grep -n "def _should_retry_response" -A 30 venv/lib/python3.12/site-packages/googleapiclient/http.py | grep -nE "403|reason|rateLimit" | he…
+201. Bash: date -u +%H:%M:%S
+202. Bash: venv/bin/python -m pytest tests/test_youtube_upload.py tests/test_upload_log.py tests/test_balance.py -q 2>&1 | tail -1
+203. Bash: date -u +%H:%M:%S
+204. Bash: sed -n '/^## 2026-10-28/,/^### Done/p' WORKLOG.md | wc -w
+205. Bash: date -u +%H:%M:%S
+206. Bash: venv/bin/python scripts/context_budget.py --allocation 2>&1 | head -12
+207. Bash: venv/bin/python scripts/context_budget.py --allocation 2>&1 | grep -iE "2026-10-28|alloc|total|reliab" | head -8
+208. Bash: date -u +%H:%M:%S
+209. ToolSearch: select:WebFetch
+210. WebFetch: https://support.google.com/youtube/answer/12504220?hl=en
 211. Bash: python3 - <<'EOF'
-212. Bash: python3 - <<'EOF'
-213. Bash: sed -n '/^## 2026-10-27 (23:45)/,/^## 2026-10-27 (17:05)/p' WORKLOG.md | head -60
-214. Bash: sed -i 's/^- Seven fixes live, one built, two findings\./- Six fixes live, one built, two findings./' WORKLOG.md && grep -c "Six fixes live…
-215. Bash: git status --short; git worktree list; git fetch -q origin && git log --oneline -1 origin/main; git log --oneline -1 origin/reliability/upl…
+212. Bash: git add WORKLOG.md && git commit -qm "Handover: second candidate round's music question answered (no change)" && git pull -q --rebase origi…
+213. Bash: venv/bin/python scripts/report.py --offline --routes 2>&1 | head -4; grep -n "followers_short\|show_routes\|route_distances" tests/*.py | h…
+214. Bash: grep -nE "requests\.get|urlopen|praw|retry|Retry|RETRIES|timeout=" src/content.py src/reddit*.py 2>/dev/null | head -15
+215. Bash: grep -nE "praw|\.top\(|\.hot\(|\.comments|except|def " src/content.py | head -30; venv/bin/python -c "import prawcore, inspect; from prawco…
+216. Bash: venv/bin/python scripts/report.py --experiments 2>&1 | head -22; grep -nE "^#10,|^#3," analysis/experiments.csv
+217. Bash: venv/bin/python - <<'EOF'
+218. Bash: python3 - <<'EOF'
+219. Bash: gh issue view 77 --json body,updatedAt --jq '.updatedAt, .body' > /tmp/i77.md; head -1 /tmp/i77.md; grep -nE "checks pass|tests pass|combin…
+220. Bash: wc -l /tmp/i77.md; grep -nE "Python 3\.1[0-9]|merge|live|v8|label" /tmp/i77.md | cut -c1-260 | head -12
+221. Bash: git status --short | head -3; SAMPLE=1 timeout 280 venv/bin/python -m src.run 2>&1 | grep -vE "^\s*(frame|chunk|t:|MoviePy|\r)" | tail -15;…
+222. Bash: ls -la assets/gen/*.mp4 2>/dev/null | head -3; f=$(ls -t assets/gen/*.mp4 2>/dev/null | head -1); [ -n "$f" ] && (ffprobe -v error -show_en…
+223. Bash: FF=$(venv/bin/python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())") && $FF -v error -i assets/gen/final_askreddit_vide…
+224. Bash: python3 - <<'EOF'
+225. Bash: python3 - <<'EOF'
