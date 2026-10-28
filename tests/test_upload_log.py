@@ -31,6 +31,22 @@ def test_a_migration_that_fails_part_way_leaves_the_old_log_whole(monkeypatch, t
     with pytest.raises(OSError):
         log._migrate_header(path, ["timestamp_utc", "video_id", "new_column"])
     assert path.read_text() == before
+    assert not (tmp_path / "upload_log.csv.tmp").exists()
+
+
+def test_an_append_that_fails_after_writing_leaves_no_part_row(monkeypatch, tmp_path):
+    path = tmp_path / "upload_log.csv"
+    path.write_text("timestamp_utc,video_id\r\n2026-10-01,a\r\n")
+    before = path.read_bytes()
+    real = csv.DictWriter.writerow
+
+    def write_then_fail(self, row):
+        real(self, row)
+        raise OSError("disk full")
+    monkeypatch.setattr(csv.DictWriter, "writerow", write_then_fail)
+    with pytest.raises(OSError):
+        log._append(path, ["timestamp_utc", "video_id"], {"video_id": "b"})
+    assert path.read_bytes() == before
 
 
 def test_a_migration_still_rewrites_the_header(tmp_path):
