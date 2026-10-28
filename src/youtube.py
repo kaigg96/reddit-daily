@@ -19,9 +19,10 @@ from googleapiclient.http import MediaFileUpload
 # here: with chunksize=-1 it resent the spent file object, an empty body.
 # Without any retry, one transient error cost the run its upload.
 UPLOAD_RETRIES = 3
-# Meant to fit a whole Short in one request (check a render's size before merging), but finite: with chunksize=-1
-# googleapiclient 2.158 computes a resumed range wrongly (size - progress - 1
-# as the end), so a retry after a partial upload ends in a 400 (review).
+# A whole Short in one request (renders ran 3-11 MB, 10-14 to 10-26), but
+# finite: with chunksize=-1 googleapiclient 2.158 computes a resumed range
+# wrongly (size - progress - 1 as the end), so a retry after a partial upload
+# ends in a 400 (review). A multiple of 256 KiB, as resumable uploads require.
 UPLOAD_CHUNK = 100 * 1024 * 1024
 _RETRIABLE_STATUS = (429, 500, 502, 503, 504)
 
