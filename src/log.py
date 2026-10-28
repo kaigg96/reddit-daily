@@ -2,6 +2,7 @@
 committed back by the workflow. Joins against YouTube analytics on video_id."""
 
 import csv
+import os
 
 from . import config
 
@@ -66,11 +67,16 @@ def _migrate_header(path, fields):
         rows = list(csv.DictReader(f))
     if rows and list(rows[0].keys()) == fields:
         return
-    with open(path, "w", newline="") as f:
+    # Written aside, then swapped in: a failure part-way leaves the old file
+    # whole rather than truncated, so a run that carries on past it cannot
+    # commit a damaged log (run.py records an upload even if this raises).
+    tmp = path.with_name(path.name + ".tmp")
+    with open(tmp, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         for r in rows:
             writer.writerow({k: (r.get(k) or "") for k in fields})
+    os.replace(tmp, path)
     print(f"Log schema migrated: {path.name} -> {len(fields)} columns")
 
 
@@ -87,7 +93,15 @@ def _append(path, fields, row):
 
 
 def append_upload_log(row):
-    _append(config.UPLOAD_LOG, FIELDS, row)
+    """Never raises. run.py calls it after the video is live, and a raise
+    would fail the run before the workflow commits prev_post.txt, so a later
+    run could ship the post again. The row is lost instead, and the run
+    summary says so (a migration failure leaves the old file whole)."""
+    try:
+        _append(config.UPLOAD_LOG, FIELDS, row)
+    except Exception as e:
+        print(f"::error::Upload {row.get('video_id') or '?'} not logged: "
+              f"{type(e).__name__}: {e}")
 
 
 def uploaded_titles():

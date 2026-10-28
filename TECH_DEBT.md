@@ -492,14 +492,3 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
   the text columns at HEAD, leave history. **Closes when** decided there.
-- **After a live upload, a failing upload-log append still loses the record
-  (2026-10-28, reliability).** Since 10-28 nothing else between a successful
-  upload and the record raises: the upload retries, and thumbnail, caption
-  and comment catch any error. `log.append_upload_log` (`src/run.py`, after
-  `prev_post.txt` is written) can still raise, most plausibly from a future
-  column change's `_migrate_header`. The run then fails, the workflow commits
-  neither file, and the next run may ship the post again. Not fixed: letting
-  the run succeed past it could commit a damaged log, since the migration
-  truncates before rewriting. **Fix when** the log's columns next change:
-  migrate by writing a temporary file and renaming it, then catch the append
-  so the run commits `prev_post.txt`.
