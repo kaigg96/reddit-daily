@@ -232,8 +232,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`. **Rehearsed again 10-27** over `main` `4efb08d`: both merge
-  cleanly, 900 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  after `v8`. **Rehearsed again 10-28** over `main` `ef6aec7`: both merge
+  cleanly, 936 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
   fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
   (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
   the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
@@ -382,7 +382,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `weekly-analytics.yml` names three Google packages in `pip install`; every
   other workflow reads `requirements.txt`, and `test_requirements.py` reads
   only the requirements files. A broken release on a Monday loses that week's
-  snapshot for good (no backfill). Not raised alone: unlikely, and the owner's
+  snapshot for good (no backfill). **10-28:** httplib2, under all three and
+  unpinned in `requirements.txt` too, shipped 0.32.1 that morning (drops a
+  distrusted Comodo root, not Google's); with the job's newest three, TLS to
+  every Google host and all tests pass. Not raised alone: unlikely, and the owner's
   queue is the binding limit. Patch and test built 10-18 (the bundle above).
   **Closes when** the next workflow patch to the
   owner carries `pip install -r requirements.txt` there, with a test that
@@ -482,7 +485,7 @@ a list nobody can read is the same as no list.
 
 - **The repo keeps YouTube API text past YouTube's 30-day limit (found
   2026-10-24, Legal).** `analysis/channel_videos.csv` (`scripts/analyze_channel.py`,
-  a one-off, last run 09-11) holds 1,309 uploads' titles, questions and
+  a one-off, last run 09-11) holds 993 uploads' titles, questions and
   answers as read from the Data API, public in this repo and its history.
   YouTube's developer policy III.E.4 lets a client keep non-statistics API
   data 30 days, then refresh or delete it; statistics may stay. The text is
