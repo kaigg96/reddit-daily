@@ -108,7 +108,7 @@ def upload_thumbnail(video_id, thumbnail_path):
         ).execute()
         print("Thumbnail uploaded.")
     except Exception as e:
-        print(f"Failed to upload thumbnail: {type(e).__name__}: {e}")
+        print(f"::warning::Failed to upload thumbnail: {type(e).__name__}: {e}")
 
 
 def upload_caption(video_id, srt_path, language="en", name="English"):
@@ -128,7 +128,7 @@ def upload_caption(video_id, srt_path, language="en", name="English"):
         print("Caption track uploaded.")
         return True
     except Exception as e:
-        print(f"Failed to upload caption (continuing): {type(e).__name__}: {e}")
+        print(f"::warning::Failed to upload caption (continuing): {type(e).__name__}: {e}")
         return False
 
 
@@ -147,5 +147,5 @@ def post_comment(video_id, text):
         print("Engagement comment posted.")
         return True
     except Exception as e:
-        print(f"Failed to post comment (continuing): {type(e).__name__}: {e}")
+        print(f"::warning::Failed to post comment (continuing): {type(e).__name__}: {e}")
         return False
