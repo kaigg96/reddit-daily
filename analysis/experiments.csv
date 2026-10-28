@@ -59,3 +59,5 @@ groq-judge,Groq judges host tags,observational,agreement,2026-10-24,,2026-10-24,
 #15-tags-eye,v8 tags by eye,release,verdict_or_label_tags,2026-10-25,,,pending,,"first 6 uploads, 18 tags (rule)",bar 3 or more,,PRD §4 2026-10-23 (10-25); git bf0c76e
 R4,weekly view swings: viewers or data,observational,weekly_views,2026-10-26,2026-11-16,,pending,,10-12 to 11-16 (rule),,,PRD §0 R4; PRD §4 2026-10-26; git 42ffd08
 reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,,pending,,,bar under 150 a day,,PRD §4 2026-10-26
+#14-balance,"#14's arms by subreddit (assignments only)",coin,subreddit,2026-10-28,2026-11-23,,pending,,30 per arm (rule),bar Fisher p < 0.05,,PRD §0 #14; git 75fda3c
+R2-balance,"R2's voices by subreddit (assignments only)",coin,subreddit,2026-10-28,2026-11-02,,pending,,≥12 each (rule),bar Fisher p < 0.05,,PRD §0 R2; git 75fda3c
