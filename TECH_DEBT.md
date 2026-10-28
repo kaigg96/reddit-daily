@@ -40,7 +40,7 @@ this file tracks *code health* independent of any feature phase.
 
 ### Deferred to a future pass
 
-- **No automated tests exist.** Not urgent for the rendering path (correctly verified by the existing dry-run + frame-extraction ritual — genuinely visual/audio correctness that needs eyes, not assertions). But `weekly_digest.py`'s date/threshold arithmetic (cadence windows, unlogged-video buffers) and `analyze_channel.py`'s stats (age-adjusted residuals, distinctive terms) are pure, deterministic, and have already needed two manual recalibrations this week from eyeballing — exactly the class of bug a small `pytest` suite over just those functions would catch for free. Owner scoped this pass to Tier 1+2 (cleanup + structure) and left testing for later; worth revisiting at the next check-in.
+- ~~**No automated tests exist.**~~ *Closed in Pass 2* (`tests/test_insights.py`; 669 tests on 2026-10-28). Not urgent for the rendering path (correctly verified by the existing dry-run + frame-extraction ritual — genuinely visual/audio correctness that needs eyes, not assertions). But `weekly_digest.py`'s date/threshold arithmetic (cadence windows, unlogged-video buffers) and `analyze_channel.py`'s stats (age-adjusted residuals, distinctive terms) are pure, deterministic, and have already needed two manual recalibrations this week from eyeballing — exactly the class of bug a small `pytest` suite over just those functions would catch for free. Owner scoped this pass to Tier 1+2 (cleanup + structure) and left testing for later; worth revisiting at the next check-in.
 - `scripts/` still mixes true one-time tools (`make_sfx.py`, `prep_broll.py`) with recurring CI-invoked scripts (`weekly_analytics.py`, `weekly_digest.py`) and an ad hoc-but-substantial one (`analyze_channel.py`), with no naming/directory convention distinguishing them. Not painful yet at 5 scripts; reconsider if the directory keeps growing.
 
 ## Pass 2 — 2026-08-23 (after v4 + v5 + b-roll + Step 0 telemetry)
@@ -492,3 +492,14 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
   the text columns at HEAD, leave history. **Closes when** decided there.
+- **After a live upload, a failing upload-log append still loses the record
+  (2026-10-28, reliability).** Since 10-28 nothing else between a successful
+  upload and the record raises: the upload retries, and thumbnail, caption
+  and comment catch any error. `log.append_upload_log` (`src/run.py`, after
+  `prev_post.txt` is written) can still raise, most plausibly from a future
+  column change's `_migrate_header`. The run then fails, the workflow commits
+  neither file, and the next run may ship the post again. Not fixed: letting
+  the run succeed past it could commit a damaged log, since the migration
+  truncates before rewriting. **Fix when** the log's columns next change:
+  migrate by writing a temporary file and renaming it, then catch the append
+  so the run commits `prev_post.txt`.
