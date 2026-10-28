@@ -95,16 +95,20 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
         return None
 
 
+# The three calls below run after the video is live and before run.py records
+# it. Each catches any error, its sign-in included (a token refresh over the
+# network): a raise here would fail the run unrecorded, skipping the commit of
+# prev_post.txt and upload_log.csv, so the next run could ship the post again.
 def upload_thumbnail(video_id, thumbnail_path):
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.thumbnails().set(
             videoId=video_id,
             media_body=MediaFileUpload(str(thumbnail_path), mimetype="image/png"),
         ).execute()
         print("Thumbnail uploaded.")
-    except HttpError as e:
-        print(f"Failed to upload thumbnail: {e}")
+    except Exception as e:
+        print(f"::warning::Failed to upload thumbnail: {type(e).__name__}: {e}")
 
 
 def upload_caption(video_id, srt_path, language="en", name="English"):
@@ -113,8 +117,8 @@ def upload_caption(video_id, srt_path, language="en", name="English"):
     Returns True/False so the outcome can be logged — a silent failure here
     previously vanished with the Actions log and was only discoverable by
     querying YouTube directly."""
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.captions().insert(
             part="snippet",
             body={"snippet": {"videoId": video_id, "language": language,
@@ -123,8 +127,8 @@ def upload_caption(video_id, srt_path, language="en", name="English"):
         ).execute()
         print("Caption track uploaded.")
         return True
-    except HttpError as e:
-        print(f"Failed to upload caption (continuing): {e}")
+    except Exception as e:
+        print(f"::warning::Failed to upload caption (continuing): {type(e).__name__}: {e}")
         return False
 
 
@@ -133,8 +137,8 @@ def post_comment(video_id, text):
     (The Data API cannot pin comments — pinning stays manual.)
 
     Returns True/False so the outcome can be logged."""
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.commentThreads().insert(
             part="snippet",
             body={"snippet": {"videoId": video_id,
@@ -142,6 +146,6 @@ def post_comment(video_id, text):
         ).execute()
         print("Engagement comment posted.")
         return True
-    except HttpError as e:
-        print(f"Failed to post comment (continuing): {e}")
+    except Exception as e:
+        print(f"::warning::Failed to post comment (continuing): {type(e).__name__}: {e}")
         return False

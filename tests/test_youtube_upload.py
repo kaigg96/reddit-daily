@@ -1,6 +1,7 @@
-"""The live upload retries a transient error by resuming (src/youtube.py)."""
+"""The live upload retries a transient error by resuming, and nothing after it raises (src/youtube.py)."""
 import http.client
 
+import google.auth.exceptions
 import httplib2
 import pytest
 from googleapiclient.discovery import build
@@ -122,3 +123,39 @@ def test_a_lost_completion_returns_the_video_without_a_second_upload(tmp_path):
     assert _upload(tmp_path, server) == (None, {"id": "abc"})
     assert [m for m, _ in server.sent] == ["POST", "PUT", "PUT"]
     assert server.sent[2][1]["Content-Range"] == f"bytes */{SIZE}"
+
+
+# After the video is live, nothing may raise before run.py records it.
+class _Client:
+    """Any call chain (thumbnails().set(...)) ends in an execute() that fails."""
+    def __init__(self, error):
+        self.error = error
+
+    def __getattr__(self, name):
+        return lambda *a, **k: self
+
+    def execute(self):
+        raise self.error
+
+
+@pytest.mark.parametrize("call, failed", [
+    (lambda: youtube.upload_thumbnail("abc", "t.png"), None),
+    (lambda: youtube.upload_caption("abc", "c.srt"), False),
+    (lambda: youtube.post_comment("abc", "hi"), False),
+])
+@pytest.mark.parametrize("error", [ConnectionResetError("reset"),
+                                   http.client.IncompleteRead(b""),
+                                   google.auth.exceptions.TransportError("token")])
+def test_the_calls_after_an_upload_never_raise(monkeypatch, capsys, call, failed, error):
+    def fail(*a, **k):
+        raise error
+    monkeypatch.setattr(youtube, "MediaFileUpload", lambda *a, **k: None)
+    monkeypatch.setattr(youtube, "_authenticate", fail)                  # sign-in
+    assert call() is failed
+    monkeypatch.setattr(youtube, "_authenticate", lambda: None)
+    monkeypatch.setattr(youtube, "build", fail)                          # client
+    assert call() is failed
+    monkeypatch.setattr(youtube, "build", lambda *a, **k: _Client(error))  # the call
+    assert call() is failed
+    out = capsys.readouterr().out
+    assert out.count("::warning::") == 3 and type(error).__name__ in out
