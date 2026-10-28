@@ -113,6 +113,19 @@ def test_a_failed_command_shows_its_message_not_only_its_exit_code():
     assert "✗ Bash: venv/bin/python -m pytest — Exit code 1: ImportError: cannot import name 'x'" in text
 
 
+def test_a_dotted_github_token_is_redacted_whole():
+    # The shape of the workflow token the agent holds (2026-10-28): segments of
+    # 5, 36, 243, 21 and 64 characters after `ghs_`, joined by dots and underscores.
+    parts = ["Ab3dE", "B" * 36, "C" * 243, "D" * 21, "E" * 64]
+    token = "ghs_" + parts[0] + "." + parts[1] + "." + parts[2] + "_" + parts[3] + "." + parts[4]
+    run = [_assistant(_tool(1, "Bash", command="echo " + token[:100])),
+           {"type": "result", "subtype": "success", "result": "it printed " + token + "."}]
+    text = shift_trace.render(*shift_trace.trace(run), env={})
+    assert "ghs_" not in text
+    for part in parts:
+        assert part[:5] not in text, part[:5]
+
+
 def test_a_token_cut_by_the_line_limit_leaves_no_prefix():
     token = "ghp_" + "A" * 36
     run = [_assistant(_tool(1, "Bash", command="x" * 125 + " " + token))]
