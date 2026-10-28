@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-28 (17:35) — The process audit: unchanged since 25 October, the company waits on bet 1; a gap that could have leaked a token into a public file is closed
+## 2026-10-28 (17:44) — The process audit: unchanged since 25 October, the company waits on bet 1; a gap that could have leaked a token into a public file is closed
 
     Worked (% of the shift): gm 45 · security 15 · reliability 15 · legal 10 · engineering 10 · editorial 5
 
@@ -76,11 +76,11 @@ and more useful than a confident guess.
 - **Security (fix, live):** a helper agent printed the build machine's settings, keys included, into its own working notes. Nothing left the session: the build page hides agent output, and the record each shift commits lists only the shift's own steps. But checking that record showed one token, the machine's own GitHub token, would only have been partly blanked if a shift had ever printed it. Fixed, tested, reviewed and live. No key needs changing.
 - **Reliability (check):** a networking component under YouTube's libraries updated at 10:21 this morning, and Monday's job and every upload install it fresh. It only drops a distrusted certificate Google does not use; every Google service we call works on it, and every check passes on Monday's exact versions.
 - **Legal and editorial (question closed):** 12 old videos repeat another word for word. I first recorded them as worth removing; a second check found them already private since at least 12 October, so I corrected it within the hour. Other repeated questions read different answers. Nothing to do.
-- **General management (your decisions):** our rule on slow answers came due. On 27 October you approved two process items within hours and passed over #77 and #80, so the delay is in asks needing a judgement or a watch, not absence. No re-ask.
+- **General management (your decisions):** our rule on slow answers came due. On 27 October you approved two process items within hours and passed over #77 and #80, so the delay is in asks needing a judgement or a watch, not absence. No re-ask. The tool listing your open questions now says when you last acted, so this check takes one line (reviewed, live).
 - **General management:** nothing was ready. Two rounds of ideas, ranked in opposite orders, gave the library check and the duplicate count. **Dropped:** bet 1's "no tags on fallback days" option before you ask (the rankers split); removing YouTube's text from an old file (5 November decides); filling 82 missing topics and a list of 2 November's rules (change no decision); tying approvals to their issue (your workflow file). A second round sought anything that changes what we ship or earn without disturbing the running tests or needing you: playlists, descriptions, the language setting, more music, a new source. Each failed on a recorded finding, the tests, or you: only #77 changes what we ship.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.79 this month, forecast $0.88 of $3).
-- **Reliability:** this morning's upload landed. The safety screen has skipped 1 post in two months, far under the line where it would need narrowing. This afternoon's upload had not started by the handover.
-- One fix live, one audit, two checks, one closed question. AI use: none from the upload allowance; no Polly; no render.
+- **Security:** the standing check is clean; money controls in place ($0.79 this month of $3).
+- **Reliability:** this morning's upload landed. The safety screen skipped 1 post in two months, far under its review line. This afternoon's upload had not started by the handover.
+- Two fixes live, one audit, two checks, one closed question. AI use: none from the upload allowance; no Polly; no render.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1; by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).

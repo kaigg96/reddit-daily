@@ -367,7 +367,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-28, reviewed (left: a full stop after a token is blanked with it). (6) Decisions (re-reviews inline):
   D4 and D11 hold false assumptions, D5 and D9 strained; D8 is clean at a
   third audit, so it can graduate (a skill change, for the bundle); D10
-  graduated to a stub the same day; the file is at 15 of 15.
+  graduated to a stub the same day; the file is at 15 of 15. D13's
+  question, absence or the ask's form, is now one line: `escalations.py
+  open` prints the owner's last deliberate act (10-28, reviewed twice; a
+  `referenced` event carries the owner's name when auto-apply pushes).
   **Outward look:** re-read 10-25; not repeated after three days.
   **Left alone:** the shift cadence and the owner's queue, which no shift
   change moves.

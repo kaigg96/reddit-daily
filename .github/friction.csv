@@ -64,3 +64,4 @@ F62,2026-10-28T17:26:40+00:00,40733029176,gm,"Two generation rounds, two rankers
 F63,2026-10-28T17:33:50+00:00,40733029176,gm,"Audit 2026-10-28 (nine shifts since 10-25): findings in TECH_DEBT, eleven decisions re-reviewed inline",done,,none,,,0,
 F64,2026-10-28T17:35:08+00:00,40733029176,security,"Shift trace: a dotted GitHub token was only partly redacted; fixed, reviewed, merged",done,,none,,,0,
 F65,2026-10-28T17:35:09+00:00,40733029176,gm,D10 graduated to a stub (owed since the 10-25 audit),done,,none,,,0,
+F66,2026-10-28T17:42:57+00:00,40733029176,gm,escalations.py open prints the owner's last deliberate act (D13's recurring question),done,,mistake,"the first version counted 'referenced' events, which GitHub credits to the owner when the auto-apply job pushes with their token; only the review found it",a note in the auto-apply workflow that its pushes carry the owner's name,5,
