@@ -39,7 +39,7 @@ v7-long,v7 credit within long videos,release,watch_seconds,2026-10-07,2026-10-12
 #13,move AI calls to Groq,release,watch_seconds; title fallbacks,2026-10-08,,,pending,,≥20 uploads (rule),bar titles fall back on ≥4 of first 20,,PRD §0 #13; git 726e312
 title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120% (median 179 vs 81.5),65/68,,,PRD §4 2026-10-09
 #3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,,pending,,≥15 each (rule),~18%,,PRD §0 #3; git 7a7a8fe
-#10,title style B weighting,coin,watch_seconds,2026-10-10,,,pending,,≥15 B and ≥8 others (rule),~30%,,PRD §0 #10; git 3b9929d
+#10,title style B weighting,coin,watch_seconds,2026-10-10,2026-11-02,,pending,,≥15 B and ≥8 others (rule),~30%,,PRD §0 #10; git 3b9929d
 #14,"one capitalised word, randomized",coin,views; watch_seconds,2026-10-10,2026-11-23,,pending,,30 per arm (rule),~82% views; ~16% watch_seconds,,PRD §0 #14; git 518bdf7
 R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-10-10,,2026-10-10,keep,31% to 18% at 15 a side,newest 90,bar ≥⅓ narrower,,"PRD §4 2026-10-10; git d9ee9b3, 3f81022"
 R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,recorded,4 of 25 at ≤5 views (p=0.049),25,bar p 0.0125,,PRD §4 2026-10-12; git c0860b2
