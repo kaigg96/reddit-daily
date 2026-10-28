@@ -330,44 +330,47 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`integration/preview`): the second model first, given the main call's
   reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
 
-- **Audit 2026-10-25: the process is working at the margin; the owner's
-  queue binds, and shifts fill the wait with small fixes.** Nine shifts since
-  10-21, 26–43 of 60 minutes (mean ~38), every one with nothing ready and
-  every one handed over. Nothing reached viewers (`v7` since 09-25); bet 1's
-  spoken sample is on #77. Gates caught real defects (two held samples, a
-  slur from truncation, a blank line dropping every host line); no reverts,
-  no attribution trailers, one dry run per shift at most, every render
-  clear of uploads. **Found:** (1) the owner has been silent since 10-20
-  21:12, past their longest gap, with #77 and #80 plain labels (D13
-  re-reviewed: absence). #77's title and body still asked for a local
-  render after the ask became a label (third drift); #82's title gave
-  31 October, not 12 January. Both rewritten by edit, no email. (2) Distribution
-  and finance had no time in 20 shifts, monetization and editorial none
-  since 10-21; for the 11-05 monthly (finance's break-even done 10-25). (3) All nine "Than last shift"
-  answers say better while the trajectory is flat: self-grading, as the
-  template warns. Answer for viewers first. (4) Six of nine shifts were
-  "mostly fixes", many of them tag word lists on the unreleased branch,
-  grown three times (grading, agreeing, "is right"). (5) `context_budget.py
-  --allocation` counted a re-stamped entry twice (10-24 08:50/09:05) and its
-  40-commit window fell short of ten shifts: fixed and merged 10-25
-  (reviewed). A re-stamp that also rewords its headline now links by its
-  summary (10-18, merged 10-25, reviewed). Left: `--dropped` still lists that
-  one twice, and a re-stamp across midnight counts twice in both. (6) Break-even was
-  dropped four times as "needs your subscription price"; bounded on public
-  prices instead (PLAN §1, 10-25).
-  (7) Four branches look abandoned (`pre-trip`, `data/release-chance`,
-  `integration/two-answer-meta-fallback`, `product/host-line-fallback`);
-  18 are contained in `integration/preview` and go when `v8` merges. Not
-  deleted: unmerged work. **Decisions:** all re-reviewed but D1 (the worked
-  example); D7 compressed to a stub, D10 is due one.
-  **Outward look (docs re-read 10-25):** a skill's frontmatter can now carry
-  `hooks:`, keeping a hook under protected `.claude/skills/**` rather than
-  the unprotected `.claude/settings.json`; `` !`cmd` `` injection could
-  pre-load the orientation commands. Rejected: auto mode (the shift job holds
-  no upload secrets; the classifier could block the handover push), a
-  compaction hook (no shift is known to compact; measure first). The audit
-  skill's three "not yet tried" were all decided 10-09; its text is stale.
-  The Stop hook is dropped: every traced shift after the 10-19 two-minute one handed over.
+- **Audit 2026-10-28: as on 10-25, the process works at the margin and the
+  owner's label on #77 binds; shifts fill the wait with protective fixes.**
+  Eight shifts since 10-25 15:40, 26–61 of 60 minutes (mean 38, unchanged);
+  four began with nothing ready, four with carried work or the owner's two
+  items. 6 of 8 were fixes; two changes reached viewers, both protective (a
+  clip retired, the shock-title guard). Watch time flat at 12 s; the
+  scorecard reads WORSE on its zero-rate guardrail (4.8% → 11.4%), one
+  period, so read it again on 11-02 (D9's trigger if it repeats). Fresh
+  reviews caught real defects again (the upload retry's resume range and two
+  missed errors, a half-written log row, an ambiguous balance rule, the dose
+  count); dry runs caught none; no reverts, no attribution, live data written
+  only by the upload job. **Of 10-25's findings:** self-grading fixed
+  (entries lead "No for viewers" from 10-27 17:05); still mostly fixes;
+  audience still 0 (distribution, editorial, finance 5% once each), as every
+  ship-or-earn idea needs bet 1 or the owner (two rounds on 10-28 found
+  none); issue bodies drifted again (four, 10-27), so the carried re-raise
+  fix stands; the four branches stay. **New:** (1) PRD §4 grew 6,593 →
+  10,452 → 12,162 words (10-18, 10-25, now), unbudgeted while every session
+  is sent to it: compress at the 11-05 monthly, then budget it in
+  `context_budget.py`. (2) Entries run ~1,000 words each since 10-12, so
+  WORKLOG's word budget keeps two and its ten-entry cap never binds (D4's
+  (1) false there): a cold session sees under a day, and a Next pointing at
+  an older entry breaks when it goes (one caught 10-28). Propose a
+  per-entry cap at the monthly. (3) Six candidates were dropped twice across
+  shifts despite `--dropped` (an outage alarm, the voice read's limit, early
+  11-05 drafting, render refusals, a detection limit, voice cost per
+  source); minutes each. (4) A recommendation to the owner reached `main`
+  before its premise was checked (10-28: removing 12 duplicates already
+  private; a fresh agent caught it within the hour). A finding that asks the
+  owner to act gets a fresh check before it lands, as code does. (5) A
+  helper agent printed the runner's environment into its own output
+  (10-28). Contained: the action hides agent output and the trace lists only
+  the shift's own calls; but the agent's workflow token (dotted, not
+  `GITHUB_TOKEN`) slipped the trace's token shapes, fixed on
+  `security/trace-dotted-github-token`. (6) Decisions (re-reviews inline):
+  D4 and D11 hold false assumptions, D5 and D9 strained; D8 is clean at a
+  third audit, so it can graduate (a skill change, for the bundle); D10's
+  stub, due since 10-25, is still not done; the file is at 15 of 15.
+  **Outward look:** re-read 10-25; not repeated after three days.
+  **Left alone:** the shift cadence and the owner's queue, which no shift
+  change moves.
   **Carried, for one bundled proposal at the 11-05 monthly (not raised now,
   to keep #77 the owner's only ask):** the re-raise that replaces an issue's
   body (`process/reraise-replaces-ask`, with the weekly install's pin; a

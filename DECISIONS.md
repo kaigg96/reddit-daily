@@ -88,6 +88,7 @@ in advance; `/audit` checks for all three. The experiment process has none of
 them yet (`PLAN.md` C18).
 
 **Revisit:** at the rule's read, and at each `/audit`.
+**Re-reviewed 2026-10-28 (audit):** holds: all four shifts since it went live logged their rows, about 40% "none"; the rest untestable until the 11-24 read.
 
 ---
 
@@ -110,6 +111,7 @@ declined it as a gate). **Assumptions:** (1) monetization review comes only
 when we apply; (2) audience is the binding step (21 subscribers, §1).
 **Revisit** before applying to any paid programme, or at 1,000 subscribers.
 **Re-reviewed 2026-10-25 (audit):** holds; (2) unchanged (21 subscribers). Stale beside it: D9's and D10's 10-13 lines call YouTube's review bet 1's real gate, which D14 declined; PLAN §1 still rates Audience "none" (11-05 monthly).
+**Re-reviewed 2026-10-28 (audit):** holds: 22 subscribers, engaged views ~757× short; (1) untestable, as nothing has been applied for.
 
 ## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
 
@@ -175,6 +177,7 @@ unowned:
 unanswered (4 false); or the cadences push shifts past the reserve (3 false).
 **Re-reviewed 2026-10-13 (audit):** holds. Market and Monetization did their first work (10-13); Audience is still none, blocked on #75, so a finding at the 11-05 monthly.
 **Re-reviewed 2026-10-25 (audit):** holds. Stale beside it: the coverage table (PLAN §1, last set 10-05) still rates Audience "none" though D14 made audience the binding step; distribution and finance had no time in 20 shifts (`--allocation`). Both for the 11-05 monthly.
+**Re-reviewed 2026-10-28 (audit):** (1) and (3) hold; (2) waits on the 11-05 monthly (audience, monetization and market still "none"); (4) strained: asks resting on outside evidence wait longest (#80 nine days, #82 seven).
 
 ## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
 
@@ -226,6 +229,7 @@ asks as labels (#70 splits bet 1 out of #55). Revisit if shifts still end early
 once #70 is answered.
 **Re-reviewed 2026-10-13 (audit) — trigger fired:** after #70 closed, two shifts ran 26 and 25 of 60 minutes (shift-usage.csv); both ready items wait on #74. Carried by D13.
 **Re-reviewed 2026-10-25 (audit) — trigger fired again:** nine shifts, every one with ready 0, ran 26–43 of 60 minutes. Its floor is 5 in `backlog_status.py` but 3 in the shift and backlog skills (and was in PRD §0, now pointing at the tool); assumption 3's "a floor of 3" is stale. The cause is D13's, not supply's: the work above the bar waits on the owner.
+**Re-reviewed 2026-10-28 (audit):** (1) false: 0 ready against a floor of 5, for every shift since 10-25 that did not inherit work; (3) false: the shift skill says 3, the tool 5 (in the 11-05 bundle). The cause is D13's.
 
 ## D10 · 2026-09-25 · No new spending until the channel earns money
 
@@ -263,6 +267,7 @@ asked for so Reddit posts stop reaching a free tier that trains on them (#62):
 *"Not approved to spend money on this, find another solution."*
 **Re-reviewed 2026-10-13 (audit):** (1) holds for longer: new applicants need 20M Shorts views from 1 Feb 2027 (PLAN §1). (2) in doubt: text-only commentary may fail YouTube's review, and a spoken host needs spend or the owner's voice.
 **Re-reviewed 2026-10-25 (audit):** holds; revenue $0. (2)'s doubt about YouTube's review no longer steers bet 1 (D14). The Partner Program bar is about break-even, not profit, on any plan above Pro (PLAN §1, 10-25).
+**Re-reviewed 2026-10-28 (audit):** holds: revenue $0, and free routes keep turning up (the stand-in voice, Groq). Its one-line stub, due since 10-25, is still owed.
 
 ## D6 · 2026-09-21 · A release verdict must clear the channel's own drift
 
@@ -295,6 +300,7 @@ the new cadence, not borrowed from the 2-a-day era.
 **Re-reviewed 2026-10-13 (audit):** (b) at risk: `v8` is read on AskReddit alone (~1 a day under #3), so its 20 uploads take ~20 days and four a day (#4) could land mid-bake.
 **2026-10-18:** the floor still reads the whole era, but the comparison now reads the release replaced, at 20+ uploads: `v7` read +20% over the pool, so `v8` could have fallen ~17% below it and passed.
 **Re-reviewed 2026-10-25 (audit):** holds; still two uploads a day, and four a day waits on bet 1 (#80).
+**Re-reviewed 2026-10-28 (audit):** holds: two a day, four waiting on #80; the Monday snapshot retries since 10-27.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
@@ -332,6 +338,7 @@ breaches today on 2.4% → 5.6% (n=42 vs 36), which the scorecard itself calls
 weather at this size.
 **Re-reviewed 2026-10-13 (audit):** (2) weakened: `v7` raised watch-seconds 20% while the engaged share stayed 0.34–0.36 (PRD #8), and bet 1's real gate, YouTube's review, has no metric.
 **Re-reviewed 2026-10-25 (audit):** "bet 1's real gate, YouTube's review" is superseded: the owner made a first-time viewer the test (D14, 10-19). The typed metrics stand; the revenue bar counts engaged views (PLAN §1).
+**Re-reviewed 2026-10-28 (audit):** (1) strained: the zero-rate guardrail breached again (4.8% → 11.4%), as on 10-09; a breach on 11-02 too is the revisit trigger. (2) strained: watch-seconds is flat while the revenue bar counts engaged views.
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
@@ -363,6 +370,7 @@ which name what went wrong with Gemini: exploit and subordinate, never elevate.
 or `WORKLOG` shows the method skipped (2 false).
 **Re-reviewed 2026-10-13 (audit):** holds; the last three shifts ranked forward and reversed.
 **Re-reviewed 2026-10-25 (audit):** holds; every shift since 10-21 ranked forward and reversed.
+**Re-reviewed 2026-10-28 (audit):** holds, clean for a third audit (10-13, 10-25, 10-28): eligible to graduate into the backlog skill, a change for the 11-05 bundle.
 
 ## D7 · 2026-09-21 · Slack goes to research, not back to the clock — **absorbed by D11 and the shift skill**
 
@@ -402,6 +410,7 @@ approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
 #50's could not be read. Each failure costs the owner another round trip.
 **Re-reviewed 2026-10-13 (audit):** (1) strained: two shifts held back a rule fix to spare the owner's queue, and no skill change can land until #50 is applied (8 days).
 **Re-reviewed 2026-10-25 (audit) — trigger fired.** #50 approved 10-05 and unapplied 20 days; #65 behind it 17. Its cost is now visible: the shift skill and the backlog skill say the ready floor is 3, `backlog_status.py` says 5, and the skill's "cannot read Actions logs" is false (`gh run view --log` works). Workflow-file patches never needed #50 (`apply-approved.yml` lands them on a label). For the 11-05 monthly: one bundled skill change, not more asks to an absent owner.
+**Re-reviewed 2026-10-28 (audit):** (1) false: #50, approved 10-05, is still unapplied; (3) mixed: process wording is labelled within hours (#84, #85).
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
@@ -432,6 +441,7 @@ largest item runs past 500 words, so items grow rather than count. Shorter
 entries would come from the template, which is what the owner reads. Left as is.
 **Re-reviewed 2026-10-13 (audit):** the count fell to 21 of 25, but items grow instead (the Groq item runs ~500 words); (3) still strained.
 **Re-reviewed 2026-10-25 (audit):** (3) worse: TECH_DEBT sits at 25 of 25 with items up to ~785 words, and WORKLOG's word budget holds two entries. Closure happened this audit (the 10-21 item resolved into this one), but item length is unbounded.
+**Re-reviewed 2026-10-28 (audit):** (1) false for WORKLOG: ~1,000-word entries mean its word budget keeps two and the ten-entry cap never binds; (3) strained: TECH_DEBT at 24 of 25.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
@@ -458,6 +468,7 @@ wrong in either direction — trivia means too tight, silence means shifts are
 deciding what they shouldn't (3).
 **Re-reviewed 2026-10-13 (audit):** holds; a sample and a fresh review caught bet 1's dropped host lines before merge.
 **Re-reviewed 2026-10-25 (audit):** holds; gates caught real defects (two held samples, a truncation slur, a blank line dropping the host). Its text omits two later gates: the fresh-context review (CLAUDE.md §3) and the publishing-policy exception (§4).
+**Re-reviewed 2026-10-28 (audit):** (1) strained: two commits reached `main` before their fresh review (friction F37), which CI does not enforce; (2) untestable, no bad release since; (3) holds.
 
 ## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3**
 
