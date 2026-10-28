@@ -62,3 +62,5 @@ F60,2026-10-28T17:23:22+00:00,40733029176,legal,"Duplicate old videos counted fo
 F61,2026-10-28T17:26:40+00:00,40733029176,legal,Duplicates finding corrected: the 12 exact copies were already private since at least 10-12,done,,mistake,"I recommended removing videos without checking their privacy; the snapshot records it, but nothing pointed me there",the catalogue's privacy status beside each video in the file I counted from,8,
 F62,2026-10-28T17:26:40+00:00,40733029176,gm,"Two generation rounds, two rankers: 15 candidates, 2 done, the rest dropped (WORKLOG)",done,,none,,,0,
 F63,2026-10-28T17:33:50+00:00,40733029176,gm,"Audit 2026-10-28 (nine shifts since 10-25): findings in TECH_DEBT, eleven decisions re-reviewed inline",done,,none,,,0,
+F64,2026-10-28T17:35:08+00:00,40733029176,security,"Shift trace: a dotted GitHub token was only partly redacted; fixed, reviewed, merged",done,,none,,,0,
+F65,2026-10-28T17:35:09+00:00,40733029176,gm,D10 graduated to a stub (owed since the 10-25 audit),done,,none,,,0,

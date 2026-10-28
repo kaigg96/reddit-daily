@@ -363,11 +363,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   helper agent printed the runner's environment into its own output
   (10-28). Contained: the action hides agent output and the trace lists only
   the shift's own calls; but the agent's workflow token (dotted, not
-  `GITHUB_TOKEN`) slipped the trace's token shapes, fixed on
-  `security/trace-dotted-github-token`. (6) Decisions (re-reviews inline):
+  `GITHUB_TOKEN`) slipped the trace's token shapes: fixed and merged
+  10-28, reviewed (left: a full stop after a token is blanked with it). (6) Decisions (re-reviews inline):
   D4 and D11 hold false assumptions, D5 and D9 strained; D8 is clean at a
-  third audit, so it can graduate (a skill change, for the bundle); D10's
-  stub, due since 10-25, is still not done; the file is at 15 of 15.
+  third audit, so it can graduate (a skill change, for the bundle); D10
+  graduated to a stub the same day; the file is at 15 of 15.
   **Outward look:** re-read 10-25; not repeated after three days.
   **Left alone:** the shift cadence and the owner's queue, which no shift
   change moves.

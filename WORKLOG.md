@@ -61,6 +61,44 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-28 (17:35) — The process audit: unchanged since 25 October, the company waits on bet 1; a gap that could have leaked a token into a public file is closed
+
+    Worked (% of the shift): gm 45 · security 15 · reliability 15 · legal 10 · engineering 10 · editorial 5
+
+**Summary:** Nothing viewers see changed and nothing moved revenue directly. Bet 1 still waits on your label (#77). The process audit came due and found the same picture as three days ago: shifts keep the system safe while the one change that matters waits on you. It also found and closed a gap that could have put a working token into a public file.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Bet 1 is ready the day you label it.** Today's live code, the release and the counting fix built beside it combine with no conflicts, and all 936 checks pass.
+
+### Done
+- **General management (the audit, due after about ten shifts):** eight shifts since 25 October ran 26 to 61 minutes of 60 (38 on average, as before). Six of eight were fixes, and the two changes viewers saw were protective. Of the last audit's findings, the self-grading is fixed (these reports now answer "No for viewers" first); the rest stand because they wait on bet 1 or on you. New: the product plan's findings section has nearly doubled in ten days and nothing caps it; these reports run about 1,000 words, so only the last two survive for the next shift; six ideas were dropped twice by different shifts; and a recommendation to you went in before its premise was checked (below). Every decision was re-tested and dated; one, settled in the rules, was cut to a line. Proposals go to the 5 November review, not to you now.
+- **Security (fix, live):** a helper agent printed the build machine's settings, keys included, into its own working notes. Nothing left the session: the build page hides agent output, and the record each shift commits lists only the shift's own steps. But checking that record showed one token, the machine's own GitHub token, would only have been partly blanked if a shift had ever printed it. Fixed, tested, reviewed and live. No key needs changing.
+- **Reliability (check):** a networking component under YouTube's libraries updated at 10:21 this morning, and Monday's job and every upload install it fresh. It only drops a distrusted certificate Google does not use; every Google service we call works on it, and every check passes on Monday's exact versions.
+- **Legal and editorial (question closed):** 12 old videos repeat another word for word. I first recorded them as worth removing; a second check found them already private since at least 12 October, so I corrected it within the hour. Other repeated questions read different answers. Nothing to do.
+- **General management (your decisions):** our rule on slow answers came due. On 27 October you approved two process items within hours and passed over #77 and #80, so the delay is in asks needing a judgement or a watch, not absence. No re-ask.
+- **General management:** nothing was ready. Two rounds of ideas, ranked in opposite orders, gave the library check and the duplicate count. **Dropped:** bet 1's "no tags on fallback days" option before you ask (the rankers split); removing YouTube's text from an old file (5 November decides); filling 82 missing topics and a list of 2 November's rules (change no decision); tying approvals to their issue (your workflow file). A second round sought anything that changes what we ship or earn without disturbing the running tests or needing you: playlists, descriptions, the language setting, more music, a new source. Each failed on a recorded finding, the tests, or you: only #77 changes what we ship.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.79 this month, forecast $0.88 of $3).
+- **Reliability:** this morning's upload landed. The safety screen has skipped 1 post in two months, far under the line where it would need narrowing. This afternoon's upload had not started by the handover.
+- One fix live, one audit, two checks, one closed question. AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
+
+### Next
+- **This afternoon's upload** is the first on today's code and on this morning's library update: check its log row, and that the run shows no warning.
+- **2 November snapshot:** first check that the Monday check-in names no figure YouTube refused, and read each test's warnings before its verdict. Then the views rule, the subreddit test, the title-style test and the voice question (it reads engaged views); each should have enough videos. Before the voice read, run the fairness check its rule names, counting only the uploads that read will see. Apply each rule as written and record each read in the ledger. Read the scorecard's zero-view guardrail again: a second breach is a decision's revisit trigger.
+- **If #77 is labelled:** merge the release, then the counting fix (both rehearsed today), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
+- **5 November monthly:** the audit's proposals (the technical list): compress and cap the findings section, a length cap for these reports, one decision ready to retire into the rules, with the bundle carried from 25 October.
+- **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. A little for safety: one token can no longer leak through the shift record.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-28 (10:16) — One passing YouTube error can no longer lose an upload or ship a post twice; the next two coin-flip tests get a fairness check first
 
     Worked (% of the shift): reliability 55 · data 25 · gm 15 · security 5
@@ -92,44 +130,6 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** No for viewers or revenue. Yes for safety: an upload can no longer be lost, or repeated, by one passing error.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-27 (23:45) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
-
-    Worked (% of the shift): reliability 30 · data 25 · gm 20 · legal 10 · strategy 10 · security 5
-
-**Summary:** The experiment-ledger wording you approved (#85) is live. Last Monday YouTube's reporting service failed once and the weekly figures lost nearly every video's subscriber count without anyone noticing; that can no longer pass silently, and a repeat on 2 November, when four test reads are due, is now retried. Nothing viewers see changed, and nothing moved revenue directly.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
-- **Protecting the evidence.** Every bet is judged on the Monday figures, and a lost week cannot be fetched later. On 26 October one "internal error" from YouTube cost nearly every video its subscriber count; on the first requests it would have cost the whole week, including the four reads due on 2 November. Each request now tries up to three times.
-- **One more fact for 5 November.** AI use does not decide between replacement sources at two a day (2–5 requests per video for Reddit and Stack Exchange, 2–3 for our own questions, against 20 a day); at four, the first two reach the cap on a bad day.
-
-### Done
-- **General management (your decision, #85):** landed as one approved commit at 23:00 UTC; #85 is closed. Quarterly preparation now quotes the ledger before proposing any bet's rule, and every rule set or read updates its row; first read in early January.
-- **Reliability (three fixes, live):** every request the Monday jobs make to YouTube now retries a server error, as one kind already did after 19 October, including the 22-page list of our videos that comes before any figure, and your check-in's own requests. Fresh reviews found no bugs; each found a request still left out, now covered. The three libraries that job installs without fixed versions work at their newest releases, so are no risk for Monday unless one ships first.
-- **Reliability (built, not merged):** the upload itself has no retry, so one passing YouTube error loses that run's video. Two reviews each caught a flaw in the library's own retry; the branch now resumes as YouTube's example does, which cannot make a second video. Not merged at 23:40, just before a scheduled upload.
-- **Data (three fixes, live):** the reports said "insufficient data" about subscribers when the truth was "YouTube refused the request". Our rules tell a shift to accept a report's refusal as the answer, so a failed collection would have read as too few videos. They now say it was not collected. Your Monday check-in, which said "ran clean" that day, now names any refused figure. Test reads dropped a refused figure silently too; each now warns (today: 11 videos' subscriber figures). Fresh reviews found no bugs. To check the warning I ran the voice question's command filtered to warnings only, so none of its result was seen early.
-- **Legal (for #82):** its description now lists the questions on Reddit's API request form, from an archived copy (Reddit refuses automated reads); editing sends no email. One choice is yours: "developer" or "commercial developer", which asks for a monthly data budget. I recommend "developer", saying plainly that the videos go on YouTube, earn nothing today, and that we would ask Reddit before earning from them, as you decided on 10 October. A news check of Reddit's and YouTube's rules found nothing new; Reddit's $1,000 migration bounty is for community tools, not us.
-- **General management:** #65 stays open: your label predates its corrected sentence and has no reply since; a "yes" lands it.
-- **Reliability:** both of today's uploads landed. Bet 1's release still combines cleanly with everything live.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
-- **General management:** nothing was ready. A fresh agent proposed eight ideas, finding the refused subscriber counts; two rankers, in opposite orders, put the same three first. **Dropped:** a topic test chosen after seeing the data (both rankers last); counting deleted Reddit posts (Reddit refuses our build machine); why likes per 100 views rose (under one like per video).
-- Six fixes live, one built, two findings. AI use: none from the upload allowance; no Polly; no render.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January; the form's questions are now on it); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
-
-### Next
-- **2 November snapshot:** check first that the Monday check-in names no figure YouTube refused, and read each test's warnings before its verdict; the voice question reads engaged views. Then the views rule, the subreddit test, the title-style test and the voice question; all should have enough videos (20 a side; 27 against 14; 21 and 17), counted from the upload log without reading any result. Record each read in the ledger.
-- **The upload retry** (its branch's last commit): a fresh review of that commit, a check that a render fits its 100 MB request, then merge early in a shift and watch the next upload land.
-- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how). **If #65 gets a yes:** land the corrected sentence as one commit with the approval line.
-
-### Better?
-- **Than last shift:** No for viewers or revenue. Yes for the evidence: a one-off YouTube error can no longer quietly cost a week of test data, and a failed collection no longer reads as "too few videos".
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
