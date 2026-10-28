@@ -16,6 +16,8 @@ def issue(n, title, labels, comments, body=""):
 
 def fake_github(monkeypatch, issues, comments, labelled_by="kaigg96"):
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -128,6 +130,8 @@ def closed_github(monkeypatch, closed, comments, closed_by=None):
     """Open list empty; the closed list is what the refusal check reads."""
     closed_by = closed_by or {}
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -245,7 +249,10 @@ def test_the_open_listing_says_when_the_owner_last_acted(monkeypatch, capsys):
                      "created_at": "2026-10-27T21:20:06Z", "issue": {"number": 85}},
                     {"event": "labeled", "label": {"name": "needs-owner"},
                      "actor": {"login": "github-actions[bot]"},
-                     "created_at": "2026-10-28T10:00:00Z", "issue": {"number": 86}}]
+                     "created_at": "2026-10-28T10:00:00Z", "issue": {"number": 86}},
+                    # the auto-apply job pushes with the owner's token: not the owner acting
+                    {"event": "referenced", "actor": {"login": "kaigg96"},
+                     "created_at": "2026-10-28T12:00:00Z", "issue": {"number": 81}}]
         if p.endswith("/issues/comments"):
             return [{"author_association": "OWNER", "created_at": "2026-10-19T03:00:00Z",
                      "issue_url": "https://api.github.com/repos/kaigg96/reddit-daily/issues/77"},

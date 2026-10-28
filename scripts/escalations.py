@@ -172,17 +172,25 @@ def _answered_in_comment(issues):
     return out
 
 
+OWNER_ACTS = {"labeled", "unlabeled", "closed", "reopened"}
+
+
 def _owner_last_action():
     """(when, what) the owner last did on any issue, or None.
 
     D13 revisits when a label-only ask waits over three days, and asks first
     whether the owner is away or passing it over. Each of its re-reviews
     (10-11 to 10-28) dug that up by hand; on 10-28 the answer was that they
-    had labelled #84 and #85 within hours while #77 and #80 waited."""
+    had labelled #84 and #85 within hours while #77 and #80 waited.
+
+    Only deliberate acts count. A `referenced` event names whoever's token
+    pushed the commit, and the auto-apply job pushes with the owner's: an
+    unattended run would read as the owner here (review, 10-28)."""
     owner = REPO.split("/")[0]
     seen = []
     for e in _api(f"/repos/{REPO}/issues/events?per_page=100") or []:
-        if (e.get("actor") or {}).get("login") == owner and e.get("created_at"):
+        if (e.get("event") in OWNER_ACTS and (e.get("actor") or {}).get("login") == owner
+                and e.get("created_at")):
             label = (e.get("label") or {}).get("name")
             seen.append((e["created_at"], f"{e.get('event', '?')}{' ' + label if label else ''}"
                                           f" #{(e.get('issue') or {}).get('number', '?')}"))
