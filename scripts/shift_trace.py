@@ -28,9 +28,11 @@ MAX_FINAL = 2000
 SECRET_VARS = ("GEMINI_API_KEY", "GROQ_API_KEY", "AWS_READONLY_ACCESS_KEY_ID",
                "AWS_READONLY_SECRET_ACCESS_KEY", "GITHUB_TOKEN", "GH_TOKEN")
 # Anything token-shaped that a secret variable would not catch, such as a token
-# minted during the run or the job's OIDC request token.
+# minted during the run or the job's OIDC request token. A GitHub token may be
+# dotted segments (the agent's workflow token, 2026-10-28: `ghs_` then five
+# characters and a dot), which a plain run of letters left mostly visible.
 TOKEN_SHAPES = re.compile(
-    r"gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_\-]{10,}"
+    r"gh[pousr]_[A-Za-z0-9][A-Za-z0-9_.]{19,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_\-]{10,}"
     r"|gsk_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_\-]{30,}|A[SK]IA[0-9A-Z]{16}"
     r"|x-access-token:[^@\s]+|(?i:(?<=bearer )\S{16,})|(?i:authorization: *basic +\S+)"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]*")
