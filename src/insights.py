@@ -1197,6 +1197,34 @@ def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, to
     return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
 
 
+def assignment_balance(coin, against, since=None, rows=None):
+    """(arms, levels, counts, p) for a randomized `coin` against `against`,
+    from the upload log alone. No outcome is read, so it may run before a
+    coin's read without peeking (PRD §0 #14, R2). counts[arm][level] is a
+    count; p[level] the two-sided Fisher p that both arms hold that level at
+    one rate (that level against the rest). Uploads with the coin unset are
+    left out; a coin with other than two arms raises ValueError."""
+    rows = _read_upload_log() if rows is None else rows
+    if since:
+        rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
+    rows = [r for r in rows if (r.get(coin) or "").strip()]
+    arms = sorted({r[coin].strip() for r in rows})
+    if len(arms) != 2:
+        raise ValueError(f"{coin} has {len(arms)} arm(s) here "
+                         f"({', '.join(arms) or 'none'}); balance reads two")
+
+    def level(r):
+        return (r.get(against) or "").strip() or "(unset)"
+
+    levels = sorted({level(r) for r in rows})
+    counts = {a: dict.fromkeys(levels, 0) for a in arms}
+    for r in rows:
+        counts[r[coin].strip()][level(r)] += 1
+    (a, b), n = arms, {arm: sum(counts[arm].values()) for arm in arms}
+    p = {lv: buried_rate_p(counts[a][lv], n[a], counts[b][lv], n[b]) for lv in levels}
+    return arms, levels, counts, p
+
+
 def hit_rates(videos, key, top=0.10):
     """([(group, n, hits, p)], cut): how often each value of `key` makes the
     top `top` share of `videos` by views, highest rate first, with Fisher's

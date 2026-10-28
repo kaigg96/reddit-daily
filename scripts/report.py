@@ -16,6 +16,7 @@ Usage:
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
   venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
+  venv/bin/python scripts/report.py --balance title_caps --by subreddit   # a coin's arms; no outcome read
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -600,6 +601,27 @@ def show_concentration(args):
     print(f"  mean upload {total / n:.0f}")
 
 
+def show_balance(coin, against, since):
+    if not against:
+        sys.exit("--balance takes --by, the field to check its arms against")
+    try:
+        since = datetime.date.fromisoformat(since) if since else None
+        arms, levels, counts, p = insights.assignment_balance(coin, against, since)
+    except ValueError as e:
+        sys.exit(f"--balance {coin}: {e}")
+    print(f"Balance of {coin} by {against}, assignments only (no outcome read)"
+          + (f", since {since}" if since else "") + "\n")
+    print(f"  {against:24} " + " ".join(f"{coin + '=' + a:>{len(coin) + 9}}" for a in arms)
+          + f" {'Fisher p':>9}")
+    for lv in levels:
+        cells = " ".join(f"{counts[a][lv]:>{len(coin) + 9}}" for a in arms)
+        print(f"  {lv:24} {cells} {p[lv]:>9.3f}")
+    print("  " + " " * 24 + " ".join(f"{sum(counts[a].values()):>{len(coin) + 9}}"
+                                     for a in arms) + "  total")
+    print("\n  p is each level against the rest, two-sided, with no correction for"
+          "\n  the number of levels. Read it at the bar the coin's rule pre-committed.")
+
+
 def show_hit_rates(videos, key):
     """`--concentration --by F`: which values of F are over-represented among
     the top 10% of uploads by views? (PRD §0 R5)"""
@@ -691,6 +713,10 @@ def main():
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
+    p.add_argument("--balance", metavar="COIN",
+                   help="a randomized coin's arms against --by, from the upload log "
+                        "alone: no outcome is read, so it runs before a read "
+                        "(e.g. --balance title_caps --by subreddit --since 2026-10-15)")
     args = p.parse_args()
     if args.within:
         try:
@@ -728,6 +754,10 @@ def main():
     if args.experiments:    # the ledger of rules, not the analytics
         print(insights.render_experiment_ledger(
             insights.experiment_ledger(insights.load_experiments(), now.date())))
+        return
+
+    if args.balance:        # assignments only: returns before any outcome loads
+        show_balance(args.balance, args.by, args.since)
         return
 
     if args.scorecard:     # many metrics; no single one can judge this channel
