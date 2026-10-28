@@ -602,15 +602,14 @@ def show_concentration(args):
 
 
 def show_balance(coin, against, since):
-    if not against:
-        sys.exit("--balance takes --by, the field to check its arms against")
     try:
         since = datetime.date.fromisoformat(since) if since else None
         arms, levels, counts, p = insights.assignment_balance(coin, against, since)
     except ValueError as e:
         sys.exit(f"--balance {coin}: {e}")
     print(f"Balance of {coin} by {against}, assignments only (no outcome read)"
-          + (f", since {since}" if since else "") + "\n")
+          + (f", since {since}" if since else
+             "; every upload logged, so pass the coin's start as --since") + "\n")
     print(f"  {against:24} " + " ".join(f"{coin + '=' + a:>{len(coin) + 9}}" for a in arms)
           + f" {'Fisher p':>9}")
     for lv in levels:
@@ -723,6 +722,11 @@ def main():
             insights.ids_within(args.within)
         except ValueError as e:
             sys.exit(f"--within {args.within}: {e}")
+
+    if args.balance and (args.within or args.compare or args.release or args.min_views > 1
+                         or args.at_age is not None or not args.by):
+        # Assignments only: the outcome options would be silently ignored.
+        sys.exit("--balance takes --by and optionally --since, nothing else")
 
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.

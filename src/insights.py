@@ -1204,7 +1204,8 @@ def assignment_balance(coin, against, since=None, rows=None):
     count; p[level] the two-sided Fisher p that both arms hold that level at
     one rate (that level against the rest). Uploads with the coin unset are
     left out; a coin with other than two arms raises ValueError."""
-    rows = _read_upload_log() if rows is None else rows
+    rows = [_with_derived_dimensions(r)        # slot, title_writer, ...: no outcome
+            for r in (_read_upload_log() if rows is None else rows)]
     if since:
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
     rows = [r for r in rows if (r.get(coin) or "").strip()]
@@ -1214,9 +1215,13 @@ def assignment_balance(coin, against, since=None, rows=None):
                          f"({', '.join(arms) or 'none'}); balance reads two")
 
     def level(r):
-        return (r.get(against) or "").strip() or "(unset)"
+        return str(r.get(against) or "").strip() or "(unset)"
 
     levels = sorted({level(r) for r in rows})
+    if len(levels) < 2 or levels == ["(unset)"]:
+        # A typo or a field the log lacks would otherwise print one row at p 1.
+        raise ValueError(f"{against} takes {len(levels)} value(s) ({', '.join(levels)}) "
+                         f"over these uploads, so there is no mix to compare")
     counts = {a: dict.fromkeys(levels, 0) for a in arms}
     for r in rows:
         counts[r[coin].strip()][level(r)] += 1

@@ -8,8 +8,9 @@ from src import insights
 
 
 def _rows(*cells, since="2026-10-20"):
-    return [{"timestamp_utc": f"{since}T05:00:00+00:00", "title_caps": coin, "subreddit": sub}
-            for coin, sub, n in cells for _ in range(n)]
+    return [{"timestamp_utc": f"{since}T05:00:00+00:00", "video_id": f"{coin}{sub}{i}",
+             "title_caps": coin, "subreddit": sub}
+            for coin, sub, n in cells for i in range(n)]
 
 
 def test_arms_with_one_mix_are_not_flagged():
@@ -27,12 +28,48 @@ def test_arms_drawn_from_different_mixes_are_flagged():
 
 def test_since_and_an_unset_coin_leave_uploads_out():
     rows = (_rows(("0", "A", 3), ("1", "B", 3), since="2026-10-01")
-            + _rows(("0", "A", 2), ("1", "A", 2), ("", "B", 9)))
+            + _rows(("0", "A", 2), ("1", "C", 2), ("", "B", 9)))
     arms, levels, counts, _ = insights.assignment_balance(
         "title_caps", "subreddit", since=datetime.date(2026, 10, 15), rows=rows)
-    assert levels == ["A"] and counts == {"0": {"A": 2}, "1": {"A": 2}}
+    assert levels == ["A", "C"] and counts == {"0": {"A": 2, "C": 0}, "1": {"A": 0, "C": 2}}
 
 
 def test_a_coin_without_two_arms_is_refused():
     with pytest.raises(ValueError, match="1 arm"):
         insights.assignment_balance("title_caps", "subreddit", rows=_rows(("0", "A", 4)))
+
+
+def test_a_field_the_log_lacks_is_refused_not_printed_as_balanced():
+    rows = _rows(("0", "A", 4), ("1", "B", 4))
+    with pytest.raises(ValueError, match="no mix"):
+        insights.assignment_balance("title_caps", "subredit", rows=rows)
+
+
+def test_the_cut_off_day_itself_is_counted():
+    rows = _rows(("0", "A", 1), ("1", "B", 1), since="2026-10-15")
+    *_, counts, _ = insights.assignment_balance(
+        "title_caps", "subreddit", since=datetime.date(2026, 10, 15), rows=rows)
+    assert counts == {"0": {"A": 1, "B": 0}, "1": {"A": 0, "B": 1}}
+
+
+def test_report_balance_reads_no_outcome(monkeypatch, capsys):
+    """The mode's point: it may run before a read, so nothing it calls may load one."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "report", insights.config.ROOT / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(report)
+
+    def peek(*a, **k):
+        raise AssertionError("an outcome was loaded")
+    for name in ("load_videos", "load_videos_offline", "load_channel_videos"):
+        monkeypatch.setattr(insights, name, peek)
+    monkeypatch.setattr(insights, "_read_upload_log",
+                        lambda: _rows(("0", "A", 3), ("1", "B", 3)))
+    monkeypatch.setattr("sys.argv", ["report.py", "--balance", "title_caps", "--by", "subreddit"])
+    report.main()
+    assert "no outcome read" in capsys.readouterr().out
+    monkeypatch.setattr("sys.argv", ["report.py", "--balance", "title_caps", "--by", "subreddit",
+                                     "--within", "subreddit=A"])
+    with pytest.raises(SystemExit, match="nothing else"):
+        report.main()
