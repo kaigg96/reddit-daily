@@ -52,7 +52,7 @@ def test_the_cut_off_day_itself_is_counted():
     assert counts == {"0": {"A": 1, "B": 0}, "1": {"A": 0, "B": 1}}
 
 
-def test_report_balance_reads_no_outcome(monkeypatch, capsys):
+def test_report_balance_reads_no_outcome(monkeypatch, capsys, tmp_path):
     """The mode's point: it may run before a read, so nothing it calls may load one."""
     import importlib.util
     spec = importlib.util.spec_from_file_location(
@@ -64,6 +64,7 @@ def test_report_balance_reads_no_outcome(monkeypatch, capsys):
         raise AssertionError("an outcome was loaded")
     for name in ("load_videos", "load_videos_offline", "load_channel_videos"):
         monkeypatch.setattr(insights, name, peek)
+    monkeypatch.setattr(insights.config, "ANALYTICS_SNAPSHOTS", tmp_path / "none.csv")
     monkeypatch.setattr(insights, "_read_upload_log",
                         lambda: _rows(("0", "A", 3), ("1", "B", 3)))
     monkeypatch.setattr("sys.argv", ["report.py", "--balance", "title_caps", "--by", "subreddit"])
@@ -73,3 +74,11 @@ def test_report_balance_reads_no_outcome(monkeypatch, capsys):
                                      "--within", "subreddit=A"])
     with pytest.raises(SystemExit, match="nothing else"):
         report.main()
+
+
+def test_until_counts_only_what_a_seven_day_read_sees():
+    rows = _rows(("0", "A", 2), ("1", "B", 2), since="2026-10-20") + _rows(
+        ("0", "B", 5), since="2026-10-30")
+    *_, counts, _ = insights.assignment_balance(
+        "title_caps", "subreddit", until=datetime.date(2026, 10, 26), rows=rows)
+    assert counts == {"0": {"A": 2, "B": 0}, "1": {"A": 0, "B": 2}}

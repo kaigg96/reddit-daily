@@ -1197,7 +1197,7 @@ def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, to
     return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
 
 
-def assignment_balance(coin, against, since=None, rows=None):
+def assignment_balance(coin, against, since=None, rows=None, until=None):
     """(arms, levels, counts, p) for a randomized `coin` against `against`,
     from the upload log alone. No outcome is read, so it may run before a
     coin's read without peeking (PRD §0 #14, R2). counts[arm][level] is a
@@ -1208,6 +1208,8 @@ def assignment_balance(coin, against, since=None, rows=None):
             for r in (_read_upload_log() if rows is None else rows)]
     if since:
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
+    if until:   # a read at 7 days sees uploads up to its snapshot's date less 7
+        rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] <= until.isoformat()]
     rows = [r for r in rows if (r.get(coin) or "").strip()]
     arms = sorted({r[coin].strip() for r in rows})
     if len(arms) != 2:

@@ -601,15 +601,17 @@ def show_concentration(args):
     print(f"  mean upload {total / n:.0f}")
 
 
-def show_balance(coin, against, since):
+def show_balance(coin, against, since, until):
     try:
         since = datetime.date.fromisoformat(since) if since else None
-        arms, levels, counts, p = insights.assignment_balance(coin, against, since)
+        until = datetime.date.fromisoformat(until) if until else None
+        arms, levels, counts, p = insights.assignment_balance(coin, against, since, until=until)
     except ValueError as e:
         sys.exit(f"--balance {coin}: {e}")
     print(f"Balance of {coin} by {against}, assignments only (no outcome read)"
           + (f", since {since}" if since else
-             "; every upload logged, so pass the coin's start as --since") + "\n")
+             "; every upload logged, so pass the coin's start as --since")
+          + (f", until {until}" if until else "") + "\n")
     print(f"  {against:24} " + " ".join(f"{coin + '=' + a:>{len(coin) + 9}}" for a in arms)
           + f" {'Fisher p':>9}")
     for lv in levels:
@@ -716,6 +718,9 @@ def main():
                    help="a randomized coin's arms against --by, from the upload log "
                         "alone: no outcome is read, so it runs before a read "
                         "(e.g. --balance title_caps --by subreddit --since 2026-10-15)")
+    p.add_argument("--until", metavar="YYYY-MM-DD",
+                   help="--balance: uploads published on or before this date, so it "
+                        "counts what a read at 7 days sees (its snapshot's date less 7)")
     args = p.parse_args()
     if args.within:
         try:
@@ -723,16 +728,18 @@ def main():
         except ValueError as e:
             sys.exit(f"--within {args.within}: {e}")
 
-    if args.balance and (args.within or args.compare or args.release or args.min_views > 1
-                         or args.at_age is not None or not args.by):
-        # Assignments only: the outcome options would be silently ignored.
-        sys.exit("--balance takes --by and optionally --since, nothing else")
-
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
              args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
              args.experiments)
+    if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
+                         or args.at_age is not None or args.replays or args.concentration
+                         or not args.by):
+        # Assignments only: any other mode or outcome option would be ignored.
+        sys.exit("--balance takes --by and optionally --since and --until, nothing else")
+    if args.until and not args.balance:
+        sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -761,7 +768,7 @@ def main():
         return
 
     if args.balance:        # assignments only: returns before any outcome loads
-        show_balance(args.balance, args.by, args.since)
+        show_balance(args.balance, args.by, args.since, args.until)
         return
 
     if args.scorecard:     # many metrics; no single one can judge this channel
