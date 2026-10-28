@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-28 (10:35) — One passing YouTube error can no longer lose an upload or ship a post twice; the next two coin-flip tests get a fairness check first
+
+    Worked (% of the shift): reliability 55 · data 25 · gm 15 · security 5
+
+**Summary:** The upload is now protected end to end. A passing error from YouTube no longer loses that run's video, and a blip just after a video goes live can no longer leave it unrecorded, which could have uploaded the same post twice. Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Protecting what we publish.** No upload has been lost or repeated this way yet, but each was one network blip away. A repeated video is the kind of thing YouTube's spam rules count, and a lost one costs a day's test data. Bet 1 adds four columns to the upload log, so its first live run rewrites that file; the rewrite can no longer damage it.
+- **Keeping two tests honest.** The voice question (2 November) and the one-capital-word title test (about 23 November) each compare two groups that chance filled from different subreddit mixes. A check now shows how different, from assignments alone without seeing any result. Today both gaps are within chance. A rule, set before either read, says what happens if they are not.
+
+### Done
+- **Reliability (fix, live):** the upload retry is merged. A fresh review ran the real upload library against a pretend YouTube server and found two kinds of dropped connection the retry still missed; both are covered, and the tests now run the real library, so an upgrade cannot quietly break it. Videos run 3–11 MB, one request each. Merged at 09:48, eight hours before the next upload.
+- **Reliability (fix, live):** after the upload, the thumbnail, captions and comment each sign in again. Any of those six network requests failing crashed the run after the video was live, so nothing recorded it and a later run could have uploaded the post again. They now carry on and flag a warning. Reviewed; its findings fixed.
+- **Reliability (fix):** the same for the last step, writing the upload log: it now cannot crash the run, and its rewrite cannot leave a damaged file. Bet 1's release still combines with everything live; all 933 checks pass.
+- **Data (built and live):** the fairness check, and the rule for the two reads. Two review passes; the second caught wording that a later shift could have read two ways, now exact.
+- **General management:** nothing was ready. A fresh agent proposed seven ideas; two rankers, in opposite orders, both put the post-upload fix and the fairness check in their top three. **Dropped:** a map of the Partner Program's review criteria (every one already has an answer, AI disclosure settled on 18 October); longer videos and reach (answered 7 October for 15–31 seconds, and no upload has run longer); due dates in the test ledger (the dates are known); a rule for judging a lifted reach cut (applies only if 2 November finds a cut). GitHub moved its build machines to a new system this morning; Monday's analytics job is no risk, as this morning's upload set up the same Python on it.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
+- **Reliability:** yesterday's two uploads and this morning's landed. #50's patch still applies to the current code as written.
+- Three fixes and one measurement live. AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
+
+### Next
+- **This evening's upload** is the first on today's code: check its log row, and that the run shows no warning. A warning means a step after the upload failed and was survived; read it.
+- **2 November snapshot:** as the 23:45 handover says. Before the voice read, run the fairness check its rule names, counting only the uploads that read will see, and apply the rule as written.
+- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
+
+### Better?
+- **Than last shift:** No for viewers or revenue. Yes for safety: an upload can no longer be lost, or repeated, by one passing error.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-27 (23:45) — Your ledger decision is live; Monday's figures, which four test reads depend on, are now protected from a one-off YouTube error
 
     Worked (% of the shift): reliability 30 · data 25 · gm 20 · legal 10 · strategy 10 · security 5
@@ -90,47 +126,10 @@ and more useful than a confident guess.
 ### Next
 - **2 November snapshot:** check first that the Monday check-in names no figure YouTube refused, and read each test's warnings before its verdict; the voice question reads engaged views. Then the views rule, the subreddit test, the title-style test and the voice question; all should have enough videos (20 a side; 27 against 14; 21 and 17), counted from the upload log without reading any result. Record each read in the ledger.
 - **The upload retry** (its branch's last commit): a fresh review of that commit, a check that a render fits its 100 MB request, then merge early in a shift and watch the next upload land.
-- **If #77 is labelled:** as the 17:05 handover says. **If #65 gets a yes:** land the corrected sentence as one commit with the approval line.
+- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how). **If #65 gets a yes:** land the corrected sentence as one commit with the approval line.
 
 ### Better?
 - **Than last shift:** No for viewers or revenue. Yes for the evidence: a one-off YouTube error can no longer quietly cost a week of test data, and a failed collection no longer reads as "too few videos".
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-27 (17:05) — The friction log is live; two of your open questions rested on facts that had moved, and both now say what will really happen
-
-    Worked (% of the shift): gm 45 · engineering 15 · market 10 · legal 10 · reliability 10 · security 10
-
-**Summary:** The friction log you approved (#84) is live, and two questions still before you (#65, #77) now state facts that had moved since you were asked. Nothing reached viewers; the 5 November source decision gained two facts, both against an easy replacement for Reddit.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on #77 (bet 1). The channel is flat: 12 seconds watched per view for six weeks.
-- **Bet 1's approval had a gap, now on #77.** It says the host's tags are written by the main AI model. On a day that model fails (1 upload in 18 since 18 October), they would come from the cheaper test model, which mostly labels, or from Groq, whose tags missed our bar. Still label it: the test counts those uploads against bet 1, so they can only make it look worse. Bet 1 still combines with everything live; all 900 checks pass.
-- **Two facts for 5 November.** Stack Exchange's three best sites produce about 1.6 usable questions a day, under our two uploads and 41% fewer than a year ago. Reaching two or four a day means adding niche sites (philosophy, law, language), a different show. And Reddit's terms leave no side door when the free API ends: scraping, RSS or its page data all need Reddit's written consent, and commercial use needs a written agreement. That makes registering our app (#82) matter more.
-
-### Done
-- **General management (your decision, #84):** the friction log landed as one approved commit, live from 16:40 UTC; #84 is closed. Its first rows are in, and its rule is first read at the 24 November monthly review.
-- **General management (your decision, #65, held back):** you approved letting a shift ask for a sample video near an upload, because its AI requests go to a test model "production uses only for telemetry". Since 18 October each upload also tries that model once when the main one fails, so that reason is no longer true. The risk stays small (renders are capped at about 10 requests a day), so #65 now carries a corrected sentence; reply "yes" and the next shift lands it. It answers the friction log's costliest recurring problem: sample videos holding up finished work.
-- **General management (a check, by a fresh agent):** besides #77, #80's reasons have aged. Bet 1's notes became one-to-three-word tags, so it does less to make videos differ, and "bet 2 slips four weeks" overstates it: the plan says each late week costs one week at four a day. #59's six checks predate the Groq key, now a seventh. #82's text still gave 31 October, which does not apply to us; 12 January does. I corrected all three by editing them, which sends no email; their recommendations stand. #85 checks out.
-- **Engineering (a fix):** the friction log's own test demanded that every row already be sorted into a group, but new rows wait for the weekly review. The first real row failed the checks on two pushes, for about four minutes. Fixed; all 645 checks pass. I pushed this and a comment fix before a fresh review, which the rules ask for first; the review ran afterwards, found no bugs and two small gaps, both fixed.
-- **General management (fixes):** the plan told the next shift to "merge" #85's branch, which the rule guard would undo automatically; it now says to land it as one approved commit. The code comment that misled #65 is corrected.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3). Process health: ok.
-- **Reliability:** both of yesterday's uploads and this morning's landed.
-- **General management:** nothing was ready. I considered seven ideas and a fresh agent eight more; the four above cleared the bar (the facts check, the supply rate, Reddit's terms, the merge rehearsal). A last pass at 17:04, aimed at audience, monetization, market and distribution, found nothing new, so I handed over at 17:05. **Dropped:** re-testing every decision's assumptions (the audit's job); how often the fallback fires (a count changes nothing); upload timing (answered 30 September); the test model's daily cap (measuring it spends requests); more sample renders (your call, and a second ask beside #77); bet 1's detection limit (changes no decision); a Reddit-outage alarm (dropped 26 October); a search tool for recorded answers (the weekly review ranks friction fixes).
-- Nothing viewers see changed. AI use: none from the upload allowance; no Polly; no render.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #85 (one label adds the ledger to quarterly planning); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
-
-### Next
-- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
-- **If #65 gets a yes:** land the corrected sentence as one commit with the approval line. **If #85 is labelled:** land its branch the same way, squashed to one commit.
-- **2 November snapshot:** the views rule first, then the subreddit test, the title-style test if it has its eighth video, and the voice question; record each read in the ledger. The weekly review sorts the friction log's first rows; four are questions to you whose facts moved after they were asked (#65, #77, #80, #82), the pattern worth a fix.
-
-### Better?
-- **Than last shift:** No for viewers or revenue. Slightly for your decisions: #77 and #65 now describe what would actually happen.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
