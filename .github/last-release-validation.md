@@ -5,26 +5,27 @@ needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
 - **Commit:** `ec2f077`
-- **When:** 2026-10-28T15:06:22Z
+- **When:** 2026-10-29T15:13:55Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/40712328623)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/40899173159)
 
 ## What the gates said
 
-## Release validation
-
-Route: **gemini**. Budget: at most 8 requests (Gemini's 20/day cap is shared with production).
+…(truncated)…
+.
 
 ### Gate 1 — merged metadata prompt
 
-- ✅ `title`: What hobby will ACTUALLY break your bank?
-- ✅ `keywords`: expensive hobbies, hobbies cost too much, hobbies to avoid, photography cost, warhammer co
-- ✅ `cta`: I'm raising my hand for skiing; those lift tickets are brutal. Which one gets YOUR vote?
-- ✅ host setup: I know one!
+- ✅ `title`: What HOBBY will make YOU broke?
+- ✅ `keywords`: expensive hobbies, hobbies too expensive, costly pastimes, hobby inflation, reddit hobbies
+- ✅ `cta`: I'm raising my hand for Skiing. That lift ticket price is just brutal. Which one gets your
+- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)
 - ✅ host reaction 1: Ouch, lenses
-- ✅ host reaction 2: Plastic crack, lol
-- ✅ host reaction 3: So true, though
+- ✅ host reaction 2: Plastic crack, wow
+- ✅ host reaction 3: Wild price tag
+- ⚠️ Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (2 words)
+- ⚠️ Commentary setup, as written: "Relatable problem"
 
 ### Gate 2 — R4.6 screen replay
 
