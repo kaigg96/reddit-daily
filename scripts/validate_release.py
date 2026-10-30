@@ -112,6 +112,25 @@ def _git_gated_code_changed(target_ref):
     return changed
 
 
+def _resolve_ref(target):
+    """The ref naming `target` in this clone, preferring the remote's copy.
+
+    CI's checkout makes a local branch for `main` only, so `integration/preview`
+    exists there as `origin/integration/preview` alone. Passed bare, rev-parse
+    printed nothing and `git diff` exited 128, which reads as "gated code
+    changed": the gates re-ran an unchanged `ec2f077` every day from 2026-10-25
+    to 10-30, 6 of production's 20 requests each time. The remote's copy comes
+    first because it is what the workflow checks out and records.
+    """
+    for ref in (f"origin/{target}", target):
+        found = subprocess.run(
+            ["git", "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+            cwd=ROOT, capture_output=True)
+        if found.returncode == 0:
+            return ref
+    return target  # unresolvable: the diff fails, which validates
+
+
 def should_run_cli(args):
     """`--should-run`: decide, print `proceed=` for the workflow, spend nothing."""
     try:
@@ -120,10 +139,11 @@ def should_run_cli(args):
     except OSError:
         verdict_text = ""
 
-    target_sha = subprocess.run(["git", "rev-parse", "--short", args.target],
+    ref = _resolve_ref(args.target)
+    target_sha = subprocess.run(["git", "rev-parse", "--short", ref],
                                 cwd=ROOT, capture_output=True, text=True).stdout.strip()
     proceed, why = should_validate(verdict_text, target_sha,
-                                   _git_gated_code_changed(args.target))
+                                   _git_gated_code_changed(ref))
 
     print(f"{'validating' if proceed else 'skipping'}: {why}")
     out = os.environ.get("GITHUB_OUTPUT")
