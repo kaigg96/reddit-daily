@@ -61,6 +61,44 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-30 (23:40) — The release check was spending 6 of our uploads' 20 daily AI requests re-checking a release that had not changed; fixed
+
+    Worked (% of the shift): reliability 40 · gm 40 · legal 10 · editorial 5 · security 5
+
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. The daily check of the next release had re-run every afternoon since 25 October on a release that had not changed, using 6 of the 20 free AI requests our uploads share. It now runs only when the release changes, or weekly, as designed.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Protecting what we publish.** Each upload's title, closing line and safety screen draw on that allowance of 20 a day. The check took 6 of them a few hours before each evening upload. Running out cost an upload its title on 20 September. It also matters for four uploads a day: our plan says four fits the allowance, but it never counted this.
+
+### Done
+- **Reliability (fix, live):** a fresh agent's round of ideas found it, and the build log confirmed it. The build machine knows the release only by its remote name, so the check could never tell that nothing had changed. Fixed and tested. A fresh review found no defects; its one test gap is closed. Merged 23:12. The release's sample tags now print when it changes or weekly, not daily.
+- **General management (fix, live):** the check that catches the plan calling finished work "pending" could never fire, for the same reason and because it looked for old branch names. A fresh review then found that fixing it would have woken a second fault: it read the start of each paragraph, not the words beside the work it names. Both fixed and tested; today it finds nothing stale.
+- **Legal (check):** the stock-footage licence bars reselling clips on stock or wallpaper sites and selling unaltered copies. Keeping our five clips in our public project is neither. Recorded beside the credits.
+- **Editorial (check):** this evening's upload asked about Patrick Stewart's death. Major outlets confirm he died on 28 October, so we did not spread a false claim.
+- **General management:** no shift ran on 29 or 30 October. The weekly shift allowance was spent by the evening of the 28th (228 units over 15 shifts, against a ceiling near 200), so five shifts were skipped. It also tripped a day early the week before (210). Nothing was lost, since everything waits on you. But the breaker meant to catch a runaway shift now sets the weekly pace, as the average shift rose from about 11 units to 15.
+- **General management:** nothing was ready. A fresh agent proposed eight ideas from the data. Two rankers, in opposite orders, put the release check first and the licence second. **Dropped:** counting AI requests per day (the logs do not print them, and the fix removes the uncounted share); logging why a title was refused (bet 1's release rewrites that code, so it is in the technical list for after it); updating our Reddit library (its new version adds nothing for Reddit's API change); a shorter list of dropped ideas, and compressing the findings section (both already proposals for the 5 November review); recording the Claude plan (it changes no decision).
+- **Reliability:** all five uploads since the last shift landed. On the 29th one shipped the Reddit question as its title, as designed, after the shock-phrase guard refused the AI's.
+- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.87 this month, forecast $0.90 of $3).
+- Two fixes live, two checks. AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; bet 2's window for it opened today and closes about 6 November); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
+
+### Next
+- **Tomorrow's release check (about 13:00–15:00 UTC):** its build log should say it skipped, as already validated. If it ran, read why.
+- **2 November snapshot:** as the 28 October (17:44) handover says: refused figures first, then the views rule, the subreddit test, the title-style test and the voice question, each with its fairness check and rule as written. The zero-view guardrail: a second breach is a decision's revisit trigger.
+- **If #77 is labelled:** merge the release, then the counting fix, set the live format to v8 in the product plan, and close #77.
+- **5 November monthly:** the audit's proposals, plus the weekly shift breaker now setting the pace.
+- **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. Yes for the uploads' margin: 6 of 20 daily AI requests are back.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-28 (17:44) — The process audit: unchanged since 25 October, the company waits on bet 1; a gap that could have leaked a token into a public file is closed
 
     Worked (% of the shift): gm 45 · security 15 · reliability 15 · legal 10 · engineering 10 · editorial 5
@@ -96,41 +134,3 @@ and more useful than a confident guess.
 - **Than last shift:** No for viewers or revenue. A little for safety: one token can no longer leak through the shift record.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-28 (10:16) — One passing YouTube error can no longer lose an upload or ship a post twice; the next two coin-flip tests get a fairness check first
-
-    Worked (% of the shift): reliability 55 · data 25 · gm 15 · security 5
-
-**Summary:** The upload is now protected end to end. A passing error from YouTube no longer loses that run's video, and a blip just after a video goes live can no longer leave it unrecorded, which could have uploaded the same post twice. Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
-- **Protecting what we publish.** No upload has been lost or repeated this way yet, but each was one network blip away. A repeated video is the kind of thing YouTube's spam rules count, and a lost one costs a day's test data. Bet 1 adds four columns to the upload log, so its first live run rewrites that file; the rewrite can no longer damage it.
-- **Keeping two tests honest.** The voice question (2 November) and the one-capital-word title test (about 23 November) each compare two groups that chance filled from different subreddit mixes. A check now shows how different, from assignments alone without seeing any result. Today both gaps are within chance. A rule, set before either read, says what happens if they are not.
-
-### Done
-- **Reliability (fix, live):** the upload retry is merged. A fresh review ran the real upload library against a pretend YouTube server and found two kinds of dropped connection the retry still missed; both are covered, and the tests now run the real library, so an upgrade cannot quietly break it. Videos run 3–11 MB, one request each. Merged at 09:48, eight hours before the next upload.
-- **Reliability (fix, live):** after the upload, the thumbnail, captions and comment each sign in again. Any of those six network requests failing crashed the run after the video was live, so nothing recorded it and a later run could have uploaded the post again. They now carry on and flag a warning. Reviewed; its findings fixed.
-- **Reliability (fix, live):** the same for the last step, writing the upload log: it now cannot crash the run, and a failure part-way can no longer leave a damaged file. The first review found that this fix itself could have saved half a row; that is prevented and checked. Bet 1's release still combines with everything live; all 933 checks pass.
-- **Data (built and live):** the fairness check, and the rule for the two reads. Two review passes; the second caught wording that a later shift could have read two ways, now exact.
-- **General management:** nothing was ready. A fresh agent proposed seven ideas; two rankers, in opposite orders, both put the post-upload fix and the fairness check in their top three. **Dropped:** a map of the Partner Program's review criteria (every one already has an answer, AI disclosure settled on 18 October); longer videos and reach (answered 7 October for 15–31 seconds, and no upload has run longer); due dates in the test ledger (the dates are known); a rule for judging a lifted reach cut (applies only if 2 November finds a cut). A second round, aimed at the functions this shift did not touch, asked whether our music track halves our cut of Shorts revenue: YouTube's page says music shrinks the pool all creators share, but each creator's share still counts all its engaged views, so the earnings estimate stands. Also dropped: the revenue-route report's TikTok line (it already shows our 0 followers against 10,000) and the voice cost of each replacement source (cents a month, so it cannot decide 5 November). The start of a run is covered too: fetching from Reddit already retries a passing error. The test ledger now dates the title-style read to 2 November (27 against 14 videos, counted without any result), so a late read would show. With nothing above the bar left, I handed over at 10:16. GitHub moved its build machines to a new system this morning; Monday's analytics job is no risk, as this morning's upload set up the same Python on it.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, you the only collaborator, money controls in place ($0.78 this month, forecast $0.88 of $3).
-- **Reliability:** yesterday's two uploads and this morning's landed. A free sample of today's code renders and plays. #50's patch still applies to the current code as written.
-- Three fixes and one measurement live. AI use: none from the upload allowance; no Polly; no render.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; it must merge by about 30 October to 6 November for bet 2 to run as planned); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
-
-### Next
-- **This evening's upload** is the first on today's code: check its log row, and that the run shows no warning. A warning means a step after the upload failed and was survived; read it.
-- **2 November snapshot:** as the 23:45 handover says. Before the voice read, run the fairness check its rule names, counting only the uploads that read will see, and apply the rule as written.
-- **If #77 is labelled:** merge the release, then the counting fix built beside it (the technical list names both), set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
-
-### Better?
-- **Than last shift:** No for viewers or revenue. Yes for safety: an upload can no longer be lost, or repeated, by one passing error.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
