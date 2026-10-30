@@ -133,10 +133,15 @@ def test_a_branch_only_the_remote_has_still_skips(tmp_path, monkeypatch):
     _git(upstream, "checkout", "-qb", "integration/preview")
     (upstream / "src" / "a.py").write_text("x = 2\n")
     _git(upstream, "commit", "-qam", "release")
+    validated = _git(upstream, "rev-parse", "--short", "HEAD")
+    # A doc-only commit after the validated one, so the skip has to come
+    # through the diff of the remote's copy rather than the sha check.
+    (upstream / "NOTES.md").write_text("notes\n")
+    _git(upstream, "add", ".")
+    _git(upstream, "commit", "-qm", "docs")
     clone = tmp_path / "clone"
     _git(tmp_path, "clone", "-q", "-b", "main", str(upstream), str(clone))
-    sha = _git(clone, "rev-parse", "--short", "origin/integration/preview")
-    # On the release commit, a doc-only commit on main must not re-run it either.
+    sha = validated
     (clone / ".github").mkdir()
     when = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     (clone / ".github" / "v.md").write_text(verdict(sha, PASS, when=when))
@@ -148,6 +153,7 @@ def test_a_branch_only_the_remote_has_still_skips(tmp_path, monkeypatch):
     validate_release.should_run_cli(argparse.Namespace(
         target="integration/preview", verdict_file=".github/v.md"))
     assert "proceed=false" in out.read_text()
+    assert "nothing the gates exercise changed" in out.read_text()
 
 
 # --- The three states of gate 1 -------------------------------------------
