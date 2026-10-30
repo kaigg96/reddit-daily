@@ -47,15 +47,36 @@ def check_live_format():
     return True, f"live format {code.group(1)} agrees with the code"
 
 
-def check_merged_branches():
-    """Docs describing a branch as pending when it has already merged."""
-    prd = _read("PRD.md")
+def check_merged_branches(root=ROOT, prd=None):
+    """Docs describing a branch as pending when it has already merged.
+
+    Until 2026-10-30 this could not fire: it matched prefixes the repo stopped
+    using (branches are `product/`, `data/`, `reliability/`…), and looked up
+    local branches, of which a shift's clone has only `main`, so every branch
+    was "gone". The remote's copy now comes first, as the release check does;
+    a name that is a file (`analysis/screen_log.csv`) is not a branch."""
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+
+    def ref(name):
+        for r in (f"origin/{name}", name):
+            if run("rev-parse", "--verify", "--quiet", f"{r}^{{commit}}").returncode == 0:
+                return r
+        return None
+
+    prd = _read("PRD.md") if prd is None else prd
+    base = ref("main")
     stale = []
-    for branch in set(re.findall(r"`((?:feature|integration|fix|chore|analysis)/[\w.\-/]+)`", prd)):
+    for branch in set(re.findall(
+            r"`((?:feature|integration|fix|chore|analysis|product|data|reliability"
+            r"|security|gm|engineering|legal|editorial)/[\w.\-/]+)`", prd)):
+        if os.path.exists(os.path.join(root, branch)):
+            continue
         # Merged into main, or gone entirely -> describing it as pending is stale.
-        merged = _git("branch", "--merged", "main", "--list", branch)
-        exists = _git("rev-parse", "--verify", "--quiet", branch)
-        if merged or not exists:
+        found = ref(branch)
+        merged = bool(found and base) and run(
+            "merge-base", "--is-ancestor", found, base).returncode == 0
+        if merged or not found:
             near = " ".join(
                 l for l in prd.splitlines() if branch in l)[:160].lower()
             if any(re.search(rf"\b{w}\b", near) for w in (
