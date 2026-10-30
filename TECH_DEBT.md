@@ -299,7 +299,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (#10, #14) unmarked (review, 2026-10-11). A `meta_source` column is built
   on `data/meta-source-column`, on top of `product/text-host`: land it after
   `v8` and before the switch (reviewed 10-11, no faults; its test reads
-  `run.py`'s source, not the written row). It and `product/vote-comment-caps`
+  `run.py`'s source, not the written row). **10-30:** land with it why a
+  title was refused: a shock phrase, a swear word or emoji, and a reply that
+  cleans to nothing all log `title_ok` 0 with `meta_failure` blank, so #13's
+  "shock refusals aside" cannot be counted (10-29 06:06 is one). Not built
+  now: `v8` rewrites that code. It and `product/vote-comment-caps`
   (the vote posted as the comment, capitalised; reviewed, fixed) merge
   cleanly over `v8` and `main` together, tests green (re-checked 10-12
   over that morning's `main`: 523 pass). Its review's two logging gaps closed
