@@ -1,11 +1,14 @@
 """The release gate's skip decision — it guards 6 of the 20 daily Gemini
 requests, and those are shared with live uploads."""
+import argparse
 import datetime
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from scripts import validate_release
 from scripts.validate_release import parse_verdict, should_validate
 
 WRITTEN = "2026-09-20T13:02:51Z"
@@ -108,6 +111,49 @@ def test_a_pass_still_holds_the_day_before_it_expires():
 
 def test_an_undated_verdict_is_not_trusted():
     assert decide(verdict("c6ee5f7", PASS, when="whenever"), "c6ee5f7")[0] is True
+
+
+def _git(cwd, *args):
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+    return subprocess.run(["git", *args], cwd=cwd, env=env, check=True,
+                          capture_output=True, text=True).stdout.strip()
+
+
+def test_a_branch_only_the_remote_has_still_skips(tmp_path, monkeypatch):
+    """CI's checkout makes a local `main` only. Passed bare, the release branch
+    resolved to nothing, and the gates re-ran an unchanged commit daily."""
+    upstream = tmp_path / "upstream"
+    upstream.mkdir()
+    _git(upstream, "init", "-q", "-b", "main")
+    (upstream / "src").mkdir()
+    (upstream / "src" / "a.py").write_text("x = 1\n")
+    _git(upstream, "add", ".")
+    _git(upstream, "commit", "-qm", "main")
+    _git(upstream, "checkout", "-qb", "integration/preview")
+    (upstream / "src" / "a.py").write_text("x = 2\n")
+    _git(upstream, "commit", "-qam", "release")
+    validated = _git(upstream, "rev-parse", "--short", "HEAD")
+    # A doc-only commit after the validated one, so the skip has to come
+    # through the diff of the remote's copy rather than the sha check.
+    (upstream / "NOTES.md").write_text("notes\n")
+    _git(upstream, "add", ".")
+    _git(upstream, "commit", "-qm", "docs")
+    clone = tmp_path / "clone"
+    _git(tmp_path, "clone", "-q", "-b", "main", str(upstream), str(clone))
+    sha = validated
+    (clone / ".github").mkdir()
+    when = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    (clone / ".github" / "v.md").write_text(verdict(sha, PASS, when=when))
+
+    monkeypatch.setattr(validate_release, "ROOT", str(clone))
+    out = tmp_path / "out"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+    assert validate_release._resolve_ref("integration/preview") == "origin/integration/preview"
+    validate_release.should_run_cli(argparse.Namespace(
+        target="integration/preview", verdict_file=".github/v.md"))
+    assert "proceed=false" in out.read_text()
+    assert "nothing the gates exercise changed" in out.read_text()
 
 
 # --- The three states of gate 1 -------------------------------------------
