@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-10-28 · **Live format:** `v7` (opens on the question, merged 2026-09-25; earlier releases under **Shipped**). `integration/preview` holds the next release, which the daily release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
+**Last updated:** 2026-10-28 · **Live format:** `v7` (opens on the question, merged 2026-09-25; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
 
 > **Two tracks** (2026-07-22), by whether we act on a change's own result: keepers ship fast; bets are isolated and baked under a pre-committed rule (§8).
 
