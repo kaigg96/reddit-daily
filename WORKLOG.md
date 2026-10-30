@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-30 (23:40) — The release check was spending 6 of our uploads' 20 daily AI requests re-checking a release that had not changed; fixed
+## 2026-10-30 (23:25) — The release check was spending 6 of our uploads' 20 daily AI requests re-checking a release that had not changed; fixed
 
     Worked (% of the shift): reliability 40 · gm 40 · legal 10 · editorial 5 · security 5
 
@@ -76,11 +76,12 @@ and more useful than a confident guess.
 - **General management (fix, live):** the check that catches the plan calling finished work "pending" could never fire, for the same reason and because it looked for old branch names. A fresh review then found that fixing it would have woken a second fault: it read the start of each paragraph, not the words beside the work it names. Both fixed and tested; today it finds nothing stale.
 - **Legal (check):** the stock-footage licence bars reselling clips on stock or wallpaper sites and selling unaltered copies. Keeping our five clips in our public project is neither. Recorded beside the credits.
 - **Editorial (check):** this evening's upload asked about Patrick Stewart's death. Major outlets confirm he died on 28 October, so we did not spread a false claim.
-- **General management:** no shift ran on 29 or 30 October. The weekly shift allowance was spent by the evening of the 28th (228 units over 15 shifts, against a ceiling near 200), so five shifts were skipped. It also tripped a day early the week before (210). Nothing was lost, since everything waits on you. But the breaker meant to catch a runaway shift now sets the weekly pace, as the average shift rose from about 11 units to 15.
+- **General management:** no shift ran on 29 or 30 October. The weekly shift allowance was spent by the evening of the 28th (228 units over 15 shifts, against a ceiling near 200), so five shifts were skipped. It also tripped a day early the week before (210). Nothing was lost, since everything waits on you. But the breaker meant to catch a runaway shift now sets the weekly pace, as the average shift rose from about 11 units to 15. Recorded for the 5 November review, so this shift stopped once nothing above the bar was left rather than spend a later shift's allowance.
 - **General management:** nothing was ready. A fresh agent proposed eight ideas from the data. Two rankers, in opposite orders, put the release check first and the licence second. **Dropped:** counting AI requests per day (the logs do not print them, and the fix removes the uncounted share); logging why a title was refused (bet 1's release rewrites that code, so it is in the technical list for after it); updating our Reddit library (its new version adds nothing for Reddit's API change); a shorter list of dropped ideas, and compressing the findings section (both already proposals for the 5 November review); recording the Claude plan (it changes no decision).
 - **Reliability:** all five uploads since the last shift landed. On the 29th one shipped the Reddit question as its title, as designed, after the shock-phrase guard refused the AI's.
 - **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.87 this month, forecast $0.90 of $3).
-- Two fixes live, two checks. AI use: none from the upload allowance; no Polly; no render.
+- **Product:** bet 1 is still ready the day you label it: tonight's live code and the release combine with no conflicts, and all 942 checks pass.
+- Two fixes live, three checks. AI use: none from the upload allowance; no Polly; no render.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1; bet 2's window for it opened today and closes about 6 November); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).

@@ -385,8 +385,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
   #65's sentence; the audit skill's stale "not yet tried". A shift cannot
   write skill files (refused 10-25), so the issue carries the exact text, as
-  #65 did. **Closes when**
-  that bundle is raised, or the next audit.
+  #65 did. **For the same monthly (10-30):** the weekly shift breaker, "a
+  runaway breaker, not a budget" (`shift.yml`), tripped both weeks (210 and
+  228 units against a ceiling near 200; 2 and 5 shifts skipped, recorded
+  nowhere) as units per shift rose from ~11 to ~15: it now sets the pace.
+  **Closes when** that bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
