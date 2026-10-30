@@ -111,3 +111,50 @@ def test_unrelated_histories_are_unknown_not_clean(tmp_path):
 def test_a_missing_release_branch_is_skipped_not_failed(tmp_path):
     _repo(tmp_path)
     assert c.check_next_release_merges(str(tmp_path), "main", "nope")[0] is None
+
+
+def _clone_with_remote_branches(tmp_path):
+    """A shift's clone: local `main` only; `product/done` merged into main,
+    `product/next` not, both only on the remote."""
+    import subprocess
+    up = tmp_path / "up"
+    up.mkdir()
+    git = _repo(up)
+    git("checkout", "-q", "-b", "product/done", "next")
+    git("checkout", "-q", "main")
+    git("merge", "-q", "--no-ff", "-m", "merge done", "product/done")
+    git("checkout", "-q", "-b", "product/next")
+    (up / "n.txt").write_text("unmerged\n")
+    git("add", "."); git("commit", "-q", "-m", "unmerged")
+    git("checkout", "-q", "main")
+    clone = tmp_path / "clone"
+    subprocess.run(["git", "clone", "-q", "-b", "main", str(up), str(clone)],
+                   check=True, capture_output=True)
+    return clone
+
+
+def test_a_merged_branch_only_the_remote_has_is_caught(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    ok, why = c.check_merged_branches(str(clone), "Built on `product/done`, awaiting merge.")
+    assert ok is False and "product/done" in why
+
+
+def test_an_unmerged_branch_only_the_remote_has_is_not_gone(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    assert c.check_merged_branches(str(clone), "On `product/next`, awaiting the label.")[0]
+
+
+def test_pending_is_read_beside_the_branch_not_at_the_paragraphs_start(tmp_path):
+    """PRD paragraphs are single lines of thousands of characters."""
+    clone = _clone_with_remote_branches(tmp_path)
+    opens = "Not yet read. " + "detail " * 60
+    assert c.check_merged_branches(str(clone), opens + "merged as `product/done`.")[0]
+    late = "detail " * 60 + "`product/done`, awaiting merge."
+    assert c.check_merged_branches(str(clone), late)[0] is False
+
+
+def test_a_file_path_is_not_a_branch(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    (clone / "analysis").mkdir()
+    (clone / "analysis" / "log.csv").write_text("x\n")
+    assert c.check_merged_branches(str(clone), "`analysis/log.csv` is pending a read.")[0]
