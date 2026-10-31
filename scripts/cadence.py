@@ -12,8 +12,7 @@ shift's sense of whether it has been a while:
                        reads that month's figures), or from the 10th regardless;
                        at once if last month's was skipped too
     quarterly prep     no packet prepared yet this quarter, once a monthly is held
-                       in it (the packet draws on it); at once if last quarter's
-                       was skipped too
+                       in it (the packet draws on it), or at once when overdue
     quarterly planning prepared, but not yet held with the owner -- never a shift's to do
 
 PLAN.md §5 records when each was last held. A review updates its own row.
@@ -90,11 +89,10 @@ def due(held, today, snapshot):
                               f"(last weekly {weekly or 'never'})"))
     prep = held.get("quarterly prep")
     quarter = _quarter(today)
-    last_quarter = (quarter[0] - 1, 3) if quarter[1] == 0 else (quarter[0], quarter[1] - 1)
     if (prep is None or _quarter(prep) < quarter) and (
             monthly is None or _quarter(monthly) == quarter
-            or (prep is not None and (_quarter(prep) < last_quarter      # already late: never wait
-                                      or (today - prep).days > OVERDUE_DAYS["quarterly prep"]))):
+            or (prep is not None                                   # already overdue: never wait
+                and (today - prep).days > OVERDUE_DAYS["quarterly prep"])):
         out.append(("quarterly prep", f"no packet yet this quarter (last {prep or 'never'})"))
     plan = held.get("quarterly planning")
     if prep and _quarter(prep) == _quarter(today) and (plan is None or plan < prep):
