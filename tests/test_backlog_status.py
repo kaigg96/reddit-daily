@@ -163,11 +163,40 @@ def test_indented_lines_of_a_later_bullet_stay_out_of_the_dropped_one():
     assert b.dropped_in(text) == [("2026-10-17 (08:00) — X", ["Considered and dropped: a."])]
 
 
+def test_drops_listed_inside_a_bullet_are_read_from_their_label_on():
+    """Since 10-20 drops sit inside the General management bullet, which the
+    opening match missed, so nothing newer than 10-20 was listed (10-24)."""
+    text = ("## 2026-10-24 (15:30) — X\n\n### Done\n"
+            "- **General management:** nothing was ready. Two survived. **Dropped:** draft\n"
+            "  answers (the form's questions were never recorded); affiliate links.\n"
+            "- **Product:** the filter dropped nothing new. **Also:** x.\n"
+            "- **The vote no longer gets dropped for running long.** A fix.\n"
+            "- **Dropped after ranking** (eight): likes.\n"
+            "- **Data:** read it. **Considered and dropped:** a subscriber rate.\n")
+    assert b.dropped_in(text) == [("2026-10-24 (15:30) — X", [
+        "Dropped: draft answers (the form's questions were never recorded); affiliate links.",
+        "Dropped after ranking (eight): likes.",
+        "Considered and dropped: a subscriber rate."])]
+    done = b.done_in(text)[0][1]       # a headline saying "dropped" is done work
+    assert any(d.startswith("The vote no longer") for d in done)
+    assert not any(d.startswith("Dropped after") for d in done)
+
+
 def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
     def v(time, headline):
         return f"## 2026-10-17 ({time}) — {headline}\n- **Considered and dropped:** a.\n"
     got = b.recently_dropped(versions=[v("08:28", "Y"), v("08:28", "X"), v("08:24", "X")])
     assert [h for h, _ in got] == ["2026-10-17 (08:28) — Y"]
+
+
+def test_a_draft_with_a_placeholder_time_is_the_same_shift():
+    def v(time):
+        return f"## 2026-10-31 ({time}) — X\n- **Considered and dropped:** a.\n"
+    got = b.recently_dropped(versions=[v("10:15"), v("HH:MM")])
+    assert [h for h, _ in got] == ["2026-10-31 (10:15) — X"]
+    assert b._heading_parts("2026-10-31 (HH:MM) — X") == ("2026-10-31", "", "X")
+    # September's slot words stay in the headline, so two slots stay two shifts.
+    assert b._heading_parts("2026-09-20 (evening) — X")[2] == "(evening) — X"
 
 
 def test_the_real_history_reads_without_error_even_in_a_shallow_clone():

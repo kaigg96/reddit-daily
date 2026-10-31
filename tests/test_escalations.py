@@ -16,6 +16,8 @@ def issue(n, title, labels, comments, body=""):
 
 def fake_github(monkeypatch, issues, comments, labelled_by="kaigg96"):
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -128,6 +130,8 @@ def closed_github(monkeypatch, closed, comments, closed_by=None):
     """Open list empty; the closed list is what the refusal check reads."""
     closed_by = closed_by or {}
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -234,3 +238,43 @@ def test_the_latest_comment_is_read_past_the_first_page(monkeypatch, capsys):
     monkeypatch.setattr(escalations, "_declined", lambda: [])
     escalations.show(True)
     assert "owner: " + LATER in capsys.readouterr().out
+
+
+def test_the_open_listing_says_when_the_owner_last_acted(monkeypatch, capsys):
+    """D13's question, absence or the ask's form, read from one line."""
+    def api(path, data=None, method=None):
+        p = path.split("?")[0]
+        if p.endswith("/issues/events"):
+            return [{"event": "labeled", "label": {"name": "approved"}, "actor": {"login": "kaigg96"},
+                     "created_at": "2026-10-27T21:20:06Z", "issue": {"number": 85}},
+                    {"event": "labeled", "label": {"name": "needs-owner"},
+                     "actor": {"login": "github-actions[bot]"},
+                     "created_at": "2026-10-28T10:00:00Z", "issue": {"number": 86}},
+                    # the auto-apply job pushes with the owner's token: not the owner acting
+                    {"event": "referenced", "actor": {"login": "kaigg96"},
+                     "created_at": "2026-10-28T12:00:00Z", "issue": {"number": 81}}]
+        if p.endswith("/issues/comments"):
+            return [{"author_association": "OWNER", "created_at": "2026-10-19T03:00:00Z",
+                     "issue_url": "https://api.github.com/repos/kaigg96/reddit-daily/issues/77"},
+                    {"author_association": "NONE", "created_at": "2026-10-28T11:00:00Z",
+                     "issue_url": "https://api.github.com/repos/kaigg96/reddit-daily/issues/77"}]
+        return [issue(77, "Bet 1", ["needs-owner"], [])]
+    monkeypatch.setattr(escalations, "_api", api)
+    monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
+    escalations._print_owner_last_action(now=escalations.datetime(2026, 10, 28, 17, 20,
+                                                                 tzinfo=escalations.timezone.utc))
+    out = capsys.readouterr().out
+    assert "last acted 20 hours ago (2026-10-27 21:20 UTC: labeled approved #85)" in out
+    escalations.show(False)
+    assert "The owner last acted" in capsys.readouterr().out
+
+
+def test_an_unreadable_last_action_never_stops_the_listing(monkeypatch, capsys):
+    def api(path, data=None, method=None):
+        if "/issues/events" in path or "/issues/comments" in path:
+            raise ValueError("bad page")
+        return [issue(77, "Bet 1", ["needs-owner"], [])]
+    monkeypatch.setattr(escalations, "_api", api)
+    escalations.show(False)
+    out = capsys.readouterr().out
+    assert "could not be read (ValueError)" in out and "#77  Bet 1" in out

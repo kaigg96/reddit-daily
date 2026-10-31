@@ -172,8 +172,55 @@ def _answered_in_comment(issues):
     return out
 
 
+OWNER_ACTS = {"labeled", "unlabeled", "closed", "reopened"}
+
+
+def _owner_last_action():
+    """(when, what) the owner last did on any issue, or None.
+
+    D13 revisits when a label-only ask waits over three days, and asks first
+    whether the owner is away or passing it over. Each of its re-reviews
+    (10-11 to 10-28) dug that up by hand; on 10-28 the answer was that they
+    had labelled #84 and #85 within hours while #77 and #80 waited.
+
+    Only deliberate acts count. A `referenced` event names whoever's token
+    pushed the commit, and the auto-apply job pushes with the owner's: an
+    unattended run would read as the owner here (review, 10-28)."""
+    owner = REPO.split("/")[0]
+    seen = []
+    for e in _api(f"/repos/{REPO}/issues/events?per_page=100") or []:
+        if (e.get("event") in OWNER_ACTS and (e.get("actor") or {}).get("login") == owner
+                and e.get("created_at")):
+            label = (e.get("label") or {}).get("name")
+            seen.append((e["created_at"], f"{e.get('event', '?')}{' ' + label if label else ''}"
+                                          f" #{(e.get('issue') or {}).get('number', '?')}"))
+    for c in _api(f"/repos/{REPO}/issues/comments?sort=created&direction=desc&per_page=100") or []:
+        if c.get("author_association") == "OWNER" and c.get("created_at"):
+            seen.append((c["created_at"], f"commented on #{(c.get('issue_url') or '?').rsplit('/', 1)[-1]}"))
+    return max(seen) if seen else None
+
+
+def _print_owner_last_action(now=None):
+    """One line, and never the reason the listing fails: it is context."""
+    try:
+        last = _owner_last_action()
+    except Exception as e:
+        print(f"The owner's last action could not be read ({type(e).__name__}).")
+        return
+    if not last:
+        print("The owner's last action: none in the newest issue events and comments.")
+        return
+    when, what = last
+    now = now or datetime.now(timezone.utc)
+    hours = (now - datetime.strptime(when, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)) / timedelta(hours=1)
+    print(f"The owner last acted {hours:.0f} hours ago ({when[:16].replace('T', ' ')} UTC: {what}). "
+          "An ask waiting longer than that waited while they were here (D13).")
+
+
 def show(want_approved):
     issues = _issues()
+    if not want_approved:
+        _print_owner_last_action()
     rows = [(i, l) for i, l in issues if ("approved" in l) == want_approved]
     if want_approved:
         answered = _answered_in_comment(issues)

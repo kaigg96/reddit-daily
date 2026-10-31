@@ -115,6 +115,20 @@ _EDGE_MARKS = re.compile(r"(?<![A-Za-z*])['\"*]+|['\"*]+(?![A-Za-z*])")
 _CONTRACTED = re.compile(r"([A-Za-z*]+)'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
 
 
+# The US midterms fall on 2026-11-03. YouTube removes content that misleads
+# voters on "the time, place, means, or eligibility requirements for voting",
+# and we read answers word for word, jokes like "the other side votes
+# Wednesday" included. So until config.ELECTION_SKIP_UNTIL a question about
+# voting or the election is not a candidate. Over-matching costs one post.
+_ELECTION = re.compile(r"\b(vot(e|es|ed|er|ers|ing)|ballots?|elections?|midterms?|polling)\b",
+                       re.IGNORECASE)
+
+
+def _election_week(title, today=None):
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    return today <= config.ELECTION_SKIP_UNTIL and bool(_ELECTION.search(title))
+
+
 def _profane(text, censor=profanity):
     return (censor.contains_profanity(text)
             or censor.contains_profanity(_EDGE_MARKS.sub(" ", text))
@@ -235,6 +249,7 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
             and not _profane(post.title)
             and len(post.title) <= config.MAX_TITLE_LENGTH
             and not _has_emoji(post.title)
+            and not _election_week(post.title)
             and post.title != prev_title
             and post.title not in uploaded
         ):

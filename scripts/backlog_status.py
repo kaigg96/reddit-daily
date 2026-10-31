@@ -114,7 +114,7 @@ def main(argv=None):
         return 0
     if "--dropped" in argv:
         for heading, bullet in recently_dropped():
-            print(f"{heading[:70]}\n  {bullet[:600]}\n")
+            print(f"{heading[:70]}\n  {bullet}\n")   # cut, a drop is re-proposed
         print("DONE in the last ten shifts (each bullet's opening), so "
               "finished work is not proposed again:\n")
         for heading, bullets in recently_dropped(extract=done_in):
@@ -143,25 +143,37 @@ def main(argv=None):
 
 
 _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
-_DROPPED = re.compile(r"^- \*\*[^*]*\bdropped\b", re.I)
+# A short bold label ("**Dropped:**", "**Ranked and dropped**"), anywhere in a
+# bullet: since 10-20 a shift lists its drops inside its General management
+# bullet, and a match only at the opening showed the generator nothing newer
+# (found 10-24). Short, so a bold headline that says "dropped" is not one.
+_DROPPED = re.compile(r"(?<!\S)\*\*(?:\w+\s+){0,3}dropped(?:\s+\w+){0,2}:?\*\*", re.I)
+
+
+def _dropped_part(bullet):
+    """The dropped list a bullet holds, from its label on, or None."""
+    m = _DROPPED.search(bullet)
+    return bullet[m.start():].replace("**", "").strip() if m else None
 
 
 def dropped_in(text):
     """(entry heading, [dropped bullets]) for each WORKLOG entry that has any."""
-    out, heading, bullets, inside = [], None, [], False
+    out, heading, bullets, bullet = [], None, [], None
     for line in text.splitlines() + ["## 0000-00-00 end"]:
+        if bullet is not None and line.startswith("  ") and line.strip():
+            bullet += " " + line.strip()        # the bullet wrapped onto more lines
+            continue
+        part = bullet and _dropped_part(bullet)
+        if part:
+            bullets.append(part)
+        bullet = None                           # any other line ends it
         m = _ENTRY.match(line)
         if m:
             if heading and bullets:
                 out.append((heading, bullets))
-            heading, bullets, inside = m.group(1).strip(), [], False
-        elif heading and _DROPPED.match(line):
-            bullets.append(line[2:].replace("**", "").strip())
-            inside = True
-        elif inside and line.startswith("  ") and line.strip():
-            bullets[-1] += " " + line.strip()   # the bullet wrapped onto more lines
-        else:
-            inside = False                      # any other line ends it
+            heading, bullets = m.group(1).strip(), []
+        elif heading and line.startswith("- "):
+            bullet = line
     return out
 
 
@@ -189,7 +201,7 @@ def done_in(text):
         elif sec:
             section, inside = sec.group(1), False
         elif (heading and section in _DONE_SECTIONS and line.startswith("- ")
-              and not _DROPPED.match(line)):
+              and not _DROPPED.match(line, 2)):          # one that opens on its label
             bullets.append(line[2:].replace("**", "").strip())
             inside = True
         elif inside and line.startswith("  ") and line.strip():
@@ -207,9 +219,12 @@ def _clip(text, width):
 
 
 def _heading_parts(heading):
-    """(date, time or "", headline) of an entry heading."""
-    m = re.match(r"(\S+)\s*(?:\((\d\d:\d\d)\))?\s*(?:—\s*)?(.*)", heading)
-    return m.group(1), m.group(2) or "", m.group(3).strip()
+    """(date, time or "", headline) of an entry heading. A draft's placeholder
+    time ("(HH:MM)", 10-31 10:10) is no time: read as headline, it made the
+    draft a second shift, and the ten listed held nine (found 10-31)."""
+    m = re.match(r"(\S+)\s*(?:\((\d\d:\d\d|HH:MM)\))?\s*(?:—\s*)?(.*)", heading)
+    time = m.group(2) or ""
+    return m.group(1), "" if time == "HH:MM" else time, m.group(3).strip()
 
 
 def _worklog_versions(commits):

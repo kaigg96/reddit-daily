@@ -1,5 +1,6 @@
 """Central configuration. Importing this module loads .env (local dev only)."""
 
+import datetime
 import os
 from pathlib import Path
 
@@ -78,6 +79,8 @@ CAPTION_WIDTH = W - 2 * SAFE_X
 # --- content limits ---
 MAX_COMMENT_LENGTH = 150
 MAX_TITLE_LENGTH = 90
+# content._election_week: questions about voting are skipped through this date.
+ELECTION_SKIP_UNTIL = datetime.date(2026, 11, 10)
 NUM_COMMENTS = 3
 MAX_TOTAL_SECONDS = 45  # R1.7: drop last comment if exceeded
 INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
@@ -107,7 +110,8 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # ships. It runs on a different model from every other call here because the
 # free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel), so it spends that model's
-# allowance, never the one titles and the screen share. $0 either way (#22).
+# allowance, not the one titles and the screen share -- though their one-try
+# fallback (llm.FALLBACK_MODEL) is this model, since 2026-10-18. $0 either way (#22).
 SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since at least 2026-09-25
 
 # Who answers every AI call. Gemini's free tier may train on what we send,

@@ -1,0 +1,16 @@
+group,title,status,item,opened,resolved,note
+G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true
+G2,"Recorded answers are hard to find, so work gets redone",open,,2026-09-26,,seeded 2026-10-27 from the work log's notes; check it is still true
+G3,The views-never-revert rule hid side-by-side findings,open,,2026-09-28,,seeded 2026-10-27 from the work log's notes; check it is still true
+G4,The work log's word budget fights the retention it asks for,open,,2026-09-29,,seeded 2026-10-27 from the work log's notes; check it is still true
+G5,report.py could not produce a needed count,fixed,report.py,2026-09-29,2026-09-29,
+G6,Plans tied to a clock window; shifts start hours late,open,,2026-09-30,,seeded 2026-10-27 from the work log's notes; check it is still true
+G7,The approved-decisions list showed only titles,fixed,escalations.py,2026-10-01,2026-10-01,
+G8,Protected process files cannot be edited even on a branch,open,,2026-10-01,,seeded 2026-10-27 from the work log's notes; check it is still true
+G9,The shift plan is written after starting,open,,2026-10-01,,seeded 2026-10-27 from the work log's notes; check it is still true
+G10,The doc check reads past log entries as current claims,open,,2026-10-03,,seeded 2026-10-27 from the work log's notes; check it is still true
+G11,Tests not rerun after the last edit before a merge,open,,2026-10-04,,seeded 2026-10-27 from the work log's notes; check it is still true
+G12,escalate.py waits silently without a description,open,,2026-10-05,,seeded 2026-10-27 from the work log's notes; check it is still true
+G13,Pages wrongly marked as needing a browser,fixed,,2026-10-06,2026-10-06,The note was corrected
+G14,Shifts cannot read the channel's own YouTube data,open,,2026-10-07,,seeded 2026-10-27 from the work log's notes; check it is still true
+G15,PLAN.md at its word budget forces trims every shift,open,,2026-10-27,,Budget raised 1300 -> 1400 on 10-27; watch whether it refills

@@ -16,6 +16,7 @@ Usage:
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
   venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
+  venv/bin/python scripts/report.py --balance title_caps --by subreddit   # a coin's arms; no outcome read
 
 --offline reads the committed weekly snapshot instead of the live API, so a
 scheduled shift — which is deliberately given no YouTube secrets — can still
@@ -207,6 +208,10 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
     defaults to the release's pre-committed size (`RELEASE_MIN_UPLOADS`)."""
     if min_uploads is None:
         min_uploads = insights.RELEASE_MIN_UPLOADS.get(version, insights.MIN_COHORT)
+    if within_spec is None:
+        within_spec = insights.RELEASE_WITHIN.get(version)
+        if within_spec:
+            print(f"(the cut {version}'s rule commits to, insights.RELEASE_WITHIN)")
     read = insights.release_read(version, key, target_age, within_spec)
     if read is None:
         sys.exit(f"No upload has a snapshot at ~{target_age:.0f} days old.")
@@ -310,11 +315,23 @@ def _within_rows(rows, spec):
     return [r for r in rows if r.get("video_id") in ids]
 
 
-def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
+def _period_metrics(at_age=7, tolerance=4, half=3, root=None, min_age=4):
     """Metrics for the recent `half` publish-weeks vs the `half` before them.
 
     Every upload read at the same age, so the two periods are comparable.
     Duration comes from upload_log; the rest from the weekly snapshot.
+
+    No read under `min_age` days, so both periods are read at 4-10 days. Only
+    the newest week's Thursday uploads are ever read at 3, so they sat in the
+    recent period alone. It matters only at the zero line: an upload with
+    views is complete at 3 days (median views and watch-seconds equal a week
+    later, n=22), while 2 of 4 three-day zeros showed a view a week later,
+    against 0 of 17 older ones (10-31; all six had at most 1 view, so they
+    were buried, not late). Two 3-day zeros were half the 10-26 breach (4.8%
+    -> 11.4%; 6.1% without them); the 11-02 snapshot re-reads both at 10 days.
+    Set 10-31, before the 3-day reads it first drops. After a missed snapshot
+    the week before it loses its Thursday too. `insights._read_at_age`
+    (trajectory) has no floor; harmless while it drops zeros.
     """
     import csv as _csv
     import datetime as _dt
@@ -347,7 +364,7 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
                 except (ValueError, TypeError):
                     continue
                 age = (snap - pub).days
-                if abs(age - at_age) > tolerance:
+                if abs(age - at_age) > tolerance or age < min_age:
                     continue
                 vid = r.get("video_id")
                 prev = best.get(vid)
@@ -364,7 +381,9 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
         views = insights._optional_float(r.get("views")) or 0.0
         if insights._privatised_zero(vid, views, privacy):
             continue
-        buckets.setdefault(pub.strftime("%Y-W%V"), []).append((vid, r))
+        # %G, the ISO year: under %Y, 2027-01-01..03 (ISO 2026-W53) read as
+        # "2027-W53" and sorted after all of 2027 (review, 10-31)
+        buckets.setdefault(pub.strftime("%G-W%V"), []).append((vid, r))
     weeks = sorted(w for w, v in buckets.items() if len(v) >= 5)
     if len(weeks) < half * 2:
         return None, None, 0, 0
@@ -447,10 +466,14 @@ def show_routes():
     per_90 = sum(g for _, g, _ in gained) * 90 / days if days else 0
     with open(config.CHANNEL_LOG) as f:
         subs = int([r for r in _csv.DictReader(f) if r["subscribers"]][-1]["subscribers"])
-    pct = f"{share:.0%}" if share is not None else "unknown (too few videos)"
+    pct = (f"{share:.0%}" if share is not None else
+           "engaged share not collected (the API refused it)"
+           if insights.refused(snap, "engaged_views") else "unknown (too few videos)")
     print(f"Revenue routes: ~{per_90:,.0f} play starts per 90 days (over {days} days "
           f"of snapshots), {subs} subscribers; from snapshot {latest}, {pct} engaged and "
-          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else "rate unknown")
+          + (f"{rate:.2f} subscribers per 1,000 views" if rate is not None else
+             "subscriber rate not collected (the API refused it)"
+             if insights.refused(snap, "subs_gained") else "rate unknown")
           + "\n")
     fmt = lambda x: "-" if x is None else "met" if x <= 1 else f"~{x:,.0f}x short"
     for d in insights.route_distances(per_90, share, subs, rate):
@@ -562,9 +585,10 @@ def show_catalogue(args):
         print("fewer than two snapshots: no answer")
         return
     print("Views gained per day between snapshots, by each video's age at the earlier one\n")
-    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8}")
-    for snap, old, recent, days in rows:
-        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f}")
+    print(f"  {'snapshot':10} {'days':>4} {'60d+ old':>9} {'recent':>8} {'recent, 2 wks':>14}")
+    for (snap, old, recent, days), two in zip(rows, insights.two_week_rate(rows)):
+        two = "" if two is None else f"{two:.0f}"
+        print(f"  {snap.date()!s:10} {days:>4} {old / days:>9.0f} {recent / days:>8.0f} {two:>14}")
     old = sum(o for _, o, _, _ in rows)
     total = old + sum(r for _, _, r, _ in rows)
     if not total:
@@ -574,7 +598,8 @@ def show_catalogue(args):
           "\n  uploads, so a step in its column at the same snapshot as one in the"
           "\n  recent column is the channel's distribution; a column in single digits"
           "\n  is too small to show one. Neither column is age-matched: judge uploads"
-          "\n  with --trajectory.")
+          "\n  with --trajectory. Weekly gains have alternated low and high, so read a"
+          "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
 def show_concentration(args):
@@ -590,6 +615,28 @@ def show_concentration(args):
     print(f"  top 10% ({top_n} uploads) earned {top_total:.0f}: {top_total / total:.0%}")
     print(f"  biggest single upload: {biggest:.0f} ({biggest / total:.0%})")
     print(f"  mean upload {total / n:.0f}")
+
+
+def show_balance(coin, against, since, until):
+    try:
+        since = datetime.date.fromisoformat(since) if since else None
+        until = datetime.date.fromisoformat(until) if until else None
+        arms, levels, counts, p = insights.assignment_balance(coin, against, since, until=until)
+    except ValueError as e:
+        sys.exit(f"--balance {coin}: {e}")
+    print(f"Balance of {coin} by {against}, assignments only (no outcome read)"
+          + (f", since {since}" if since else
+             "; every upload logged, so pass the coin's start as --since")
+          + (f", until {until}" if until else "") + "\n")
+    print(f"  {against:24} " + " ".join(f"{coin + '=' + a:>{len(coin) + 9}}" for a in arms)
+          + f" {'Fisher p':>9}")
+    for lv in levels:
+        cells = " ".join(f"{counts[a][lv]:>{len(coin) + 9}}" for a in arms)
+        print(f"  {lv:24} {cells} {p[lv]:>9.3f}")
+    print("  " + " " * 24 + " ".join(f"{sum(counts[a].values()):>{len(coin) + 9}}"
+                                     for a in arms) + "  total")
+    print("\n  p is each level against the rest, two-sided, with no correction for"
+          "\n  the number of levels. Read it at the bar the coin's rule pre-committed.")
 
 
 def show_hit_rates(videos, key):
@@ -669,6 +716,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--experiments", action="store_true",
+                   help="the experiment ledger: rules read on time, keeps credited, "
+                        "what is due next (PLAN C18)")
     p.add_argument("--concentration", action="store_true",
                    help="share of 7-day views the top 10%% of uploads earn: "
                         "are views a hit-rate problem? (PRD R4)")
@@ -680,6 +730,13 @@ def main():
     p.add_argument("--offline", action="store_true",
                    help="read the committed weekly snapshot instead of the live "
                         "YouTube API (no credentials needed; a week stale)")
+    p.add_argument("--balance", metavar="COIN",
+                   help="a randomized coin's arms against --by, from the upload log "
+                        "alone: no outcome is read, so it runs before a read "
+                        "(e.g. --balance title_caps --by subreddit --since 2026-10-15)")
+    p.add_argument("--until", metavar="YYYY-MM-DD",
+                   help="--balance: uploads published on or before this date, so it "
+                        "counts what a read at 7 days sees (its snapshot's date less 7)")
     args = p.parse_args()
     if args.within:
         try:
@@ -690,7 +747,15 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release)
+             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
+             args.experiments)
+    if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
+                         or args.at_age is not None or args.replays or args.concentration
+                         or not args.by):
+        # Assignments only: any other mode or outcome option would be ignored.
+        sys.exit("--balance takes --by and optionally --since and --until, nothing else")
+    if args.until and not args.balance:
+        sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
     if args.min_views > 1 and (any(early) or args.replays or not args.compare):
@@ -712,6 +777,15 @@ def main():
         sys.exit(f"--at-age {args.at_age:g} is under {insights.MIN_AGE_DAYS} days, where "
                  f"Analytics has not yet reported many uploads; read at "
                  f"{insights.MIN_AGE_DAYS} or later.")
+
+    if args.experiments:    # the ledger of rules, not the analytics
+        print(insights.render_experiment_ledger(
+            insights.experiment_ledger(insights.load_experiments(), now.date())))
+        return
+
+    if args.balance:        # assignments only: returns before any outcome loads
+        show_balance(args.balance, args.by, args.since, args.until)
+        return
 
     if args.scorecard:     # many metrics; no single one can judge this channel
         show_scorecard(args)
@@ -748,6 +822,8 @@ def main():
         for label, since in (("all videos", None), ("published in the last 90 days", cut)):
             n, views, engaged, share = insights.engaged_share(rows, since)
             verdict = (f"{share:.0%}" if share is not None else
+                       "not collected: the API refused it (engaged_views says why)"
+                       if insights.refused(rows, "engaged_views") else
                        f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)")
             print(f"  {label:32} n={n:<5} views {views:>8,}  engaged {engaged:>8,}  share {verdict}")
         print("\n  The Partner Program's 10M bar counts qualified (engaged) views, so a"
@@ -755,7 +831,9 @@ def main():
         print("\nSubscribers gained per 1,000 views, same snapshot")
         for label, since in (("all videos", None), ("published in the last 90 days", cut)):
             n, views, subs, rate = insights.subscriber_rate(rows, since)
-            if rate is None:
+            if rate is None and insights.refused(rows, "subs_gained"):
+                verdict = "not collected: the API refused it (subs_gained says why)"
+            elif rate is None:
                 verdict = f"insufficient data (<{insights.ENGAGED_SHARE_MIN_VIDEOS} videos)"
             else:
                 lo, hi = (x / views * 1000 for x in insights.poisson_interval(subs))
@@ -885,10 +963,18 @@ def main():
         if args.metric not in (Metric.WATCH, Metric.VIEWS, Metric.TOTAL):
             age = insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age
             within = f" --within {args.within}" if args.within else ""
+            # Not the verdict's cut: a diagnostic reads the cut its own rule
+            # commits to, and v8's avg % viewed and retention points read long
+            # videos since 10-07, not AskReddit (PRD §0 #15; review, 2026-10-26).
+            verdict_cut = insights.RELEASE_WITHIN.get(args.release)
+            note = ("; add the --within and --since this metric's own rule names "
+                    "in PRD §0, if it has one")
+            if verdict_cut:
+                note += f" ({verdict_cut} is the watch-seconds verdict's cut)"
             sys.exit(f"--release judges watch-seconds by its rule (views and total "
                      f"watch time beside it) and does not read --metric {args.metric}. "
                      f"Read it per release instead: --by {args.release_key} --metric "
-                     f"{args.metric} --at-age {age:g}{within}")
+                     f"{args.metric} --at-age {age:g}{within}{note}")
         release(args.release, args.release_key,
                 insights.AGE_MATCH_TARGET_DAYS if args.at_age is None else args.at_age,
                 args.min_uploads, args.within)

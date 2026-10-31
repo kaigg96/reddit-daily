@@ -4,27 +4,26 @@ Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
 - **Branch:** `integration/preview`
-- **Commit:** `9cd1022`
-- **When:** 2026-10-24T12:40:41Z
+- **Commit:** `ec2f077`
+- **When:** 2026-10-30T15:04:08Z
 - **Verdict:** ✅ PASS — safe to merge
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/40094821116)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/41076840107)
 
 ## What the gates said
 
 …(truncated)…
- 8 requests (Gemini's 20/day cap is shared with production).
+ate 1 — merged metadata prompt
 
-### Gate 1 — merged metadata prompt
-
-- ✅ `title`: What hobby will DESTROY your wallet?
-- ✅ `keywords`: expensive hobbies, hobbies that cost too much, photography cost, warhammer expensive, skii
-- ✅ `cta`: I'm raising my hand for skiing; that lift ticket price is just brutal. Which one gets YOUR
+- ✅ `title`: What hobby will ACTUALLY break the bank?
+- ✅ `keywords`: expensive hobbies, hobbies cost too much, hobbies to avoid, photography cost, warhammer ex
+- ✅ `cta`: I'm raising my hand for skiing: those lift tickets are wild! Which one gets YOUR vote?
 - ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)
-- ✅ host reaction 1: Oof, lenses!
-- ✅ host reaction 2: Plastic crack is right
-- ✅ host reaction 3: Two hundred?! No way
-- ⚠️ Commentary: past its length cap, a placeholder or emoji, or a setup that is not a reaction: setup (2 words)
+- ✅ host reaction 1: Ouch, lenses
+- ✅ host reaction 2: Plastic crack, lol
+- ✅ host reaction 3: Two hundred?! No.
+- ⚠️ Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (2 words)
+- ⚠️ Commentary setup, as written: "Relatable problem"
 
 ### Gate 2 — R4.6 screen replay
 

@@ -7,8 +7,12 @@ that shift's work (`/review`). This decides "due" from facts, not from a
 shift's sense of whether it has been a while:
 
     weekly             the newest analytics snapshot is newer than the last weekly review
-    monthly            no monthly review yet this calendar month
-    quarterly prep     no packet prepared yet this quarter (the agent drafts the bets)
+    monthly            no monthly review yet this calendar month, once the weekly
+                       review has read a snapshot dated this month (so the packet
+                       reads that month's figures), or from the 10th regardless;
+                       at once if last month's was skipped too
+    quarterly prep     no packet prepared yet this quarter, once a monthly is held
+                       in it (the packet draws on it), or at once when overdue
     quarterly planning prepared, but not yet held with the owner -- never a shift's to do
 
 PLAN.md §5 records when each was last held. A review updates its own row.
@@ -29,6 +33,9 @@ SNAPSHOTS = os.path.join(ROOT, "analysis", "analytics_snapshots.csv")
 # The order a shift takes them in when several are due. Monthly first: it is
 # the one that reaches the owner, and its findings feed the quarter's packet.
 ORDER = ["monthly", "weekly", "quarterly prep"]
+# A month's first Monday snapshot lands by the 7th; this leaves its weekly
+# review a few days before the monthly comes due without it.
+MONTHLY_LATEST_DAY = 10
 # Overdue by this many days and the process has a problem worth escalating
 # (context_budget.py --health). Generous: a review a few days late is normal.
 OVERDUE_DAYS = {"weekly": 14, "monthly": 45, "quarterly prep": 100}
@@ -67,14 +74,25 @@ def due(held, today, snapshot):
     """[(review, why)] due today, in ORDER, plus quarterly planning if waiting."""
     out = []
     monthly = held.get("monthly")
-    if monthly is None or (monthly.year, monthly.month) < (today.year, today.month):
-        out.append(("monthly", f"last held {monthly or 'never'}"))
     weekly = held.get("weekly")
+    this_month = (today.year, today.month)
+    last_month = (today.year - 1, 12) if today.month == 1 else (today.year, today.month - 1)
+    read_this_month = (snapshot is not None and (snapshot.year, snapshot.month) == this_month
+                       and weekly is not None and weekly >= snapshot)
+    monthly_held = monthly is not None and (monthly.year, monthly.month) == this_month
+    if monthly is None or (not monthly_held and (
+            (monthly.year, monthly.month) < last_month       # already overdue: never wait
+            or read_this_month or today.day >= MONTHLY_LATEST_DAY)):
+        out.append(("monthly", f"last held {monthly or 'never'}"))
     if snapshot and (weekly is None or snapshot > weekly):
         out.append(("weekly", f"snapshot of {snapshot} not yet reviewed "
                               f"(last weekly {weekly or 'never'})"))
     prep = held.get("quarterly prep")
-    if prep is None or _quarter(prep) < _quarter(today):
+    quarter = _quarter(today)
+    if (prep is None or _quarter(prep) < quarter) and (
+            monthly is None or _quarter(monthly) == quarter
+            or (prep is not None                                   # already overdue: never wait
+                and (today - prep).days > OVERDUE_DAYS["quarterly prep"])):
         out.append(("quarterly prep", f"no packet yet this quarter (last {prep or 'never'})"))
     plan = held.get("quarterly planning")
     if prep and _quarter(prep) == _quarter(today) and (plan is None or plan < prep):
@@ -96,6 +114,32 @@ def overdue(held, today, snapshot):
     return late
 
 
+def upcoming(held, today, snapshot, horizon=120):
+    """{review: date} when each review in ORDER next comes due, from due() itself.
+
+    Assumes Monday's snapshot arrives every week and each review is taken the
+    day it comes due. A plan quotes this rather than guessing a date: "the
+    11-05 monthly" was written for a review the rule made due on 11-01.
+    """
+    sim, out = dict(held), {}
+    for n in range(horizon):
+        day = today + datetime.timedelta(days=n)
+        monday = day - datetime.timedelta(days=day.weekday())
+        # Only Mondays from today on are assumed; an earlier one counts if it landed.
+        arrived = [s for s in (snapshot, monday if monday >= today else None) if s]
+        snap = max(arrived) if arrived else None
+        while True:   # one review can open the next the same day (weekly, then monthly)
+            fresh = [r for r, _ in due(sim, day, snap) if r in ORDER and sim.get(r) != day]
+            if not fresh:
+                break
+            for review in fresh:
+                out.setdefault(review, day)
+                sim[review] = day
+        if len(out) == len(ORDER):
+            break
+    return out
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     try:
@@ -111,12 +155,17 @@ def main(argv=None):
         return 0
     if not found:
         print("No review is due.")
-        return 0
     for review, why in found:
         mark = "DUE   " if review in ORDER else "OWNER "
         print(f"{mark}{review}: {why}")
     if shift_work:
         print(f"\nThis shift's work: /review {shift_work[0][0]} (one review per shift).")
+    nxt = upcoming(last_held(text), today, newest_snapshot())
+    now = {r for r, _ in shift_work}
+    later = [f"{r} {d}" for r, d in sorted(nxt.items(), key=lambda kv: kv[1]) if r not in now]
+    if later:
+        print("Next, if Monday's snapshots arrive and each is taken the day it comes due: "
+              + " · ".join(later))
     return 0
 
 
