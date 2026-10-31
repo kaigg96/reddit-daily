@@ -1766,10 +1766,11 @@ def test_scorecard_skips_reads_under_four_days_which_analytics_has_not_caught_up
         for i in range(6):
             pub = monday + dt.timedelta(weeks=week, days=i)
             snap = pub + dt.timedelta(days=7)
-            if week == 5 and i == 3:                      # Thursday: read at 3 days, a lagged zero
+            views = 100
+            if week == 5 and i == 2:                      # Wednesday: read at 4 days, kept
+                snap = newest
+            if week == 5 and i == 3:                      # Thursday: read at 3 days, a soft zero
                 snap, views = newest, 0
-            else:
-                views = 100
             # its reading, then the newest snapshot (too old to be read), which
             # holds every upload, so none reads as made private
             for s in (snap, dt.date(2026, 9, 28)):
