@@ -6,26 +6,26 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `reliability/shock-title-guard`
-- **Commit:** `9103351`
-- **When:** 2026-10-26T23:13:41Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 23.0 s, audio, no dead air
+- **Branch:** `editorial/election-week-skip`
+- **Commit:** `5e2772a`
+- **When:** 2026-10-31T23:06:26Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 29.3 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/40417916937)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/41250932069)
 
 What it picked:
 
 ```
-Selected post: What’s the worst cheating story you’ve ever heard?
-Slate topics (rank order): relationships-dating|nostalgia|other|other
-Title style A, caps arm 1: The most brutal betrayal stories EVER told on Reddit
-CTA: What is the worst cheating story you have ever heard?
-Assembled: 23.0s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
-Today's top AskReddit post, asked by u/Homunculus_316: What’s the worst cheating story you’ve ever heard?
+Selected post: I unfortunately have to use adult diapers, can others smell them?
+Slate topics (rank order): health-body|relationships-dating|humor-absurd|humor-absurd|nostalgia|life-advice
+Title style B, caps arm 0: Do you worry people can smell when you wear adult diapers?
+CTA: Would you notice? Drop your thoughts in the comments.
+Assembled: 29.3s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/Character_Pattern424: I unfortunately have to use adult diapers, can others smell them?
 ```
 
 ## Last request
 
-- **Branch:** `reliability/shock-title-guard`
-- **When:** 2026-10-26T23:13:41Z
+- **Branch:** `editorial/election-week-skip`
+- **When:** 2026-10-31T23:06:26Z
 - **Outcome:** rendered -- see above
