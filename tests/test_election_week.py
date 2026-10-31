@@ -12,7 +12,9 @@ def test_voting_questions_are_skipped_through_the_end_date():
                   "What would make you vote for the other party?",
                   "Non-Americans, what do you think of the US election?",
                   "Have you ever been turned away at a polling place?",
-                  "Is a mail-in BALLOT safe?"):
+                  "Is a mail-in BALLOT safe?",
+                  "What time do polls close on Tuesday?",
+                  "Should the electoral college go?"):
         assert content._election_week(title, D(2026, 11, 1)), title
         assert content._election_week(title, config.ELECTION_SKIP_UNTIL), title
 
@@ -45,3 +47,27 @@ def test_select_post_never_picks_a_voting_question(monkeypatch):
     picked = content.select_post(Reddit(), prev_title="")
     assert picked.title == "What smell takes you back?"
     assert "Who are you voting for on Tuesday?" in seen
+
+
+def test_the_live_path_skips_it_and_says_why(monkeypatch, capsys):
+    """No stub: the real rule, on today's UTC date, inside select_post."""
+    class Post:
+        def __init__(self, title):
+            self.title, self.over_18, self.shortlink = title, False, "https://redd.it/x"
+
+    class Reddit:
+        def subreddit(self, name):
+            return self
+
+        def top(self, time_filter, limit):
+            return [Post("How long was your wait at the polls?"), Post("What smell takes you back?")]
+
+    class Today(datetime.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime.datetime(2026, 11, 3, 15, tzinfo=datetime.timezone.utc)
+
+    monkeypatch.setattr(content.datetime, "datetime", Today)
+    monkeypatch.setattr(content, "_comment_pool", lambda post, limit: ["a", "b", "c", "d"])
+    assert content.select_post(Reddit(), prev_title="").title == "What smell takes you back?"
+    assert "About voting in election week, not a candidate: How long" in capsys.readouterr().out

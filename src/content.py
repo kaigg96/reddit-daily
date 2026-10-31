@@ -96,7 +96,7 @@ _CONTRACTED = re.compile(r"([A-Za-z*]+)'(?:s|ll|re|ve|d|m|t)\b", re.IGNORECASE)
 # and we read answers word for word, jokes like "the other side votes
 # Wednesday" included. So until config.ELECTION_SKIP_UNTIL a question about
 # voting or the election is not a candidate. Over-matching costs one post.
-_ELECTION = re.compile(r"\b(vot(e|es|ed|er|ers|ing)|ballots?|elections?|midterms?|polling)\b",
+_ELECTION = re.compile(r"\b(vot(e|es|ed|er|ers|ing)|ballots?|elections?|electoral|midterms?|polls?|polling)\b",
                        re.IGNORECASE)
 
 
@@ -192,6 +192,8 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
     for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT):
         if post.title in uploaded and post.title != prev_title:
             print(f"Already uploaded, not a candidate: {post.title[:60]}")
+        if _election_week(post.title):
+            print(f"About voting in election week, not a candidate: {post.title[:60]}")
         if (
             not post.over_18
             and not _profane(post.title)
