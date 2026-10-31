@@ -78,7 +78,10 @@ TRAFFIC_FIELDS = ["snapshot_date", "scope", "traffic_source", "views",
 WEEK_DAYS = 7
 
 CHANNEL_OUT = config.CHANNEL_LOG
-CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos"]
+CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos",
+                  "subscribed_view_share", "top_countries"]
+AUDIENCE_DAYS = 28
+TOP_COUNTRIES = 5
 COMMENTS_OUT = config.COMMENTS_LOG
 COMMENTS_FIELDS = ["snapshot_date", "video_id", "comment_id", "published_at", "likes", "text"]
 
@@ -381,8 +384,52 @@ def snapshot_traffic(ya, today):
     print(f"appended {written} traffic-source rows to {TRAFFIC_OUT}")
 
 
-def snapshot_channel(yt, today, path=None):
-    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11).
+def fetch_views_by(ya, today, dimension):
+    """{value: views} for the whole channel over the AUDIENCE_DAYS to `today`."""
+    end = datetime.date.fromisoformat(today)
+    resp = ya.reports().query(
+        ids="channel==MINE",
+        startDate=(end - datetime.timedelta(days=AUDIENCE_DAYS)).isoformat(),
+        endDate=today,
+        metrics="views",
+        dimensions=dimension,
+    ).execute(num_retries=SERVER_RETRIES)
+    columns = [h["name"] for h in resp.get("columnHeaders", [])]
+    rows = (dict(zip(columns, row)) for row in resp.get("rows", []))
+    return {d[dimension]: int(d.get("views", 0)) for d in rows}
+
+
+def audience_fields(ya, today):
+    """Who watches (ORG.md, Audience & community): the share of the last 28 days'
+    views from subscribed viewers, the nearest the API gets to returning viewers,
+    and the countries with most views as "US:0.412|GB:0.090". Each is fail-soft
+    and blank when refused or empty, never a guess: the subscriber count beside
+    them must land whatever these do."""
+    out = {"subscribed_view_share": "", "top_countries": ""}
+    try:
+        by_status = fetch_views_by(ya, today, "subscribedStatus")
+        total = sum(by_status.values())
+        if total:
+            out["subscribed_view_share"] = f"{by_status.get('SUBSCRIBED', 0) / total:.3f}"
+    except Exception as e:
+        print(f"::warning::views by subscribed status failed ({type(e).__name__}: {e}); "
+              f"column left blank")
+    try:
+        # Every country, so each share is of all views, not of the top five's.
+        by_country = fetch_views_by(ya, today, "country")
+        total = sum(by_country.values())
+        if total:
+            top = sorted(by_country.items(), key=lambda kv: -kv[1])[:TOP_COUNTRIES]
+            out["top_countries"] = "|".join(f"{c}:{v / total:.3f}" for c, v in top)
+    except Exception as e:
+        print(f"::warning::views by country failed ({type(e).__name__}: {e}); "
+              f"column left blank")
+    return out
+
+
+def snapshot_channel(yt, today, path=None, ya=None):
+    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11),
+    and, given an Analytics client, who watches (audience_fields).
 
     The Data API rounds subscriber counts to three significant figures, which is
     exact below 1,000 -- the threshold that matters.
@@ -390,8 +437,10 @@ def snapshot_channel(yt, today, path=None):
     path = path or CHANNEL_OUT
     stats = yt.channels().list(mine=True, part="statistics").execute(
         num_retries=SERVER_RETRIES)["items"][0]["statistics"]
+    audience = audience_fields(ya, today) if ya is not None else {}
     is_new = not path.exists()
     path.parent.mkdir(exist_ok=True)
+    ensure_header(path, CHANNEL_FIELDS)
     with open(path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CHANNEL_FIELDS, lineterminator="\n")
         if is_new:
@@ -402,6 +451,7 @@ def snapshot_channel(yt, today, path=None):
             "subscribers_hidden": int(bool(stats.get("hiddenSubscriberCount"))),
             "views": stats.get("viewCount", ""),
             "videos": stats.get("videoCount", ""),
+            **audience,
         })
     print(f"channel: {stats.get('subscriberCount', '?')} subscribers -> {path}")
 
@@ -535,8 +585,10 @@ def main():
     else:
         # Fail soft, as the traffic snapshot does.
         try:
-            snapshot_channel(analytics.youtube_client(), today)
-        except Exception as e:
+            snapshot_channel(analytics.youtube_client(), today, ya=ya)
+        # SystemExit too: ensure_header refuses a header it cannot extend that
+        # way, and ending here would lose the per-video rows before the commit.
+        except (Exception, SystemExit) as e:
             print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
                   f"per-video snapshot is unaffected")
 

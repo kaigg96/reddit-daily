@@ -171,14 +171,75 @@ def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):
     wa.snapshot_channel(yt, "2026-10-19", p)
     lines = p.read_text().splitlines()
     assert lines == [",".join(wa.CHANNEL_FIELDS),
-                     "2026-10-12,142,0,91000,180",
-                     "2026-10-19,142,0,91000,180"]
+                     "2026-10-12,142,0,91000,180,,",
+                     "2026-10-19,142,0,91000,180,,"]
 
 
 def test_hidden_subscriber_count_is_flagged_not_guessed(tmp_path):
     p = tmp_path / "channel.csv"
     wa.snapshot_channel(_FakeYT({"hiddenSubscriberCount": True, "viewCount": "1"}), "2026-10-12", p)
-    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,"
+    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,,,"
+
+
+class _FakeAudience:
+    """reports().query(...).execute() answering by dimension; a listed one raises."""
+
+    def __init__(self, rows, refuse=()):
+        self.rows, self.refuse, self.queries = rows, refuse, []
+
+    def reports(self):
+        return self
+
+    def query(self, **kw):
+        self.queries.append(kw)
+        self.kw = kw
+        return self
+
+    def execute(self, num_retries=0):
+        dim = self.kw["dimensions"]
+        if dim in self.refuse:
+            raise RuntimeError("403 refused")
+        return {"columnHeaders": [{"name": dim}, {"name": "views"}],
+                "rows": self.rows.get(dim, [])}
+
+
+_AUDIENCE = {"subscribedStatus": [["SUBSCRIBED", 30], ["UNSUBSCRIBED", 970]],
+             "country": [["IN", 50], ["US", 600], ["GB", 100], ["CA", 80], ["AU", 70],
+                         ["DE", 60], ["PH", 40]]}
+
+
+def test_who_watches_is_shares_of_all_views_over_28_days(tmp_path):
+    p = tmp_path / "channel.csv"
+    ya = _FakeAudience(_AUDIENCE)
+    wa.snapshot_channel(_FakeYT({"subscriberCount": "22", "viewCount": "9", "videoCount": "3"}),
+                        "2026-11-09", p, ya=ya)
+    assert p.read_text().splitlines()[1] == (
+        "2026-11-09,22,0,9,3,0.030,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060")
+    assert {(q["startDate"], q["endDate"], q["ids"]) for q in ya.queries} == {
+        ("2026-10-12", "2026-11-09", "channel==MINE")}
+
+
+def test_a_refused_audience_query_blanks_its_column_and_the_row_still_lands(tmp_path):
+    p = tmp_path / "channel.csv"
+    yt = _FakeYT({"subscriberCount": "22", "viewCount": "9", "videoCount": "3"})
+    wa.snapshot_channel(yt, "2026-11-09", p, ya=_FakeAudience(_AUDIENCE, refuse={"country"}))
+    wa.snapshot_channel(yt, "2026-11-16", p, ya=_FakeAudience(_AUDIENCE, refuse={"subscribedStatus"}))
+    wa.snapshot_channel(yt, "2026-11-23", p, ya=_FakeAudience({}))  # no rows: blank, not 0
+    assert p.read_text().splitlines()[1:] == [
+        "2026-11-09,22,0,9,3,0.030,",
+        "2026-11-16,22,0,9,3,,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060",
+        "2026-11-23,22,0,9,3,,"]
+
+
+def test_the_live_channel_file_gains_the_columns_in_its_header_only(tmp_path):
+    p = tmp_path / "channel.csv"
+    old = b"snapshot_date,subscribers,subscribers_hidden,views,videos\n2026-10-26,22,0,97399,1064\n"
+    p.write_bytes(old)
+    wa.snapshot_channel(_FakeYT({"subscriberCount": "23", "viewCount": "9", "videoCount": "3"}),
+                        "2026-11-09", p, ya=_FakeAudience(_AUDIENCE))
+    head, rest = p.read_bytes().split(b"\n", 1)
+    assert head.decode().split(",") == wa.CHANNEL_FIELDS
+    assert rest.startswith(b"2026-10-26,22,0,97399,1064\n")
 
 
 class _FakeComments:
