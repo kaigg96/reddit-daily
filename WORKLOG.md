@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-10-31 (22:29) — Your security checklist could have led you to cut off our own uploader; fixed. We will start learning who watches
 
-    Worked (% of the shift): audience 25 · gm 25 · market 20 · security 10 · editorial 5 · product 5 · data 5 · reliability 5
+    Worked (% of the shift): audience 25 · market 20 · gm 15 · reliability 10 · security 10 · editorial 5 · product 5 · strategy 5 · data 5
 
 **Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Shows built on their own questions do get paid at scale, which matters for November's choice of a source after Reddit. A fix to the security checklist means following it cannot stop our uploads.
 
@@ -73,9 +73,10 @@ and more useful than a confident guess.
 
 ### Done
 - **Security (fix):** check 3 on #59 told you to remove any connected app you do not recognise. It did not say that our uploader is one of them, or that Google labels it unverified. Removing it would stop every upload and Monday's figures until you made a new login on your own machine. The check now says to keep it. Corrected by edit, so no email.
-- **Audience (bet, built):** each Monday's figures will add two things we have never had: the share of views from subscribers (the nearest YouTube offers to returning viewers) and the top five countries. Country matters because YouTube shares ad money by country. Live from Monday's run: each sits behind its own guard, so a refusal blanks only its column and can never cost the main figures. A fresh review found no fault; its small notes are fixed.
+- **Audience (bet, built):** each Monday's figures will add two things we have never had: the share of views from subscribers (the nearest YouTube offers to returning viewers) and the top five countries. Country matters because YouTube shares ad money by country. Live from Monday's run: each sits behind its own guard, so a refusal blanks only its column and can never cost the main figures. A fresh review found no fault; its small notes are fixed. A second change, also reviewed, tests the one guard that matters most: a problem with this file can no longer end Monday's job before the main figures are saved.
 - **Audience (answered):** in the last two weeks viewers left 8 comments: 7 on one politics question, reacting to the topic, and 1 answering the closing vote. So the vote draws almost nothing. That changes no decision: bet 1 is judged on watch time.
 - **Editorial (check):** this evening's upload asked where "$1.8 trillion wiped out" went. Reuters and NBC report the 30 October sell-off, so the premise is true.
+- **Strategy (answered):** no reliable figure exists for how often small channels reach the Partner Program bar. Published ones disagree a hundredfold, and the most specific describes channels unlike ours (we have over 1,000 videos and 22 subscribers). Nothing changes.
 - **Data (answered):** since January YouTube's bulk reports count thumbnail impressions. The Shorts feed, which brings 97% of our views, shows no thumbnails, so they would miss our reach. No change.
 - **Product, reliability, security:** bet 1 still merges cleanly with today's live code and all 952 checks pass. Both of today's uploads landed. No workflow changed; money controls in place ($0.89 this month, forecast $0.90 of $3). Sunday's US clock change moves Google's AI-allowance reset to 08:00 UTC; nothing we run depends on that hour.
 - **General management:** nothing was ready. Two fresh agents proposed 14 ideas; two rankers, reading them in opposite orders, put the paid-channels count first and the audience figures third. Dropped: holding back shift time for bet 1's merge (your call at the monthly, which already leads with the shift cap); closing #80 for you (it is yours to decide); building four a day before bet 1 (#80 says wait); a forum search for a reach drop (it invites explaining away Monday's read); pricing sponsorship (Reddit's terms bar it on today's videos, and we are below every minimum); a sample that plays in one tap (GitHub serves a video as a download). You have been away since 27 October, so nothing is re-asked.
