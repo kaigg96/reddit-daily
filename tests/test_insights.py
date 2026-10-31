@@ -1746,6 +1746,41 @@ def test_scorecard_zero_rate_drops_a_privatised_zero_as_the_offline_loaders_do(t
     assert abs(now["zero_rate"] - 100.0 / 17) < 1e-9
 
 
+def test_scorecard_skips_reads_under_four_days_which_analytics_has_not_caught_up_on(tmp_path):
+    """Only the newest week's Thursday uploads are ever read at 3 days, and a
+    3-day zero later shows a view half the time (10-31): two of them made the
+    10-26 zero_rate breach. They wait for the next snapshot instead."""
+    import datetime as dt, importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    (tmp_path / "analysis").mkdir()
+    (tmp_path / "upload_log.csv").write_text("video_id,duration_s\n")
+    rows = ["snapshot_date,video_id,published_at,views,avg_view_duration_s,"
+            "avg_view_pct,privacy_status"]
+    monday = dt.date(2026, 8, 3)
+    newest = monday + dt.timedelta(weeks=5, days=7)          # the last week's Monday after
+    for week in range(6):
+        for i in range(6):
+            pub = monday + dt.timedelta(weeks=week, days=i)
+            snap = pub + dt.timedelta(days=7)
+            if week == 5 and i == 3:                      # Thursday: read at 3 days, a lagged zero
+                snap, views = newest, 0
+            else:
+                views = 100
+            # its reading, then the newest snapshot (too old to be read), which
+            # holds every upload, so none reads as made private
+            for s in (snap, dt.date(2026, 9, 28)):
+                rows.append(f"{s},w{week}v{i},{pub}T12:00:00Z,{views},{10 if views else 0},50,public")
+    (tmp_path / "analysis" / "analytics_snapshots.csv").write_text("\n".join(rows) + "\n")
+    _, now, _, n_now = report._period_metrics(root=str(tmp_path))
+    assert n_now == 17 and now["zero_rate"] == 0.0
+    _, now, _, n_now = report._period_metrics(root=str(tmp_path), min_age=0)
+    assert n_now == 18 and now["zero_rate"] > 0
+
+
 def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
     videos = [
         v("a", 10, views=50, pct=120.0),   # replaying

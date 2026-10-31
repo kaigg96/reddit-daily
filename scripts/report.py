@@ -313,11 +313,19 @@ def _within_rows(rows, spec):
     return [r for r in rows if r.get("video_id") in ids]
 
 
-def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
+def _period_metrics(at_age=7, tolerance=4, half=3, root=None, min_age=4):
     """Metrics for the recent `half` publish-weeks vs the `half` before them.
 
     Every upload read at the same age, so the two periods are comparable.
     Duration comes from upload_log; the rest from the weekly snapshot.
+
+    No read under `min_age` days: Analytics lags 1-2 days, and only the newest
+    week's Thursday uploads are ever read at 3, so they sat in the recent
+    period alone. Over every snapshot to 10-26, 21% of reads at 3 days were
+    zeros (6 of 28) against 6% at 5-14, and 2 of 4 such zeros showed a view a
+    week later against 1 of 17 older ones. Two 3-day zeros made the 10-26
+    zero_rate breach (4.8% -> 11.4%; 6.1% without them). Set 10-31, before
+    the 11-02 snapshot it first changes.
     """
     import csv as _csv
     import datetime as _dt
@@ -350,7 +358,7 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
                 except (ValueError, TypeError):
                     continue
                 age = (snap - pub).days
-                if abs(age - at_age) > tolerance:
+                if abs(age - at_age) > tolerance or age < min_age:
                     continue
                 vid = r.get("video_id")
                 prev = best.get(vid)
