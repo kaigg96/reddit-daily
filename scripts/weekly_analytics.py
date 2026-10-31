@@ -510,6 +510,17 @@ def already_snapshotted(path, today):
         return any(row.startswith(today) for row in f)
 
 
+def channel_step(ya, today):
+    """snapshot_channel, failing soft as the traffic snapshot does. SystemExit
+    too: ensure_header refuses a header it cannot extend, and ending the job
+    here would lose the per-video rows, which the workflow commits later."""
+    try:
+        snapshot_channel(analytics.youtube_client(), today, ya=ya)
+    except (Exception, SystemExit) as e:
+        print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
+              f"per-video snapshot is unaffected")
+
+
 def main():
     today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
 
@@ -585,14 +596,7 @@ def main():
     if channel_done:
         print(f"channel stats for {today} already present; skipping append")
     else:
-        # Fail soft, as the traffic snapshot does.
-        try:
-            snapshot_channel(analytics.youtube_client(), today, ya=ya)
-        # SystemExit too: ensure_header refuses a header it cannot extend that
-        # way, and ending here would lose the per-video rows before the commit.
-        except (Exception, SystemExit) as e:
-            print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
-                  f"per-video snapshot is unaffected")
+        channel_step(ya, today)
 
     if already_snapshotted(COMMENTS_OUT, today):
         print(f"comments for {today} already present; skipping append")
