@@ -480,3 +480,16 @@ def test_retention_columns_extend_the_live_header_as_a_pure_append():
     live = open(os.path.join(os.path.dirname(__file__), "..", "analysis",
                              "analytics_snapshots.csv")).readline().strip().split(",")
     assert wa.FIELDS[:len(live)] == live
+
+
+def test_a_channel_header_it_cannot_extend_never_ends_the_job(tmp_path, monkeypatch, capsys):
+    """Monday's per-video rows are committed by a later workflow step, so the
+    channel step must not end the job, even on ensure_header's SystemExit."""
+    p = tmp_path / "channel.csv"
+    p.write_bytes(b"snapshot_date,views,subscribers\n2026-10-26,1,22\n")
+    monkeypatch.setattr(wa, "CHANNEL_OUT", p)
+    monkeypatch.setattr(wa.analytics, "youtube_client",
+                        lambda: _FakeYT({"subscriberCount": "23", "viewCount": "9", "videoCount": "3"}))
+    wa.channel_step(_FakeAudience(_AUDIENCE), "2026-11-09")  # raises nothing
+    assert p.read_bytes() == b"snapshot_date,views,subscribers\n2026-10-26,1,22\n"
+    assert "channel snapshot failed (SystemExit" in capsys.readouterr().out
