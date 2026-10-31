@@ -319,13 +319,15 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None, min_age=4):
     Every upload read at the same age, so the two periods are comparable.
     Duration comes from upload_log; the rest from the weekly snapshot.
 
-    No read under `min_age` days: Analytics lags 1-2 days, and only the newest
-    week's Thursday uploads are ever read at 3, so they sat in the recent
-    period alone. Over every snapshot to 10-26, 21% of reads at 3 days were
+    No read under `min_age` days: only the newest week's Thursday uploads are
+    ever read at 3, so they sat in the recent period alone, and at 3 days the
+    zero line is soft. Over every snapshot to 10-26, 21% of 3-day reads were
     zeros (6 of 28) against 6% at 5-14, and 2 of 4 such zeros showed a view a
-    week later against 1 of 17 older ones. Two 3-day zeros made the 10-26
-    zero_rate breach (4.8% -> 11.4%; 6.1% without them). Set 10-31, before
-    the 11-02 snapshot it first changes.
+    week later against 1 of 17 older ones. An upload with views is already
+    complete at 3 days (median views and watch-seconds equal a week later,
+    n=22), so the floor moves only zero_rate. Two 3-day zeros were half the
+    10-26 breach (4.8% -> 11.4%; 6.1% without them); the 11-02 snapshot
+    re-reads both at 10 days. Set 10-31, before the 3-day reads it first drops.
     """
     import csv as _csv
     import datetime as _dt
