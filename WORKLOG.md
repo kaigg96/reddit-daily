@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-31 (22:29) — Your security checklist could have led you to cut off our own uploader; fixed. We will start learning who watches
+
+    Worked (% of the shift): audience 25 · gm 25 · market 20 · security 10 · editorial 5 · product 5 · data 5 · reliability 5
+
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Shows built on their own questions do get paid at scale, which matters for November's choice of a source after Reddit. A fix to the security checklist means following it cannot stop our uploads.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Evidence for the source after Reddit.** Of 15 quiz and would-you-rather Shorts channels, 6 show the members button only Partner Program channels get, including 5 of the 7 with over 300,000 subscribers. Among Reddit-reading channels it was 11 of about 185. Their questions are their own, so neither YouTube's reused-content rule nor Reddit's terms reach them. Whether they use a voice cannot be seen from outside.
+
+### Done
+- **Security (fix):** check 3 on #59 told you to remove any connected app you do not recognise. It did not say that our uploader is one of them, or that Google labels it unverified. Removing it would stop every upload and Monday's figures until you made a new login on your own machine. The check now says to keep it. Corrected by edit, so no email.
+- **Audience (bet, built):** each Monday's figures will add two things we have never had: the share of views from subscribers (the nearest YouTube offers to returning viewers) and the top five countries. Country matters because YouTube shares ad money by country. Live from Monday's run: each sits behind its own guard, so a refusal blanks only its column and can never cost the main figures. A fresh review found no fault; its small notes are fixed.
+- **Audience (answered):** in the last two weeks viewers left 8 comments: 7 on one politics question, reacting to the topic, and 1 answering the closing vote. So the vote draws almost nothing. That changes no decision: bet 1 is judged on watch time.
+- **Editorial (check):** this evening's upload asked where "$1.8 trillion wiped out" went. Reuters and NBC report the 30 October sell-off, so the premise is true.
+- **Data (answered):** since January YouTube's bulk reports count thumbnail impressions. The Shorts feed, which brings 97% of our views, shows no thumbnails, so they would miss our reach. No change.
+- **Product, reliability, security:** bet 1 still merges cleanly with today's live code and all 952 checks pass. Both of today's uploads landed. No workflow changed; money controls in place ($0.89 this month, forecast $0.90 of $3). Sunday's US clock change moves Google's AI-allowance reset to 08:00 UTC; nothing we run depends on that hour.
+- **General management:** nothing was ready. Two fresh agents proposed 14 ideas; two rankers, reading them in opposite orders, put the paid-channels count first and the audience figures third. Dropped: holding back shift time for bet 1's merge (your call at the monthly, which already leads with the shift cap); closing #80 for you (it is yours to decide); building four a day before bet 1 (#80 says wait); a forum search for a reach drop (it invites explaining away Monday's read); pricing sponsorship (Reddit's terms bar it on today's videos, and we are below every minimum); a sample that plays in one tap (GitHub serves a video as a download). You have been away since 27 October, so nothing is re-asked.
+- AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register at Reddit's registration page by 12 January); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks; check 3 now says what to keep).
+
+### Next
+- **2 November, the weekly:** first check that Monday's figures name nothing YouTube refused, and read each test's warnings before its verdict. Then the views rule, the subreddit test, the title-style test and the voice question (its fairness check is done), each applied as written and recorded in the test ledger. The scorecard reads at 4–10 days; a second breach of the buried-uploads alarm is a decision's revisit trigger. If Monday's figures do not arrive, re-run the Monday job that day. Then check that the channel row carries the two new figures; blank means YouTube refused them for a channel this small.
+- **Then the November monthly:** lead with the shift cap (it trips about 4 November), then the audit's proposals in the technical list and the bundle carried from 25 October. Put today's paid-channels finding beside the own-questions sample.
+- **If #77 is labelled:** merge the release, then the counting fix, set the live format to v8 in the product plan, and close #77.
+- **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. A little for the source decision (outside evidence where we had none) and for safety (your checklist can no longer stop uploads).
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-31 (16:30) — The buried-uploads alarm due to reopen a decision on Monday was half two readings taken too young; every upload is now read at the same age
 
     Worked (% of the shift): data 50 · gm 25 · market 10 · audience 5 · reliability 5 · security 5
@@ -93,40 +129,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** Too early to say.
 
 ---
-
-## 2026-10-31 (10:15) — Your Reddit registration ask pointed at a form that closed today; fixed. Your monthly report now comes after Monday's figures, not the day before
-
-    Worked (% of the shift): gm 50 · legal 20 · security 15 · reliability 10 · market 5
-
-**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Two of your asks were corrected or settled for you, and the monthly report will now read the current month's figures.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
-- **Protecting the source.** Every upload reads Reddit, and an unregistered app loses access on 12 January. The ask now sends you to the one page that registers existing apps.
-
-### Done
-- **Legal (fix):** #82's description listed the questions on Reddit's form for *new* API access as if they were the registration form's, and linked that form. New requests closed today. Reddit's registration page says only "log in to start registration". Corrected by edit, so no email.
-- **General management (fix, live):** every plan expected your November monthly report on 5 November. The scheduler would have called it due tomorrow, Sunday, on figures already reviewed on 26 October, a day before Monday's figures and four test reads. It now waits for the month's first weekly review, as October's did: 2 November, after the weekly, or from the 10th if Monday's figures never arrive. A fresh agent's round of ideas found it. A fresh review then found three ways my first version could hide a late review from its alarm, and a test sweeping eight months of dates found two more. All fixed and merged. It also now prints when each review next comes due, worked out by the same rule, so a plan quotes a date rather than guessing one.
-- **General management (for you, at that review):** the weekly cap on shift usage pays for about 560 shift-minutes, but 21 one-hour shifts are scheduled, and the early-ending alarm asks for all of them. Both cannot hold: full shifts mean about nine a week, then two or three dark days. At this week's pace the cap trips around 4 November, inside bet 1's window. The cap or the schedule is your choice; the review will recommend one.
-- **Security (done for you):** the Gemini key is restricted. One free request from it to YouTube's API was refused by the key's own list of allowed APIs. #59 now has six checks.
-- **General management:** #50 closed as superseded. Since 27 October a shift lands a rule change you have labelled itself, as #84 and #85 did, which is what it asked for. The 19 October digest is closed too; the 26 October one replaces it.
-- **Product:** bet 1 is still ready the day you label it: today's live code, the release and the counting fix combine cleanly, and all 949 checks pass.
-- **Reliability, security, market:** all five uploads since the last shift landed. No workflow changed, money controls in place ($0.88 this month, forecast $0.90 of $3). No news on Reddit's API dates or YouTube's rules since 27 October. A major update of a sign-in library came out this morning; uploads pin the old version and Monday's figures job does not use it.
-- **General management:** nothing was ready. A fresh agent read the last 40 build runs, the upload log, the technical list and the risks; beyond the two items above, nothing cleared the bar. **Dropped:** a pacing line for the shift cap (it would turn a breaker into a budget, your call); repeated background clips (chance); a lower-case closing line (bet 1's release fixes it); GitHub's warning on old build steps (they already run on the new version).
-- AI use: none from the upload allowance; no Polly; no render.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register at Reddit's registration page by 12 January); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1 until you answer); #59 (six account checks).
-
-### Next
-- **This afternoon's release check (about 13:00–15:00 UTC):** its build log should say it skipped.
-- **2 November, the weekly:** first check that Monday's check-in names no figure YouTube refused, and read each test's warnings before its verdict. Then the views rule, the subreddit test, the title-style test and the voice question. Before the voice read, run the fairness check its rule names, counting only the uploads that read will see. Apply each rule as written; record each read in the ledger. The zero-view guardrail: a second breach is a decision's revisit trigger.
-- **If Monday's figures do not arrive,** re-run the Monday job that day: the monthly now waits for them, until the 10th.
-- **Then the November monthly:** lead with the shift cap (it trips about 4 November), then the audit's proposals in the technical list and the bundle carried from 25 October. A labelled bundle lands by a shift's commit.
-- **If #77 is labelled:** merge the release, then the counting fix, set the live format to v8 in the product plan, and close #77. If you ask for no tags on fallback days, build that first (the technical list says how).
-- **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
-
-### Better?
-- **Than last shift:** No for viewers or revenue. A little for the source and for your monthly report: the registration ask can no longer send you to a closed form, and the report will read November's figures.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
