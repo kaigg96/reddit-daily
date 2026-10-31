@@ -44,9 +44,28 @@ def test_weekly_follows_the_data_not_the_calendar():
 
 
 def test_monthly_is_due_once_per_calendar_month():
-    held = table(weekly="2026-10-06", monthly="2026-10-31", prep="2026-10-03", planning="2026-10-04")
-    assert "monthly" not in names(held, "2026-10-31", "2026-10-05")
-    assert "monthly" in names(held, "2026-11-01", "2026-10-05")
+    held = table(weekly="2026-11-02", monthly="2026-10-31", prep="2026-10-03", planning="2026-10-04")
+    assert "monthly" not in names(held, "2026-10-31", "2026-10-26")
+    assert "monthly" in names(held, "2026-11-02", "2026-11-02")
+
+
+def test_monthly_waits_for_the_months_first_weekly_review():
+    # 2026-11-01 is a Sunday: the packet would read figures October's last
+    # weekly already reviewed, a day before Monday's snapshot.
+    before = table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert names(before, "2026-11-01", "2026-10-26") == []
+    assert names(before, "2026-11-02", "2026-11-02") == ["weekly"]
+    after = table(weekly="2026-11-02", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert names(after, "2026-11-02", "2026-11-02") == ["monthly"]
+
+
+def test_monthly_comes_due_without_a_weekly_from_the_10th():
+    # A broken snapshot job must not hide the monthly, or its overdue alarm.
+    stuck = table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert "monthly" not in names(stuck, "2026-11-09", "2026-10-26")
+    assert "monthly" in names(stuck, "2026-11-10", "2026-10-26")
+    late = dict(c.overdue(c.last_held(stuck), D("2026-11-20"), D("2026-10-26")))
+    assert late == {"monthly": 46}
 
 
 def test_quarterly_planning_waits_on_the_owner_after_prep():
@@ -54,7 +73,9 @@ def test_quarterly_planning_waits_on_the_owner_after_prep():
     assert names(held, "2026-10-08", "2026-10-05") == ["quarterly planning"]
     done = table(weekly="2026-10-06", monthly="2026-10-02", prep="2026-10-04", planning="2026-10-07")
     assert names(done, "2026-10-08", "2026-10-05") == []
-    assert "quarterly prep" in names(done, "2027-01-02", "2026-10-05")
+    assert names(done, "2027-01-02", "2026-10-05") == ["monthly"]   # the quarter's monthly first
+    monthly_done = table(weekly="2026-10-06", monthly="2027-01-02", prep="2026-10-04", planning="2026-10-07")
+    assert names(monthly_done, "2027-01-02", "2026-10-05") == ["quarterly prep"]
 
 
 def test_only_long_overdue_reviews_are_a_process_failure():
@@ -66,3 +87,29 @@ def test_only_long_overdue_reviews_are_a_process_failure():
 def test_the_real_plan_parses():
     held = c.last_held(open(c.PLAN).read())
     assert set(held) == {"weekly", "monthly", "quarterly prep", "quarterly planning"}
+
+
+def test_a_late_weekly_on_old_figures_does_not_open_the_monthly():
+    # The 10-26 snapshot reviewed late, on 11-01: the row says November, the figures October.
+    late = table(weekly="2026-11-01", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert names(late, "2026-11-01", "2026-10-26") == []
+
+
+def test_an_overdue_monthly_stays_due_across_the_month_boundary():
+    # November's was skipped: December must not wait for its first weekly.
+    skipped = table(weekly="2026-11-30", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    for day in ("2026-11-30", "2026-12-01", "2026-12-06"):
+        assert "monthly" in names(skipped, day, "2026-11-30")
+    late = dict(c.overdue(c.last_held(skipped), D("2026-12-01"), D("2026-11-30")))
+    assert late == {"monthly": 57}
+
+
+def test_quarterly_prep_follows_the_quarters_first_monthly_and_stays_due():
+    december = table(weekly="2026-12-28", monthly="2026-12-07", prep="2026-10-05", planning="2026-10-10")
+    assert names(december, "2027-01-01", "2026-12-28") == []          # January's monthly first
+    january = table(weekly="2027-01-04", monthly="2027-01-04", prep="2026-10-05", planning="2026-10-10")
+    assert names(january, "2027-01-04", "2027-01-04") == ["quarterly prep"]
+    # Left undone past January, prep must not vanish while February waits for its monthly.
+    for day in ("2027-02-01", "2027-02-09"):
+        assert "quarterly prep" in names(january, day, "2027-01-25")
+    assert dict(c.overdue(c.last_held(january), D("2027-02-01"), D("2027-01-25")))["quarterly prep"] == 119

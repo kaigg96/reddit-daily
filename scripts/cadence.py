@@ -7,8 +7,12 @@ that shift's work (`/review`). This decides "due" from facts, not from a
 shift's sense of whether it has been a while:
 
     weekly             the newest analytics snapshot is newer than the last weekly review
-    monthly            no monthly review yet this calendar month
-    quarterly prep     no packet prepared yet this quarter (the agent drafts the bets)
+    monthly            no monthly review yet this calendar month, once the weekly
+                       review has read a snapshot dated this month (so the packet
+                       reads that month's figures), or from the 10th regardless;
+                       at once if last month's was skipped too
+    quarterly prep     no packet prepared yet this quarter, once a monthly is held
+                       in it (the packet draws on it)
     quarterly planning prepared, but not yet held with the owner -- never a shift's to do
 
 PLAN.md §5 records when each was last held. A review updates its own row.
@@ -29,6 +33,9 @@ SNAPSHOTS = os.path.join(ROOT, "analysis", "analytics_snapshots.csv")
 # The order a shift takes them in when several are due. Monthly first: it is
 # the one that reaches the owner, and its findings feed the quarter's packet.
 ORDER = ["monthly", "weekly", "quarterly prep"]
+# A month's first Monday snapshot lands by the 7th; this leaves its weekly
+# review a few days before the monthly comes due without it.
+MONTHLY_LATEST_DAY = 10
 # Overdue by this many days and the process has a problem worth escalating
 # (context_budget.py --health). Generous: a review a few days late is normal.
 OVERDUE_DAYS = {"weekly": 14, "monthly": 45, "quarterly prep": 100}
@@ -67,14 +74,22 @@ def due(held, today, snapshot):
     """[(review, why)] due today, in ORDER, plus quarterly planning if waiting."""
     out = []
     monthly = held.get("monthly")
-    if monthly is None or (monthly.year, monthly.month) < (today.year, today.month):
-        out.append(("monthly", f"last held {monthly or 'never'}"))
     weekly = held.get("weekly")
+    this_month = (today.year, today.month)
+    last_month = (today.year - 1, 12) if today.month == 1 else (today.year, today.month - 1)
+    read_this_month = (snapshot is not None and (snapshot.year, snapshot.month) == this_month
+                       and weekly is not None and weekly >= snapshot)
+    monthly_held = monthly is not None and (monthly.year, monthly.month) == this_month
+    if monthly is None or (not monthly_held and (
+            (monthly.year, monthly.month) < last_month       # already overdue: never wait
+            or read_this_month or today.day >= MONTHLY_LATEST_DAY)):
+        out.append(("monthly", f"last held {monthly or 'never'}"))
     if snapshot and (weekly is None or snapshot > weekly):
         out.append(("weekly", f"snapshot of {snapshot} not yet reviewed "
                               f"(last weekly {weekly or 'never'})"))
     prep = held.get("quarterly prep")
-    if prep is None or _quarter(prep) < _quarter(today):
+    if (prep is None or _quarter(prep) < _quarter(today)) and (
+            monthly is None or _quarter(monthly) == _quarter(today)):
         out.append(("quarterly prep", f"no packet yet this quarter (last {prep or 'never'})"))
     plan = held.get("quarterly planning")
     if prep and _quarter(prep) == _quarter(today) and (plan is None or plan < prep):
