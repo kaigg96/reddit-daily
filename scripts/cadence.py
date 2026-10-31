@@ -114,6 +114,30 @@ def overdue(held, today, snapshot):
     return late
 
 
+def upcoming(held, today, snapshot, horizon=120):
+    """{review: date} when each review in ORDER next comes due, from due() itself.
+
+    Assumes Monday's snapshot arrives every week and each review is taken the
+    day it comes due. A plan quotes this rather than guessing a date: "the
+    11-05 monthly" was written for a review the rule made due on 11-01.
+    """
+    sim, out = dict(held), {}
+    for n in range(horizon):
+        day = today + datetime.timedelta(days=n)
+        monday = day - datetime.timedelta(days=day.weekday())
+        snap = max(snapshot, monday) if snapshot else monday
+        while True:   # one review can open the next the same day (weekly, then monthly)
+            fresh = [r for r, _ in due(sim, day, snap) if r in ORDER and sim.get(r) != day]
+            if not fresh:
+                break
+            for review in fresh:
+                out.setdefault(review, day)
+                sim[review] = day
+        if len(out) == len(ORDER):
+            break
+    return out
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     try:
@@ -129,12 +153,16 @@ def main(argv=None):
         return 0
     if not found:
         print("No review is due.")
-        return 0
     for review, why in found:
         mark = "DUE   " if review in ORDER else "OWNER "
         print(f"{mark}{review}: {why}")
     if shift_work:
         print(f"\nThis shift's work: /review {shift_work[0][0]} (one review per shift).")
+    nxt = upcoming(last_held(text), today, newest_snapshot())
+    later = [f"{r} {d}" for r, d in sorted(nxt.items(), key=lambda kv: kv[1]) if d > today]
+    if later:
+        print("Next, if Monday's snapshots arrive and each is taken the day it comes due: "
+              + " · ".join(later))
     return 0
 
 
