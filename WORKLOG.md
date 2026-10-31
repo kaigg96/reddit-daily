@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-31 (22:29) — Your security checklist could have led you to cut off our own uploader; fixed. We will start learning who watches
+## 2026-10-31 (22:29) — Election week is covered, your security checklist can no longer cut off our uploader, and we will start learning who watches
 
     Worked (% of the shift): audience 20 · editorial 15 · market 15 · gm 15 · reliability 10 · security 10 · product 5 · strategy 5 · data 5
 
@@ -80,21 +80,21 @@ and more useful than a confident guess.
 - **Strategy (answered):** no reliable figure exists for how often small channels reach the Partner Program bar. Published ones disagree a hundredfold, and the most specific describes channels unlike ours (we have over 1,000 videos and 22 subscribers). Nothing changes.
 - **Data (answered):** since January YouTube's bulk reports count thumbnail impressions. The Shorts feed, which brings 97% of our views, shows no thumbnails, so they would miss our reach. No change.
 - **Product, reliability, security:** bet 1 still merges cleanly with today's live code. The election skip first clashed with it in one file; I combined the two, and all 959 checks pass. So tomorrow morning's release check re-tests bet 1, as it does after any change. Both of today's uploads landed. No workflow changed; money controls in place ($0.89 this month, forecast $0.90 of $3). Sunday's US clock change moves Google's AI-allowance reset to 08:00 UTC; nothing we run depends on that hour.
-- **General management:** nothing was ready. Two fresh agents proposed 14 ideas; two rankers, reading them in opposite orders, put the paid-channels count first and the audience figures third. Dropped: holding back shift time for bet 1's merge (your call at the monthly, which already leads with the shift cap); closing #80 for you (it is yours to decide); building four a day before bet 1 (#80 says wait); a forum search for a reach drop (it invites explaining away Monday's read); pricing sponsorship (Reddit's terms bar it on today's videos, and we are below every minimum); a sample that plays in one tap (GitHub serves a video as a download); the music track's credit terms (checking needs your login, and nothing changes in two weeks). You have been away since 27 October, so nothing is re-asked.
+- **General management:** nothing was ready. Two fresh agents proposed 14 ideas; two rankers, reading them in opposite orders, put the paid-channels count first and the audience figures third. Dropped: holding back shift time for bet 1's merge (your call at the monthly, which already leads with the shift cap); closing #80 for you (it is yours to decide); building four a day before bet 1 (#80 says wait); a forum search for a reach drop (it invites explaining away Monday's read); pricing sponsorship (Reddit's terms bar it on today's videos, and we are below every minimum); a sample that plays in one tap (GitHub serves a video as a download); the music track's credit terms (checking needs your login, and nothing changes in two weeks). A third round, on the functions the first two missed, found the midterms. You have been away since 27 October, so nothing is re-asked.
 - AI use: none from the upload allowance; no Polly; one sample render, on the test model's allowance.
 
 ### Blocked
 - **For you, in order:** #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register at Reddit's registration page by 12 January); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks; check 3 now says what to keep).
 
 ### Next
-- **2 November, the weekly:** first check that Monday's figures name nothing YouTube refused, and read each test's warnings before its verdict. Then the views rule, the subreddit test, the title-style test and the voice question (its fairness check is done), each applied as written and recorded in the test ledger. The scorecard reads at 4–10 days; a second breach of the buried-uploads alarm is a decision's revisit trigger. If Monday's figures do not arrive, re-run the Monday job that day. Then check that the channel row carries the two new figures; blank means YouTube refused them for a channel this small.
 - **First, before 3 November (the US midterms):** the skip of questions about voting through 10 November is built and reviewed. YouTube removes content that misleads voters on "the time, place, means, or eligibility requirements for voting". A first violation is a warning, and a second within 90 days counts against the channel. We read answers word for word, jokes included, and 7 of October's 61 uploads were political. It would have skipped 1 of 210 past uploads. It is live from tonight's runs. The review found it misses "polls" and "electoral"; that fix, with a log line for each skipped post, is on its own branch and needs one sample render before it merges. That is the next shift's first job. Until the full version is live, each shift checks that day's uploads for voting claims and raises any it finds with you.
+- **2 November, the weekly:** first check that Monday's figures name nothing YouTube refused, and read each test's warnings before its verdict. Then the views rule, the subreddit test, the title-style test and the voice question (its fairness check is done), each applied as written and recorded in the test ledger. The scorecard reads at 4–10 days; a second breach of the buried-uploads alarm is a decision's revisit trigger. If Monday's figures do not arrive, re-run the Monday job that day. Then check that the channel row carries the two new figures; blank means YouTube refused them for a channel this small.
 - **Then the November monthly:** lead with the shift cap (it trips about 4 November), then the audit's proposals in the technical list and the bundle carried from 25 October. Put today's paid-channels finding beside the own-questions sample.
 - **If #77 is labelled:** merge the release, then the counting fix, set the live format to v8 in the product plan, and close #77.
 - **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
 
 ### Better?
-- **Than last shift:** No for viewers or revenue. A little for the source decision (outside evidence where we had none) and for safety (your checklist can no longer stop uploads).
+- **Than last shift:** No for viewers or revenue. A little for the source decision (outside evidence where we had none) and for safety (election week is covered, and your checklist can no longer stop uploads).
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
 
