@@ -1,5 +1,6 @@
 """Central configuration. Importing this module loads .env (local dev only)."""
 
+import datetime
 import os
 from pathlib import Path
 
@@ -56,6 +57,8 @@ CAPTION_WIDTH = W - 2 * SAFE_X
 # --- content limits ---
 MAX_COMMENT_LENGTH = 150
 MAX_TITLE_LENGTH = 90
+# content._election_week: questions about voting are skipped through this date.
+ELECTION_SKIP_UNTIL = datetime.date(2026, 11, 10)
 NUM_COMMENTS = 3
 MAX_TOTAL_SECONDS = 45  # R1.7: drop last comment if exceeded
 INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
