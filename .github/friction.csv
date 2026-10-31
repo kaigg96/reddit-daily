@@ -78,3 +78,4 @@ F76,2026-10-31T10:03:10+00:00,41189535685,gm,"Cadence fix merged: monthly after 
 F77,2026-10-31T10:09:01+00:00,41189535685,gm,Sweep test for cadence (overdue stays due until held) found two more prep-hiding cases; merged,done,,none,None,None,0,
 F78,2026-10-31T10:09:45+00:00,41189535685,reliability,Library releases since 10-28 vs Monday's snapshot job and tonight's upload: oauthlib 4.0.1 today is pinned out; google-api-core 2.43.2 already ran this morning's upload,done,,none,None,None,0,
 F79,2026-10-31T10:15:09+00:00,41189535685,gm,cadence prints each review's next due date from due() itself (F74's ask); review caught a Monday-before-snapshot blind spot,done,,none,None,None,0,
+F80,2026-10-31T16:14:02+00:00,41217982011,gm,Dropped-ideas list counted a (HH:MM) handover draft as a second shift; fixed and merged,done,,none,None,None,0,
