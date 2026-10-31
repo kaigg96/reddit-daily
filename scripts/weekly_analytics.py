@@ -401,10 +401,12 @@ def fetch_views_by(ya, today, dimension):
 
 def audience_fields(ya, today):
     """Who watches (ORG.md, Audience & community): the share of the last 28 days'
-    views from subscribed viewers, the nearest the API gets to returning viewers,
-    and the countries with most views as "US:0.412|GB:0.090". Each is fail-soft
-    and blank when refused or empty, never a guess: the subscriber count beside
-    them must land whatever these do."""
+    views from subscribed viewers, the nearest the API gets to returning viewers
+    (subscribed when they watched; signed-out viewers count as not), and the
+    countries with most views as "US:0.412|GB:0.090", where ZZ is YouTube's
+    "country unknown". Each is fail-soft and blank when refused or empty, never
+    a guess: the subscriber count beside them must land whatever these do. Rows
+    from before 2026-11-02 read back as None for both under csv.DictReader."""
     out = {"subscribed_view_share": "", "top_countries": ""}
     try:
         by_status = fetch_views_by(ya, today, "subscribedStatus")

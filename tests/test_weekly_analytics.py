@@ -196,6 +196,7 @@ class _FakeAudience:
         return self
 
     def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES >= 1
         dim = self.kw["dimensions"]
         if dim in self.refuse:
             raise RuntimeError("403 refused")
@@ -239,7 +240,8 @@ def test_the_live_channel_file_gains_the_columns_in_its_header_only(tmp_path):
                         "2026-11-09", p, ya=_FakeAudience(_AUDIENCE))
     head, rest = p.read_bytes().split(b"\n", 1)
     assert head.decode().split(",") == wa.CHANNEL_FIELDS
-    assert rest.startswith(b"2026-10-26,22,0,97399,1064\n")
+    assert rest == (b"2026-10-26,22,0,97399,1064\n"
+                    b"2026-11-09,23,0,9,3,0.030,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060\n")
 
 
 class _FakeComments:
