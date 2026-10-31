@@ -113,3 +113,33 @@ def test_quarterly_prep_follows_the_quarters_first_monthly_and_stays_due():
     for day in ("2027-02-01", "2027-02-09"):
         assert "quarterly prep" in names(january, day, "2027-01-25")
     assert dict(c.overdue(c.last_held(january), D("2027-02-01"), D("2027-01-25")))["quarterly prep"] == 119
+
+
+def test_an_overdue_review_stays_due_every_day_until_held():
+    # Each gate added on 10-31 first hid an overdue review at some month or
+    # quarter boundary. Sweep every day against held dates nobody updates,
+    # with Monday snapshots arriving or the job stuck: once overdue, a review
+    # must be due the next day too, or the health alarm goes quiet.
+    start = D("2026-09-01")
+    days = [start + dt.timedelta(n) for n in range(240)]
+    held_dates = ["2026-08-03", "2026-09-01", "2026-09-30", "2026-10-01", "2026-10-05", "never"]
+    for weekly in held_dates:
+        for monthly in held_dates:
+            for prep in held_dates:
+                held = c.last_held(table(weekly=weekly, monthly=monthly, prep=prep))
+                for stuck in (False, True):
+                    def snap(d):
+                        monday = d - dt.timedelta(d.weekday())
+                        return min(monday, D("2026-09-28")) if stuck else monday
+                    for d in days:
+                        nxt = d + dt.timedelta(1)
+                        tomorrow = {r for r, _ in c.due(held, nxt, snap(nxt))}
+                        late = {r for r, _ in c.overdue(held, d, snap(d))}
+                        for review in late:
+                            assert review in tomorrow, (review, d, weekly, monthly, prep, stuck)
+                        # Past its line, a monthly or prep is flagged whatever gates it.
+                        # (A weekly needs a snapshot to review, so it is exempt.)
+                        for review in ("monthly", "quarterly prep"):
+                            last = held[review]
+                            if last and (d - last).days > c.OVERDUE_DAYS[review]:
+                                assert review in late, (review, d, weekly, monthly, prep, stuck)
