@@ -189,6 +189,14 @@ def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
     assert [h for h, _ in got] == ["2026-10-17 (08:28) — Y"]
 
 
+def test_a_draft_with_a_placeholder_time_is_the_same_shift():
+    def v(time):
+        return f"## 2026-10-31 ({time}) — X\n- **Considered and dropped:** a.\n"
+    got = b.recently_dropped(versions=[v("10:15"), v("HH:MM")])
+    assert [h for h, _ in got] == ["2026-10-31 (10:15) — X"]
+    assert b._heading_parts("2026-10-31 (HH:MM) — X") == ("2026-10-31", "", "X")
+
+
 def test_the_real_history_reads_without_error_even_in_a_shallow_clone():
     got = b.recently_dropped(limit=3)
     assert len(got) <= 3 and all(bullet for _, bullet in got)
