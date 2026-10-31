@@ -313,11 +313,23 @@ def _within_rows(rows, spec):
     return [r for r in rows if r.get("video_id") in ids]
 
 
-def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
+def _period_metrics(at_age=7, tolerance=4, half=3, root=None, min_age=4):
     """Metrics for the recent `half` publish-weeks vs the `half` before them.
 
     Every upload read at the same age, so the two periods are comparable.
     Duration comes from upload_log; the rest from the weekly snapshot.
+
+    No read under `min_age` days, so both periods are read at 4-10 days. Only
+    the newest week's Thursday uploads are ever read at 3, so they sat in the
+    recent period alone. It matters only at the zero line: an upload with
+    views is complete at 3 days (median views and watch-seconds equal a week
+    later, n=22), while 2 of 4 three-day zeros showed a view a week later,
+    against 0 of 17 older ones (10-31; all six had at most 1 view, so they
+    were buried, not late). Two 3-day zeros were half the 10-26 breach (4.8%
+    -> 11.4%; 6.1% without them); the 11-02 snapshot re-reads both at 10 days.
+    Set 10-31, before the 3-day reads it first drops. After a missed snapshot
+    the week before it loses its Thursday too. `insights._read_at_age`
+    (trajectory) has no floor; harmless while it drops zeros.
     """
     import csv as _csv
     import datetime as _dt
@@ -350,7 +362,7 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
                 except (ValueError, TypeError):
                     continue
                 age = (snap - pub).days
-                if abs(age - at_age) > tolerance:
+                if abs(age - at_age) > tolerance or age < min_age:
                     continue
                 vid = r.get("video_id")
                 prev = best.get(vid)
@@ -367,7 +379,9 @@ def _period_metrics(at_age=7, tolerance=4, half=3, root=None):
         views = insights._optional_float(r.get("views")) or 0.0
         if insights._privatised_zero(vid, views, privacy):
             continue
-        buckets.setdefault(pub.strftime("%Y-W%V"), []).append((vid, r))
+        # %G, the ISO year: under %Y, 2027-01-01..03 (ISO 2026-W53) read as
+        # "2027-W53" and sorted after all of 2027 (review, 10-31)
+        buckets.setdefault(pub.strftime("%G-W%V"), []).append((vid, r))
     weeks = sorted(w for w, v in buckets.items() if len(v) >= 5)
     if len(weeks) < half * 2:
         return None, None, 0, 0
