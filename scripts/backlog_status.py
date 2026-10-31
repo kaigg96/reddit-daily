@@ -222,9 +222,9 @@ def _heading_parts(heading):
     """(date, time or "", headline) of an entry heading. A draft's placeholder
     time ("(HH:MM)", 10-31 10:10) is no time: read as headline, it made the
     draft a second shift, and the ten listed held nine (found 10-31)."""
-    m = re.match(r"(\S+)\s*(?:\(([^)]*)\))?\s*(?:—\s*)?(.*)", heading)
+    m = re.match(r"(\S+)\s*(?:\((\d\d:\d\d|HH:MM)\))?\s*(?:—\s*)?(.*)", heading)
     time = m.group(2) or ""
-    return m.group(1), time if re.fullmatch(r"\d\d:\d\d", time) else "", m.group(3).strip()
+    return m.group(1), "" if time == "HH:MM" else time, m.group(3).strip()
 
 
 def _worklog_versions(commits):

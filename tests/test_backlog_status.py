@@ -195,6 +195,8 @@ def test_a_draft_with_a_placeholder_time_is_the_same_shift():
     got = b.recently_dropped(versions=[v("10:15"), v("HH:MM")])
     assert [h for h, _ in got] == ["2026-10-31 (10:15) — X"]
     assert b._heading_parts("2026-10-31 (HH:MM) — X") == ("2026-10-31", "", "X")
+    # September's slot words stay in the headline, so two slots stay two shifts.
+    assert b._heading_parts("2026-09-20 (evening) — X")[2] == "(evening) — X"
 
 
 def test_the_real_history_reads_without_error_even_in_a_shallow_clone():
