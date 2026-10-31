@@ -389,6 +389,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   runaway breaker, not a budget" (`shift.yml`), tripped both weeks (210 and
   228 units against a ceiling near 200; 2 and 5 shifts skipped, recorded
   nowhere) as units per shift rose from ~11 to ~15: it now sets the pace.
+  **10-31, the arithmetic:** 34 shifts since 10-16 spent 0.357 units a
+  minute, so 200 buys ~560 shift-minutes a week against 1,260 scheduled
+  (21 × 60): 44%. `backlog_status.py`'s "ending early" alarm (#67) asks for
+  full shifts, which the breaker cannot pay for; full hours mean ~9 shifts,
+  then two to three dark days. The owner picks the allowance or the schedule.
   **Closes when** that bundle is raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
