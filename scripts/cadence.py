@@ -125,7 +125,9 @@ def upcoming(held, today, snapshot, horizon=120):
     for n in range(horizon):
         day = today + datetime.timedelta(days=n)
         monday = day - datetime.timedelta(days=day.weekday())
-        snap = max(snapshot, monday) if snapshot else monday
+        # Only Mondays from today on are assumed; an earlier one counts if it landed.
+        arrived = [s for s in (snapshot, monday if monday >= today else None) if s]
+        snap = max(arrived) if arrived else None
         while True:   # one review can open the next the same day (weekly, then monthly)
             fresh = [r for r, _ in due(sim, day, snap) if r in ORDER and sim.get(r) != day]
             if not fresh:
@@ -159,7 +161,8 @@ def main(argv=None):
     if shift_work:
         print(f"\nThis shift's work: /review {shift_work[0][0]} (one review per shift).")
     nxt = upcoming(last_held(text), today, newest_snapshot())
-    later = [f"{r} {d}" for r, d in sorted(nxt.items(), key=lambda kv: kv[1]) if d > today]
+    now = {r for r, _ in shift_work}
+    later = [f"{r} {d}" for r, d in sorted(nxt.items(), key=lambda kv: kv[1]) if r not in now]
     if later:
         print("Next, if Monday's snapshots arrive and each is taken the day it comes due: "
               + " · ".join(later))

@@ -150,3 +150,15 @@ def test_upcoming_quotes_the_rule_not_a_guess():
                              planning="2026-10-10"))
     assert c.upcoming(held, D("2026-10-31"), D("2026-10-26")) == {
         "weekly": D("2026-11-02"), "monthly": D("2026-11-02"), "quarterly prep": D("2027-01-04")}
+
+
+def test_upcoming_before_mondays_snapshot_and_with_the_job_stuck():
+    held = c.last_held(table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05",
+                             planning="2026-10-10"))
+    # Monday 03:17, the 06:00 snapshot not yet in: nothing due, both expected today.
+    assert c.due(held, D("2026-11-02"), D("2026-10-26")) == []
+    nxt = c.upcoming(held, D("2026-11-02"), D("2026-10-26"))
+    assert nxt["weekly"] == nxt["monthly"] == D("2026-11-02")
+    # Wednesday with Monday's job stuck: next Monday, not a date already past.
+    nxt = c.upcoming(held, D("2026-11-04"), D("2026-10-26"))
+    assert nxt["weekly"] == nxt["monthly"] == D("2026-11-09")
