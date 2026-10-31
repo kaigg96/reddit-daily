@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-10-31 (16:30) — The buried-uploads alarm due to reopen a decision on Monday was half two readings taken too young; every upload is now read at the same age
+
+    Worked (% of the shift): data 50 · gm 25 · market 10 · audience 5 · reliability 5 · security 5
+
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Monday's review would have reopened how we judge results on an alarm that rested half on two uploads read at three days old, younger than anything they were compared with. The scorecard now reads every upload at the same age. That was set before Monday's figures exist.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Keeping Monday's decisions honest.** Monday's review reads four tests and the alarm on buried uploads. Each read now counts what its rule says it counts, so a keep or a drop rests on real differences.
+
+### Done
+- **Data (fix, live):** the scorecard compares the last three weeks of uploads with the three before, each read about a week old. It also accepted readings at three days, which only the newest week ever has. Two of its four recent zero-view uploads were such readings, both from 22 October. Without them the share is 6.1% against 4.8%, inside the alarm's 3-point margin, not 11.4%. Uploads with views already show their full count at three days, so only the zero count moves. Monday's figures re-read both at ten days, so whether they were buried is Monday's to say. A fresh agent's round of ideas pointed here. My first explanation, that YouTube's figures arrive late, was wrong, and my own check showed it. A fresh review confirmed the rest, corrected one number, and found week labels that would have sorted 1–3 January after the rest of 2027. All fixed.
+- **Data (Monday's prep):** the voice test's fairness check reads only who got which voice, so its answer is already fixed: within chance (p 0.19). Its rule stands as written; recorded in the test ledger.
+- **Market (answered, changes no decision):** the weekly view swings come from the Shorts feed. It alternated high and low for eight weeks (363 to 2,902 views) while search held at 26–66. A delay in YouTube's figures would have shrunk both alike. The test set for 16 November still decides.
+- **Audience (answered):** our 24 subscribers came one each from 23 uploads over 18 months. No topic or upload drew them, so there is nothing to copy.
+- **General management (fix, live):** the list of ideas past shifts dropped counted this morning's draft handover as a separate shift, so it showed nine shifts, not ten. Fixed and reviewed.
+- **Reliability, security:** all uploads since the last shift landed. This afternoon's release check skipped in 8 seconds, so yesterday's fix works. No workflow changed; money controls in place ($0.89 this month, forecast $0.90 of $3). #65 still needs your "yes" to the corrected sentence: your label predates the correction.
+- AI use: none from the upload allowance; no Polly; no render.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register at Reddit's registration page by 12 January); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
+
+### Next
+- **2 November, the weekly:** as the 10:15 entry says, refused figures first, then each test with its rule as written. The scorecard now reads at 4–10 days. If the alarm on buried uploads breaches on that read, D9's trigger fires as written. The voice test's fairness check is done. The comparison tool takes readings from 3.5 days, so each test's read includes 29 October's morning upload at about 3.75 days. That is one in about 40 uploads, and harmless unless that upload is the only zero in an arm.
+- **Then the November monthly**, **if #77 is labelled**, and **7 November** — as the 10:15 entry says.
+
+### Better?
+- **Than last shift:** No for viewers or revenue. A little for decisions: Monday's alarm read is no longer tilted by readings only one side could have.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-10-31 (10:15) — Your Reddit registration ask pointed at a form that closed today; fixed. Your monthly report now comes after Monday's figures, not the day before
 
     Worked (% of the shift): gm 50 · legal 20 · security 15 · reliability 10 · market 5
@@ -95,44 +128,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** No for viewers or revenue. A little for the source and for your monthly report: the registration ask can no longer send you to a closed form, and the report will read November's figures.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-10-30 (23:23) — The release check was spending 6 of our uploads' 20 daily AI requests re-checking a release that had not changed; fixed
-
-    Worked (% of the shift): reliability 40 · gm 40 · legal 10 · editorial 5 · security 5
-
-**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. The daily check of the next release had re-run every afternoon since 25 October on a release that had not changed, using 6 of the 20 free AI requests our uploads share. It now runs only when the release changes, or weekly, as designed.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
-- **Protecting what we publish.** Each upload's title, closing line and safety screen draw on that allowance of 20 a day. The check took 6 of them a few hours before each evening upload. Running out cost an upload its title on 20 September. It also matters for four uploads a day: our plan says four fits the allowance, but it never counted this.
-
-### Done
-- **Reliability (fix, live):** a fresh agent's round of ideas found it, and the build log confirmed it. The build machine knows the release only by its remote name, so the check could never tell that nothing had changed. Fixed and tested. A fresh review found no defects; its one test gap is closed. Merged 23:12. The release's sample tags now print when it changes or weekly, not daily.
-- **General management (fix, live):** the check that catches the plan calling finished work "pending" could never fire, for the same reason and because it looked for old branch names. A fresh review then found that fixing it would have woken a second fault: it read the start of each paragraph, not the words beside the work it names. Both fixed and tested; today it finds nothing stale.
-- **Legal (check):** the stock-footage licence bars reselling clips on stock or wallpaper sites and selling unaltered copies. Keeping our five clips in our public project is neither. Recorded beside the credits.
-- **Editorial (check):** this evening's upload asked about Patrick Stewart's death. Major outlets confirm he died on 28 October, so we did not spread a false claim.
-- **General management:** no shift ran on 29 or 30 October. The weekly shift allowance was spent by the evening of the 28th (228 units over 15 shifts, against a ceiling near 200), so five shifts were skipped. It also tripped a day early the week before (210). Nothing was lost, since everything waits on you. But the breaker meant to catch a runaway shift now sets the weekly pace, as the average shift rose from about 11 units to 15. Recorded for the 5 November review, so this shift stopped once nothing above the bar was left rather than spend a later shift's allowance.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas from the data. Two rankers, in opposite orders, put the release check first and the licence second. **Dropped:** counting AI requests per day (the logs do not print them, and the fix removes the uncounted share); logging why a title was refused (bet 1's release rewrites that code, so it is in the technical list for after it); updating our Reddit library (its new version adds nothing for Reddit's API change); a shorter list of dropped ideas, and compressing the findings section (both already proposals for the 5 November review); recording the Claude plan (it changes no decision).
-- **Reliability:** all five uploads since the last shift landed. On the 29th one shipped the Reddit question as its title, as designed, after the shock-phrase guard refused the AI's.
-- **Security:** the standing check is clean: no secrets in the project, no workflow changes, money controls in place ($0.87 this month, forecast $0.90 of $3).
-- **Product:** bet 1 is still ready the day you label it: tonight's live code and the release combine with no conflicts, and all 942 checks pass.
-- Two fixes live, three checks. AI use: none from the upload allowance; no Polly; no render.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1; bet 2's window for it opened today and closes about 6 November); #65 (a "yes" lands the corrected sentence); #82 (register our Reddit app by 12 January); #80 (four a day waits for bet 1 until you answer); #59 (the account checks); #50 (your hands, on a workflow file).
-
-### Next
-- **Tomorrow's release check (about 13:00–15:00 UTC):** its build log should say it skipped, as already validated. If it ran, read why.
-- **2 November snapshot:** as the 28 October (17:44) handover says: refused figures first, then the views rule, the subreddit test, the title-style test and the voice question, each with its fairness check and rule as written. The zero-view guardrail: a second breach is a decision's revisit trigger.
-- **If #77 is labelled:** merge the release, then the counting fix, set the live format to v8 in the product plan, and close #77.
-- **5 November monthly:** the audit's proposals, plus the weekly shift breaker now setting the pace.
-- **7 November:** if #77 is still open, render a fresh sample before the current one expires on the 8th.
-
-### Better?
-- **Than last shift:** No for viewers or revenue. Yes for the uploads' margin: 6 of 20 daily AI requests are back.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
