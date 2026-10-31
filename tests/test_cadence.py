@@ -44,9 +44,28 @@ def test_weekly_follows_the_data_not_the_calendar():
 
 
 def test_monthly_is_due_once_per_calendar_month():
-    held = table(weekly="2026-10-06", monthly="2026-10-31", prep="2026-10-03", planning="2026-10-04")
-    assert "monthly" not in names(held, "2026-10-31", "2026-10-05")
-    assert "monthly" in names(held, "2026-11-01", "2026-10-05")
+    held = table(weekly="2026-11-02", monthly="2026-10-31", prep="2026-10-03", planning="2026-10-04")
+    assert "monthly" not in names(held, "2026-10-31", "2026-10-26")
+    assert "monthly" in names(held, "2026-11-02", "2026-11-02")
+
+
+def test_monthly_waits_for_the_months_first_weekly_review():
+    # 2026-11-01 is a Sunday: the packet would read figures October's last
+    # weekly already reviewed, a day before Monday's snapshot.
+    before = table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert names(before, "2026-11-01", "2026-10-26") == []
+    assert names(before, "2026-11-02", "2026-11-02") == ["weekly"]
+    after = table(weekly="2026-11-02", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert names(after, "2026-11-02", "2026-11-02") == ["monthly"]
+
+
+def test_monthly_comes_due_without_a_weekly_from_the_10th():
+    # A broken snapshot job must not hide the monthly, or its overdue alarm.
+    stuck = table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05", planning="2026-10-10")
+    assert "monthly" not in names(stuck, "2026-11-09", "2026-10-26")
+    assert "monthly" in names(stuck, "2026-11-10", "2026-10-26")
+    late = dict(c.overdue(c.last_held(stuck), D("2026-11-20"), D("2026-10-26")))
+    assert late == {"monthly": 46}
 
 
 def test_quarterly_planning_waits_on_the_owner_after_prep():

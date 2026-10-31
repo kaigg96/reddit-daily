@@ -7,7 +7,9 @@ that shift's work (`/review`). This decides "due" from facts, not from a
 shift's sense of whether it has been a while:
 
     weekly             the newest analytics snapshot is newer than the last weekly review
-    monthly            no monthly review yet this calendar month
+    monthly            no monthly review yet this calendar month, once a weekly
+                       review has been held in it (so the packet reads that
+                       month's figures), or from the 10th regardless
     quarterly prep     no packet prepared yet this quarter (the agent drafts the bets)
     quarterly planning prepared, but not yet held with the owner -- never a shift's to do
 
@@ -29,6 +31,9 @@ SNAPSHOTS = os.path.join(ROOT, "analysis", "analytics_snapshots.csv")
 # The order a shift takes them in when several are due. Monthly first: it is
 # the one that reaches the owner, and its findings feed the quarter's packet.
 ORDER = ["monthly", "weekly", "quarterly prep"]
+# A month's first Monday snapshot lands by the 7th; this leaves its weekly
+# review a few days before the monthly comes due without it.
+MONTHLY_LATEST_DAY = 10
 # Overdue by this many days and the process has a problem worth escalating
 # (context_budget.py --health). Generous: a review a few days late is normal.
 OVERDUE_DAYS = {"weekly": 14, "monthly": 45, "quarterly prep": 100}
@@ -67,9 +72,12 @@ def due(held, today, snapshot):
     """[(review, why)] due today, in ORDER, plus quarterly planning if waiting."""
     out = []
     monthly = held.get("monthly")
-    if monthly is None or (monthly.year, monthly.month) < (today.year, today.month):
-        out.append(("monthly", f"last held {monthly or 'never'}"))
     weekly = held.get("weekly")
+    this_month = (today.year, today.month)
+    weekly_this_month = weekly is not None and (weekly.year, weekly.month) == this_month
+    if monthly is None or ((monthly.year, monthly.month) < this_month
+                           and (weekly_this_month or today.day >= MONTHLY_LATEST_DAY)):
+        out.append(("monthly", f"last held {monthly or 'never'}"))
     if snapshot and (weekly is None or snapshot > weekly):
         out.append(("weekly", f"snapshot of {snapshot} not yet reviewed "
                               f"(last weekly {weekly or 'never'})"))
