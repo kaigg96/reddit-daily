@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-31 (HH:MM) — Your Reddit registration ask pointed at a form that closed today; fixed. Your monthly report now comes after Monday's figures, not the day before
+## 2026-10-31 (10:15) — Your Reddit registration ask pointed at a form that closed today; fixed. Your monthly report now comes after Monday's figures, not the day before
 
     Worked (% of the shift): gm 50 · legal 20 · security 15 · reliability 10 · market 5
 
@@ -73,7 +73,7 @@ and more useful than a confident guess.
 
 ### Done
 - **Legal (fix):** #82's description listed the questions on Reddit's form for *new* API access as if they were the registration form's, and linked that form. New requests closed today. Reddit's registration page says only "log in to start registration". Corrected by edit, so no email.
-- **General management (fix, live):** every plan expected your November monthly report on 5 November. The scheduler would have called it due tomorrow, Sunday, on figures already reviewed on 26 October, a day before Monday's figures and four test reads. It now waits for the month's first weekly review, as October's did: 2 November, after the weekly, or from the 10th if Monday's figures never arrive. A fresh agent's round of ideas found it. A fresh review then found three ways my first version could hide a late review from its alarm, and a test sweeping eight months of dates found two more. All fixed and merged.
+- **General management (fix, live):** every plan expected your November monthly report on 5 November. The scheduler would have called it due tomorrow, Sunday, on figures already reviewed on 26 October, a day before Monday's figures and four test reads. It now waits for the month's first weekly review, as October's did: 2 November, after the weekly, or from the 10th if Monday's figures never arrive. A fresh agent's round of ideas found it. A fresh review then found three ways my first version could hide a late review from its alarm, and a test sweeping eight months of dates found two more. All fixed and merged. It also now prints when each review next comes due, worked out by the same rule, so a plan quotes a date rather than guessing one.
 - **General management (for you, at that review):** the weekly cap on shift usage pays for about 560 shift-minutes, but 21 one-hour shifts are scheduled, and the early-ending alarm asks for all of them. Both cannot hold: full shifts mean about nine a week, then two or three dark days. At this week's pace the cap trips around 4 November, inside bet 1's window. The cap or the schedule is your choice; the review will recommend one.
 - **Security (done for you):** the Gemini key is restricted. One free request from it to YouTube's API was refused by the key's own list of allowed APIs. #59 now has six checks.
 - **General management:** #50 closed as superseded. Since 27 October a shift lands a rule change you have labelled itself, as #84 and #85 did, which is what it asked for. The 19 October digest is closed too; the 26 October one replaces it.
