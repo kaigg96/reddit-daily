@@ -305,6 +305,7 @@ weather at this size.
 **Re-reviewed 2026-10-13 (audit):** (2) weakened: `v7` raised watch-seconds 20% while the engaged share stayed 0.34–0.36 (PRD #8), and bet 1's real gate, YouTube's review, has no metric.
 **Re-reviewed 2026-10-25 (audit):** "bet 1's real gate, YouTube's review" is superseded: the owner made a first-time viewer the test (D14, 10-19). The typed metrics stand; the revenue bar counts engaged views (PLAN §1).
 **Re-reviewed 2026-10-28 (audit):** (1) strained: the zero-rate guardrail breached again (4.8% → 11.4%), as on 10-09; a breach on 11-02 too is the revisit trigger. (2) strained: watch-seconds is flat while the revenue bar counts engaged views.
+**Corrected 2026-10-31:** that breach rested on two uploads read at 3 days old, which only the newest week ever has; such reads are zero 21% of the time against ~6% at 5–14 days, and half of them later show a view. Without them it reads 4.8% → 6.1%, no breach. The scorecard reads nothing under 4 days from now, set before the 11-02 snapshot; the trigger stands on that read.
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
