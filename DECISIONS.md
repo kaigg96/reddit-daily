@@ -377,6 +377,7 @@ approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
 **Re-reviewed 2026-10-13 (audit):** (1) strained: two shifts held back a rule fix to spare the owner's queue, and no skill change can land until #50 is applied (8 days).
 **Re-reviewed 2026-10-25 (audit) — trigger fired.** #50 approved 10-05 and unapplied 20 days; #65 behind it 17. Its cost is now visible: the shift skill and the backlog skill say the ready floor is 3, `backlog_status.py` says 5, and the skill's "cannot read Actions logs" is false (`gh run view --log` works). Workflow-file patches never needed #50 (`apply-approved.yml` lands them on a label). For the 11-05 monthly: one bundled skill change, not more asks to an absent owner.
 **Re-reviewed 2026-10-28 (audit):** (1) false: #50, approved 10-05, is still unapplied; (3) mixed: process wording is labelled within hours (#84, #85).
+**2026-10-31:** #50 closed as superseded. Since 10-27 a shift lands a labelled skill, `CLAUDE.md` or `ORG.md` change itself with `Approved-In` (#84, #85), so the apply step no longer blocks; only the owner's answer does (#65).
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
