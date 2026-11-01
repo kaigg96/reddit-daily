@@ -1,0 +1,32 @@
+diff --git a/.github/workflows/shift.yml b/.github/workflows/shift.yml
+index a12b536..3636a1b 100644
+--- a/.github/workflows/shift.yml
++++ b/.github/workflows/shift.yml
+@@ -78,6 +78,17 @@ jobs:
+         with:
+           fetch-depth: 0     # shifts read git history
+ 
++      # #86: GitHub emails a scheduled job's failure to whoever last edited its
++      # schedule, and for the upload job that has been a bot since 10-11. This
++      # job's schedule is the owner's and it runs whatever the allowance, so a
++      # missed or failed upload fails it, and that email reaches the owner.
++      # Here, on the fresh checkout of main: after the shift, fetching fails.
++      - name: Did the uploads land?
++        id: uploads
++        if: steps.auth.outputs.ready == 'true'
++        continue-on-error: true   # the shift still runs; the last step fails the job
++        run: python3 scripts/upload_watch.py upload_log.csv "${{ github.repository }}" "${{ github.token }}"
++
+       # A runaway breaker, not a budget. Remaining quota is not observable on a
+       # runner, and the owner's real weekly figure (their Claude console)
+       # includes their own interactive sessions, which dwarf shift usage --
+@@ -356,3 +367,9 @@ jobs:
+             exit 1
+           fi
+           echo "handover present"
++
++      - name: Fail the run if an upload was missed
++        if: always() && steps.uploads.outcome == 'failure'
++        run: |
++          echo "::error::An upload was missed or failed: see 'Did the uploads land?' above."
++          exit 1
