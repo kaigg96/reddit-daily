@@ -2416,6 +2416,38 @@ def attach_answer_lengths(videos, path=ANSWER_LENGTHS):
     return sum(v.first_answer_words is not None for v in videos)
 
 
+# Watch time and reach (PRD §4, pre-committed 2026-11-01, before the 11-02
+# snapshot and before any number was read): every bet is judged on
+# watch-seconds (D9), but the revenue bar counts views. Do uploads watched
+# longer earn more views? Uploads since 2026-10-05 read at ~7 days with 10+
+# views, Spearman rho between watch-seconds and views, as R3 read the opening.
+# Observational: reach can also bring colder viewers who leave sooner, so a
+# missing or inverse link changes what a watch-seconds gain is credited with,
+# never the metric itself. Read once.
+WATCH_REACH_RHO = 0.3
+WATCH_REACH_SINCE = datetime.date(2026, 10, 5)
+
+
+def watch_reach_verdict(rho, p_value, age_rhos=(None, None)):
+    """The pre-committed rule above, applied as written. `age_rhos` is each
+    metric's rho against reading age (views, watch-seconds): a link both
+    share with age, in the same direction, is age, not watching -- read again
+    at the next snapshot. Opposite directions would push rho down, not up."""
+    if rho is None:
+        return "insufficient data: read at the next snapshot"
+    if p_value < 0.05 and rho >= WATCH_REACH_RHO:
+        a, b = age_rhos
+        if (a is not None and b is not None and min(abs(a), abs(b)) >= WATCH_REACH_RHO
+                and a * b > 0):
+            return "confounded: both track reading age; read again at the next snapshot"
+        return "tracks: uploads watched longer earn more views; D9's assumption 2 holds on this count"
+    if p_value < 0.05 and rho <= -WATCH_REACH_RHO:
+        return ("inverse: uploads watched longer earn fewer views; the November monthly "
+                "takes it to D9 and to the owner")
+    return ("no link at this size: a watch-seconds gain is not credited as reach; "
+            "the November monthly takes it to D9")
+
+
 def first_answer_verdict(rho, p_value):
     """The pre-committed rule above, applied as written."""
     if rho is None:
