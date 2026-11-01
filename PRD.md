@@ -29,10 +29,10 @@
 | Item | Status | Req | Decision rule |
 |---|---|---|---|
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
-| ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (spam policy, PLAN §4) | done: merged after dry run PASS at `9103351` | R2.2 | Such a title falls back like a failed one (style blank); no bump. |
+| ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (PLAN §4) | done | R2.2 | Falls back like a failed title (style blank); no bump. |
 | Election-week fallback | ready: `editorial/election-week-fallback` (`88ecde5`), reviewed twice, no fault; dry run from 11-02 11:17 | — | Fix, no bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. Merge by 11-03. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
-| ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10/25/50/75/100% (`watch_ratio_*`), swipe-aways excluded (§4); `report.py --metric` reads it. **Never a trigger.** |
+| ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -55,6 +55,7 @@ The source of ready work that never waits on a sample video or costs money. Belo
 
 | # | Status | Question | Test |
 |---|---|---|---|
+| R5 | blocked: the 11-02 snapshot | **Does watch time still predict reach?** (§4, 11-01) | `--offline --watch-reach`, read once; rule set 11-01 (§4). |
 | R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. |
 | R2 | blocked: ~11-02 snapshot | **Does Stephen's voice raise the engaged share?** A lead (§4) | **Pre-committed 2026-10-14:** `report.py --at-age 7 --since 2026-10-08 --compare voice=Stephen --metric engaged_share`, read once, at the first snapshot printing n≥12 each, pooled (voice is a coin in every release). Either voice past the printed chance gap → backlog: that voice only, released after `v8`'s read (#18); else noise. **Balance first:** as #14. |
 
