@@ -2711,3 +2711,16 @@ def test_first_answer_verdict_applies_the_rule_as_written():
     assert insights.first_answer_verdict(-0.3, 0.05).startswith("noise")
     assert insights.first_answer_verdict(-0.29, 0.001).startswith("noise")
     assert insights.first_answer_verdict(0.6, 0.001).startswith("noise")
+
+
+def test_watch_reach_verdict_applies_the_rule_as_written():
+    v = insights.watch_reach_verdict
+    assert v(None, None) == "insufficient data"
+    assert v(0.3, 0.049).startswith("tracks")
+    assert v(0.3, 0.049, (0.1, 0.5)).startswith("tracks")      # one tracks age: not both
+    assert v(0.3, 0.049, (0.3, -0.4)).startswith("confounded")
+    assert v(0.3, 0.05).startswith("no link")
+    assert v(0.29, 0.001).startswith("no link")
+    assert v(-0.3, 0.049).startswith("inverse")
+    assert v(-0.29, 0.001).startswith("no link")
+    assert v(-0.3, 0.049, (0.5, 0.5)).startswith("inverse")    # age guards only a link
