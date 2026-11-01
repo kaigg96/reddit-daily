@@ -178,3 +178,20 @@ def test_a_top_ten_that_used_the_whole_screen_cap_still_fails(monkeypatch):
         content.select_post(reddit, prev_title="", screener=screener)
     assert len(screened) == config.MAX_SCREENED_CANDIDATES
     assert reddit.limits == [config.CANDIDATE_LIMIT]
+
+
+def test_the_screen_cap_holds_across_both_reads(monkeypatch):
+    _on_day(monkeypatch, D(2026, 11, 4))
+    titles = ["Who did you vote for?"] * 7 + ["Skip a?", "Skip b?", "Skip c?"]
+    titles += ["Skip d?", "Skip e?", "Skip f?", "What smell takes you back?"]
+    reddit = _Day(titles)
+    screened = []
+
+    def screener(title, pool):
+        screened.append(title)
+        return _Verdict("skip_post" if title.startswith("Skip") else "pass")
+
+    with pytest.raises(ValueError):
+        content.select_post(reddit, prev_title="", screener=screener)
+    # three from the top 10 leave one for the deeper read: four in all, never seven
+    assert screened == ["Skip a?", "Skip b?", "Skip c?", "Skip d?"]
