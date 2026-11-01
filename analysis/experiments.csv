@@ -29,7 +29,7 @@ R4-clip-reuse,clip buried once reused,observational,buried_rate,2026-10-04,,2026
 title-length,title length (raw-title mechanism),observational,views,,,2026-10-04,noise,+16% (132 vs 114),63 vs 57,,,PRD §4 2026-09-28 (2026-10-04)
 R3-voice-burial,narrator voice and burial,coin,buried_rate,2026-10-04,2026-10-05,2026-10-12,recorded,Stephen 5/16 vs Danielle 2/22 (p=0.13),16 vs 22,,,"PRD §4 2026-10-12; git 988b63a, 0dbd473"
 placebo,alternate-day test split,observational,watch_seconds,,,2026-10-05,drop,12% (alternate days) vs 13% (consecutive batches),150,,,PRD §4 2026-10-05
-bet-2,double weekly views (bet 2),release,views,2026-10-05,2026-12-27,,pending,,W49–W52 vs W36–W39 (rule),"bar 16,600 views",,PLAN §2; PRD §4 2026-10-25; git 788ba37
+bet-2,double weekly views (bet 2),release,views,2026-10-05,2026-12-27,,pending,,W49–W52 vs W36–W39 (rule),"bar 16,600 views; its baseline is the lowest of 11 four-week windows since W29 (median 11,212), so a pass is x1.5 a typical window, not x2 (2026-11-01, before any read)",,PLAN §2; PRD §4 2026-10-25; git 788ba37
 #7,voiced host (two-voice reaction),release,watch_seconds,2026-10-05,,,drop,,≥20 uploads (rule),,,"git 7a0c197, 6badebb (owner #71, 2026-10-10)"
 R4-concentration,views earned by a few hits,observational,top10_share,2026-10-06,,2026-10-06,recorded,42%,169,bar ≤30% broad / ≥50% hit-driven,,"PRD §4 2026-10-06; git ca4a37b, cb3b18c"
 R5-hits,logged traits predict hits,observational,hit_rate,2026-10-06,,2026-10-06,recorded,lowest p 0.10,15 hits of 150,bar p 0.007,,"PRD §4 2026-10-06; git 343cdd3, 32a5bfb"
@@ -61,3 +61,4 @@ R4,weekly view swings: viewers or data,observational,weekly_views,2026-10-26,202
 reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,,pending,,,bar under 150 a day,,PRD §4 2026-10-26
 #14-balance,#14's arms by subreddit (assignments only),coin,subreddit,2026-10-28,2026-11-23,,pending,,30 per arm (rule),bar Fisher p < 0.05,,PRD §4 2026-10-28; git 75fda3c
 R2-balance,R2's voices by subreddit (assignments only),coin,subreddit,2026-10-28,2026-11-02,2026-10-31,noise,"Fisher p 0.191 (AskReddit 8 Danielle, 11 Stephen; NoStupidQuestions 13, 6)",21 vs 17,bar Fisher p < 0.05,,"PRD §4 2026-10-28; git 75fda3c; read 10-31 with --until 10-26, the uploads an 11-02 7-day read sees"
+watch-reach,does watch time still predict reach,observational,rho,2026-11-01,2026-11-02,,pending,,uploads since 10-05 at ~7 days,bar |rho| ≥ 0.3 at p < 0.05,,PRD §4 2026-11-01

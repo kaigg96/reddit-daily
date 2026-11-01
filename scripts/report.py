@@ -703,6 +703,9 @@ def main():
     p.add_argument("--opening-reach", action="store_true",
                    help="R3: do uploads whose plays more often become engaged views earn "
                         "more views? Rank correlation at ~7 days, its rule pre-committed (PRD §0)")
+    p.add_argument("--watch-reach", action="store_true",
+                   help="do uploads watched longer earn more views? Rank correlation at ~7 "
+                        "days, its rule pre-committed (PRD §4, 2026-11-01)")
     p.add_argument("--first-answer", action="store_true",
                    help="does a long first answer lose watch time? v7 uploads at ~7 days, rank "
                         "correlation, its rule pre-committed (PRD §4); needs "
@@ -747,13 +750,16 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
                          or not args.by):
         # Assignments only: any other mode or outcome option would be ignored.
         sys.exit("--balance takes --by and optionally --since and --until, nothing else")
+    if args.within and (args.opening_reach or args.watch_reach or args.first_answer):
+        # Each reads its pre-committed sample; a filter would be ignored silently.
+        sys.exit("--opening-reach, --watch-reach and --first-answer take no --within")
     if args.until and not args.balance:
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
@@ -872,6 +878,26 @@ def main():
                 if confounded else "a backlog candidate with its own rule"))
         else:
             print("  rho >= 0.3 at p < 0.05: not met -- noise; the row leaves")
+        return
+
+    if args.watch_reach:    # read once against its pre-committed rule (insights)
+        age = args.at_age or 7
+        load = insights.load_videos_at_age(age)
+        videos = insights.since(load.videos, insights.WATCH_REACH_SINCE)
+        rho, p_value, n = insights.rank_correlation(videos, Metric.WATCH, "views")
+        print(f"Watch-seconds against views, uploads since {insights.WATCH_REACH_SINCE} "
+              f"read at ~{age} days, 10+ views (n={n})")
+        age_rhos = (None, None)
+        if rho is not None:
+            for v in videos:  # weekly snapshots read ~4-10 days; views grow with age
+                v.reading_age = (load.anchor - v.published).total_seconds() / 86400
+            age_rhos = tuple(insights.rank_correlation(videos, "reading_age", m)[0]
+                             for m in ("views", Metric.WATCH))
+            print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+            print("  against reading age: views " + ", watch-seconds ".join(
+                "-" if r is None else f"{r:+.2f}" for r in age_rhos))
+        print(f"  |rho| >= {insights.WATCH_REACH_RHO} at p < 0.05: "
+              + insights.watch_reach_verdict(rho, p_value, age_rhos))
         return
 
     if args.first_answer:   # read once against its pre-committed rule (insights)

@@ -29,9 +29,10 @@
 | Item | Status | Req | Decision rule |
 |---|---|---|---|
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
-| ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (spam policy, PLAN §4) | done: merged after dry run PASS at `9103351` | R2.2 | The prompt's ban leaked on 10-20 ("…chilling genius will surprise you"). Such a title falls back like a failed one (style blank), as #14's caps hold does; no bump. Would have refused 11 of 199 logged titles, all shock bait. |
-| ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call, always a dry run; it proves a **render** change only. Other paths need `dry_run.py request` (Gemini calls on `SAMPLE_MODEL`'s free tier). |
-| ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10/25/50/75/100% (`watch_ratio_*`), swipe-aways excluded (§4); `report.py --metric` reads it. **Never a trigger.** |
+| ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (PLAN §4) | done | R2.2 | Falls back like a failed title (style blank); no bump. |
+| ~~Election-week fallback~~ ✅ 2026-11-01 | done: dry run PASS at `88ecde5` | — | No bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. |
+| ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
+| ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -54,6 +55,7 @@ The source of ready work that never waits on a sample video or costs money. Belo
 
 | # | Status | Question | Test |
 |---|---|---|---|
+| R5 | blocked: the 11-02 snapshot | **Does watch time still predict reach?** | `--offline --watch-reach`, read once; rule set 11-01 (§4). |
 | R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. |
 | R2 | blocked: ~11-02 snapshot | **Does Stephen's voice raise the engaged share?** A lead (§4) | **Pre-committed 2026-10-14:** `report.py --at-age 7 --since 2026-10-08 --compare voice=Stephen --metric engaged_share`, read once, at the first snapshot printing n≥12 each, pooled (voice is a coin in every release). Either voice past the printed chance gap → backlog: that voice only, released after `v8`'s read (#18); else noise. **Balance first:** as #14. |
 
@@ -118,6 +120,8 @@ All metrics via YouTube Studio / Analytics API. The **≥ 14 days / ≥ 20 uploa
 Directional, not contractual — the algorithm is stochastic, and the strongest measured predictor of views explains only part of the variance (`r ≈ +0.34`). The system's job is to make every upload *worthy* of distribution and measurable (R0.2), so format versions can be compared honestly.
 
 ### Findings — data reviews
+
+**Does watch time still predict reach? Rule set before the 11-02 snapshot (2026-11-01, Data; no number read).** Every bet is judged on watch-seconds (D9), and in August it was the strongest measured predictor of views (r ≈ +0.34, above); the revenue bar counts views. `report.py --watch-reach`, read once on the 11-02 snapshot: uploads since 10-05 at ~7 days with 10+ views, Spearman rho between watch-seconds and views, permutation p, as R3 read the opening. rho ≥ +0.3 at p < 0.05: **tracks**, D9's assumption 2 holds on this count, unless both also track reading age in the same direction at |rho| ≥ 0.3 (then read again at the next snapshot). rho ≤ −0.3 at p < 0.05: **inverse**, to the owner through the November monthly. Otherwise **no link**: a watch-seconds gain is not credited as reach in the reports, and the monthly takes it to D9's assumption 2. Observational, so no verdict changes the metric: reach can bring colder viewers who leave sooner. In the ledger as `watch-reach`.
 
 **Before the voice and capitals reads, a balance check (2026-10-28, Data; set from assignments only).** The voice (R2, due 11-02) and one-capital-word (#14, ~11-23) coins compare arms whose subreddit mix can differ by chance, and #3 tests subreddit as a cause of watch-seconds. `report.py --balance` reads only the upload log, so it runs before a read without peeking. **Pre-committed:** each read first runs `--balance <coin> --by subreddit --since <its start> --until <its snapshot's date less 7>`, so it counts the uploads a 7-day read sees. If p is 0.05 or more (with three or more subreddits, the smallest p), the rule stands as written. Otherwise the read also runs `--within subreddit=<each>` on each metric its rule reads, and a keep or lead is credited only if no within-read has its median difference of the opposite sign to the pooled one (the sign alone, not the chance gap). A within-read the tool refuses as too thin neither blocks nor supports credit. **10-28** (no `--until`): capitals, AskReddit 9 of 15 uncapitalised against 3 of 11 capitalised (p 0.13); voice, AskReddit 9 of 23 Danielle against 11 of 18 Stephen (p 0.22); capitals by style C, 4 against 0 (p 0.11). All within chance. Ledger: `#14-balance`, `R2-balance`.
 

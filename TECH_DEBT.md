@@ -379,7 +379,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Left alone:** the shift cadence and the owner's queue, which no shift
   change moves.
   **Carried, for one bundled proposal at the 11-05 monthly (not raised now,
-  to keep #77 the owner's only ask):** the re-raise that replaces an issue's
+  to keep #77 the owner's only ask):** the upload check's workflow patch
+  (11-01, the item on failure emails below); the re-raise that replaces an issue's
   body (`process/reraise-replaces-ask`, with the weekly install's pin; a
   workflow patch, so a label lands it without #50); in the shift skill, the
   false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
@@ -513,3 +514,21 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
   the text columns at HEAD, leave history. **Closes when** decided there.
+
+- **A failed upload run emails no one (found 2026-11-01, Reliability).**
+  GitHub sends a scheduled workflow's failure email to the last editor of its
+  `schedule` lines. `apply-approved.yml` commits as `github-actions[bot]`, and
+  its e3f5854 (10-11, #73) edited `run-reddit-video.yml`'s, so the bot gets
+  them; the job has no alert of its own. The other scheduled workflows are
+  the owner's. Fix is the owner's (disable, then re-enable the workflow):
+  #86. Any later approved patch touching a
+  `cron:` line repeats this, so its escalation must say so; `apply-approved.yml`
+  is owner-only, so no guard in code. **11-01 evening: premise very likely false.** GitHub's docs make the cron's
+  changer the runs' `actor` and the email's recipient; every scheduled upload
+  run since e3f5854 names the owner, as `APPLY_TOKEN` (needed to push
+  workflow files) is a personal token. #86 retitled "probably not needed". The lasting fix needs no
+  GitHub rule: `scripts/upload_watch.py` (merged, reviewed) fails the shift
+  job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
+  scheduled run; its workflow patch is `upload-watch.patch` on
+  `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
+  as auto-apply refuses an edited one). **Closes when** that patch lands.
