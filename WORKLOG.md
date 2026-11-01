@@ -61,11 +61,11 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-01 (17:45) — Election week could have failed an upload outright; the fix waits only for its sample. A lasting upload alarm is built, and this morning's #86 claim is less certain than it read
+## 2026-11-01 (17:45) — Election week could have failed an upload outright; the fix waits only for its sample. A lasting upload alarm is built, and this morning's #86 ask is very likely not needed
 
     Worked (% of the shift): reliability 40 · editorial 30 · gm 20 · market 5 · security 5
 
-**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Two upload risks in the unwatched days around the election are now covered or ready: a run that finds no usable question, and a missed upload that nobody hears about.
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Two upload risks in the unwatched days around the election are now covered or ready: a run that finds no usable question, and a missed upload whose run never started, which no email reports.
 
 ### Toward revenue
 - **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
@@ -74,7 +74,7 @@ and more useful than a confident guess.
 ### Done
 - **Editorial (fix, ready):** when the election skip leaves none of the day's top 10 questions usable, or our safety check rejects the few that are left, the run now reads the day's top 30 instead of failing. The same filters and the same cap on AI checks apply. An ordinary day is unchanged. NoStupidQuestions sometimes has only 2 usable questions out of 10 even without the skip. Its first review found no fault and two gaps, both now fixed. Uploads that came from the deeper list are marked, so they cannot blur a running test. 713 checks pass.
 - **Reliability (built, for the monthly):** a check in the shift job, which runs on your schedule three times a day even when the shift allowance is spent. If fewer than 2 uploads landed in 28 hours, or a scheduled upload run failed, it fails that job, so GitHub emails you. Replayed over the 95 shift runs since 20 September, it raised no false alarm and caught the one real miss, on 5 October. A fresh review found two gaps, both fixed. It is on main but does nothing until your label adds one step to the shift job. To save you a separate email, that step joins the single proposal the monthly review brings you.
-- **Reliability (correction, by edit, no email):** this morning's #86 said a failed upload emails no one. But GitHub still names you as the account behind every scheduled upload run since 11 October, so it may still email you. I cannot see who gets the emails. The two clicks remain harmless, and #86 now says they are not urgent.
+- **Reliability (correction, by edit, no email):** this morning's #86 said a failed upload emails no one. That is very likely wrong. GitHub's documentation sends the email to whoever changed the schedule, and GitHub still names you on every scheduled upload run since 11 October. The automatic approver pushes with a personal token, so to GitHub the change was yours. I cannot see who gets the emails, so this is not proof. #86 now says no action is needed.
 - **Market (checked):** Reddit stops its public RSS feeds on 13 November. We read Reddit through its registered API, not RSS, so this does not touch us. No new YouTube monetization rule since July turned up.
 - **Editorial (answered):** the election skip reads titles only. In 993 past videos, 5 had an election word only in an answer, and none of those was about when or how to vote. So answers need no screening.
 - **General management:** nothing was ready. A fresh agent proposed 8 ideas and I added one. Two rankers, reading them in opposite orders, both put the election fallback and the lasting alarm first and second. Dropped: re-checking Monday's libraries (none has a new release since 28 October); a security audit of our libraries (six days after the last one); a check on quoted review dates (no effect on any decision); fixing a comment about the clock change (no shift starts in that hour); tallying hype-word titles (the wider guard waits for bet 1's release, so a count now changes nothing).
@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - AI use: none from the upload allowance; no Polly; no sample video (the 12-hour cap).
 
 ### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #82 (register by 12 January; check the app's name first); #86 (two clicks, no longer urgent); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
+- **For you, in order:** #77 (one label ships bet 1); #82 (register by 12 January; check the app's name first); #86 (very likely not needed: close it); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
 
 ### Next
 - **Tomorrow's 11:17 shift, first thing:** request the election fallback's sample video and merge it on a pass, before the polls close on 3 November. It is the only ready item.
