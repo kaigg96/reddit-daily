@@ -72,8 +72,8 @@ and more useful than a confident guess.
 - **Protecting the uploads and their source.** A failed upload reaches you again once #86 is done. Reddit's terms bar its name from our app's name, so #82 now says to check that before you register.
 
 ### Done
-- **Reliability (found, for you):** GitHub emails a scheduled job's failures to whoever last changed its schedule. On 11 October our automatic approver applied your four-a-day approval, so that person is now a bot, and the upload job has no alert of its own. Nothing has failed since; the last failure, on 5 October, did reach you. Shifts are the only other check, and none runs once the weekly allowance is spent (29–30 October, and again about 4 November). #86 gives the fix: in the Actions tab, disable the upload job and enable it again straight away. A later approved schedule change would repeat it; that is recorded.
-- **Editorial (fix, live):** election week's skip now also catches "polls" and "electoral", and logs each post it skips. A fresh review found no fault, and all 707 checks pass. Across 211 past uploads it would skip nothing more than before. Its sample passed; it is live from today's 12:23 run.
+- **Reliability (found, for you):** GitHub emails a scheduled job's failures to whoever last changed its schedule. On 11 October our automatic approver applied your four-a-day approval, so the last editor is now a bot, and the upload job has no alert of its own. Nothing has failed since; the last failure, on 5 October, did reach you. Shifts are the only other check, and none runs once the weekly allowance is spent (29–30 October, and again about 4 November). #86 gives the fix: in the Actions tab, disable the upload job and enable it again straight away. A later approved schedule change would repeat it; that is recorded.
+- **Editorial (fix, live):** election week's skip now also catches "polls" and "electoral", and logs each post it skips. A fresh review found no fault, and all 707 checks pass. Across 211 past uploads it would skip nothing more than before. Its sample passed; it is live from this evening's upload.
 - **Editorial (check):** this morning's upload, on makeup, makes no claim about voting.
 - **Legal (for you, no email):** Reddit's developer terms (section 5.3) forbid its name "in the name of your App". We cannot see our app's name, and this project's own name is reddit-daily. #82 now tells you to check the name before you register, and to rename the app if it says "reddit". I edited the issue, so no email.
 - **Data (recorded before any read):** bet 2 starts from 8,300 views over four weeks, the lowest of the 11 four-week stretches since July; the middle one is 11,212. So its bar of 16,600 is about one and a half times a typical stretch, not double. It is in the test ledger, so December's read cannot overstate a pass.
@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - AI use: none from the upload allowance; no Polly; one sample render, on the test model's allowance.
 
 ### Blocked
-- **For you, in order:** #86 (two clicks, away from the upload times: 00:23, 06:23, 12:23, 18:23 UTC); #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register by 12 January; check the app's name first); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
+- **For you, in order:** #86 (two clicks, about a minute); #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register by 12 January; check the app's name first); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
 
 ### Next
 - **Election week:** the full skip is live, so the daily voting check ends; the skip lapses by itself after 10 November.
