@@ -520,7 +520,7 @@ a list nobody can read is the same as no list.
   its e3f5854 (10-11, #73) edited `run-reddit-video.yml`'s, so the bot gets
   them; the job has no alert of its own. The other scheduled workflows are
   the owner's. Fix is the owner's (disable, then re-enable the workflow):
-  escalated, key `upload-failure-emails`. Any later approved patch touching a
+  #86. Any later approved patch touching a
   `cron:` line repeats this, so its escalation must say so; `apply-approved.yml`
   is owner-only, so no guard in code. **Closes when** the owner has re-enabled
   it.
