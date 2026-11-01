@@ -100,9 +100,33 @@ _ELECTION = re.compile(r"\b(vot(e|es|ed|er|ers|ing)|ballots?|elections?|electora
                        re.IGNORECASE)
 
 
-def _election_week(title, today=None):
+def _election_skip_on(today=None):
     today = today or datetime.datetime.now(datetime.timezone.utc).date()
-    return today <= config.ELECTION_SKIP_UNTIL and bool(_ELECTION.search(title))
+    return today <= config.ELECTION_SKIP_UNTIL
+
+
+def _election_week(title, today=None):
+    return _election_skip_on(today) and bool(_ELECTION.search(title))
+
+
+def _eligible(posts, prev_title, uploaded):
+    candidates = []
+    for post in posts:
+        if post.title in uploaded and post.title != prev_title:
+            print(f"Already uploaded, not a candidate: {post.title[:60]}")
+        if _election_week(post.title):
+            print(f"About voting in election week, not a candidate: {post.title[:60]}")
+        if (
+            not post.over_18
+            and not _profane(post.title)
+            and len(post.title) <= config.MAX_TITLE_LENGTH
+            and not _has_emoji(post.title)
+            and not _election_week(post.title)
+            and post.title != prev_title
+            and post.title not in uploaded
+        ):
+            candidates.append(post)
+    return candidates
 
 
 def _profane(text):
@@ -188,22 +212,20 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
     a question re-asked weeks later is refused too (one was, 2026-08-20): to a
     viewer it is the same video."""
     subreddit = reddit.subreddit(subreddit_name)
-    candidates = []
-    for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT):
-        if post.title in uploaded and post.title != prev_title:
-            print(f"Already uploaded, not a candidate: {post.title[:60]}")
-        if _election_week(post.title):
-            print(f"About voting in election week, not a candidate: {post.title[:60]}")
-        if (
-            not post.over_18
-            and not _profane(post.title)
-            and len(post.title) <= config.MAX_TITLE_LENGTH
-            and not _has_emoji(post.title)
-            and not _election_week(post.title)
-            and post.title != prev_title
-            and post.title not in uploaded
-        ):
-            candidates.append(post)
+    candidates = _eligible(subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT),
+                           prev_title, uploaded)
+    # Election week can empty the whole top 10 (NoStupidQuestions keeps as few
+    # as 2 on an ordinary day), and an empty list fails the run. So read the
+    # rest of the same day's list once, under the same filters. Only when
+    # nothing survived: an ordinary day's pick, slate and rank are unchanged,
+    # and the screen still sees at most MAX_SCREENED_CANDIDATES posts. The
+    # whole list is filtered again, as the ranking may have moved meanwhile.
+    if not candidates and _election_skip_on():
+        print(f"Election week left no candidate in the top {config.CANDIDATE_LIMIT}; "
+              f"reading the top {config.ELECTION_FALLBACK_LIMIT}")
+        candidates = _eligible(
+            subreddit.top(time_filter="day", limit=config.ELECTION_FALLBACK_LIMIT),
+            prev_title, uploaded)
 
     # R4.4 Step 0.5. Rank here is position in `candidates`, the same basis as
     # candidate_rank, so slate[candidate_rank - 1] is the selected post and its
