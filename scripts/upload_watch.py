@@ -8,11 +8,14 @@ allowance is spent. The shift workflow's own schedule is the owner's, and it
 runs three times a day whatever the allowance, so a step there that fails on a
 missed upload reaches them however the upload job's schedule was last edited.
 
-Two checks, because each misses what the other sees:
-- the newest upload is older than STALE_HOURS: catches runs that never start;
-  the longest gap between two good uploads since September was 15.1 hours;
-- a scheduled upload run failed in the last day: catches a single missed slot,
-  which the next slot's upload would hide from the first check.
+Two checks:
+- fewer than MIN_UPLOADS uploads in the last WINDOW_HOURS: catches any missed
+  slot, a run that never started or was cancelled included. Replayed over the
+  95 scheduled shift starts from 09-20 to 11-01 it raises no false alarm, and
+  flags the one real miss (10-05's evening) at both shifts after it; 26 hours
+  raised one false alarm (10-12, a 15-hour gap);
+- a scheduled upload run that failed in the last day: the same day's news,
+  where the count can wait for the next morning.
 
     upload_watch.py <upload_log.csv> [<repo> <token>]
 
@@ -24,7 +27,8 @@ import datetime
 import json
 import sys
 
-STALE_HOURS = 20
+WINDOW_HOURS = 28
+MIN_UPLOADS = 2   # at two a day; at four it still catches three misses in a row
 FAILED = {"failure", "timed_out", "startup_failure"}
 WORKFLOW = "run-reddit-video.yml"
 
@@ -33,21 +37,28 @@ def _ts(text):
     return datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
 
 
-def last_upload(log_path):
+def upload_times(log_path):
+    """Every upload's time; a row that does not parse is skipped, not fatal,
+    since a crash here would read as a missed upload."""
+    stamps = []
     with open(log_path, newline="") as f:
-        stamps = [_ts(r["timestamp_utc"]) for r in csv.DictReader(f) if r.get("timestamp_utc")]
-    return max(stamps) if stamps else None
+        for r in csv.DictReader(f):
+            try:
+                stamps.append(_ts(r["timestamp_utc"]))
+            except (KeyError, TypeError, ValueError, AttributeError):
+                continue
+    return stamps
 
 
-def problems(last, runs, now):
+def problems(stamps, runs, now):
     """Plain-language problems; [] when the uploads look fine. `runs` is the
     workflow's run list from the API, or None when it could not be read."""
     found = []
-    if last is None:
-        found.append("the upload log has no uploads")
-    elif now - last > datetime.timedelta(hours=STALE_HOURS):
-        hours = (now - last).total_seconds() / 3600
-        found.append(f"no upload for {hours:.0f} hours (the last was {last:%Y-%m-%d %H:%M} UTC)")
+    recent = [t for t in stamps if now - datetime.timedelta(hours=WINDOW_HOURS) < t <= now]
+    if len(recent) < MIN_UPLOADS:
+        last = f"the last was {max(stamps):%Y-%m-%d %H:%M} UTC" if stamps else "the log has none"
+        found.append(f"{len(recent)} upload(s) in the last {WINDOW_HOURS} hours, "
+                     f"where {MIN_UPLOADS} are expected ({last})")
     for r in runs or []:
         if r.get("event") != "schedule" or r.get("conclusion") not in FAILED:
             continue
@@ -73,7 +84,7 @@ def main(argv):
         print(__doc__)
         return 2
     runs = scheduled_runs(argv[2], argv[3]) if len(argv) == 4 else None
-    found = problems(last_upload(argv[1]), runs, datetime.datetime.now(datetime.timezone.utc))
+    found = problems(upload_times(argv[1]), runs, datetime.datetime.now(datetime.timezone.utc))
     for p in found:
         print(f"::error::Upload check: {p}")
     if not found:
