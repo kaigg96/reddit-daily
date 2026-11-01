@@ -111,8 +111,9 @@ def test_an_all_election_top_ten_reads_deeper_instead_of_failing(monkeypatch, ca
     reddit = _Day(titles)
     picked = content.select_post(reddit, prev_title="")
     assert picked.title == "What smell takes you back?"
+    assert picked.candidate_rank == config.CANDIDATE_LIMIT + 1   # a deeper pick, told apart in the log
     assert reddit.limits == [config.CANDIDATE_LIMIT, config.ELECTION_FALLBACK_LIMIT]
-    assert "Election week left no candidate in the top 10" in capsys.readouterr().out
+    assert "Election week left no post in the top 10" in capsys.readouterr().out
 
 
 def test_the_deeper_read_never_runs_when_the_top_ten_has_a_candidate(monkeypatch):
@@ -137,3 +138,43 @@ def test_the_deeper_read_still_skips_voting_and_shipped_questions(monkeypatch):
     reddit = _Day(titles)
     picked = content.select_post(reddit, prev_title="", uploaded=frozenset({"What smell takes you back?"}))
     assert picked.title == "What hobby costs too much?"
+
+
+class _Verdict:
+    def __init__(self, verdict):
+        self.verdict, self.topic, self.source, self.failure = verdict, "", "gemini", ""
+        self.category, self.demoted, self.unsafe = "x", False, []
+
+
+def test_a_top_ten_the_screen_empties_reads_deeper_within_the_screen_cap(monkeypatch):
+    _on_day(monkeypatch, D(2026, 11, 4))
+    titles = ["Who did you vote for?"] * 8 + ["Skip me?", "What hobby costs too much?"]
+    titles += ["What hobby costs too much?", "Skip me too?", "What smell takes you back?", "Never read?"]
+    reddit = _Day(titles)
+    screened = []
+
+    def screener(title, pool):
+        screened.append(title)
+        return _Verdict("skip_post" if title.startswith("Skip") or "hobby" in title else "pass")
+
+    picked = content.select_post(reddit, prev_title="", screener=screener)
+    assert picked.title == "What smell takes you back?"
+    # the top 10's two, then the deeper list without the one already tried
+    assert screened == ["Skip me?", "What hobby costs too much?", "Skip me too?", "What smell takes you back?"]
+    assert len(screened) <= config.MAX_SCREENED_CANDIDATES
+    assert picked.candidate_rank == config.CANDIDATE_LIMIT + 2
+
+
+def test_a_top_ten_that_used_the_whole_screen_cap_still_fails(monkeypatch):
+    _on_day(monkeypatch, D(2026, 11, 4))
+    reddit = _Day([f"Skip me {i}?" for i in range(config.CANDIDATE_LIMIT)] + ["What smell takes you back?"])
+    screened = []
+
+    def screener(title, pool):
+        screened.append(title)
+        return _Verdict("skip_post")
+
+    with pytest.raises(ValueError):
+        content.select_post(reddit, prev_title="", screener=screener)
+    assert len(screened) == config.MAX_SCREENED_CANDIDATES
+    assert reddit.limits == [config.CANDIDATE_LIMIT]
