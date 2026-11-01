@@ -61,11 +61,11 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-01 (10:27) — A failed upload has emailed no one since 11 October, and two clicks of yours fix it; election week's fuller skip waits only on its sample
+## 2026-11-01 (10:27) — A failed upload has emailed no one since 11 October, and two clicks of yours fix it; election week's fuller skip is live
 
     Worked (% of the shift): reliability 30 · editorial 20 · gm 20 · legal 15 · data 10 · security 5
 
-**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Since 11 October a failed upload would have emailed no one, which matters most when the shift allowance runs out around 4 November; #86 asks you for the two clicks that fix it. Election week's skip, now also catching polls, is reviewed and waits on one sample.
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Since 11 October a failed upload would have emailed no one, which matters most when the shift allowance runs out around 4 November; #86 asks you for the two clicks that fix it. Election week's skip now also catches questions about polls, live from today.
 
 ### Toward revenue
 - **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
@@ -73,7 +73,7 @@ and more useful than a confident guess.
 
 ### Done
 - **Reliability (found, for you):** GitHub emails a scheduled job's failures to whoever last changed its schedule. On 11 October our automatic approver applied your four-a-day approval, so that person is now a bot, and the upload job has no alert of its own. Nothing has failed since; the last failure, on 5 October, did reach you. Shifts are the only other check, and none runs once the weekly allowance is spent (29–30 October, and again about 4 November). #86 gives the fix: in the Actions tab, disable the upload job and enable it again straight away. A later approved schedule change would repeat it; that is recorded.
-- **Editorial (fix):** election week's skip now also catches "polls" and "electoral", and logs each post it skips. A fresh review found no fault, and all 707 checks pass. Across 211 past uploads it would skip nothing more than before. Its sample was requested at 11:06, the first moment the one-per-12-hours limit allowed.
+- **Editorial (fix, live):** election week's skip now also catches "polls" and "electoral", and logs each post it skips. A fresh review found no fault, and all 707 checks pass. Across 211 past uploads it would skip nothing more than before. Its sample passed; it is live from today's 12:23 run.
 - **Editorial (check):** this morning's upload, on makeup, makes no claim about voting.
 - **Legal (for you, no email):** Reddit's developer terms (section 5.3) forbid its name "in the name of your App". We cannot see our app's name, and this project's own name is reddit-daily. #82 now tells you to check the name before you register, and to rename the app if it says "reddit". I edited the issue, so no email.
 - **Data (recorded before any read):** bet 2 starts from 8,300 views over four weeks, the lowest of the 11 four-week stretches since July; the middle one is 11,212. So its bar of 16,600 is about one and a half times a typical stretch, not double. It is in the test ledger, so December's read cannot overstate a pass.
@@ -85,7 +85,7 @@ and more useful than a confident guess.
 - **For you, in order:** #86 (two clicks, away from the upload times: 00:23, 06:23, 12:23, 18:23 UTC); #77 (one label ships bet 1; bet 2's window closes about 6 November); #82 (register by 12 January; check the app's name first); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
 
 ### Next
-- **First:** if the election skip's sample passed on commit 92948f7 and it is not merged, merge it.
+- **Election week:** the full skip is live, so the daily voting check ends; the skip lapses by itself after 10 November.
 - **2 November, the weekly; then the November monthly; if #77 is labelled; 7 November:** all as the 31 October (22:29) entry says.
 - **Once #86 is done:** close it, and the item in the technical list.
 
