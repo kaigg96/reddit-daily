@@ -513,3 +513,14 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
   the text columns at HEAD, leave history. **Closes when** decided there.
+
+- **A failed upload run emails no one (found 2026-11-01, Reliability).**
+  GitHub sends a scheduled workflow's failure email to the last editor of its
+  `schedule` lines. `apply-approved.yml` commits as `github-actions[bot]`, and
+  its e3f5854 (10-11, #73) edited `run-reddit-video.yml`'s, so the bot gets
+  them; the job has no alert of its own. The other scheduled workflows are
+  the owner's. Fix is the owner's (disable, then re-enable the workflow):
+  escalated, key `upload-failure-emails`. Any later approved patch touching a
+  `cron:` line repeats this, so its escalation must say so; `apply-approved.yml`
+  is owner-only, so no guard in code. **Closes when** the owner has re-enabled
+  it.
