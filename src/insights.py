@@ -2431,11 +2431,14 @@ WATCH_REACH_SINCE = datetime.date(2026, 10, 5)
 def watch_reach_verdict(rho, p_value, age_rhos=(None, None)):
     """The pre-committed rule above, applied as written. `age_rhos` is each
     metric's rho against reading age (views, watch-seconds): a link both
-    share with age is age, not watching -- read again at the next snapshot."""
+    share with age, in the same direction, is age, not watching -- read again
+    at the next snapshot. Opposite directions would push rho down, not up."""
     if rho is None:
-        return "insufficient data"
+        return "insufficient data: read at the next snapshot"
     if p_value < 0.05 and rho >= WATCH_REACH_RHO:
-        if all(r is not None and abs(r) >= WATCH_REACH_RHO for r in age_rhos):
+        a, b = age_rhos
+        if (a is not None and b is not None and min(abs(a), abs(b)) >= WATCH_REACH_RHO
+                and a * b > 0):
             return "confounded: both track reading age; read again at the next snapshot"
         return "tracks: uploads watched longer earn more views; D9's assumption 2 holds on this count"
     if p_value < 0.05 and rho <= -WATCH_REACH_RHO:

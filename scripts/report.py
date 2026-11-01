@@ -755,6 +755,9 @@ def main():
                          or not args.by):
         # Assignments only: any other mode or outcome option would be ignored.
         sys.exit("--balance takes --by and optionally --since and --until, nothing else")
+    if args.within and (args.opening_reach or args.watch_reach or args.first_answer):
+        # Each reads its pre-committed sample; a filter would be ignored silently.
+        sys.exit("--opening-reach, --watch-reach and --first-answer take no --within")
     if args.until and not args.balance:
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
