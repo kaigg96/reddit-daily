@@ -30,7 +30,7 @@
 |---|---|---|---|
 | ~~Suppression-risk screen~~ ✅ `v5` · retiered `v6` | done | R4.6 | **Standing audit:** review `analysis/screen_log.csv` weekly; if skips look like false positives or exceed ~15% of candidates, narrow the prompt rather than revert (§6). |
 | ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (spam policy, PLAN §4) | done: merged after dry run PASS at `9103351` | R2.2 | Such a title falls back like a failed one (style blank); no bump. |
-| Election-week fallback | ready: `editorial/election-week-fallback` (`b43940c`), reviewed; dry run from 11-02 11:17 | — | Fix, no bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. Merge by 11-03. |
+| Election-week fallback | ready: `editorial/election-week-fallback` (`88ecde5`), reviewed twice, no fault; dry run from 11-02 11:17 | — | Fix, no bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. Merge by 11-03. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10/25/50/75/100% (`watch_ratio_*`), swipe-aways excluded (§4); `report.py --metric` reads it. **Never a trigger.** |
 
