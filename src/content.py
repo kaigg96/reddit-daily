@@ -100,9 +100,33 @@ _ELECTION = re.compile(r"\b(vot(e|es|ed|er|ers|ing)|ballots?|elections?|electora
                        re.IGNORECASE)
 
 
-def _election_week(title, today=None):
+def _election_skip_on(today=None):
     today = today or datetime.datetime.now(datetime.timezone.utc).date()
-    return today <= config.ELECTION_SKIP_UNTIL and bool(_ELECTION.search(title))
+    return today <= config.ELECTION_SKIP_UNTIL
+
+
+def _election_week(title, today=None):
+    return _election_skip_on(today) and bool(_ELECTION.search(title))
+
+
+def _eligible(posts, prev_title, uploaded):
+    candidates = []
+    for post in posts:
+        if post.title in uploaded and post.title != prev_title:
+            print(f"Already uploaded, not a candidate: {post.title[:60]}")
+        if _election_week(post.title):
+            print(f"About voting in election week, not a candidate: {post.title[:60]}")
+        if (
+            not post.over_18
+            and not _profane(post.title)
+            and len(post.title) <= config.MAX_TITLE_LENGTH
+            and not _has_emoji(post.title)
+            and not _election_week(post.title)
+            and post.title != prev_title
+            and post.title not in uploaded
+        ):
+            candidates.append(post)
+    return candidates
 
 
 def _profane(text):
@@ -188,22 +212,8 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
     a question re-asked weeks later is refused too (one was, 2026-08-20): to a
     viewer it is the same video."""
     subreddit = reddit.subreddit(subreddit_name)
-    candidates = []
-    for post in subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT):
-        if post.title in uploaded and post.title != prev_title:
-            print(f"Already uploaded, not a candidate: {post.title[:60]}")
-        if _election_week(post.title):
-            print(f"About voting in election week, not a candidate: {post.title[:60]}")
-        if (
-            not post.over_18
-            and not _profane(post.title)
-            and len(post.title) <= config.MAX_TITLE_LENGTH
-            and not _has_emoji(post.title)
-            and not _election_week(post.title)
-            and post.title != prev_title
-            and post.title not in uploaded
-        ):
-            candidates.append(post)
+    candidates = _eligible(subreddit.top(time_filter="day", limit=config.CANDIDATE_LIMIT),
+                           prev_title, uploaded)
 
     # R4.4 Step 0.5. Rank here is position in `candidates`, the same basis as
     # candidate_rank, so slate[candidate_rank - 1] is the selected post and its
@@ -220,52 +230,79 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
         if slate:
             slate_topics = "|".join(t or "?" for t in slate)
 
-    for rank, post in enumerate(candidates[: config.MAX_SCREENED_CANDIDATES], 1):
-        pool = _comment_pool(post, config.COMMENT_POOL)
-        if len(pool) < config.NUM_COMMENTS:
-            continue
+    screened = 0   # posts looked at, across both reads: the screen's cap holds
 
-        topic = screen_source = screen_failure = ""
-        if screener:
-            result = screener(post.title, pool)
-            topic, screen_source = result.topic, result.source
-            screen_failure = result.failure
-            if result.verdict == "skip_post":
-                print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
-                if on_verdict:
-                    on_verdict(post.title, result, "skip_post")
+    def first_passing(posts, first_rank):
+        nonlocal screened
+        for rank, post in enumerate(posts, first_rank):
+            if screened >= config.MAX_SCREENED_CANDIDATES:
+                return None
+            screened += 1
+            pool = _comment_pool(post, config.COMMENT_POOL)
+            if len(pool) < config.NUM_COMMENTS:
                 continue
 
-            # Answer-level category raised against the post: not a skip, but
-            # recorded so the audit can see what the old taxonomy would have cost.
-            if result.demoted and on_verdict:
-                on_verdict(post.title, result, "demoted_post_risk")
-
-            if result.unsafe:
-                kept = [c for i, c in enumerate(pool) if i not in result.unsafe]
-                if len(kept) < config.NUM_COMMENTS:
-                    print(f"Screen: too few safe comments — {post.title[:60]}")
+            topic = screen_source = screen_failure = ""
+            if screener:
+                result = screener(post.title, pool)
+                topic, screen_source = result.topic, result.source
+                screen_failure = result.failure
+                if result.verdict == "skip_post":
+                    print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                     if on_verdict:
-                        on_verdict(post.title, result, "skip_insufficient_comments")
+                        on_verdict(post.title, result, "skip_post")
                     continue
-                print(f"Screen: dropped {len(result.unsafe)} comment(s) ({result.category})")
-                if on_verdict:
-                    on_verdict(post.title, result, "drop_comments")
-                pool = kept
 
-        if rank > 1:
-            print(f"Selected candidate rank {rank} (earlier candidates filtered/screened out)")
-        return PostContent(
-            subreddit=subreddit_name,
-            title=post.title,
-            comments=pool[: config.NUM_COMMENTS],
-            shortlink=post.shortlink,
-            candidate_rank=rank,
-            topic=topic,
-            screen_source=screen_source,
-            screen_failure=screen_failure,
-            slate_topics=slate_topics,
-            author=credit_name(getattr(post, "author", None)),
-        )
+                # Answer-level category raised against the post: not a skip, but
+                # recorded so the audit can see what the old taxonomy would have cost.
+                if result.demoted and on_verdict:
+                    on_verdict(post.title, result, "demoted_post_risk")
+
+                if result.unsafe:
+                    kept = [c for i, c in enumerate(pool) if i not in result.unsafe]
+                    if len(kept) < config.NUM_COMMENTS:
+                        print(f"Screen: too few safe comments — {post.title[:60]}")
+                        if on_verdict:
+                            on_verdict(post.title, result, "skip_insufficient_comments")
+                        continue
+                    print(f"Screen: dropped {len(result.unsafe)} comment(s) ({result.category})")
+                    if on_verdict:
+                        on_verdict(post.title, result, "drop_comments")
+                    pool = kept
+
+            if rank > 1:
+                print(f"Selected candidate rank {rank} (earlier candidates filtered/screened out)")
+            return PostContent(
+                subreddit=subreddit_name,
+                title=post.title,
+                comments=pool[: config.NUM_COMMENTS],
+                shortlink=post.shortlink,
+                candidate_rank=rank,
+                topic=topic,
+                screen_source=screen_source,
+                screen_failure=screen_failure,
+                slate_topics=slate_topics,
+                author=credit_name(getattr(post, "author", None)),
+            )
+        return None
+
+    picked = first_passing(candidates, 1)
+    # Election week can empty the top 10 (NoStupidQuestions keeps as few as 2
+    # on an ordinary day), or leave a few the screen then skips, and either
+    # fails the run. So read the rest of the day's list once, under the same
+    # filters, within what is left of the screen's cap. Only on a run that
+    # would have failed: an ordinary day's pick, slate and rank are unchanged.
+    # Deeper picks rank from CANDIDATE_LIMIT + 1, so upload_log tells them
+    # from the top 10's, and the slate (top 10 only) never claims them.
+    if picked is None and _election_skip_on() and screened < config.MAX_SCREENED_CANDIDATES:
+        print(f"Election week left no post in the top {config.CANDIDATE_LIMIT}; "
+              f"reading the top {config.ELECTION_FALLBACK_LIMIT}")
+        tried = {p.title for p in candidates}
+        deeper = [p for p in _eligible(subreddit.top(time_filter="day", limit=config.ELECTION_FALLBACK_LIMIT),
+                                       prev_title, uploaded)
+                  if p.title not in tried]
+        picked = first_passing(deeper, config.CANDIDATE_LIMIT + 1)
+    if picked is not None:
+        return picked
 
     raise ValueError("No suitable Reddit post found (after filters and screen).")
