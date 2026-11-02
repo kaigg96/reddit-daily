@@ -84,26 +84,38 @@ def earliest(last_render, now, uploaded_today):
     return t, "; ".join(why) or "neither limit applies"
 
 
-def last_render():
+def last_render(cwd=None):
     out = subprocess.run(
         ["gh", "api", "repos/{owner}/{repo}/actions/artifacts?name=dry-run-render&per_page=50",
          "--jq", "[.artifacts[].created_at] | max // \"\""],
-        capture_output=True, text=True)
+        capture_output=True, text=True, cwd=cwd)
     if out.returncode != 0:
         sys.exit(f"could not read the render history: {out.stderr.strip()}")
     stamp = out.stdout.strip()
     return datetime.datetime.fromisoformat(stamp.replace("Z", "+00:00")) if stamp else None
 
 
-def next_slot(log="upload_log.csv"):
+def next_slot():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    busy = subprocess.run(
+        ["gh", "run", "list", "--workflow", "dry-run.yml", "--json", "status",
+         "--jq", '[.[] | select(.status != "completed")] | length'],
+        capture_output=True, text=True, cwd=root)
+    if busy.returncode == 0 and busy.stdout.strip() not in ("", "0"):
+        # Its artifact lands only when it finishes, so the 12 hours cannot be
+        # read yet, and a second request now would overwrite its verdict.
+        print("a render request is being handled now: wait for its verdict, then ask again")
+        return 0
+    # The workflow reads main's upload log, not this checkout's.
+    subprocess.run(["git", "fetch", "-q", "origin", "main"], cwd=root, capture_output=True)
+    log = subprocess.run(["git", "show", "origin/main:upload_log.csv"],
+                         capture_output=True, text=True, cwd=root).stdout
     now = datetime.datetime.now(datetime.timezone.utc)
-    today = now.strftime("%Y-%m-%d")
-    with open(log) as f:
-        uploaded = any(line.startswith(today) for line in f)
-    t, why = earliest(last_render(), now, uploaded)
+    uploaded = any(line.startswith(now.strftime("%Y-%m-%d")) for line in log.splitlines())
+    t, why = earliest(last_render(root), now, uploaded)
     when = "now" if t <= now else f"{t:%Y-%m-%d %H:%M} UTC"
     print(f"next automated render: {when} ({why})")
-    print("a push before then is refused; the render takes 5-10 minutes after it")
+    print("the render takes 5-10 minutes after the request is pushed")
     return 0
 
 
