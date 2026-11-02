@@ -38,7 +38,7 @@ v7-long,v7 credit within long videos,release,watch_seconds,2026-10-07,2026-10-12
 #4,posting volume 2 → 4/day,release,watch_seconds,2026-10-07,,,pending,,,"~13% (release check drift floor, 2026-10-27 data)",,PRD §0 #4; git 48fe1a4
 #13,move AI calls to Groq,release,watch_seconds; title fallbacks,2026-10-08,,,pending,,≥20 uploads (rule),bar titles fall back on ≥4 of first 20,,PRD §0 #13; git 726e312
 title_hype,capitalised word in title,observational,views,,,2026-10-09,lead,+120% (median 179 vs 81.5),65/68,,,PRD §4 2026-10-09
-#3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,2026-11-02,keep,"NoStupidQuestions +35% (13.5 vs 10.0); engaged share −25% (gap 24%), for #4",16 vs 19,~18%,no,PRD §0 #3; PRD §4 2026-11-02; git 7a7a8fe
+#3,subreddit rotation,coin,watch_seconds,2026-10-10,2026-11-02,2026-11-02,keep,"NoStupidQuestions +35% (13.5 vs 10.0); engaged share −25% (gap 24%), for #4",16 vs 19,20%,no,PRD §0 #3; PRD §4 2026-11-02; git 7a7a8fe
 #10,title style B weighting,coin,watch_seconds,2026-10-10,2026-11-02,2026-11-02,keep,−8% (11.0 vs 12.0); engaged share no difference,27 vs 9,~30%,no,PRD §0 #10; PRD §4 2026-11-02; git 3b9929d
 #14,"one capitalised word, randomized",coin,views; watch_seconds,2026-10-10,2026-11-23,,pending,,30 per arm (rule),~82% views; ~16% watch_seconds,,PRD §0 #14; git 518bdf7
 R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-10-10,,2026-10-10,keep,31% to 18% at 15 a side,newest 90,bar ≥⅓ narrower,,"PRD §4 2026-10-10; git d9ee9b3, 3f81022"
@@ -47,7 +47,7 @@ R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,r
 #8-v8,"engaged share, v8 vs v7",release,engaged_share,2026-10-12,,,pending,,,,,PRD §0 #8
 #8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,,,pending,,,,,PRD §0 #8; git c41807d
 R2-lead,voice engaged-share lead (1 of 10 reads),coin,engaged_share,,,2026-10-14,lead,0.44 vs 0.29,12/13,25%,,PRD §4 2026-10-06 (2026-10-14)
-R2,Stephen's voice and engaged share,coin,engaged_share,2026-10-14,2026-11-02,2026-11-02,lead,+47% (0.46 vs 0.31); within AskReddit +42% (diagnostic),14 vs 22,27%,,PRD §0 #16; PRD §4 2026-11-02; git ccada12
+R2,Stephen's voice and engaged share,coin,engaged_share,2026-10-14,2026-11-02,2026-11-02,lead,+47% medians (0.46 vs 0.31); within AskReddit +42% (diagnostic),14 vs 22,27%,,PRD §0 #16; PRD §4 2026-11-02; git ccada12
 #15-avgpct,"v8 avg % viewed, long videos",release,avg_view_pct,2026-10-17,,,pending,,,bar 5 points lower,,PRD §0 #15; git 1d55ba2
 #15-where,v8 retention points,release,watch_ratio_25/50/75,2026-10-17,,,pending,,8 a side (rule),bar 0.05 lower,,PRD §0 #15; git 990cbbd
 #15-dose,v8 host-line dose,release,host_lines,2026-10-17,,,pending,,first 20 (rule),bar all lines on fewer than 15 of 20,,PRD §0 #15; git bbbfd0c
@@ -58,7 +58,7 @@ groq-judge,Groq judges host tags,observational,agreement,2026-10-24,,2026-10-24,
 #15-sameness,v8 tags repeat across videos,release,repeated_tags,2026-10-25,,,pending,,first 20 (rule),bar a tag on 5+ of 20,,PRD §4 2026-10-23 (10-25); git 276f081
 #15-tags-eye,v8 tags by eye,release,verdict_or_label_tags,2026-10-25,,,pending,,"first 6 uploads, 18 tags (rule)",bar 3 or more,,PRD §4 2026-10-23 (10-25); git bf0c76e
 R4,weekly view swings: viewers or data,observational,weekly_views,2026-10-26,2026-11-16,,pending,,10-12 to 11-16 (rule),,,PRD §0 R4; PRD §4 2026-10-26; git 42ffd08
-reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,,pending,,,bar under 150 a day,,PRD §4 2026-10-26
+reach-cut,second low week read as a reach cut,observational,catalogue_recent_views_per_day,2026-10-26,2026-11-02,2026-11-02,noise,"recent column 725 a day (high week, as the alternation predicted)",,bar under 150 a day,,"PRD §4 2026-10-26, 2026-11-02"
 #14-balance,#14's arms by subreddit (assignments only),coin,subreddit,2026-10-28,2026-11-23,,pending,,30 per arm (rule),bar Fisher p < 0.05,,PRD §4 2026-10-28; git 75fda3c
 R2-balance,R2's voices by subreddit (assignments only),coin,subreddit,2026-10-28,2026-11-02,2026-10-31,noise,"Fisher p 0.191 (AskReddit 8 Danielle, 11 Stephen; NoStupidQuestions 13, 6)",21 vs 17,bar Fisher p < 0.05,,"PRD §4 2026-10-28; git 75fda3c; read 10-31 with --until 10-26, the uploads an 11-02 7-day read sees"
 watch-reach,does watch time still predict reach,observational,rho,2026-11-01,2026-11-02,2026-11-02,noise,"rho −0.23, p 0.17; age: views −0.02, watch −0.10",38,bar |rho| ≥ 0.3 at p < 0.05,,"PRD §4 2026-11-01, 2026-11-02"
