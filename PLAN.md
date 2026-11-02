@@ -63,7 +63,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | 2026-10-26 |
+| Weekly | 2026-11-02 |
 | Monthly | 2026-10-05 |
 | Quarterly prep | 2026-10-05 |
 | Quarterly planning | 2026-10-10 |
