@@ -31,7 +31,7 @@ FIELDS = ["queued_utc", "video_id", "parent_id", "reply", "status", "posted_utc"
 REPLIES_PER_DAY = 5
 REPLY_MAX_CHARS = 200
 
-_LINK = re.compile(r"https?://|www\.|\b[\w-]+\s?\.\s?(com|net|org|io|ly|be|co|tv|gg|me|app|uk|dev|xyz)\b"
+_LINK = re.compile(r"https?://|www\.|\b[\w-]+(?:\.|\s+\.\s+)(com|net|org|io|ly|be|co|tv|gg|me|app|uk|dev|xyz)\b"
                    r"|\bdot\s+(com|net|org)\b", re.IGNORECASE)
 # Any mention of AI or automation, and any claim to be a person: the policy
 # leaves questions about who runs the channel unanswered, so a reply never
@@ -47,9 +47,11 @@ QUOTE_WORDS = 6
 
 
 def _quotes(reply, comment, n=QUOTE_WORDS):
-    """Does the reply repeat `n` or more words of the comment in a row?"""
-    words = lambda t: re.findall(r"[a-z0-9']+", (t or "").lower())
+    """Does the reply repeat `n` or more words of the comment in a row, or a
+    shorter comment whole (three words or more)?"""
+    words = lambda t: re.findall(r"\w+", (t or "").lower())
     c = words(comment)
+    n = max(3, min(n, len(c)))
     runs = {tuple(c[i:i + n]) for i in range(len(c) - n + 1)}
     r = words(reply)
     return any(tuple(r[i:i + n]) in runs for i in range(len(r) - n + 1))

@@ -30,6 +30,11 @@ def test_check_reply_refuses_each_policy_breach():
     viewer = "I go to school every day with a bit of concealer and mascara"
     assert replies.check_reply("You go to school every day with a bit of it?", viewer) == "quotes the viewer"
     assert replies.check_reply("Minimal makeup still counts!", viewer) is None
+    assert replies.check_reply("So you hate your step mum?", "I hate my step mum") is None
+    assert replies.check_reply("Wait, I hate my step mum too", "I hate my step mum") == "quotes the viewer"
+    assert replies.check_reply("я люблю эту игру очень сильно правда", "я люблю эту игру очень сильно правда") == "quotes the viewer"
+    for prose in ("I agree. Me too", "Exactly. Be kind", "Fair. Co-parenting is hard", "Good point. Tv shows too"):
+        assert replies.check_reply(prose) is None, prose
 
 
 def test_queue_reply_appends_once_per_comment_and_refuses_bad_drafts():
