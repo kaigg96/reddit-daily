@@ -115,3 +115,4 @@ F113,2026-11-01T23:16:07+00:00,41359041345,engineering,"Merging the fallback lef
 F114,2026-11-02T11:12:21+00:00,41434073049,gm,"Weekly friction sort: 40 ungrouped rows into groups, 8 new",done,,mistake,"Python's csv writer emits CRLF; the file is LF, so the first rewrite touched every row until I normalised it",A friction.py command that sets a row's group in place,2,
 F115,2026-11-02T11:15:08+00:00,41434073049,gm,dry_run.py next: when the render workflow next accepts a request,done,G1,none,,,0,
 F116,2026-11-02T11:17:31+00:00,41434073049,strategy,"A dated rule for the replacement source (12-14), for the monthly",done,,none,,,0,
+F117,2026-11-02T11:19:16+00:00,41434073049,monetization,Brand-deal and affiliate routes priced for the source decision,done,,none,,,0,
