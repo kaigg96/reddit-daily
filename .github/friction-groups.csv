@@ -1,5 +1,5 @@
 group,title,status,item,opened,resolved,note
-G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true
+G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true. 11-02: `dry_run.py next` computes the slot (F112's share); the 12-hour cap and #65 remain
 G2,"Recorded answers are hard to find, so work gets redone",open,,2026-09-26,,seeded 2026-10-27 from the work log's notes; check it is still true
 G3,The views-never-revert rule hid side-by-side findings,open,,2026-09-28,,seeded 2026-10-27 from the work log's notes; check it is still true
 G4,The work log's word budget fights the retention it asks for,open,,2026-09-29,,seeded 2026-10-27 from the work log's notes; check it is still true
