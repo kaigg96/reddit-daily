@@ -69,7 +69,7 @@ and more useful than a confident guess.
 
 ### Toward revenue
 - **Nothing viewers see changed.** Bet 1 waits on #77; the channel is flat at 12 seconds per view.
-- **Bet 1's date is now on its ask.** Bet 2 is judged from 30 November to 27 December. Four uploads a day can start only after bet 1's own test, 24 to 31 days from its merge. So bet 1 needs your label by about 6 November to cover all four of bet 2's weeks, and each week later loses one. #77, where you decide, now says so.
+- **Bet 1's date is now on its ask.** Bet 2 is judged from 30 November to 27 December, and four uploads a day can start only after bet 1's own 24-to-31-day test. So bet 1 needs your label by about 6 November to cover all four of bet 2's weeks; each week later loses one. #77, where you decide, now says so.
 - **What tests are judged on.** Every test is judged on watch time, because in August longer-watched videos got more views. On today's 38 recent uploads there is no such link, so a watch-time gain no longer counts as reach. Bet 1's case rests on originality, which gates every route to income.
 - **A voice lead.** Plays of Stephen's uploads get past the opening more often than Danielle's: 46% against 31% at the median, beyond chance, and it holds within one subreddit alone. Only those plays count toward the Partner Program, but that lead raises the count only if his uploads hold their views, which this size cannot check yet. It is queued after bet 1 (one change at a time) and needs a sample in the real voice, which only you can make.
 
@@ -80,15 +80,15 @@ and more useful than a confident guess.
   - Subreddits: NoStupidQuestions is watched 35% longer than AskReddit, so both stay. Fewer of its plays get past the opening (33% against 45%). Recorded for the four-a-day test. Its views trail by half, too noisy to tell at this size.
   - Titles that address "you" are not measurably worse than the others, so they stay at four in six.
   - Last week's low in views was ordinary weather, as predicted. No background clip needs retiring.
-  - A fresh review agreed with every number and verdict, and caught six places where I had worded a result too strongly; all are fixed.
-- **Data (built, live):** the reach checks now print a range beside their verdict. That shows whether "no link" means ruled out or just not seen, and never changes a verdict; reviewed.
+  - A fresh review agreed with every number and verdict and caught six overstated wordings, all fixed.
+- **Data (built, live):** the reach checks print a range beside their verdict, showing whether "no link" means ruled out or unseen; reviewed.
 - **General management (fix, live):** the review nearly missed one of the five reads due today. The check that says a review is due now also lists those reads. Replayed on this morning's records, it names all five; reviewed.
 - **Data (for the monthly):** what tests could be judged on instead. Tests can detect a 20 to 30% change in watch time or in the share of plays past the opening, but would see the Partner Program's count only if it roughly doubled. That share is the useful one: the count is views times the share, and the share shows no link to views, so raising it should raise the count while views hold. One option for you at the monthly: judge tests on that share, keep watch time as the check that viewers are not worse off, and judge views on the whole channel over weeks, as bet 2 does.
-- **General management (ranking):** after the review one item was ready. A fresh agent proposed four; ranked in both orders, the input on what tests are judged on came first, then the voice correction and next Monday's routing, all done. Dropped: recording the first audience figures (no decision changes). Fixes and improvements were about even.
-- **Audience (reopened):** viewers commented on 4 uploads this week (7 comments), against 1 upload in each of the two weeks before. Our rule reopens the reply plan at 3 or more. I built and merged its first part after two fresh reviews: the list shifts draft replies into, refusing any with a link, a mention of AI, a claim to be a person, or the viewer's own words. Posting needs one workflow change from you, sent once the rest is built; our YouTube permission already covers replies.
+- **General management (ranking):** a fresh agent proposed four items; ranked in both orders, the input on what tests are judged on came first, then the voice correction and next Monday's routing, all done. Dropped: the first audience figures (no decision changes). Fixes and improvements were about even.
+- **Audience (reopened):** viewers commented on 4 uploads this week (7 comments), against 1 upload in each of the two weeks before. Our rule reopens the reply plan at 3. I built and merged its first two parts, each after fresh reviews. One is the list shifts draft replies into, refusing any with a link, a mention of AI, a claim to be a person, or the viewer's own words. The other is the posting step's checks: never our own comment, never one already answered, never past the daily cap, and only on a clear safety-screen pass. Left: the connection to YouTube, then one workflow change from you; our permission already covers replies.
 - **Data (rule, before any data):** the capitals test (about 23 November) will also show its result within each subreddit, which moves both things it measures. Its verdict cannot change.
 - **Watch:** five uploads since 15 October had no views at a week old, against three in the six weeks before; no shared topic, two on a clip since retired. This check has now tripped three times since 9 October, and our rule names today's as the point to revisit it, so the monthly will.
-- **Reliability:** all 15 uploads from last Monday to this morning landed; one had a fallback title (29 October). The safety screen skipped no post; it removed two answers from one. Tonight's evening upload had not started by 21:40: every scheduled job ran 8 to 10 hours late today. The alarm that would email you about a missed upload is built but not yet on (it goes in the monthly's bundle); until then the next shift catches a miss.
+- **Reliability:** all 15 uploads since last Monday landed, one with a fallback title (29 October); the safety screen skipped no post. Tonight's evening upload had not started by 21:40: every scheduled job ran 8 to 10 hours late today. The alarm that would email you about a missed upload is built but not yet on (it goes in the monthly's bundle); until then the next shift catches a miss.
 - **Security:** no workflow change since 20 October, no secret in the repository, money controls in place ($0.01 this month, forecast $0.76 of $3); library warnings unchanged.
 - AI use: none from the upload allowance; no Polly; no sample video.
 
@@ -98,7 +98,7 @@ and more useful than a confident guess.
 ### Next
 - **The November monthly review is due now** and is the next shift's first work. It brings you three things: the 14 December source date, the income read, and what tests should be judged on (watch time's missing link to views, and the zero-view check that keeps tripping).
 - Check that tonight's evening upload landed; after midnight still counts as today's.
-- After the monthly: the reply plan, now the only ready item. Next Monday: re-read the no-view uploads by subreddit, as set tonight.
+- After the monthly: the reply plan's connection to YouTube (screening each reply spends the uploads' Gemini allowance, so run it after the day's second upload). Next Monday: re-read the no-view uploads by subreddit, as set tonight.
 
 ### Better?
 - **Than last shift:** a little. Bet 1's ask now shows its deadline, and watch time shows no link to views, which sharpens what the monthly asks you.
