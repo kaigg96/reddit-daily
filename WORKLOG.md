@@ -97,10 +97,10 @@ and more useful than a confident guess.
 ### Next
 - **The November monthly review is due now** and is the next shift's first work. It brings you three things: the 14 December source date, the income read, and what tests should be judged on (watch time's missing link to views, and the zero-view check that keeps tripping).
 - Check that tonight's evening upload landed. It may land after midnight and still count as today's.
-- After the monthly: the reply plan, now the only ready item. Next Monday: re-read the no-view uploads by subreddit and by background, as set tonight.
+- After the monthly: the reply plan, now the only ready item. Next Monday: re-read the no-view uploads by subreddit, as set tonight.
 
 ### Better?
-- **Than last shift:** a little. Bet 1's ask now shows its deadline, and we know watch time is not the lever for views, which sharpens what the monthly asks you.
+- **Than last shift:** a little. Bet 1's ask now shows its deadline, and watch time shows no link to views, which sharpens what the monthly asks you.
 - **Than ~10 shifts ago:** no for viewers. Watch time is flat at 12 seconds; first-week views over four weeks are up a third, inside normal swings; bet 1 has not shipped.
 - **Than ~100 shifts ago:** too early to say.
 
