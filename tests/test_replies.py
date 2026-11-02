@@ -165,3 +165,11 @@ def test_post_due_dry_run_spends_no_screen():
     rows = _queued("ok")
     replies.post_due(rows, TODAY, _Client({"ok": ("viewer", "hi")}), screen, "US", {}, NOW, dry_run=True)
     assert rows[0]["status"] == "queued"
+
+
+def test_post_due_refuses_when_the_comment_text_cannot_be_read():
+    rows = _queued("blank")
+    client = _Client({"blank": ("viewer", "")})
+    replies.post_due(rows, TODAY, client, lambda q, cs: _Verdict(), "US", {}, NOW, dry_run=False)
+    assert rows[0]["status"] == "refused" and rows[0]["note"] == "comment text unreadable"
+    assert client.posted == []

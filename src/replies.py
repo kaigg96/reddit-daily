@@ -187,6 +187,8 @@ def _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out):
     if found is None:
         return mark(r, "refused", "comment gone")
     author, text = found
+    if not (text or "").strip():   # the quote check needs it: fail closed
+        return mark(r, "refused", "comment text unreadable")
     if author == channel_id:
         return mark(r, "refused", "our own comment")
     if client.replied(r["parent_id"], channel_id):
