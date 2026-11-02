@@ -13,4 +13,12 @@ G11,Tests not rerun after the last edit before a merge,open,,2026-10-04,,seeded 
 G12,escalate.py waits silently without a description,open,,2026-10-05,,seeded 2026-10-27 from the work log's notes; check it is still true
 G13,Pages wrongly marked as needing a browser,fixed,,2026-10-06,2026-10-06,The note was corrected
 G14,Shifts cannot read the channel's own YouTube data,open,,2026-10-07,,seeded 2026-10-27 from the work log's notes; check it is still true
-G15,PLAN.md at its word budget forces trims every shift,open,,2026-10-27,,Budget raised 1300 -> 1400 on 10-27; watch whether it refills
+G15,Tracker caps force trims before work can land,open,,2026-10-27,,"Widened 11-02 from PLAN.md alone to every capped tracker (PRD §0, open items). Budget raised 1300 -> 1400 on 10-27; watch whether it refills"
+G16,"An escalation's facts drift after it is raised, or go out unchecked",open,,2026-11-02,,
+G17,Outside sites refuse the fetch tool; curl with a browser agent works,open,,2026-11-02,,
+G18,Reading a library's code misses its traps; only running it settles them,open,,2026-11-02,,
+G19,First drafts carry errors only a fresh review catches,wontfix,CLAUDE.md §3,2026-11-02,,The fresh-review gate is the fix and caught every one before it shipped. Reopen if a draft error ships past a review
+G20,"Account-side facts (who gets failure emails, the app's name) are invisible to a shift",open,,2026-11-02,,
+G21,"The shift allowance's controls are opaque to a shift (skips, opposing limits)",open,,2026-11-02,,
+G22,Merge mechanics show their breakage only after landing,open,,2026-11-02,,
+G23,"YouTube withholds caption tracks, so another channel's narration cannot be checked",wontfix,,2026-11-02,,An external limit with no workaround a shift can build
