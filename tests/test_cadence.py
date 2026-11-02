@@ -173,8 +173,10 @@ def test_due_reads_lists_unread_ledger_rows_due_by_the_snapshot(tmp_path):
         "c,2026-11-02,2026-11-02,keep\n"  # read
         "d,2026-11-09,,pending\n"        # not yet due
         "e,,,pending\n"                  # undated
-        "f,2026-11-02,,drop\n",          # closed without a read
+        "f,2026-11-02,,drop\n"           # closed without a read
+        "g,2026-02-30,,pending\n"        # not a real date: undated, no crash
+        "h,2026-11-01,, \n",             # a blank verdict is pending, as insights reads it
         encoding="utf-8")
-    assert c.due_reads(D("2026-11-02"), ledger) == ["a", "b"]
+    assert c.due_reads(D("2026-11-02"), ledger) == ["a", "b", "h"]
     assert c.due_reads(None, ledger) == []
     assert c.due_reads(D("2026-11-02"), tmp_path / "missing.csv") == []

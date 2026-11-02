@@ -81,9 +81,13 @@ def due_reads(snapshot, path=LEDGER):
         return []
     out = []
     for r in rows:
-        hit = re.fullmatch(r"\s*(\d{4}-\d{2}-\d{2})\s*", r.get("due") or "")
-        unread = not (r.get("read") or "").strip() and (r.get("verdict") or "pending").strip() == "pending"
-        if hit and unread and datetime.date.fromisoformat(hit.group(1)) <= snapshot:
+        try:
+            when = datetime.date.fromisoformat((r.get("due") or "").strip())
+        except ValueError:     # blank, or not a real date: insights reads it as undated
+            continue
+        # The same reading of "pending" as insights.experiment_ledger.
+        unread = not (r.get("read") or "").strip() and ((r.get("verdict") or "").strip() or "pending") == "pending"
+        if unread and when <= snapshot:
             out.append(r.get("id") or "?")
     return out
 
