@@ -77,7 +77,7 @@ and more useful than a confident guess.
 - **Data (weekly review):**
   - Watch time and views: no link (above).
   - Voice: Stephen leads (above).
-  - Subreddits: NoStupidQuestions is watched 35% longer than AskReddit, so both stay. Fewer of its plays get past the opening (33% against 45%). That is recorded for the four-a-day test.
+  - Subreddits: NoStupidQuestions is watched 35% longer than AskReddit, so both stay. Fewer of its plays get past the opening (33% against 45%). That is recorded for the four-a-day test. Its views trail by about half, but views are too noisy to tell at this size.
   - Titles that address "you" are no worse than the others, so they stay at four in six.
   - Last week's low in views was ordinary weather, as predicted. No background clip needs retiring.
   - A fresh review re-ran every number and agreed with every verdict. It found six places where I worded a result more strongly than the tool did. All are fixed.
