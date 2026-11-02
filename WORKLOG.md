@@ -84,7 +84,7 @@ and more useful than a confident guess.
 - **Data (built, live):** the reach checks now print a range beside their verdict. That shows whether "no link" means ruled out or just not seen, and it never changes a verdict. A fresh review's three small points are fixed.
 - **General management (fix, live):** the review nearly missed one of the five reads due today. The check that says a review is due now also lists those reads. Replayed on this morning's records, it names all five. A fresh review's two small points are fixed.
 - **Data (rule, before any data):** the capitals test, read about 23 November, will also show its result within each subreddit, since subreddit moves both things it measures. This cannot change that test's verdict.
-- **Watch:** five uploads since 15 October had no views at a week old, against three in the six weeks before. They share no topic. Two used a background clip we have since retired. One period's rise counts as weather unless it repeats, so it is read again next Monday.
+- **Watch:** five uploads since 15 October had no views at a week old, against three in the six weeks before. They share no topic. Two used a background clip we have since retired. It is the third time since 9 October that this check has tripped, and our rule on how tests are judged named today's reading as the point to revisit the check itself. So the monthly takes that up too.
 - **Reliability:** all 15 uploads from last Monday to this morning landed; one had a fallback title (29 October). The safety screen skipped no post; it removed two answers from one. Tonight's evening upload had not started by 21:40, because every scheduled job ran 8 to 10 hours late today. The check that would email you about a missed upload is built but not yet switched on (its change goes in the monthly's bundle). Until then, the next shift's own check catches a miss.
 - **Security:** no workflow has changed since 20 October, and no secret is in the repository. The money controls are in place ($0.01 so far this month, forecast $0.76 of $3). Library warnings are unchanged (Pillow and oauthlib, already listed).
 - AI use: none from the upload allowance; no Polly; no sample video.
@@ -93,7 +93,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (one label ships bet 1, by about 6 November for bet 2); #82 (register by 12 January); #86 (very likely not needed: close it); #65 (it still waits for your "yes" to the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
 
 ### Next
-- **The November monthly review is due now** and is the next shift's first work. It brings you three things: the 14 December source date, the income read, and what tests should be judged on.
+- **The November monthly review is due now** and is the next shift's first work. It brings you three things: the 14 December source date, the income read, and what tests should be judged on (watch time's missing link to views, and the zero-view check that keeps tripping).
 - Check that tonight's evening upload landed. It may land after midnight and still count as today's.
 
 ### Better?
