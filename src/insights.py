@@ -2462,10 +2462,15 @@ def rank_corr_interval(rho, n, z=1.96):
 
 
 def interval_reading(interval, bar):
-    """Which links of size `bar` the interval excludes, in words."""
+    """Which links of size `bar` the interval excludes, in words. Decided on
+    the two decimals report.py prints, so the words never contradict them."""
     if interval is None:
         return "no interval: too few uploads"
-    lo, hi = interval
+    lo, hi = (round(x, 2) for x in interval)
+    if lo >= bar:
+        return f"a link of +{bar} or more: weaker ones ruled out"
+    if hi <= -bar:
+        return f"a link of -{bar} or less: weaker ones ruled out"
     above, below = hi < bar, lo > -bar
     if above and below:
         return f"rules out a link of {bar} either way"

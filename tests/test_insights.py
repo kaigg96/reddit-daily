@@ -2730,7 +2730,7 @@ def test_watch_reach_verdict_applies_the_rule_as_written():
     assert v(-0.3, 0.049, (0.5, 0.5)).startswith("inverse")    # age guards only a link
 
 
-def test_rank_corr_interval_brackets_rho_and_narrows_with_n():
+def test_rank_corr_interval_reads_r5_and_narrows_with_n():
     lo, hi = insights.rank_corr_interval(-0.228, 38)
     assert lo < -0.228 < hi
     assert round(lo, 2) == -0.51 and round(hi, 2) == 0.10     # 11-02's R5 read
@@ -2749,3 +2749,7 @@ def test_interval_reading_names_what_is_ruled_out():
     assert insights.interval_reading((-0.1, 0.5), 0.3).startswith("rules out -0.3 or less")
     assert "cannot rule out" in insights.interval_reading((-0.4, 0.4), 0.3)
     assert insights.interval_reading(None, 0.3).startswith("no interval")
+    assert insights.interval_reading((0.44, 0.72), 0.3).startswith("a link of +0.3 or more")
+    assert insights.interval_reading((-0.8, -0.3), 0.3).startswith("a link of -0.3 or less")
+    # 0.2996 prints as +0.30, so it must not read "rules out +0.3"
+    assert "cannot rule out" in insights.interval_reading((-0.35, 0.2996), 0.3)
