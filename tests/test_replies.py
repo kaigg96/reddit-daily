@@ -108,10 +108,13 @@ def _queued(*parents):
 
 
 def test_post_due_posts_only_what_passes_every_check():
-    rows = _queued("ok", "gone", "ours", "answered", "unsafe", "backstop", "fails")
-    client = _Client({p: ("viewer", "a comment") for p in ("ok", "answered", "unsafe", "backstop", "fails")}
+    rows = _queued("ok", "gone", "ours", "answered", "unsafe", "backstop", "fails", "demoted")
+    client = _Client({p: ("viewer", "a comment") for p in ("ok", "answered", "unsafe", "backstop", "fails", "demoted")}
                      | {"ours": ("US", "our pinned question")}, answered={"answered"}, fail={"fails"})
-    verdicts = {"unsafe": _Verdict("skip_post", category="sexual"), "backstop": _Verdict(source="backstop")}
+    demoted = _Verdict()
+    demoted.demoted = "graphic_harm"
+    verdicts = {"unsafe": _Verdict("skip_post", category="sexual"), "backstop": _Verdict(source="backstop"),
+                "fails": _Verdict(), "ok": _Verdict(), "demoted": demoted}
     for r in rows:   # one reply text per row, so the screen can tell them apart
         r["reply"] = f"Nice one {r['parent_id']}"
     screen = lambda q, cs: verdicts.get(cs[0].split()[-1], _Verdict())
@@ -124,7 +127,8 @@ def test_post_due_posts_only_what_passes_every_check():
     assert status["answered"] == ("refused", "already answered on YouTube")
     assert status["unsafe"][0] == "refused" and status["backstop"][0] == "refused"
     assert status["fails"][0] == "queued"                    # a failed post stays queued, to retry
-    assert len(log) == 7
+    assert status["demoted"] == ("refused", "screen: pass, graphic_harm")
+    assert len(log) == 8
 
 
 def test_post_due_refuses_a_reply_quoting_the_live_comment_and_dry_run_changes_nothing():

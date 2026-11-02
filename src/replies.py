@@ -194,8 +194,12 @@ def _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out):
     if reason:
         return mark(r, "refused", reason)
     verdict = screen_fn(titles.get(r.get("video_id"), ""), [r["reply"]])
-    if verdict.verdict != "pass" or verdict.unsafe or verdict.source == "backstop":
-        return mark(r, "refused", f"screen: {verdict.verdict}, {verdict.category or verdict.source}")
+    # Any raised category refuses, a demoted one too: the pick tolerates a
+    # risky post minus its flagged answers; a reply we publish gets no such slack.
+    if (verdict.verdict != "pass" or verdict.unsafe or verdict.source == "backstop"
+            or getattr(verdict, "demoted", "")):
+        return mark(r, "refused", f"screen: {verdict.verdict}, "
+                                  f"{verdict.category or getattr(verdict, 'demoted', '') or verdict.source}")
     if dry_run:
         out.append(f"would post {r['parent_id']}  {r['reply']}")
     elif client.post(r["parent_id"], r["reply"]):
