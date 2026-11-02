@@ -18,6 +18,9 @@ own comment (only it can read the author); the safety screen on every post
 (it spends Gemini), which also catches a claim like "I'm a dad" no pattern
 can; and, before each post, checking the thread for a reply from us already,
 since a stale copy of this file saved over a "posted" row would re-queue it.
+The screen spends Gemini requests from the 20 a day the uploads share
+(CLAUDE.md §1), up to one per reply at the daily cap: the job should run
+after the day's second upload, or screen on the test model's allowance.
 """
 import csv
 import datetime
