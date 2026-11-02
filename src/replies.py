@@ -155,29 +155,48 @@ def post_due(rows, today, client, screen_fn, channel_id, titles, now, dry_run=Tr
     for r in refuse:
         mark(r, "refused", check_reply(r.get("reply")) or "comment already answered")
     for r in post:
-        found = client.comment(r["parent_id"])
-        if found is None:
-            mark(r, "refused", "comment gone")
-            continue
-        author, text = found
-        if author == channel_id:
-            mark(r, "refused", "our own comment")
-            continue
-        if client.replied(r["parent_id"], channel_id):
-            mark(r, "refused", "already answered on YouTube")
-            continue
-        reason = check_reply(r["reply"], text)
-        if reason:
-            mark(r, "refused", reason)
-            continue
-        verdict = screen_fn(titles.get(r.get("video_id"), ""), [r["reply"]])
-        if verdict.verdict != "pass" or verdict.unsafe or verdict.source == "backstop":
-            mark(r, "refused", f"screen: {verdict.verdict}, {verdict.category or verdict.source}")
-            continue
-        if dry_run:
-            out.append(f"would post {r['parent_id']}  {r['reply']}")
-        elif client.post(r["parent_id"], r["reply"]):
-            mark(r, "posted", "")
-        else:
-            out.append(f"failed   {r['parent_id']}  left queued")
+        try:
+            _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out)
+        except Exception as e:   # one row's API error must not lose the marks already made
+            out.append(f"error    {r.get('parent_id')}  {type(e).__name__}; left queued")
+            _failed(r, dry_run, mark)
     return out
+
+
+POST_TRIES = 3
+
+
+def _failed(r, dry_run, mark):
+    """A failed post stays queued to retry, at most POST_TRIES times."""
+    tries = int((re.match(r"post failed (\d+)", r.get("note") or "") or [0, "0"])[1]) + 1
+    if dry_run:
+        return
+    if tries >= POST_TRIES:
+        mark(r, "refused", f"post failed {tries} times")
+    else:
+        r["note"] = f"post failed {tries}"
+
+
+def _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out):
+    """One queued reply through every check, then posted (or not)."""
+    found = client.comment(r["parent_id"])
+    if found is None:
+        return mark(r, "refused", "comment gone")
+    author, text = found
+    if author == channel_id:
+        return mark(r, "refused", "our own comment")
+    if client.replied(r["parent_id"], channel_id):
+        return mark(r, "refused", "already answered on YouTube")
+    reason = check_reply(r["reply"], text)
+    if reason:
+        return mark(r, "refused", reason)
+    verdict = screen_fn(titles.get(r.get("video_id"), ""), [r["reply"]])
+    if verdict.verdict != "pass" or verdict.unsafe or verdict.source == "backstop":
+        return mark(r, "refused", f"screen: {verdict.verdict}, {verdict.category or verdict.source}")
+    if dry_run:
+        out.append(f"would post {r['parent_id']}  {r['reply']}")
+    elif client.post(r["parent_id"], r["reply"]):
+        mark(r, "posted", "")
+    else:
+        out.append(f"failed   {r['parent_id']}  left queued")
+        _failed(r, dry_run, mark)

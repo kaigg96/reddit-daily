@@ -135,3 +135,21 @@ def test_post_due_refuses_a_reply_quoting_the_live_comment_and_dry_run_changes_n
     log = replies.post_due(rows, TODAY, client, lambda q, cs: _Verdict(), "US", {}, NOW, dry_run=True)
     assert client.posted == [] and all(r["status"] == "queued" for r in rows)
     assert any("quotes the viewer" in line for line in log) and any(line.startswith("would post") for line in log)
+
+
+def test_post_due_survives_a_client_error_and_gives_up_after_three_failed_posts():
+    class Boom(_Client):
+        def comment(self, parent_id):
+            if parent_id == "boom":
+                raise RuntimeError("503")
+            return super().comment(parent_id)
+
+    rows = _queued("boom", "ok", "fails")
+    rows[2]["note"] = "post failed 2"
+    client = Boom({"ok": ("viewer", "hi"), "fails": ("viewer", "hi")}, fail={"fails"})
+    log = replies.post_due(rows, TODAY, client, lambda q, cs: _Verdict(), "US", {}, NOW, dry_run=False)
+    status = {r["parent_id"]: (r["status"], r["note"]) for r in rows}
+    assert status["boom"][0] == "queued" and status["boom"][1] == "post failed 1"
+    assert status["ok"][0] == "posted"
+    assert status["fails"] == ("refused", "post failed 3 times")
+    assert any(line.startswith("error") for line in log)
