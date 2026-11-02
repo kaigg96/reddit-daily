@@ -113,7 +113,7 @@ def test_post_due_posts_only_what_passes_every_check():
                      | {"ours": ("US", "our pinned question")}, answered={"answered"}, fail={"fails"})
     demoted = _Verdict()
     demoted.demoted = "graphic_harm"
-    verdicts = {"unsafe": _Verdict("skip_post", category="sexual"), "backstop": _Verdict(source="backstop"),
+    verdicts = {"unsafe": _Verdict("pass", unsafe={0}, category="sexual"), "backstop": _Verdict(source="backstop"),
                 "fails": _Verdict(), "ok": _Verdict(), "demoted": demoted}
     for r in rows:   # one reply text per row, so the screen can tell them apart
         r["reply"] = f"Nice one {r['parent_id']}"
@@ -124,7 +124,7 @@ def test_post_due_posts_only_what_passes_every_check():
     assert status["ok"][0] == "posted" and rows[0]["posted_utc"].startswith("2026-11-02")
     assert status["gone"] == ("refused", "comment gone")
     assert status["ours"] == ("refused", "our own comment")
-    assert status["answered"] == ("refused", "already answered on YouTube")
+    assert status["answered"] == ("posted", "found on YouTube")   # counts toward today's cap
     assert status["unsafe"][0] == "refused" and status["backstop"][0] == "refused"
     assert status["fails"][0] == "queued"                    # a failed post stays queued, to retry
     assert status["demoted"] == ("refused", "screen: pass, graphic_harm")
@@ -138,7 +138,7 @@ def test_post_due_refuses_a_reply_quoting_the_live_comment_and_dry_run_changes_n
                       "fine": ("viewer", "hello")})
     log = replies.post_due(rows, TODAY, client, lambda q, cs: _Verdict(), "US", {}, NOW, dry_run=True)
     assert client.posted == [] and all(r["status"] == "queued" for r in rows)
-    assert any("quotes the viewer" in line for line in log) and any(line.startswith("would post") for line in log)
+    assert any("quotes the viewer" in line for line in log) and any(line.startswith("would screen") for line in log)
 
 
 def test_post_due_survives_a_client_error_and_gives_up_after_three_failed_posts():
@@ -157,3 +157,11 @@ def test_post_due_survives_a_client_error_and_gives_up_after_three_failed_posts(
     assert status["ok"][0] == "posted"
     assert status["fails"] == ("refused", "post failed 3 times")
     assert any(line.startswith("error") for line in log)
+
+
+def test_post_due_dry_run_spends_no_screen():
+    def screen(q, cs):
+        raise AssertionError("a dry run must not call the screen")
+    rows = _queued("ok")
+    replies.post_due(rows, TODAY, _Client({"ok": ("viewer", "hi")}), screen, "US", {}, NOW, dry_run=True)
+    assert rows[0]["status"] == "queued"

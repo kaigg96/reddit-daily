@@ -15,8 +15,9 @@ rules each have a check here:
   would put viewer text into public history, past YouTube's 30 days.
 The posting job, which holds the keys, owns the rest: never replying to our
 own comment (only it can read the author); the safety screen on every post
-(it spends Gemini), which also catches a claim like "I'm a dad" no pattern
-can; and, before each post, checking the thread for a reply from us already,
+(it spends Gemini; it has no category for claiming to be a person, so a
+claim like "I'm a dad" is the drafting shift's to never write); and, before
+each post, checking the thread for a reply from us already,
 since a stale copy of this file saved over a "posted" row would re-queue it.
 The screen spends Gemini requests from the 20 a day the uploads share
 (CLAUDE.md §1), up to one per reply at the daily cap: the job should run
@@ -189,10 +190,15 @@ def _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out):
     if author == channel_id:
         return mark(r, "refused", "our own comment")
     if client.replied(r["parent_id"], channel_id):
-        return mark(r, "refused", "already answered on YouTube")
+        # Counted as posted today, so a stale queue that re-queued our own
+        # posts can over-count the cap but never exceed it.
+        return mark(r, "posted", "found on YouTube")
     reason = check_reply(r["reply"], text)
     if reason:
         return mark(r, "refused", reason)
+    if dry_run:   # the screen spends Gemini; a dry run spends none
+        out.append(f"would screen, then post {r['parent_id']}  {r['reply']}")
+        return None
     verdict = screen_fn(titles.get(r.get("video_id"), ""), [r["reply"]])
     # Any raised category refuses, a demoted one too: the pick tolerates a
     # risky post minus its flagged answers; a reply we publish gets no such slack.
@@ -200,9 +206,7 @@ def _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out):
             or getattr(verdict, "demoted", "")):
         return mark(r, "refused", f"screen: {verdict.verdict}, "
                                   f"{verdict.category or getattr(verdict, 'demoted', '') or verdict.source}")
-    if dry_run:
-        out.append(f"would post {r['parent_id']}  {r['reply']}")
-    elif client.post(r["parent_id"], r["reply"]):
+    if client.post(r["parent_id"], r["reply"]):
         mark(r, "posted", "")
     else:
         out.append(f"failed   {r['parent_id']}  left queued")
