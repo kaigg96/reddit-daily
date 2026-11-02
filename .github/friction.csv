@@ -124,3 +124,4 @@ F122,2026-11-02T20:53:56+00:00,41522241141,gm,Add bet 2's 6 November window and 
 F123,2026-11-02T20:58:06+00:00,41522241141,data,Weekly review 11-02: fixes from the fresh check,done,,mistake,"Six wording slips, all of one kind: a result stated stronger than the tool printed (a refused cut read as support, 'no link at this size' as 'no longer predicts', a clip line that ignored retired clips), plus a due ledger row (reach-cut) missed","backlog_status listing every ledger row whose due date has passed, beside the review's reads",6,G2
 F124,2026-11-02T21:00:27+00:00,41522241141,data,Pre-commit within-subreddit diagnostics beside #14's read,done,,none,,,0,
 F125,2026-11-02T21:01:11+00:00,41522241141,data,"A 95% interval beside the reach reads, merged",done,,none,,,0,
+F126,2026-11-02T21:02:28+00:00,41522241141,gm,"cadence.py lists the ledger reads a due weekly owes, merged",done,,none,,,0,

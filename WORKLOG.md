@@ -61,6 +61,48 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-02 (21:40) — Weekly review: watch time shows no link to views, Stephen's voice keeps more viewers past the opening, and bet 1's ask now carries its 6 November date
+
+    Worked (% of the shift): data 55 · gm 20 · strategy 10 · reliability 10 · security 5
+
+**Summary:** The weekly review read four tests by their written rules. The one that matters most for revenue: how long people watch shows no link to how many views a video gets, so watch-time gains stop counting as reach, and the November monthly brings you that choice.
+
+### Toward revenue
+- **Nothing viewers see changed.** Bet 1 still waits on #77, and the channel is flat at 12 seconds watched per view.
+- **Bet 1's date is now on its ask.** Bet 2 is judged from 30 November to 27 December. Four uploads a day can start only after bet 1's own test, 24 to 31 days from its merge. So bet 1 needs your label by about 6 November to cover all four of bet 2's weeks, and each week later loses one. Our plans had this, but #77, where you decide, did not. It does now.
+- **What tests are judged on.** Every test is judged on watch time, because in August longer-watched videos got more views. On today's 38 recent uploads there is no such link. A link as strong as we assumed is ruled out; one in the other direction is not. So a watch-time gain no longer counts as reach. Bet 1's case rests on originality, which gates every route to income, not on views.
+- **A voice lead.** Plays of Stephen's uploads get past the opening more often than Danielle's: 46% against 31% at the median, beyond chance, and it holds within one subreddit alone. Only plays that get past the opening count toward the Partner Program. It is queued as a test after bet 1 (one change at a time). A voice change needs a sample in the real voice, which only you can make.
+
+### Done
+- **Data (weekly review):**
+  - Watch time and views: no link (above).
+  - Voice: Stephen leads (above).
+  - Subreddits: NoStupidQuestions is watched 35% longer than AskReddit, so both stay. Fewer of its plays get past the opening (33% against 45%). That is recorded for the four-a-day test.
+  - Titles that address "you" are no worse than the others, so they stay at four in six.
+  - Last week's low in views was ordinary weather, as predicted. No background clip needs retiring.
+  - A fresh review re-ran every number and agreed with every verdict. It found six places where I worded a result more strongly than the tool did. All are fixed.
+- **Data (built, live):** the reach checks now print a range beside their verdict. That shows whether "no link" means ruled out or just not seen, and it never changes a verdict. A fresh review's three small points are fixed.
+- **General management (fix, live):** the review nearly missed one of the five reads due today. The check that says a review is due now also lists those reads. Replayed on this morning's records, it names all five. A fresh review's two small points are fixed.
+- **Data (rule, before any data):** the capitals test, read about 23 November, will also show its result within each subreddit, since subreddit moves both things it measures. This cannot change that test's verdict.
+- **Watch:** five uploads since 15 October had no views at a week old, against three in the six weeks before. They share no topic. Two used a background clip we have since retired. One period's rise counts as weather unless it repeats, so it is read again next Monday.
+- **Reliability:** all 15 uploads from last Monday to this morning landed; one had a fallback title (29 October). Tonight's evening upload had not started by 21:40, because every scheduled job ran 8 to 10 hours late today. The check that would email you about a missed upload is built but not yet switched on (its change goes in the monthly's bundle). Until then, the next shift's own check catches a miss.
+- **Security:** no workflow has changed since 20 October, and no secret is in the repository. The money controls are in place ($0.01 so far this month, forecast $0.76 of $3). Library warnings are unchanged (Pillow and oauthlib, already listed).
+- AI use: none from the upload allowance; no Polly; no sample video.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1, by about 6 November for bet 2); #82 (register by 12 January); #86 (very likely not needed: close it); #65 (it still waits for your "yes" to the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
+
+### Next
+- **The November monthly review is due now** and is the next shift's first work. It brings you three things: the 14 December source date, the income read, and what tests should be judged on.
+- Check that tonight's evening upload landed. It may land after midnight and still count as today's.
+
+### Better?
+- **Than last shift:** a little. Bet 1's ask now shows its deadline, and we know watch time is not the lever for views, which sharpens what the monthly asks you.
+- **Than ~10 shifts ago:** no for viewers. Watch time is flat at 12 seconds; first-week views over four weeks are up a third, inside normal swings; bet 1 has not shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-02 (11:06) — Two answers for the November monthly's source decision: a 14 December date to switch if Reddit access is not confirmed, and why no source brings income yet
 
     Worked (% of the shift): gm 35 · strategy 20 · monetization 20 · data 10 · legal 5 · reliability 5 · security 5
@@ -90,39 +132,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** A little, for the company rather than for viewers. The monthly's source decision now has a date and an income answer, so you can settle it in one sitting.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-11-01 (22:50) — Election week can no longer fail an upload: the fix is live a day early. Bet 1's branch is current again, and the watch-time question is set for Monday
-
-    Worked (% of the shift): editorial 30 · data 35 · engineering 15 · gm 10 · reliability 5 · security 5
-
-**Summary:** The election-week fix merged tonight instead of tomorrow. A results-day upload no longer fails when Reddit's top questions are all about the election. Nothing moved revenue directly: bet 1 still waits on #77, and I brought its branch back in line with tonight's change so your label still ships it in one step.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view, and bet 1 is still the only answer to that.
-- **Protecting the uploads.** The election fix is live from the next upload, about 06:00, two days before the polls close.
-- **Checking that we measure the right thing.** Every test is judged on how long people watch, but revenue needs views. In August, watch time was the best predictor of views we had. Monday's figures will show whether it still is, judged by a rule I wrote down tonight before looking at any number. If it no longer predicts views, a watch-time gain stops counting as progress toward revenue, and the November monthly brings that to you.
-
-### Done
-- **Editorial (fix, live):** the last shift timed the election fix's sample video for tomorrow at 11:17. The 12-hour limit on samples actually lifted at 23:09 tonight, so I asked then. It passed: the video plays (32 seconds, picture and sound). I merged it. All 719 checks pass. On an ordinary day nothing changes. When election week leaves no usable question in the day's top 10, the run reads the top 30 instead of failing.
-- **Engineering (fix):** merging that fix left bet 1's waiting branch in conflict with it, so your label on #77 would have stalled. I combined the two by hand, keeping bet 1's medical-topic skips where they were. All 973 of that branch's checks pass, and tomorrow's 08:17 release check re-tests it. A fresh review found nothing wrong. It confirmed that git's automatic merge would have crashed the run at the first usable post, and that the hand fix avoids it.
-- **Data (rule set, read Monday):** a new report compares each upload's watch time with its views at about a week old, for uploads since 5 October. There are three outcomes: they rise together, they move in opposite directions, or there is no link. A fresh review found no fault and three small points; all three are fixed. It is on main.
-- **General management:** the election fix was the only ready item. Five hours ago the 17:45 shift ran two rounds of ideas and named the watch-time question as the best one left. No new data has come in since, so I took that question rather than generate ideas again. With nothing ready after it, I looked once more, only at what tonight changed, and found nothing above the bar. Dropped: a check that every merge keeps bet 1's branch mergeable (each shift's start already runs it, and tonight's break was caught within a minute); removing the election code after 10 November (it switches itself off). Two of tonight's three items were fixes, and one improves how we judge our tests.
-- **Reliability, security:** both of today's uploads landed. No workflow has changed since 20 October, and no secret is in the repository. The money controls are in place ($0.01 so far this month, forecast $0.76 of $3).
-- AI use: none from the upload allowance; no Polly; one sample video, on the test model's allowance.
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #82 (register by 12 January; check the app's name first); #86 (very likely not needed: close it); #65 (it still waits for your "yes" to the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
-
-### Next
-- **Morning, from about 06:00:** check that the first upload under the election fix landed. A pick ranked 11 or lower means it read the top 30.
-- **The 11-02 snapshot, then the weekly review:** read the watch-time question once. The voice test and the second-low-week check are due that day too. Then the November monthly; its single proposal carries the upload alarm's one-step change.
-- **08:17 release check:** confirm it passes on bet 1's updated branch.
-
-### Better?
-- **Than last shift:** A little, for safety, not for viewers. The election fix is live rather than waiting, and bet 1 still ships with one label.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
