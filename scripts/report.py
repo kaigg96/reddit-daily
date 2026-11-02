@@ -313,6 +313,14 @@ def _within_rows(rows, spec):
     return [r for r in rows if r.get("video_id") in ids]
 
 
+def _print_interval(rho, n, bar):
+    """A rank correlation's 95% interval, beside (never inside) its verdict."""
+    interval = insights.rank_corr_interval(rho, n)
+    if interval:
+        print(f"  95% interval {interval[0]:+.2f} to {interval[1]:+.2f}: "
+              + insights.interval_reading(interval, bar) + " (not part of the rule)")
+
+
 def _period_metrics(at_age=7, tolerance=4, half=3, root=None, min_age=4):
     """Metrics for the recent `half` publish-weeks vs the `half` before them.
 
@@ -867,6 +875,7 @@ def main():
         by_age = [insights.rank_correlation(videos, "reading_age", m)[0]
                   for m in ("views", "engaged_share")]
         print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+        _print_interval(rho, n, 0.3)
         print("  against reading age: views " + ", engaged share ".join(
             "-" if r is None else f"{r:+.2f}" for r in by_age))
         if rho >= 0.3 and p_value < 0.05:
@@ -892,6 +901,7 @@ def main():
             age_rhos = tuple(insights.rank_correlation(videos, "reading_age", m)[0]
                              for m in ("views", Metric.WATCH))
             print(f"  Spearman rho {rho:+.3f}, permutation p {p_value:.4f}")
+            _print_interval(rho, n, insights.WATCH_REACH_RHO)
             print("  against reading age: views " + ", watch-seconds ".join(
                 "-" if r is None else f"{r:+.2f}" for r in age_rhos))
         print(f"  |rho| >= {insights.WATCH_REACH_RHO} at p < 0.05: "

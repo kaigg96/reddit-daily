@@ -2728,3 +2728,24 @@ def test_watch_reach_verdict_applies_the_rule_as_written():
     assert v(-0.3, 0.049).startswith("inverse")
     assert v(-0.29, 0.001).startswith("no link")
     assert v(-0.3, 0.049, (0.5, 0.5)).startswith("inverse")    # age guards only a link
+
+
+def test_rank_corr_interval_brackets_rho_and_narrows_with_n():
+    lo, hi = insights.rank_corr_interval(-0.228, 38)
+    assert lo < -0.228 < hi
+    assert round(lo, 2) == -0.51 and round(hi, 2) == 0.10     # 11-02's R5 read
+    lo2, hi2 = insights.rank_corr_interval(-0.228, 380)
+    assert hi2 - lo2 < hi - lo
+    assert insights.rank_corr_interval(None, 38) is None
+    assert insights.rank_corr_interval(0.2, 3) is None
+    assert insights.rank_corr_interval(float("nan"), 38) is None
+    lo, hi = insights.rank_corr_interval(1.0, 30)               # a perfect link stays finite
+    assert hi <= 1 and lo > 0.9
+
+
+def test_interval_reading_names_what_is_ruled_out():
+    assert insights.interval_reading((-0.2, 0.2), 0.3) == "rules out a link of 0.3 either way"
+    assert insights.interval_reading((-0.51, 0.10), 0.3).startswith("rules out +0.3 or more")
+    assert insights.interval_reading((-0.1, 0.5), 0.3).startswith("rules out -0.3 or less")
+    assert "cannot rule out" in insights.interval_reading((-0.4, 0.4), 0.3)
+    assert insights.interval_reading(None, 0.3).startswith("no interval")

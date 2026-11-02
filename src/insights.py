@@ -2448,6 +2448,34 @@ def watch_reach_verdict(rho, p_value, age_rhos=(None, None)):
             "the November monthly takes it to D9")
 
 
+def rank_corr_interval(rho, n, z=1.96):
+    """A 95% interval for Spearman's rho: Fisher's z with Bonett and Wright's
+    variance (1 + rho^2/2) / (n - 3). It never changes a verdict; it says
+    whether "no link" rules a link of the rule's size out or only failed to
+    see one at this n (2026-11-02, for D9 at the monthly). None when rho is
+    unread or n under 4."""
+    if rho is None or n is None or n < 4 or math.isnan(rho):
+        return None
+    r = max(-0.999999, min(0.999999, rho))
+    centre, se = math.atanh(r), math.sqrt((1 + r * r / 2) / (n - 3))
+    return math.tanh(centre - z * se), math.tanh(centre + z * se)
+
+
+def interval_reading(interval, bar):
+    """Which links of size `bar` the interval excludes, in words."""
+    if interval is None:
+        return "no interval: too few uploads"
+    lo, hi = interval
+    above, below = hi < bar, lo > -bar
+    if above and below:
+        return f"rules out a link of {bar} either way"
+    if above:
+        return f"rules out +{bar} or more; cannot rule out -{bar}"
+    if below:
+        return f"rules out -{bar} or less; cannot rule out +{bar}"
+    return f"cannot rule out a link of {bar} either way: too few uploads to tell"
+
+
 def first_answer_verdict(rho, p_value):
     """The pre-committed rule above, applied as written."""
     if rho is None:
