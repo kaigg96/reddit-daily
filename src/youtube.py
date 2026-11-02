@@ -170,7 +170,10 @@ class ReplyClient:
         if not items:
             return None
         snip = items[0]["snippet"]
-        return (snip.get("authorChannelId") or {}).get("value"), snip.get("textOriginal") or ""
+        # textOriginal is guaranteed only to the comment's author; textDisplay,
+        # in plain text, is what the weekly collection reads too.
+        return ((snip.get("authorChannelId") or {}).get("value"),
+                snip.get("textDisplay") or snip.get("textOriginal") or "")
 
     def replied(self, parent_id, channel_id):
         """Has `channel_id` already replied to this comment?"""

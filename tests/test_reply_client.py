@@ -50,7 +50,7 @@ class _Yt:
 
 
 def _snip(author, text=""):
-    return {"snippet": {"authorChannelId": {"value": author}, "textOriginal": text}}
+    return {"snippet": {"authorChannelId": {"value": author}, "textDisplay": text}}
 
 
 def test_reply_client_reads_author_and_text_and_none_once_gone():
