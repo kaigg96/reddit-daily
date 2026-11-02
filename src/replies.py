@@ -11,10 +11,13 @@ its text, which YouTube lets us keep 30 days, #75) and the reply. The policy's
 rules each have a check here:
 - no links, no AI attribution (CLAUDE.md §5), never claiming to be a person;
 - a daily cap;
-- never replying to our own comment, which the posting job checks against the
-  comment's author, since only it can read that.
-Every post also passes the safety screen, which spends Gemini and so runs in
-the posting job, not here.
+- never quoting the viewer: a reply sharing a run of words with the comment
+  would put viewer text into public history, past YouTube's 30 days.
+The posting job, which holds the keys, owns the rest: never replying to our
+own comment (only it can read the author); the safety screen on every post
+(it spends Gemini), which also catches a claim like "I'm a dad" no pattern
+can; and, before each post, checking the thread for a reply from us already,
+since a stale copy of this file saved over a "posted" row would re-queue it.
 """
 import csv
 import datetime
@@ -25,23 +28,36 @@ from .content import _profane
 
 QUEUE = config.ROOT / "analysis" / "replies.csv"   # beside the data the jobs commit back
 FIELDS = ["queued_utc", "video_id", "parent_id", "reply", "status", "posted_utc", "note"]
-STATUSES = {"queued", "posted", "refused"}
 REPLIES_PER_DAY = 5
 REPLY_MAX_CHARS = 200
 
-_LINK = re.compile(r"https?://|www\.|\b[\w-]+\.(com|net|org|io|ly|be|co|tv|gg|me|app)\b",
-                   re.IGNORECASE)
+_LINK = re.compile(r"https?://|www\.|\b[\w-]+\s?\.\s?(com|net|org|io|ly|be|co|tv|gg|me|app|uk|dev|xyz)\b"
+                   r"|\bdot\s+(com|net|org)\b", re.IGNORECASE)
 # Any mention of AI or automation, and any claim to be a person: the policy
 # leaves questions about who runs the channel unanswered, so a reply never
 # raises it either way. Over-matching costs one draft.
 _ABOUT_US = re.compile(
-    r"\b(a\.?i\.?|artificial intelligence|bots?|automated|generated|chat ?gpt|gpt|claude|"
-    r"gemini|llm|language model|algorithm|human|real person|a person|i'?m real)\b",
+    r"\b(a\.?i\.?|ais|artificial intelligence|(chat|ro)?bots?|automated|generated|chat ?gpt|gpt|"
+    r"claude|gemini|openai|anthropic|llms?|language models?|algorithm|humans?|real person|"
+    r"a person|i'?m real)\b",
     re.IGNORECASE)
 
 
-def check_reply(text):
-    """Why a drafted reply may not be posted, or None when it may."""
+QUOTE_WORDS = 6
+
+
+def _quotes(reply, comment, n=QUOTE_WORDS):
+    """Does the reply repeat `n` or more words of the comment in a row?"""
+    words = lambda t: re.findall(r"[a-z0-9']+", (t or "").lower())
+    c = words(comment)
+    runs = {tuple(c[i:i + n]) for i in range(len(c) - n + 1)}
+    r = words(reply)
+    return any(tuple(r[i:i + n]) in runs for i in range(len(r) - n + 1))
+
+
+def check_reply(text, comment=""):
+    """Why a drafted reply may not be posted, or None when it may. `comment`
+    is the viewer's text, read at drafting time and never stored."""
     text = (text or "").strip()
     if not text:
         return "empty"
@@ -53,6 +69,8 @@ def check_reply(text):
         return "mentions AI, automation or being a person"
     if _profane(text):
         return "profanity"
+    if comment and _quotes(text, comment):
+        return "quotes the viewer"
     return None
 
 
@@ -75,28 +93,29 @@ def save(rows, path=QUEUE):
 
 
 def due(rows, today, cap=REPLIES_PER_DAY):
-    """The queued rows the posting job may post today, oldest first: at most
-    `cap` less those already posted today, one per parent comment, and none
-    whose text fails `check_reply` (those are for the job to mark refused)."""
+    """(to post, to refuse) among the queued rows. To post: oldest first, at
+    most `cap` less those already posted today, one per parent comment. To
+    refuse: rows whose text fails `check_reply` or whose comment already has
+    a posted reply, for the job to mark refused rather than leave queued."""
     posted_today = sum(1 for r in rows if r.get("status") == "posted"
                        and (r.get("posted_utc") or "")[:10] == today.isoformat())
     replied = {r.get("parent_id") for r in rows if r.get("status") == "posted"}
-    out = []
+    out, refuse = [], []
     for r in sorted((r for r in rows if r.get("status") == "queued"),
                     key=lambda r: r.get("queued_utc") or ""):
-        if len(out) >= cap - posted_today:
-            break
         if r.get("parent_id") in replied or check_reply(r.get("reply")):
-            continue
-        replied.add(r.get("parent_id"))
-        out.append(r)
-    return out
+            refuse.append(r)
+        elif len(out) < cap - posted_today:
+            replied.add(r.get("parent_id"))
+            out.append(r)
+    return out, refuse
 
 
-def queue_reply(rows, video_id, parent_id, reply, now=None):
+def queue_reply(rows, video_id, parent_id, reply, comment="", now=None):
     """Append a drafted reply, refusing it at once if it breaks a rule.
+    `comment` is the viewer's text, checked against and never stored.
     Returns the reason it was refused, or None."""
-    reason = check_reply(reply)
+    reason = check_reply(reply, comment)
     if not video_id or not parent_id:
         reason = "needs the video and the comment replied to"
     if any(r.get("parent_id") == parent_id and r.get("status") in ("queued", "posted") for r in rows):
