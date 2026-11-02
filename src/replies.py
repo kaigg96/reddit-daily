@@ -23,7 +23,7 @@ import re
 from . import config
 from .content import _profane
 
-QUEUE = config.ROOT / "community" / "replies.csv"
+QUEUE = config.ROOT / "analysis" / "replies.csv"   # beside the data the jobs commit back
 FIELDS = ["queued_utc", "video_id", "parent_id", "reply", "status", "posted_utc", "note"]
 STATUSES = {"queued", "posted", "refused"}
 REPLIES_PER_DAY = 5
