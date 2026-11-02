@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-02 (11:06) — Two answers for the November monthly's source decision: a 14 December date to switch if Reddit access is not confirmed, and why no source brings income yet
+
+    Worked (% of the shift): gm 35 · strategy 20 · monetization 20 · data 10 · legal 5 · reliability 5 · security 5
+
+**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. The monthly's source decision now has a dated fallback and a priced answer on income. Today's figures had not arrived by 11:50, so the weekly review passes to the next shift.
+
+### Toward revenue
+- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
+- **Keeping uploads alive past 12 January.** If our Reddit app is not registered by then, uploads stop that day. Your labels on GitHub come quickly (41 since September; the slowest took 4 days). Asks that need work outside GitHub take longer: the account checks have waited 27 days, and the registration 12 days so far. A replacement source also needs time to build. So the monthly will propose a date. If the registration is not confirmed by 14 December, shifts build the chosen replacement and merge it switched off. One label from you before 11 January then turns it on.
+- **What a new source earns: nothing yet, at any source.** I read YouTube's own pages today. Both of its brand-deal programmes need the Partner Program, which we are about 227 times short of. Outside sponsors start at around 1,000 subscribers, and we have 22. Shop links cannot be clicked in a Short. So the source decision is about two things. First, whether uploads continue. Second, whether earning is allowed at all: Reddit's terms bar it, while the alternatives allow it. Originality gates every route, so bet 1 stays first whatever the source.
+
+### Done
+- **Strategy (proposal, for the monthly):** the 14 December date above, with its reasoning, is in the product plan's findings beside the two replacement samples.
+- **Monetization (answered):** the income read above. A sponsor's fee counts as revenue from Reddit's data on a plain reading of its terms.
+- **Data (answered):** among viewers who get past the opening, half leave between a quarter and half way through, during the first answer or two. Each later quarter loses under a fifth. This is the baseline bet 1's "where do viewers leave" read compares against.
+- **General management (fix):** sorted the week's 40 unsorted friction notes into groups, ahead of the weekly review. The largest group, 10 notes, is about sample videos holding finished work. On Sunday a shift timed a sample 12 hours later than it could have run, and only the next shift noticed. I built a command that tells a shift when the next sample will be accepted. It passed a fresh review, its four points are fixed, and it is merged. Two groups are closed as "won't fix", with reasons. First drafts that only a fresh review catches are the review doing its job.
+- **General management (ranking):** nothing was ready. A fresh agent proposed 8 ideas and I added one. Two rankers, reading in opposite orders, both put the 14 December date first and the income read second. A second round, aimed at audience, distribution, editorial, finance, market and product, found nothing that clears the bar: everything that changes what we ship waits on bet 1 or would disturb the running tests. Dropped: Reddit's brand rules on our channel name (their site cannot be read from here); recording each post's Reddit score (Reddit has about ten weeks left); a weekly count of similar channels' views; a shares report; a check on the capitals test's precision (it would change a rule mid-test). Also dropped: Gemini's daily reset moved to 08:00 UTC with the clock change, an hour after our rules assume. No shift or scheduled render starts in that hour, as decided on 1 November.
+- **Reliability, security:** all 15 uploads since last Monday landed, one with a fallback title (29 October). No workflow has changed since 20 October, and no secret is in the repository. The money controls are in place ($0.01 so far this month, forecast $0.76 of $3). Library advisories are unchanged in kind: Pillow and oauthlib, already in the technical list.
+- AI use: none from the upload allowance; no Polly; no sample video.
+
+### Blocked
+- **For you, in order:** #77 (one label ships bet 1); #82 (register by 12 January; the monthly proposes 14 December as the date to start building a replacement); #86 (very likely not needed: close it); #65 (it still waits for your "yes" to the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
+
+### Next
+- **Weekly review, once today's figures land** (they have arrived between 11:30 and 13:50 on recent Mondays). Read the watch-time question, the voice test and the subreddit test once each, by their written rules. The friction notes are already sorted, and the voice test's balance check passes (as on 31 October). Watch the 22–23 October uploads: three of four uploads that young had no views on the last snapshot.
+- **Then the November monthly.** Its source proposal now carries the 14 December date and the income read.
+
+### Better?
+- **Than last shift:** A little, for the company rather than for viewers. The monthly's source decision now has a date and an income answer, so you can settle it in one sitting.
+- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** Too early to say.
+
+---
+
 ## 2026-11-01 (22:50) — Election week can no longer fail an upload: the fix is live a day early. Bet 1's branch is current again, and the watch-time question is set for Monday
 
     Worked (% of the shift): editorial 30 · data 35 · engineering 15 · gm 10 · reliability 5 · security 5
@@ -90,41 +124,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** A little, for safety, not for viewers. The election fix is live rather than waiting, and bet 1 still ships with one label.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
----
-
-## 2026-11-01 (17:45) — Election week could have failed an upload outright; the fix waits only for its sample. A lasting upload alarm is built, and this morning's #86 ask is very likely not needed
-
-    Worked (% of the shift): reliability 40 · editorial 30 · gm 20 · market 5 · security 5
-
-**Summary:** Nothing viewers see changed and nothing moved revenue directly; bet 1 still waits on #77. Two upload risks in the unwatched days around the election are now covered or ready: a run that finds no usable question, and a missed upload whose run never started, which no email reports.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see still waits on bet 1 (#77). The channel is flat at 12 seconds watched per view.
-- **Protecting the uploads.** Around results day, Reddit's top questions may nearly all be about the election, which we skip. Today such a day fails the run and loses that upload. The fix is built and reviewed. It needs one sample video, which the rules allow from tomorrow at 11:17.
-
-### Done
-- **Editorial (fix, ready):** when the election skip leaves none of the day's top 10 questions usable, or our safety check rejects the few that are left, the run now reads the day's top 30 instead of failing. The same filters and the same cap on AI checks apply. An ordinary day is unchanged. NoStupidQuestions sometimes has only 2 usable questions out of 10 even without the skip. Its first review found no fault and two gaps, both now fixed. A second review ran the old and new code side by side on 3,000 simulated days each: ordinary days matched exactly, and of 226 election-week runs that would have failed, 108 now upload. Uploads that came from the deeper list are marked, so they cannot blur a running test. 714 checks pass.
-- **Reliability (built, for the monthly):** a check in the shift job, which runs on your schedule three times a day even when the shift allowance is spent. If fewer than 2 uploads landed in 28 hours, or a scheduled upload run failed, it fails that job, so GitHub emails you. Replayed over the 95 shift runs since 20 September, it raised no false alarm and caught the one real miss, on 5 October. A fresh review found two gaps, both fixed. It is on main but does nothing until your label adds one step to the shift job. To save you a separate email, that step joins the single proposal the monthly review brings you.
-- **Reliability (correction, by edit, no email):** this morning's #86 said a failed upload emails no one. That is very likely wrong. GitHub's documentation sends the email to whoever changed the schedule, and GitHub still names you on every scheduled upload run since 11 October. The automatic approver pushes with a personal token, so to GitHub the change was yours. I cannot see who gets the emails, so this is not proof. #86 now says no action is needed.
-- **Market (checked):** Reddit stops its public RSS feeds on 13 November. We read Reddit through its registered API, not RSS, so this does not touch us. YouTube's monetization page, read first-hand, still has the wording our plan quotes on readings of others' text, AI personas and shock content.
-- **Editorial (answered):** the election skip reads titles only. In 993 past videos, 5 had an election word only in an answer, and none of those was about when or how to vote. So answers need no screening.
-- **General management:** nothing was ready. A fresh agent proposed 8 ideas and I added one. Two rankers, reading them in opposite orders, both put the election fallback and the lasting alarm first and second. Dropped: re-checking Monday's libraries (none has a new release since 28 October); a security audit of our libraries (six days after the last, and the tool is not installed); a check on quoted review dates (no effect on any decision); fixing a comment about the clock change (no shift starts in that hour); tallying hype-word titles (the wider guard waits for bet 1's release, so a count now changes nothing). A second round, on the functions this shift missed, found nothing that clearly clears the bar. The closest is below, under Next. Also considered: bet 2's bar is 1.16 times our best four weeks on record, so at two a day it needs a record month (context for the monthly, no decision); a reading rule for the new subscriber share; a required-growth line; the two replacement-source samples expiring on 8–9 November; halving the voice bill (it changes the captions, needs a release, and saves cents).
-- **Reliability, security:** this morning's upload landed; this evening's had not started when I handed over (it usually starts between 17:15 and 18:30). No workflow changed. Money controls are in place ($0.89 this month, forecast $0.90 of $3).
-- AI use: none from the upload allowance; no Polly; no sample video (the 12-hour cap).
-
-### Blocked
-- **For you, in order:** #77 (one label ships bet 1); #82 (register by 12 January; check the app's name first); #86 (very likely not needed: close it); #65 (a "yes" lands the corrected sentence); #80 (four a day waits for bet 1); #59 (six account checks).
-
-### Next
-- **Tonight's 19:17 shift:** the best open candidate is whether watch time still predicts reach. Every bet is judged on watch time, but revenue needs reach. Set its rule before Monday's figures arrive (about 06:00), then build the read (about 35 minutes).
-- **Tomorrow's 11:17 shift, first thing:** request the election fallback's sample video and merge it on a pass, before the polls close on 3 November. It is the only ready item.
-- **The weekly, then the November monthly:** the monthly's bundled proposal now also carries the upload alarm's one-step change.
-- **Once the alarm's step lands:** check that the shift job printed "uploads ok", then close the technical-list item.
-
-### Better?
-- **Than last shift:** No for viewers or revenue. A little for safety: a results-day upload no longer fails once the fix merges, and a lasting alarm is one label away.
 - **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** Too early to say.
