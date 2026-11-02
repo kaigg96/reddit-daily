@@ -29,6 +29,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAN = os.path.join(ROOT, "PLAN.md")
 SNAPSHOTS = os.path.join(ROOT, "analysis", "analytics_snapshots.csv")
+LEDGER = os.path.join(ROOT, "analysis", "experiments.csv")
 
 # The order a shift takes them in when several are due. Monthly first: it is
 # the one that reaches the owner, and its findings feed the quarter's packet.
@@ -64,6 +65,27 @@ def newest_snapshot(path=SNAPSHOTS):
     except (OSError, KeyError):
         return None
     return datetime.date.fromisoformat(max(dates)) if dates else None
+
+
+def due_reads(snapshot, path=LEDGER):
+    """Ledger rows still unread whose due date is on or before `snapshot`:
+    the reads a weekly review owes that snapshot. The ledger calls a read
+    overdue only a week after it is due, so without this list a review read
+    the rows it remembered and missed one (reach-cut, 2026-11-02)."""
+    if snapshot is None:
+        return []
+    try:
+        with open(path, encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+    except OSError:
+        return []
+    out = []
+    for r in rows:
+        hit = re.fullmatch(r"\s*(\d{4}-\d{2}-\d{2})\s*", r.get("due") or "")
+        unread = not (r.get("read") or "").strip() and (r.get("verdict") or "pending").strip() == "pending"
+        if hit and unread and datetime.date.fromisoformat(hit.group(1)) <= snapshot:
+            out.append(r.get("id") or "?")
+    return out
 
 
 def _quarter(d):
@@ -158,6 +180,10 @@ def main(argv=None):
     for review, why in found:
         mark = "DUE   " if review in ORDER else "OWNER "
         print(f"{mark}{review}: {why}")
+    if any(r == "weekly" for r, _ in found):
+        owed = due_reads(newest_snapshot())
+        if owed:
+            print("Ledger reads due by this snapshot (analysis/experiments.csv): " + ", ".join(owed))
     if shift_work:
         print(f"\nThis shift's work: /review {shift_work[0][0]} (one review per shift).")
     nxt = upcoming(last_held(text), today, newest_snapshot())
