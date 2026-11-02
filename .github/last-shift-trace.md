@@ -1,103 +1,97 @@
-## Shift trace — run 41359041345
+## Shift trace — run 41434073049
 
-**Ended:** success, is_error false, 108 turns, 31.2 min, stop end_turn. **Tool calls:** 107, 2 failed. Helper agents made 39 more, 0 failed.
+**Ended:** success, is_error false, 145 turns, 44.5 min, stop end_turn. **Tool calls:** 144, 1 failed. Helper agents made 83 more, 1 failed.
 
 **Last message:**
 
-> Shift done; the handover is pushed. I'm stopping at 23:21, 28 minutes early, because no work is ready and a fresh look turned up nothing worth doing.
+> The shift is over and the handover is on `main`. Nothing moved revenue directly: everything viewers would see still waits on your decision on bet 1 (#77). Today's analytics snapshot had still not arrived at 11:51, so the weekly review goes to the next shift.
 >
-> **What happened:**
-> - **Election-week fix is live, a day earlier than planned.** The last shift had timed its sample video for tomorrow at 11:17. The 12-hour limit between samples actually lifted at 23:09 tonight, so I asked for one then. It passed (32 seconds, playable). I merged it and all 719 tests pass. From the next upload (about 06:00), a run that finds no usable question in the day's top 10 reads the top 30 instead of failing.
-> - **Bet 1's branch would have stalled the owner's label on #77.** The fix conflicted with it. Git's automatic merge would have crashed the run at the first usable post, so I combined the two by hand. All 973 of that branch's tests pass. A fresh review found nothing wrong, and tomorrow's 08:17 release check re-tests it.
-> - **Watch time vs views: the rule is set, the read is Monday.** Every test is judged on watch time, but revenue needs views. I added a report that checks whether uploads watched longer get more views. Its rule is written down before any number was looked at, and it gets read once on Monday's figures. A fresh review found no bugs and three small points; all three are fixed. It's on main.
-> - **Checks:** both of today's uploads landed, the money controls are fine ($0.01 spent this month, $0.76 forecast of the $3 budget), no workflow has changed since 20 October, no secrets are in the repository, and the process health check is ok.
->
-> **Why I stopped early:** the election fix was the only ready item. The 17:45 shift already ran two rounds of ideas, and no new data has come in since. I looked once more, only at what tonight changed, and checked the risk list: every risk already has a response, and nothing new cleared the bar.
->
-> **Next shift:**
-> 1. Check that the 06:00 upload landed under the fix.
-> 2. Confirm the 08:17 release check passes on bet 1's updated branch.
-> 3. Read the watch-ti
+> **Done:**
+> - **Reliability and security:** all 15 uploads since last Monday landed, one with a fallback title on 29 October. No workflow has changed since 20 October, and no secret is in the repository. The AWS money controls are intact ($0.01 spent this month, forecast $0.76 of the $3 budget).
+> - **A date for replacing Reddit, proposed for the November monthly:** if the Reddit app's registration (#82) isn't confirmed by **14 December**, shifts build the replacement source the monthly picks and merge it switched off. One label from you by 11 January then turns it on. The reason for the date: your GitHub approvals are fast (41 so far, the slowest took 4 days), but tasks you have to do outside GitHub wait longer (the account checks 27 days, the registration 12 so far). Also, both replacement samples were built on bet 1's unmerged branch, so they need rebuilding first if bet 1 hasn't merged.
+> - **What a new source would earn: nothing yet, whichever we pick.** YouTube's own help pages, read today, say both its brand-deal programmes (Creator Partnerships and Open Call) require the Partner Program. Outside sponsors typically start at about 1,000 subscribers; we have 22. Links can't be clicked in a Short. So the source decision is about whether uploads continue and whether earning is allowed at all: Reddit's terms bar it, while the alternatives allow it.
+> - **Where viewers leave:** of the viewers who get past the opening, half leave between a quarter and halfway through, during the first answer or two. Bet 1's "where do viewers leave" check will compare against this.
+> - **Friction notes:** I sorted the week's 40 unsorted notes into groups, ahead of the weekly review. The biggest group was finished work waiting for a sample
 
-### Tool calls (last 80 of 107)
+### Tool calls (last 80 of 144)
 
-28. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-29. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-30. Bash: sed -n 745,760p scripts/report.py; grep -n "^import\|^from" src/insights.py | head
-31. Bash: python3 - <<'EOF'
-32. Bash: sed -n 50,56p src/insights.py; sed -n 2700,2716p tests/test_insights.py
-33. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
-34. Bash: date -u +%H:%M && venv/bin/python -m pytest tests/test_insights.py -q -k "watch_reach or first_answer" 2>&1 | tail -3 && venv/bin/python sc…
-35. Bash: venv/bin/python scripts/report.py --offline --watch-reach 2>/dev/null | grep -c "at p < 0.05:"; grep -n "^## \|^### " PRD.md | sed -n 1,30p…
-36. Bash: sed -n 105,119p PRD.md | cut -c1-900; grep -n -o ".\{300\}0\.34.\{200\}" PRD.md | head -5
-37. Bash: python3 - <<'EOF'
-38. Bash: venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -3; venv/bin/python scripts/check_docs.py 2>&1 | tail -5
-39. Bash: git add -A && git commit -q -m "Watch time and reach: --watch-reach, its rule pre-committed before the 11-02 snapshot (no number read)
-40. Agent: Review watch-reach diff
-41. Bash: git checkout -q main && date -u +%H:%M && git log -1 --format=%cd --date=iso origin/main -- .github/workflows/ && git log --oneline -3 orig…
-42. Bash: git merge-tree --write-tree origin/main origin/editorial/election-week-fallback >/dev/null && echo "merges clean"; git diff origin/main...o…
-43. Bash: grep -n -i "SAMPLE_MODEL\|GEMINI_MODEL" .github/workflows/validate-release.yml .github/workflows/dry-run.yml src/config.py | head
-44. Bash: grep -rn -i "sample_model\|flash-lite\|gemini-2" .github/workflows/*.yml src/*.py | grep -v "^\s*#" | head
-45. Bash: sed -n 20,64p PRD.md | cut -c1-260
-46. Bash: git checkout -q data/watch-reach && python3 - <<'EOF'
-47. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -v "^\s*ok" | head -20
-48. Bash: python3 - <<'EOF'
-49. Bash: grep -n "SAMPLE=1" README.md CLAUDE.md .claude/skills/*/SKILL.md | head -5; grep -n "Retention points in the weekly snapshot" PRD.md | cut …
-50. Bash: python3 - <<'EOF'
-51. Bash: grep -ln "context_budget" .github/workflows/*.yml; python3 - <<'EOF'
-52. Bash: sed -n 24,26p PRD.md
-53. Bash: git add -A && git commit -q -m "Tracker: R5, does watch time still predict reach, blocked on the 11-02 snapshot; two done rows trimmed for …
-54. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -30
-55. Bash: git checkout -q main && git pull -q --ff-only && ls .dry-run-requests/ && cat .dry-run-requests/*.md 2>/dev/null | head; grep -n "on:" -A6 …
-56. Bash: git status --short; git checkout -q data/watch-reach && python3 - <<'EOF'
-57. Bash: git add -A && git commit -q -m "Watch-reach, the review's points: the age confound needs both age links in the same direction (opposite one…
-58. Bash: grep -rn -E "(opening-reach|first-answer|watch-reach)[^|]*--within" --include=*.md --include=*.py --include=*.yml . 2>/dev/null | grep -v "…
-59. Bash: grep -n "^## 2026" WORKLOG.md; venv/bin/python scripts/report.py --trajectory 2>&1 | tail -3
-60. Bash: date -u +%H:%M:%S
-61. Write: /tmp/worklog_entry.md
-62. Bash: date -u +%H:%M:%S
-63. Bash: awk '/^## Open items/{f=1} f && /^- \*\*/{print NR": "substr($0,1,170)}' TECH_DEBT.md | head -30
-64. Bash: git diff origin/main...origin/editorial/election-week-fallback -- src/content.py | head -230
-65. ToolSearch: select:Monitor
-66. Bash: until [ "$(date -u +%H%M%S)" -ge 230925 ] && [ "$(date -u +%H)" = "23" ]; do sleep 5; done; date -u +%H:%M:%S
-67. Bash: git checkout -q main && git pull -q --ff-only && venv/bin/python scripts/friction.py add --function data --task "Set the watch-time-vs-reac…
-68. Bash: venv/bin/python scripts/friction.py add --function data --task "Set the watch-time-vs-reach rule before the 11-02 snapshot and built its re…
-69. Bash: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/62c46ba9-dd3b-4052-94bd-875be5d889d7/tasks/b1mzubqq3.output ]; do s…
-70. Bash: git pull -q --ff-only; venv/bin/python scripts/dry_run.py request editorial/election-week-fallback && git add .dry-run-requests .github/fri…
-71. Bash: for i in $(seq 1 40); do git fetch -q origin main 2>/dev/null; if git show origin/main:.github/last-dry-run.md 2>/dev/null | grep -q "When:…
-72. Bash: sleep 20; gh run list --workflow dry-run.yml --limit 2 --json status,conclusion,createdAt,headSha,displayTitle 2>&1 | head -20
-73. Bash: grep -n -i "election\|watch.*reach" PLAN.md | cut -c1-250
-74. Bash: git merge-tree --write-tree origin/main origin/data/watch-reach >/dev/null && echo "watch-reach merges clean with main"; T=$(git merge-tree…
-75. Bash: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/62c46ba9-dd3b-4052-94bd-875be5d889d7/tasks/bn1ii97d9.output ]; do s…
-76. Bash: git pull -q --ff-only && git merge -q --no-ff origin/editorial/election-week-fallback -m "Merge editorial/election-week-fallback: when elec…
-77. Bash: python3 - <<'EOF'
-78. Bash: git merge --no-ff --no-commit origin/data/watch-reach 2>&1 | tail -2; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD…
-79. Bash: git diff --name-only --diff-filter=U; grep -n -A12 "^<<<<<<<" PRD.md | cut -c1-200
-80. Bash: python3 - <<'EOF'
-81. Bash: python3 - <<'EOF'
-82. Bash: git add PRD.md && git commit -q -m "Merge data/watch-reach: report.py --watch-reach, its rule pre-committed before the 11-02 snapshot (no n…
-83. Bash: grep -rn "integration/preview" .github/workflows/*.yml scripts/*.py | cut -c1-220 | head -15
-84. Bash: git checkout -q -b integration-preview-current origin/integration/preview && git merge --no-commit origin/main 2>&1 | grep -i conflict; git…
-85. Bash: awk '/^<<<<<<< /{f=1} f{print NR": "$0} /^>>>>>>> /{f=0}' src/content.py | head -230
-86. Bash: sed -n 255,420p src/content.py
-87. Bash: git show origin/integration/preview:src/content.py | awk '/^def select_post/{f=1} f' | sed -n 30,95p
-88. Bash: python3 - <<'EOF'
-89. Bash: git add -A && git commit -q -m "Merge origin/main into integration/preview: the election-week fallback
-90. Agent: Review preview merge resolution
-91. Bash: git checkout -q main && git pull -q --ff-only && venv/bin/python scripts/friction.py add --function editorial --task "Requested the electio…
-92. Bash: cat > /tmp/worklog_entry.md <<'EOF'
-93. Bash: wc -l WORKLOG.md; tail -3 WORKLOG.md | cut -c1-100
-94. ✗ Bash: sleep 45; date -u +%H:%M — <tool_use_error>Blocked: sleep 45 followed by: date -u +%H:%M. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>…
-95. Bash: python3 - <<'EOF'
-96. Bash: venv/bin/python scripts/backlog_status.py | head -8; venv/bin/python scripts/check_docs.py 2>&1 | grep -E "STALE|No stale"
-97. Bash: grep -n -i "last-release-validation\|integration\|PASS" .github/workflows/apply-approved.yml | head -10; gh issue view 77 --json body --jq …
-98. Bash: date -u +%H:%M:%S
-99. Bash: venv/bin/python scripts/backlog_status.py --dropped 2>&1 | head -40 | cut -c1-200
-100. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-101. Bash: until [ "$(date -u +%H%M)" -ge 2320 ]; do sleep 5; done; date -u +%H:%M:%S
-102. Bash: python3 - <<'EOF'
-103. Bash: git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover (22:50): election-week fallback merged a day early (dry run PASS at 8…
-104. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -25; git status --short
-105. Bash: awk '/^## 4/{f=1} /^## 5/{f=0} f' PLAN.md | cut -c1-330
-106. ✗ Bash: git fetch -q origin && git status -sb | head -2 && git rev-parse --short HEAD origin/main origin/integration/preview && date -u +%H:%M — Exit code 128: ## main...origin/main
-107. Bash: for r in HEAD origin/main origin/integration/preview; do echo "$r $(git rev-parse --short $r)"; done; date -u +%H:%M
+65. Bash: cd /tmp && curl -sL -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" --compressed "ht…
+66. Bash: cd /tmp && python3 -c "
+67. Bash: date -u +%H:%M; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.output
+68. Bash: cd /tmp && curl -sL -A "Mozilla/5.0 Chrome/124.0" --compressed "https://redditbrand.lingoapp.com/s/Overview-orqY1E/" -o ov.html -w "%{http_…
+69. Bash: grep -n "11-05\|5 November" PLAN.md PRD.md DECISIONS.md TECH_DEBT.md | cut -c1-220 | head -20; gh issue view 82 --json title,state,labels,u…
+70. Bash: git switch -q gm/dry-run-next && grep -n "on:" -A8 .github/workflows/dry-run.yml | head -14 && grep -n "def next_slot" -A12 scripts/dry_run…
+71. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/dry_run.py
+72. Bash: grep -n '"gh", "api"' -B2 -A4 scripts/dry_run.py
+73. Bash: python3 - <<'EOF'
+74. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git commit -qam "dry_run.py next, the review's points: main's upload log rather than …
+75. Bash: python3 - <<'EOF'
+76. Bash: sed -n 158,162p PRD.md | cut -c1-2500; gh issue view 82 --json body --jq .body | head -40
+77. Bash: awk 'NR>=100 && NR<=160 && /^\*\*/ {print NR": "substr($0,1,180)}' PRD.md; grep -n "^## \|^### " PRD.md | sed -n 1,20p
+78. Bash: sed -n 148p PRD.md | cut -c1-1800; echo; sed -n 158p PRD.md | cut -c2500-5000
+79. Bash: gh issue list --state all --label approved -L 40 --json number,createdAt,title --jq '.[] | "\(.number) \(.createdAt[:10])"' > /tmp/appr.txt…
+80. Bash: gh issue list --state open -L 30 --json number,createdAt,title,labels --jq '.[] | "\(.number) \(.createdAt[:10]) [\([.labels[].name]|join("…
+81. Bash: git branch -r | grep -i -E "source|stack|own|question" ; git branch -r | wc -l
+82. Bash: git log --oneline -3 origin/strategy/own-questions-sample; git diff --stat main...origin/strategy/own-questions-sample | tail -3; git branc…
+83. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | head -20
+84. Bash: git pull -q --ff-only && venv/bin/python - <<'EOF'
+85. Bash: sed -i 's/| The owner registers our app (#82); C16, building switched off from 12-14 (PRD §4) |/| The owner registers our app (#82); C16; a…
+86. Bash: gh issue list --state all --label approved -L 200 --json number --jq 'length'; gh issue list --state all --label approved -L 200 --json num…
+87. Bash: gh issue list --state all --label approved -L 200 --json number,createdAt --jq '.[] | select(.createdAt[:10]=="2026-09-19") | .number' | wh…
+88. Bash: sed -i 's/(40 approvals since 09-20: most the same day, the slowest 4 days)/(41 approvals since 09-19: most the same day, the slowest 4 day…
+89. ToolSearch: select:WebSearch,WebFetch
+90. Bash: grep -n -i -o ".\{120\}\(sponsor\|affiliate\|brandconnect\|shopping\).\{160\}" PRD.md PLAN.md DECISIONS.md | head -10; cat /tmp/claude-1001…
+91. WebSearch: YouTube Shorts clickable links description 2026
+92. WebSearch: YouTube BrandConnect eligibility requirements subscribers 2026
+93. WebSearch: YouTube Shorts sponsorship rate per 1000 views small creators 2026
+94. WebSearch: "Creator Partnerships" YouTube Help eligibility site:support.google.com
+95. WebFetch: https://fluxnote.io/guides/youtube-shorts-sponsorship-rates-small-channels
+96. WebFetch: https://support.google.com/youtube/answer/9385307?hl=en&co=GENIE.CountryCode%3DUS
+97. WebFetch: https://support.google.com/youtube/answer/17210205
+98. WebSearch: YouTube Help Shorts links descriptions comments not clickable related video site:support.google.com
+99. Bash: git pull -q --ff-only; venv/bin/python - <<'EOF'
+100. Bash: sed -i 's/Reddit'"'"'s terms bar revenue from its data, a sponsor'"'"'s fee included (§4 Legal, PLAN §4), where/Reddit'"'"'s terms bar reve…
+101. WebFetch: https://redditbrand.lingoapp.com/s/Overview-orqY1E/
+102. WebSearch: Reddit trademark brand guidelines "Reddit" in name of channel podcast account not allowed
+103. Bash: cd /tmp && curl -sL -A "Mozilla/5.0" "https://cdn.dribbble.com/users/1516648/screenshots/4422646/attachments/1005080/reddit_brand_guideline…
+104. ✗ Read: /tmp/rb.pdf — pdftoppm is not installed. Install poppler-utils (e.g. `brew install poppler` or `apt-get install poppler-utils`) to enable PDF page render…
+105. Bash: venv/bin/python scripts/friction.py add --function legal --task "Reddit's brand rules on a channel name: dropped, unreadable" --outcome aba…
+106. Bash: for m in 10 25 50 75 100; do echo "== watch_ratio_$m"; venv/bin/python scripts/report.py --offline --at-age 7 --by format_version --metric …
+107. Bash: grep -n "^\*\*Retention points leave out viewers who swipe away" PRD.md && grep "^\*\*Retention points leave out viewers who swipe away" PR…
+108. Bash: venv/bin/python - <<'EOF'
+109. Bash: awk '/^## Open items/,0' TECH_DEBT.md | sed -n '261,282p;337,353p'
+110. Agent: Second-round candidate generation
+111. Bash: venv/bin/python scripts/friction.py add --function data --task "v7's retention profile from the retention points" --outcome done --category…
+112. Bash: grep -n -i "monthly\|snapshot" scripts/cadence.py | head -30
+113. Bash: date -u +%H:%M; gh run list --workflow weekly-analytics.yml -L 1 --json status,createdAt --jq '.[0]'; gh run list -L 5 --json workflowName,…
+114. Bash: gh run list -L 15 --json workflowName,conclusion,createdAt,headSha --jq '.[] | "\(.createdAt[11:19]) \(.workflowName) \(.conclusion) \(.hea…
+115. Bash: awk '/^## 2026-11-01 \(17:45\)/{p=1} p' WORKLOG.md | wc -w; grep -n "^## " WORKLOG.md
+116. Bash: head -1 analysis/traffic_sources.csv; tail -12 analysis/traffic_sources.csv
+117. Bash: date -u +%H:%M; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.output
+118. Bash: awk '/^## Open items/,0' TECH_DEBT.md | sed -n '353,400p'
+119. Write: /tmp/worklog_entry.md
+120. Bash: date -u +%H:%M; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.output
+121. Bash: grep -n "bundle" TECH_DEBT.md PLAN.md PRD.md | cut -c1-260 | head -12
+122. Bash: sed -n 376,400p TECH_DEBT.md
+123. Bash: venv/bin/python scripts/statusline.py --budget; venv/bin/python scripts/escalations.py open 2>&1 | head -20
+124. Bash: gh api "repos/{owner}/{repo}/issues/77/comments" --jq '.[] | "\(.created_at[:16]) \(.user.login) \(.body[:80] | gsub("\n";" "))"' | tail -8
+125. Bash: date -u +%H:%M:%S; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.ou…
+126. Bash: grep "^\*\*Before the voice and capitals reads" PRD.md | cut -c1-1500
+127. Bash: venv/bin/python scripts/report.py --offline --balance voice --by subreddit --since 2026-10-08 --until 2026-10-26 2>&1 | tail -15
+128. Bash: head -1 analysis/experiments.csv; grep -i "balance" analysis/experiments.csv | cut -c1-300
+129. Bash: date -u +%H:%M:%S; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.ou…
+130. Bash: grep -n "^\*\*A date for the replacement source\|^\*\*No source opens income" PRD.md | cut -c1-80
+131. Bash: date -u +%H:%M:%S; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/05fafcf4-9a3d-4acd-99fe-f44eade61215/tasks/bb72kb91s.ou…
+132. Bash: for i in 1 2 3 4; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"')…
+133. Bash: for i in 1 2 3 4; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"')…
+134. Bash: venv/bin/python scripts/friction.py add --function gm --task "Two generation rounds and two rankers; second round found nothing above the b…
+135. Bash: cd /tmp && python3 - <<'EOF'
+136. Bash: python3 - <<'EOF'
+137. Bash: for i in 1 2 3 4 5; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"…
+138. Bash: for i in 1 2 3 4 5; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"…
+139. Bash: git pull -q --ff-only && python3 - <<'EOF'
+140. Bash: grep -n "^## \|^---" WORKLOG.md; venv/bin/python scripts/check_docs.py 2>&1 | tail -2; venv/bin/python scripts/context_budget.py --health 2…
+141. Bash: date -u +%H:%M && sed -i 's/Today'"'"'s figures had not arrived by 12:00, so the weekly review passes to the next shift./Today'"'"'s figure…
+142. Bash: for i in 1 2 3 4 5; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"…
+143. Bash: for i in 1 2 3 4 5; do s=$(gh run list --workflow weekly-analytics.yml -L 1 --json createdAt,status --jq '.[0] | "\(.createdAt) \(.status)"…
+144. Bash: git fetch -q origin && git log --oneline -1 origin/main && git status -sb | head -2
