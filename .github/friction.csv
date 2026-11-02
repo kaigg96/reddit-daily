@@ -116,3 +116,4 @@ F114,2026-11-02T11:12:21+00:00,41434073049,gm,"Weekly friction sort: 40 ungroupe
 F115,2026-11-02T11:15:08+00:00,41434073049,gm,dry_run.py next: when the render workflow next accepts a request,done,G1,none,,,0,
 F116,2026-11-02T11:17:31+00:00,41434073049,strategy,"A dated rule for the replacement source (12-14), for the monthly",done,,none,,,0,
 F117,2026-11-02T11:19:16+00:00,41434073049,monetization,Brand-deal and affiliate routes priced for the source decision,done,,none,,,0,
+F118,2026-11-02T11:19:45+00:00,41434073049,legal,"Reddit's brand rules on a channel name: dropped, unreadable",abandoned,,access,Reddit's brand site is script-only; the one text copy is a 2018 PDF on a third-party host no installed tool can extract,A PDF text extractor in the venv,4,G17
