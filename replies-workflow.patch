@@ -1,9 +1,9 @@
 diff --git a/.github/workflows/post-replies.yml b/.github/workflows/post-replies.yml
 new file mode 100644
-index 0000000..07523b1
+index 0000000..8edd9eb
 --- /dev/null
 +++ b/.github/workflows/post-replies.yml
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,74 @@
 +name: Post replies to viewer comments
 +
 +# PLAN C10, under the owner's publishing policy (ORG.md, Audience & community).
@@ -33,6 +33,9 @@ index 0000000..07523b1
 +
 +jobs:
 +  post_replies:
++    # Only main's code may post: a manual run on a branch would publish with
++    # unmerged code (the same reason branch renders never hold the Polly keys).
++    if: github.ref == 'refs/heads/main'
 +    runs-on: ubuntu-latest
 +
 +    steps:
@@ -69,6 +72,7 @@ index 0000000..07523b1
 +        git commit -m "Replies: post and record" || { echo "No changes to commit"; exit 0; }
 +        for attempt in 1 2 3; do
 +          git pull --rebase origin main && git push && exit 0
++          git rebase --abort 2>/dev/null || true
 +          echo "push attempt $attempt failed; retrying"
 +          sleep 5
 +        done
