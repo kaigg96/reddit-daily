@@ -79,3 +79,59 @@ def test_load_and_save_round_trip_with_lf(tmp_path):
     replies.save(rows, path)
     assert b"\r\n" not in path.read_bytes()
     assert replies.load(path)[0]["reply"] == "Thanks for watching"
+
+
+class _Verdict:
+    def __init__(self, verdict="pass", unsafe=(), category="", source="gemini"):
+        self.verdict, self.unsafe, self.category, self.source = verdict, set(unsafe), category, source
+
+
+class _Client:
+    def __init__(self, comments, answered=(), fail=()):
+        self.comments, self.answered, self.fail, self.posted = comments, set(answered), set(fail), []
+
+    def comment(self, parent_id):
+        return self.comments.get(parent_id)
+
+    def replied(self, parent_id, channel_id):
+        return parent_id in self.answered
+
+    def post(self, parent_id, text):
+        if parent_id in self.fail:
+            return False
+        self.posted.append(parent_id)
+        return True
+
+
+def _queued(*parents):
+    return [_row(i + 1, parent=p) for i, p in enumerate(parents)]
+
+
+def test_post_due_posts_only_what_passes_every_check():
+    rows = _queued("ok", "gone", "ours", "answered", "unsafe", "backstop", "fails")
+    client = _Client({p: ("viewer", "a comment") for p in ("ok", "answered", "unsafe", "backstop", "fails")}
+                     | {"ours": ("US", "our pinned question")}, answered={"answered"}, fail={"fails"})
+    verdicts = {"unsafe": _Verdict("skip_post", category="sexual"), "backstop": _Verdict(source="backstop")}
+    for r in rows:   # one reply text per row, so the screen can tell them apart
+        r["reply"] = f"Nice one {r['parent_id']}"
+    screen = lambda q, cs: verdicts.get(cs[0].split()[-1], _Verdict())
+    log = replies.post_due(rows, TODAY, client, screen, "US", {}, NOW, dry_run=False, cap=10)
+    status = {r["parent_id"]: (r["status"], r["note"]) for r in rows}
+    assert client.posted == ["ok"]
+    assert status["ok"][0] == "posted" and rows[0]["posted_utc"].startswith("2026-11-02")
+    assert status["gone"] == ("refused", "comment gone")
+    assert status["ours"] == ("refused", "our own comment")
+    assert status["answered"] == ("refused", "already answered on YouTube")
+    assert status["unsafe"][0] == "refused" and status["backstop"][0] == "refused"
+    assert status["fails"][0] == "queued"                    # a failed post stays queued, to retry
+    assert len(log) == 7
+
+
+def test_post_due_refuses_a_reply_quoting_the_live_comment_and_dry_run_changes_nothing():
+    rows = _queued("q", "fine")
+    rows[0]["reply"] = "You said I go to school every day with concealer"
+    client = _Client({"q": ("viewer", "I go to school every day with concealer and mascara"),
+                      "fine": ("viewer", "hello")})
+    log = replies.post_due(rows, TODAY, client, lambda q, cs: _Verdict(), "US", {}, NOW, dry_run=True)
+    assert client.posted == [] and all(r["status"] == "queued" for r in rows)
+    assert any("quotes the viewer" in line for line in log) and any(line.startswith("would post") for line in log)

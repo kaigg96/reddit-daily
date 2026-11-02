@@ -129,3 +129,55 @@ def queue_reply(rows, video_id, parent_id, reply, comment="", now=None):
                  "parent_id": parent_id, "reply": reply.strip(), "status": "queued",
                  "posted_utc": "", "note": ""})
     return None
+
+
+def post_due(rows, today, client, screen_fn, channel_id, titles, now, dry_run=True,
+             cap=REPLIES_PER_DAY):
+    """The posting job's pass over the queue, rows updated in place; returns
+    one line per row acted on, for the job's log.
+
+    `client` reads and posts through YouTube: `comment(parent_id)` gives
+    (author channel ID, text) or None when the comment is gone;
+    `replied(parent_id, channel_id)` says whether we answered it already;
+    `post(parent_id, text)` returns True once posted. `screen_fn(question,
+    comments)` is `screen.screen`, which fails open by design; a reply needs
+    a real pass, so a backstop verdict refuses it. `titles` maps a video to
+    the question it asked. Under `dry_run` nothing is posted or marked."""
+    post, refuse = due(rows, today, cap)
+    out = []
+
+    def mark(r, status, note):
+        out.append(f"{status:8} {r.get('parent_id')}  {note}")
+        if not dry_run:
+            r.update(status=status, note=note,
+                     posted_utc=now.isoformat(timespec="seconds") if status == "posted" else "")
+
+    for r in refuse:
+        mark(r, "refused", check_reply(r.get("reply")) or "comment already answered")
+    for r in post:
+        found = client.comment(r["parent_id"])
+        if found is None:
+            mark(r, "refused", "comment gone")
+            continue
+        author, text = found
+        if author == channel_id:
+            mark(r, "refused", "our own comment")
+            continue
+        if client.replied(r["parent_id"], channel_id):
+            mark(r, "refused", "already answered on YouTube")
+            continue
+        reason = check_reply(r["reply"], text)
+        if reason:
+            mark(r, "refused", reason)
+            continue
+        verdict = screen_fn(titles.get(r.get("video_id"), ""), [r["reply"]])
+        if verdict.verdict != "pass" or verdict.unsafe or verdict.source == "backstop":
+            mark(r, "refused", f"screen: {verdict.verdict}, {verdict.category or verdict.source}")
+            continue
+        if dry_run:
+            out.append(f"would post {r['parent_id']}  {r['reply']}")
+        elif client.post(r["parent_id"], r["reply"]):
+            mark(r, "posted", "")
+        else:
+            out.append(f"failed   {r['parent_id']}  left queued")
+    return out
