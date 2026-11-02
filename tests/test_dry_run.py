@@ -183,3 +183,31 @@ def test_branch_code_never_receives_the_polly_keys():
     render = next(s for s in steps if s.get("id") == "render")
     assert render["env"]["SILENT_NARRATION"] == "${{ steps.req.outputs.branch != 'main' && '1' || '' }}"
     assert "CHANNEL_NAME" not in render["env"]
+
+
+def _t(day, hour, minute=0):
+    import datetime
+    return datetime.datetime(2026, 11, day, hour, minute, tzinfo=datetime.timezone.utc)
+
+
+@pytest.mark.parametrize("last, now, uploaded, want", [
+    # F112: the last render at 23:11 frees the slot at 11:11 the next day
+    (_t(1, 23, 11), _t(2, 2, 0), False, _t(2, 11, 11)),
+    (_t(1, 23, 11), _t(2, 11, 30), True, _t(2, 11, 30)),
+    (None, _t(2, 15, 0), True, _t(2, 15, 0)),
+    # before 07:00 with the morning upload not yet logged: 07:00 at the latest
+    (None, _t(2, 5, 0), False, _t(2, 7, 0)),
+    (None, _t(2, 5, 0), True, _t(2, 5, 0)),
+    # the 12 hours end before 07:00 on a later day, whose upload is unknown
+    (_t(1, 18, 30), _t(1, 20, 0), True, _t(2, 7, 0)),
+])
+def test_next_slot_applies_both_refusals(last, now, uploaded, want):
+    assert dry_run.earliest(last, now, uploaded)[0] == want
+
+
+def test_next_slot_matches_the_workflow():
+    """The workflow is the authority; the restated limits must not drift."""
+    wf = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           ".github/workflows/dry-run.yml")).read()
+    assert f"-lt {int(dry_run.RENDER_GAP.total_seconds())} ]" in wf
+    assert f'"$(date -u +%H)" -lt {dry_run.RESET_HOUR} ]' in wf

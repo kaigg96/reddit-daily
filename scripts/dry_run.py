@@ -7,6 +7,7 @@ the workflow token for its own, which has no Actions permission (#27). So it
 asks, and `.github/workflows/dry-run.yml` renders:
 
     dry_run.py request <branch>   # queue it, then commit and push the file
+    dry_run.py next               # when dry-run.yml will next accept a request
     dry_run.py pending            # (dry-run.yml) which branch to render
     dry_run.py check <video.mp4>  # (dry-run.yml) is this a playable video?
     dry_run.py record ...         # (dry-run.yml) write the verdict
@@ -57,6 +58,52 @@ def request(branch):
         f.write(f"branch: {branch}\nrequested_at: {now}\n")
     print(f"queued {path}\ncommit and push it -- dry-run.yml renders it and writes "
           f"{VERDICT} (5-10 minutes; at most one automated render per 12 hours)")
+    return 0
+
+
+# dry-run.yml's two refusals for a pushed request, restated so a shift can
+# plan around them (F112: a shift timed a sample 12 hours late because nothing
+# computed the slot). The workflow stays the authority; a test pins these.
+RENDER_GAP = datetime.timedelta(hours=12)
+RESET_HOUR = 7
+
+
+def earliest(last_render, now, uploaded_today):
+    """When dry-run.yml next accepts a pushed request: (time, why).
+
+    last_render: the newest render artifact's time, or None. uploaded_today:
+    whether upload_log.csv has a row dated now's UTC day."""
+    t, why = now, []
+    if last_render and last_render + RENDER_GAP > now:
+        t = last_render + RENDER_GAP
+        why.append(f"12 hours after the last render, {last_render:%m-%d %H:%M}")
+    if t.hour < RESET_HOUR and not (uploaded_today and t.date() == now.date()):
+        t = t.replace(hour=RESET_HOUR, minute=0, second=0, microsecond=0)
+        why.append("before 07:00 a request waits for that day's first upload, so "
+                   "07:00 at the latest")
+    return t, "; ".join(why) or "neither limit applies"
+
+
+def last_render():
+    out = subprocess.run(
+        ["gh", "api", "repos/{owner}/{repo}/actions/artifacts?name=dry-run-render&per_page=50",
+         "--jq", "[.artifacts[].created_at] | max // \"\""],
+        capture_output=True, text=True)
+    if out.returncode != 0:
+        sys.exit(f"could not read the render history: {out.stderr.strip()}")
+    stamp = out.stdout.strip()
+    return datetime.datetime.fromisoformat(stamp.replace("Z", "+00:00")) if stamp else None
+
+
+def next_slot(log="upload_log.csv"):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    with open(log) as f:
+        uploaded = any(line.startswith(today) for line in f)
+    t, why = earliest(last_render(), now, uploaded)
+    when = "now" if t <= now else f"{t:%Y-%m-%d %H:%M} UTC"
+    print(f"next automated render: {when} ({why})")
+    print("a push before then is refused; the render takes 5-10 minutes after it")
     return 0
 
 
@@ -212,6 +259,7 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("request").add_argument("branch")
+    sub.add_parser("next")
     sub.add_parser("pending")
     sub.add_parser("check").add_argument("video")
     r = sub.add_parser("record")
@@ -225,6 +273,8 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.cmd == "request":
         return request(a.branch)
+    if a.cmd == "next":
+        return next_slot()
     if a.cmd == "pending":
         return pending()
     if a.cmd == "check":
