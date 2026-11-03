@@ -63,13 +63,13 @@ and more useful than a confident guess.
 
 ## 2026-11-03 (19:25) — The three sample videos your open decisions rest on were due for deletion on 8–9 November; they are now kept
 
-    Worked (% of the shift): gm 45 · legal 20 · reliability 15 · audience 10 · security 10
+    Worked (% of the shift): gm 50 · legal 20 · reliability 10 · audience 10 · security 10
 
 **Summary:** Nothing viewers see changed, and bet 1 still waits on your label (#77, ideally by 6 November). GitHub deletes every sample video 14 days after it is made, so bet 1's sample and both replacement-source samples would have vanished on 8–9 November, before #90's 14 December decision. They are now kept, and both issues link the copies.
 
 ### Toward revenue
 - **Nothing directly.** Everything viewers would see waits on bet 1 (#77), and the channel is flat at 12 seconds watched per view.
-- **Protecting the decision that matters most.** Bet 1's sample (#77) is the video you were asked to judge. A new render would write different host lines, so the one you were shown could not be made again. A copy now stays with no expiry, linked under the original in #77. #90's two samples are kept the same way.
+- **Protecting the decision that matters most.** Bet 1's sample (#77) is the video you were asked to judge. A new render would write different host lines, so the one you were shown could not be made again. A copy now stays on a branch with no expiry date, linked under the original in #77. #90's two samples are kept the same way.
 
 ### Done
 - **General management (fix):** kept the three sample videos (above). I edited the issue text rather than commenting, so no extra email. #89's text was left alone, since editing it would stop its patch from applying.
@@ -79,7 +79,7 @@ and more useful than a confident guess.
 - **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas and I added two. Two rankers, reading in opposite orders, both put the sample videos first, results night second and the reply check third. Dropped: a fallback plan if #77 slips (on 6 November only if still unlabelled: it would be a twelfth ask); a cut for Monday's zero-view read (chosen after the fact); Groq's newer models (two failed already); run lateness against four a day (a month away); the election skip's end date (ends by itself); the run logs (nothing exposed); compressing the findings (not in 30 minutes). A second round, aimed at deadlines that could pass unnoticed and at functions rarely worked, ranked the same two ways, put two dated checks first and the expiry warning third (all three below). Dropped from it: an age limit on queued replies (nothing posts until #89; recorded beside the reply rule for before 16 November); a record of bet 2's lost weeks (bookkeeping); closing an old weekly digest (changes nothing); which comments download each reply read uses (the fix that matters is keeping the file).
 - **General management (fix, live):** the list of your decisions that every shift reads first now warns when a sample video an open ask links is within a week of deletion, and says whether a kept copy is linked. Today it names the three above, each with its copy; reviewed.
 - **Legal (fix):** the check of Reddit's terms against today's saved copies, due on or after 10 November, now has a dated row that the weekly review lists, rather than only a sentence. It must happen before #90's 14 December date.
-- **General management:** three lines pointed at the 5 November review, which the monthly replaced; each now says where its item went.
+- **General management:** two lines pointed at the 5 November review, which the monthly replaced; each now says where its item went.
 - **Reliability:** both uploads on 2 November and this morning's landed; the afternoon runs were the planned no-ops. UPLOAD
 - **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.05 this month, forecast $0.71 of $3).
 - AI use: none from the upload allowance; no Polly; no sample video.
@@ -88,7 +88,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 6 November), #82 (register by 12 January), #89, #90, #91, #92, #88, #86, #65, #80, #59. Nothing new was added.
 
 ### Next
-- **Results night, continued:** read tomorrow morning's upload narration for election claims. Its run log prints every spoken line ("comment 1:" and "CTA:"): `gh run view <id> --log`. NEXT
+- **Results night, continued:** read tomorrow morning's upload narration for election claims. The upload run's log prints every spoken line.
 - **6 November:** if #77 is still unlabelled, decide whether a fallback is worth a twelfth ask.
 - Carried from the monthly: 9 November's zero-view re-read by subreddit, 16 November's view-swing read.
 
