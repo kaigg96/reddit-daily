@@ -69,8 +69,8 @@ and more useful than a confident guess.
 
 ### Where we stand
 - **Revenue $0.** About 14,500 plays a quarter get past the opening. The Partner Program needs 10 million (691 times short; a month ago, 757), and 20 million for new applicants from February. We have 23 of the 1,000 subscribers it needs. The nearest route, the 500-subscriber tier, is 207 times short.
-- **Can the current path reach the goal? Not at today's size, plainly.** Every route needs the format to be ours first (bet 1), then far more views per video: six uploads a day still leaves every YouTube route 70 times short. What would make it known: bet 1's first 20 uploads, then bet 2's four weeks from 30 November.
-- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Today's checks found no fault in our pipeline; one of the five was age-restricted for a swear in its title, which the filter has refused since 24 October. Next Monday's read checks the other four by subreddit.
+- **Can the current path reach the goal? Not at today's size, plainly.** Every route needs the format to be ours first (bet 1), then far more views per video: six uploads a day leaves every YouTube route at least 70 times short. What would make it known: bet 1's first 20 uploads, then bet 2's four weeks from 30 November.
+- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Today's checks found no fault in our pipeline; of the five old enough to check, one was age-restricted for a swear in its title, which the filter has refused since 24 October. Next Monday's read checks the other four by subreddit.
 - **Every function now has work behind it:** audience, monetization and market intelligence moved off "none".
 
 ### Money
@@ -84,12 +84,12 @@ and more useful than a confident guess.
 ### Market and policy
 - **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
 - **Comparable channels:** a 246,000-subscriber Reddit-stories channel with human voices was reportedly demonetised in May; channels whose host gives an opinion stay paid (secondary source). So a voice alone does not make a reading original; the host's view, bet 1's plan, does.
-- **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1: one recurring show, read on views per upload.
+- **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1, once you switch it on in Studio: one recurring show.
 - **Reddit** reportedly updates on 10 November; today's pages are saved to compare before 14 December.
-- Discarded: three platform changes, none nearer to revenue.
+- Discarded: three platform changes.
 
 ### Proposals for you
-Five new asks, each recommended, none costing money:
+Five new asks, none costing money:
 1. **A replacement source, with a date (#90).** If Reddit hasn't confirmed our app by 14 December, build our own questions as the source, merged switched off; one label turns it on. You can approve the date alone and choose after narrated renders, which only you can make. Both allow earning, unlike Reddit; ours are not a reading and never run out.
 2. **What tests are judged on (#91).** For new tests, the share of plays past the opening, with watch time as the viewer check: watch time shows no link to views, and the Partner Program counts views times that share.
 3. **Two finished jobs: replies to viewers, and an email to you when an upload is missed (#89).** One label applies both and posts the three queued replies that evening, so please read them first.
@@ -101,9 +101,9 @@ Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 J
 ### Next month
 - Bet 1 (#77) decides the month: nothing viewers see changes until it ships.
 - **9 November:** the zero-view re-read by subreddit. **16 November:** are weekly view swings viewers or data. **About 23 November:** the capitals test. **24 November:** the friction log's first verdict. **30 November:** bet 2's four weeks begin.
-- Carried, not done today: shortening the product plan's findings and a word cap per work-log entry.
+- Carried: shortening the product plan's findings and a word cap per work-log entry.
 - **Built (fix, reviewed, merged):** a command listing every past sample video's verdict, which today took digging by hand.
-- **Ranked and dropped:** a screen replay (new tooling); upload delays (ruled out 09-30); a series row (waits on bet 1); subscribers per upload (nearly all zero); late uploads (two).
+- **Ranked and dropped:** a screen replay (new tooling); upload delays (timing showed no effect, 09-30); a series row (waits on bet 1); subscribers per upload (nearly all zero); late uploads (two).
 
 ### Better?
 - **Than last shift:** a little: the source decision and the test measure are now with you.
