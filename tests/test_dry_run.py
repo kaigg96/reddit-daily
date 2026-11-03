@@ -256,7 +256,12 @@ def test_history_is_newest_first_deduplicated_and_filtered(monkeypatch):
         def __init__(self, out, code=0):
             self.stdout, self.returncode, self.stderr = out, code, ""
 
+    calls = []
+
     def fake_run(cmd, **kw):
+        calls.append((cmd, kw.get("cwd")))
+        if cmd[:2] == ["git", "fetch"]:
+            return Done("")
         if cmd[:2] == ["git", "log"]:
             return Done("a\nb\nc\nd\n")
         return Done(files[cmd[2].split(":")[0]])
@@ -265,3 +270,8 @@ def test_history_is_newest_first_deduplicated_and_filtered(monkeypatch):
     renders = dry_run.history()
     assert [r["branch"] for r in renders] == ["strategy/own-questions-sample", "strategy/se-sample"]
     assert [r["branch"] for r in dry_run.history("strategy/se-sample")] == ["strategy/se-sample"]
+    # Verdicts are committed to main, so a branch's own history would miss them;
+    # and the path is resolved from the repository root, wherever it is run.
+    log_calls = [(c, cwd) for c, cwd in calls if c[:2] == ["git", "log"]]
+    assert all("origin/main" in c for c, _ in log_calls)
+    assert all(cwd and os.path.isdir(os.path.join(cwd, "scripts")) for _, cwd in log_calls)

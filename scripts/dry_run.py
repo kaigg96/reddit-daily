@@ -286,9 +286,15 @@ def parse_render(text):
     return render if render["branch"] and render["when"] else None
 
 
-def history(branch=None, cwd=None):
-    """Every render the verdict file has recorded, newest first, deduplicated."""
-    log = subprocess.run(["git", "log", "--format=%H", "--", VERDICT],
+def history(branch=None, cwd=None, ref="origin/main"):
+    """Every render the verdict file has recorded, newest first, deduplicated.
+    Read from main, where dry-run.yml commits verdicts: a feature branch's own
+    history lacks every render since it forked, its own included."""
+    cwd = cwd or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if ref.startswith("origin/"):
+        subprocess.run(["git", "fetch", "-q", "origin", ref.split("/", 1)[1]],
+                       cwd=cwd, capture_output=True)
+    log = subprocess.run(["git", "log", "--format=%H", ref, "--", VERDICT],
                          capture_output=True, text=True, cwd=cwd)
     if log.returncode != 0:
         sys.exit(f"could not read the verdict file's history: {log.stderr.strip()}")
