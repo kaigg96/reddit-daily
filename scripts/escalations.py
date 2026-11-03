@@ -247,11 +247,13 @@ def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
                 if e.code in (404, 410):
                     continue
                 raise
-            for a in ((resp or {}).get("artifacts") or [] if isinstance(resp, dict) else []):
+            for a in (resp.get("artifacts") or [] if isinstance(resp, dict) else []):
+                if a.get("expired"):
+                    continue
                 when = datetime.fromisoformat(str(a.get("expires_at") or "").replace("Z", "+00:00"))
                 if when.tzinfo is None:
                     when = when.replace(tzinfo=timezone.utc)
-                if not a.get("expired") and when - now <= timedelta(days=days):
+                if when - now <= timedelta(days=days):
                     out.append((i, run, when, kept))
     return out
 
