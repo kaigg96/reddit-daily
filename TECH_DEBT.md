@@ -503,8 +503,10 @@ a list nobody can read is the same as no list.
   at risk the access every upload needs. `analysis/topics_cache.json` holds
   ~1,000 question titles (from Reddit, not the API). Not fixed: dropping the
   text columns rewrites production data (CLAUDE.md §4), and history is the
-  owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
-  the text columns at HEAD, leave history. **Closes when** decided there.
+  owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
+  replaced the 11-05 review, held it with five asks open): keep IDs and
+  statistics, drop the text columns at HEAD, leave history. **Closes when**
+  decided there.
 
 - **A failed upload run emails no one (found 2026-11-01, Reliability).**
   GitHub sends a scheduled workflow's failure email to the last editor of its

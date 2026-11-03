@@ -11,6 +11,9 @@ approved escalation is a **work item**, not a question.
                                      # also lists recent refusals
     escalations.py close <n> "what was done"
 
+Both listings first flag any sample render an open ask links whose download
+GitHub deletes within a week, so the evidence outlives the decision.
+
 Needs GH_TOKEN (locally, from .env) or GITHUB_TOKEN (in CI).
 """
 import json
@@ -217,8 +220,67 @@ def _print_owner_last_action(now=None):
           "An ask waiting longer than that waited while they were here (D13).")
 
 
+# A render's download lasts 14 days (dry-run.yml's retention-days), and the
+# owner's decision on one can take longer: on 2026-11-03 the three samples #77
+# and #90 rest on had five days left, and nothing said so. A week's warning
+# outlasts the two dark days a spent weekly allowance has caused.
+EXPIRY_WARN_DAYS = 7
+_RUN_LINK = re.compile(r"/actions/runs/(\d+)")
+
+
+def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
+    """(issue, run, deletion time, copy linked?) for each render an open ask
+    links whose download GitHub deletes within `days`. Asks with no run link
+    cost no artifact request. A run GitHub no longer has (404, 410) is
+    skipped; any other failure raises, for `_print_expiring` to report."""
+    now = now or datetime.now(timezone.utc)
+    out = []
+    for i, _ in issues:
+        text = "\n".join([i.get("body") or ""] + [c.get("body") or "" for c in
+                                                  (_comments(i) if i.get("comments") else [])])
+        # Per ask, not per run: the warning still prints, and says to check.
+        kept = "sample-frames" in text and ".mp4" in text
+        for run in sorted(set(_RUN_LINK.findall(text))):
+            try:
+                resp = _api(f"/repos/{REPO}/actions/runs/{run}/artifacts")
+            except urllib.error.HTTPError as e:
+                if e.code in (404, 410):
+                    continue
+                raise
+            for a in (resp.get("artifacts") or [] if isinstance(resp, dict) else []):
+                if a.get("expired"):
+                    continue
+                when = datetime.fromisoformat(str(a.get("expires_at") or "").replace("Z", "+00:00"))
+                if when.tzinfo is None:
+                    when = when.replace(tzinfo=timezone.utc)
+                if when - now <= timedelta(days=days):
+                    out.append((i, run, when, kept))
+    return out
+
+
+def _print_expiring(issues, now=None):
+    """Context, never the reason the listing fails: a failure says so in one
+    line, so silence always means nothing is about to be deleted."""
+    try:
+        expiring = _expiring(issues, now)
+    except Exception as e:
+        print(f"Sample renders linked from open asks could not be checked for deletion "
+              f"({type(e).__name__}); look before trusting that none is expiring.")
+        return
+    if not expiring:
+        return
+    print(f"SAMPLES GITHUB DELETES WITHIN {EXPIRY_WARN_DAYS} DAYS, linked from an open ask. "
+          "Keep each video on the sample-frames branch and link the copy in the ask "
+          "(an edit sends no email; never edit a body that carries a patch, or "
+          "apply-approved refuses it):")
+    for i, run, when, kept in expiring:
+        print(f"  #{i['number']}  run {run}: deleted {when:%Y-%m-%d %H:%M} UTC"
+              + ("  (the ask links a sample-frames video; check it is this run's)" if kept else ""))
+
+
 def show(want_approved):
     issues = _issues()
+    _print_expiring(issues)
     if not want_approved:
         _print_owner_last_action()
     rows = [(i, l) for i, l in issues if ("approved" in l) == want_approved]
