@@ -378,24 +378,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Outward look:** re-read 10-25; not repeated after three days.
   **Left alone:** the shift cadence and the owner's queue, which no shift
   change moves.
-  **Carried, for one bundled proposal at the 11-05 monthly (not raised now,
-  to keep #77 the owner's only ask):** the upload check's workflow patch
-  (11-01, the item on failure emails below); the re-raise that replaces an issue's
-  body (`process/reraise-replaces-ask`, with the weekly install's pin; a
-  workflow patch, so a label lands it without #50); in the shift skill, the
-  false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
-  #65's sentence; the audit skill's stale "not yet tried". A shift cannot
-  write skill files (refused 10-25), so the issue carries the exact text, as
-  #65 did. **For the same monthly (10-30):** the weekly shift breaker, "a
-  runaway breaker, not a budget" (`shift.yml`), tripped both weeks (210 and
-  228 units against a ceiling near 200; 2 and 5 shifts skipped, recorded
-  nowhere) as units per shift rose from ~11 to ~15: it now sets the pace.
-  **10-31, the arithmetic:** 34 shifts since 10-16 spent 0.357 units a
-  minute, so 200 buys ~560 shift-minutes a week against 1,260 scheduled
-  (21 × 60): 44%. `backlog_status.py`'s "ending early" alarm (#67) asks for
-  full shifts, which the breaker cannot pay for; full hours mean ~9 shifts,
-  then two to three dark days. The owner picks the allowance or the schedule.
-  **Closes when** that bundle is raised, or the next audit.
+  **Raised at the 11-03 monthly:** the upload check's patch beside the reply
+  job's (one bundle ask), the shift and audit skills' stale lines (#65's
+  sentence stays in #65), and the weekly breaker as a schedule ask: at
+  ~12.6–16 units a shift it pays for 13–16 of 21 scheduled shifts, and six
+  ran dark 10-28 to 10-30; the ask proposes two a day. **Still carried:** the
+  re-raise that replaces an issue's body (`process/reraise-replaces-ask`, a
+  workflow patch) and D8's graduation (a skill change), held so that day's
+  asks stayed five. **Closes when** those two are raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
