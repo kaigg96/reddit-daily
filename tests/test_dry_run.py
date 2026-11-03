@@ -211,3 +211,67 @@ def test_next_slot_matches_the_workflow():
                            ".github/workflows/dry-run.yml")).read()
     assert f"-lt {int(dry_run.RENDER_GAP.total_seconds())} ]" in wf
     assert f'"$(date -u +%H)" -lt {dry_run.RESET_HOUR} ]' in wf
+
+
+VERDICT_FILE = """# Dry runs
+
+## Last render
+
+- **Branch:** `strategy/se-sample`
+- **Commit:** `f597d0b`
+- **When:** 2026-10-25T21:54:13Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 37.5 s, audio, no dead air
+
+[Sample video and full output](https://github.com/o/r/actions/runs/40237322778)
+
+## Last request
+
+- **Branch:** `other/branch`
+- **When:** 2026-10-26T09:00:00Z
+"""
+
+
+def test_a_verdict_is_read_from_its_render_section_only():
+    """Each render overwrites the file, so an old sample's verdict lives only in
+    git history; a shift dug two out by hand on 11-03."""
+    assert dry_run.parse_render(VERDICT_FILE) == dict(
+        branch="strategy/se-sample", commit="f597d0b", when="2026-10-25T21:54:13Z",
+        verdict="✅ PASS -- playable: 1080x1920, 30 fps, 37.5 s, audio, no dead air",
+        url="https://github.com/o/r/actions/runs/40237322778")
+
+
+@pytest.mark.parametrize("text", ["", "# Dry runs\n\n## Last request\n\n- **Branch:** `x`\n",
+                                  "## Last render\n\n- **Verdict:** FAIL\n"])
+def test_a_file_without_a_named_render_gives_none(text):
+    assert dry_run.parse_render(text) is None
+
+
+def test_history_is_newest_first_deduplicated_and_filtered(monkeypatch):
+    older = VERDICT_FILE
+    newer = VERDICT_FILE.replace("strategy/se-sample", "strategy/own-questions-sample").replace(
+        "2026-10-25T21:54:13Z", "2026-10-26T09:57:27Z")
+    files = {"a": newer, "b": older, "c": older, "d": "no render here"}
+
+    class Done:
+        def __init__(self, out, code=0):
+            self.stdout, self.returncode, self.stderr = out, code, ""
+
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append((cmd, kw.get("cwd")))
+        if cmd[:2] == ["git", "fetch"]:
+            return Done("")
+        if cmd[:2] == ["git", "log"]:
+            return Done("a\nb\nc\nd\n")
+        return Done(files[cmd[2].split(":")[0]])
+
+    monkeypatch.setattr(dry_run.subprocess, "run", fake_run)
+    renders = dry_run.history()
+    assert [r["branch"] for r in renders] == ["strategy/own-questions-sample", "strategy/se-sample"]
+    assert [r["branch"] for r in dry_run.history("strategy/se-sample")] == ["strategy/se-sample"]
+    # Verdicts are committed to main, so a branch's own history would miss them;
+    # and the path is resolved from the repository root, wherever it is run.
+    log_calls = [(c, cwd) for c, cwd in calls if c[:2] == ["git", "log"]]
+    assert all("origin/main" in c for c, _ in log_calls)
+    assert all(cwd and os.path.isdir(os.path.join(cwd, "scripts")) for _, cwd in log_calls)

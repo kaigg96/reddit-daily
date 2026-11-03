@@ -8,6 +8,7 @@ asks, and `.github/workflows/dry-run.yml` renders:
 
     dry_run.py request <branch>   # queue it, then commit and push the file
     dry_run.py next               # when dry-run.yml will next accept a request
+    dry_run.py history [branch]   # every past verdict, newest first, from git
     dry_run.py pending            # (dry-run.yml) which branch to render
     dry_run.py check <video.mp4>  # (dry-run.yml) is this a playable video?
     dry_run.py record ...         # (dry-run.yml) write the verdict
@@ -266,12 +267,69 @@ def record(args):
     return 0
 
 
+def parse_render(text):
+    """The "Last render" section of a verdict file: {branch, commit, when,
+    verdict, url}, or None. Each commit of the file overwrites the last, so an
+    old verdict -- a source sample's, say -- survives only in git history."""
+    m = re.search(r"^## Last render\n(.*?)(?=^## |\Z)", text or "", re.S | re.M)
+    if not m:
+        return None
+    body = m.group(1)
+
+    def field(name):
+        f = re.search(rf"^- \*\*{name}:\*\* `?([^`\n]*?)`?\s*$", body, re.M)
+        return f.group(1).strip() if f else ""
+
+    url = re.search(r"https://github\.com/[^\s)]+/actions/runs/\d+", body)
+    render = dict(branch=field("Branch"), commit=field("Commit"), when=field("When"),
+                  verdict=field("Verdict"), url=url.group(0) if url else "")
+    return render if render["branch"] and render["when"] else None
+
+
+def history(branch=None, cwd=None, ref="origin/main"):
+    """Every render the verdict file has recorded, newest first, deduplicated.
+    Read from main, where dry-run.yml commits verdicts: a feature branch's own
+    history lacks every render since it forked, its own included."""
+    cwd = cwd or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if ref.startswith("origin/"):
+        subprocess.run(["git", "fetch", "-q", "origin", ref.split("/", 1)[1]],
+                       cwd=cwd, capture_output=True)
+    log = subprocess.run(["git", "log", "--format=%H", ref, "--", VERDICT],
+                         capture_output=True, text=True, cwd=cwd)
+    if log.returncode != 0:
+        sys.exit(f"could not read the verdict file's history: {log.stderr.strip()}")
+    seen, renders = set(), []
+    for sha in log.stdout.split():
+        shown = subprocess.run(["git", "show", f"{sha}:{VERDICT}"],
+                               capture_output=True, text=True, cwd=cwd)
+        render = parse_render(shown.stdout) if shown.returncode == 0 else None
+        if not render or (branch and render["branch"] != branch):
+            continue
+        key = (render["branch"], render["commit"], render["when"])
+        if key not in seen:
+            seen.add(key)
+            renders.append(render)
+    return sorted(renders, key=lambda r: r["when"], reverse=True)
+
+
+def print_history(branch=None):
+    renders = history(branch)
+    if not renders:
+        print(f"no recorded render{' of ' + branch if branch else ''}")
+        return 0
+    for r in renders:
+        verdict = r["verdict"].split(" -- ")[0]
+        print(f"{r['when']}  {r['branch']} @ {r['commit']}  {verdict}  {r['url']}")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("request").add_argument("branch")
     sub.add_parser("next")
+    sub.add_parser("history").add_argument("branch", nargs="?")
     sub.add_parser("pending")
     sub.add_parser("check").add_argument("video")
     r = sub.add_parser("record")
@@ -287,6 +345,8 @@ def main(argv=None):
         return request(a.branch)
     if a.cmd == "next":
         return next_slot()
+    if a.cmd == "history":
+        return print_history(a.branch)
     if a.cmd == "pending":
         return pending()
     if a.cmd == "check":

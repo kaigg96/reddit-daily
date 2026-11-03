@@ -110,7 +110,8 @@ workflow → dry_run: true* — the rendered video is attached as a workflow
 artifact for review. A shift holds no render credentials, so it asks instead:
 `scripts/dry_run.py request <branch>` queues a render that `dry-run.yml` runs
 with no YouTube credentials, recording the verdict in `.github/last-dry-run.md`
-(the video is attached to that run too).
+(the video is attached to that run too). Each render overwrites it; every past
+verdict, newest first: `scripts/dry_run.py history [branch]`.
 
 ## Development workflow (standing convention)
 
