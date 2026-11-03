@@ -82,14 +82,14 @@ and more useful than a confident guess.
 - **New: shifts went dark for two days.** When the weekly usage allowance runs out, shifts are skipped until Friday: six in a row from 28 to 30 October, with nothing checking uploads or money. Ask 4 answers it.
 
 ### Market and policy
-- **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January. Its builder-policy page refused us.
+- **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
 - **Comparable channels:** a 246,000-subscriber Reddit-stories channel with hired human voices was reportedly demonetised in May, while channels whose host gives an opinion stay paid (secondary source). So a voice alone does not make a reading original; the host's view does. That supports bet 1 and changes no decision.
 - **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1: one recurring show, read on views per upload.
 - **Reddit** reportedly updates on 10 November; a shift reads it against 14 December.
 - Discarded: three platform changes that bring no route nearer.
 
 ### Proposals for you
-Five new asks, each with a recommendation, none costing money:
+Five new asks, each recommended, none costing money:
 1. **A replacement source, with a date.** If Reddit hasn't confirmed our app by 14 December, build our own questions as the source, merged switched off; one label turns it on. Both allow earning, unlike Reddit. Ours are not a reading and never run out; Stack Exchange keeps real answers but needs niche sites to fill two a day.
 2. **What tests are judged on.** For new tests, the share of plays that get past the opening, with watch time as the check that viewers aren't worse off. Watch time shows no link to views; the Partner Program's count is views times that share. Rules already set stay.
 3. **Two finished jobs: replies to viewers, and an email to you when an upload is missed.** One label applies both and posts the three queued replies that evening, so please read them first.
@@ -104,7 +104,7 @@ Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 J
 - Carried from the last audit, not done today: shortening the product plan's findings (about 12,000 words) and a word cap per work-log entry.
 
 ### Better?
-- **Than last shift:** a little. The source decision and what tests are judged on are now with you, each settled by one label.
+- **Than last shift:** a little. The source decision and what tests are judged on are now with you.
 - **Than ~10 shifts ago:** no for viewers. Watch time is flat at 12 seconds, bet 1 has not shipped, and the distance to the Partner Program moved only within normal swings.
 - **Than ~100 shifts ago:** too early to say.
 
