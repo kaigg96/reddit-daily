@@ -231,30 +231,40 @@ _RUN_LINK = re.compile(r"/actions/runs/(\d+)")
 def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
     """(issue, run, deletion time, copy linked?) for each render an open ask
     links whose download GitHub deletes within `days`. Asks with no run link
-    cost no request. Never stops the listing: a run that is gone is skipped."""
+    cost no artifact request. A run GitHub no longer has (404, 410) is
+    skipped; any other failure raises, for `_print_expiring` to report."""
     now = now or datetime.now(timezone.utc)
     out = []
     for i, _ in issues:
         text = "\n".join([i.get("body") or ""] + [c.get("body") or "" for c in
                                                   (_comments(i) if i.get("comments") else [])])
+        # Per ask, not per run: the warning still prints, and says to check.
         kept = "sample-frames" in text and ".mp4" in text
         for run in sorted(set(_RUN_LINK.findall(text))):
             try:
                 resp = _api(f"/repos/{REPO}/actions/runs/{run}/artifacts")
-            except (urllib.error.URLError, ValueError):
-                continue
-            for a in (resp.get("artifacts", []) if isinstance(resp, dict) else []):
-                try:
-                    when = datetime.fromisoformat(a["expires_at"].replace("Z", "+00:00"))
-                except (KeyError, TypeError, ValueError):
+            except urllib.error.HTTPError as e:
+                if e.code in (404, 410):
                     continue
+                raise
+            for a in ((resp or {}).get("artifacts") or [] if isinstance(resp, dict) else []):
+                when = datetime.fromisoformat(str(a.get("expires_at") or "").replace("Z", "+00:00"))
+                if when.tzinfo is None:
+                    when = when.replace(tzinfo=timezone.utc)
                 if not a.get("expired") and when - now <= timedelta(days=days):
                     out.append((i, run, when, kept))
     return out
 
 
 def _print_expiring(issues, now=None):
-    expiring = _expiring(issues, now)
+    """Context, never the reason the listing fails: a failure says so in one
+    line, so silence always means nothing is about to be deleted."""
+    try:
+        expiring = _expiring(issues, now)
+    except Exception as e:
+        print(f"Sample renders linked from open asks could not be checked for deletion "
+              f"({type(e).__name__}); look before trusting that none is expiring.")
+        return
     if not expiring:
         return
     print(f"SAMPLES GITHUB DELETES WITHIN {EXPIRY_WARN_DAYS} DAYS, linked from an open ask. "
@@ -263,7 +273,7 @@ def _print_expiring(issues, now=None):
           "apply-approved refuses it):")
     for i, run, when, kept in expiring:
         print(f"  #{i['number']}  run {run}: deleted {when:%Y-%m-%d %H:%M} UTC"
-              + ("  (a sample-frames copy is linked; check it is this one)" if kept else ""))
+              + ("  (the ask links a sample-frames video; check it is this run's)" if kept else ""))
 
 
 def show(want_approved):

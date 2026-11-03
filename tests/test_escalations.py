@@ -336,3 +336,17 @@ def test_a_run_github_no_longer_has_never_stops_the_listing(monkeypatch, capsys)
     escalations._print_expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
     out = capsys.readouterr().out
     assert "#77  run 2: deleted 2026-11-05 00:00 UTC" in out and "run 1" not in out
+
+
+def test_a_failed_expiry_check_says_so_and_the_listing_goes_on(monkeypatch, capsys):
+    """A null deletion date, or a 403 on the artifacts call, is not "nothing
+    expiring": it prints one line, and the decisions still list."""
+    denied = escalations.urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
+    for artifacts in ({"1": [{"expires_at": None, "expired": False}]}, {"1": denied}):
+        issues = [issue(65, "Approved ask", ["needs-owner", "approved"], [], body=f"{RUN}1")]
+        _artifacts_github(monkeypatch, issues, {}, artifacts)
+        monkeypatch.setattr(escalations, "_approved_by_owner", lambda i: True)
+        escalations.show(True)
+        out = capsys.readouterr().out
+        assert "could not be checked for deletion" in out
+        assert "#65  Approved ask" in out
