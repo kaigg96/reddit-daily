@@ -63,45 +63,46 @@ and more useful than a confident guess.
 
 ## 2026-11-03 — Monthly review: no route to revenue is in reach yet; bet 1 still decides the month, and five new asks each need one label
 
-    Worked (% of the shift): gm 25 · strategy 20 · legal 10 · market 10 · data 10 · reliability 10 · finance 5 · monetization 5 · audience 5
+    Worked (% of the shift): gm 25 · data 15 · strategy 15 · legal 10 · market 10 · reliability 10 · finance 5 · monetization 5 · audience 5
 
-**Summary:** For viewers and revenue we are no closer than a month ago: bet 1 has not shipped, and watch time is flat at 12 seconds a view. The next month turns on your label for a revised bet 1 (#77), ideally by 6 November, and on the Reddit registration (#82) before the 14 December date proposed below.
+**Summary:** For viewers and revenue we are no closer than a month ago: bet 1 has not shipped, and watch time is flat at 12 seconds a view. The next month turns on bet 1 (#77), ideally labelled by 6 November, and the Reddit registration (#82) before 14 December.
 
 ### Where we stand
 - **Revenue $0.** About 14,500 plays a quarter get past the opening. The Partner Program needs 10 million (691 times short; a month ago, 757), and 20 million for new applicants from February. We have 23 of the 1,000 subscribers it needs. The nearest route, the 500-subscriber tier, is 207 times short.
 - **Can the current path reach the goal? Not at today's size, plainly.** Every route needs the format to be ours first (bet 1), then far more views per video: even six uploads a day leaves every YouTube route about 70 times short. What would make it known: bet 1's first 20 uploads, then bet 2's four weeks from 30 November.
-- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Next Monday's read checks whether one subreddit is being hidden.
-- **Every function now has work behind it.** Audience (the reply job), monetization (the income read) and market intelligence (studies of paid channels) moved off "none".
+- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Today's checks found no fault in our pipeline; one of the five was age-restricted for a swear in its title, which the filter has refused since 24 October. Next Monday's read checks the other four by subreddit.
+- **Every function now has work behind it:** audience, monetization and market intelligence moved off "none".
 
 ### Money
 - Speech has cost $0.05 so far this month, forecast $0.70 of the $3 budget. Every control at Amazon is intact. Priced this month: four uploads a day at about $1.80 a month. Nothing new spent.
 
 ### Risks
-- **Ratings unchanged.** YouTube's rules and Reddit's terms, read first-hand today, say what they said a month ago: a reading cannot earn, Reddit bars earning from its data, and unregistered apps lose access on 12 January.
+- **Ratings unchanged:** YouTube's rules and Reddit's terms, read first-hand today, say what they said a month ago.
 - **A line we had not recorded:** YouTube's spam policy, which can end a channel, bars "re-posting material from other websites… without adding anything of your own". Bet 1's host reactions already answer it.
-- **New: shifts went dark for two days.** When the weekly usage allowance runs out, shifts are skipped until Friday, three weeks running: six in a row on 28–30 October, with nothing checking uploads or money. Ask 4 answers it.
+- **New: shifts went dark for two days.** When the weekly usage allowance runs out, shifts are skipped until Friday, three weeks running: six in a row on 28–30 October, with nothing checking uploads or money. #92 answers it.
 
 ### Market and policy
 - **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
-- **Comparable channels:** a 246,000-subscriber Reddit-stories channel with hired human voices was reportedly demonetised in May, while channels whose host gives an opinion stay paid (secondary source). So a voice alone does not make a reading original; the host's view does. It supports bet 1.
+- **Comparable channels:** a 246,000-subscriber Reddit-stories channel with human voices was reportedly demonetised in May; channels whose host gives an opinion stay paid (secondary source). So a voice alone does not make a reading original; the host's view does. It supports bet 1.
 - **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1: one recurring show, read on views per upload.
-- **Reddit** reportedly updates on 10 November; a shift reads it against 14 December.
-- Discarded: three platform changes that bring no route nearer.
+- **Reddit** reportedly updates on 10 November; today's pages are saved to compare before 14 December.
+- Discarded: three platform changes, none nearer to revenue.
 
 ### Proposals for you
 Five new asks, each recommended, none costing money:
-1. **A replacement source, with a date.** If Reddit hasn't confirmed our app by 14 December, build our own questions as the source, merged switched off; one label turns it on. You can approve the date alone and choose after hearing narrated renders, which only you can make. Both allow earning, unlike Reddit. Ours are not a reading and never run out; Stack Exchange keeps real answers but needs niche sites.
-2. **What tests are judged on.** For new tests, the share of plays that get past the opening, with watch time as the check that viewers aren't worse off. Watch time shows no link to views; the Partner Program's count is views times that share. Rules already set stay.
-3. **Two finished jobs: replies to viewers, and an email to you when an upload is missed.** One label applies both and posts the three queued replies that evening, so please read them first.
-4. **Two shifts a day instead of three**, so the allowance stops leaving whole days without one.
-5. **Three stale lines in the shift instructions**, fixed to match the tools.
+1. **A replacement source, with a date (#90).** If Reddit hasn't confirmed our app by 14 December, build our own questions as the source, merged switched off; one label turns it on. You can approve the date alone and choose after narrated renders, which only you can make. Both allow earning, unlike Reddit; ours are not a reading and never run out.
+2. **What tests are judged on (#91).** For new tests, the share of plays past the opening, with watch time as the viewer check: watch time shows no link to views, and the Partner Program counts views times that share.
+3. **Two finished jobs: replies to viewers, and an email to you when an upload is missed (#89).** One label applies both and posts the three queued replies that evening, so please read them first.
+4. **Two shifts a day instead of three** (#92), so the allowance stops leaving whole days without one.
+5. **Three stale lines in the shift instructions** (#88), fixed to match the tools.
 
-Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 January), #86 (closes if ask 3 lands), #65 (your "yes" to the corrected sentence), #80, #59.
+Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 January), #86 (closes if #89 lands), #65, #80, #59.
 
 ### Next month
 - Bet 1 (#77) decides the month: nothing viewers see changes until it ships.
 - **9 November:** the zero-view re-read by subreddit. **16 November:** are weekly view swings viewers or data. **About 23 November:** the capitals test. **24 November:** the friction log's first verdict. **30 November:** bet 2's four weeks begin.
 - Carried, not done today: shortening the product plan's findings and a word cap per work-log entry.
+- **Ranked and dropped:** replaying the screen on the four (new tooling); upload delays (timing ruled out 09-30); a series row (waits on bet 1); subscribers per upload (nearly all zero); late uploads (only two).
 
 ### Better?
 - **Than last shift:** a little: the source decision and the test measure are now with you.
