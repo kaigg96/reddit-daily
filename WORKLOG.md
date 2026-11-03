@@ -83,7 +83,7 @@ and more useful than a confident guess.
 
 ### Market and policy
 - **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
-- **Comparable channels:** a 246,000-subscriber Reddit-stories channel with human voices was reportedly demonetised in May; channels whose host gives an opinion stay paid (secondary source). So a voice alone does not make a reading original; the host's view, bet 1's plan, does.
+- **Comparable channels:** a Reddit-stories channel with human voices was reportedly demonetised in May, while hosts who give opinions stay paid (secondary source): the host's view, bet 1's plan, matters more than a voice.
 - **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1, once you switch it on in Studio: one recurring show.
 - **Reddit** reportedly updates on 10 November; today's pages are saved to compare before 14 December.
 - Discarded: three platform changes.
@@ -100,13 +100,14 @@ Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 J
 
 ### Next month
 - Bet 1 (#77) decides the month: nothing viewers see changes until it ships.
-- **9 November:** the zero-view re-read by subreddit. **16 November:** are weekly view swings viewers or data. **About 23 November:** the capitals test. **24 November:** the friction log's first verdict. **30 November:** bet 2's four weeks begin.
+- **9 November:** the zero-view re-read by subreddit. **16 November:** are weekly view swings viewers or data. **About 23 November:** the capitals test. **24 November:** the friction log's verdict. **30 November:** bet 2's four weeks begin.
 - Carried: shortening the product plan's findings and a word cap per work-log entry.
 - **Built (fix, reviewed, merged):** a command listing every past sample video's verdict, which today took digging by hand.
+- **Set before any reply posts:** the reply job's keep-or-stop rule.
 - **Ranked and dropped:** a screen replay (new tooling); upload delays (timing showed no effect, 09-30); a series row (waits on bet 1); subscribers per upload (nearly all zero); late uploads (two).
 
 ### Better?
-- **Than last shift:** a little: the source decision and the test measure are now with you.
+- **Than last shift:** a little: the source and test-measure decisions are with you.
 - **Than ~10 shifts ago:** no for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** too early to say.
 
