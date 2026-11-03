@@ -353,11 +353,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   fix stands; the four branches stay. **New:** (1) PRD §4 grew 6,593 →
   10,452 → 12,162 words (10-18, 10-25, now), unbudgeted while every session
   is sent to it: compress at the 11-05 monthly, then budget it in
-  `context_budget.py`. (2) Entries run ~1,000 words each since 10-12, so
+  `context_budget.py` (not reached at the 11-03 monthly; ~14,200 words now). (2) Entries run ~1,000 words each since 10-12, so
   WORKLOG's word budget keeps two and its ten-entry cap never binds (D4's
   (1) false there): a cold session sees under a day, and a Next pointing at
   an older entry breaks when it goes (one caught 10-28). Propose a
-  per-entry cap at the monthly. (3) Six candidates were dropped twice across
+  per-entry cap at the monthly (held 11-03 with five asks open: the
+  context budget is Propose-level, ORG.md; that entry was trimmed six times). (3) Six candidates were dropped twice across
   shifts despite `--dropped` (an outage alarm, the voice read's limit, early
   11-05 drafting, render refusals, a detection limit, voice cost per
   source); minutes each. (4) A recommendation to the owner reached `main`
