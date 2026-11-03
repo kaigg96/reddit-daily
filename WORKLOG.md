@@ -70,7 +70,7 @@ and more useful than a confident guess.
 ### Where we stand
 - **Revenue $0.** About 14,500 plays a quarter get past the opening. The Partner Program needs 10 million (691 times short; a month ago, 757), and 20 million for new applicants from February. We have 23 of the 1,000 subscribers it needs. The nearest route, the 500-subscriber tier, is 207 times short.
 - **Can the current path reach the goal? Not at today's size, plainly.** Every route needs the format to be ours first (bet 1), then far more views per video: six uploads a day leaves every YouTube route at least 70 times short. What would make it known: bet 1's first 20 uploads, then bet 2's four weeks from 30 November.
-- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Today's checks found no fault in our pipeline; of the five old enough to check, one was age-restricted for a swear in its title, which the filter has refused since 24 October. Next Monday's read checks the other four by subreddit.
+- **One warning is real, not noise.** Uploads with no views at a week old rose from 1 in 41 to 6 in 34. It has fired on 3 of the last 5 weekly reads, and held at matched ages. Today's checks found no shared fault in our pipeline; of the five old enough to check, one was age-restricted for a swear in its title, which the filter has refused since 24 October. Next Monday's read checks the other four by subreddit.
 - **Every function now has work behind it:** audience, monetization and market intelligence moved off "none".
 
 ### Money
