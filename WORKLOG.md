@@ -82,9 +82,9 @@ and more useful than a confident guess.
 - **New: shifts went dark for two days.** When the weekly usage allowance runs out, shifts are skipped until Friday, three weeks running: six in a row on 28–30 October, with nothing checking uploads or money. #92 answers it.
 
 ### Market and policy
-- **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms (last revised March and July). Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
+- **Policy pages:** no change to YouTube's eligibility, monetization, Shorts or spam pages, or to Reddit's terms. Reddit's registration page confirms 12 January; its builder-policy page refused us. No new asset needs a licence check.
 - **Comparable channels:** a Reddit-stories channel with human voices was reportedly demonetised in May, while hosts who give opinions stay paid (secondary source): the host's view, bet 1's plan, matters more than a voice.
-- **New on YouTube:** Shorts can be grouped into a series (YouTube's blog, 27 October). A free test after bet 1, once you switch it on in Studio: one recurring show.
+- **New on YouTube:** Shorts can be grouped into a series. A free test after bet 1, once you switch it on in Studio: one recurring show.
 - **Reddit** reportedly updates on 10 November; today's pages are saved to compare before 14 December.
 - Discarded: three platform changes.
 
@@ -96,10 +96,11 @@ Five new asks, none costing money:
 4. **Two shifts a day instead of three** (#92), so no day goes without one.
 5. **Three stale lines in the shift instructions** (#88), fixed to match the tools.
 
-Still waiting, in order: #77 (bet 1, by about 6 November), #82 (register by 12 January), #86 (closes if #89 lands), #65, #80, #59.
+Still waiting: #77 (bet 1, by about 6 November), #82 (register by 12 January), #86 (closes if #89 lands), #65, #80, #59.
 
 ### Next month
 - Bet 1 (#77) decides the month: nothing viewers see changes until it ships.
+- **Results night:** read tonight's and tomorrow morning's narration for election claims.
 - **9 November:** the zero-view re-read by subreddit. **16 November:** are weekly view swings viewers or data. **About 23 November:** the capitals test. **24 November:** the friction log's verdict. **30 November:** bet 2's four weeks begin.
 - Carried: shortening the product plan's findings and a word cap per work-log entry.
 - **Built (fix, reviewed, merged):** a command listing every past sample video's verdict, which today took digging by hand.
