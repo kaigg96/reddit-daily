@@ -426,7 +426,10 @@ def _strip_quotes(value):
     quoted question: "3 answers to 'House and Senate are Blue, how are we
     feeling?" shipped on 2026-11-04. A quote at either end now goes only when
     it wraps the whole text or has no partner inside it, so an apostrophe
-    ("you'd") is never read as one."""
+    ("you'd") is never read as one. Still wrong, none seen in the upload log:
+    a text that opens and closes on its own quotes loses both ("'Dream' jobs
+    that are a 'nightmare'"), and a stray end quote stays after an apostrophe
+    that starts a word ("Best of the '90s'")."""
     value, before = value.strip(), None
     while value != before:
         before = value
