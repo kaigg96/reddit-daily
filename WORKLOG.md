@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-04 (19:25) — Two defects viewers could see were found in what we actually shipped; one is fixed, the other waits on a sample video
+
+    Worked (% of the shift): product 35 · reliability 25 · data 20 · gm 10 · legal 5 · security 5
+
+**Summary:** Reading what the channel actually published turned up two text defects, and both now have fixes. Titles that end on a quoted question no longer lose the closing quote; that fix is live. In the title-capitals test, the no-capitals group was also getting an all-lower-case closing line (11 of its 27 videos), which can skew that test's 23 November result; that fix waits on a sample video. Separately, this morning's shift lost its hour by waiting on work it had sent to the background. A guard against that needs your label.
+
+### Toward revenue
+- **Indirectly, by protecting a decision.** The capitals test decides how every future title is written. Its no-capitals group was also ending on a closing line with no capital letter, shown on screen and posted as our comment, in 11 of its 27 uploads, against none in the other group. That could make capitals look better than they are, so the 23 November read must now give the same answer with those 11 left out. The tool to do that is built.
+- **Viewer-facing fix, live:** this morning's title shipped as "3 answers to 'House and Senate are Blue, how are we feeling?", missing its closing quote. That can't happen again. It was 1 of 217 uploads.
+
+### Done
+- **Product (fix, live):** the title fix above. Before merging I replayed every published title and Reddit question through the old and new versions, which caught two of my own mistakes that the tests had missed.
+- **Product (fix, built, not live):** an all-lower-case closing line now ships with sentence capitals. Of the 151 closing lines I could recover, only those 11 change. It changes what is on screen, so it needs a sample video first. I didn't request one, because tonight's upload hadn't started and it would have fallen inside the protected hour before it.
+- **Data (built, live):** the reporting tool can now leave a list of uploads out of a read. Reviewed; its one finding is fixed.
+- **Reliability (diagnosis):** the 10:54 shift didn't crash. It started its idea generator in the background and ended its turn to wait, and in a scheduled run that ends the job. I wrote a guard that refuses background work in scheduled shifts only, but the files it belongs in are protected from shifts, so it is with you as a ready patch (new ask, below). This shift kept all its helpers in the foreground.
+- **Legal (results night, last day):** this morning's narration is reactions to the results. None of it covers voting procedure or claims fraud. The check is closed.
+- **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.10 this month, forecast $0.74 of $3).
+- AI use: no Gemini requests, no Polly, no sample video. Three fresh reviews, all foreground.
+
+### Blocked
+- **New for you:** label the background-work guard `approved` (one label; it spends nothing and weakens no control). Then, as before: #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #88, #86, #65 (still waiting on your reply), #80, #59.
+
+### Next
+- **03:17 shift:** request the sample video for the closing-line fix, and merge it on a pass. I recommend no format-version bump: like the 14 October title fix, it repairs a leak inside the capitals test, and a bump would split this version's uploads mid-test.
+- Log the closing line beside the title in the upload log. It took 151 run logs to count this, and those logs expire after 90 days.
+- Carried: 6 November (#77 fallback, which I'd still not ship), 9 November zero-view re-read, 10 November Reddit terms, 16 November view-swing read, 23 November capitals read (both ways, as above).
+
+### Better?
+- **Than last shift:** yes, a little. One viewer-facing defect is fixed, and a skew in the next test read was caught before the read rather than after.
+- **Than ~10 shifts ago:** no for viewers: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-04 (00:25) — Nothing was ready, and two rounds of new ideas found nothing worth doing; bet 1 still waits on your label, ideally by 6 November
 
     Worked (% of the shift): gm 50 · data 15 · legal 10 · audience 10 · reliability 10 · security 5
@@ -90,44 +124,6 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no. One stale instruction was withdrawn; nothing else moved.
-- **Than ~10 shifts ago:** no for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-03 (19:25) — The three sample videos your open decisions rest on were due for deletion on 8–9 November; they are now kept
-
-    Worked (% of the shift): gm 50 · legal 20 · reliability 10 · audience 10 · security 10
-
-**Summary:** Nothing viewers see changed, and bet 1 still waits on your label (#77, ideally by 6 November). GitHub deletes every sample video 14 days after it is made, so bet 1's sample and both replacement-source samples would have vanished on 8–9 November, before #90's 14 December decision. They are now kept, and both issues link the copies.
-
-### Toward revenue
-- **Nothing directly.** Everything viewers would see waits on bet 1 (#77), and the channel is flat at 12 seconds watched per view.
-- **Protecting the decision that matters most.** Bet 1's sample (#77) is the video you were asked to judge. A new render would write different host lines, so the one you were shown could not be made again. A copy now stays on a branch with no expiry date, linked under the original in #77. #90's two samples are kept the same way.
-
-### Done
-- **General management (fix):** kept the three sample videos (above). I edited the issue text rather than commenting, so no extra email. #89's text was left alone, since editing it would stop its patch from applying.
-- **Legal (results night):** read the narration of the last two uploads before tonight's: none says anything about voting or the election. Tonight's had not started by the time I handed over.
-- **Legal (answered, dropped):** should answers, not only questions, be screened for voting claims until 10 November? In 5 of 993 past uploads an answer mentioned voting under a question that wasn't about it, and none gave voting information. Too rare for a release in the window's last week, so the check stays a read.
-- **Audience (fix):** checked the three replies #89 would post. The one stating a legal fact ("US courts have allowed some deception during questioning") is accurate, and the note sits beside it in the list #89 links.
-- **General management (ranking):** nothing was ready. A fresh agent proposed eight ideas and I added two. Two rankers, reading in opposite orders, both put the sample videos first, results night second and the reply check third. Dropped: a fallback plan if #77 slips (on 6 November only if still unlabelled: it would be a twelfth ask); a cut for Monday's zero-view read (chosen after the fact); Groq's newer models (two failed already); run lateness against four a day (a month away); the election skip's end date (ends by itself); the run logs (nothing exposed); compressing the findings (not in 30 minutes). A second round, aimed at deadlines that could pass unnoticed and at functions rarely worked, ranked the same two ways, put two dated checks first and the expiry warning third (all three below). Dropped from it: an age limit on queued replies (nothing posts until #89; recorded beside the reply rule for before 16 November); a record of bet 2's lost weeks (bookkeeping); closing an old weekly digest (changes nothing); which comments download each reply read uses (the fix that matters is keeping the file). A third round, aimed at income, distribution and market work, found nothing worth ten minutes: a views prediction for Monday (the 16 November read already tests the swings), two stale figures that change no decision, the TikTok route's country rule (followers bind, not country), and the Claude plan (dropped before).
-- **General management (fix, live):** the list of your decisions that every shift reads first now warns when a sample video an open ask links is within a week of deletion, and says whether a kept copy is linked. Today it names the three above, each with its copy; reviewed.
-- **Legal (fix):** the check of Reddit's terms against today's saved copies, due on or after 10 November, now has a dated row that the weekly review lists, rather than only a sentence. It must happen before #90's 14 December date.
-- **General management:** two lines pointed at the 5 November review, which the monthly replaced; each now says where its item went.
-- **Reliability:** both uploads on 2 November and this morning's landed; the afternoon runs were the planned no-ops. Tonight's run had not started at handover; scheduled jobs have run hours late all week.
-- **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.05 this month, forecast $0.71 of $3).
-- AI use: none from the upload allowance; no Polly; no sample video.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 6 November), #82 (register by 12 January), #89, #90, #91, #92, #88, #86, #65, #80, #59. Nothing new was added.
-
-### Next
-- **Results night, continued:** check tonight's upload landed, then read its narration and tomorrow morning's for election claims. The upload run's log prints every spoken line.
-- **6 November:** if #77 is still unlabelled, decide whether a fallback is worth a twelfth ask.
-- Carried from the monthly: 9 November's zero-view re-read by subreddit, 16 November's view-swing read.
-
-### Better?
-- **Than last shift:** a little, defensively: the evidence for your two biggest open decisions no longer expires.
 - **Than ~10 shifts ago:** no for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
 - **Than ~100 shifts ago:** too early to say.
 
