@@ -939,6 +939,20 @@ def test_ids_within_filters_the_trajectory_on_logged_fields():
         insights.ids_within("bg_clip!=pexels_1", log)
 
 
+def test_a_read_can_leave_out_a_list_of_uploads():
+    """#14's read must hold without the 11 uploads whose closing line shipped
+    all lower case (PRD §4, 2026-11-04), which no logged field marks."""
+    log = [{"video_id": i, "post_title": t} for i, t in
+           (("a", "Why, though?"), ("b", "q"), ("c", "q"), ("d", "q"))]
+    assert insights.ids_within("video_id!=a,c", log) == {"b", "d"}
+    assert insights.ids_within("video_id=a, c", log) == {"a", "c"}
+    # A value that itself holds a comma still matches whole
+    assert insights.ids_within("post_title=Why, though?", log) == {"a"}
+    # One mistyped id in the list is refused, not silently kept in
+    with pytest.raises(ValueError, match="video_id=x"):
+        insights.ids_within("video_id!=a,x", log)
+
+
 def test_a_release_that_shifts_video_length_says_so():
     """R2: the b-roll switch moved median length 19.3s -> 20.4s, and longer
     videos hold more watch-seconds, so the verdict line must carry it."""
