@@ -48,6 +48,11 @@ FIELDS = [
     # Added 2026-10-09 (PRD §0 #14): the title's capitals arm, 1 or 0, blank
     # when the title fell back to the Reddit question and no arm applied.
     "title_caps",
+    # Added 2026-11-04: the closing line as shipped (spoken, captioned and
+    # posted as our comment; cta_ok says whether it was written for the post).
+    # It was only in the run log, so #14's arm leaking into it went unseen for
+    # four weeks and took 151 run logs to count (PRD §4); those logs expire.
+    "cta",
 ]
 
 
