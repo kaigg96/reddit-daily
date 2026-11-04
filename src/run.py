@@ -235,6 +235,7 @@ def main():
         "meta_failure": meta.failure,
         "screen_failure": post.screen_failure,
         "title_caps": title_caps_logged,
+        "cta": outro_text,
     })
 
 
