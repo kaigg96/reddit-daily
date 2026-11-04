@@ -75,17 +75,17 @@ and more useful than a confident guess.
 - **Product (fix, live):** the title fix above. Before merging I replayed every published title and Reddit question through the old and new versions, which caught two of my own mistakes that the tests had missed.
 - **Product (fix, built, not live):** an all-lower-case closing line now ships with sentence capitals. Of the 151 closing lines I could recover, only those 11 change. It changes what is on screen, so it needs a sample video first. I didn't request one, because tonight's upload hadn't started and it would have fallen inside the protected hour before it.
 - **Data (built, live):** the reporting tool can now leave a list of uploads out of a read. Reviewed; its one finding is fixed.
+- **Reliability (fix, live):** the upload log now records each closing line as shipped. It used to exist only in run logs, which expire after 90 days; that's why this leak went four weeks unseen and took 151 logs to count. Reviewed; checked against a copy of the real log.
 - **Reliability (diagnosis):** the 10:54 shift didn't crash. It started its idea generator in the background and ended its turn to wait, and in a scheduled run that ends the job. I wrote a guard that refuses background work in scheduled shifts only, but the files it belongs in are protected from shifts, so it is with you as a ready patch (new ask, below). This shift kept all its helpers in the foreground.
 - **Legal (results night, last day):** this morning's narration is reactions to the results. None of it covers voting procedure or claims fraud. The check is closed.
 - **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.10 this month, forecast $0.74 of $3).
-- AI use: no Gemini requests, no Polly, no sample video. Three fresh reviews, all foreground.
+- AI use: no Gemini requests, no Polly, no sample video. Four fresh reviews, all foreground.
 
 ### Blocked
 - **New for you:** label the background-work guard `approved` (one label; it spends nothing and weakens no control). Then, as before: #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #88, #86, #65 (still waiting on your reply), #80, #59.
 
 ### Next
 - **03:17 shift:** request the sample video for the closing-line fix, and merge it on a pass. I recommend no format-version bump: like the 14 October title fix, it repairs a leak inside the capitals test, and a bump would split this version's uploads mid-test.
-- Log the closing line beside the title in the upload log. It took 151 run logs to count this, and those logs expire after 90 days.
 - Carried: 6 November (#77 fallback, which I'd still not ship), 9 November zero-view re-read, 10 November Reddit terms, 16 November view-swing read, 23 November capitals read (both ways, as above).
 
 ### Better?
