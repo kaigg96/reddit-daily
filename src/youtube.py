@@ -149,3 +149,45 @@ def post_comment(video_id, text):
     except Exception as e:
         print(f"::warning::Failed to post comment (continuing): {type(e).__name__}: {e}")
         return False
+
+
+class ReplyClient:
+    """What the reply job (PLAN C10, src/replies.py post_due) reads and posts,
+    over one authenticated Data API resource. force-ssl, as post_comment."""
+
+    def __init__(self, youtube=None):
+        self.yt = youtube or build("youtube", "v3", credentials=_authenticate())
+
+    def channel_id(self):
+        """Our own channel's ID, to tell our comments from viewers'."""
+        items = self.yt.channels().list(part="id", mine=True).execute().get("items", [])
+        return items[0]["id"] if items else None
+
+    def comment(self, parent_id):
+        """(author channel ID, text) of a top-level comment, None once it is gone."""
+        items = self.yt.comments().list(part="snippet", id=parent_id,
+                                        textFormat="plainText").execute().get("items", [])
+        if not items:
+            return None
+        snip = items[0]["snippet"]
+        # textOriginal is guaranteed only to the comment's author; textDisplay,
+        # in plain text, is what the weekly collection reads too.
+        return ((snip.get("authorChannelId") or {}).get("value"),
+                snip.get("textDisplay") or snip.get("textOriginal") or "")
+
+    def replied(self, parent_id, channel_id):
+        """Has `channel_id` already replied to this comment?"""
+        request = self.yt.comments().list(part="snippet", parentId=parent_id, maxResults=100)
+        while request is not None:
+            page = request.execute()
+            if any((i["snippet"].get("authorChannelId") or {}).get("value") == channel_id
+                   for i in page.get("items", [])):
+                return True
+            request = self.yt.comments().list_next(request, page)
+        return False
+
+    def post(self, parent_id, text):
+        """Post one reply; True once YouTube accepted it."""
+        self.yt.comments().insert(part="snippet",
+                                  body={"snippet": {"parentId": parent_id, "textOriginal": text}}).execute()
+        return True

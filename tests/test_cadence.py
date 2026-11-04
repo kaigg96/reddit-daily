@@ -162,3 +162,21 @@ def test_upcoming_before_mondays_snapshot_and_with_the_job_stuck():
     # Wednesday with Monday's job stuck: next Monday, not a date already past.
     nxt = c.upcoming(held, D("2026-11-04"), D("2026-10-26"))
     assert nxt["weekly"] == nxt["monthly"] == D("2026-11-09")
+
+
+def test_due_reads_lists_unread_ledger_rows_due_by_the_snapshot(tmp_path):
+    ledger = tmp_path / "experiments.csv"
+    ledger.write_text(
+        "id,due,read,verdict\n"
+        "a,2026-11-02,,pending\n"        # due on the snapshot: owed
+        "b,2026-10-26,,\n"               # due earlier, never read: owed
+        "c,2026-11-02,2026-11-02,keep\n"  # read
+        "d,2026-11-09,,pending\n"        # not yet due
+        "e,,,pending\n"                  # undated
+        "f,2026-11-02,,drop\n"           # closed without a read
+        "g,2026-02-30,,pending\n"        # not a real date: undated, no crash
+        "h,2026-11-01,, \n",             # a blank verdict is pending, as insights reads it
+        encoding="utf-8")
+    assert c.due_reads(D("2026-11-02"), ledger) == ["a", "b", "h"]
+    assert c.due_reads(None, ledger) == []
+    assert c.due_reads(D("2026-11-02"), tmp_path / "missing.csv") == []

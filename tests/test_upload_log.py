@@ -55,3 +55,16 @@ def test_a_migration_still_rewrites_the_header(tmp_path):
     log._migrate_header(path, ["timestamp_utc", "video_id", "new_column"])
     assert path.read_text().splitlines() == ["timestamp_utc,video_id,new_column", "2026-10-01,a,"]
     assert not (tmp_path / "upload_log.csv.tmp").exists()
+
+
+def test_the_closing_line_is_logged_whole_and_old_rows_stay_blank(monkeypatch, tmp_path):
+    """Added 2026-11-04: the closing line lived only in the run log (PRD §4)."""
+    path = tmp_path / "upload_log.csv"
+    old = [f for f in log.FIELDS if f != "cta"]
+    path.write_text(",".join(old) + "\n" + ",".join("x" for _ in old) + "\n")
+    monkeypatch.setattr(log.config, "UPLOAD_LOG", path)
+    line = "Married a 'bad boy'? Share your story, \"honestly\", below!"
+    log.append_upload_log({"video_id": "new", "cta": line})
+    rows = list(csv.DictReader(path.open(newline="")))
+    assert list(rows[0]) == log.FIELDS
+    assert (rows[0]["cta"], rows[1]["cta"]) == ("", line)

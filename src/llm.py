@@ -794,8 +794,67 @@ def _clean_str(value):
     if not isinstance(value, str):
         return None
     value = re.sub(r"[*_`]", "", value)                    # markdown emphasis
-    value = re.sub(r"\s+", " ", value).strip().strip('"').strip("'").strip()
+    value = _strip_quotes(re.sub(r"\s+", " ", value))
     return value or None
+
+
+def _strip_quotes(value):
+    """Take off the quotes a reply comes wrapped in, keeping any the text uses.
+
+    `.strip('"').strip("'")` took the closing quote off a title that ends on a
+    quoted question: "3 answers to 'House and Senate are Blue, how are we
+    feeling?" shipped on 2026-11-04. A quote at either end now goes only when
+    it wraps the whole text or has no partner inside it, so an apostrophe
+    ("you'd") is never read as one. Still wrong, none seen in the upload log:
+    a text that opens and closes on its own quotes loses both ("'Dream' jobs
+    that are a 'nightmare'"), and a stray end quote stays after an apostrophe
+    that starts a word ("Best of the '90s'")."""
+    value, before = value.strip(), None
+    while value != before:
+        before = value
+        # A matching pair is peeled even when it could be the text's own: a
+        # plural possessive ("Pets' secret") reads as a closing quote, so
+        # pairing would leave a wrapped title its opening quote.
+        if len(value) >= 2 and value[0] in "\"'" and value[-1] == value[0]:
+            value = value[1:-1].strip()
+        if value and value[0] in "\"'" and _partner(value) is None:
+            value = value[1:].strip()
+        if value and value[-1] in "\"'" and not _left_open(value):
+            value = value[:-1].strip()
+    return value
+
+
+def _quote_kind(value, i):
+    """A quote opens at the start or after a space or bracket and closes before
+    the end, a space or punctuation; the one in "you'd" does neither."""
+    before, after = value[i - 1:i], value[i + 1:i + 2]
+    if (not before or before in " ([:\"'") and after and not after.isspace() and after not in "\"'":
+        return 1
+    if before and not before.isspace() and (not after or after in " .,?!:;)]\"'"):
+        return -1
+    return 0
+
+
+def _partner(value):
+    """Where the quote at value[0] is closed, or None. A single quote after an
+    s may be a plural possessive ("'Pets' toys"), so it closes nothing."""
+    depth = 0
+    for i in range(1, len(value)):
+        if value[i] == value[0]:
+            kind = _quote_kind(value, i)
+            if kind < 0 and not depth and not (value[0] == "'" and value[i - 1] in "sS"):
+                return i
+            depth = max(0, depth + kind)
+    return None
+
+
+def _left_open(value):
+    """Whether a quote like the last character is still open before it."""
+    depth = 0
+    for i in range(len(value) - 1):
+        if value[i] == value[-1]:
+            depth = max(0, depth + _quote_kind(value, i))
+    return depth > 0
 
 
 def _clean_published(value):
@@ -941,7 +1000,7 @@ def sanitize_title(title, fallback, max_len=100):
     """Strip LLM artifacts (R0.5). 100 is YouTube's title limit."""
     if not title:
         return fallback[:max_len]
-    title = re.sub(r"\s+", " ", title).strip().strip('"').strip("'").strip()
+    title = _strip_quotes(re.sub(r"\s+", " ", title))
     if not title:
         return fallback[:max_len]
     return title[:max_len]

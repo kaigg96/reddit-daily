@@ -262,7 +262,7 @@ def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
 def test_the_upload_log_carries_the_host_line_count():
     import inspect
     from src import log
-    assert log.FIELDS[-1] == "host_lines"
+    assert "host_lines" in log.FIELDS[log.FIELDS.index("title_caps"):]   # appended, not inserted
     assert '"host_lines": host_lines' in inspect.getsource(run.main)
 
 

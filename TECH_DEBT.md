@@ -353,11 +353,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   fix stands; the four branches stay. **New:** (1) PRD §4 grew 6,593 →
   10,452 → 12,162 words (10-18, 10-25, now), unbudgeted while every session
   is sent to it: compress at the 11-05 monthly, then budget it in
-  `context_budget.py`. (2) Entries run ~1,000 words each since 10-12, so
+  `context_budget.py` (not reached at the 11-03 monthly; ~14,200 words now). (2) Entries run ~1,000 words each since 10-12, so
   WORKLOG's word budget keeps two and its ten-entry cap never binds (D4's
   (1) false there): a cold session sees under a day, and a Next pointing at
   an older entry breaks when it goes (one caught 10-28). Propose a
-  per-entry cap at the monthly. (3) Six candidates were dropped twice across
+  per-entry cap at the monthly (held 11-03 with five asks open: the
+  context budget is Propose-level, ORG.md; that entry was trimmed six times). (3) Six candidates were dropped twice across
   shifts despite `--dropped` (an outage alarm, the voice read's limit, early
   11-05 drafting, render refusals, a detection limit, voice cost per
   source); minutes each. (4) A recommendation to the owner reached `main`
@@ -378,24 +379,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Outward look:** re-read 10-25; not repeated after three days.
   **Left alone:** the shift cadence and the owner's queue, which no shift
   change moves.
-  **Carried, for one bundled proposal at the 11-05 monthly (not raised now,
-  to keep #77 the owner's only ask):** the upload check's workflow patch
-  (11-01, the item on failure emails below); the re-raise that replaces an issue's
-  body (`process/reraise-replaces-ask`, with the weekly install's pin; a
-  workflow patch, so a label lands it without #50); in the shift skill, the
-  false "cannot read Actions logs", the floor (3 in prose, 5 in code), and
-  #65's sentence; the audit skill's stale "not yet tried". A shift cannot
-  write skill files (refused 10-25), so the issue carries the exact text, as
-  #65 did. **For the same monthly (10-30):** the weekly shift breaker, "a
-  runaway breaker, not a budget" (`shift.yml`), tripped both weeks (210 and
-  228 units against a ceiling near 200; 2 and 5 shifts skipped, recorded
-  nowhere) as units per shift rose from ~11 to ~15: it now sets the pace.
-  **10-31, the arithmetic:** 34 shifts since 10-16 spent 0.357 units a
-  minute, so 200 buys ~560 shift-minutes a week against 1,260 scheduled
-  (21 × 60): 44%. `backlog_status.py`'s "ending early" alarm (#67) asks for
-  full shifts, which the breaker cannot pay for; full hours mean ~9 shifts,
-  then two to three dark days. The owner picks the allowance or the schedule.
-  **Closes when** that bundle is raised, or the next audit.
+  **Raised at the 11-03 monthly:** the upload check's patch beside the reply
+  job's (one bundle ask), the shift and audit skills' stale lines (#65's
+  sentence stays in #65), and the weekly breaker as a schedule ask: at
+  ~12.6–16 units a shift it pays for 13–16 of 21 scheduled shifts, and six
+  ran dark 10-28 to 10-30; the ask proposes two a day. **Still carried:** the
+  re-raise that replaces an issue's body (`process/reraise-replaces-ask`, a
+  workflow patch) and D8's graduation (a skill change), held so that day's
+  asks stayed five. **Closes when** those two are raised, or the next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
@@ -512,8 +503,10 @@ a list nobody can read is the same as no list.
   at risk the access every upload needs. `analysis/topics_cache.json` holds
   ~1,000 question titles (from Reddit, not the API). Not fixed: dropping the
   text columns rewrites production data (CLAUDE.md §4), and history is the
-  owner's. **Recommend** at the 11-05 review: keep IDs and statistics, drop
-  the text columns at HEAD, leave history. **Closes when** decided there.
+  owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
+  replaced the 11-05 review, held it with five asks open): keep IDs and
+  statistics, drop the text columns at HEAD, leave history. **Closes when**
+  decided there.
 
 - **A failed upload run emails no one (found 2026-11-01, Reliability).**
   GitHub sends a scheduled workflow's failure email to the last editor of its

@@ -939,6 +939,23 @@ def test_ids_within_filters_the_trajectory_on_logged_fields():
         insights.ids_within("bg_clip!=pexels_1", log)
 
 
+def test_a_read_can_leave_out_a_list_of_uploads():
+    """#14's read must hold without the 11 uploads whose closing line shipped
+    all lower case (PRD §4, 2026-11-04), which no logged field marks."""
+    log = [{"video_id": i, "post_title": t} for i, t in
+           (("a", "Why, though?"), ("b", "q"), ("c", "q"), ("d", "q"))]
+    assert insights.ids_within("video_id!=a,c", log) == {"b", "d"}
+    assert insights.ids_within("video_id=a, c", log) == {"a", "c"}
+    # A value that itself holds a comma still matches whole
+    assert insights.ids_within("post_title=Why, though?", log) == {"a"}
+    # One mistyped id in the list is refused, not silently kept in
+    with pytest.raises(ValueError, match="video_id=x"):
+        insights.ids_within("video_id!=a,x", log)
+    for blanks in (",", " , ", ",,"):
+        with pytest.raises(ValueError):
+            insights.ids_within(f"video_id!={blanks}", log)
+
+
 def test_a_release_that_shifts_video_length_says_so():
     """R2: the b-roll switch moved median length 19.3s -> 20.4s, and longer
     videos hold more watch-seconds, so the verdict line must carry it."""
@@ -2737,3 +2754,28 @@ def test_watch_reach_verdict_applies_the_rule_as_written():
     assert v(-0.3, 0.049).startswith("inverse")
     assert v(-0.29, 0.001).startswith("no link")
     assert v(-0.3, 0.049, (0.5, 0.5)).startswith("inverse")    # age guards only a link
+
+
+def test_rank_corr_interval_reads_r5_and_narrows_with_n():
+    lo, hi = insights.rank_corr_interval(-0.228, 38)
+    assert lo < -0.228 < hi
+    assert round(lo, 2) == -0.51 and round(hi, 2) == 0.10     # 11-02's R5 read
+    lo2, hi2 = insights.rank_corr_interval(-0.228, 380)
+    assert hi2 - lo2 < hi - lo
+    assert insights.rank_corr_interval(None, 38) is None
+    assert insights.rank_corr_interval(0.2, 3) is None
+    assert insights.rank_corr_interval(float("nan"), 38) is None
+    lo, hi = insights.rank_corr_interval(1.0, 30)               # a perfect link stays finite
+    assert hi <= 1 and lo > 0.9
+
+
+def test_interval_reading_names_what_is_ruled_out():
+    assert insights.interval_reading((-0.2, 0.2), 0.3) == "rules out a link of 0.3 either way"
+    assert insights.interval_reading((-0.51, 0.10), 0.3).startswith("rules out +0.3 or more")
+    assert insights.interval_reading((-0.1, 0.5), 0.3).startswith("rules out -0.3 or less")
+    assert "cannot rule out" in insights.interval_reading((-0.4, 0.4), 0.3)
+    assert insights.interval_reading(None, 0.3).startswith("no interval")
+    assert insights.interval_reading((0.44, 0.72), 0.3).startswith("a link of +0.3 or more")
+    assert insights.interval_reading((-0.8, -0.3), 0.3).startswith("a link of -0.3 or less")
+    # 0.2996 prints as +0.30, so it must not read "rules out +0.3"
+    assert "cannot rule out" in insights.interval_reading((-0.35, 0.2996), 0.3)

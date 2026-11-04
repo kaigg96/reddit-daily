@@ -397,7 +397,14 @@ def matches(meta, spec):
     "not X" would mix history in (the trap `split_cohorts` names)."""
     key, value, negate = _parse_spec(spec)
     got = str(meta.get(key, "")).strip()
-    return bool(got) and (got == value) != negate
+    return bool(got) and (got in _spec_values(value)) != negate
+
+
+def _spec_values(value):
+    """The values a spec names: one, or a comma-separated list, so a read can
+    leave out named uploads (`video_id!=a,b`; PRD §4, #14's closing line). The
+    whole string counts too, for a field whose own values hold a comma."""
+    return {value} | {v.strip() for v in value.split(",") if v.strip()}
 
 
 # A derived field's possible values, so a filter can name one no upload has
@@ -410,10 +417,15 @@ def _require_value(metas, spec):
     """Refuse a filter whose value no upload has. "!=" with a typo would
     otherwise keep every upload and print as if it had filtered."""
     key, value, _ = _parse_spec(spec)
-    if value in _DERIVED_VALUES.get(key, ()):
+    have = {str(m.get(key, "")).strip() for m in metas} | _DERIVED_VALUES.get(key, set())
+    if value in have:
         return
-    if not any(str(m.get(key, "")).strip() == value for m in metas):
-        raise ValueError(f"no logged upload has {key}={value}: check the spelling")
+    # Each value of a list, so one mistyped id cannot stay in unnoticed.
+    # A list of blanks ("$A,$B" with both unset) names nothing, so it is refused.
+    parts = _spec_values(value) - {value}
+    missing = sorted(parts - have) if parts else [value]
+    if missing:
+        raise ValueError(f"no logged upload has {key}={', '.join(missing)}: check the spelling")
 
 
 def within(videos, spec):
@@ -2467,6 +2479,39 @@ def watch_reach_verdict(rho, p_value, age_rhos=(None, None)):
                 "takes it to D9 and to the owner")
     return ("no link at this size: a watch-seconds gain is not credited as reach; "
             "the November monthly takes it to D9")
+
+
+def rank_corr_interval(rho, n, z=1.96):
+    """A 95% interval for Spearman's rho: Fisher's z with Bonett and Wright's
+    variance (1 + rho^2/2) / (n - 3). It never changes a verdict; it says
+    whether "no link" rules a link of the rule's size out or only failed to
+    see one at this n (2026-11-02, for D9 at the monthly). None when rho is
+    unread or n under 4."""
+    if rho is None or n is None or n < 4 or math.isnan(rho):
+        return None
+    r = max(-0.999999, min(0.999999, rho))
+    centre, se = math.atanh(r), math.sqrt((1 + r * r / 2) / (n - 3))
+    return math.tanh(centre - z * se), math.tanh(centre + z * se)
+
+
+def interval_reading(interval, bar):
+    """Which links of size `bar` the interval excludes, in words. Decided on
+    the two decimals report.py prints, so the words never contradict them."""
+    if interval is None:
+        return "no interval: too few uploads"
+    lo, hi = (round(x, 2) for x in interval)
+    if lo >= bar:
+        return f"a link of +{bar} or more: weaker ones ruled out"
+    if hi <= -bar:
+        return f"a link of -{bar} or less: weaker ones ruled out"
+    above, below = hi < bar, lo > -bar
+    if above and below:
+        return f"rules out a link of {bar} either way"
+    if above:
+        return f"rules out +{bar} or more; cannot rule out -{bar}"
+    if below:
+        return f"rules out -{bar} or less; cannot rule out +{bar}"
+    return f"cannot rule out a link of {bar} either way: too few uploads to tell"
 
 
 def first_answer_verdict(rho, p_value):

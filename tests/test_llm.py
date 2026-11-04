@@ -394,6 +394,30 @@ def test_sanitize_title_falls_back_when_generation_failed():
     assert len(llm.sanitize_title("z" * 200, fallback="x")) == 100
 
 
+def test_a_quote_the_title_uses_is_kept():
+    """Shipped 2026-11-04 as "3 answers to 'House and Senate are Blue, how are
+    we feeling?": stripping every end quote took the closing one too."""
+    for title in ("3 answers to 'House and Senate are Blue, how are we feeling?'",
+                  '3 answers to "Why do cats knead?"',
+                  "'Dream' careers you'd regret",
+                  "Is your 'dream' career on this list?"):
+        assert llm.sanitize_title(title, fallback="x") == title
+        assert llm._clean_str(title) == title
+        assert llm.resolve_title(title, style="C", fallback="x").title == title
+
+
+def test_wrapping_and_stray_quotes_still_go():
+    for reply, expected in (('"Quoted"', "Quoted"), ("'Quoted'", "Quoted"),
+                            ("\"'Both'\"", "Both"), ("'Lone", "Lone"),
+                            ("Lone'", "Lone"), ("\"He said 'no'\"", "He said 'no'"),
+                            ("'Which 'Dumb' choice?'", "Which 'Dumb' choice?"),
+                            ("'Your Pets' secret?'", "Your Pets' secret?"),
+                            ("Their 'DON'T TOUCH' item!'", "Their 'DON'T TOUCH' item!"),
+                            ("'", ""), ('""', "")):
+        assert llm._strip_quotes(reply) == expected
+    assert llm.sanitize_title("'", fallback="Raw?") == "Raw?"
+
+
 def _raises(exc):
     def boom(*a, **k):
         raise exc
