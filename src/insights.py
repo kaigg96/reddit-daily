@@ -421,7 +421,9 @@ def _require_value(metas, spec):
     if value in have:
         return
     # Each value of a list, so one mistyped id cannot stay in unnoticed.
-    missing = sorted(_spec_values(value) - {value} - have) if "," in value else [value]
+    # A list of blanks ("$A,$B" with both unset) names nothing, so it is refused.
+    parts = _spec_values(value) - {value}
+    missing = sorted(parts - have) if parts else [value]
     if missing:
         raise ValueError(f"no logged upload has {key}={', '.join(missing)}: check the spelling")
 

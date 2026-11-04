@@ -951,6 +951,9 @@ def test_a_read_can_leave_out_a_list_of_uploads():
     # One mistyped id in the list is refused, not silently kept in
     with pytest.raises(ValueError, match="video_id=x"):
         insights.ids_within("video_id!=a,x", log)
+    for blanks in (",", " , ", ",,"):
+        with pytest.raises(ValueError):
+            insights.ids_within(f"video_id!={blanks}", log)
 
 
 def test_a_release_that_shifts_video_length_says_so():
