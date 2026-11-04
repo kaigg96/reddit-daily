@@ -375,7 +375,8 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         keywords=_clean_keywords(data.get("keywords")),
         # The capitals test's "no capitals" arm leaks into this line as it did
         # into titles: 11 of its 27 uploads to 11-02 ended on an all-lower-case
-        # line, which is captioned and posted as our comment (0 of 123 others).
+        # line, posted as our comment and in the closed captions (on screen it
+        # is upper-cased anyway) (0 of 123 others).
         cta=sentence_case(_clean_published(data.get("cta"))),
         source=route,
         failure=prior,
