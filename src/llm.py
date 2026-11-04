@@ -614,8 +614,8 @@ def sentence_case(title):
     if not title or any(c.isupper() for c in title):
         return title
     # A sentence ends at ? or !, or at a full stop after a word of two or more
-    # letters: not an ellipsis ("self... and why") or "i.e." / "a.i.".
-    title = re.sub(r"(^\W*|(?:(?<=\w\w)\.|[?!])\s+\W*)([a-z])",
+    # letters: not an ellipsis ("self... and why"), "i.e." / "a.i." or "vs.".
+    title = re.sub(r"(^\W*|(?:(?<=\w\w)(?<!\bvs)\.|[?!])\s+\W*)([a-z])",
                    lambda m: m.group(1) + m.group(2).upper(), title)
     return re.sub(r"(?<![./])\bi\b(?![./])", "I", title)
 
