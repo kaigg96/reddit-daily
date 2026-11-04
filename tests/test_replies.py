@@ -71,6 +71,17 @@ def test_due_skips_failing_text_and_a_second_reply_to_one_comment():
     assert sorted(r["queued_utc"][11:13] for r in refuse) == ["01", "03", "05"]
 
 
+def test_a_reply_queued_over_two_weeks_ago_is_refused_not_posted_late():
+    """PRD §4 (2026-11-03): #89's label could come weeks after the drafts."""
+    rows = [_row(1), _row(2), dict(_row(3), queued_utc=""), dict(_row(4), queued_utc="soon")]
+    post, refuse = replies.due(rows, TODAY + dt.timedelta(days=14))
+    assert [r["parent_id"] for r in post] == ["c1", "c2"]           # 14 days old: still due
+    assert sorted(r["parent_id"] for r in refuse) == ["c3", "c4"]   # no readable date
+    post, refuse = replies.due(rows, TODAY + dt.timedelta(days=15))
+    assert post == [] and len(refuse) == 4
+    assert replies._stale(rows[0], TODAY + dt.timedelta(days=15)) == "queued over 14 days ago"
+
+
 def test_load_and_save_round_trip_with_lf(tmp_path):
     path = tmp_path / "community" / "replies.csv"
     assert replies.load(path) == []

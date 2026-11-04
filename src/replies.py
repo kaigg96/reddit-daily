@@ -109,12 +109,29 @@ def due(rows, today, cap=REPLIES_PER_DAY):
     out, refuse = [], []
     for r in sorted((r for r in rows if r.get("status") == "queued"),
                     key=lambda r: r.get("queued_utc") or ""):
-        if r.get("parent_id") in replied or check_reply(r.get("reply")):
+        if r.get("parent_id") in replied or check_reply(r.get("reply")) or _stale(r, today):
             refuse.append(r)
         elif len(out) < cap - posted_today:
             replied.add(r.get("parent_id"))
             out.append(r)
     return out, refuse
+
+
+REPLY_MAX_AGE_DAYS = 14
+
+
+def _stale(r, today):
+    """Why a queued reply is too old to post, or None. Answering a comment
+    weeks late risks the keep-or-stop rule's "removed or held" trigger (PRD
+    §4, 2026-11-03), and #89's label could come weeks after the drafts, so an
+    old reply is refused, never posted late. No readable date fails closed."""
+    try:
+        queued = datetime.date.fromisoformat((r.get("queued_utc") or "")[:10])
+    except ValueError:
+        return "queued date unreadable"
+    if (today - queued).days > REPLY_MAX_AGE_DAYS:
+        return f"queued over {REPLY_MAX_AGE_DAYS} days ago"
+    return None
 
 
 def queue_reply(rows, video_id, parent_id, reply, comment="", now=None):
@@ -157,7 +174,7 @@ def post_due(rows, today, client, screen_fn, channel_id, titles, now, dry_run=Tr
                      posted_utc=now.isoformat(timespec="seconds") if status == "posted" else "")
 
     for r in refuse:
-        mark(r, "refused", check_reply(r.get("reply")) or "comment already answered")
+        mark(r, "refused", check_reply(r.get("reply")) or _stale(r, today) or "comment already answered")
     for r in post:
         try:
             _post_one(r, client, screen_fn, channel_id, titles, dry_run, mark, out)
