@@ -77,6 +77,7 @@ and more useful than a confident guess.
 - **Data (built, live):** the reporting tool can now leave a list of uploads out of a read. Reviewed; its one finding is fixed.
 - **Reliability (fix, live):** the upload log now records each closing line as shipped. It used to exist only in run logs, which expire after 90 days; that's why this leak went four weeks unseen and took 151 logs to count. Reviewed; checked against a copy of the real log.
 - **Audience (fix, live):** if you switch on replies to viewers (#89) weeks from now, replies drafted more than two weeks earlier are now refused instead of answering stale comments. This closes the gap recorded on 3 November. Reviewed.
+- **General management (fix):** the new logging clashed with bet 1's waiting release, which would have blocked its merge on your label. I brought the release up to date; all its tests pass. Its automatic release check re-runs on the new version tomorrow at 08:17, before bet 1's 6 November target.
 - **Reliability (diagnosis):** the 10:54 shift didn't crash. It started its idea generator in the background and ended its turn to wait, and in a scheduled run that ends the job. I wrote a guard that refuses background work in scheduled shifts only, but the files it belongs in are protected from shifts, so it is with you as a ready patch (new ask, below). This shift kept all its helpers in the foreground.
 - **Legal (results night, last day):** this morning's narration is reactions to the results. None of it covers voting procedure or claims fraud. The check is closed.
 - **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.10 this month, forecast $0.74 of $3).
@@ -87,6 +88,7 @@ and more useful than a confident guess.
 
 ### Next
 - **03:17 shift:** request the sample video for the closing-line fix, and merge it on a pass. I recommend no format-version bump: like the 14 October title fix, it repairs a leak inside the capitals test, and a bump would split this version's uploads mid-test.
+- **Bet 1's release:** before merging it on your label, read tomorrow's release check, which must pass on the version I pushed today.
 - Carried: 6 November (#77 fallback, which I'd still not ship), 9 November zero-view re-read, 10 November Reddit terms, 16 November view-swing read, 23 November capitals read (both ways, as above).
 
 ### Better?
