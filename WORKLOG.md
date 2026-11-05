@@ -61,6 +61,46 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-05 (11:30) — Doubling views this quarter now needs bet 1 by about 13–20 November; tomorrow's reason to wait on Stephen's voice is corrected
+
+    Worked (% of the shift): gm 30 · data 30 · strategy 15 · reliability 10 · security 10 · legal 5
+
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. Doubling weekly views this quarter (bet 2) now fails unless bet 1 merges by about 13–20 November. Stephen's voice may hold viewers longer than the shared voice; a test set today on newer uploads settles it on 23 November.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds.
+- **Bet 2's real deadline:** views over the last four weeks run about 2,760 a week. At two uploads a day that reaches about 11,000 of the 16,600 bet 2 needs. Even if four a day doubled views, about two of the quarter's last four weeks must run at four a day, so four a day must start by 14 December. Four a day can only start 24–31 days after bet 1 merges, so bet 1 must merge by about 13–20 November.
+
+### Done
+- **Data (a lead, not acted on):** last shift said that if bet 1 is still unlabelled on 6 November, the one alternative, Stephen's voice alone, should wait, because his lead was only in plays past the opening (watch time +9%, within chance). That figure was out of date. On the latest figures, his uploads are watched 35% longer (13.5 against 10.0 seconds), beyond the 20% chance gives. Within AskReddit alone, though, the gap is 26%, inside chance. I found this by looking, so it isn't evidence yet. I set a test in advance on uploads from 30 October onward, which this look could not see, to be read on 23 November. If it holds and bet 1 is still unlabelled, the next shift brings Stephen's voice to you as the alternative to waiting. It needs your hand-run sample with the real voice either way, so no shift could ship it tomorrow.
+- **Reliability (measured):** uploads now start about 7 hours after their scheduled time (all seven this week over 6 hours), up from 4.6 in mid-October. At two a day nothing breaks. At four a day each run would land after the next was due. The slot logging waiting behind bet 1 already covers that.
+- **Security:** a permanent copy of bet 1's waiting release now exists, so deleting its branch by accident can't lose it. No workflow change since 20 October, no secret in the repository, money controls intact ($0.11 this month, forecast $0.71 of $3).
+- **Legal (checked):** of the 219 uploads the pipeline made, two contain a swear today's filters refuse: the 22 October title (already age-restricted) and one 6 August narration (1 view). So do 22 of the older readings. Those are the first candidates when you decide the old videos' fate. No new ask.
+- **General management (ranking):** a fresh agent proposed eight ideas and I added two. Two rankers, reading the list in opposite orders, both put the four items above at the top. A fresh review found five small faults in my changes, all fixed before merging. Dropped:
+  - updating the AI quota's reset hour for winter (already dropped 31 October: only a protected file uses it)
+  - a comparison tool that splits by subreddit (it could quietly replace a pre-set rule mid-test)
+  - building the Reddit replacement now (it needs AI requests and your choice on #90; 14 December stands)
+  - a word limit for the product plan's findings (the audit's job)
+  - a search-traffic lever (search is 2% of views)
+- Nearly all of this was checks and corrections. The voice test is the one bet-shaped piece.
+- AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, now by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
+
+### Next
+- **6 November:** if #77 is still unlabelled, there is nothing to ship. Stephen's voice waits for 23 November's test and needs your sample anyway.
+- **Today, around 16:15:** the release check on bet 1's latest version. GitHub runs the 08:17 job about eight hours late. Read it before any merge on your label.
+- **9 November weekly:** mark the two friction fixes from 2 and 3 November as fixed, and re-read the zero-view uploads.
+- **Later dates:** 10 November, Reddit's terms; 16 November, the view-swing read; 23 November, the capitals read and the voice test.
+
+### Better?
+- **Than last shift:** no for viewers. The dates you are deciding against are now right.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-05 (01:05) — The plan for losing Reddit no longer stalls if you're away; the process audit is done
 
     Worked (% of the shift): gm 55 · strategy 15 · security 10 · reliability 10 · product 5 · data 5
