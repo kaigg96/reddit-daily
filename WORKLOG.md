@@ -61,6 +61,46 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-05 (19:15) — Bet 2's second target is now written down before anyone can read it; nothing else was ready
+
+    Worked (% of the shift): gm 50 · data 20 · product 15 · security 15
+
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: every change that would move it still waits on your label for bet 1 (#77). This shift fixed bet 2's second target as a number, and confirmed bet 1 can still merge the moment you label it.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds.
+
+### Done
+- **Data (fix):** bet 2's second measure counts only plays that get past the opening, the unit YouTube's Partner Program counts. Its rule was set on 14 October, but the number was never worked out. It is 9,412 over the quarter's last four weeks, double the 4,706 of 28 September to 25 October. It is harder than the views target: those four weeks were a typical month, while the views target was set against the weakest one. So if views pass and this misses, the cause is the starting points, not fewer viewers staying.
+- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading in opposite orders both put the target first. A fresh review of my change found three things a later reader would misread; all were fixed before merging. Dropped:
+  - a test of whether one subreddit gets buried (already set for 9 November)
+  - a scan of similar channels (done 5 October, and you made a first-time viewer the test)
+  - deciding now what 23 November asks you (it needs that day's capitals result)
+  - a guide to re-running a failed Monday report (shifts can't start that job)
+  - counting uploads advertisers avoid (at about 691 times short of the bar, it changes nothing)
+- A second round, aimed at money, audience, distribution, editorial, market and legal, found only preparation for items waiting on you.
+- **Data (disclosed):** the idea helper looked at the capitals test's results by accident while the test is still blind. Its sample is under the test's minimum, and I drew nothing from it. The 23 November rule stands as set, and the peek is recorded beside it.
+- **Product (checked):** bet 1's release still combines cleanly with today's main code, all its tests pass, and today's automatic release check passed on its latest version. Your label can merge it.
+- **Security:** no secret in the repository, no workflow change since 20 October, money controls intact ($0.12 this month, forecast $0.72 of $3). The sample videos #77 and #90 point at already have permanent copies; GitHub deletes its own on 8–9 November.
+- Tonight's upload had not landed by 19:10. That is normal at today's seven-hour delay, and the next shift checks it.
+- AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, needed by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
+
+### Next
+- **6 November:** if #77 is still unlabelled, nothing ships.
+- **9 November weekly:** mark the two friction fixes from 2–3 November as fixed, and re-read the zero-view uploads by subreddit, as already set.
+- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is still unlabelled. 23 November, the capitals and voice reads.
+- **Tooling idea, logged:** the reporting tool could warn anyone who reads a blind test's results before its date.
+
+### Better?
+- **Than last shift:** no for viewers. Bet 2 can now be judged on both its measures without anyone picking a number after the fact.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-05 (11:30) — Doubling views this quarter now needs bet 1 by about 13–20 November; tomorrow's reason to wait on Stephen's voice is corrected
 
     Worked (% of the shift): gm 25 · data 30 · strategy 15 · reliability 10 · security 10 · legal 5 · audience 5
@@ -99,39 +139,3 @@ and more useful than a confident guess.
 - **Than last shift:** no for viewers. The dates you are deciding against are now right.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-05 (01:05) — The plan for losing Reddit no longer stalls if you're away; the process audit is done
-
-    Worked (% of the shift): gm 55 · strategy 15 · security 10 · reliability 10 · product 5 · data 5
-
-**Summary:** If Reddit's January cutoff comes with your choice of replacement (#90) still open, shifts now build the recommended one, our own questions, switched off, so one label from you turns it on. Nothing viewers see changed, and the company is no closer to revenue: everything that would be waits on you, and you have not acted since 27 October.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds; bet 1 (#77) is still the step every revenue route needs.
-- **Protecting the company's survival:** the replacement-source plan said shifts build "the source you chose" on 14 December, but nothing said what to do if you hadn't chosen. Uploads would have stopped on 12 January. Now the default is your recommended option, built switched off; only your label turns it on, and nothing is spent.
-
-### Done
-- **Strategy (sized):** the replacement source is about one shift of building and one sample, with or without bet 1. Your label and the extra music tracks #90 already asks for set the lead time, not the build, so 14 December stands. A fresh review caught two errors in my first sizing, both fixed before merging.
-- **General management (process audit, 13 shifts since 28 October):** the process works at the margin, and your absence is what binds it. 8 of 13 shifts began with nothing ready, and about four in five things done were fixes. The two text defects viewers saw on 4 November were found by reading what we published, which no check requires; proposed as a check for any text change. The findings section of the product plan has grown 24% to about 15,000 words with no limit, carried by two monthly reviews. Proposals are recorded, not sent, while you're away.
-- **Reliability (checked):** the loss of 4 November's morning shift can be prevented by a one-line setting, which our pinned Claude Code version supports. Your waiting ask (#93) does the same job, so I sent no new ask.
-- **Data (answered, no change):** no topic has enough uploads in today's format for the topic-ranking test to reopen.
-- **Product (checked, for bet 1's merge):** all 218 titles we have shipped come out the same through bet 1's waiting release as through today's code, so the release changes nothing about how titles are cleaned. This is the check that caught 4 November's defects. I also brought the release up to date with last night's closing-line fix: it combines cleanly, all its tests pass, and closing lines keep their capitals either way, so the capitals test isn't skewed again when bet 1 merges. I also fixed a small flaw in the release: bet 1's vote, posted as our comment, could show "i" in lower case or a stray capital after "vs.". Two fresh reviews found three regressions in my fix, all fixed before it went on the release.
-- **Security:** no workflow change since 20 October, no secret in the repository, library advisories unchanged since 26 October, money controls intact ($0.10 this month, forecast $0.74 of $3).
-- **General management (ranking):** a fresh agent proposed eight ideas, and two rankers reading in opposite orders both put the sizing first. Dropped: widening the shock-title guard (it would change titles while the capitals test runs), per-video traffic sources (YouTube refuses them), a comments-and-closing-lines read (too few comments), and a rule for when to give up on Shorts revenue (no other route to switch to yet).
-- AI use: none from the upload allowance; no Polly; no sample video. All helpers ran in the foreground.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
-
-### Next
-- **Bet 1's release:** read today's 08:17 release check; it must pass on the version pushed tonight before a merge on your label.
-- 6 November: #77's fallback, Stephen's voice alone. Still wait: its lead is in plays past the opening, not watch time, and it would push bet 1's read back about three weeks. The 9 November weekly: mark the two friction fixes from 2 and 3 November as fixed, or the 24 November read fails; also the zero-view re-read. 10 November: Reddit's terms. 16 November: the view-swing read. 23 November: the capitals read.
-
-### Better?
-- **Than last shift:** no for viewers. A gap that would have stopped uploads after 12 January is closed.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----

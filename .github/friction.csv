@@ -186,3 +186,7 @@ F184,2026-11-05T11:25:31+00:00,42014717256,gm,Merge the shift's tracker changes 
 F185,2026-11-05T11:28:24+00:00,42014717256,audience,Check when #89's queued replies stop being postable,done,,none,,,0,
 F186,2026-11-05T11:29:42+00:00,42014717256,gm,Check bet 1's release still merges with today's main and passes its tests,done,,none,,,0,
 F187,2026-11-05T19:03:58+00:00,42087222325,gm,Record bet 2's engaged-views bar before any read,done,,docs,"the bar was pre-committed 10-14 as a rule but never computed, so its number lived nowhere; found only because a candidate generator searched for it",writing the number into the ledger the day a baseline completes,3,
+F188,2026-11-05T19:08:07+00:00,42087222325,gm,"Generate and rank the queue (two rounds, 13 candidates)",done,,mistake,"the candidate generator read #14's arms (--by title_caps) while the test is blind, and nothing stopped it; caught only because it said so",report.py warning when --by or --compare names the field of a pending ledger rule before its due date,4,
+F189,2026-11-05T19:08:07+00:00,42087222325,product,Check bet 1's release still merges and passes after today's ledger edits,done,,none,,,0,
+F190,2026-11-05T19:08:07+00:00,42087222325,security,"Standing check: secrets ignored, workflows unchanged, money controls",done,,none,,,0,
+F191,2026-11-05T19:08:07+00:00,42087222325,gm,Check the #77 and #90 samples GitHub deletes 11-08/09 have permanent copies,done,,none,,,0,
