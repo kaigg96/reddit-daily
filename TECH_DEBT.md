@@ -362,8 +362,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   for one each shift, so the CI guard is what holds it. **Outward (docs read
   11-05):** the headless docs describe background work at exit and an env
   switch, `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS`: a one-line alternative to
-  #93's guard in `shift.yml`, to check against the pinned 2.1.280 before
-  patching. A `Stop` hook could hold an unattended shift to its hand-over
+  #93's 40-line hook in `shift.yml`. The pinned 2.1.280 binary carries the
+  switch (checked 11-05); #93's tested hook does the same job, so no new ask:
+  prefer the switch if #93 is ever redone. A `Stop` hook could hold an unattended shift to its hand-over
   time (`.claude/settings.json`, which shifts cannot write). Rejected:
   `/clear` inside a shift (one non-interactive prompt); `/doctor` cuts (not
   in the docs). Done: skills well under 500 lines. **Changed:** the
