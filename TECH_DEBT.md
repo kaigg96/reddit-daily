@@ -337,8 +337,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 - **Audit 2026-11-05: the process works at the margin; the owner's absence
   binds (last act 10-27 21:20).** Thirteen shifts since 10-28, plus one that
   lost its hour to background work (11-04 10:54) and six skipped on the weekly
-  allowance (10-28 to 10-30). 8 began with nothing ready; mean 38 of 60 minutes,
-  unchanged. ~26 fixes to 6 bets; only 11-04's two fixes reached viewers; ~8
+  allowance (10-28 to 10-30). 8 began with nothing ready; mean ~40 of 60 minutes,
+  about as before (38). ~26 fixes to 6 bets; only 11-04's two fixes reached viewers; ~8
   items were internal tooling, and 11-04 00:25 only re-planned. Time: gm 28%,
   reliability and data 16% each, product 3% (0 in 11 of 13), distribution 0:
   not a ranking failure, as every product item waits on #77. "Than ~10 shifts
@@ -346,13 +346,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   fixes, so 10-25's self-grading fix is fading. Scorecard WORSE (zero-rate
   2.4% → 17.6%); watch time 12.0 s, flat. **Gates:** fresh reviews caught ~19
   defects; four dry runs and eight release checks caught none. Both
-  viewer-facing defects (11-04) were found by replaying published output
-  (F159), which no gate requires: for any change to shipped text, replaying
-  every logged title and line through old and new code is the gate that
-  works. **Escalations:** 7 opened since 10-28, none answered, 2 trivial (#86
+  viewer-facing defects (11-04) were found by reading published output (the
+  narration log, 151 run logs), which no gate requires, and a replay of every
+  logged title through old and new code caught the fix's own regressions
+  (F159): for any change to shipped text, that replay is the gate that works. **Escalations:** 7 opened since 10-28, none answered, 2 trivial (#86
   retracted, #88). Too tight on files, not decisions: `.claude/` and workflows
   turn finished guards into asks (#89, #93). **Of 10-28's findings:** (1)
-  PRD §4 worse, 12,168 → ~14,900 words, unbudgeted, carried by two monthlies;
+  PRD §4 worse, 12,162 → ~15,050 words (+24%), unbudgeted, carried by two monthlies;
   (2) entries still ~940 words; (3) dropped ideas re-proposed six or more
   times, and the generator re-derived settled items again (F168); (4) an
   unchecked premise reached the owner again (#86, retracted the same day);
