@@ -177,3 +177,6 @@ F175,2026-11-05T00:54:23+00:00,41940829518,product,Replay every shipped title th
 F176,2026-11-05T00:57:02+00:00,41940829518,gm,Bring bet 1's release up to date with main and check closing-line capitals,done,,none,,,0,
 F177,2026-11-05T00:58:02+00:00,41940829518,product,Compare the release's vote-comment capitals with main's closing-line capitals,partial,,none,,,0,
 F178,2026-11-05T01:04:55+00:00,41940829518,product,Fix the vote comment's capitals on bet 1's release,done,,mistake,"my first rule (a stop ends a sentence only after two letters) lost capitals after 'option a.' and 'pick 5.', and my second treated '3.0.' as an initialism; two fresh reviews caught both",probing a regex change with a list of plausible votes before the first commit,4,
+F179,2026-11-05T11:12:45+00:00,42014717256,data,Re-read the voice coin on watch-seconds before the 6 Nov fallback call; pre-commit R7 on unseen uploads,done,,rederived,the 11-04 'wait' reason quoted a 10-14 read (+9%) that no longer held; nothing flags a quoted number going stale,a date beside each number a handover quotes,3,
+F180,2026-11-05T11:12:45+00:00,42014717256,strategy,Refresh bet 2's views pace and the merge date it implies,done,,none,,,0,
+F181,2026-11-05T11:12:45+00:00,42014717256,security,Tag bet 1's release head so a deleted branch loses nothing,done,,none,,,0,
