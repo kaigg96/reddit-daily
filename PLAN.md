@@ -27,7 +27,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 **Bet 1 approved** (#70): make the format ours, viewers first (D14); no
 voice (#71, PRD #15). Bet 2
-approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled (W40: 1,762; `--metric engaged_views`)); price other routes
+approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, 4,706, doubled: **9,412** (computed 11-05; `--metric engaged_views`)); price other routes
 and pilot the best (§1; Reddit's terms, §4). Bet 2 needs bet 1 by ~11-13–11-20 (PRD §4).
 
 ## 3. Work queue
