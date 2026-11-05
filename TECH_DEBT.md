@@ -230,7 +230,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   host lines none, so neither is replayable yet. Brought current with `main`
   the same night (`f046eba`): clean, 1,013 pass; the CTA is cased by
   `main`'s 11-04 fix and the vote comment by `vote-comment-caps`, so #14's
-  no-capitals arm keeps capitals after the merge. Its review's one gap: the
+  no-capitals arm keeps capitals after the merge. **Left (11-05): two
+  sentence-case rules.** The vote comment's `content.sentence_case` (per
+  sentence, any text) and `llm.sentence_case` (only text with no capital)
+  differ on 19 of 420 lower-cased logged texts: the former leaves "i" ("Can
+  i legally") and caps after "vs.", "u.s." and "..." ("Cats vs. Dogs"), the
+  bugs 003c9bb fixed in the latter. Both arms share it, so no skew; cosmetic,
+  in our comment. Fix with the merge or after: one function with per-sentence
+  scope and `llm`'s "I", "vs." and initialism rules. Its review's one gap: the
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
