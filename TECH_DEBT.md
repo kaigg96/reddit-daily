@@ -227,7 +227,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   all 218 shipped titles come out identical through `main`'s and the
   release's `_clean_published`, `_shock_bait` and `sentence_case` (2 refused
   by both, for a swear word or emoji); closing lines have one logged row, and
-  host lines none, so neither is replayable yet. Its review's one gap: the
+  host lines none, so neither is replayable yet. Brought current with `main`
+  the same night (`f046eba`): clean, 1,013 pass; the CTA is cased by
+  `main`'s 11-04 fix and the vote comment by `vote-comment-caps`, so #14's
+  no-capitals arm keeps capitals after the merge. Its review's one gap: the
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
