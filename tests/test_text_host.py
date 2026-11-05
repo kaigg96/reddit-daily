@@ -130,6 +130,13 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
     # stop, and a contraction is still a plain word.
     assert content.sentence_case("nope. sorry. which?") == "Nope. Sorry. Which?"
     assert content.sentence_case("i'd pick it. don’t you?") == "I'd pick it. Don’t you?"
+    # 2026-11-05: "i" alone is a capital, and "vs.", "u.s." and an ellipsis
+    # end no sentence, as in llm.sentence_case.
+    assert content.sentence_case("can i pick both? so do i. which?") == "Can I pick both? So do I. Which?"
+    assert content.sentence_case("cats vs. dogs: which wins?") == "Cats vs. dogs: which wins?"
+    assert content.sentence_case("the u.s. president? the job... for you?") == (
+        "The u.s. president? The job... for you?")
+    assert content.sentence_case("this one, i.e. the cat") == "This one, i.e. the cat"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept

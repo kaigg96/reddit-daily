@@ -93,8 +93,12 @@ def sentence_case(text):
         word = m.group(2).rstrip(",;:.!?").replace("'", "").replace("’", "")  # "i'd", "don’t"
         plain = word.isalpha() and word.islower()
         return m.group(1) + (m.group(2)[:1].upper() + m.group(2)[1:] if plain else m.group(2))
-    # The stop is looked behind, not matched, so "nope. which?" caps both.
-    return re.sub(r"(^|(?<=[.!?])\s+)(\S+)", cap, text)
+    # The stop is looked behind, not matched, so "nope. which?" caps both. A
+    # full stop ends a sentence only after a word of two letters or "i", so
+    # not inside an ellipsis ("leave... now"), "u.s." or "vs." (as
+    # llm.sentence_case, 003c9bb; the two disagreed on 19 of 420 logged texts).
+    text = re.sub(r"(^|(?:(?<=[!?])|(?<=\w\w\.)(?<!\bvs\.)|(?<=\bi\.))\s+)(\S+)", cap, text)
+    return re.sub(r"(?<![./])\bi\b(?!\.\w|/)", "I", text)   # not "i.e.", "i/o"
 
 
 def _has_emoji(text):
