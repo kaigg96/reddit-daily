@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-05 (11:30) — Doubling views this quarter now needs bet 1 by about 13–20 November; tomorrow's reason to wait on Stephen's voice is corrected
 
-    Worked (% of the shift): gm 30 · data 30 · strategy 15 · reliability 10 · security 10 · legal 5
+    Worked (% of the shift): gm 25 · data 30 · strategy 15 · reliability 10 · security 10 · legal 5 · audience 5
 
 **Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. Doubling weekly views this quarter (bet 2) now fails unless bet 1 merges by about 13–20 November. Stephen's voice may hold viewers longer than the shared voice; a test set today on newer uploads settles it on 23 November.
 
@@ -82,6 +82,7 @@ and more useful than a confident guess.
   - building the Reddit replacement now (it needs AI requests and your choice on #90; 14 December stands)
   - a word limit for the product plan's findings (the audit's job)
   - a search-traffic lever (search is 2% of views)
+- **Audience (checked):** the three replies waiting on your #89 label become too old to post on 17 November. After that the label would post nothing, so a shift redrafts them then. A second round of ideas, aimed at the functions not yet touched today (money, audience, distribution, editorial, market), found only this.
 - Nearly all of this was checks and corrections. The voice test is the one bet-shaped piece.
 - AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
 
@@ -92,7 +93,7 @@ and more useful than a confident guess.
 - **6 November:** if #77 is still unlabelled, there is nothing to ship. Stephen's voice waits for 23 November's test and needs your sample anyway.
 - **Today, around 16:15:** the release check on bet 1's latest version. GitHub runs the 08:17 job about eight hours late. Read it before any merge on your label.
 - **9 November weekly:** mark the two friction fixes from 2 and 3 November as fixed, and re-read the zero-view uploads.
-- **Later dates:** 10 November, Reddit's terms; 16 November, the view-swing read; 23 November, the capitals read and the voice test.
+- **Later dates:** 10 November, Reddit's terms; 16 November, the view-swing read; 17 November, the three viewer replies waiting on #89 become too old to post, so redraft them if #89 is still unlabelled, or your label posts nothing; 23 November, the capitals read and the voice test.
 
 ### Better?
 - **Than last shift:** no for viewers. The dates you are deciding against are now right.
