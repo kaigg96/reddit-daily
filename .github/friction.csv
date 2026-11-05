@@ -175,3 +175,4 @@ F173,2026-11-05T00:49:55+00:00,41940829518,gm,"Process audit 2026-11-05, with a 
 F174,2026-11-05T00:51:47+00:00,41940829518,reliability,Check the docs' background switch against the pinned Claude Code,done,,none,,,0,
 F175,2026-11-05T00:54:23+00:00,41940829518,product,Replay every shipped title through main and bet 1's release,done,,tool,"the cleaner prints a refusal notice to stdout, which corrupted the JSON the replay wrote there; and two identical outputs had to be proven to come from two different code trees",a replay script that writes to a file and prints which module it loaded,2,
 F176,2026-11-05T00:57:02+00:00,41940829518,gm,Bring bet 1's release up to date with main and check closing-line capitals,done,,none,,,0,
+F177,2026-11-05T00:58:02+00:00,41940829518,product,Compare the release's vote-comment capitals with main's closing-line capitals,partial,,none,,,0,
