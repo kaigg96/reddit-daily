@@ -275,10 +275,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   is written first, so a fault there cannot repeat an upload. **At the switch, keep
   `MAX_SCREENED_CANDIDATES` at 4:** PRD §2's cut to 2 was the free route for
   Gemini's worst case, which `v8`'s Groq fallback now answers, so the cut
-  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is not rising: weekly median 4.3–4.6h (W36–W38),
-  5.5h (W40), 5.9h (W41), then 4.6h over W42's 14 uploads (10-19; 6.5h was its
-  first 3), so the median run still lands before the next slot; the worst
-  (8.9h) does not. Runs are safe (`run_slot` takes
+  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising again (upload times against their slot, 11-05): weekly
+  median 4.3–4.8h (W36–W39), 5.5–5.9h (W40–W41), 4.6–4.7h (W42–W43), 5.7h (W44),
+  then 6.7h with all 7 of W45's uploads over 6h (worst 9.5h), so at four a day the
+  median run now lands after the next slot is due. Runs are safe (`run_slot` takes
   the day from the cron line); the digest is what misreads. **If #4 goes
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
