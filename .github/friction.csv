@@ -171,3 +171,4 @@ F169,2026-11-05T00:36:24+00:00,41940829518,data,Read whether the topic ranker's 
 F170,2026-11-05T00:36:24+00:00,41940829518,strategy,Size the replacement-source build with and without bet 1,done,,none,,,0,
 F171,2026-11-05T00:39:36+00:00,41940829518,security,Re-run the dependency scan against the 10-26 record,done,,none,,,0,
 F172,2026-11-05T00:39:36+00:00,41940829518,strategy,Default C16's build to own questions if #90 is unanswered on 12-14,done,,rules,"PLAN.md sat at 1,398 of 1,400 words, so a 12-word rule took five trims to fit","nothing needed: the cap did its job, though each trim cost a re-run",2,
+F173,2026-11-05T00:49:55+00:00,41940829518,gm,"Process audit 2026-11-05, with a fresh review of the branch",done,,mistake,my sizing counted the Stack Exchange sample in own questions' 290 lines and left out #90's own music condition; the fresh review caught both before merge,"reading the ask (#90) the finding serves before writing the finding, not after",4,
