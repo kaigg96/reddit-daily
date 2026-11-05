@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-05 (01:05) — The plan for losing Reddit no longer stalls if you're away; the process audit is done
+
+    Worked (% of the shift): gm 60 · strategy 15 · security 10 · reliability 10 · data 5
+
+**Summary:** If Reddit's January cutoff comes with your choice of replacement (#90) still open, shifts now build the recommended one, our own questions, switched off, so one label from you turns it on. Nothing viewers see changed, and the company is no closer to revenue: everything that would be waits on you, and you have not acted since 27 October.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds; bet 1 (#77) is still the step every revenue route needs.
+- **Protecting the company's survival:** the replacement-source plan said shifts build "the source you chose" on 14 December, but nothing said what to do if you hadn't chosen. Uploads would have stopped on 12 January. Now the default is your recommended option, built switched off; only your label turns it on, and nothing is spent.
+
+### Done
+- **Strategy (sized):** the replacement source is about one shift of building and one sample, with or without bet 1. Your label and the extra music tracks #90 already asks for set the lead time, not the build, so 14 December stands. A fresh review caught two errors in my first sizing, both fixed before merging.
+- **General management (process audit, 13 shifts since 28 October):** the process works at the margin, and your absence is what binds it. 8 of 13 shifts began with nothing ready, and about four in five things done were fixes. The two text defects viewers saw on 4 November were found by reading what we published, which no check requires; proposed as a check for any text change. The findings section of the product plan has grown 24% to about 15,000 words with no limit, carried by two monthly reviews. Proposals are recorded, not sent, while you're away.
+- **Reliability (checked):** the loss of 4 November's morning shift can be prevented by a one-line setting, which our pinned Claude Code version supports. Your waiting ask (#93) does the same job, so I sent no new ask.
+- **Data (answered, no change):** no topic has enough uploads in today's format for the topic-ranking test to reopen.
+- **Security:** no workflow change since 20 October, no secret in the repository, library advisories unchanged since 26 October, money controls intact ($0.10 this month, forecast $0.74 of $3).
+- **General management (ranking):** a fresh agent proposed eight ideas, and two rankers reading in opposite orders both put the sizing first. Dropped: widening the shock-title guard (it would change titles while the capitals test runs), per-video traffic sources (YouTube refuses them), a comments-and-closing-lines read (too few comments), and a rule for when to give up on Shorts revenue (no other route to switch to yet).
+- AI use: none from the upload allowance; no Polly; no sample video. All helpers ran in the foreground.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
+
+### Next
+- **Bet 1's release:** read today's 08:17 release check; it must pass before a merge on your label.
+- 6 November: #77's fallback (still: wait). The 9 November weekly: mark the two friction fixes from 2 and 3 November as fixed, or the 24 November read fails; also the zero-view re-read. 10 November: Reddit's terms. 16 November: the view-swing read. 23 November: the capitals read.
+
+### Better?
+- **Than last shift:** no for viewers. A gap that would have stopped uploads after 12 January is closed.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-04 (19:30) — Two defects viewers could see were found in what we actually shipped, and both fixes are live
 
     Worked (% of the shift): product 30 · reliability 25 · data 20 · audience 5 · gm 10 · legal 5 · security 5
