@@ -1,107 +1,97 @@
-## Shift trace — run 41940829518
+## Shift trace — run 42014717256
 
-**Ended:** success, is_error false, 151 turns, 43.2 min, stop end_turn. **Tool calls:** 148, 0 failed. Helper agents made 129 more, 3 failed.
+**Ended:** success, is_error false, 90 turns, 33.7 min, stop end_turn. **Tool calls:** 88, 0 failed. Helper agents made 91 more, 0 failed.
 
 **Last message:**
 
-> The handover is committed and pushed (01:05). I'm ending with about 16 minutes left: nothing is ready, and anything new would need a review cycle that wouldn't fit before the cutoff.
+> I've handed over at 11:29 with about 25 minutes left. Nothing was ready at the start, two rounds of new ideas turned up nothing more worth doing, and everything is merged and pushed to main. Nothing viewers see changed, and the company is no closer to revenue: bet 1 still waits on the owner's label (#77).
 >
-> **Toward revenue:** nothing moved directly. Watch time is flat at 12 seconds per view, and every step toward revenue waits on bet 1 (#77). The owner hasn't acted since 27 October.
->
-> **What this shift did:**
-> - **A gap in the Reddit cutoff plan is closed.** On 14 December shifts start building a replacement for Reddit, but nothing said what to build if the owner still hadn't chosen one (#90). Uploads would then have stopped on 12 January. The default is now the recommended source, our own questions, built switched off. Only the owner's label turns it on, and it spends nothing.
-> - **The replacement build is sized.** It's about one shift of work plus one sample, so the 14 December date stands. The owner's label and the extra music tracks #90 already asks for set the lead time, not the build. A fresh review caught two errors in my first sizing; both were fixed before merging.
-> - **The process audit is done** (13 shifts since the last one):
->   - The process works at the margin, and the owner's absence is what holds it back.
->   - About four in five things done were fixes rather than new bets.
->   - The two text defects viewers saw on 4 November were found by reading what we published, which no check requires.
->   - The product plan's findings section has grown 24% to about 15,000 words, with no limit on it.
->   - Proposals are written down but not sent while the owner is away.
-> - **Bet 1's release is checked and up to date with `main`:**
->   - All 218 titles we've shipped come out the same through the release as through today's code.
->   - It merges cleanly with `main` and all 1,013 tests pass.
->   - Closing lines keep their capitals, so the capitals test won't be skewed when bet 1 merges.
->   - I fixed a small flaw in how bet 1's vote is capitalised in our posted comment (e.g. "Can i legally…", "Cats vs. Dogs")
+> **What this shift found and did:**
+> - **Bet 2's real deadline:** views run about 2,760 a week, which at two uploads a day reaches about 11,000 of the 16,600 bar. The bar needs about two of the quarter's last four weeks at four a day. Four a day can only start 24–31 days after bet 1 merges, so bet 1 must merge by about 13–20 November. The company plan now says so.
+> - **Tomorrow's reason to wait on Stephen's voice was out of date.** It quoted a +9% watch-time lead from mid-October. The latest figures show +35% (13.5 against 10.0 seconds), beyond the 20% chance gives. Within AskReddit alone it is +26%, inside the 30% chance gives there. I found this by looking, so it isn't evidence. I set a test in advance on uploads from 30 October onward, which this look didn't use, to be read on 23 November. It's in the product plan and the test ledger. Either way, a narration change needs the owner's real-voice sample, so tomorrow there is nothing to ship.
+> - **Upload delays are rising:** runs now start about 7 hours late, with all seven this week over 6 hours. That's harmless at two a day. At four a day each run would land after the next one was due; the slot logging waiting behind bet 1 already handles this. The code-health list is corrected.
+> - **Bet 1's release:** I tagged its current version so an accidental branch deletion can't lose it. It still merges cleanly with today's main, and all 1,013 tests pass on the combined code.
+> - **Swears in old uploads:** 2 of the 219 pipeline uploads (the age-restricted 22 October title and a 6 August narration) and 22 of the older readings contain a swear today's filters refuse. They're the first candidates when the owner decides the old video
 
-### Tool calls (last 80 of 148)
+### Tool calls (last 80 of 88)
 
-69. Bash: sed -n '391,424p;459,530p' TECH_DEBT.md
-70. Bash: awk 'NR>=150 && NR<=390' TECH_DEBT.md | grep -n -o "\*\*Closes when\*\*[^.]*\.\|^- \*\*[^*]*\*\*" | head -40; date -u +%H:%M
-71. Bash: sed -n '337,390p' TECH_DEBT.md
-72. Bash: git log origin/main --since=2026-10-28T18:00 --format='%H' -- WORKLOG.md | while read h; do git show $h:WORKLOG.md 2>/dev/null | grep -m1 "…
-73. Bash: git log origin/main --since=2026-10-28T18:00 --format='%H' -- WORKLOG.md | while read h; do git show $h:WORKLOG.md 2>/dev/null | grep "^## …
-74. Bash: git log origin/main --since=2026-10-28T18:00 --format='%H' -- WORKLOG.md | while read h; do git show $h:WORKLOG.md 2>/dev/null | grep "^## …
-75. Skill: audit
-76. Agent: Audit: shift series evidence
-77. Agent: Audit: re-test decisions
-78. Agent: Audit: gates, escalations, friction
-79. Agent: Audit: outward look at docs
-80. Bash: date -u +%H:%M; grep -n "^## D\|Re-reviewed 2026-1" DECISIONS.md | head -40
-81. Bash: grep -n "^## D[0-9]\|Re-reviewed 2026-10-28" DECISIONS.md | sed -n '1,60p' | awk -F: '$1>344'; wc -l DECISIONS.md
-82. Bash: grep -o ".\{60\}−0.23.\{60\}\|.\{60\}-0.23.\{60\}" PRD.md DECISIONS.md | head -3; venv/bin/python scripts/escalations.py open 2>&1 | grep -…
-83. Bash: grep -n "2026-11-0[1-4]" DECISIONS.md | cut -c1-200
-84. Bash: sed -n '92p;115p;141p;182p;234p;271p;312p;344p;384p;416p;443p' DECISIONS.md | cat -A | cut -c1-60
-85. Bash: venv/bin/python - <<'EOF'
-86. Bash: venv/bin/python - <<'EOF'
-87. Bash: timeout 400 venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -5; venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | tail -4
-88. Bash: git add DECISIONS.md TECH_DEBT.md && git commit -q -m "Audit 2026-11-05: re-review the decisions; replace the 10-28 audit item
-89. Agent: Fresh review of branch diff
-90. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-91. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-92. Bash: venv/bin/python - <<'EOF'
-93. Bash: venv/bin/python scripts/friction.py add --function gm --task "Process audit 2026-11-05, with a fresh review of the branch" --outcome done -…
-94. Bash: git status -sb | head -1; awk '/^## 4/{f=1} /^## 5/{f=0} f' PRD.md > /tmp/s4.md; wc -w /tmp/s4.md; grep -n -i "retracted\|superseded\|withd…
-95. Bash: grep -n -i "claude-code\|version\|2\.1\.\|BACKGROUND\|env:" .github/workflows/shift.yml | head -20
-96. ToolSearch: select:WebFetch
-97. WebFetch: https://code.claude.com/docs/en/headless
-98. WebFetch: https://code.claude.com/docs/en/changelog
-99. WebFetch: https://code.claude.com/docs/en/env-vars
-100. Bash: date -u +%H:%M
-101. Bash: C=$(command -v claude 2>/dev/null); echo "bin: $C"; [ -n "$C" ] && (readlink -f "$C"; timeout 20 claude --version 2>/dev/null); F=$(readlin…
-102. Bash: gh issue view 93 --json title,body --jq '.title, .body[0:1800]'
-103. Bash: git checkout -q -b gm/shift-2026-11-05-night-2 && venv/bin/python - <<'EOF'
-104. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-105. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-106. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i "WORKLOG\|over\|within"; date -u +%H:%M
-107. Bash: timeout 200 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add WORKLOG.md && git commit -q -m "Handover: C16's default source, t…
-108. Bash: grep -n "^def \(_clean_published\|sentence_case\|_sentence_case\|_shock_bait\|clean_title\|_close_quotes\|_fix_quotes\|_balance_quotes\)" s…
-109. Bash: rm -rf /tmp/pv && git worktree add -q /tmp/pv origin/integration/preview 2>&1 | tail -1; cat > /tmp/replay.py <<'EOF'
-110. Bash: cat /tmp/main.err | tail -n 5; echo ---; cat /tmp/pv.err | tail -n 5; ls -la /tmp/main.json /tmp/pv.json
-111. Bash: head -c 300 /tmp/main.json; echo; head -c 300 /tmp/pv.json; echo; cmp /tmp/main.json /tmp/pv.json && echo IDENTICAL
-112. Bash: cd /tmp/pv && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -c "import sys; sys.path.insert(0,'.'); from src import llm; prin…
-113. Bash: grep -n "Merge rehearsed 10-26" TECH_DEBT.md; grep -n -o "\*\*Merge rehearsed 10-26\*\*[^.]*\." TECH_DEBT.md
-114. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-115. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-116. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-117. Bash: git worktree remove --force /tmp/pv; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i "WORKLOG\|over\|within"; date -u +%H:…
-118. Bash: venv/bin/python - <<'EOF'
-119. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-120. Bash: git checkout -q -b gm/shift-2026-11-05-night-3 && venv/bin/python scripts/friction.py add --function product --task "Replay every shipped t…
-121. Bash: git fetch -q origin; git merge-base --is-ancestor 0969536 origin/integration/preview && echo "cta fix IS in preview" || echo "cta fix NOT i…
-122. Bash: rm -rf /tmp/mr && git worktree add -q --detach /tmp/mr origin/main && cd /tmp/mr && git -c user.name=rehearsal -c user.email=r@example.inva…
-123. Bash: cd /tmp/mr && grep -n "sentence_case(" src/*.py | grep -v "^src/[a-z]*.py:[0-9]*:def " | head -12; git log --oneline -1 origin/product/vote…
-124. Bash: git worktree remove --force /tmp/mr && rm -rf /tmp/pvm && git worktree add -q -b tmp-preview-sync /tmp/pvm origin/integration/preview && cd…
-125. Bash: cd /tmp/pvm && git push -q origin HEAD:integration/preview 2>&1 | tail -2; git log --oneline -1 origin/integration/preview; cd /home/runner…
-126. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-127. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-128. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-129. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i "over\|within"; git checkout -q -b gm/shift-2026-11-05-night-4 && venv/bin…
-130. Bash: rm -rf /tmp/pq && git worktree add -q --detach /tmp/pq origin/integration/preview && cd /tmp/pq && /home/runner/work/reddit-daily/reddit-da…
-131. Bash: git grep -n "content.sentence_case\|from .content import.*sentence_case\|def sentence_case" origin/integration/preview -- src/ tests/ | hea…
-132. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-133. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-134. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i "over\|within"; git checkout -q -b gm/shift-2026-11-05-night-5 && venv/bin…
-135. Bash: rm -rf /tmp/fx && git worktree add -q -b product/vote-caps-rules /tmp/fx origin/integration/preview && sed -n '115,142p' /tmp/fx/tests/test…
-136. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-137. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-138. Bash: cd /tmp/fx && timeout 200 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | grep -…
-139. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-140. Agent: Review vote-caps fix
-141. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-142. Bash: cd /tmp/fx && git add -A src/content.py tests/test_text_host.py && git -c user.name="$(git -C /home/runner/work/reddit-daily/reddit-daily c…
-143. Agent: Re-review revised vote-caps rule
-144. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-145. Bash: cd /tmp/fx && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python - <<'EOF'
-146. Bash: cd /tmp/fx && git add -A src/content.py tests/test_text_host.py && git -c user.name="$(git -C /home/runner/work/reddit-daily/reddit-daily c…
-147. Bash: git checkout -q -b gm/shift-2026-11-05-night-6 && venv/bin/python - <<'EOF'
-148. Bash: git fetch -q origin && venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | head -5; venv/bin/python scripts/check_docs.py 2>&1 | …
+9. Bash: gh run view 41865532583 2>&1 | head -40; git log origin/main --format='%h %ad %s' --date=iso -- .github/last-release-validation.md | head -5
+10. Skill: backlog
+11. Bash: venv/bin/python scripts/report.py --trajectory 2>&1 | tail -30; echo ----; venv/bin/python scripts/backlog_status.py --dropped 2>&1 | head …
+12. Bash: venv/bin/python scripts/backlog_status.py --help 2>&1 | head -20; venv/bin/python scripts/backlog_status.py -v 2>&1 | head -60
+13. Bash: grep -n "^## \|^### " PRD.md | head -30; grep -n "^## \|^### " PLAN.md | head -30
+14. Bash: sed -n 13,65p PRD.md; sed -n 26,60p PLAN.md
+15. Bash: grep -rn -i "clock change\|PST\b\|08:00 UTC\|daylight\|Pacific" PRD.md TECH_DEBT.md PLAN.md DECISIONS.md .claude/skills/shift/SKILL.md CLAU…
+16. Bash: git log --all --format='%h %ad %s' --date=short -i --grep='clock\|DST\|daylight\|Pacific\|PST' | head -20; grep -rn -i "clock" TECH_DEBT.md…
+17. Bash: grep -rn -i "reset" src/ scripts/ --include=*.py | grep -i -v "claude\|five_hour\|weekly\|resets_at" | head -30
+18. Bash: date -u +%H:%M; sed -n 40,130p scripts/dry_run.py
+19. Bash: venv/bin/python scripts/report.py --zeros 2>&1 | tail -25; ls analysis/ | head -40
+20. Agent: Generate 8 candidate work items
+21. Bash: date -u +%H:%M; grep -n "6 November\|11-06\|fallback.*#77\|#77.*fallback" PRD.md PLAN.md DECISIONS.md | head -15
+22. Bash: grep -n -i "Stephen" PRD.md | head -12; gh issue view 77 --json title,labels,body --jq '.title, (.labels|map(.name)|join(",")), .body' | gr…
+23. Bash: grep -rn -i "voice alone\|ahead of bet 1\|before bet 1\|#16 first\|#16 ahead" PRD.md PLAN.md DECISIONS.md TECH_DEBT.md WORKLOG.md | head -10
+24. Agent: Rank candidates (forward order)
+25. Agent: Rank candidates (reversed order)
+26. Bash: date -u +%H:%M; grep -n -A4 "^on:" .github/workflows/*.yml | grep -i "tags" ; git tag -l | tail -5; git ls-remote --tags origin | tail -5; …
+27. Bash: grep -rn -i "06.*fallback\|fallback.*06\|without bet 1.*voice\|voice.*if #77\|#77.*unlabel\|no label" PRD.md PLAN.md DECISIONS.md TECH_DEBT…
+28. Bash: git show f7b1440 -- WORKLOG.md | grep -i -B2 -A3 "stephen's voice alone\|6 november" | head -30
+29. Bash: venv/bin/python scripts/report.py --offline --at-age 7 --since 2026-10-07 --min-views 10 --compare voice=Stephen 2>&1 | tail -15; echo ----…
+30. Bash: git checkout -q -b gm/shift-2026-11-05-day && head -3 analysis/experiments.csv && tail -4 analysis/experiments.csv; grep -n "R4 |" PRD.md |…
+31. Bash: grep -o "\*\*R[0-9]*\*\*\|(R[0-9]*)\|R[0-9]\b" PRD.md | sort | uniq -c | sort -k2 | head -20; grep -c "" analysis/experiments.csv; grep -n …
+32. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+33. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+34. Bash: printf '%s\n' 'R7-voice-watch,Stephen leads on watch-seconds: the 11-05 peek re-read on uploads it could not see,coin,watch_seconds,2026-11…
+35. Bash: date -u +%H:%M; venv/bin/python scripts/check_docs.py 2>&1 | tail -5; venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -3; venv/bin/pytho…
+36. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+37. Bash: git ls-remote origin refs/heads/integration/preview; grep -rn "on:" -A3 .github/workflows/*.yml | grep -i "push" | head; grep -n "tags\|cre…
+38. Bash: for f in dry-run escalations guardrails protect-process; do echo "== $f"; grep -n -A6 "^ push:" .github/workflows/$f.yml | head -8; done
+39. Bash: git tag -a keep/integration-preview-2026-11-05 5a44db0 -m "Bet 1's release as of 2026-11-05: a copy if integration/preview is ever deleted …
+40. Bash: date -u +%H:%M; grep -rn -i "swear\|profan\|PROFAN\|BLOCKED_WORDS\|bad_words" src/*.py | head -15
+41. Bash: venv/bin/python - <<'EOF'
+42. Bash: venv/bin/python - <<'EOF'
+43. Bash: venv/bin/python - <<'EOF'
+44. Bash: grep -n "^F84," .github/friction.csv | cut -c1-600; venv/bin/python scripts/friction.py --help 2>&1 | head -25
+45. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -30; tail -3 .github/friction.csv | cut -c1-400
+46. Bash: grep -o '"[a-z-]*",' /dev/null; cut -d, -f8 .github/friction.csv | sort | uniq -c | sort -rn | head -8
+47. Bash: venv/bin/python scripts/friction.py add --function data --task "Re-read the voice coin on watch-seconds before the 6 Nov fallback call; pre…
+48. Bash: date -u +%H:%M; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/2a64d871-7d48-480e-b815-6bef535a3d1c/tasks/bkdhpzjur.output
+49. Bash: grep -n -i "not rising\|delay" TECH_DEBT.md | head -8; head -1 upload_log.csv
+50. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+51. Bash: grep -rn "SLOT_CRONS\s*=" -A8 src/*.py | head -14; gh run list --workflow run-reddit-video.yml -L 12 --json createdAt,event,conclusion,disp…
+52. Bash: cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/2a64d871-7d48-480e-b815-6bef535a3d1c/tasks/bkdhpzjur.output; grep -rn "UPL…
+53. Bash: sed -n 50,70p src/run.py; grep -n "def slot_is_on\|def active_slots\|ON_SLOTS\|slot in\|slot %\|slot <" src/*.py | head
+54. Bash: grep -n "def live_slots" -A8 src/content.py; grep -n "def run_slot" -A22 src/content.py | head -30
+55. Bash: venv/bin/python - <<'EOF'
+56. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+57. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+58. Bash: date -u +%H:%M; venv/bin/python scripts/friction.py add --function reliability --task "Re-measure upload delays against their cron slots fo…
+59. Bash: timeout 100 venv/bin/python - <<'EOF'
+60. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
+61. Bash: venv/bin/python scripts/friction.py add --function legal --task "Check every catalogue title, question and narration against today's swear …
+62. Agent: Review shift diff before merge
+63. Bash: date -u +%H:%M; venv/bin/python - <<'EOF'
+64. Bash: git worktree add -q /tmp/mainwt main 2>&1 | tail -1; cd /tmp/mainwt && /home/runner/work/reddit-daily/reddit-daily/venv/bin/python scripts/…
+65. Bash: grep -n "^| ~~3~~" PRD.md | cut -c1-80; grep -n "^#3,\|^#3-" analysis/experiments.csv | cut -c1-120; sed -n 121,124p PRD.md | cut -c1-300
+66. Bash: venv/bin/python - <<'EOF'
+67. Bash: venv/bin/python - <<'EOF'
+68. Bash: sed -i 's/Bet 2 needs bet 1 merged by ~11-13–11-20 to reach its bar (PRD §4)\./Bet 2 needs bet 1 by ~11-13–11-20 (PRD §4)./' PLAN.md && ven…
+69. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -2; venv/bin/python scripts/check_docs.py 2>&1 | tail -3; venv/bin/python scripts/backlog_s…
+70. Bash: git log --since=2026-10-20 --format='%h %ad %s' --date=short -- .github/workflows/ | head -3; git check-ignore -q .env && echo ".env ignore…
+71. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+72. Bash: sed -i 's/So do 22 of the 883 older readings\./So do 22 of the older readings./' WORKLOG.md && venv/bin/python scripts/context_budget.py --…
+73. Bash: venv/bin/python - <<'EOF'
+74. Bash: git add WORKLOG.md && git commit -q -m "WORKLOG: drop the 11-04 (19:30) entry to stay within budget" && git pull -q --rebase origin main &&…
+75. Bash: git fetch -q origin sample-frames 2>&1 | tail -1; git ls-tree -r --name-only origin/sample-frames | head -30; for n in 77 90; do echo "== #…
+76. Bash: gh api repos/{owner}/{repo}/actions/runs/40176650537 --jq '.head_sha[:7] + " " + .created_at + " " + .name'; gh api repos/{owner}/{repo}/ac…
+77. Bash: venv/bin/python scripts/friction.py add --function gm --task "Merge the shift's tracker changes and hand over" --outcome done --category ru…
+78. Agent: Second-round candidates, other functions
+79. Bash: head -1 analysis/replies.csv; cut -d, -f1-3 analysis/replies.csv | tail -4; grep -rn -i "days=14\|14 \* \|MAX_REPLY_AGE\|STALE\|timedelta(d…
+80. Bash: sed -n 120,135p src/replies.py; grep -n "STALE\|_DAYS" src/replies.py src/config.py | head -5
+81. Bash: venv/bin/python - <<'EOF'
+82. Bash: sed -i "s/its 3 queued replies expire 11-17 (redraft then) |/its 3 queued replies expire 11-17: redraft |/" PLAN.md && venv/bin/python scri…
+83. Bash: venv/bin/python - <<'EOF'
+84. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | grep -n "^- \*\*" | cut -c1-170
+85. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | sed -n '239,272p;307,316p;328,343p'
+86. Bash: git fetch -q origin && git merge-tree --write-tree origin/main origin/integration/preview >/tmp/mt.txt 2>&1; echo "exit $?"; head -5 /tmp/m…
+87. Bash: git worktree add -q --detach /tmp/relwt origin/integration/preview && cd /tmp/relwt && git -c user.name=t -c user.email=t@t merge -q --no-e…
+88. Bash: venv/bin/python - <<'EOF'
