@@ -89,6 +89,7 @@ them yet (`PLAN.md` C18).
 
 **Revisit:** at the rule's read, and at each `/audit`.
 **Re-reviewed 2026-10-28 (audit):** holds: all four shifts since it went live logged their rows, about 40% "none"; the rest untestable until the 11-24 read.
+**Re-reviewed 2026-11-05 (audit):** holds: every shift since 10-28 logged rows, about 45% "none"; the 11-24 read passes its fixed-groups test only if G1 and G2 (fixes shipped 11-02, 11-03) are marked fixed by then.
 
 ---
 
@@ -112,6 +113,7 @@ when we apply; (2) audience is the binding step (21 subscribers, §1).
 **Revisit** before applying to any paid programme, or at 1,000 subscribers.
 **Re-reviewed 2026-10-25 (audit):** holds; (2) unchanged (21 subscribers). Stale beside it: D9's and D10's 10-13 lines call YouTube's review bet 1's real gate, which D14 declined; PLAN §1 still rates Audience "none" (11-05 monthly).
 **Re-reviewed 2026-10-28 (audit):** holds: 22 subscribers, engaged views ~757× short; (1) untestable, as nothing has been applied for.
+**Re-reviewed 2026-11-05 (audit):** holds: 23 subscribers, ~691× short; (1) untestable.
 
 ## D13 · 2026-10-11 · Short shifts are the shift's to fix; what reaches the owner is one label
 
@@ -138,6 +140,7 @@ change label-only. So the handover leads with #50's four commands.
 **Re-reviewed 2026-10-25 (audit) — trigger fired; absence, not hands.** #77 has been a label since 10-25 08:33 (the stand-in voice took the render off the owner's machine, 10-23), so 10-21's "hands" cause is gone. But #80, a label, has waited 5.6 days, and nothing of the owner's has moved since 10-20 21:12 (~4.5 days, past their 76-hour longest gap). (1) is false for now; no re-ask, since re-raising to an absent owner only adds email. #77's title and body asked for a local render after the ask became a label; both rewritten 10-25 (an edit sends no email). Nine shifts ran 26–43 of 60 minutes, every one with nothing ready.
 **Re-reviewed 2026-10-28 17:15 — trigger fired; not absence: the owner settles what they can read.** #77 has been one label for 3.4 days, #80 for nine. On 10-27 the owner labelled #84 and #85, process wording, 7 and 12 hours after each opened, and passed over both. So (1) holds for asks settled by reading and fails for the two needing a judgement on direction (#80) or a watch (#77: a 10 MB download from the build page; its frames are in the comment). No re-ask: #77 was re-raised the day before. Its download expires 11-08; if #77 is open on 11-07, a shift renders a fresh sample rather than leave a dead link.
 **2026-11-04: that re-render is withdrawn.** An identical copy is kept on the `sample-frames` branch and linked in #77's 25 October comment (11-03), so the link cannot die; a fresh render would write different host lines from the ones the owner is judging. The owner has not acted since 10-27 21:20 (171 hours, past the 76-hour longest gap): absence, so still no re-ask.
+**Re-reviewed 2026-11-05 (audit) — (1) false: absence.** The owner last acted 10-27 21:20 (~195 hours, past their 76-hour longest gap). Seven asks opened since (#86, #88–#93), plain labels among them (#88, #91–#93), and none is answered. No re-ask. Where waiting is fatal, a shift's one move is a default set in advance that only a label turns on (C16, 11-05).
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
@@ -179,6 +182,7 @@ unanswered (4 false); or the cadences push shifts past the reserve (3 false).
 **Re-reviewed 2026-10-13 (audit):** holds. Market and Monetization did their first work (10-13); Audience is still none, blocked on #75, so a finding at the 11-05 monthly.
 **Re-reviewed 2026-10-25 (audit):** holds. Stale beside it: the coverage table (PLAN §1, last set 10-05) still rates Audience "none" though D14 made audience the binding step; distribution and finance had no time in 20 shifts (`--allocation`). Both for the 11-05 monthly.
 **Re-reviewed 2026-10-28 (audit):** (1) and (3) hold; (2) waits on the 11-05 monthly (audience, monetization and market still "none"); (4) strained: asks resting on outside evidence wait longest (#80 nine days, #82 seven).
+**Re-reviewed 2026-11-05 (audit):** (2) holds since the 11-03 monthly emptied "none"; (3) strained: six shifts ran dark 10-28 to 10-30 on the weekly allowance (#92); (4) strained: #80 has waited 17 days, #82 15.
 
 ## D11 · 2026-09-25 · Supply is ready work, with a floor the system refills
 
@@ -231,6 +235,7 @@ once #70 is answered.
 **Re-reviewed 2026-10-13 (audit) — trigger fired:** after #70 closed, two shifts ran 26 and 25 of 60 minutes (shift-usage.csv); both ready items wait on #74. Carried by D13.
 **Re-reviewed 2026-10-25 (audit) — trigger fired again:** nine shifts, every one with ready 0, ran 26–43 of 60 minutes. Its floor is 5 in `backlog_status.py` but 3 in the shift and backlog skills (and was in PRD §0, now pointing at the tool); assumption 3's "a floor of 3" is stale. The cause is D13's, not supply's: the work above the bar waits on the owner.
 **Re-reviewed 2026-10-28 (audit):** (1) false: 0 ready against a floor of 5, for every shift since 10-25 that did not inherit work; (3) false: the shift skill says 3, the tool 5 (in the 11-05 bundle). The cause is D13's.
+**Re-reviewed 2026-11-05 (audit):** (1) false: 8 of 13 shifts since 10-28 began with nothing ready, and rounds on 11-03, 11-04 and 11-05 found little above the bar; (3) false (#88 unanswered). The cause is D13's.
 
 ## D10 · 2026-09-25 · No new spending until the channel earns money — **graduated 2026-10-28**
 
@@ -268,6 +273,7 @@ the new cadence, not borrowed from the 2-a-day era.
 **2026-10-18:** the floor still reads the whole era, but the comparison now reads the release replaced, at 20+ uploads: `v7` read +20% over the pool, so `v8` could have fallen ~17% below it and passed.
 **Re-reviewed 2026-10-25 (audit):** holds; still two uploads a day, and four a day waits on bet 1 (#80).
 **Re-reviewed 2026-10-28 (audit):** holds: two a day, four waiting on #80; the Monday snapshot retries since 10-27.
+**Re-reviewed 2026-11-05 (audit):** holds: two a day; the 11-02 snapshot landed.
 
 ## D9 · 2026-09-21 · Success is judged by typed metrics, never one number
 
@@ -309,6 +315,7 @@ weather at this size.
 **Measured 2026-10-31:** half that breach was two uploads read at 3 days old, which only the newest week ever has (4.8% → 6.1% without them). Only the newest week is ever read that young, and a 3-day zero later shows a view half the time (2 of 4, against 0 of 17 older), so the scorecard now reads both periods at 4–10 days; the 11-02 snapshot re-reads both at 10 days. Whether they were suppressed is that read's to say; the trigger stands on it.
 **Triggered 2026-11-02 (weekly review):** `zero_rate` breached again, 2.4% → 17.6% (n=41 vs 34), with five isolated zero-view uploads since 10-15; and (2): watch-seconds showed no link to views (R5, rho −0.23, its 95% interval excluding +0.3; PRD §4). The November monthly revisits (1) and (2).
 **Revisited 2026-11-03 (monthly):** (1) holds for `zero_rate`. It fired on 3 of the last 5 weekly reads, not every period, and the 11-02 breach survived both periods being read at 10 days, so it is catching a repeated rise in uploads nobody is shown rather than weather. The 3-point margin stays; the response is the 11-09 re-read by subreddit (PRD §4), routed before it is read. (2) is false as a proxy for reach (R5): to the owner as `d9-test-metric`, proposing engaged share for rules written from now, with watch-seconds as the viewer gate; rules set before their data stand.
+**Re-reviewed 2026-11-05 (audit):** as the 11-03 monthly found; nothing new. (2)'s replacement measure waits on #91.
 
 ## D8 · 2026-09-21 · PM's judgement jobs get methods, not exhortation
 
@@ -341,6 +348,7 @@ or `WORKLOG` shows the method skipped (2 false).
 **Re-reviewed 2026-10-13 (audit):** holds; the last three shifts ranked forward and reversed.
 **Re-reviewed 2026-10-25 (audit):** holds; every shift since 10-21 ranked forward and reversed.
 **Re-reviewed 2026-10-28 (audit):** holds, clean for a third audit (10-13, 10-25, 10-28): eligible to graduate into the backlog skill, a change for the 11-05 bundle.
+**Re-reviewed 2026-11-05 (audit) — strained, so not graduated.** Ranking ran forward and reversed every time, but twice the filter against §4's findings ran after ranking, not before (F157, 11-04: the top two already settled; F168, 11-05: 3 of 8). Graduation waits for a clean audit.
 
 ## D7 · 2026-09-21 · Slack goes to research, not back to the clock — **absorbed by D11 and the shift skill**
 
@@ -382,6 +390,7 @@ approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
 **Re-reviewed 2026-10-25 (audit) — trigger fired.** #50 approved 10-05 and unapplied 20 days; #65 behind it 17. Its cost is now visible: the shift skill and the backlog skill say the ready floor is 3, `backlog_status.py` says 5, and the skill's "cannot read Actions logs" is false (`gh run view --log` works). Workflow-file patches never needed #50 (`apply-approved.yml` lands them on a label). For the 11-05 monthly: one bundled skill change, not more asks to an absent owner.
 **Re-reviewed 2026-10-28 (audit):** (1) false: #50, approved 10-05, is still unapplied; (3) mixed: process wording is labelled within hours (#84, #85).
 **2026-10-31:** #50 closed as superseded. Since 10-27 a shift lands a labelled skill, `CLAUDE.md` or `ORG.md` change itself with `Approved-In` (#84, #85), so the apply step no longer blocks; only the owner's answer does (#65).
+**Re-reviewed 2026-11-05 (audit):** (1) false in a new way: shifts cannot write `.claude/` or push workflow files even on a branch (F161), so finished guards become asks (#89, #93); (3) the owner has not acted since 10-27.
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
@@ -413,6 +422,7 @@ entries would come from the template, which is what the owner reads. Left as is.
 **Re-reviewed 2026-10-13 (audit):** the count fell to 21 of 25, but items grow instead (the Groq item runs ~500 words); (3) still strained.
 **Re-reviewed 2026-10-25 (audit):** (3) worse: TECH_DEBT sits at 25 of 25 with items up to ~785 words, and WORKLOG's word budget holds two entries. Closure happened this audit (the 10-21 item resolved into this one), but item length is unbounded.
 **Re-reviewed 2026-10-28 (audit):** (1) false for WORKLOG: ~1,000-word entries mean its word budget keeps two and the ten-entry cap never binds; (3) strained: TECH_DEBT at 24 of 25.
+**Re-reviewed 2026-11-05 (audit):** (1) still false for WORKLOG (entries ~940 words, two fit); (3) strained: TECH_DEBT and DECISIONS at their caps, PLAN at its word cap (a 12-word rule took five trims, F172), and PRD §4 at ~14,900 words, unbudgeted, up 22% since 10-28.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
@@ -440,6 +450,7 @@ deciding what they shouldn't (3).
 **Re-reviewed 2026-10-13 (audit):** holds; a sample and a fresh review caught bet 1's dropped host lines before merge.
 **Re-reviewed 2026-10-25 (audit):** holds; gates caught real defects (two held samples, a truncation slur, a blank line dropping the host). Its text omits two later gates: the fresh-context review (CLAUDE.md §3) and the publishing-policy exception (§4).
 **Re-reviewed 2026-10-28 (audit):** (1) strained: two commits reached `main` before their fresh review (friction F37), which CI does not enforce; (2) untestable, no bad release since; (3) holds.
+**Re-reviewed 2026-11-05 (audit):** (1) strained: two text defects reached viewers for weeks (a dropped closing quote; lower-case closing lines in 11 of #14's no-capitals uploads), found by reading published output, not by a gate. Fresh reviews caught ~19 defects since 10-28; four dry runs and eight release checks caught none. (2) untestable; (3) holds.
 
 ## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3**
 
