@@ -223,7 +223,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
   unparseable reply raw to the public log, where `_clean_published` never
   echoes a refused field. **Merge rehearsed 10-26** (local, over `main`
-  `5e96eb2`): no conflicts, 857 pass, no network. Its review's one gap: the
+  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay (11-05):**
+  all 218 shipped titles come out identical through `main`'s and the
+  release's `_clean_published`, `_shock_bait` and `sentence_case` (2 refused
+  by both, for a swear word or emoji); closing lines have one logged row, and
+  host lines none, so neither is replayable yet. Its review's one gap: the
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
