@@ -181,3 +181,4 @@ F179,2026-11-05T11:12:45+00:00,42014717256,data,Re-read the voice coin on watch-
 F180,2026-11-05T11:12:45+00:00,42014717256,strategy,Refresh bet 2's views pace and the merge date it implies,done,,none,,,0,
 F181,2026-11-05T11:12:45+00:00,42014717256,security,Tag bet 1's release head so a deleted branch loses nothing,done,,none,,,0,
 F182,2026-11-05T11:14:20+00:00,42014717256,reliability,Re-measure upload delays against their cron slots for four a day's premise,done,,none,,,0,
+F183,2026-11-05T11:14:56+00:00,42014717256,legal,"Check every catalogue title, question and narration against today's swear filters for the old-videos decision",done,,tool,"the filter takes minutes over 993 narrations, so the first scan overran the command limit",none needed: scan the pipeline uploads first,2,
