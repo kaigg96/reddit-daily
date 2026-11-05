@@ -137,6 +137,10 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
     assert content.sentence_case("the u.s. president? the job... for you?") == (
         "The u.s. president? The job... for you?")
     assert content.sentence_case("this one, i.e. the cat") == "This one, i.e. the cat"
+    # Its review: one-letter words, digits and closing marks still end one.
+    assert content.sentence_case("option a. option b. so do I. which?") == (
+        "Option a. Option b. So do I. Which?")
+    assert content.sentence_case("pick 5. cats (obviously). you?") == "Pick 5. Cats (obviously). You?"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept
