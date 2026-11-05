@@ -721,7 +721,11 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     return MetadataResult(
         title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
-        cta=_clean_published(data.get("cta")),
+        # The capitals test's "no capitals" arm leaks into this line as it did
+        # into titles: 11 of its 27 uploads to 11-02 ended on an all-lower-case
+        # line, posted as our comment and in the closed captions (on screen it
+        # is upper-cased anyway) (0 of 123 others).
+        cta=sentence_case(_clean_published(data.get("cta"))),
         source=route,
         failure=prior,
         commentary=_clean_commentary(data, len(comments)) if commentary else None,
@@ -990,8 +994,8 @@ def sentence_case(title):
     if not title or any(c.isupper() for c in title):
         return title
     # A sentence ends at ? or !, or at a full stop after a word of two or more
-    # letters: not an ellipsis ("self... and why") or "i.e." / "a.i.".
-    title = re.sub(r"(^\W*|(?:(?<=\w\w)\.|[?!])\s+\W*)([a-z])",
+    # letters: not an ellipsis ("self... and why"), "i.e." / "a.i." or "vs.".
+    title = re.sub(r"(^\W*|(?:(?<=\w\w)(?<!\bvs)\.|[?!])\s+\W*)([a-z])",
                    lambda m: m.group(1) + m.group(2).upper(), title)
     return re.sub(r"(?<![./])\bi\b(?![./])", "I", title)
 

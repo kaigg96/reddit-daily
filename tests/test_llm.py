@@ -264,6 +264,19 @@ def test_metadata_strips_the_junk_llms_add(monkeypatch):
     assert meta.cta == "Bold line"
 
 
+def test_an_all_lower_case_closing_line_ships_in_sentence_case(monkeypatch):
+    """Shipped on 2026-10-15 in #14's no-capitals arm, captioned and posted as
+    our comment. A line with any capital is the model's and stays as written."""
+    for cta, expected in (("what do you think happens next? share your prediction below.",
+                           "What do you think happens next? Share your prediction below."),
+                          ("cats vs. dogs: which side are you on?",
+                           "Cats vs. dogs: which side are you on?"),
+                          ("If YOU woke up in 2020, what's YOUR move?",
+                           "If YOU woke up in 2020, what's YOUR move?")):
+        monkeypatch.setattr(llm, "_generate", lambda *a, **k: json.dumps({"cta": cta}))
+        assert llm.get_metadata("q", ["a", "b", "c"]).cta == expected
+
+
 def test_resolve_title_blanks_the_style_when_generation_failed():
     """The R2.2 contamination fix.
 

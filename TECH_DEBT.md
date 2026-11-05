@@ -223,7 +223,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
   unparseable reply raw to the public log, where `_clean_published` never
   echoes a refused field. **Merge rehearsed 10-26** (local, over `main`
-  `5e96eb2`): no conflicts, 857 pass, no network. Its review's one gap: the
+  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay (11-05):**
+  all 218 shipped titles come out identical through `main`'s and the
+  release's `_clean_published`, `_shock_bait` and `sentence_case` (2 refused
+  by both, for a swear word or emoji); closing lines have one logged row, and
+  host lines none, so neither is replayable yet. Its review's one gap: the
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
@@ -334,59 +338,47 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`integration/preview`): the second model first, given the main call's
   reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
 
-- **Audit 2026-10-28: as on 10-25, the process works at the margin and the
-  owner's label on #77 binds; shifts fill the wait with protective fixes.**
-  Eight shifts since 10-25 15:40, 26–61 of 60 minutes (mean 38, unchanged);
-  four began with nothing ready, four with carried work or the owner's two
-  items. 6 of 8 were fixes; two changes reached viewers, both protective (a
-  clip retired, the shock-title guard). Watch time flat at 12 s; the
-  scorecard reads WORSE on its zero-rate guardrail (4.8% → 11.4%), one
-  period, so read it again on 11-02 (D9's trigger if it repeats). Fresh
-  reviews caught real defects again (the upload retry's resume range and two
-  missed errors, a half-written log row, an ambiguous balance rule, the dose
-  count); dry runs caught none; no reverts, no attribution, live data written
-  only by the upload job. **Of 10-25's findings:** self-grading fixed
-  (entries lead "No for viewers" from 10-27 17:05); still mostly fixes;
-  audience still 0 (distribution, editorial, finance 5% once each), as every
-  ship-or-earn idea needs bet 1 or the owner (two rounds on 10-28 found
-  none); issue bodies drifted again (four, 10-27), so the carried re-raise
-  fix stands; the four branches stay. **New:** (1) PRD §4 grew 6,593 →
-  10,452 → 12,162 words (10-18, 10-25, now), unbudgeted while every session
-  is sent to it: compress at the 11-05 monthly, then budget it in
-  `context_budget.py` (not reached at the 11-03 monthly; ~14,200 words now). (2) Entries run ~1,000 words each since 10-12, so
-  WORKLOG's word budget keeps two and its ten-entry cap never binds (D4's
-  (1) false there): a cold session sees under a day, and a Next pointing at
-  an older entry breaks when it goes (one caught 10-28). Propose a
-  per-entry cap at the monthly (held 11-03 with five asks open: the
-  context budget is Propose-level, ORG.md; that entry was trimmed six times). (3) Six candidates were dropped twice across
-  shifts despite `--dropped` (an outage alarm, the voice read's limit, early
-  11-05 drafting, render refusals, a detection limit, voice cost per
-  source); minutes each. (4) A recommendation to the owner reached `main`
-  before its premise was checked (10-28: removing 12 duplicates already
-  private; a fresh agent caught it within the hour). A finding that asks the
-  owner to act gets a fresh check before it lands, as code does. (5) A
-  helper agent printed the runner's environment into its own output
-  (10-28). Contained: the action hides agent output and the trace lists only
-  the shift's own calls; but the agent's workflow token (dotted, not
-  `GITHUB_TOKEN`) slipped the trace's token shapes: fixed and merged
-  10-28, reviewed (left: a full stop after a token is blanked with it). (6) Decisions (re-reviews inline):
-  D4 and D11 hold false assumptions, D5 and D9 strained; D8 is clean at a
-  third audit, so it can graduate (a skill change, for the bundle); D10
-  graduated to a stub the same day; the file is at 15 of 15. D13's
-  question, absence or the ask's form, is now one line: `escalations.py
-  open` prints the owner's last deliberate act (10-28, reviewed twice; a
-  `referenced` event carries the owner's name when auto-apply pushes).
-  **Outward look:** re-read 10-25; not repeated after three days.
-  **Left alone:** the shift cadence and the owner's queue, which no shift
-  change moves.
-  **Raised at the 11-03 monthly:** the upload check's patch beside the reply
-  job's (one bundle ask), the shift and audit skills' stale lines (#65's
-  sentence stays in #65), and the weekly breaker as a schedule ask: at
-  ~12.6–16 units a shift it pays for 13–16 of 21 scheduled shifts, and six
-  ran dark 10-28 to 10-30; the ask proposes two a day. **Still carried:** the
-  re-raise that replaces an issue's body (`process/reraise-replaces-ask`, a
-  workflow patch) and D8's graduation (a skill change), held so that day's
-  asks stayed five. **Closes when** those two are raised, or the next audit.
+- **Audit 2026-11-05: the process works at the margin; the owner's absence
+  binds (last act 10-27 21:20).** Thirteen shifts since 10-28, plus one that
+  lost its hour to background work (11-04 10:54) and six skipped on the weekly
+  allowance (10-28 to 10-30). 8 began with nothing ready; mean ~40 of 60 minutes,
+  about as before (38). ~26 fixes to 6 bets; only 11-04's two fixes reached viewers; ~8
+  items were internal tooling, and 11-04 00:25 only re-planned. Time: gm 28%,
+  reliability and data 16% each, product 3% (0 in 11 of 13), distribution 0:
+  not a ranking failure, as every product item waits on #77. "Than ~10 shifts
+  ago" read No in 13 of 13; from 11-01 entries lead "a little" on protective
+  fixes, so 10-25's self-grading fix is fading. Scorecard WORSE (zero-rate
+  2.4% → 17.6%); watch time 12.0 s, flat. **Gates:** fresh reviews caught ~19
+  defects; four dry runs and eight release checks caught none. Both
+  viewer-facing defects (11-04) were found by reading published output (the
+  narration log, 151 run logs), which no gate requires, and a replay of every
+  logged title through old and new code caught the fix's own regressions
+  (F159): for any change to shipped text, that replay is the gate that works. **Escalations:** 7 opened since 10-28, none answered, 2 trivial (#86
+  retracted, #88). Too tight on files, not decisions: `.claude/` and workflows
+  turn finished guards into asks (#89, #93). **Of 10-28's findings:** (1)
+  PRD §4 worse, 12,162 → ~15,050 words (+24%), unbudgeted, carried by two monthlies;
+  (2) entries still ~940 words; (3) dropped ideas re-proposed six or more
+  times, and the generator re-derived settled items again (F168); (4) an
+  unchecked premise reached the owner again (#86, retracted the same day);
+  (5) no recurrence seen. **Decisions** (inline): D13 false (absence); D8
+  strained, so not graduated; D2, D4, D5, D9, D11, D12 strained or false.
+  **Rules:** no attribution trailer, though the session harness still asks
+  for one each shift, so the CI guard is what holds it. **Outward (docs read
+  11-05):** the headless docs describe background work at exit and an env
+  switch, `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS`: a one-line alternative to
+  #93's 40-line hook in `shift.yml`. The pinned 2.1.280 binary carries the
+  switch (checked 11-05); #93's tested hook does the same job, so no new ask:
+  prefer the switch if #93 is ever redone. A `Stop` hook could hold an unattended shift to its hand-over
+  time (`.claude/settings.json`, which shifts cannot write). Rejected:
+  `/clear` inside a shift (one non-interactive prompt); `/doctor` cuts (not
+  in the docs). Done: skills well under 500 lines. **Changed:** the
+  re-reviews; C16's default source (PLAN). **Proposed, not raised** (another
+  ask to an absent owner only adds email): budget and compress PRD §4; a
+  per-entry WORKLOG cap; the replay gate for shipped text; the env switch
+  into #93; the re-raise patch (`process/reraise-replaces-ask`). **Left
+  alone:** the shift cadence (#92) and the owner's queue. **Closes when**
+  those are raised, at the owner's return or the 12-07 monthly, or at the
+  next audit.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
