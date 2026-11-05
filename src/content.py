@@ -97,7 +97,7 @@ def sentence_case(text):
     # full stop ends a sentence except after another ("leave... now"), after
     # "vs" or in an initialism ("u.s.", "i.e."), as in llm.sentence_case
     # (003c9bb; the two disagreed on 19 of 420 logged texts).
-    text = re.sub(r"(^|(?:(?<=[!?])|(?<=\.)(?<!\.\.)(?<!\bvs\.)(?<!\.\w\.))\s+)(\S+)",
+    text = re.sub(r"(^|(?:(?<=[!?])|(?<=\.)(?<!\.\.)(?<!\bvs\.)(?<!\.[^\W\d_]\.))\s+)(\S+)",
                   cap, text)
     return re.sub(r"(?<![./])\bi\b(?!\.\w|/)", "I", text)   # not "i.e.", "i/o"
 

@@ -141,6 +141,7 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
     assert content.sentence_case("option a. option b. so do I. which?") == (
         "Option a. Option b. So do I. Which?")
     assert content.sentence_case("pick 5. cats (obviously). you?") == "Pick 5. Cats (obviously). You?"
+    assert content.sentence_case("web 3.0. ios 17.1. which?") == "Web 3.0. Ios 17.1. Which?"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept
