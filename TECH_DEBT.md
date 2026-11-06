@@ -223,10 +223,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
   unparseable reply raw to the public log, where `_clean_published` never
   echoes a refused field. **Merge rehearsed 10-26** (local, over `main`
-  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay (11-05):**
-  all 218 shipped titles come out identical through `main`'s and the
-  release's `_clean_published`, `_shock_bait` and `sentence_case` (2 refused
-  by both, for a swear word or emoji); closing lines have one logged row, and
+  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay:**
+  `scripts/replay_text.py main integration/preview`, re-run before the
+  merge (11-06: 220 of 220 titles identical through `_clean_published`,
+  `_shock_bait` and `sentence_case`; 13 refused by both, all shipped before
+  their guard); closing lines have three logged rows, and
   host lines none, so neither is replayable yet. Brought current with `main`
   the same night (`f046eba`): clean, 1,013 pass; the CTA is cased by
   `main`'s 11-04 fix and the vote comment by `vote-comment-caps`, so #14's

@@ -190,3 +190,5 @@ F188,2026-11-05T19:08:07+00:00,42087222325,gm,"Generate and rank the queue (two 
 F189,2026-11-05T19:08:07+00:00,42087222325,product,Check bet 1's release still merges and passes after today's ledger edits,done,,none,,,0,
 F190,2026-11-05T19:08:07+00:00,42087222325,security,"Standing check: secrets ignored, workflows unchanged, money controls",done,,none,,,0,
 F191,2026-11-05T19:08:07+00:00,42087222325,gm,Check the #77 and #90 samples GitHub deletes 11-08/09 have permanent copies,done,,none,,,0,
+F192,2026-11-06T00:19:06+00:00,42135584908,gm,Keep #77's sample watchable past GitHub's 8 Nov deletion; correct its stale deadline,done,,tool,escalations.py flags the expiring run but not which part of the ask still links it; had to read body vs comments by hand,the flag naming the body line that links the expiring run,4,
+F193,2026-11-06T00:28:01+00:00,42135584908,data,Candidate: age-restriction check of 4 zero-view uploads from the 11-02 digest,abandoned,,rederived,"the four were 0-2 days old on the 11-02 snapshot, so their zeros are analytics lag; the generator read them as zero-view",the digest marking uploads under 3 days old as not yet measurable,5,
