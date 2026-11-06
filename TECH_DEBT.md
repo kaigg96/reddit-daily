@@ -521,7 +521,7 @@ a list nobody can read is the same as no list.
   is owner-only, so no guard in code. **11-01 evening: premise very likely false.** GitHub's docs make the cron's
   changer the runs' `actor` and the email's recipient; every scheduled upload
   run since e3f5854 names the owner, as `APPLY_TOKEN` (needed to push
-  workflow files) is a personal token. #86 retitled "probably not needed". The lasting fix needs no
+  workflow files) is a personal token. #86 withdrawn 11-06 (its lasting piece is in #89). The lasting fix needs no
   GitHub rule: `scripts/upload_watch.py` (merged, reviewed) fails the shift
   job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
   scheduled run; its workflow patch is `upload-watch.patch` on
