@@ -659,17 +659,19 @@ def show_hit_rates(videos, key):
 
 
 def refuse_blind(args, ledger, today):
-    """Exit before any outcome loads when --by, --compare or --within cuts by a
-    blind test's field (insights.BLIND_FIELDS), unless --unblind gives a reason."""
+    """Exit before any outcome loads when --by, --compare, --within or
+    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), unless
+    --unblind gives a reason."""
+    key = getattr(args, "release_key", None) if getattr(args, "release", None) else None
     fields = [re.split(r"!?=", spec)[0].strip()
-              for spec in (args.by, args.compare, args.within) if spec]
+              for spec in (args.by, args.compare, args.within, key) if spec]
     blind = insights.blind_reads(fields, ledger, today)
     for field, test, due in blind:
         if not args.unblind:
-            sys.exit(f"{field} is {test}'s coin, blind until {due} (its pre-committed read). "
-                     f"Its arms' balance is open: --balance {field} --by <field>. To read "
-                     f"it anyway, add --unblind \"<reason>\" and record the peek beside "
-                     f"{test} in analysis/experiments.csv.")
+            sys.exit(f"{field} cuts by {test}'s coin, blind until {due} (its pre-committed "
+                     f"read). Its arms' balance stays open (--balance, assignments only). "
+                     f"To read it anyway, add --unblind \"<reason>\" and record the peek "
+                     f"beside {test} in analysis/experiments.csv.")
         print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
               f"ledger row.\n")
 

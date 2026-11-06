@@ -2531,8 +2531,11 @@ def _ledger_date(value):
 # generator cut views by title_caps with #14 still baking (n=18/12), and
 # nothing stopped it. Each field names the ledger row whose `due` and `read`
 # say whether it is still blind; --balance, which reads assignments only, is
-# never refused.
-BLIND_FIELDS = {"title_caps": "#14", "voice": "R7-voice-watch"}
+# never refused. `title_hype` (a derived dimension) matches #14's arm on 49
+# of its first 50 uploads, so it is the same cut. It opens at 00:00 UTC on the
+# due date, hours before that day's 06:00 snapshot: an --offline read then
+# still sees the week before, which is the read's to check, not a peek.
+BLIND_FIELDS = {"title_caps": "#14", "title_hype": "#14", "voice": "R7-voice-watch"}
 
 
 def blind_reads(fields, rows, today):
