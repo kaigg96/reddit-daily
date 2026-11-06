@@ -314,7 +314,8 @@ def test_a_sample_an_open_ask_links_is_flagged_before_github_deletes_it(monkeypa
         "2": [{"expires_at": "2026-11-20T00:00:00Z", "expired": False}],    # 17 days: not yet
         "3": [{"expires_at": "2026-11-02T00:00:00Z", "expired": True}]})    # gone already
     got = escalations._expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
-    assert [(i["number"], run, kept) for i, run, _, kept in got] == [(77, "1", False)]
+    assert [(i["number"], run, kept, where) for i, run, _, kept, where in got] == [
+        (77, "1", False, "comments")]
 
 
 def test_a_kept_copy_is_noted_and_an_ask_without_runs_costs_no_request(monkeypatch):
@@ -324,7 +325,7 @@ def test_a_kept_copy_is_noted_and_an_ask_without_runs_costs_no_request(monkeypat
     calls = _artifacts_github(monkeypatch, issues, {},
                               {"2": [{"expires_at": "2026-11-09T09:56:49Z", "expired": False}]})
     got = escalations._expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
-    assert [(i["number"], kept) for i, _, _, kept in got] == [(90, True)]
+    assert [(i["number"], kept, where) for i, _, _, kept, where in got] == [(90, True, "body")]
     assert sum("/actions/runs/" in p for p in calls) == 1
 
 
@@ -335,7 +336,9 @@ def test_a_run_github_no_longer_has_never_stops_the_listing(monkeypatch, capsys)
         "1": gone, "2": [{"expires_at": "2026-11-05T00:00:00Z", "expired": False}]})
     escalations._print_expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
     out = capsys.readouterr().out
-    assert "#77  run 2: deleted 2026-11-05 00:00 UTC" in out and "run 1" not in out
+    assert ("#77  run 2: deleted 2026-11-05 00:00 UTC, linked in the ask's body; "
+            "no kept copy: keep the video, then link it in the body") in out
+    assert "run 1" not in out
 
 
 def test_a_failed_expiry_check_says_so_and_the_listing_goes_on(monkeypatch, capsys):
