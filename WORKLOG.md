@@ -82,6 +82,7 @@ and more useful than a confident guess.
   - whether four "zero-view" uploads were age-restricted (they were under three days old on 2 November's figures, so the zeros were YouTube's reporting delay; 9 November reads them properly)
   - a search tool for ideas already settled, and grouping the friction log (both the 9 November weekly's to rank)
   - preparing the removal of stored YouTube text for the 7 December decision (four weeks early)
+- A second round, aimed at money, audience, distribution, editorial, market, legal, strategy and finance, found nothing: each idea was blocked on bet 1 or you, already dated, or already dropped. I also closed the 26 October weekly digest, which the 2 November one replaces; its findings are in the plan.
 - **Security:** no secret in the repository; the only workflow change since 20 October is the one you applied that day; money controls intact ($0.12 this month, forecast $0.72 of $3). Both 5 November uploads landed.
 - All five were fixes. None changes what we ship, because everything that would waits on bet 1.
 - AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
