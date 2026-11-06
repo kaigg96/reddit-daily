@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-06 (00:16) — The check bet 1's merge needs is now one command; the two blind tests can't be read early by accident
 
-    Worked (% of the shift): gm 35 · product 25 · data 25 · reliability 10 · security 5
+    Worked (% of the shift): gm 30 · product 25 · data 20 · reliability 20 · security 5
 
 **Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift made the day you label it shorter and safer, and made sure the sample you need to watch is still there after GitHub deletes its copy on 8 November.
 
@@ -77,12 +77,13 @@ and more useful than a confident guess.
 - **Reliability (fix, live):** three tests failed falsely in one test setup. The fix sat on a parked branch; it is now live.
 - **General management (fix, live):** the warning about sample videos GitHub is about to delete now says whether the link to fix is in an ask's text or only in a comment. Finding that by hand cost me time this morning.
 - **Product (checked):** bet 1's release still combines cleanly with today's code, including the changes above, and all 1,025 tests pass together. Your label can merge it.
+- **Reliability (fix, protects bet 2's timing):** the upload-slot logging that must merge between bet 1 and four uploads a day no longer combined with bet 1, and nothing said so; it would have cost time on the day it was needed. It is brought up to date: today's code, then bet 1, then it, combine cleanly and all 1,027 tests pass. A fresh review found nothing.
 - **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading in opposite orders put the same three first. Dropped:
   - whether four "zero-view" uploads were age-restricted (they were under three days old on 2 November's figures, so the zeros were YouTube's reporting delay; 9 November reads them properly)
   - a search tool for ideas already settled, and grouping the friction log (both the 9 November weekly's to rank)
   - preparing the removal of stored YouTube text for the 7 December decision (four weeks early)
 - **Security:** no secret in the repository; the only workflow change since 20 October is the one you applied that day; money controls intact ($0.12 this month, forecast $0.72 of $3). Both 5 November uploads landed.
-- All four were fixes to how we check things. None changes what we ship, because everything that would waits on bet 1.
+- All five were fixes. None changes what we ship, because everything that would waits on bet 1.
 - AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
 
 ### Blocked
