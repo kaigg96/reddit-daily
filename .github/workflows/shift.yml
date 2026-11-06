@@ -197,6 +197,26 @@ jobs:
           # action can already do.
           GITHUB_TOKEN: ${{ github.token }}
 
+      # The action hides the agent's output (these logs are public) and a shift
+      # cannot read Actions logs, so a shift that stopped early left nothing to
+      # find out why: run 39338110057, 2026-10-19, 32 turns and no handover.
+      # This prints a redacted trace (how it ended, its last message, every
+      # tool call) and writes it where the next shift can read it; a step below
+      # commits it. The secrets are here only so their values are redacted, and
+      # are only those the agent already held: it runs from a tree the agent
+      # could edit, so the subscription token stays out (its shape is redacted).
+      - name: Trace what the shift did
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          AWS_READONLY_ACCESS_KEY_ID: ${{ secrets.AWS_READONLY_ACCESS_KEY_ID }}
+          AWS_READONLY_SECRET_ACCESS_KEY: ${{ secrets.AWS_READONLY_SECRET_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/shift_trace.py /home/runner/work/_temp/claude-execution-output.json \
+            --write .github/last-shift-trace.md || true
+
       # A shift that runs and leaves no trace looks identical to one that never
       # ran -- which is how the first scheduled shift passed silently. Every
       # shift owes a WORKLOG entry, including "nothing cleared the bar".
@@ -219,6 +239,18 @@ jobs:
             "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git add .github/shift-usage.csv 2>/dev/null || exit 0
           git commit -m "Record shift cost" || exit 0
+          for a in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            sleep 5
+          done
+
+      # Its own commit and push, after the cost row is safe: a trace refused
+      # for any reason must never cost the weekly breaker its row.
+      - name: Keep the trace where the next shift can read it
+        if: always() && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
+        run: |
+          git add .github/last-shift-trace.md 2>/dev/null || exit 0
+          git commit -m "Record shift trace" || exit 0
           for a in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
             sleep 5
@@ -320,6 +352,7 @@ jobs:
             echo "::error::The shift left no WORKLOG entry. Either it did nothing,"
             echo "::error::or it did work and failed to hand over. Both are faults:"
             echo "::error::a silent shift cannot be told apart from one that never ran."
+            echo "::error::How it ended: 'Trace what the shift did' above, and .github/last-shift-trace.md on main."
             exit 1
           fi
           echo "handover present"

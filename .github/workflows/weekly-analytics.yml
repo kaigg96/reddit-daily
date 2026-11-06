@@ -32,6 +32,19 @@ jobs:
         YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
       run: python scripts/weekly_analytics.py
 
+    # PLAN C5: last week's viewer comments, for a shift to read. Never
+    # committed: YouTube's developer policies (III.E.4) allow comment text to be
+    # kept for no more than 30 days, and git history keeps it for good in a
+    # public repository. A shift downloads this artifact through the API.
+    - name: Keep viewer comments for 30 days
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: viewer-comments
+        path: analysis/viewer_comments.csv
+        retention-days: 30
+        if-no-files-found: ignore
+
     - name: Generate digest
       env:
         YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}

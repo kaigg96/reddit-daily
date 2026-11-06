@@ -46,10 +46,10 @@ def build_segments(post, outro_text, host, synth, host_voice):
     then each answer followed by its reaction, then the host's vote. Without
     them, today's: question, the answers, the CTA."""
     segments = [synth("title", post.title, kind="title")]
-    # With commentary on, a fallback reads the same two answers its title was
-    # written from, so a "2 Answers" title is never read over three.
-    two = host or config.COMMENTARY
-    answers = post.comments[:config.COMMENTARY_ANSWERS] if two else post.comments
+    # With commentary on, a fallback reads the same answers its title was
+    # written from, so a title's count always matches what is read.
+    capped = host or config.COMMENTARY
+    answers = post.comments[:config.COMMENTARY_ANSWERS] if capped else post.comments
     text = host and config.HOST_TEXT    # #71: the host is read, never heard
     if text:
         segments[0].note = host.setup
@@ -220,7 +220,8 @@ def main():
     keywords = meta.keywords or []
 
     video_title, title_style, title_ok = llm.resolve_title(
-        meta.title, style=title_style, fallback=post.title)
+        meta.title, style=title_style, fallback=post.title, caps=title_caps,
+        source=" ".join([post.title, *post.comments[:3]]))
     if not title_ok:
         print("Title generation failed — shipping the Reddit question and "
               "logging no style (it was never applied)")
@@ -247,17 +248,22 @@ def main():
 
     # --- tts ---
     voice = rng.choice(config.VOICES)
+    if config.REUSE_NARRATION:   # drawn anyway, so later draws do not shift
+        voice = config.VOICES[0]
     # R3.2: the host speaks in the voice the narrator is not using.
     host_voice = next((v for v in config.VOICES if v != voice), voice)
     silent = config.SAMPLE or config.SILENT_NARRATION
     polly = None if silent else tts.make_polly()
     print(f"Narrator voice: {voice}"
           + (f", host voice: {host_voice}" if host and not config.HOST_TEXT else ""))
+    if silent:
+        print("Narration: " + ("stand-in voice (Kokoro), not Polly"
+                               if config.STAND_IN_VOICE else "silent"))
 
     def synth(name, text, kind, speaker=None):
         path = config.GEN / f"{name}.mp3"
         if silent:
-            marks = sample.synthesize(text, path)
+            marks = sample.synthesize(text, path, speaker or voice)
         else:
             marks = tts.synthesize_with_marks(polly, text, speaker or voice, path)
         return video.Segment(kind=kind, text=text, audio_path=str(path), marks=marks)
@@ -269,7 +275,7 @@ def main():
         def display(s):
             dur = _probe_duration(s.audio_path)
             return max(dur, config.MIN_COMMENT_DISPLAY) if s.kind == "comment" else dur
-        return sum(display(s) for s in segs) + config.INTER_SEGMENT_GAP * (len(segs) - 1)
+        return sum(display(s) for s in segs) + sum(video.gap_after(s) for s in segs[:-1])
 
     outro_text = fit_to_length(segments, lambda segs: projected(segs) > config.MAX_TOTAL_SECONDS,
                                host, synth)
@@ -348,6 +354,7 @@ def main():
         "own_words_share": own_words,
         "meta_source": meta.source,
         "host_lines": host_lines,
+        "cta": outro_text,
         "run_slot": content.slot_key(day, slot, schedule),
     })
 

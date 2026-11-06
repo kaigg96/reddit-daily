@@ -6,29 +6,26 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `reliability/groq-switch`
-- **Commit:** `74c81a7`
-- **When:** 2026-10-13T10:43:58Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 14.7 s, audio, no dead air
+- **Branch:** `product/cta-sentence-case`
+- **Commit:** `7225d18`
+- **When:** 2026-11-04T19:27:24Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 26.9 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/38385064997)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/41896592041)
 
 What it picked:
 
 ```
-Selected post: Introverted guys how did you meet your girlfriend/wife?
-Slate topics (rank order): relationships-dating|politics-news|life-advice|health-body
-Commentary: a host line ran past its length cap
-Title style B, caps arm 1: How did YOU actually find your girlfriend?
-Commentary: no usable host lines -- shipping today's reading
-CTA: Like, subscribe, and comment your answer below!
-Commentary: our own words are 0.000 of the narration
-Assembled: 14.7s, bg=pexels_9668945.mp4, music=funk_bg_lower.mp3
-Today's top AskReddit post, asked by u/Accomplished-Call5: Introverted guys how did you meet your girlfriend/wife?
+Selected post: What happens to Elon musk now that blue won?
+Slate topics (rank order): politics-news|politics-news|politics-news
+Title style C, caps arm 1: 3 Reddit answers on what happens to Elon now that Democrats REIGN
+CTA: What do you think happens to Elon now? Comment below.
+Assembled: 26.9s, bg=pexels_7565898.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/Many_Difficulty_490: What happens to Elon musk now that blue won?
 ```
 
 ## Last request
 
-- **Branch:** `reliability/groq-switch`
-- **When:** 2026-10-13T10:43:58Z
+- **Branch:** `product/cta-sentence-case`
+- **When:** 2026-11-04T19:27:24Z
 - **Outcome:** rendered -- see above

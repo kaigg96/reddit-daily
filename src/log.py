@@ -2,6 +2,7 @@
 committed back by the workflow. Joins against YouTube analytics on video_id."""
 
 import csv
+import os
 
 from . import config
 
@@ -27,6 +28,8 @@ FIELDS = [
     # nobody can confirm ran.
     "screen_source",
     # Added 2026-09-24: why the metadata call failed, blank when it answered.
+    # Since 2026-10-18 also set when Gemini's second model answered (logged as
+    # no source yet), so a value beside title_ok=1 means a fallback wrote it.
     # The ok-flags above say THAT it failed; a 429 on the shared daily cap and
     # a timeout need different fixes, and the flags cannot tell them apart.
     "meta_failure",
@@ -57,10 +60,15 @@ FIELDS = [
     # reads (#10, #14).
     "meta_source",
     # Added 2026-10-13 (bet 1, #15): how many host lines the viewer got (notes
-    # shown plus the vote; 4 when whole with two answers), blank while
+    # shown plus the vote; 5 when whole with three answers), blank while
     # commentary is off. commentary_ok is 1 for a partial host too, since a
     # text line too long now drops alone: read this beside it.
     "host_lines",
+    # Added 2026-11-04: the closing line as shipped (spoken, captioned and
+    # posted as our comment; cta_ok says whether it was written for the post).
+    # It was only in the run log, so #14's arm leaking into it went unseen for
+    # four weeks and took 151 run logs to count (PRD §4); those logs expire.
+    "cta",
     # Added 2026-10-13 (PRD §0 #4): the slot this run was scheduled for, as
     # "<day>/<slot>" from the cron line that started it (content.run_slot).
     # GitHub starts runs hours late, so the publish time cannot say which
@@ -86,11 +94,19 @@ def _migrate_header(path, fields):
         rows = list(csv.DictReader(f))
     if rows and list(rows[0].keys()) == fields:
         return
-    with open(path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
-        writer.writeheader()
-        for r in rows:
-            writer.writerow({k: (r.get(k) or "") for k in fields})
+    # Written aside, then swapped in: a failure part-way leaves the old file
+    # whole rather than truncated, so a run that carries on past it cannot
+    # commit a damaged log (run.py records an upload even if this raises).
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        with open(tmp, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            for r in rows:
+                writer.writerow({k: (r.get(k) or "") for k in fields})
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
     print(f"Log schema migrated: {path.name} -> {len(fields)} columns")
 
 
@@ -99,15 +115,33 @@ def _append(path, fields, row):
     path.parent.mkdir(parents=True, exist_ok=True)
     if not is_new:
         _migrate_header(path, fields)
-    with open(path, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+    size = 0 if is_new else path.stat().st_size
+    try:
+        with open(path, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+            if is_new:
+                writer.writeheader()
+            writer.writerow({k: row.get(k, "") for k in fields})
+    except BaseException:
+        # A row half written would be committed by a run that carries on past
+        # this (append_upload_log never raises): cut the file back to before it.
         if is_new:
-            writer.writeheader()
-        writer.writerow({k: row.get(k, "") for k in fields})
+            path.unlink(missing_ok=True)
+        elif path.exists():
+            os.truncate(path, size)
+        raise
 
 
 def append_upload_log(row):
-    _append(config.UPLOAD_LOG, FIELDS, row)
+    """Never raises. run.py calls it after the video is live, and a raise
+    would fail the run before the workflow commits prev_post.txt, so a later
+    run could ship the post again. The row is lost instead, and the run
+    summary says so (a migration failure leaves the old file whole)."""
+    try:
+        _append(config.UPLOAD_LOG, FIELDS, row)
+    except Exception as e:
+        print(f"::error::Upload {row.get('video_id') or '?'} not logged: "
+              f"{type(e).__name__}: {e}")
 
 
 def uploaded_titles():

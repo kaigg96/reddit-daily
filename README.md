@@ -35,7 +35,7 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
   `POLLY_CHAR_BUDGET` in `src/tts.py` enforces a per-process cap.
 - Feature work goes on a branch; `main` runs live twice daily (see below).
 - Work autonomously and merge your own work (owner, 2026-09-19) — under the
-  gates in `.claude/skills/shift/SKILL.md` §4. Safety and cost controls,
+  gates in `CLAUDE.md` §3. Safety and cost controls,
   production data and spending still need the owner.
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis
   (see "Answering 'did X work?'").
@@ -110,7 +110,8 @@ workflow → dry_run: true* — the rendered video is attached as a workflow
 artifact for review. A shift holds no render credentials, so it asks instead:
 `scripts/dry_run.py request <branch>` queues a render that `dry-run.yml` runs
 with no YouTube credentials, recording the verdict in `.github/last-dry-run.md`
-(the video is attached to that run too).
+(the video is attached to that run too). Each render overwrites it; every past
+verdict, newest first: `scripts/dry_run.py history [branch]`.
 
 ## Development workflow (standing convention)
 

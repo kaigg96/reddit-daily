@@ -13,7 +13,9 @@ Exits 0 if every gate passes, 1 otherwise, and writes a Markdown verdict to
 $GITHUB_STEP_SUMMARY when present. Costs at most MAX_REQUESTS Gemini calls.
 """
 import argparse
+import contextlib
 import datetime
+import io
 import os
 import re
 import subprocess
@@ -112,6 +114,25 @@ def _git_gated_code_changed(target_ref):
     return changed
 
 
+def _resolve_ref(target):
+    """The ref naming `target` in this clone, preferring the remote's copy.
+
+    CI's checkout makes a local branch for `main` only, so `integration/preview`
+    exists there as `origin/integration/preview` alone. Passed bare, rev-parse
+    printed nothing and `git diff` exited 128, which reads as "gated code
+    changed": the gates re-ran an unchanged `ec2f077` every day from 2026-10-25
+    to 10-30, 6 of production's 20 requests each time. The remote's copy comes
+    first because it is what the workflow checks out and records.
+    """
+    for ref in (f"origin/{target}", target):
+        found = subprocess.run(
+            ["git", "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+            cwd=ROOT, capture_output=True)
+        if found.returncode == 0:
+            return ref
+    return target  # unresolvable: the diff fails, which validates
+
+
 def should_run_cli(args):
     """`--should-run`: decide, print `proceed=` for the workflow, spend nothing."""
     try:
@@ -120,10 +141,11 @@ def should_run_cli(args):
     except OSError:
         verdict_text = ""
 
-    target_sha = subprocess.run(["git", "rev-parse", "--short", args.target],
+    ref = _resolve_ref(args.target)
+    target_sha = subprocess.run(["git", "rev-parse", "--short", ref],
                                 cwd=ROOT, capture_output=True, text=True).stdout.strip()
     proceed, why = should_validate(verdict_text, target_sha,
-                                   _git_gated_code_changed(args.target))
+                                   _git_gated_code_changed(ref))
 
     print(f"{'validating' if proceed else 'skipping'}: {why}")
     out = os.environ.get("GITHUB_OUTPUT")
@@ -155,7 +177,19 @@ def check_metadata():
     comments = ["Photography. Lenses cost more than my car did.",
                 "Warhammer. The plastic crack is genuinely brutal now.",
                 "Skiing. A lift ticket is close to two hundred dollars."]
-    meta = llm.get_metadata(q, comments, style="A", caps=True)
+    # As replay_screen.py does for the screen: the second model's answer would
+    # be inconclusive below, so trying it would only spend a request.
+    llm.FALLBACK_MODEL = None
+    # Its log too: which host line ran long, and by how much, is printed
+    # there and not otherwise in this file, which is what a shift reads.
+    log = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(log):
+            meta = llm.get_metadata(q, comments, style="A", caps=True)
+    finally:
+        print(log.getvalue(), end="")
+    dropped = [ln for ln in log.getvalue().splitlines()
+               if ln.startswith("Commentary: past") or ", as written: " in ln]
 
     if meta.source == "error":
         # Deliberately not retried, for the same reason check_screen doesn't:
@@ -165,12 +199,12 @@ def check_metadata():
              "unreachable). The prompt was never exercised, so this is not a "
              "verdict either way; the next scheduled run re-checks it.\n")
         return None
-    if meta.source == llm.GROQ_SOURCE:
-        # Groq's answer says nothing about the route under test, and a pass
-        # here would send gate 2's five requests to a Gemini that just failed.
+    if meta.source in (llm.GROQ_SOURCE, llm.FALLBACK_SOURCE):
+        # A fallback's answer says nothing about the model under test, and a
+        # pass here would send gate 2's five requests to a Gemini that just failed.
         note(f"- ⚠️ INCONCLUSIVE — Gemini did not answer ({meta.failure}); "
-             "Groq, its fallback, did, which does not test this release's "
-             "route. The next scheduled run re-checks it.\n")
+             f"its fallback ({meta.source}) did, which does not test this "
+             "release's model. The next scheduled run re-checks it.\n")
         return None
 
     ok = True
@@ -206,14 +240,20 @@ def check_metadata():
         else:
             # A line past its cap now drops alone (#15), so the upload keeps a
             # host; warn, so the verdict file still shows the prompt overran.
-            def shown(label, line, ships="the rest still ship"):
+            def shown(label, line, ships="the rest still ship", why="past its cap"):
                 note(f"- ✅ host {label}: {line}" if line
-                     else f"- ⚠️ host {label}: dropped, past its cap ({ships})")
-            shown("setup", host.setup)
+                     else f"- ⚠️ host {label}: dropped, {why} ({ships})")
+            if host.setup:
+                shown("setup", host.setup)
+            else:
+                note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
             for i, line in enumerate(host.reactions, 1):
-                shown(f"reaction {i}", line)
-            if not host.verdict:
-                shown("vote", "", "the usual closing line ships")
+                shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
+            if not host.verdict:   # a swear word now drops it too (the run log says which)
+                note("- ⚠️ host vote: dropped, past its cap or a swear word"
+                     " (the usual closing line ships)")
+        for line in dropped:
+            note(f"- ⚠️ {line}")
     note("")
     return ok
 

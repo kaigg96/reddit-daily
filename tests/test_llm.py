@@ -71,6 +71,81 @@ def test_metadata_is_one_request_not_three(captured):
     assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
 
 
+def test_metadata_asks_gemini_for_its_exact_shape(captured):
+    """The 2026-10-17 release check: asked for JSON in the prompt alone, the
+    three-answer reply did not parse, and a live retry gave four reactions for
+    three answers. Either cost the upload every host line."""
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    cfg = captured[0]["json"]["generationConfig"]
+    assert cfg["responseMimeType"] == "application/json"
+    assert cfg["thinkingConfig"]["thinkingBudget"] == 0
+    reactions = cfg["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == llm.config.COMMENTARY_ANSWERS
+    assert cfg["responseSchema"]["required"] == ["title", "keywords", "setup", "reactions", "cta"]
+
+
+def test_the_schema_counts_the_answers_actually_read(captured):
+    """A thread with fewer answers than the setting reads fewer, one note each."""
+    llm.get_metadata("q", ["a", "b"], style="B")
+    reactions = captured[0]["json"]["generationConfig"]["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == 2
+
+
+def test_the_plain_reading_asks_only_for_its_three_fields(captured, monkeypatch):
+    monkeypatch.setattr(llm.config, "COMMENTARY", False)
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    schema = captured[0]["json"]["generationConfig"]["responseSchema"]
+    assert schema["required"] == ["title", "keywords", "cta"]
+
+
+def test_a_sample_model_gets_the_schema_without_a_thinking_budget(captured):
+    """Gemini 3.x 400s on thinkingBudget, so the schema must not bring it back."""
+    llm._generate("x", model="gemini-3.5-flash-lite", schema={"type": "OBJECT"})
+    assert captured[0]["json"]["generationConfig"] == {
+        "responseMimeType": "application/json", "responseSchema": {"type": "OBJECT"}}
+
+
+def test_other_calls_are_not_switched_to_json_mode(captured):
+    """Only the metadata call changed; the screen's request stays as validated."""
+    llm._generate("hello")
+    assert set(captured[0]["json"]["generationConfig"]) == {"thinkingConfig"}
+
+
+def test_an_unparseable_reply_is_quoted_near_the_fault(monkeypatch, capsys):
+    """The 2026-10-17 failure logged only "unparseable JSON", so its cause could
+    not be read; the log now shows the reply around the error, on one line."""
+    # The fault sits past the excerpt's width, so the excerpt must follow it.
+    reply = ('{"title": "Ok", "keywords": [' + '"pad", ' * 60 + '"x"], '
+             '"cta": "Vote for "plastic crack" now"}')
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    llm.get_metadata("q", ["a", "b", "c"])
+    out = capsys.readouterr().out
+    assert "plastic crack" in out and "fall back" in out
+    assert len(out.strip().splitlines()) == 1 and len(out) < 400
+
+
+def test_a_trailing_comma_no_longer_costs_every_field(monkeypatch, capsys):
+    """Measured 2026-10-17 on the sample model, in JSON mode: a pretty-printed
+    reply ending `"cta": "...",\\n}`. Strict parsing dropped title, keywords,
+    vote and host lines over one comma. The repair is logged, not silent."""
+    reply = ('{\n  "title": "T",\n  "keywords": ["a", "b",],\n  "setup": "S",\n'
+             '  "reactions": ["r1", "r2", "r3"],\n  "cta": "Which one, YOU?",\n}')
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.keywords, meta.cta) == ("T", ["a", "b"], "Which one, YOU?")
+    assert meta.failure == ""
+    assert "trailing comma" in capsys.readouterr().out
+
+
+def test_a_comma_inside_a_line_is_never_touched(monkeypatch):
+    """The repair only runs on a reply that failed, and only drops a comma
+    that sits before a closing bracket."""
+    reply = '{"title": "Wait, really?", "keywords": ["x"], "cta": "One, two, three",}'
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.cta) == ("Wait, really?", "One, two, three")
+
+
 def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
     """v1 answers thinkingConfig with HTTP 400 'Thinking is not enabled for
     api version v1'. Dropping back to v1 would silently restore the bug."""
@@ -193,6 +268,19 @@ def test_metadata_strips_the_junk_llms_add(monkeypatch):
     assert meta.cta == "Bold line"
 
 
+def test_an_all_lower_case_closing_line_ships_in_sentence_case(monkeypatch):
+    """Shipped on 2026-10-15 in #14's no-capitals arm, captioned and posted as
+    our comment. A line with any capital is the model's and stays as written."""
+    for cta, expected in (("what do you think happens next? share your prediction below.",
+                           "What do you think happens next? Share your prediction below."),
+                          ("cats vs. dogs: which side are you on?",
+                           "Cats vs. dogs: which side are you on?"),
+                          ("If YOU woke up in 2020, what's YOUR move?",
+                           "If YOU woke up in 2020, what's YOUR move?")):
+        monkeypatch.setattr(llm, "_generate", lambda *a, **k: json.dumps({"cta": cta}))
+        assert llm.get_metadata("q", ["a", "b", "c"]).cta == expected
+
+
 def test_resolve_title_blanks_the_style_when_generation_failed():
     """The R2.2 contamination fix.
 
@@ -220,11 +308,131 @@ def test_resolve_title_treats_whitespace_only_as_a_failure():
     assert r.ok is False
 
 
+def test_a_shock_phrase_title_ships_as_a_failed_one():
+    """The prompt's ban leaked on 2026-10-20; the title falls back and claims
+    no style, so it is evidence about neither #10's nor #14's arms."""
+    for title in ("Animals' chilling genius will surprise you",
+                  "You WON'T Believe These Rare Possessions!",
+                  "3 Shocking Answers: Friends for Life?",
+                  "3 Surprising Answers: How Dating a Pro Athlete Went",
+                  "This is jaw-dropping", "Mind blowing facts", "An INSANE story"):
+        r = llm.resolve_title(title, style="B", fallback="Raw?", caps=True)
+        assert (r.title, r.style, r.ok) == ("Raw?", "", False), title
+
+
+def test_a_title_near_a_shock_phrase_still_ships():
+    for title in ("What surprised YOU most about moving abroad?",
+                  "What World War II fact SHOCKED you?", "Which Dumb Death Shocks YOU Most?",
+                  "Culture shock: what hit you hardest?",
+                  "Would YOU believe a stranger?", "Chill pills that work?",
+                  "Shockwave? No, a sonic boom"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+EXPECTED_REFUSED = [
+    "Did YOU know THESE chilling 9/11 facts?",
+    "3 Surprising Answers: How Dating a Pro Athlete Went",
+    "You'll Never Guess These Harder-Than-You-Think Degrees!",
+    "3 Shocking Answers: Homeschooling Parents Who Barely Passed High School?",
+    "Divorce Horrors: Lawyers Reveal Their Shocking Cases",
+    "You Won't Believe What We Miss From The 2000s!",
+    "You WON'T Believe These Rare Possessions!",
+    "3 Shocking Answers: Friends for Life?",
+    "You Won't Believe WHY Asia Has Almost No Homeless!",
+    "Early Risers: The SHOCKING Truth Behind Waking Up Early",
+    "Animals' chilling genius will surprise you",
+]
+
+
+def test_a_shock_word_the_asker_used_is_not_refused():
+    r = llm.resolve_title("The most SHOCKING Epstein detail?", style="B", fallback="Raw?",
+                          source="What is the most shocking detail in the Epstein files?")
+    assert r.ok and r.style == "B"
+    for title in ("This will shock you", "You'll be shocked", "You'll never guess",
+                  "Unbelievable answers", "Mind\u2011blowing facts"):
+        assert not llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+def test_the_logged_titles_it_refuses_are_the_known_shock_ones():
+    """False refusals checked by eye on 2026-10-26; widening the pattern must
+    re-check them, so this names the set rather than counting it."""
+    import csv
+    from src import config
+    with open(config.UPLOAD_LOG, encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r["timestamp_utc"] < "2026-10-26T12"]
+    refused = sorted(r["video_title"] for r in rows
+                     if llm._shock_bait(r["video_title"], r["post_title"]))
+    assert len(rows) == 199
+    assert refused == sorted(EXPECTED_REFUSED)
+
+
+def test_an_all_lower_case_title_ships_in_sentence_case():
+    """PRD §0 #14: the no-capitals arm came back with no capitals at all."""
+    cases = {
+        "how to get jehovah's witnesses to leave you alone":
+            "How to get jehovah's witnesses to leave you alone",
+        "which celeb aged best without trying? you decide.":
+            "Which celeb aged best without trying? You decide.",
+        "is your 'dream' career on this list?": "Is your 'dream' career on this list?",
+        "(not) a dumb question?": "(Not) a dumb question?",
+        "if they lose: what do you think happens next?":
+            "If they lose: what do you think happens next?",
+        "what i'd tell my younger self... and why": "What I'd tell my younger self... and why",
+        "3 answers about wi-fi": "3 answers about wi-fi",
+        "i.e. what now?": "I.e. what now?",
+        "what is a.i. doing? you tell me": "What is a.i. doing? You tell me",
+        "wi-fi or i/o?": "Wi-fi or i/o?",
+    }
+    for generated, shipped in cases.items():
+        r = llm.resolve_title(generated, style="B", fallback="Raw?")
+        assert (r.title, r.style, r.ok) == (shipped, "B", True)
+
+
+def test_a_title_with_any_capital_is_left_as_the_model_wrote_it():
+    """Capitals are #14's variable: only a title with none at all is touched,
+    so neither arm's capitals are added to or taken away."""
+    for title in ("Who's YOUR hero?", "when did Reddit go bad for you?",
+                  "3 Answers: Is Baby Formula REALLY Necessary?", "i love NYC"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").title == title
+
+
+def test_the_raw_fallback_is_never_recased():
+    """A raw Reddit question is its own cohort (title_source=raw), including
+    when the reply cleans to nothing, which must not claim a style either."""
+    for generated in (None, "'"):
+        r = llm.resolve_title(generated, style="B", fallback="why do cats knead?")
+        assert (r.title, r.style, r.ok) == ("why do cats knead?", "", False)
+
+
 def test_sanitize_title_falls_back_when_generation_failed():
     """The fallback path is what shipped raw Reddit questions as titles."""
     assert llm.sanitize_title(None, fallback="Raw question?") == "Raw question?"
     assert llm.sanitize_title('  "Quoted"  ', fallback="x") == "Quoted"
     assert len(llm.sanitize_title("z" * 200, fallback="x")) == 100
+
+
+def test_a_quote_the_title_uses_is_kept():
+    """Shipped 2026-11-04 as "3 answers to 'House and Senate are Blue, how are
+    we feeling?": stripping every end quote took the closing one too."""
+    for title in ("3 answers to 'House and Senate are Blue, how are we feeling?'",
+                  '3 answers to "Why do cats knead?"',
+                  "'Dream' careers you'd regret",
+                  "Is your 'dream' career on this list?"):
+        assert llm.sanitize_title(title, fallback="x") == title
+        assert llm._clean_str(title) == title
+        assert llm.resolve_title(title, style="C", fallback="x").title == title
+
+
+def test_wrapping_and_stray_quotes_still_go():
+    for reply, expected in (('"Quoted"', "Quoted"), ("'Quoted'", "Quoted"),
+                            ("\"'Both'\"", "Both"), ("'Lone", "Lone"),
+                            ("Lone'", "Lone"), ("\"He said 'no'\"", "He said 'no'"),
+                            ("'Which 'Dumb' choice?'", "Which 'Dumb' choice?"),
+                            ("'Your Pets' secret?'", "Your Pets' secret?"),
+                            ("Their 'DON'T TOUCH' item!'", "Their 'DON'T TOUCH' item!"),
+                            ("'", ""), ('""', "")):
+        assert llm._strip_quotes(reply) == expected
+    assert llm.sanitize_title("'", fallback="Raw?") == "Raw?"
 
 
 def _raises(exc):
@@ -236,14 +444,16 @@ def _raises(exc):
 def test_failure_names_why_the_fields_are_empty(monkeypatch):
     """The upload log's ok-flags cannot tell the shared daily cap (429) from a
     timeout, and the two need different fixes. `failure` can."""
+    monkeypatch.setattr(config, "DRY_RUN", False)
     quota = llm.requests.Response()
     quota.status_code = 429
     monkeypatch.setattr(llm, "_generate",
                         _raises(llm.requests.HTTPError("429", response=quota)))
-    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+    # Both Gemini models missed: the main model's reason first, then its fallback's.
+    assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429"
 
     monkeypatch.setattr(llm, "_generate", _raises(llm.requests.ReadTimeout()))
-    assert llm.get_metadata("q", ["a"]).failure == "timeout"
+    assert llm.get_metadata("q", ["a"]).failure == "timeout;fallback_timeout"
 
     monkeypatch.setattr(llm, "_generate", lambda *a, **k: "no json here")
     assert llm.get_metadata("q", ["a"]).failure == "no_json"
@@ -256,9 +466,46 @@ def test_failure_names_why_the_fields_are_empty(monkeypatch):
 
 
 def test_failure_label_never_carries_the_keyed_url(monkeypatch):
+    monkeypatch.setattr(config, "DRY_RUN", False)
     monkeypatch.setattr(llm, "_generate", _raises(
         llm.requests.ConnectionError("failed for url: ...?key=super-secret")))
-    assert llm.get_metadata("q", ["a"]).failure == "ConnectionError"
+    assert llm.get_metadata("q", ["a"]).failure == "ConnectionError;fallback_ConnectionError"
+
+
+def _quota_429(body):
+    resp = llm.requests.Response()
+    resp.status_code = 429
+    resp._content = body.encode()
+    return llm.requests.HTTPError("429", response=resp)
+
+
+def test_a_429_names_which_cap_it_hit():
+    """A spent day and a per-minute burst need different answers, and a bare
+    http_429 could not tell them apart (the 2026-10-20 release check)."""
+    day = ('{"error": {"code": 429, "details": [{"violations": [{"quotaId": '
+           '"GenerateRequestsPerDayPerProjectPerModel-FreeTier", "quotaValue": "20"}]}]}}')
+    minute = day.replace("PerDay", "PerMinute")
+    both = day.replace("}]}]", '}, {"quotaId": "GenerateRequestsPerMinutePerProjectPerModel"}]}]')
+    groq = '{"error": {"message": "Rate limit reached on tokens per minute (TPM): Limit 8000"}}'
+    assert llm._failure_kind(_quota_429(day)) == "http_429_day"
+    assert llm._failure_kind(_quota_429(minute)) == "http_429_minute"
+    assert llm._failure_kind(_quota_429(both)) == "http_429_day"   # the cap that lasts
+    assert llm._failure_kind(_quota_429(groq)) == "http_429_minute"
+    assert llm._failure_kind(_quota_429("")) == "http_429"
+    assert llm._failure_kind(_quota_429("Too Many Requests")) == "http_429"
+
+
+def test_only_a_429_reads_the_body():
+    resp = llm.requests.Response()
+    resp.status_code = 503
+    resp._content = b'{"quotaId": "PerDay"}'
+    assert llm._failure_kind(llm.requests.HTTPError("503", response=resp)) == "http_503"
+
+
+def test_the_metadata_log_carries_the_cap(monkeypatch):
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    monkeypatch.setattr(llm, "_generate", _raises(_quota_429('"quotaId": "PerDayPerModel"')))
+    assert llm.get_metadata("q", ["a"]).failure == "http_429_day;fallback_http_429_day"
 
 
 def test_the_upload_log_keeps_the_failure_kind():
@@ -307,6 +554,24 @@ def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
 
 
+@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-2.5-flash")])
+def test_a_dry_run_can_write_its_tags_on_the_upload_model(monkeypatch, switch, model):
+    """#77: the owner judges tags in a narrated local render, a dry run. The
+    sample model's tags were labels where the upload model's reacted
+    (2026-10-20), so the switch puts the metadata call alone on MODEL."""
+    seen = []
+
+    def gen(prompt, **kw):
+        seen.append(kw.get("model"))
+        return '{"title": "t", "keywords": ["a"], "cta": "c"}'
+
+    monkeypatch.setattr(llm.config, "DRY_RUN", True)
+    monkeypatch.setattr(llm.config, "METADATA_ON_UPLOAD_MODEL", switch)
+    monkeypatch.setattr(llm, "_generate", gen)
+    llm.get_metadata("Q?", ["a", "b", "c"])
+    assert seen == [model]
+
+
 def test_title_styles_run_four_b_to_one_a_to_one_c():
     """§0 #10: any six consecutive days carry B:A:C = 4:1:1, A and C the control.
     Keyed on the date, so both daily uploads share a style and each day splits
@@ -338,6 +603,92 @@ def test_metadata_retries_a_503_once(monkeypatch):
     assert meta.title == "A Great Title"
 
 
+def test_two_503s_go_to_geminis_second_model_before_the_fields_fall_back(monkeypatch):
+    """Two 503s 30s apart cost the 2026-10-18 16:02 upload its title, keywords
+    and CTA; the screen already had this model for exactly that."""
+    calls = []
+
+    def overloaded(*a, **k):
+        calls.append(k.get("model"))
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert calls == [None, None, llm.FALLBACK_MODEL]   # one retry, then one fallback
+    assert meta.title == "A Great Title" and meta.keywords and meta.cta
+    # Gemini's failure stays, so the log shows why the second model ran.
+    assert (meta.source, meta.failure) == (llm.FALLBACK_SOURCE, "http_503")
+
+
+def test_the_second_model_gets_the_main_calls_reply_schema(monkeypatch):
+    """Bet 1's host lines need the schema (2026-10-17); every sample render
+    already sends it to this model."""
+    sent = []
+
+    def overloaded(*a, **k):
+        sent.append((k.get("model"), k.get("schema")))
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    llm.get_metadata("q", ["a", "b", "c"])
+    (_, main), _, (model, fallback) = sent
+    assert model == llm.FALLBACK_MODEL and main and fallback == main
+
+
+def test_a_503_on_both_models_waits_once_and_never_retries_the_second(monkeypatch):
+    calls, waits = [], []
+
+    def overloaded(*a, **k):
+        calls.append(k.get("model"))
+        raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", waits.append)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a"])
+    assert calls == [None, None, llm.FALLBACK_MODEL] and waits == [llm._OVERLOAD_WAIT]
+    assert (meta.source, meta.failure) == ("error", "http_503;fallback_http_503")
+
+
+def test_with_no_second_model_the_fields_fall_back_after_one_model(monkeypatch):
+    """The release check's setting: no request to a model it would not count."""
+    calls = []
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: calls.append(k.get("model")) or _raises(
+        llm.requests.HTTPError("429", response=FakeResponse(status=429)))())
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    assert llm.get_metadata("q", ["a"]).failure == "http_429"
+    assert calls == [None]
+
+
+def test_a_second_model_junk_reply_is_named_after_geminis(monkeypatch):
+    def overloaded(*a, **k):
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return "no json here"
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    meta = llm.get_metadata("q", ["a"])
+    assert (meta.title, meta.source, meta.failure) == (
+        None, llm.FALLBACK_SOURCE, "http_503;fallback_no_json")
+
+
+def test_the_screen_and_metadata_share_one_fallback_model():
+    from src import screen
+    assert (screen.FALLBACK_MODEL, screen.FALLBACK_SOURCE) == (
+        llm.FALLBACK_MODEL, llm.FALLBACK_SOURCE)
+
+
 def test_a_503_waits_out_an_overload_before_retrying(monkeypatch):
     """A 4s wait did not outlast the 503s on the 2026-10-02 release check or
     the 2026-10-04 06:04 upload, which lost its title."""
@@ -360,14 +711,16 @@ def test_metadata_never_retries_a_429(monkeypatch):
     calls = []
 
     def capped(*a, **k):
-        calls.append(1)
+        calls.append(k.get("model"))
         raise llm.requests.HTTPError("429", response=FakeResponse(status=429))
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(config, "DRY_RUN", False)
     meta = llm.get_metadata("q", ["a", "b", "c"])
-    assert len(calls) == 1
-    assert meta.failure == "http_429"
+    # One try on each model: the cap is counted per model, so only the other can answer.
+    assert calls == [None, llm.FALLBACK_MODEL]
+    assert meta.failure == "http_429;fallback_http_429"
 
 
 def _metadata_prompt(monkeypatch, vote_rule):
@@ -563,15 +916,16 @@ def test_a_gemini_429_is_not_retried_even_when_it_names_a_short_wait(monkeypatch
     calls = []
 
     def capped(*a, **k):
-        calls.append(1)
+        calls.append(k.get("model"))
         resp = FakeResponse(status=429)
         resp.headers = {"retry-after": "7"}
         raise llm.requests.HTTPError("429", response=resp)
 
     monkeypatch.setattr(llm, "_generate", capped)
     monkeypatch.setattr(llm.time, "sleep", lambda s: pytest.fail("slept on a Gemini 429"))
-    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429"
-    assert len(calls) == 1
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    assert llm.get_metadata("q", ["a", "b", "c"]).failure == "http_429;fallback_http_429"
+    assert calls == [None, llm.FALLBACK_MODEL]
 
 
 def test_a_groq_key_alone_leaves_every_call_on_gemini(monkeypatch):
@@ -645,7 +999,7 @@ def test_groq_answers_the_metadata_when_gemini_fails(monkeypatch):
     assert len(sent) == 1
     assert meta.title and meta.keywords and meta.cta
     # Gemini's failure stays, so the log shows why Groq ran.
-    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429;fallback_http_429")
 
 
 def test_off_keyless_dry_or_already_on_groq_the_fields_fall_back_as_before(monkeypatch):
@@ -661,20 +1015,24 @@ def test_off_keyless_dry_or_already_on_groq_the_fields_fall_back_as_before(monke
             monkeypatch.setattr(config, "AI_PROVIDER", "groq")
         meta = llm.get_metadata("q", ["a"])
         assert sent == [], case
-        assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429"), case
+        # Off or keyless, Gemini's second model still tried; dry or on Groq, nothing did.
+        failure = "http_429;fallback_http_429" if case in ("off", "keyless") else "http_429"
+        assert (meta.title, meta.source, meta.failure) == (None, "error", failure), case
 
 
 def test_a_groq_miss_is_named_after_geminis(monkeypatch):
     _gemini_429(monkeypatch, groq_error=llm.requests.ReadTimeout())
     meta = llm.get_metadata("q", ["a"])
-    assert (meta.title, meta.source, meta.failure) == (None, "error", "http_429;groq_timeout")
+    assert (meta.title, meta.source, meta.failure) == (
+        None, "error", "http_429;fallback_http_429;groq_timeout")
 
     _gemini_429(monkeypatch, groq_reply="no json here")
     meta = llm.get_metadata("q", ["a"])
-    assert (meta.title, meta.source, meta.failure) == (None, "groq_fallback", "http_429;groq_no_json")
+    assert (meta.title, meta.source, meta.failure) == (
+        None, "groq_fallback", "http_429;fallback_http_429;groq_no_json")
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
-    assert llm.get_metadata("q", ["a"]).failure == "http_429;groq_bad_json"
+    assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429;groq_bad_json"
 
 
 def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
@@ -693,7 +1051,7 @@ def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
     monkeypatch.setattr(llm.time, "sleep", slept.append)
     meta = llm.get_metadata("q", ["a"])
     assert slept == [7.0]
-    assert (meta.source, meta.failure) == ("groq_fallback", "http_429")
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429;fallback_http_429")
     # The success leaves no failure label, so the wait is printed instead.
     assert "per-minute cap" in capsys.readouterr().out
 
@@ -720,4 +1078,4 @@ def test_the_rescue_never_waits_twice_on_a_daily_cap_or_off_a_429(monkeypatch):
         monkeypatch.setattr(llm.time, "sleep", slept.append)
         meta = llm.get_metadata("q", ["a"])
         assert (slept, len(sent)) == (sleeps, calls), headers
-        assert meta.failure == f"http_429;{groq_failure}", headers
+        assert meta.failure == f"http_429;fallback_http_429;{groq_failure}", headers

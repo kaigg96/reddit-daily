@@ -1,5 +1,6 @@
 """Central configuration. Importing this module loads .env (local dev only)."""
 
+import datetime
 import os
 from pathlib import Path
 
@@ -33,6 +34,28 @@ SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
 SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
 DRY_RUN = SAMPLE or SILENT_NARRATION or \
     os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# STAND_IN_VOICE: a narration that never calls Polly uses a free offline voice
+# (src/standin.py) rather than silence, so a branch render can be judged by ear
+# (#77). On by default for SILENT_NARRATION, the branch renders; off for SAMPLE,
+# whose fixed post only proves a render plays. Uploads never reach it.
+STAND_IN_VOICE = os.environ.get(
+    "STAND_IN_VOICE", "1" if SILENT_NARRATION and not SAMPLE else "").lower() in ("1", "true", "yes")
+# METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
+# the upload model (llm.MODEL): one request from the allowance uploads share,
+# so only for a render the owner judges (#77). The screen stays on the sample
+# model. On three posts (2026-10-20) the sample model's tags were labels where
+# the upload model's reacted (1 of 9 reactions against 7), so a render that
+# judges the tags must show what an upload would. Uploads use MODEL already.
+# On by default with the stand-in voice: a branch render that speaks exists to
+# be judged by ear, and dry-run.yml allows one such render per 12 hours.
+METADATA_ON_UPLOAD_MODEL = os.environ.get(
+    "METADATA_ON_UPLOAD_MODEL", "1" if STAND_IN_VOICE else "").lower() in ("1", "true", "yes")
+# REUSE_NARRATION=1, on a dry run only: narration already bought for the same
+# text and voice is reused from GEN/narration/ rather than billed again, and
+# the narrator is always VOICES[0] so a re-render finds it. For the owner's
+# narrated renders (#77): each timing tweak cost a Polly run (TECH_DEBT).
+REUSE_NARRATION = DRY_RUN and os.environ.get(
+    "REUSE_NARRATION", "").lower() in ("1", "true", "yes")
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
@@ -56,6 +79,11 @@ CAPTION_WIDTH = W - 2 * SAFE_X
 # --- content limits ---
 MAX_COMMENT_LENGTH = 150
 MAX_TITLE_LENGTH = 90
+# content._election_week: questions about voting are skipped through this date.
+ELECTION_SKIP_UNTIL = datetime.date(2026, 11, 10)
+# When the skip leaves none of the top CANDIDATE_LIMIT, the day's list is read
+# this deep instead of failing the run (content.select_post).
+ELECTION_FALLBACK_LIMIT = 30
 NUM_COMMENTS = 3
 MAX_TOTAL_SECONDS = 45  # R1.7: drop last comment if exceeded
 INTER_SEGMENT_GAP = 0.15  # natural breath between segments; music covers it
@@ -85,7 +113,8 @@ MAX_SCREENED_CANDIDATES = 4   # caps Gemini calls per run (worst case) for free-
 # ships. It runs on a different model from every other call here because the
 # free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel), so it spends that model's
-# allowance, never the one titles and the screen share. $0 either way (#22).
+# allowance, not the one titles and the screen share -- though their one-try
+# fallback (llm.FALLBACK_MODEL) is this model, since 2026-10-18. $0 either way (#22).
 SLATE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 for this key since at least 2026-09-25
 
 # Who answers every AI call. Gemini's free tier may train on what we send,
@@ -114,13 +143,16 @@ FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and react
 HOUSE_VOTE_RULE = None
 
 # Bet 1's first step as the owner approved it (#70, 2026-10-10; PRD R3.2's
-# commentary-led variant): the host speaks a setup, a reaction after each of
-# the top two answers, and its vote in place of the CTA, all from the same
+# commentary-led variant): the host speaks a setup, a reaction after each
+# answer read, and its vote in place of the CTA, all from the same
 # metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
 # threads at selection (content.is_medical). Turning it on changes the video:
 # bump FORMAT_VERSION, take a sample, and the owner listens to one first.
 COMMENTARY = True
-COMMENTARY_ANSWERS = 2  # the top two in vote order (owner, 2026-08-23)
+# In vote order (owner, 2026-08-23). Two made room for the spoken host (#70);
+# text notes take no time, and two answers cut the median video from 23.3s to
+# ~17.2s, where uploads hold 25% less watch time (PRD §4, 2026-10-14).
+COMMENTARY_ANSWERS = 3
 HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
 # The text-only host's notes (PRD R3.2, after #71): below the word captions
 # (y=700) and above the watermark (y=1500), inside the Shorts safe zone.
@@ -132,6 +164,16 @@ NOTE_BAND_OPACITY = 0.55  # the dark band behind a note; the clip still shows th
 # The host's setup and reactions as on-screen notes, never spoken; the
 # narrator speaks the vote, as today's CTA (#71).
 HOST_TEXT = True
+# The notes as tags of 1-3 words, each shown on its segment's last spoken
+# words and held through a longer pause, so it is read while nothing else is
+# said (owner, #77, 2026-10-19): a sentence shown mid-answer could not be read
+# while the answer was heard. False restores those notes (NOTE_LEAD).
+HOST_TAGS = True
+TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
+# The gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP. A
+# tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to
+# move down, read and take it in (owner, 2026-10-19), so about 1.2s.
+TAG_PAUSE = 0.9
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
@@ -144,6 +186,18 @@ POLLY_CHAR_BUDGET = int(os.environ.get("POLLY_CHAR_BUDGET", 5000))
 
 VOICES = ["Danielle", "Stephen"]
 OUTRO_TEXT = "Like, subscribe, and comment your answer below!"
+
+# Capitals in a title that are real acronyms, not emphasis. One list for both
+# PRD §0 #14's no-capitals arm (llm.drop_emphasis_caps) and the title_hype
+# read (insights), so the two share what counts as an acronym. Roman numerals
+# ("World War II") count too.
+TITLE_ACRONYMS = {"AI", "AITA", "ADHD", "AM", "ATM", "BBQ", "BF", "CDC", "CEO", "CIA",
+                  "COVID", "CPR", "DIY", "DM", "DMV", "DNA", "DR", "ER", "EU", "FBI", "GF",
+                  "GOAT", "GPS", "HOA", "HP", "HR", "IBM", "ICU", "ID", "IQ", "IRS", "LA",
+                  "LGBTQ", "MIL", "MIT", "MLB", "NASA", "NBA", "NFL", "NHL", "NPC", "NSA",
+                  "NYC", "OCD", "OK", "PC", "PM", "POV", "PTSD", "RIP", "SUV", "TL", "TSA",
+                  "TV", "UFC", "UFO", "UK", "US", "USA", "WC",
+                  "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII"}
 
 # --- paths ---
 ASSETS = ROOT / "assets"

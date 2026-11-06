@@ -1,14 +1,54 @@
 """YouTube upload. Callers are responsible for the DRY_RUN gate."""
 
+import http.client
 import os
+import time
 
 from . import config  # noqa: F401  (ensures .env is loaded for direct imports)
 
+import httplib2
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+
+# Retries of the video upload after a 5xx, 429 or dropped connection, as in
+# YouTube's own upload sample: the caller calls next_chunk() again, and the
+# client first asks the server how much arrived ("bytes */N"), seeks the file
+# there, and returns the finished video if the upload had completed, so a
+# retry cannot make a second video. The client's own num_retries is unsafe
+# here: with chunksize=-1 it resent the spent file object, an empty body.
+# Without any retry, one transient error cost the run its upload.
+# Waits before each retry: a Google 503 often outlasts a few seconds.
+UPLOAD_WAITS = (4, 16, 32)
+UPLOAD_RETRIES = len(UPLOAD_WAITS)
+# A whole Short in one request (renders ran 3-11 MB, 10-14 to 10-26), but
+# finite: with chunksize=-1 googleapiclient 2.158 computes a resumed range
+# wrongly (size - progress - 1 as the end), so a retry after a partial upload
+# ends in a 400 (review). A multiple of 256 KiB, as resumable uploads require.
+UPLOAD_CHUNK = 100 * 1024 * 1024
+_RETRIABLE_STATUS = (429, 500, 502, 503, 504)
+# A dropped connection: socket errors are OSError, but a response cut off
+# mid-read (http.client.IncompleteRead) and a failed DNS lookup are not. The
+# cut-off one matters most: the video may already be live, and an uncaught
+# raise skips prev_post.txt, so the next run would upload the post again.
+_DROPPED = (OSError, http.client.HTTPException, httplib2.ServerNotFoundError)
+
+
+def _next_chunk_retrying(request, sleep=time.sleep):
+    """request.next_chunk(), retried UPLOAD_RETRIES times on a transient error."""
+    for attempt in range(UPLOAD_RETRIES + 1):
+        try:
+            return request.next_chunk()
+        except (HttpError, *_DROPPED) as e:
+            status = getattr(getattr(e, "resp", None), "status", None)
+            transient = not isinstance(e, HttpError) or int(status or 0) in _RETRIABLE_STATUS
+            if not transient or attempt == UPLOAD_RETRIES:
+                raise
+            print(f"Upload: {type(e).__name__} {status or ''}; retry {attempt + 1} "
+                  f"of {UPLOAD_RETRIES}")
+            sleep(UPLOAD_WAITS[attempt])
 
 
 def _authenticate():
@@ -39,12 +79,13 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
             "selfDeclaredMadeForKids": False,
         },
     }
-    media = MediaFileUpload(str(file_path), chunksize=-1, resumable=True, mimetype="video/mp4")
+    media = MediaFileUpload(str(file_path), chunksize=UPLOAD_CHUNK, resumable=True,
+                            mimetype="video/mp4")
     request = youtube.videos().insert(part=",".join(body.keys()), body=body, media_body=media)
     try:
         response = None
         while response is None:
-            status, response = request.next_chunk()
+            status, response = _next_chunk_retrying(request)
             if status:
                 print(f"Uploading... {int(status.progress() * 100)}%")
         print(f"Upload complete! Video ID: {response['id']}")
@@ -54,16 +95,20 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
         return None
 
 
+# The three calls below run after the video is live and before run.py records
+# it. Each catches any error, its sign-in included (a token refresh over the
+# network): a raise here would fail the run unrecorded, skipping the commit of
+# prev_post.txt and upload_log.csv, so the next run could ship the post again.
 def upload_thumbnail(video_id, thumbnail_path):
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.thumbnails().set(
             videoId=video_id,
             media_body=MediaFileUpload(str(thumbnail_path), mimetype="image/png"),
         ).execute()
         print("Thumbnail uploaded.")
-    except HttpError as e:
-        print(f"Failed to upload thumbnail: {e}")
+    except Exception as e:
+        print(f"::warning::Failed to upload thumbnail: {type(e).__name__}: {e}")
 
 
 def upload_caption(video_id, srt_path, language="en", name="English"):
@@ -72,8 +117,8 @@ def upload_caption(video_id, srt_path, language="en", name="English"):
     Returns True/False so the outcome can be logged — a silent failure here
     previously vanished with the Actions log and was only discoverable by
     querying YouTube directly."""
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.captions().insert(
             part="snippet",
             body={"snippet": {"videoId": video_id, "language": language,
@@ -82,8 +127,8 @@ def upload_caption(video_id, srt_path, language="en", name="English"):
         ).execute()
         print("Caption track uploaded.")
         return True
-    except HttpError as e:
-        print(f"Failed to upload caption (continuing): {e}")
+    except Exception as e:
+        print(f"::warning::Failed to upload caption (continuing): {type(e).__name__}: {e}")
         return False
 
 
@@ -92,8 +137,8 @@ def post_comment(video_id, text):
     (The Data API cannot pin comments — pinning stays manual.)
 
     Returns True/False so the outcome can be logged."""
-    youtube = build("youtube", "v3", credentials=_authenticate())
     try:
+        youtube = build("youtube", "v3", credentials=_authenticate())
         youtube.commentThreads().insert(
             part="snippet",
             body={"snippet": {"videoId": video_id,
@@ -101,6 +146,48 @@ def post_comment(video_id, text):
         ).execute()
         print("Engagement comment posted.")
         return True
-    except HttpError as e:
-        print(f"Failed to post comment (continuing): {e}")
+    except Exception as e:
+        print(f"::warning::Failed to post comment (continuing): {type(e).__name__}: {e}")
         return False
+
+
+class ReplyClient:
+    """What the reply job (PLAN C10, src/replies.py post_due) reads and posts,
+    over one authenticated Data API resource. force-ssl, as post_comment."""
+
+    def __init__(self, youtube=None):
+        self.yt = youtube or build("youtube", "v3", credentials=_authenticate())
+
+    def channel_id(self):
+        """Our own channel's ID, to tell our comments from viewers'."""
+        items = self.yt.channels().list(part="id", mine=True).execute().get("items", [])
+        return items[0]["id"] if items else None
+
+    def comment(self, parent_id):
+        """(author channel ID, text) of a top-level comment, None once it is gone."""
+        items = self.yt.comments().list(part="snippet", id=parent_id,
+                                        textFormat="plainText").execute().get("items", [])
+        if not items:
+            return None
+        snip = items[0]["snippet"]
+        # textOriginal is guaranteed only to the comment's author; textDisplay,
+        # in plain text, is what the weekly collection reads too.
+        return ((snip.get("authorChannelId") or {}).get("value"),
+                snip.get("textDisplay") or snip.get("textOriginal") or "")
+
+    def replied(self, parent_id, channel_id):
+        """Has `channel_id` already replied to this comment?"""
+        request = self.yt.comments().list(part="snippet", parentId=parent_id, maxResults=100)
+        while request is not None:
+            page = request.execute()
+            if any((i["snippet"].get("authorChannelId") or {}).get("value") == channel_id
+                   for i in page.get("items", [])):
+                return True
+            request = self.yt.comments().list_next(request, page)
+        return False
+
+    def post(self, parent_id, text):
+        """Post one reply; True once YouTube accepted it."""
+        self.yt.comments().insert(part="snippet",
+                                  body={"snippet": {"parentId": parent_id, "textOriginal": text}}).execute()
+        return True

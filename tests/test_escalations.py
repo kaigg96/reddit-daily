@@ -16,6 +16,8 @@ def issue(n, title, labels, comments, body=""):
 
 def fake_github(monkeypatch, issues, comments, labelled_by="kaigg96"):
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -128,6 +130,8 @@ def closed_github(monkeypatch, closed, comments, closed_by=None):
     """Open list empty; the closed list is what the refusal check reads."""
     closed_by = closed_by or {}
     def api(path, data=None, method=None):
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []                                   # repo-wide: the owner's last action
         if path.split("?")[0].endswith("/comments"):
             return [] if "page=2" in path else comments[int(path.split("?")[0].split("/")[-2])]
         if "/events" in path:
@@ -234,3 +238,115 @@ def test_the_latest_comment_is_read_past_the_first_page(monkeypatch, capsys):
     monkeypatch.setattr(escalations, "_declined", lambda: [])
     escalations.show(True)
     assert "owner: " + LATER in capsys.readouterr().out
+
+
+def test_the_open_listing_says_when_the_owner_last_acted(monkeypatch, capsys):
+    """D13's question, absence or the ask's form, read from one line."""
+    def api(path, data=None, method=None):
+        p = path.split("?")[0]
+        if p.endswith("/issues/events"):
+            return [{"event": "labeled", "label": {"name": "approved"}, "actor": {"login": "kaigg96"},
+                     "created_at": "2026-10-27T21:20:06Z", "issue": {"number": 85}},
+                    {"event": "labeled", "label": {"name": "needs-owner"},
+                     "actor": {"login": "github-actions[bot]"},
+                     "created_at": "2026-10-28T10:00:00Z", "issue": {"number": 86}},
+                    # the auto-apply job pushes with the owner's token: not the owner acting
+                    {"event": "referenced", "actor": {"login": "kaigg96"},
+                     "created_at": "2026-10-28T12:00:00Z", "issue": {"number": 81}}]
+        if p.endswith("/issues/comments"):
+            return [{"author_association": "OWNER", "created_at": "2026-10-19T03:00:00Z",
+                     "issue_url": "https://api.github.com/repos/kaigg96/reddit-daily/issues/77"},
+                    {"author_association": "NONE", "created_at": "2026-10-28T11:00:00Z",
+                     "issue_url": "https://api.github.com/repos/kaigg96/reddit-daily/issues/77"}]
+        return [issue(77, "Bet 1", ["needs-owner"], [])]
+    monkeypatch.setattr(escalations, "_api", api)
+    monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
+    escalations._print_owner_last_action(now=escalations.datetime(2026, 10, 28, 17, 20,
+                                                                 tzinfo=escalations.timezone.utc))
+    out = capsys.readouterr().out
+    assert "last acted 20 hours ago (2026-10-27 21:20 UTC: labeled approved #85)" in out
+    escalations.show(False)
+    assert "The owner last acted" in capsys.readouterr().out
+
+
+def test_an_unreadable_last_action_never_stops_the_listing(monkeypatch, capsys):
+    def api(path, data=None, method=None):
+        if "/issues/events" in path or "/issues/comments" in path:
+            raise ValueError("bad page")
+        return [issue(77, "Bet 1", ["needs-owner"], [])]
+    monkeypatch.setattr(escalations, "_api", api)
+    escalations.show(False)
+    out = capsys.readouterr().out
+    assert "could not be read (ValueError)" in out and "#77  Bet 1" in out
+
+
+def _artifacts_github(monkeypatch, issues, comments, artifacts):
+    """issues/comments as fake_github; `artifacts` maps a run ID to its
+    artifact list, or to an exception the API raises for it."""
+    calls = []
+    def api(path, data=None, method=None):
+        calls.append(path)
+        if "/actions/runs/" in path:
+            got = artifacts[path.split("/actions/runs/")[1].split("/")[0]]
+            if isinstance(got, Exception):
+                raise got
+            return {"artifacts": got}
+        if path.split("?")[0].endswith(("/issues/comments", "/issues/events")):
+            return []
+        if path.split("?")[0].endswith("/comments"):
+            return [] if "page=2" in path else comments.get(int(path.split("?")[0].split("/")[-2]), [])
+        if "/events" in path:
+            return []
+        return issues
+    monkeypatch.setattr(escalations, "_api", api)
+    return calls
+
+
+EXPIRY_NOW = escalations.datetime(2026, 11, 3, 18, 0, tzinfo=escalations.timezone.utc)
+RUN = "https://github.com/kaigg96/reddit-daily/actions/runs/"
+
+
+def test_a_sample_an_open_ask_links_is_flagged_before_github_deletes_it(monkeypatch):
+    issues = [issue(77, "Bet 1", ["needs-owner"], [1]),
+              issue(90, "Source", ["needs-owner"], [], body=f"[ours]({RUN}2) [theirs]({RUN}3)")]
+    _artifacts_github(monkeypatch, issues, {77: [{"body": f"[video]({RUN}1)"}]}, {
+        "1": [{"expires_at": "2026-11-08T08:30:35Z", "expired": False}],    # 5 days: flagged
+        "2": [{"expires_at": "2026-11-20T00:00:00Z", "expired": False}],    # 17 days: not yet
+        "3": [{"expires_at": "2026-11-02T00:00:00Z", "expired": True}]})    # gone already
+    got = escalations._expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
+    assert [(i["number"], run, kept) for i, run, _, kept in got] == [(77, "1", False)]
+
+
+def test_a_kept_copy_is_noted_and_an_ask_without_runs_costs_no_request(monkeypatch):
+    issues = [issue(90, "Source", ["needs-owner"], [],
+                    body=f"[ours]({RUN}2), kept: blob/sample-frames/.github/samples/x.mp4"),
+              issue(91, "No sample", ["needs-owner"], [], body="no links here")]
+    calls = _artifacts_github(monkeypatch, issues, {},
+                              {"2": [{"expires_at": "2026-11-09T09:56:49Z", "expired": False}]})
+    got = escalations._expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
+    assert [(i["number"], kept) for i, _, _, kept in got] == [(90, True)]
+    assert sum("/actions/runs/" in p for p in calls) == 1
+
+
+def test_a_run_github_no_longer_has_never_stops_the_listing(monkeypatch, capsys):
+    gone = escalations.urllib.error.HTTPError("u", 404, "Not Found", {}, None)
+    issues = [issue(77, "Bet 1", ["needs-owner"], [], body=f"{RUN}1 and {RUN}2")]
+    _artifacts_github(monkeypatch, issues, {}, {
+        "1": gone, "2": [{"expires_at": "2026-11-05T00:00:00Z", "expired": False}]})
+    escalations._print_expiring([(i, set()) for i in issues], now=EXPIRY_NOW)
+    out = capsys.readouterr().out
+    assert "#77  run 2: deleted 2026-11-05 00:00 UTC" in out and "run 1" not in out
+
+
+def test_a_failed_expiry_check_says_so_and_the_listing_goes_on(monkeypatch, capsys):
+    """A null deletion date, or a 403 on the artifacts call, is not "nothing
+    expiring": it prints one line, and the decisions still list."""
+    denied = escalations.urllib.error.HTTPError("u", 403, "Forbidden", {}, None)
+    for artifacts in ({"1": [{"expires_at": None, "expired": False}]}, {"1": denied}):
+        issues = [issue(65, "Approved ask", ["needs-owner", "approved"], [], body=f"{RUN}1")]
+        _artifacts_github(monkeypatch, issues, {}, artifacts)
+        monkeypatch.setattr(escalations, "_approved_by_owner", lambda i: True)
+        escalations.show(True)
+        out = capsys.readouterr().out
+        assert "could not be checked for deletion" in out
+        assert "#65  Approved ask" in out

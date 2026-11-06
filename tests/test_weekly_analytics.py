@@ -82,7 +82,8 @@ class _FakeAnalytics:
         self._ids = kw["filters"].removeprefix("video==").split(",")
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        self.num_retries = num_retries
         if (self.refuse_engaged and wa.ENGAGED_METRIC in self._metrics
                 and not (self.only_beside_all and len(self._metrics) == 2)):
             raise RuntimeError("HttpError 400: Unknown identifier (engagedViews)")
@@ -97,6 +98,14 @@ def test_engaged_views_are_collected_when_served():
     stats = wa.fetch_stats_with_engaged(ya, ["a", "b"], "2026-09-28")
     assert stats["a"][wa.ENGAGED_METRIC] == 3 and stats["a"]["views"] == 9
     assert len(ya.calls) == 1
+
+
+def test_the_snapshot_queries_retry_a_server_error():
+    """10-26: one HTTP 500 cost every upload its subscribers; on the main
+    query it would have cost the whole week's snapshot."""
+    ya = _FakeAnalytics(refuse_engaged=False)
+    wa.fetch_stats(ya, ["a"], "2026-11-02", f"views,{wa.SUBS_METRIC}")
+    assert ya.num_retries == wa.SERVER_RETRIES >= 1
 
 
 def test_a_refused_metric_costs_the_column_not_the_snapshot():
@@ -128,8 +137,30 @@ class _FakeYT:
         assert kwargs == {"mine": True, "part": "statistics"}
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES >= 1   # R4 reads this row weekly
         return {"items": [{"statistics": self.stats}]}
+
+
+def test_the_upload_listing_retries_a_server_error():
+    """~22 pages before any figure: one 5xx on any page lost the snapshot."""
+    from src import analytics
+
+    class Listing:
+        def __init__(self): self.retries, self.pages = [], iter([{"items": [1], "nextPageToken": "p"},
+                                                                 {"items": [2]}])
+        def channels(self): self.kind = "channel"; return self
+        def playlistItems(self): self.kind = "page"; return self
+        def list(self, **kw): return self
+        def execute(self, num_retries=0):
+            self.retries.append(num_retries)
+            if self.kind == "channel":
+                return {"items": [{"contentDetails": {"relatedPlaylists": {"uploads": "UU"}}}]}
+            return next(self.pages)
+
+    yt = Listing()
+    assert analytics.list_uploaded_videos(yt) == [1, 2]
+    assert yt.retries == [analytics.SERVER_RETRIES] * 3 and analytics.SERVER_RETRIES >= 1
 
 
 def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):
@@ -140,14 +171,77 @@ def test_channel_snapshot_appends_one_row_under_one_header(tmp_path):
     wa.snapshot_channel(yt, "2026-10-19", p)
     lines = p.read_text().splitlines()
     assert lines == [",".join(wa.CHANNEL_FIELDS),
-                     "2026-10-12,142,0,91000,180",
-                     "2026-10-19,142,0,91000,180"]
+                     "2026-10-12,142,0,91000,180,,",
+                     "2026-10-19,142,0,91000,180,,"]
 
 
 def test_hidden_subscriber_count_is_flagged_not_guessed(tmp_path):
     p = tmp_path / "channel.csv"
     wa.snapshot_channel(_FakeYT({"hiddenSubscriberCount": True, "viewCount": "1"}), "2026-10-12", p)
-    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,"
+    assert p.read_text().splitlines()[1] == "2026-10-12,,1,1,,,"
+
+
+class _FakeAudience:
+    """reports().query(...).execute() answering by dimension; a listed one raises."""
+
+    def __init__(self, rows, refuse=()):
+        self.rows, self.refuse, self.queries = rows, refuse, []
+
+    def reports(self):
+        return self
+
+    def query(self, **kw):
+        self.queries.append(kw)
+        self.kw = kw
+        return self
+
+    def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES >= 1
+        dim = self.kw["dimensions"]
+        if dim in self.refuse:
+            raise RuntimeError("403 refused")
+        return {"columnHeaders": [{"name": dim}, {"name": "views"}],
+                "rows": self.rows.get(dim, [])}
+
+
+_AUDIENCE = {"subscribedStatus": [["SUBSCRIBED", 30], ["UNSUBSCRIBED", 970]],
+             "country": [["IN", 50], ["US", 600], ["GB", 100], ["CA", 80], ["AU", 70],
+                         ["DE", 60], ["PH", 40]]}
+
+
+def test_who_watches_is_shares_of_all_views_over_28_days(tmp_path):
+    p = tmp_path / "channel.csv"
+    ya = _FakeAudience(_AUDIENCE)
+    wa.snapshot_channel(_FakeYT({"subscriberCount": "22", "viewCount": "9", "videoCount": "3"}),
+                        "2026-11-09", p, ya=ya)
+    assert p.read_text().splitlines()[1] == (
+        "2026-11-09,22,0,9,3,0.030,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060")
+    assert {(q["startDate"], q["endDate"], q["ids"]) for q in ya.queries} == {
+        ("2026-10-12", "2026-11-09", "channel==MINE")}
+
+
+def test_a_refused_audience_query_blanks_its_column_and_the_row_still_lands(tmp_path):
+    p = tmp_path / "channel.csv"
+    yt = _FakeYT({"subscriberCount": "22", "viewCount": "9", "videoCount": "3"})
+    wa.snapshot_channel(yt, "2026-11-09", p, ya=_FakeAudience(_AUDIENCE, refuse={"country"}))
+    wa.snapshot_channel(yt, "2026-11-16", p, ya=_FakeAudience(_AUDIENCE, refuse={"subscribedStatus"}))
+    wa.snapshot_channel(yt, "2026-11-23", p, ya=_FakeAudience({}))  # no rows: blank, not 0
+    assert p.read_text().splitlines()[1:] == [
+        "2026-11-09,22,0,9,3,0.030,",
+        "2026-11-16,22,0,9,3,,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060",
+        "2026-11-23,22,0,9,3,,"]
+
+
+def test_the_live_channel_file_gains_the_columns_in_its_header_only(tmp_path):
+    p = tmp_path / "channel.csv"
+    old = b"snapshot_date,subscribers,subscribers_hidden,views,videos\n2026-10-26,22,0,97399,1064\n"
+    p.write_bytes(old)
+    wa.snapshot_channel(_FakeYT({"subscriberCount": "23", "viewCount": "9", "videoCount": "3"}),
+                        "2026-11-09", p, ya=_FakeAudience(_AUDIENCE))
+    head, rest = p.read_bytes().split(b"\n", 1)
+    assert head.decode().split(",") == wa.CHANNEL_FIELDS
+    assert rest == (b"2026-10-26,22,0,97399,1064\n"
+                    b"2026-11-09,23,0,9,3,0.030,US:0.600|GB:0.100|CA:0.080|AU:0.070|DE:0.060\n")
 
 
 class _FakeComments:
@@ -160,7 +254,8 @@ class _FakeComments:
     def list(self, **kwargs):
         return self
 
-    def execute(self):
+    def execute(self, num_retries=0):
+        assert num_retries == wa.SERVER_RETRIES
         return {"items": self.items}
 
 
@@ -179,6 +274,20 @@ def test_comments_keep_last_week_only_on_one_line_without_author(tmp_path):
                      "2026-10-12,v1,new,2026-10-10T01:00:00Z,2,great video"]
 
 
+def test_the_channels_own_comments_are_left_out(tmp_path):
+    """Each upload's closing question is ours (15 of 22 rows on 10-19)."""
+    def by(author, cid):
+        t = _thread(cid, "2026-10-10T01:00:00Z", "text")
+        t["snippet"]["channelId"] = "UCours"
+        t["snippet"]["topLevelComment"]["snippet"]["authorChannelId"] = {"value": author}
+        return t
+    p = tmp_path / "comments.csv"
+    yt = _FakeComments([by("UCours", "own"), by("UCviewer", "viewer"),
+                        _thread("unknown", "2026-10-10T01:00:00Z", "no ids")])
+    assert wa.snapshot_comments(yt, "2026-10-12", ["v1"], p) == 2
+    assert [line.split(",")[2] for line in p.read_text().splitlines()[1:]] == ["viewer", "unknown"]
+
+
 class _FakeSubsAnalytics(_FakeAnalytics):
     """Serves subscribersGained (as 2) unless told to refuse it."""
 
@@ -186,10 +295,10 @@ class _FakeSubsAnalytics(_FakeAnalytics):
         super().__init__(refuse_engaged=False)
         self.refuse_subs = refuse_subs
 
-    def execute(self):
+    def execute(self, num_retries=0):
         if self.refuse_subs and wa.SUBS_METRIC in self._metrics:
             raise RuntimeError("HttpError 400: Unknown identifier (subscribersGained)")
-        resp = super().execute()
+        resp = super().execute(num_retries)
         if wa.SUBS_METRIC in self._metrics:
             i = self._metrics.index(wa.SUBS_METRIC) + 1
             for row in resp["rows"]:
@@ -240,4 +349,147 @@ def test_the_live_header_extends_by_two_columns_in_one_run(tmp_path):
     p.write_bytes(",".join(LIVE).encode() + b"\n" + body)
     wa.ensure_header(p, wa.FIELDS)
     assert p.read_bytes() == ",".join(wa.FIELDS).encode() + b"\n" + body
-    assert wa.FIELDS[len(LIVE):] == ["subs_gained", "privacy_status"]
+    assert wa.FIELDS[len(LIVE):len(LIVE) + 2] == ["subs_gained", "privacy_status"]
+
+
+# ------------------------------------------- retention points (2026-10-17)
+
+class _FakeRetention:
+    """The audience-retention report: one video per query, a row per percent."""
+
+    def __init__(self, refuse=False, rows=None, fail=()):
+        self.refuse, self.rows, self.videos, self.fail = refuse, rows, [], fail
+
+    def reports(self):
+        return self
+
+    def query(self, **kw):
+        assert kw["dimensions"] == "elapsedVideoTimeRatio" and "," not in kw["filters"]
+        self.videos.append(kw["filters"].removeprefix("video=="))
+        return self
+
+    def execute(self, num_retries=0):
+        self.num_retries = num_retries
+        if self.refuse:
+            raise RuntimeError("HttpError 403: Forbidden")
+        if self.videos[-1] in self.fail:
+            raise _ServerError(self.fail[self.videos[-1]])
+        rows = self.rows if self.rows is not None else [
+            [i / 100, 1.2 - i / 100] for i in range(1, 101)]
+        return {"columnHeaders": [{"name": "elapsedVideoTimeRatio"},
+                                  {"name": "audienceWatchRatio"}],
+                "rows": rows}
+
+
+_VIDEOS = [("new", "2026-10-15T04:43:55Z", "public"),
+           ("old", "2026-08-01T04:43:55Z", "public")]
+
+
+def test_retention_points_are_read_for_recent_uploads_only():
+    ya = _FakeRetention()
+    stats = wa.add_retention(ya, {"new": {"views": 9}}, _VIDEOS, "2026-10-19")
+    assert ya.videos == ["new"]
+    assert stats["new"]["views"] == 9
+    assert [stats["new"][f] for f in wa.RETENTION_FIELDS] == [1.1, 0.95, 0.7, 0.45, 0.2]
+    assert "old" not in stats
+
+
+def test_an_upload_the_main_query_did_not_return_is_not_added():
+    ya = _FakeRetention()
+    videos = _VIDEOS + [("unseen", "2026-10-18T04:43:55Z", "public")]
+    stats = wa.add_retention(ya, {"new": {"views": 9}}, videos, "2026-10-19")
+    assert ya.videos == ["new"] and set(stats) == {"new"}
+
+
+def test_a_point_with_no_reading_near_it_is_left_blank():
+    ya = _FakeRetention(rows=[[0.1, 0.9], [0.5, 0.6]])
+    got = wa.fetch_retention(ya, "new", "2026-10-19")
+    assert got == {"watch_ratio_10": 0.9, "watch_ratio_50": 0.6}
+    assert wa.fetch_retention(_FakeRetention(rows=[]), "new", "2026-10-19") == {
+        "watch_ratio_10": "no rows"}
+
+
+def test_a_refused_retention_report_costs_one_query_and_its_column_only():
+    ya = _FakeRetention(refuse=True)
+    videos = _VIDEOS + [("new2", "2026-10-16T04:43:55Z", "public")]
+    stats = wa.add_retention(ya, {"new": {"views": 9}, "new2": {"views": 4}},
+                             videos, "2026-10-19")
+    assert ya.videos == ["new"]
+    assert stats["new"]["views"] == 9
+    assert stats["new2"]["watch_ratio_10"].startswith("refused: RuntimeError: HttpError 403")
+
+
+def test_a_server_error_is_retried_by_the_client_first():
+    """10-19: one HTTP 500 cost 23 uploads their points. The client retries a
+    5xx itself when asked; a refusal (403 above) still stops at once."""
+    ya = _FakeRetention()
+    wa.fetch_retention(ya, "new", "2026-10-19")
+    assert ya.num_retries == wa.SERVER_RETRIES >= 1
+
+
+class _ServerError(Exception):
+    """googleapiclient's HttpError as add_retention sees it: a status on resp."""
+
+    def __init__(self, status):
+        super().__init__(f"<HttpError {status}>")
+        self.resp = type("Resp", (), {"status": status})()
+
+
+def _recent(n):
+    ids = [f"v{i}" for i in range(n)]
+    return ids, [(v, "2026-10-15T04:43:55Z", "public") for v in ids], {v: {} for v in ids}
+
+
+def test_a_server_error_past_its_retries_costs_its_own_upload_only():
+    """10-19: an HTTP 500 on the 33rd query marked all 23 uploads after it."""
+    ids, videos, stats = _recent(4)
+    ya = _FakeRetention(fail={"v1": 500})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids
+    assert stats["v1"]["watch_ratio_10"].startswith("refused: _ServerError: <HttpError 500>")
+    assert [stats[v]["watch_ratio_10"] for v in ("v0", "v2", "v3")] == [1.1] * 3
+
+
+def test_only_server_errors_in_a_row_count_toward_stopping():
+    ids, videos, stats = _recent(5)
+    ya = _FakeRetention(fail={"v0": 500, "v2": 500, "v3": 500})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids and stats["v4"]["watch_ratio_10"] == 1.1
+
+
+def test_server_errors_in_a_row_stop_the_loop_as_a_refusal_does():
+    ids, videos, stats = _recent(6)
+    down = {v: 503 for v in ids[1:1 + wa.RETENTION_SERVER_ERRORS]}
+    ya = _FakeRetention(fail=down)
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ids[:1 + wa.RETENTION_SERVER_ERRORS]
+    assert stats["v0"]["watch_ratio_10"] == 1.1
+    assert all(stats[v]["watch_ratio_10"].startswith("refused:") for v in ids[1:])
+
+
+def test_a_client_error_still_stops_at_once():
+    ids, videos, stats = _recent(3)
+    ya = _FakeRetention(fail={"v0": 403})
+    wa.add_retention(ya, stats, videos, "2026-10-19")
+    assert ya.videos == ["v0"]
+    assert all(stats[v]["watch_ratio_10"].startswith("refused:") for v in ids)
+
+
+def test_retention_columns_extend_the_live_header_as_a_pure_append():
+    assert wa.FIELDS[-len(wa.RETENTION_FIELDS):] == wa.RETENTION_FIELDS
+    live = open(os.path.join(os.path.dirname(__file__), "..", "analysis",
+                             "analytics_snapshots.csv")).readline().strip().split(",")
+    assert wa.FIELDS[:len(live)] == live
+
+
+def test_a_channel_header_it_cannot_extend_never_ends_the_job(tmp_path, monkeypatch, capsys):
+    """Monday's per-video rows are committed by a later workflow step, so the
+    channel step must not end the job, even on ensure_header's SystemExit."""
+    p = tmp_path / "channel.csv"
+    p.write_bytes(b"snapshot_date,views,subscribers\n2026-10-26,1,22\n")
+    monkeypatch.setattr(wa, "CHANNEL_OUT", p)
+    monkeypatch.setattr(wa.analytics, "youtube_client",
+                        lambda: _FakeYT({"subscriberCount": "23", "viewCount": "9", "videoCount": "3"}))
+    wa.channel_step(_FakeAudience(_AUDIENCE), "2026-11-09")  # raises nothing
+    assert p.read_bytes() == b"snapshot_date,views,subscribers\n2026-10-26,1,22\n"
+    assert "channel snapshot failed (SystemExit" in capsys.readouterr().out

@@ -40,8 +40,14 @@ from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_u
 
 @pytest.fixture
 def text_host(monkeypatch):
+    """The mechanics below count nothing, so they reuse the two-answer
+    fixtures; what ships, three answers, is pinned at the end of this file.
+    They are the sentence-long notes' (HOST_TAGS off); the tags have their own
+    section below."""
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
 
 
 def _segments():
@@ -89,6 +95,16 @@ def test_a_voiced_host_keeps_its_ask(monkeypatch):
     assert llm._commentary_ask(2) == llm._COMMENTARY_ASK.format(n=2)
 
 
+@pytest.mark.parametrize("tags", [False, True])
+def test_the_spoken_vote_keeps_a_spoken_lines_cap(monkeypatch, tags):
+    """The vote is spoken, never a note: the notes' slack dropped it on 4 of
+    12 trial posts (2026-10-20)."""
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", tags)
+    assert llm._within_cap(" ".join(["word"] * 22), "cta")
+    assert not llm._within_cap(" ".join(["word"] * 23), "cta")
+
+
 def test_a_text_reaction_has_a_tighter_cap(text_host):
     assert not llm._within_cap(" ".join(["word"] * 13), "reaction")   # four lines
     assert llm._within_cap(" ".join(["word"] * 12), "reaction")
@@ -114,6 +130,18 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
     # stop, and a contraction is still a plain word.
     assert content.sentence_case("nope. sorry. which?") == "Nope. Sorry. Which?"
     assert content.sentence_case("i'd pick it. don’t you?") == "I'd pick it. Don’t you?"
+    # 2026-11-05: "i" alone is a capital, and "vs.", "u.s." and an ellipsis
+    # end no sentence, as in llm.sentence_case.
+    assert content.sentence_case("can i pick both? so do i. which?") == "Can I pick both? So do I. Which?"
+    assert content.sentence_case("cats vs. dogs: which wins?") == "Cats vs. dogs: which wins?"
+    assert content.sentence_case("the u.s. president? the job... for you?") == (
+        "The u.s. president? The job... for you?")
+    assert content.sentence_case("this one, i.e. the cat") == "This one, i.e. the cat"
+    # Its review: one-letter words, digits and closing marks still end one.
+    assert content.sentence_case("option a. option b. so do I. which?") == (
+        "Option a. Option b. So do I. Which?")
+    assert content.sentence_case("pick 5. cats (obviously). you?") == "Pick 5. Cats (obviously). You?"
+    assert content.sentence_case("web 3.0. ios 17.1. which?") == "Web 3.0. Ios 17.1. Which?"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept
@@ -132,6 +160,8 @@ def _text_metadata(monkeypatch, **lines):
     from tests.test_commentary import _metadata
     monkeypatch.setattr(config, "COMMENTARY", True)
     monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)        # as text_host
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     return _metadata(monkeypatch, json.dumps({**HOST, **lines}))[0].commentary
 
 
@@ -143,7 +173,7 @@ def test_a_long_reaction_drops_only_its_own_note(monkeypatch):
 
 
 def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
-    host = _text_metadata(monkeypatch, cta="word " * 19)
+    host = _text_metadata(monkeypatch, cta="word " * 23)
     assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
     assert run.closing_line(None, host) is None          # so today's line closes
     segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
@@ -151,6 +181,55 @@ def test_a_long_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch):
     notes = sum(len(n) for n in [HOST["setup"], *HOST["reactions"]])
     total = sum(len(s.text) + len(s.note) for s in segs)
     assert run.own_words_share(segs) == f"{notes / total:.3f}"
+
+
+@pytest.mark.parametrize("vote", ["Raising my hand for the shelter one, damn right. YOUR vote?",
+                                  "Raising my hand for the f**k off one. YOUR vote?"])
+def test_a_swearing_vote_leaves_the_generic_line_and_keeps_the_notes(monkeypatch, vote):
+    """The vote is published, so it is held to the title's guard (10-22's swear
+    word in a live title); the notes keep theirs, where "Oh god" is a reaction."""
+    host = _text_metadata(monkeypatch, cta=vote)
+    assert host.setup == HOST["setup"] and host.reactions == HOST["reactions"]
+    assert host.verdict == "" and run.closing_line(None, host) is None
+
+
+def test_a_swearing_vote_is_logged_as_one_not_as_long(monkeypatch, capsys):
+    _text_metadata(monkeypatch, cta="Raising my hand for the shelter one, damn right.")
+    out = capsys.readouterr().out
+    assert "vote (a swear word or emoji)" in out and "vote (" not in out.replace(
+        "vote (a swear word or emoji)", "")
+
+
+@pytest.mark.parametrize("tag", ["Holy shit", "F**k me", "WTF"])
+def test_a_swearing_tag_drops_alone(monkeypatch, capsys, tag):
+    """The tags are on screen, so they may not swear either (the vote guard's
+    review, 10-23), on a list that spares god, hell and damn."""
+    host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+    assert host.reactions == ["", HOST["reactions"][1]] and host.verdict == HOST["cta"]
+    out = capsys.readouterr().out
+    assert "reaction 1 (a swear word or emoji)" in out
+    assert tag not in out and "as written" not in out   # the public log never repeats it
+
+
+def test_a_reaction_may_say_oh_god(monkeypatch):
+    for tag in ("Oh god", "Hell no", "Damn right", "OMG, no"):
+        host = _text_metadata(monkeypatch, reactions=[tag, HOST["reactions"][1]])
+        assert host.reactions[0] == tag and host.verdict == HOST["cta"]
+
+
+def test_the_log_names_each_dropped_line_and_its_length(monkeypatch, capsys):
+    """Which line ran long, and by how much: the vote's drops were counted,
+    never measured (2026-10-20)."""
+    _text_metadata(monkeypatch, cta="word " * 23, reactions=[HOST["reactions"][0], "word " * 13])
+    out = capsys.readouterr().out
+    assert "vote (23 words), reaction 2 (13 words)" in out
+    assert "setup (" not in out and "reaction 1 (" not in out
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right, on a line the dry run's report reads as the AI's words.
+    said = f'Commentary reaction 2, as written: "{" ".join(["word"] * 13)}"'
+    assert said in out.splitlines() and "vote, as written" not in out
+    from scripts import dry_run
+    assert dry_run.ECHOES_CONTENT.match(said) and dry_run.PICKED.match(said)
 
 
 def test_with_no_note_left_the_upload_is_todays_reading(monkeypatch):
@@ -169,6 +248,7 @@ def test_a_voiced_host_still_falls_back_whole(monkeypatch):
 
 
 def test_the_log_counts_the_host_lines_actually_shown(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     whole = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
     assert run.host_lines_shown(run.build_segments(_Post, whole.verdict, whole, _synth, "S")) == 4
     host = _text_metadata(monkeypatch, reactions=[HOST["reactions"][0], "word " * 13])
@@ -183,7 +263,7 @@ def test_a_long_setup_drops_alone(monkeypatch):
 
 
 def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
-    host = _text_metadata(monkeypatch, cta="word " * 19)
+    host = _text_metadata(monkeypatch, cta="word " * 23)
     segs = run.build_segments(_Post, config.OUTRO_TEXT, host, _synth, "Stephen")
     calls = []
     outro = run.fit_to_length(segs, _too_long_until(3), host,
@@ -194,12 +274,13 @@ def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
 def test_the_upload_log_carries_the_host_line_count():
     import inspect
     from src import log
-    assert log.FIELDS.index("host_lines") == log.FIELDS.index("meta_source") + 1
+    assert "host_lines" in log.FIELDS[log.FIELDS.index("title_caps"):]   # appended, not inserted
     assert '"host_lines": host_lines' in inspect.getsource(run.main)
 
 
 def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     monkeypatch.setattr(config, "HOST_TEXT", False)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
     host = llm.Commentary(HOST["setup"], HOST["reactions"], HOST["cta"])
     segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
     assert run.host_lines_shown(segs) == 4
@@ -207,17 +288,247 @@ def test_a_voiced_host_counts_its_spoken_lines(monkeypatch):
     assert run.host_lines_shown(segs) == 1     # setup, last answer and its line, the vote
 
 
-@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂"])
-def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, junk):
+@pytest.mark.parametrize("junk", ["...", "🔥🔥", "So true 😂", "Wow 🇺🇸", "1️⃣ wow",
+                                  "", "   ", None])
+def test_a_placeholder_or_emoji_note_drops_alone(monkeypatch, capsys, junk):
+    """A flag or keycap is two code points, neither an emoji alone; and an
+    empty line drops alone, as a long one does (whole-branch review, 10-24)."""
     host = _text_metadata(monkeypatch, reactions=[junk, HOST["reactions"][1]])
     assert host == (HOST["setup"], ["", HOST["reactions"][1]], HOST["cta"])
+    said = [ln for ln in capsys.readouterr().out.splitlines() if "as written" in ln]
+    assert said == ([f'Commentary reaction 1, as written: "{junk}"'] if junk == "..." else [])
 
 
-def test_the_sample_setup_fits_the_text_cap():
+@pytest.mark.parametrize("line", [{"setup": ""}, {"cta": None}, {"cta": "  "}])
+def test_an_empty_setup_or_vote_drops_alone(monkeypatch, capsys, line):
+    host = _text_metadata(monkeypatch, **line)
+    assert host.reactions == HOST["reactions"]
+    want = ("", HOST["cta"]) if "setup" in line else (HOST["setup"], "")
+    assert (host.setup, host.verdict) == want
+    assert "a swear word" not in capsys.readouterr().out    # empty is not swearing
+
+
+def test_the_sample_setup_would_ship_as_a_tag(tag_host):
     from src import sample
-    assert llm._within_cap(sample.METADATA.commentary.setup, "setup")
+    assert llm._usable(sample.METADATA.commentary.setup, "setup")
 
 
 def test_a_trademark_sign_is_text_not_an_emoji(monkeypatch):
     host = _text_metadata(monkeypatch, reactions=["Reddit™ users loved this.", HOST["reactions"][1]])
     assert host.reactions[0] == "Reddit™ users loved this."
+
+
+# --- what ships: three answers (2026-10-14) -----------------------------------
+# Two answers made room for the voiced host's spoken lines (#70). Notes take no
+# time, and two answers would cut the median video from 23.3s to ~17.2s, where
+# uploads hold 25% less watch time (PRD §4), so the text host reads all three.
+
+THREE = [*HOST["reactions"], "Twenty five small bosses, zero breaks."]
+
+
+def test_the_text_host_reads_all_three_answers():
+    assert config.HOST_TEXT and config.COMMENTARY_ANSWERS == config.NUM_COMMENTS == 3
+
+
+def test_the_call_asks_for_a_reaction_to_each_of_the_three(monkeypatch):
+    import json
+    from tests.test_commentary import _metadata
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)   # THREE are sentence-long notes
+    meta, prompt = _metadata(monkeypatch, json.dumps({**HOST, "reactions": THREE}))
+    assert "exactly 3 lines" in prompt and '"reactions": ["...", "...", "..."]' in prompt
+    assert all(f'{i}. "{a}"' in prompt for i, a in enumerate(POST_ANSWERS, 1))
+    assert meta.commentary == llm.Commentary(HOST["setup"], THREE, HOST["cta"])
+
+
+def test_three_answers_each_carry_their_note(text_host, monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 3)
+    host = llm.Commentary(HOST["setup"], THREE, HOST["cta"])
+    segs = run.build_segments(_Post, host.verdict, host, _synth, "Stephen")
+    assert [s.kind for s in segs] == ["title", "comment", "comment", "comment", "vote"]
+    assert [s.text for s in segs[1:4]] == POST_ANSWERS
+    assert [s.note for s in segs] == [HOST["setup"], *THREE, ""]
+    assert run.host_lines_shown(segs) == 5
+
+
+def test_the_free_sample_has_a_note_for_every_answer_it_reads():
+    from src import sample
+    host = sample.METADATA.commentary
+    assert len(host.reactions) == len(sample.POST.comments[:config.COMMENTARY_ANSWERS])
+    assert all(llm._usable(r, "reaction") for r in host.reactions)
+
+
+# --- tags (HOST_TAGS, #77, 2026-10-19) ----------------------------------------
+# The owner, on a narrated render: a sentence shown mid-answer cannot be read
+# while the answer is heard. So each note is a tag of 1-3 words, shown on its
+# segment's last spoken words and held through a longer pause.
+
+TAGS = {"setup": "Oof, deceptively hard.", "reactions": ["Smiling is cardio.", "Boredom, then chaos."]}
+
+
+@pytest.fixture
+def tag_host(monkeypatch):
+    monkeypatch.setattr(config, "COMMENTARY", True)
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    monkeypatch.setattr(config, "COMMENTARY_ANSWERS", 2)
+
+
+def test_the_tags_ship():
+    assert config.HOST_TEXT and config.HOST_TAGS
+
+
+def test_every_tag_edit_matches_the_text_ask(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    ask = llm._commentary_ask(2)
+    for old, _ in llm._TAG_EDITS:
+        assert old.format(n=2) in ask, old
+
+
+def test_a_tag_host_is_asked_for_tags(tag_host):
+    ask = llm._commentary_ask(2)
+    assert ask.count("1 to 3 words") == 2 and "never name, label or sum up" in ask and "at a glance" in ask
+    assert "takes a side" in ask and "no two tags in one video alike" in ask
+    assert "AT MOST 10 words" not in ask and "two seconds" not in ask
+    assert "never spoken" in ask and "Never\n     repeat the answer's own words" in ask
+    assert "exactly 2 lines" in ask
+
+
+def test_a_tag_is_four_words_at_most_and_the_vote_keeps_its_cap(tag_host):
+    assert llm._within_cap("Fair point, honestly, yes.", "reaction")
+    assert not llm._within_cap("Fair point, honestly, yes, really.", "reaction")
+    assert not llm._within_cap("Everyone thinks they could do these.", "setup")
+    assert llm._within_cap(" ".join(["word"] * 18), "cta")
+
+
+@pytest.mark.parametrize("line, ok", [("Thatescalatedquickly.", False),
+                                      ("Characteristically bold.", True),
+                                      ("Bank statement? Checkmate.", True)])
+def test_words_run_together_drop(tag_host, line, ok):
+    assert llm._usable(line, "reaction") is ok
+
+
+# Setups from the trials (PRD §4): titles, a question-shaped one among them,
+# and reactions.
+@pytest.mark.parametrize("line, ok", [("Brutal truth", False), ("The mystery", False),
+                                      ("Future job apocalypse?", False),
+                                      ("Oh, THIS question.", True), ("Oof, tough one", True),
+                                      ("Lunch delivery?!", True), ('"Ugh, Mondays"', True)])
+def test_a_setup_ships_only_as_a_reaction(tag_host, line, ok):
+    assert llm._usable(line, "setup") is ok
+    assert llm._usable(line, "reaction")        # the reactions are not held to it
+
+
+# Reaction tags from the trials (PRD §4): the upload model's verdicts, and
+# reactions a check for stock verdicts must leave alone.
+@pytest.mark.parametrize("line, ok", [("Spot on", False), ("Direct hit", False),
+                                      ("Deep insight", False), ("Ah, makes sense", False),
+                                      ("Sad but true", False), ("Good point", False),
+                                      ("Math checks out", False), ("Finally said it", False),
+                                      ("Wait, what?", True), ("Oof, direct", True),
+                                      ("Good riddance", True), ("Too relatable", True),
+                                      ("Yikes, awkward", True), ("Bold move", True),
+                                      ("Charging to print?!", True), ("Yeah, right", True),
+                                      # Review, 10-24: forms the first list missed, and
+                                      # doubt or a word's other sense it wrongly dropped.
+                                      ("Spot-on", False), ("Nails it", False), ("Truuue", False),
+                                      ("Great advice", False), ("So true", False), ("Agreed!", False),
+                                      ("Is that true?!", True), ("True crime?!", True),
+                                      ("Who said it?", True), ("Exactly zero", True),
+                                      ("Polite but pointless", True), ("Not fair!", True),
+                                      ("Brutal truth", True), ("Validate this?!", True),
+                                      ("Preacher energy", True), ("Agreeable, sure", True),
+                                      ("Goood point", False), ("Spot\u2011on", False), ("Ain’t that the truth", False),
+                                      # 10-24: plain agreement, which on politics takes a
+                                      # side; a phrase's other sense still ships.
+                                      ("Well put", False), ("On point", False), ("You're right", False),
+                                      ("Amen", False), ("Hell yes", False), ("100%", False),
+                                      ("True that", False), ("Exactly this", False), ("Can confirm", False),
+                                      ("Mic drop", False), ("Absolutely!", False), ("Nailed", False),
+                                      ("Dead on", False), ("Right on", False), ("So right", False),
+                                      ("Bang on", False), ("Correct answer", False),
+                                      ("Absolutely not!", True), ("Dead on arrival", True),
+                                      ("Right on cue", True), ("So right-wing?!", True), ("Hard truth", True),
+                                      ("Too real", True), ("Oh yes, THIS", True), ("Hell no", True),
+                                      # Review: a tag opening on "100%" reacts; "nailed" can wince.
+                                      ("Facts, 100%", False), ("100 percent", False), ("Totally nailed", False),
+                                      ("Hell yeah", False), ("Based", False), ("Truth bomb", False),
+                                      ("100% chaos", True), ("100% relatable", True), ("Got nailed", True),
+                                      ("Ouch, nailed", True), ("Based on nothing", True), ("Based on what?", True),
+                                      # Release check, 10-24: naming the answer right agrees.
+                                      ("Plastic crack is right", False), ("That's right", False),
+                                      ("He’s right!", False), ("Damn right", False), ("Truth.", False),
+                                      ("Exactly right", False), ("Sounds about right", False),
+                                      ("Thats right", False), ("100% right", False),
+                                      ("That's not right!", True), ("Not quite right", True),
+                                      ("Isn't exactly right", True), ("Right in the wallet", True),
+                                      ("Serves you right", True), ("Alright, alright", True),
+                                      ("Truth hurts", True), ("Copyright drama", True)])
+def test_a_reaction_tag_that_grades_drops(tag_host, line, ok):
+    assert llm._usable(line, "reaction") is ok
+    assert llm._grades(line) is not ok      # the verdict check, not a cap, decides
+
+
+def test_only_tags_are_held_to_the_verdict_rule(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert llm._usable("That makes sense, sadly.", "reaction")
+
+
+def test_a_grading_tag_drops_alone(tag_host, monkeypatch, capsys):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS,
+                                                 "reactions": ["Spot on", TAGS["reactions"][1]]}))
+    assert meta.commentary == (TAGS["setup"], ["", TAGS["reactions"][1]], HOST["cta"])
+    assert "a tag that grades: reaction 1 (2 words)" in capsys.readouterr().out
+
+
+def test_a_title_setup_drops_alone(tag_host, monkeypatch, capsys):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS, "setup": "The mystery"}))
+    assert meta.commentary == ("", TAGS["reactions"], HOST["cta"])
+    assert "setup (2 words)" in capsys.readouterr().out
+
+
+def test_a_sentence_setup_is_not_held_to_the_tags_rule(monkeypatch):
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert llm._usable("Everyone thinks they could do these.", "setup")
+
+
+def test_tags_survive_the_metadata_call_and_a_sentence_drops_alone(tag_host, monkeypatch):
+    import json
+    from tests.test_commentary import _metadata
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS}))
+    assert meta.commentary == (TAGS["setup"], TAGS["reactions"], HOST["cta"])
+    meta, _ = _metadata(monkeypatch, json.dumps({**HOST, **TAGS,
+                                                 "reactions": [TAGS["reactions"][0], HOST["reactions"][1]]}))
+    assert meta.commentary == (TAGS["setup"], [TAGS["reactions"][0], ""], HOST["cta"])
+
+
+def test_a_tag_comes_in_on_the_last_words_and_holds_through_the_pause(tag_host):
+    start, span = video.tag_window(10.0, 3.0, 3.0)
+    assert abs(start - (13.0 - config.TAG_LEAD_IN)) < 1e-9
+    assert abs((start + span) - (13.0 + config.TAG_PAUSE)) < 1e-9
+    # A short answer holds on screen past its narration; its tag still comes
+    # in on the last words and stays until the next segment starts.
+    start, span = video.tag_window(10.0, 1.2, config.MIN_COMMENT_DISPLAY)
+    assert abs(start - (11.2 - config.TAG_LEAD_IN)) < 1e-9
+    assert abs((start + span) - (10.0 + config.MIN_COMMENT_DISPLAY + config.TAG_PAUSE)) < 1e-9
+
+
+def test_only_a_segment_with_a_tag_gets_the_longer_pause(tag_host, monkeypatch):
+    tagged = video.Segment("comment", "x", "", [], note="Oof.")
+    plain = video.Segment("comment", "x", "", [])
+    assert video.gap_after(tagged) == config.TAG_PAUSE > config.INTER_SEGMENT_GAP
+    assert video.gap_after(plain) == config.INTER_SEGMENT_GAP
+    monkeypatch.setattr(config, "HOST_TAGS", False)
+    assert video.gap_after(tagged) == config.INTER_SEGMENT_GAP
+
+
+def test_the_duration_guard_counts_the_pauses_the_video_will_have():
+    import inspect
+    assert "video.gap_after(s) for s in segs[:-1]" in inspect.getsource(run.main)

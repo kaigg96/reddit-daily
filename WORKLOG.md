@@ -61,67 +61,73 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-13 (18:19) — YouTube doubles its bar for new channels from February; the process audit finds your queue is still the limit
+## 2026-11-05 (01:05) — The plan for losing Reddit no longer stalls if you're away; the process audit is done
 
-    Worked (% of the shift): gm 40 · monetization 15 · product 10 · reliability 10 · market 5 · strategy 5 · engineering 5 · data 5 · security 5
+    Worked (% of the shift): gm 55 · strategy 15 · security 10 · reliability 10 · product 5 · data 5
 
-**Summary:** YouTube announced in August that from 1 February 2027 a new channel needs 20 million qualifying Shorts views in 90 days to earn ad revenue, double today's bar. Its smaller tier (500 subscribers, 3 million views, unlocking fan funding and Shopping) is unchanged and is now our nearest route. The process audit came due and found the owner's queue is still what holds bet 1 back.
-
-### Toward revenue
-- **Nothing shipped to viewers.** Bet 1 still waits on your label (#74), and its sample cannot run before 22:43 tonight.
-- **Bet 1's ask is now a glance:** until now, judging it meant downloading a zip from GitHub, unzipping it and playing a silent video, which is hard on a phone. #74 now shows four frames of the sample inline, in the email too: the host's three lines and the closing vote.
-- **The target moved:** the plan now records the February change and the smaller tier, about 250 times our current qualifying views, against roughly 800 times for today's full bar. No direction changes on this alone; it goes to the monthly review on 5 November.
-
-### Done
-- **Reliability:** every upload since Friday landed; the record of the last upload is intact; tonight's evening run had not started at 18:30, which is normal given GitHub's delays. Two libraries that decide which posts, comments and host lines ship were unpinned, so each run took whatever was published that morning. They are now pinned at today's versions, with a check that fails if any library is ever left unpinned (fixing; reviewed, live).
-- **Security:** standing check clean: no secrets in the project, no workflow changes, money controls in place ($0.37 this month, forecast $0.88 of $3). New this shift: the logs of every job that holds our keys are public, so I scanned the last 17 for leaked credentials, including the short-lived tokens GitHub does not hide. None found.
-- **Monetization and market:** read YouTube's own pages and its 10 August announcement (above). The template risk is also audible: all of the last 30 uploads use the same music track, so the music task on your list now answers a confirmed monetization risk.
-- **General management (the audit, 13 shifts since 9 October):** re-reviewed all eleven live decisions, each with a date. Findings: label-only asks used to close within a day and #74 has now waited over two; the rule that a shift cannot read the video job's logs is false (three shifts did it), and its fix waits on #50 because shifts cannot edit their own rules; independent reviews caught real defects in 11 of 13 shifts, while sample videos only prove a video plays; 7 of 13 shifts ended early. New from the tool's docs: a stop guard can no longer loop a shift, so "don't stop before the handover is saved" can become a rule enforced in code, proposed after #50. Bet 1's read and four uploads a day would overlap, so four a day now waits for bet 1's read if bet 1 is still being measured.
-- **Also checked:** the ban on shock phrases in titles is holding (none in 6 titles since it began, against 3 in 18 before); GitHub's start delay keeps rising (typical 4.4 hours in early September, 6.5 this week), which the uploads handle but the weekly report will misread at four a day.
-- **Dropped after ranking:** whether upload time matters (already answered: it doesn't); a fix for false "missed day" warnings at four a day (it needs each run's slot logged, after bet 1); building the stop guard or the rule fixes ahead of #50 (they would sit unused); the safety-screen gap, the setup line's display time and the image-library upgrade (each needs a sample or your label first). Handed over about 35 minutes early because nothing else cleared the bar. Fixing against improving: mostly fixing and measurement; improving: bet 1's ask made answerable.
-
-### Blocked
-- **For you, in order:** #74 (bet 1: watch tonight's sample, then label); #50 (four commands; it unblocks #65 and the rule fixes above); #75 (comments, one label); #59 (account checks). Adding two or three music tracks now also answers a monetization risk.
-
-### Next
-- After 22:43, request the sample of bet 1's branch. It also carries the Groq backup; my recommendation is to let it ride, because it only answers when Gemini fails (about 1 upload in 10) and without it those uploads would ship with no host at all. Bet 1's read can count those uploads separately with the existing report.
-- When tonight's sample lands, put its frames on #74 the same way (the image lives on its own branch; keep that branch while #74 is open).
-- If #74 is still open at 10:49 tomorrow, the rule about how long your asks wait has fired: the next shift should re-think how bet 1 reaches you rather than ask again.
-
-### Better?
-- **Than last shift:** Slightly. Nothing reached viewers, but the company's target is now the real one, bet 1's one remaining step can be taken from a phone, and a silent risk to every live run is gone.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds and bet 1 is still unshipped, though median views at 7 days rose from 64 to 91.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-13 (10:36) — Bet 1 could have shipped some videos with none of its host lines; fixed before it ships, and new evidence that text alone may not pass YouTube's review
-
-    Worked (% of the shift): product 35 · engineering 15 · gm 15 · market 15 · data 10 · reliability 5 · security 5
-
-**Summary:** A test render of what would ship showed bet 1 dropping all its host lines whenever the AI writes one too long, leaving a plain reading; I built a fix so only the long line is lost. On #74 I told you only your label now stands in bet 1's way, along with new evidence that on-screen text alone may not satisfy YouTube's monetization review.
+**Summary:** If Reddit's January cutoff comes with your choice of replacement (#90) still open, shifts now build the recommended one, our own questions, switched off, so one label from you turns it on. Nothing viewers see changed, and the company is no closer to revenue: everything that would be waits on you, and you have not acted since 27 October.
 
 ### Toward revenue
-- **Indirectly, on bet 1.** Without the fix, some of its uploads would ship with none of our words, weakening both its watch-time read and the channel's case at review. It happened on one sample in four, on the cheaper model samples use; the live model fitted both times checked, so the fix is cheap insurance. Your label on #74 is still the one remaining step.
-- **A finding for your next decision on bet 1:** I found no report of text-only commentary getting a channel like ours through YouTube's review. YouTube's own help page calls reactions "without added voice commentary" reused content. Bet 1 is still worth shipping (more of ours, measurable, reversible), but the step after it may need our words spoken, in a voice you accept.
+- **Nothing directly.** Watch time is flat at 12 seconds; bet 1 (#77) is still the step every revenue route needs.
+- **Protecting the company's survival:** the replacement-source plan said shifts build "the source you chose" on 14 December, but nothing said what to do if you hadn't chosen. Uploads would have stopped on 12 January. Now the default is your recommended option, built switched off; only your label turns it on, and nothing is spent.
 
 ### Done
-- **Reliability:** every upload since Friday landed and the last-upload record is intact. GitHub starts our scheduled jobs 6 to 9 hours late, in its own scheduler, so nothing we can fix. Security standing check clean: no secrets in the project, no workflow change, money controls in place ($0.37 this month, forecast $0.88 of $3).
-- **Product (bet 1):** brought Groq's backup branch up to date and had it rendered. It plays, but one host line ran over its length limit, so the rule dropped all four. I built a fix: an over-long note is left out alone, an over-long vote falls back to the usual closing line, and only with no note left is the video today's reading. A fresh review found no bugs and one real risk: the upload log would have marked a partial host the same as a whole one, so a later read could not tell them apart. It now records how many host lines each video showed. The review also caught a wasted narration charge when the closing line was already the usual one; fixed. A second review's two small points are fixed. Bet 1's verdict will now also say how many of its videos showed all, some or none of the host lines (never a trigger; reviewed, no changes). 543 tests pass, and a local render with one note dropped shows no empty box. The daily release check now tests this branch and warns on a dropped line. It needs its own sample (the next is possible after 22:43 tonight) before it merges.
-- **General management:** with both ready items waiting on you, I generated eight candidates from the flat watch time, the risk list, stalled decision rules and uncovered functions, ranked separately forward and reversed. Both orders put first: updating #74 (it said bet 1 would ship "after Monday's read", now done) and sampling the whole bet 1 stack. Both done.
-- **Data:** whether any background clip loses more plays in the opening can't be read yet (two to seven uploads per clip). Bet 1's committed read runs as written. Bet 2: 9,158 views in the last four weeks against a 16,600 bar, so it depends on four a day landing in November and holding about 150 views per upload; whether closer uploads dilute views can't be read ahead, since 80% of our gaps are 11 to 13 hours.
-- **Market intelligence (its first work):** the review evidence above, from YouTube's own pages, a YouTube spokesman (July 2025), one demonetized Reddit channel (May 2026) and two industry blogs.
-- **Product:** a fresh review of the whole bet 1 branch found nothing blocking; its quick fixes are in, and a short display time for the first note waits for your label.
-- **Data (engineering):** closed a code-health item: the report now refuses a filter pairing it used to ignore silently; the item's other half proved already handled (reviewed, merged).
-- Dropped: a known safety-screen gap (never seen in practice); the comment-reply format (waits on #75); measuring Groq's long lines (no AI keys here). Awkward again: the rules say a shift cannot read the video job's logs, yet I read the sample's directly; left for the next audit. Fixing against improving: mostly fixing (bet 1's long-line loss and its logging); improving: the market read.
+- **Strategy (sized):** the replacement source is about one shift of building and one sample, with or without bet 1. Your label and the extra music tracks #90 already asks for set the lead time, not the build, so 14 December stands. A fresh review caught two errors in my first sizing, both fixed before merging.
+- **General management (process audit, 13 shifts since 28 October):** the process works at the margin, and your absence is what binds it. 8 of 13 shifts began with nothing ready, and about four in five things done were fixes. The two text defects viewers saw on 4 November were found by reading what we published, which no check requires; proposed as a check for any text change. The findings section of the product plan has grown 24% to about 15,000 words with no limit, carried by two monthly reviews. Proposals are recorded, not sent, while you're away.
+- **Reliability (checked):** the loss of 4 November's morning shift can be prevented by a one-line setting, which our pinned Claude Code version supports. Your waiting ask (#93) does the same job, so I sent no new ask.
+- **Data (answered, no change):** no topic has enough uploads in today's format for the topic-ranking test to reopen.
+- **Product (checked, for bet 1's merge):** all 218 titles we have shipped come out the same through bet 1's waiting release as through today's code, so the release changes nothing about how titles are cleaned. This is the check that caught 4 November's defects.
+- **Security:** no workflow change since 20 October, no secret in the repository, library advisories unchanged since 26 October, money controls intact ($0.10 this month, forecast $0.74 of $3).
+- **General management (ranking):** a fresh agent proposed eight ideas, and two rankers reading in opposite orders both put the sizing first. Dropped: widening the shock-title guard (it would change titles while the capitals test runs), per-video traffic sources (YouTube refuses them), a comments-and-closing-lines read (too few comments), and a rule for when to give up on Shorts revenue (no other route to switch to yet).
+- AI use: none from the upload allowance; no Polly; no sample video. All helpers ran in the foreground.
 
 ### Blocked
-- **For you, in order of what each unblocks:** #74 (bet 1, one label, now with the evidence above); #50 (four commands); #75 (comments, one label, then close #53 unapplied); #65 (applies once #50 is in); #59 (account checks).
+- **For you, in order:** #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
 
 ### Next
-- After 22:43 tonight, request a sample of the fix branch, which carries all of bet 1, its follow-ups and Groq's backup. On a pass and your #74 label, merge it as `v8` in one step.
-- Once `v8` is live, check how often its uploads lose a host line (the new host-lines column).
-- A lead for after bet 1: YouTube also refuses content that "looks like it's made with a template", and every video has the same shape; varying it may matter as much as our words. A proposal once bet 1 has a read.
+- **Bet 1's release:** read today's 08:17 release check; it must pass before a merge on your label.
+- 6 November: #77's fallback, Stephen's voice alone. Still wait: its lead is in plays past the opening, not watch time, and it would push bet 1's read back about three weeks. The 9 November weekly: mark the two friction fixes from 2 and 3 November as fixed, or the 24 November read fails; also the zero-view re-read. 10 November: Reddit's terms. 16 November: the view-swing read. 23 November: the capitals read.
 
 ### Better?
-- **Than last shift:** Slightly. A flaw that could have diluted bet 1 was caught before shipping, and the review risk is in front of you. Nothing reached viewers.
-- **Than ~10 shifts ago:** Unclear. Watch time is flat at 12.0 seconds; bet 1 is unshipped.
-- **Than ~100 shifts ago:** Too early to say.
+- **Than last shift:** no for viewers. A gap that would have stopped uploads after 12 January is closed.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 has not shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
+## 2026-11-04 (19:30) — Two defects viewers could see were found in what we actually shipped, and both fixes are live
+
+    Worked (% of the shift): product 30 · reliability 25 · data 20 · audience 5 · gm 10 · legal 5 · security 5
+
+**Summary:** Reading what the channel actually published turned up two text defects, and both fixes are live. Titles that end on a quoted question no longer lose the closing quote. In the title-capitals test, the no-capitals group was also getting an all-lower-case closing line (11 of its 27 videos), which can skew that test's 23 November result; from tonight it gets proper capitals. Separately, this morning's shift lost its hour by waiting on work it had sent to the background. A guard against that needs your label.
+
+### Toward revenue
+- **Indirectly, by protecting a decision.** The capitals test decides how every future title is written. Its no-capitals group was also ending on a closing line with no capital letter in 11 of its 27 uploads, against none in the other group. Viewers saw it in our posted comment and the optional captions; the video itself shows captions in capitals, so it looked the same. That could make capitals look slightly better than they are, so the 23 November read must now give the same answer with those 11 left out. The tool to do that is built.
+- **Viewer-facing fix, live:** this morning's title shipped as "3 answers to 'House and Senate are Blue, how are we feeling?", missing its closing quote. That can't happen again. It was 1 of 217 uploads.
+
+### Done
+- **Product (fix, live):** the title fix above. Before merging I replayed every published title and Reddit question through the old and new versions, which caught two of my own mistakes that the tests had missed.
+- **Product (fix, live):** an all-lower-case closing line now ships with sentence capitals. Of the 151 closing lines I could recover, only those 11 change. The picture doesn't change, but the text sent to the voice does (only its capitals), so I waited for a sample video. I requested it once the hour around tonight's upload slot had passed; it passed, and I merged it with no format change, since the picture is the same.
+- **Data (built, live):** the reporting tool can now leave a list of uploads out of a read. Reviewed; its one finding is fixed.
+- **Reliability (fix, live):** the upload log now records each closing line as shipped. It used to exist only in run logs, which expire after 90 days; that's why this leak went four weeks unseen and took 151 logs to count. Reviewed; checked against a copy of the real log.
+- **Audience (fix, live):** if you switch on replies to viewers (#89) weeks from now, replies drafted more than two weeks earlier are now refused instead of answering stale comments. This closes the gap recorded on 3 November. Reviewed.
+- **General management (fix):** the new logging clashed with bet 1's waiting release, which would have blocked its merge on your label. I brought the release up to date; all its tests pass. Its automatic release check re-runs on the new version tomorrow at 08:17, before bet 1's 6 November target.
+- **Reliability (diagnosis):** the 10:54 shift didn't crash. It started its idea generator in the background and ended its turn to wait, and in a scheduled run that ends the job. I wrote a guard that refuses background work in scheduled shifts only, but the files it belongs in are protected from shifts, so it is with you as a ready patch (new ask, below). This shift kept all its helpers in the foreground.
+- **Legal (results night, last day):** this morning's narration is reactions to the results. None of it covers voting procedure or claims fraud. The check is closed.
+- **Security:** no workflow change since 20 October, no secret in the repository, money controls intact ($0.10 this month, forecast $0.74 of $3).
+- AI use: none of my own from the upload allowance; no Polly; one sample video (2–5 requests on the test model's allowance), passed. Five fresh reviews, all foreground.
+
+### Blocked
+- **New for you:** #93, label the background-work guard `approved` (one label; it spends nothing and weakens no control). Then, as before: #77 (bet 1, by about 6 November), #82, #89, #90, #91, #92, #88, #86, #65 (still waiting on your reply), #80, #59.
+
+### Next
+- **Bet 1's release:** before merging it on your label, read tomorrow's release check, which must pass on the version I pushed today.
+- Carried: 6 November (#77 fallback, which I'd still not ship), 9 November zero-view re-read, 10 November Reddit terms, 16 November view-swing read, 23 November capitals read (both ways, as above).
+
+### Better?
+- **Than last shift:** yes, a little. Two viewer-facing defects are fixed, and a skew in the next test read was caught before the read rather than after.
+- **Than ~10 shifts ago:** no for viewers: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+

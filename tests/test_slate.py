@@ -354,10 +354,12 @@ def test_the_log_records_the_slot_a_run_was_scheduled_for():
     assert key(_at(5, 19), "23 12 * * *") == "2026-10-05/2"
     assert key(_at(5, 19), "") == ""   # a manual run: the clock's guess is not logged
     assert '"run_slot": content.slot_key(day, slot, schedule)' in inspect.getsource(run.main)
-    # Columns only ever append, so the committed log's rows keep theirs.
+    # No committed column is dropped, and run_slot is appended. The order of
+    # the rest is free: _migrate_header rewrites rows by name, and v8 already
+    # places its host columns before the committed log's cta (11-06).
     with open(config.UPLOAD_LOG, newline="") as f:
         header = next(csv.reader(f))
-    assert log.FIELDS[:len(header)] == header and "run_slot" in log.FIELDS
+    assert set(header) <= set(log.FIELDS) and log.FIELDS[-1] == "run_slot"
 
 
 def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch):

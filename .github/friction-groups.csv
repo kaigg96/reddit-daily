@@ -1,0 +1,24 @@
+group,title,status,item,opened,resolved,note
+G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true. 11-02: `dry_run.py next` computes the slot (F112's share); the 12-hour cap and #65 remain
+G2,"Recorded answers are hard to find, so work gets redone",open,,2026-09-26,,seeded 2026-10-27 from the work log's notes; check it is still true
+G3,The views-never-revert rule hid side-by-side findings,open,,2026-09-28,,seeded 2026-10-27 from the work log's notes; check it is still true
+G4,The work log's word budget fights the retention it asks for,open,,2026-09-29,,seeded 2026-10-27 from the work log's notes; check it is still true
+G5,report.py could not produce a needed count,fixed,report.py,2026-09-29,2026-09-29,
+G6,Plans tied to a clock window; shifts start hours late,open,,2026-09-30,,seeded 2026-10-27 from the work log's notes; check it is still true
+G7,The approved-decisions list showed only titles,fixed,escalations.py,2026-10-01,2026-10-01,
+G8,Protected process files cannot be edited even on a branch,open,,2026-10-01,,seeded 2026-10-27 from the work log's notes; check it is still true
+G9,The shift plan is written after starting,open,,2026-10-01,,seeded 2026-10-27 from the work log's notes; check it is still true
+G10,The doc check reads past log entries as current claims,open,,2026-10-03,,seeded 2026-10-27 from the work log's notes; check it is still true
+G11,Tests not rerun after the last edit before a merge,open,,2026-10-04,,seeded 2026-10-27 from the work log's notes; check it is still true
+G12,escalate.py waits silently without a description,open,,2026-10-05,,seeded 2026-10-27 from the work log's notes; check it is still true
+G13,Pages wrongly marked as needing a browser,fixed,,2026-10-06,2026-10-06,The note was corrected
+G14,Shifts cannot read the channel's own YouTube data,open,,2026-10-07,,seeded 2026-10-27 from the work log's notes; check it is still true
+G15,Tracker caps force trims before work can land,open,,2026-10-27,,"Widened 11-02 from PLAN.md alone to every capped tracker (PRD §0, open items). Budget raised 1300 -> 1400 on 10-27; watch whether it refills"
+G16,"An escalation's facts drift after it is raised, or go out unchecked",open,,2026-11-02,,
+G17,Outside sites refuse the fetch tool; curl with a browser agent works,open,,2026-11-02,,
+G18,Reading a library's code misses its traps; only running it settles them,open,,2026-11-02,,
+G19,First drafts carry errors only a fresh review catches,wontfix,CLAUDE.md §3,2026-11-02,,The fresh-review gate is the fix and caught every one before it shipped. Reopen if a draft error ships past a review
+G20,"Account-side facts (who gets failure emails, the app's name) are invisible to a shift",open,,2026-11-02,,
+G21,"The shift allowance's controls are opaque to a shift (skips, opposing limits)",open,,2026-11-02,,
+G22,Merge mechanics show their breakage only after landing,open,,2026-11-02,,
+G23,"YouTube withholds caption tracks, so another channel's narration cannot be checked",wontfix,,2026-11-02,,An external limit with no workaround a shift can build

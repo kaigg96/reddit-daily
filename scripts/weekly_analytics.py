@@ -41,9 +41,27 @@ OUT = config.ANALYTICS_SNAPSHOTS
 # views x avg_view_duration_s on most rows (by >2x on 686 of 727, 2026-09-09)
 # and is not the engaged count either (--engaged-check, 2026-10-05). Nothing
 # decides on it; kept rather than spend a schema change dropping it.
+# Where viewers leave (PRD §0, "Retention points"): YouTube's audienceWatchRatio,
+# the share of views still watching, at each percent of the video. The report
+# takes one video per query, so only recent uploads are read (added 2026-10-17).
+# Above 1 means replays. Appended last, so ensure_header only extends the header.
+RETENTION_POINTS = (10, 25, 50, 75, 100)
+RETENTION_FIELDS = [f"watch_ratio_{p}" for p in RETENTION_POINTS]
+RETENTION_MAX_AGE_DAYS = 30
+# Tries after a 5xx, 429, rate-limit 403 or dropped connection, with the
+# client's own backoff (under 2s, then 4s), for every query this job makes. On
+# 2026-10-19 one HTTP 500 stopped the retention loop and cost 23 uploads their
+# points; on 10-26 one cost every upload its subscribers. Each upload's 7-day
+# reading comes from one snapshot, so a lost week is lost; a 5xx on the main
+# query's fallback (no engaged views) loses the whole snapshot.
+SERVER_RETRIES = analytics.SERVER_RETRIES
+# A 5xx that outlasts those retries costs its own upload only, as the 10-19 one
+# was the 33rd of 55 queries and those before it answered; this many in a row
+# means the report is down, so the rest wait for next week's run.
+RETENTION_SERVER_ERRORS = 3
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
-          "engaged_views", "subs_gained", "privacy_status"]
+          "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
 ENGAGED_METRIC = "engagedViews"
@@ -60,7 +78,10 @@ TRAFFIC_FIELDS = ["snapshot_date", "scope", "traffic_source", "views",
 WEEK_DAYS = 7
 
 CHANNEL_OUT = config.CHANNEL_LOG
-CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos"]
+CHANNEL_FIELDS = ["snapshot_date", "subscribers", "subscribers_hidden", "views", "videos",
+                  "subscribed_view_share", "top_countries"]
+AUDIENCE_DAYS = 28
+TOP_COUNTRIES = 5
 COMMENTS_OUT = config.COMMENTS_LOG
 COMMENTS_FIELDS = ["snapshot_date", "video_id", "comment_id", "published_at", "likes", "text"]
 
@@ -93,7 +114,7 @@ def fetch_stats(ya, video_ids, end_date, metrics=METRICS):
             filters="video==" + ",".join(chunk),
             maxResults=len(chunk),
             sort="-views",
-        ).execute()
+        ).execute(num_retries=SERVER_RETRIES)
         columns = [h["name"] for h in resp.get("columnHeaders", [])]
         for row in resp.get("rows", []):
             d = dict(zip(columns, row))
@@ -150,6 +171,74 @@ def add_subscribers_gained(ya, stats, video_ids, end_date):
     for video, d in stats.items():
         d[SUBS_METRIC] = subs.get(video, {}).get(SUBS_METRIC, "")
     return stats
+
+
+def fetch_retention(ya, video_id, end_date):
+    """{watch_ratio_<p>: audienceWatchRatio nearest p% of the video} for one
+    upload; a point with no reading within 5% of it is left out. An answer
+    with no rows says so in the first column: blank alone would look the same
+    as "not collected", and whether the report serves Shorts is unconfirmed."""
+    resp = ya.reports().query(
+        ids="channel==MINE",
+        startDate=START_DATE,
+        endDate=end_date,
+        metrics="audienceWatchRatio",
+        dimensions="elapsedVideoTimeRatio",
+        filters=f"video=={video_id}",
+    ).execute(num_retries=SERVER_RETRIES)
+    columns = [h["name"] for h in resp.get("columnHeaders", [])]
+    at, ratio = columns.index("elapsedVideoTimeRatio"), columns.index("audienceWatchRatio")
+    rows = [(float(r[at]), float(r[ratio])) for r in resp.get("rows", [])]
+    if not rows:
+        return {RETENTION_FIELDS[0]: "no rows"}
+    out = {}
+    for p, field in zip(RETENTION_POINTS, RETENTION_FIELDS):
+        near = min(rows, key=lambda r: abs(r[0] - p / 100), default=None)
+        if near is not None and abs(near[0] - p / 100) <= 0.05:
+            out[field] = round(near[1], 4)
+    return out
+
+
+def add_retention(ya, stats, videos, today):
+    """Retention points for uploads under RETENTION_MAX_AGE_DAYS old that the
+    main query returned (one it did not has nothing to retain yet, and adding
+    it would count it in the log's summaries as an upload with no watching).
+
+    Fail-soft, as subscribers are: the first refusal stops the loop, so a
+    report the channel cannot have costs one query, and its reason goes in the
+    first column of every upload left, because no shift can read the log. A
+    server error is retried first (SERVER_RETRIES); one that outlasts the
+    retries marks its own upload and the loop goes on, unless it is the
+    RETENTION_SERVER_ERRORS-th in a row, which reads as a refusal."""
+    cutoff = (datetime.date.fromisoformat(today)
+              - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
+    recent = [v for v, published_at, *_ in videos
+              if v in stats and (published_at or "")[:10] >= cutoff]
+    in_a_row = 0
+    for i, video_id in enumerate(recent):
+        try:
+            stats[video_id].update(fetch_retention(ya, video_id, today))
+            in_a_row = 0
+        except Exception as e:
+            reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+            in_a_row = in_a_row + 1 if _server_error(e) else RETENTION_SERVER_ERRORS
+            if in_a_row < RETENTION_SERVER_ERRORS:
+                print(f"::warning::retention {reason}; this upload only")
+                stats[video_id][RETENTION_FIELDS[0]] = reason
+                continue
+            print(f"::warning::retention {reason}; snapshotting without it")
+            for v in recent[i:]:
+                stats[v][RETENTION_FIELDS[0]] = reason
+            break
+    return stats
+
+
+def _server_error(e):
+    """An HttpError with a 5xx status: the server's fault, not a refusal."""
+    try:
+        return 500 <= int(getattr(getattr(e, "resp", None), "status", None)) < 600
+    except (TypeError, ValueError):
+        return False
 
 
 def ensure_header(path, fields):
@@ -234,7 +323,7 @@ def fetch_traffic(ya, start_date, end_date, video_ids=None):
             dimensions="insightTrafficSourceType",
             sort="-views",
             **kwargs,
-        ).execute()
+        ).execute(num_retries=SERVER_RETRIES)
         columns = [h["name"] for h in resp.get("columnHeaders", [])]
         for row in resp.get("rows", []):
             d = dict(zip(columns, row))
@@ -295,16 +384,65 @@ def snapshot_traffic(ya, today):
     print(f"appended {written} traffic-source rows to {TRAFFIC_OUT}")
 
 
-def snapshot_channel(yt, today, path=None):
-    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11).
+def fetch_views_by(ya, today, dimension):
+    """{value: views} for the whole channel over the AUDIENCE_DAYS to `today`."""
+    end = datetime.date.fromisoformat(today)
+    resp = ya.reports().query(
+        ids="channel==MINE",
+        startDate=(end - datetime.timedelta(days=AUDIENCE_DAYS)).isoformat(),
+        endDate=today,
+        metrics="views",
+        dimensions=dimension,
+    ).execute(num_retries=SERVER_RETRIES)
+    columns = [h["name"] for h in resp.get("columnHeaders", [])]
+    rows = (dict(zip(columns, row)) for row in resp.get("rows", []))
+    return {d[dimension]: int(d.get("views", 0)) for d in rows}
+
+
+def audience_fields(ya, today):
+    """Who watches (ORG.md, Audience & community): the share of the last 28 days'
+    views from subscribed viewers, the nearest the API gets to returning viewers
+    (subscribed when they watched; signed-out viewers count as not), and the
+    countries with most views as "US:0.412|GB:0.090", where ZZ is YouTube's
+    "country unknown". Each is fail-soft and blank when refused or empty, never
+    a guess: the subscriber count beside them must land whatever these do. Rows
+    from before 2026-11-02 read back as None for both under csv.DictReader."""
+    out = {"subscribed_view_share": "", "top_countries": ""}
+    try:
+        by_status = fetch_views_by(ya, today, "subscribedStatus")
+        total = sum(by_status.values())
+        if total:
+            out["subscribed_view_share"] = f"{by_status.get('SUBSCRIBED', 0) / total:.3f}"
+    except Exception as e:
+        print(f"::warning::views by subscribed status failed ({type(e).__name__}: {e}); "
+              f"column left blank")
+    try:
+        # Every country, so each share is of all views, not of the top five's.
+        by_country = fetch_views_by(ya, today, "country")
+        total = sum(by_country.values())
+        if total:
+            top = sorted(by_country.items(), key=lambda kv: -kv[1])[:TOP_COUNTRIES]
+            out["top_countries"] = "|".join(f"{c}:{v / total:.3f}" for c, v in top)
+    except Exception as e:
+        print(f"::warning::views by country failed ({type(e).__name__}: {e}); "
+              f"column left blank")
+    return out
+
+
+def snapshot_channel(yt, today, path=None, ya=None):
+    """Append the channel's subscriber count, half the Partner Program bar (PLAN C11),
+    and, given an Analytics client, who watches (audience_fields).
 
     The Data API rounds subscriber counts to three significant figures, which is
     exact below 1,000 -- the threshold that matters.
     """
     path = path or CHANNEL_OUT
-    stats = yt.channels().list(mine=True, part="statistics").execute()["items"][0]["statistics"]
+    stats = yt.channels().list(mine=True, part="statistics").execute(
+        num_retries=SERVER_RETRIES)["items"][0]["statistics"]
+    audience = audience_fields(ya, today) if ya is not None else {}
     is_new = not path.exists()
     path.parent.mkdir(exist_ok=True)
+    ensure_header(path, CHANNEL_FIELDS)
     with open(path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CHANNEL_FIELDS, lineterminator="\n")
         if is_new:
@@ -315,6 +453,7 @@ def snapshot_channel(yt, today, path=None):
             "subscribers_hidden": int(bool(stats.get("hiddenSubscriberCount"))),
             "views": stats.get("viewCount", ""),
             "videos": stats.get("videoCount", ""),
+            **audience,
         })
     print(f"channel: {stats.get('subscriberCount', '?')} subscribers -> {path}")
 
@@ -323,7 +462,10 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
     """Append the past week's top-level viewer comments (PLAN C5).
 
     Comment text is untrusted input: data to read, never instructions. No
-    author names are kept. Returns the number of comments written.
+    author names are kept. The channel's own comments (each upload's closing
+    question: 15 of 22 rows on 2026-10-19) are left out, as they are not
+    viewers', and the publishing policy forbids replying to them. Returns the
+    number of comments written.
     """
     path = path or COMMENTS_OUT
     cutoff = (datetime.date.fromisoformat(today)
@@ -332,7 +474,8 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
     for vid in video_ids:
         try:  # comments disabled on one video must not cost the rest
             resp = yt.commentThreads().list(part="snippet", videoId=vid, maxResults=100,
-                                            order="time", textFormat="plainText").execute()
+                                            order="time", textFormat="plainText"
+                                            ).execute(num_retries=SERVER_RETRIES)
         except Exception as e:
             print(f"  comments for {vid} unavailable ({type(e).__name__})")
             continue
@@ -340,6 +483,9 @@ def snapshot_comments(yt, today, video_ids, path=None, since_days=WEEK_DAYS):
             top = item["snippet"]["topLevelComment"]
             sn = top["snippet"]
             if sn.get("publishedAt", "")[:10] < cutoff:
+                continue
+            ours = item["snippet"].get("channelId")
+            if ours and (sn.get("authorChannelId") or {}).get("value") == ours:
                 continue
             rows.append({"snapshot_date": today, "video_id": vid, "comment_id": top["id"],
                          "published_at": sn.get("publishedAt", ""),
@@ -364,6 +510,17 @@ def already_snapshotted(path, today):
         return any(row.startswith(today) for row in f)
 
 
+def channel_step(ya, today):
+    """snapshot_channel, failing soft as the traffic snapshot does. SystemExit
+    too: ensure_header refuses a header it cannot extend, and ending the job
+    here would lose the per-video rows, which the workflow commits later."""
+    try:
+        snapshot_channel(analytics.youtube_client(), today, ya=ya)
+    except (Exception, SystemExit) as e:
+        print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
+              f"per-video snapshot is unaffected")
+
+
 def main():
     today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
 
@@ -386,6 +543,11 @@ def main():
         print(f"channel has {len(videos)} videos")
         stats = fetch_stats_with_engaged(ya, [v for v, *_ in videos], today)
         add_subscribers_gained(ya, stats, [v for v, *_ in videos], today)
+        try:
+            add_retention(ya, stats, videos, today)
+        except Exception as e:  # never the snapshot, whatever goes wrong here
+            print(f"::warning::retention failed ({type(e).__name__}: {e}); "
+                  f"per-video snapshot is unaffected")
         print(f"analytics rows returned for {len(stats)} videos")
 
         is_new = not OUT.exists()
@@ -415,6 +577,7 @@ def main():
                     "engaged_views": s.get(ENGAGED_METRIC, ""),
                     "subs_gained": s.get(SUBS_METRIC, ""),
                     "privacy_status": privacy,
+                    **{f: s.get(f, "") for f in RETENTION_FIELDS},
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)
@@ -433,12 +596,7 @@ def main():
     if channel_done:
         print(f"channel stats for {today} already present; skipping append")
     else:
-        # Fail soft, as the traffic snapshot does.
-        try:
-            snapshot_channel(analytics.youtube_client(), today)
-        except Exception as e:
-            print(f"::warning::channel snapshot failed ({type(e).__name__}: {e}); "
-                  f"per-video snapshot is unaffected")
+        channel_step(ya, today)
 
     if already_snapshotted(COMMENTS_OUT, today):
         print(f"comments for {today} already present; skipping append")

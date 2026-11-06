@@ -90,6 +90,32 @@ def test_a_pass_still_shows_calls_that_failed_soft(tmp_path, monkeypatch):
     assert "Uploaded fine" not in out
 
 
+def test_a_post_about_failure_is_not_a_soft_failure(tmp_path, monkeypatch):
+    """2026-10-17: a thread asking about a "failed attempt" listed its own post,
+    tags and greeting as failed calls. Our failures on those lines still show."""
+    (tmp_path / "check.txt").write_text("PASS -- playable")
+    (tmp_path / "run.log").write_text(
+        "Selected post: What failed attempt at domesticating?\n"
+        "  comment 1: Foxes, a failed experiment\n"
+        "Title style C, caps arm 1: 3 Failed Pets\n"
+        "Commentary reaction 1: A failed plan, falling back on cats.\n"
+        "CTA: Which failed hardest?\n"
+        "Screen: Gemini failed (http_503) — using keyword backstop\n"
+        "\n=== DRY RUN — nothing uploaded ===\n"
+        "title:       3 Failed Pets\n"
+        "tags:        ['failed domestications']\n"
+        "comment:     Which failed hardest?\n"
+        "description:\nToday's top AskReddit post, asked by u/x: What failed attempt?\n"
+        "Foxes, a failed experiment\n")
+    out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
+                 "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
+                 "--run-url", "u")
+    soft = out.split("Failed soft", 1)[1].split("What it picked", 1)[0]
+    assert "Screen: Gemini failed" in soft
+    for echo in ("domesticat", "Foxes", "Failed Pets", "cats", "Which failed", "attempt?"):
+        assert echo not in soft, echo
+
+
 def test_a_pass_shows_what_the_screen_picked_and_skipped(tmp_path, monkeypatch):
     """A screen replay on a new subreddit is read from here, not from Actions."""
     (tmp_path / "check.txt").write_text("PASS -- playable")
@@ -157,3 +183,95 @@ def test_branch_code_never_receives_the_polly_keys():
     render = next(s for s in steps if s.get("id") == "render")
     assert render["env"]["SILENT_NARRATION"] == "${{ steps.req.outputs.branch != 'main' && '1' || '' }}"
     assert "CHANNEL_NAME" not in render["env"]
+
+
+def _t(day, hour, minute=0):
+    import datetime
+    return datetime.datetime(2026, 11, day, hour, minute, tzinfo=datetime.timezone.utc)
+
+
+@pytest.mark.parametrize("last, now, uploaded, want", [
+    # F112: the last render at 23:11 frees the slot at 11:11 the next day
+    (_t(1, 23, 11), _t(2, 2, 0), False, _t(2, 11, 11)),
+    (_t(1, 23, 11), _t(2, 11, 30), True, _t(2, 11, 30)),
+    (None, _t(2, 15, 0), True, _t(2, 15, 0)),
+    # before 07:00 with the morning upload not yet logged: 07:00 at the latest
+    (None, _t(2, 5, 0), False, _t(2, 7, 0)),
+    (None, _t(2, 5, 0), True, _t(2, 5, 0)),
+    # the 12 hours end before 07:00 on a later day, whose upload is unknown
+    (_t(1, 18, 30), _t(1, 20, 0), True, _t(2, 7, 0)),
+])
+def test_next_slot_applies_both_refusals(last, now, uploaded, want):
+    assert dry_run.earliest(last, now, uploaded)[0] == want
+
+
+def test_next_slot_matches_the_workflow():
+    """The workflow is the authority; the restated limits must not drift."""
+    wf = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           ".github/workflows/dry-run.yml")).read()
+    assert f"-lt {int(dry_run.RENDER_GAP.total_seconds())} ]" in wf
+    assert f'"$(date -u +%H)" -lt {dry_run.RESET_HOUR} ]' in wf
+
+
+VERDICT_FILE = """# Dry runs
+
+## Last render
+
+- **Branch:** `strategy/se-sample`
+- **Commit:** `f597d0b`
+- **When:** 2026-10-25T21:54:13Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 37.5 s, audio, no dead air
+
+[Sample video and full output](https://github.com/o/r/actions/runs/40237322778)
+
+## Last request
+
+- **Branch:** `other/branch`
+- **When:** 2026-10-26T09:00:00Z
+"""
+
+
+def test_a_verdict_is_read_from_its_render_section_only():
+    """Each render overwrites the file, so an old sample's verdict lives only in
+    git history; a shift dug two out by hand on 11-03."""
+    assert dry_run.parse_render(VERDICT_FILE) == dict(
+        branch="strategy/se-sample", commit="f597d0b", when="2026-10-25T21:54:13Z",
+        verdict="✅ PASS -- playable: 1080x1920, 30 fps, 37.5 s, audio, no dead air",
+        url="https://github.com/o/r/actions/runs/40237322778")
+
+
+@pytest.mark.parametrize("text", ["", "# Dry runs\n\n## Last request\n\n- **Branch:** `x`\n",
+                                  "## Last render\n\n- **Verdict:** FAIL\n"])
+def test_a_file_without_a_named_render_gives_none(text):
+    assert dry_run.parse_render(text) is None
+
+
+def test_history_is_newest_first_deduplicated_and_filtered(monkeypatch):
+    older = VERDICT_FILE
+    newer = VERDICT_FILE.replace("strategy/se-sample", "strategy/own-questions-sample").replace(
+        "2026-10-25T21:54:13Z", "2026-10-26T09:57:27Z")
+    files = {"a": newer, "b": older, "c": older, "d": "no render here"}
+
+    class Done:
+        def __init__(self, out, code=0):
+            self.stdout, self.returncode, self.stderr = out, code, ""
+
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append((cmd, kw.get("cwd")))
+        if cmd[:2] == ["git", "fetch"]:
+            return Done("")
+        if cmd[:2] == ["git", "log"]:
+            return Done("a\nb\nc\nd\n")
+        return Done(files[cmd[2].split(":")[0]])
+
+    monkeypatch.setattr(dry_run.subprocess, "run", fake_run)
+    renders = dry_run.history()
+    assert [r["branch"] for r in renders] == ["strategy/own-questions-sample", "strategy/se-sample"]
+    assert [r["branch"] for r in dry_run.history("strategy/se-sample")] == ["strategy/se-sample"]
+    # Verdicts are committed to main, so a branch's own history would miss them;
+    # and the path is resolved from the repository root, wherever it is run.
+    log_calls = [(c, cwd) for c, cwd in calls if c[:2] == ["git", "log"]]
+    assert all("origin/main" in c for c, _ in log_calls)
+    assert all(cwd and os.path.isdir(os.path.join(cwd, "scripts")) for _, cwd in log_calls)

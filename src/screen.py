@@ -201,14 +201,15 @@ def _generate_screened(prompt, tries=2, model=None):
 # keyword backstop. The free tier is counted per model, so an overload or spent
 # cap on one rarely means the other. Its allowance is shared with the slate call
 # and every sample render; spent, the screen still lands on the backstop.
-# The 2026-10-09 06:21 upload went to the backstop on two 503s; titles have not
-# lost to one since the 30s wait (0 of 10), so only the screen falls back. The
+# The 2026-10-09 06:21 upload went to the backstop on two 503s; the metadata
+# call falls back the same way since one cost the 2026-10-18 16:02 upload its
+# title (llm._rescue_metadata). The
 # replay passed 5/5 on this model (2026-10-09). Gemini only, never in a dry run
 # (already on it) and never under Groq (whose point is keeping posts off
 # Gemini). `replay_screen.py` sets it to None: a fallback answer tests the
 # wrong model, so there it would only spend requests on an inconclusive case.
-FALLBACK_MODEL = llm.SAMPLE_MODEL
-FALLBACK_SOURCE = "gemini_fallback"
+FALLBACK_MODEL = llm.FALLBACK_MODEL
+FALLBACK_SOURCE = llm.FALLBACK_SOURCE
 GROQ_SOURCE = llm.GROQ_SOURCE
 
 
@@ -245,9 +246,13 @@ class _BadShape(Exception):
 
 
 def _parse(data, n_comments):
-    """(risk, topic, reason, unsafe) from the reply's JSON object."""
-    risk = data.get("post_risk", "none")
-    if not isinstance(risk, str):
+    """(risk, topic, reason, unsafe) from the reply's JSON object.
+
+    A reply with no `post_risk`, or a blank one, is a bad shape, not "none":
+    read as a pass it would screen a post that should skip, while skipping even
+    the backstop (left by two reviews from 2026-10-09; fixed 2026-10-20)."""
+    risk = data.get("post_risk")
+    if not isinstance(risk, str) or not risk.strip():
         raise _BadShape()
     risk = risk.strip().lower()
     topic = str(data.get("topic", "")).strip().lower()
@@ -356,7 +361,8 @@ def classify_slate(titles):
 
     Titles only, no comments, which is what makes one request enough. It runs
     on config.SLATE_MODEL, whose free allowance is separate from the model
-    titles and the screen use. Never retried. Returns a list the length of
+    titles and the screen use first (their one-try fallback shares it, since
+    2026-10-18). Never retried. Returns a list the length of
     `titles` ("" where the answer was not a known topic), None for an empty
     slate, and raises SlateFailed on any failure so the log records why: the
     first two live runs logged nothing and the reason only reached the console.

@@ -170,7 +170,9 @@ the shift that found it.
 
 Record the verdict against the rule in `PRD.md` §0 so the next shift cannot
 re-litigate it, and say plainly which outcome it was: kept, reverted, or not
-yet.
+yet. **Then its row in `analysis/experiments.csv`** — the read date, verdict,
+effect, n and the limit printed beside it; a new rule gets its row when it is
+set. That ledger is how the process itself is judged (D15's pattern, PLAN C18).
 
 ## 5. Checking the tracker is true
 

@@ -1,11 +1,14 @@
 """The release gate's skip decision — it guards 6 of the 20 daily Gemini
 requests, and those are shared with live uploads."""
+import argparse
 import datetime
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from scripts import validate_release
 from scripts.validate_release import parse_verdict, should_validate
 
 WRITTEN = "2026-09-20T13:02:51Z"
@@ -110,6 +113,49 @@ def test_an_undated_verdict_is_not_trusted():
     assert decide(verdict("c6ee5f7", PASS, when="whenever"), "c6ee5f7")[0] is True
 
 
+def _git(cwd, *args):
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+    return subprocess.run(["git", *args], cwd=cwd, env=env, check=True,
+                          capture_output=True, text=True).stdout.strip()
+
+
+def test_a_branch_only_the_remote_has_still_skips(tmp_path, monkeypatch):
+    """CI's checkout makes a local `main` only. Passed bare, the release branch
+    resolved to nothing, and the gates re-ran an unchanged commit daily."""
+    upstream = tmp_path / "upstream"
+    upstream.mkdir()
+    _git(upstream, "init", "-q", "-b", "main")
+    (upstream / "src").mkdir()
+    (upstream / "src" / "a.py").write_text("x = 1\n")
+    _git(upstream, "add", ".")
+    _git(upstream, "commit", "-qm", "main")
+    _git(upstream, "checkout", "-qb", "integration/preview")
+    (upstream / "src" / "a.py").write_text("x = 2\n")
+    _git(upstream, "commit", "-qam", "release")
+    validated = _git(upstream, "rev-parse", "--short", "HEAD")
+    # A doc-only commit after the validated one, so the skip has to come
+    # through the diff of the remote's copy rather than the sha check.
+    (upstream / "NOTES.md").write_text("notes\n")
+    _git(upstream, "add", ".")
+    _git(upstream, "commit", "-qm", "docs")
+    clone = tmp_path / "clone"
+    _git(tmp_path, "clone", "-q", "-b", "main", str(upstream), str(clone))
+    sha = validated
+    (clone / ".github").mkdir()
+    when = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    (clone / ".github" / "v.md").write_text(verdict(sha, PASS, when=when))
+
+    monkeypatch.setattr(validate_release, "ROOT", str(clone))
+    out = tmp_path / "out"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+    assert validate_release._resolve_ref("integration/preview") == "origin/integration/preview"
+    validate_release.should_run_cli(argparse.Namespace(
+        target="integration/preview", verdict_file=".github/v.md"))
+    assert "proceed=false" in out.read_text()
+    assert "nothing the gates exercise changed" in out.read_text()
+
+
 # --- The three states of gate 1 -------------------------------------------
 # `get_metadata` fails soft, so a spent quota and a degraded prompt both arrive
 # as three empty fields. Calling both FAIL blocks merging a healthy release and
@@ -123,6 +169,9 @@ def _metadata(monkeypatch, meta, commentary=False):
     # Explicit, so these hold on a release branch where commentary is on.
     monkeypatch.setattr("src.config.COMMENTARY", commentary)
     monkeypatch.setattr("src.llm.get_metadata", lambda *a, **k: meta)
+    # check_metadata switches the second model off; restored after the test.
+    from src import llm
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
     return vr.check_metadata()
 
 
@@ -144,9 +193,21 @@ def test_a_dropped_host_line_warns_but_passes(monkeypatch):
     fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
     host = Commentary("An angle.", ["", "Two."], "")
     assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
-    assert "- ⚠️ host reaction 1: dropped, past its cap (the rest still ship)" in lines
-    assert "- ⚠️ host vote: dropped, past its cap (the usual closing line ships)" in lines
+    assert ("- ⚠️ host reaction 1: dropped, past its cap, grading its answer or a swear word"
+            " (the rest still ship)") in lines
+    assert ("- ⚠️ host vote: dropped, past its cap or a swear word"
+            " (the usual closing line ships)") in lines
     assert "- ✅ host reaction 2: Two." in lines
+
+
+def test_a_dropped_setup_may_have_been_a_title(monkeypatch):
+    from src.llm import Commentary
+    lines = []
+    monkeypatch.setattr(vr, "note", lines.append)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    host = Commentary("", ["One.", "Two."], "My hand goes up.")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+    assert "- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)" in lines
 
 
 def test_with_commentary_off_host_lines_are_not_asked_for(monkeypatch):
@@ -166,6 +227,46 @@ def test_a_groq_rescue_is_inconclusive_not_a_verdict(monkeypatch):
         "groq_fallback", "http_429")) is None
     assert _metadata(monkeypatch, MetadataResult(
         "x" * 101, None, None, "groq_fallback", "http_503")) is None
+
+
+def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
+    """It is not the model this release ships on."""
+    assert _metadata(monkeypatch, MetadataResult(
+        "A Rewritten Title", ["a", "b", "c"], "Comment below!",
+        "gemini_fallback", "http_503")) is None
+    assert _metadata(monkeypatch, MetadataResult(
+        None, None, None, "gemini_fallback", "http_503;fallback_no_json")) is None
+
+
+def test_the_verdict_names_a_dropped_host_line_and_its_length(monkeypatch):
+    """The call's log says which line ran long; the verdict file is what a
+    shift reads, so it carries that line too (2026-10-20)."""
+    from src.llm import Commentary
+    meta = MetadataResult("A title", ["a", "b", "c"], "", "gemini",
+                          commentary=Commentary("Oof", ["Ha", "Wait", "Nope"], ""))
+
+    def get_metadata(*a, **k):
+        print("Commentary: past its length cap, or a placeholder or emoji: vote (23 words)")
+        print('Commentary setup, as written: "Wallet pain"')
+        return meta
+    monkeypatch.setattr("src.config.COMMENTARY", True)
+    monkeypatch.setattr("src.llm.get_metadata", get_metadata)
+    from src import llm
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    vr.check_metadata()
+    assert any("vote (23 words)" in line for line in vr.SUMMARY)
+    assert any('setup, as written: "Wallet pain"' in line for line in vr.SUMMARY)
+
+
+def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):
+    from src import llm
+    seen = []
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
+    monkeypatch.setattr(llm, "get_metadata", lambda *a, **k: seen.append(
+        llm.FALLBACK_MODEL) or MetadataResult(None, None, None, "error"))
+    vr.check_metadata()
+    assert seen == [None]
 
 
 def test_gemini_answering_with_junk_is_a_real_failure(monkeypatch):
