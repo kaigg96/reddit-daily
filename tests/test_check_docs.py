@@ -144,6 +144,24 @@ def test_a_stacked_branch_that_conflicts_only_with_main_is_caught(tmp_path):
     assert ok is False and "after (conflicts in s.txt)" in why
 
 
+@needs_merge_tree
+def test_a_stacked_branch_behind_the_release_tip_is_merged_over_the_release(tmp_path):
+    """The branch forked from an older release; the release then edited the
+    same line. Over main alone it merges, so only main plus the release shows it."""
+    git = _stacked(tmp_path)
+    git("checkout", "-q", "after")
+    (tmp_path / "f.txt").write_text("after\n")
+    git("commit", "-qam", "after edits f")
+    git("checkout", "-q", "next")
+    (tmp_path / "f.txt").write_text("next again\n")
+    git("commit", "-qam", "release edits f again")
+    git("checkout", "-q", "main")
+    (tmp_path / "g.txt").write_text("other\n")
+    git("add", "."); git("commit", "-q", "-m", "unrelated")
+    ok, why = c.check_after_release_merges(str(tmp_path), "main", "next", ("after",))
+    assert ok is False and "after (conflicts in f.txt)" in why
+
+
 def test_a_merged_and_deleted_stacked_branch_is_skipped(tmp_path):
     _stacked(tmp_path)
     assert c.check_after_release_merges(str(tmp_path), "main", "next", ("gone",))[0] is None

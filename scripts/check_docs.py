@@ -235,8 +235,10 @@ def check_after_release_merges(root=ROOT, base="origin/main",
         return None, f"could not try the merge (git exit {r.returncode})"
     tree = r.stdout.splitlines()[0].strip()
     # A throwaway commit of main plus the release, to merge each branch over.
-    # It is an unreferenced object, so git's garbage collection removes it.
-    c = run("commit-tree", tree, "-p", base, "-p", release, "-m", "check_docs probe")
+    # It is an unreferenced object, so git's garbage collection removes it. Its
+    # own identity, so a checkout with no user configured can still build it.
+    c = run("-c", "user.name=check_docs", "-c", "user.email=check_docs@invalid",
+            "commit-tree", tree, "-p", base, "-p", release, "-m", "check_docs probe")
     if c.returncode != 0:
         return None, "could not build main plus the release to merge over"
     probe = c.stdout.strip()
@@ -246,12 +248,13 @@ def check_after_release_merges(root=ROOT, base="origin/main",
         if ok is False:
             stale.append(f"{b} (conflicts in {out})")
         elif ok is None:
-            unknown.append(b)
+            unknown.append(f"{b} ({out})")
     if stale:
         return False, ("no longer merges over main plus the release: " + "; ".join(stale)
-                       + ". Bring it current before the owner's label")
+                       + ". Bring it current before the owner's label"
+                       + (f"; also untried: {'; '.join(unknown)}" if unknown else ""))
     if unknown:
-        return None, f"could not try {', '.join(unknown)}"
+        return None, "; ".join(unknown)
     return True, (f"{', '.join(present)} merge cleanly over {base} plus {release}"
                   " (as of the last fetch)")
 
