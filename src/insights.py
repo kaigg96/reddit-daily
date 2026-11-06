@@ -2527,6 +2527,30 @@ def _ledger_date(value):
         return None
 
 
+# A coin's outcome stays unread until its pre-committed date. On 11-05 an idea
+# generator cut views by title_caps with #14 still baking (n=18/12), and
+# nothing stopped it. Each field names the ledger row whose `due` and `read`
+# say whether it is still blind; --balance, which reads assignments only, is
+# never refused.
+BLIND_FIELDS = {"title_caps": "#14", "voice": "R7-voice-watch"}
+
+
+def blind_reads(fields, rows, today):
+    """[(field, ledger id, due)] for each of `fields` whose ledger row is
+    unread and due after `today`. A field with no row, or a row already read
+    or with no due date, is open."""
+    by_id = {r.get("id"): r for r in rows}
+    blind = []
+    for field in dict.fromkeys(fields):
+        row = by_id.get(BLIND_FIELDS.get(field))
+        if not row or (row.get("read") or "").strip():
+            continue
+        due = _ledger_date(row.get("due"))
+        if due and today < due:
+            blind.append((field, row["id"], due))
+    return blind
+
+
 def _percent(value):
     """The signed first percentage in a cell: '+20% (12.0 vs 10.0)' -> 20,
     '−39%' -> -39, '~18%' -> 18. None when there is none, or when the cell is
