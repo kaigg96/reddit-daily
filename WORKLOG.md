@@ -72,19 +72,19 @@ and more useful than a confident guess.
 - **Bet 2's fallback is now dated.** If bet 1 has not merged by 20 November, bet 2 is expected to miss at two uploads a day. That day a shift updates #80: four a day before bet 1 then becomes bet 2's only route, against the spam-policy risk #80 describes. The choice stays yours, and the 25 October rule for judging bet 2 stands as written.
 
 ### Done
-- **Security (found, no harm):** a search of the full history found two YouTube login tokens printed into a notebook's saved output in February–March 2025. Both expired within 7 days, because Google's testing mode capped them at a week; the login in use was made on 19 July 2026. Neither works without the matching client secret, which was never committed. No action needed from you.
+- **Security (found, no harm):** a search of the full history found two YouTube login tokens printed into a notebook's saved output in February–March 2025. Both expired within 7 days, because Google's testing mode capped them at a week; the login in use dates from 19 July 2026 or later. Neither works without the matching client secret, which was never committed. No action needed from you.
 - **Security (built, live):** the tests now fail if any committed file holds a credential: GitHub, AWS, Google, Groq or Anthropic keys, Google login tokens and secrets, or private keys. The tool that cleans each shift's public record now also removes Google login tokens and whole private keys. A fresh review found it removed only a private key's first line, plus two smaller faults; all were fixed before merging. It catches a leak after it is public, not before.
 - **Security (checked):** library advisories unchanged since 26 October (the image library's fix is still blocked by the video library). No workflow change since 20 October. Money controls intact ($0.15 this month, forecast $0.71 of $3).
 - **General management (built, live):** the start-of-shift tracker check now also trial-merges the two branches that must land right after bet 1. On 6 November one had silently stopped merging. Both merge cleanly today. A fresh review found a test gap and two small faults; all fixed before merging.
 - **General management (closed):** I withdrew #86. Its own correction had found it unnecessary, and its one lasting piece is in #89, so you have one ask fewer.
-- **Reliability (checked):** both 6 November uploads landed. The morning one went out without its separate caption track, which YouTube refused (the first since 22 September; 7 in September). The words are burned into the video, so viewers saw no difference; I built no retry.
+- **Reliability (checked):** both 6 November uploads landed, the evening one on GitHub's new build machines, so their switch, due by 19 November, is done and harmless. The morning one went out without its separate caption track, which YouTube refused (the first since 22 September; 7 in September). The words are burned into the video, so viewers saw no difference; I built no retry.
 - **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas; two rankers reading in opposite orders put the same two first: withdrawing #86, and bet 2's dated step. Dropped:
   - a caption retry (one refusal in 45 days, and refusals like it usually repeat)
   - asking for viewers' answers in our comment (it would disturb the capitals test and bet 1's vote)
   - starting the replacement source early (dated 14 December; your label and #90 set its lead time)
   - a search-traffic measure (search brings under 2% of views)
   - re-reading YouTube's policy pages (read 3 November)
-- A second round of ideas, aimed at the functions this shift did not touch, was still running at this writing.
+- A second round, aimed at money, audience, distribution, editorial, market, legal and finance, found nothing in those. On the security side it found that the plain music track, sealed on 10 October, can still be downloaded from the public history; no one ever took the history decision its sealing deferred. I added it, with the dead tokens, to the history question already set for the 7 December monthly, so it costs you no new ask. No viewer names, Reddit usernames beyond the public credits, or account numbers are kept in the repository.
 - All of this was fixes and checks. None changes what we ship, because everything that would waits on bet 1.
 - AI use: none from the upload allowance, no Polly, no sample video. No helper was left running at hand-over.
 

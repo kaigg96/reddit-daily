@@ -451,11 +451,9 @@ a list nobody can read is the same as no list.
   **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
   0 differ, so the render is deterministic and **the override is a video
   change** — its own release with a real sample, after `v7`'s read.
-  **The runner image moves (2026-10-19):** `ubuntu-latest` becomes 26.04
-  between 10-19 and 11-19 (GitHub changelog, 09-17). Checked: no workflow
-  installs a system package or calls a system tool; `setup-python` has 3.12
-  for 26.04; ffmpeg and fonts ship with the repo's packages and assets. If
-  an upload fails in that window, suspect the image first; the fix is
+  **The runner image moved:** the 11-06 23:17 upload run ran on
+  `ubuntu-26.04` and succeeded, so the move is done (it was due 10-19 to
+  11-19). If a later upload fails on the image, the fix is
   `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
@@ -507,8 +505,11 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
   replaced the 11-05 review, held it with five asks open): keep IDs and
-  statistics, drop the text columns at HEAD, leave history. **Closes when**
-  decided there.
+  statistics, drop the text columns at HEAD, leave history. **History also
+  holds** the plain Audio Library track (`73beb1c`, 2025-01-18; sealed at HEAD
+  10-10, whose script defers history to "a separate decision", never taken)
+  and two dead Google login tokens (a 2025 notebook's output; 11-06). Put
+  them in the same history question there. **Closes when** decided there.
 
 - **A failed upload run emails no one (found 2026-11-01, Reliability).**
   GitHub sends a scheduled workflow's failure email to the last editor of its
