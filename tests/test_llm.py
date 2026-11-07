@@ -911,3 +911,28 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
     assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429;groq_bad_json"
+
+
+class ServedBy(FakeResponse):
+    def __init__(self, version):
+        super().__init__()
+        self._version = version
+
+    def json(self):
+        return {**super().json(), "modelVersion": self._version}
+
+
+@pytest.mark.parametrize("version, shown", [
+    ("gemini-3.5-flash-lite", True),          # 12-01's reroute (PRD §4, 11-07)
+    ("gemini-2.5-flash", False),
+    ("gemini-2.5-flash-001", False),          # a dated build of the model asked for
+    (None, False),                            # a reply without the field
+])
+def test_a_reply_from_another_model_is_printed(monkeypatch, capsys, version, shown):
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: ServedBy(version))
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    llm._generate("hello", model="gemini-2.5-flash")
+    out = capsys.readouterr().out
+    assert ("Gemini served gemini-3.5-flash-lite for a gemini-2.5-flash request" in out) is shown
+    assert ("Gemini served" in out) is shown
