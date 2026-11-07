@@ -87,8 +87,8 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
-- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash instead. Then, on a later day's allowance, check its host lines over bet 1 against your bar, and decide the switch date.
-- **9 November weekly, and later dates:** as set in the last handover; the switch done by 30 November.
+- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash, which can turn thinking fully down. Then, on a later day's allowance, check its host lines over bet 1 against your bar, and decide the switch date.
+- **9 November weekly, later dates:** as last set; the switch done by 30 November.
 
 ### Better?
 - **Than last shift:** no for viewers. The forced switch is half-tested with a working setting; its test can't overspend.
