@@ -94,7 +94,7 @@ and more useful than a confident guess.
 
 ### Next
 - **On your #77 label:** the title check, the usual gates, merge, then the two follow-on branches; the start-of-shift check says whether they still merge.
-- **9 November weekly:** as set: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items.
+- **9 November weekly:** as set: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items. Also, for you through that review: the technical-debt list's cap counts 12 old history notes as open items, so it reads full at 13 real ones. You set that cap on 19 September; the review should propose counting only open items, rather than a shift changing it.
 - **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step above if bet 1 is unmerged. 23 November, the capitals and voice reads.
 
 ### Better?
