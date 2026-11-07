@@ -63,9 +63,9 @@ and more useful than a confident guess.
 
 ## 2026-11-07 (10:08) — The replacement for our title-writing AI is half-tested: it writes well but is slow as Google ships it, so tomorrow's test runs it at its lowest thinking setting
 
-    Worked (% of the shift): reliability 60 · product 10 · market 10 · gm 15 · security 5
+    Worked (% of the shift): reliability 60 · product 10 · market 10 · gm 10 · data 5 · security 5
 
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift tested Google's suggested replacement for the AI that writes our titles and runs our safety screen, which Google swaps out on 1 December, and set it up so tomorrow's shift can finish the test within its allowance.
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift tested Google's suggested replacement for the AI that writes our titles and runs our safety screen, which Google swaps out on 1 December; tomorrow's shift finishes the test.
 
 ### Toward revenue
 - **Nothing directly.** Watch time is flat at 12 seconds.
@@ -74,13 +74,14 @@ and more useful than a confident guess.
 
 ### Done
 - **Reliability (tested, half done):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", one on today's code and one on bet 1's; all tests pass on both. Not yet live.
-- **AI use, over the cap:** probably more than the 8 requests a shift may spend, up to 13. All went to the candidate model, whose daily allowance uploads do not use, so no upload was at risk. The test tool's retries on a slow model caused it, which the next item fixes.
-- **Reliability (built, live):** the safety-screen test now shows each case as it finishes, with its request count and time, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
+- **AI use, over the cap:** probably over a shift's 8 requests, up to 13, all on the candidate model, whose allowance uploads do not use. The test tool's retries caused it; the next item fixes that.
+- **Reliability (built, live):** the safety-screen test now shows each case's requests and time as it finishes, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
 - **Market intelligence (read):** Google's pages make 3.6 Flash the backup candidate, and the only migration change that touches us is the thinking setting, now handled.
 - **Reliability (checked):** all three uploads since the last shift landed; this morning's used the Reddit question as its title, because the shock-bait guard refused the AI's, as designed. The samples your asks link are kept permanently.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
-- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas. The three I took corrected claims I had written earlier today, which tomorrow's timing decision would rely on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks. The ledger had dropped "shock refusals aside", so it would have tripped at today's normal rate (3 of the last 30). Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it). Taken after the hand-over draft: the capitals test's cross-check size (below). No separate rankers: too little time left.
-- All of this was fixes and checks, apart from the model test, which is a forced change. None changes what we ship yet.
+- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas. The three I took corrected claims I had written earlier today, which tomorrow's timing decision would rely on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks. The ledger had dropped "shock refusals aside", so it would have tripped at today's normal rate (3 of the last 30). Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it).
+- **Data (rule set before the read):** the capitals test's check without its 11 flawed uploads will hold about 25 in one group, under the main read's 30. Set now, from counts only: it is read at that size against its own chance margin, and a narrow lead there extends the test once.
+- All fixes and checks, apart from the forced model test. None changes what we ship yet.
 
 ### Blocked
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
