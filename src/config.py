@@ -110,7 +110,8 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_FALLBACK = False
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v7"  # v7 = opens on the question, not the channel name + format label
+FORMAT_VERSION = "v7s"  # v7s = v7 on MODEL's successor (PRD §4, 11-07): titles, closing lines, the screen
+# v7 = opens on the question, not the channel name + format label
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
