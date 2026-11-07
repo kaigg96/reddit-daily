@@ -61,17 +61,18 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-07 (00:35) — Two old login tokens sat in the public history (both dead); the build now fails on any committed credential
+## 2026-11-07 (00:20) — Google silently swaps our title-writing AI on 1 December; choosing its successor first is now ready work
 
-    Worked (% of the shift): gm 40 · security 35 · strategy 10 · reliability 10 · data 5
+    Worked (% of the shift): gm 35 · security 30 · reliability 20 · strategy 10 · data 5
 
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label, and the 6 November date it asked for has passed. This shift found two old YouTube login tokens in the repository's public history, confirmed both are dead, and made the build fail if a credential is ever committed again.
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label, and the 6 November date it asked for has passed. This shift found that Google will quietly replace the AI model that writes our titles and runs our safety screen on 1 December, inside both bets' test windows, so the next shift picks and tests a successor first. It also found two dead login tokens in the public history and made the build fail on any committed credential.
 
 ### Toward revenue
 - **Nothing directly.** Watch time is flat at 12 seconds; every change that would move it waits on bet 1.
 - **Bet 2's fallback is now dated.** If bet 1 has not merged by 20 November, bet 2 is expected to miss at two uploads a day. That day a shift updates #80: four a day before bet 1 then becomes bet 2's only route, against the spam-policy risk #80 describes. The choice stays yours, and the 25 October rule for judging bet 2 stands as written.
 
 ### Done
+- **Reliability (found, ready for the next shift):** Google's model page says that from 1 December every request to the model that writes our titles, closing lines and host tags, and runs the safety screen, goes to a cheaper model instead. That is the one our sample videos use, which mostly labelled where ours reacted. Nothing would show it: the calls still succeed. It falls inside bet 2's judging window and inside bet 1's test, so a switch nobody chose would muddy both. Rule set tonight, before any test: we switch to a successor we choose before 1 December, as its own version, judged by the rule already set for the other model switch. Testing candidates needs AI requests, so it waits for the 07:00 reset. No cost.
 - **Security (found, no harm):** a search of the full history found two YouTube login tokens printed into a notebook's saved output in February–March 2025. Both expired within 7 days, because Google's testing mode capped them at a week; the login in use dates from 19 July 2026 or later. Neither works without the matching client secret, which was never committed. No action needed from you.
 - **Security (built, live):** the tests now fail if any committed file holds a credential: GitHub, AWS, Google, Groq or Anthropic keys, Google login tokens and secrets, or private keys. The tool that cleans each shift's public record now also removes Google login tokens and whole private keys. A fresh review found it removed only a private key's first line, plus two smaller faults; all were fixed before merging. It catches a leak after it is public, not before.
 - **Security (checked):** library advisories unchanged since 26 October (the image library's fix is still blocked by the video library). No workflow change since 20 October. Money controls intact ($0.15 this month, forecast $0.71 of $3).
@@ -93,12 +94,13 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
+- **Next shift, after 07:00:** pick the successor model and test it (the safety-screen replay and the release check), within the shift's AI allowance. Timing the switch against the capitals read (23 November) and bet 1 is the decision to make with the result.
 - **On your #77 label:** the title check, the usual gates, merge, then the two follow-on branches; the start-of-shift check says whether they still merge.
 - **9 November weekly:** as set: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items. Also, for you through that review: the technical-debt list's cap counts 12 old history notes as open items, so it reads full at 13 real ones. You set that cap on 19 September; the review should propose counting only open items, rather than a shift changing it.
 - **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step above if bet 1 is unmerged. 23 November, the capitals and voice reads.
 
 ### Better?
-- **Than last shift:** no for viewers. The public repository is safer: a committed credential now fails the build.
+- **Than last shift:** no for viewers. A silent model swap that would have muddied both bets is now known 24 days ahead, and a committed credential now fails the build.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
