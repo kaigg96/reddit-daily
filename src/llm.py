@@ -20,7 +20,8 @@ from . import content
 # question instead of a generated title. Disabling thinking put the same call
 # at 0.6s. Every task here (keyword extraction, title rephrasing, a one-line
 # CTA, the R4.6 screen's JSON verdict) is a short transformation, not a
-# reasoning problem.
+# reasoning problem. Its 3.x successor thinks by default too, and is set by
+# level rather than budget (`_LOWEST_THINKING`, and the note in `_generate`).
 #
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
@@ -46,7 +47,8 @@ FALLBACK_MODEL = SAMPLE_MODEL
 FALLBACK_SOURCE = "gemini_fallback"
 
 # Generous because it is now only a backstop against a pathological response,
-# not a routine limit — with thinking off, calls land in about a second.
+# not a routine limit — at the lowest thinking level, calls land in a few
+# seconds (3.6-flash: 2.3s for a title, 11-07).
 # requests' timeout is per-read, not a total deadline, so this does not bound
 # total call duration; it only stops a stalled socket hanging the run.
 _TIMEOUT = 60
