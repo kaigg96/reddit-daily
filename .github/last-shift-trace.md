@@ -1,104 +1,98 @@
-## Shift trace — run 42393300289
+## Shift trace — run 42422074281
 
-**Ended:** success, is_error false, 153 turns, 28.5 min, stop end_turn. **Tool calls:** 152, 0 failed. Helper agents made 64 more, 1 failed.
+**Ended:** success, is_error false, 108 turns, 20.3 min, stop end_turn; 2 permission denial(s): Bash, Monitor. **Tool calls:** 106, 4 failed. Helper agents made 71 more, 0 failed.
 
 **Last message:**
 
-> I handed over at 17:19 with nothing ready. Two rounds of looking for work turned up nothing else worth doing today. The handover is committed and pushed, `main` is clean, and no helpers are left running.
+> I handed over at 23:07, about 38 minutes early. Nothing was ready, and two rounds of generating ideas found nothing worth doing tonight. Nothing viewers see changed, and the company is no closer to revenue. Everything that would change that waits on your label on bet 1 (#77), on the capitals test that runs until 23 November, or on tomorrow's AI allowance.
 >
-> **What moved:** nothing viewers see changed, and the company is no closer to revenue. Bet 1 (#77) is still waiting on the owner's label. This shift's work went into replacing the model that writes our titles and runs the safety screen, which Google swaps out on 1 December.
->
-> - **I tested the backup candidate a day early.** The morning shift had pushed the rest of the test to tomorrow, but only the first candidate's allowance was used up. Gemini 3.6 Flash has its own, which uploads never touch.
->   - A title took 2.3 seconds; the first candidate took 34.
->   - The safety screen got all 5 test cases right. One busy-server refusal was absorbed by the existing retry.
->   - The title check over bet 1's release passed too.
->   - That used 8 AI requests, the shift's cap.
-> - **One problem:** on the one post tried, 3.6 Flash's host lines summarised the answers ("Glass costs more", "Per day cost"). Today's model mostly reacts to that same post ("Ouch, lenses"). One post shows a direction, not a rate, so tomorrow's test settles it.
-> - **Rules set before any results:**
->   - Tomorrow both candidates write host lines for the same three posts, and a fresh helper scores them blind. The one that reacts more wins; a tie goes to 3.6 Flash. If the winner reacts on fewer than 5 of 9, the owner hears about it in #77.
->   - The switch ships first, as its own version, on the first day its checks pass, whatever happens with #77. Bet 1 needed about four weeks on its own before the next change, so no order of the two releases measures it cleanly any more.
->   - Monday's weekly review decides how bet 1 is then compared, because that changes its pre-set comparison. It's not a shift's call.
-> - **The switch is ready to ship except for tomorrow's trial.** Its sample video played correctly on the branch's current 
+> **What I did:**
+> - **Checks:** both of today's uploads landed and nothing has failed. The money controls are intact ($0.18 spent this month, forecast $0.76 of $3). No secret is in the repository and no workflow has changed since 20 October. All 790 tests pass, and the model-switch branch still combines cleanly with today's code. GitHub deletes three sample videos your open asks link over the next two days, but permanent copies were made on 3 November.
+> - **One flaw found:** I read the published titles, closing lines and narrated answers of the last nine uploads. On 5 November a title went out as "Why doesn't batman just end the joker? your theories.", where Reddit had capitals. Our 14 October fix only catches titles with no capital at all, so it missed this one. It slightly favours one side of the capitals test, so I added it to the uploads that test is re-read without. I chose it from the text alone, before seeing any result. I didn't fix the code, because changing titles mid-test would itself change the test.
+> - **Ranking:** a fresh helper proposed seven ideas, and two rankers scored them in opposite orders. The two that ranked well both times fell apart when checked:
+>   - A rule for the topic-picking experiment had a false deadline. That experiment is switched off, so no results are building up. I corrected the plan's wording so the next shift doesn't propose it again.
+>   - A measure of how alike our videos are would only repeat what #80 already says: the same music track on all 20 recent uploads.
+> - **Second round:** eight more ideas, each checked against the code or data first. None cleared the bar. No background c
 
-### Tool calls (last 80 of 152)
+### Tool calls (last 80 of 106)
 
-73. Bash: awk 'NR>=53 && NR<100' WORKLOG.md | wc -w; awk 'NR>=100' WORKLOG.md | wc -w; wc -w /tmp/worklog_draft.md; grep -n "^def \|WORKLOG" scripts/…
-74. Bash: awk '/^## 0/,/^## 1/' PRD.md | grep "^| 13 \|^| \*\*\`MODEL\`" | cut -c1-2500
-75. Edit: /tmp/worklog_draft.md
-76. Edit: /tmp/worklog_draft.md
-77. Bash: git branch --show-current; git status --short | head; git worktree list; git log --oneline -1 origin/main; date -u +%H:%M
-78. Agent: Rank candidates forward order
-79. Agent: Rank candidates reversed order
-80. Bash: grep -n "def predecessor" -A40 src/insights.py | head -60
-81. Bash: grep -n "PREDECESSOR_MIN_UPLOADS =" src/insights.py; grep -n "predecessor(" src/*.py scripts/*.py | head; date -u +%H:%M
-82. Bash: git fetch -q origin && git merge-base --is-ancestor origin/integration/preview origin/reliability/model-successor-v8 && echo "v8 successor …
-83. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | tail -6
-84. Bash: grep -n "_excerpt" src/*.py | head -5; awk '/^## Open items/,0' TECH_DEBT.md | grep -n "_excerpt" | head -3
-85. ToolSearch: select:WebFetch
-86. WebFetch: https://ai.google.dev/gemini-api/docs/models
-87. WebFetch: https://aistudio.google.com/docs/models
-88. Bash: python3 - <<'EOF'
-89. Bash: venv/bin/python scripts/friction.py add --function market --task "Is gemini-3.6-flash a stable name or a repointable alias (models page)" -…
-90. Bash: grep -n "FORMAT_VERSION =" src/*.py; git show origin/integration/preview:src/config.py | grep -n "FORMAT_VERSION =" ; grep -n "FORMAT_VERSI…
-91. Bash: grep -n "def release_cohorts" -A25 src/insights.py | grep -n "version\|sorted\|order" | head -10
-92. Bash: sed -n 465,492p src/insights.py
-93. Bash: date -u +%H:%M:%S
-94. Bash: grep -n "model-successor\|MODEL's successor\|successor" PRD.md | grep -v "^124:" | cut -c1-300 | head; grep -n "successor" .github/*.csv an…
-95. Bash: grep -n "RELEASE_MIN_UPLOADS =" src/insights.py; tail -30 upload_log.csv | cut -d, -f3 | sort | uniq -c; grep -o "http_429_day" -r src/*.py…
-96. Bash: cat > /tmp/fix2.py <<'EOF'
-97. Bash: grep -n -i "thinking" scripts/validate_release.py | head; sed -n 15,20p scripts/tag_trial.py
-98. Bash: sed -n 262,268p scripts/validate_release.py && python3 - <<'EOF'
-99. Bash: cat > /tmp/fix3.py <<'EOF'
-100. Bash: python3 - <<'EOF'
-101. Bash: grep -n "11-09" PLAN.md | cut -c1-300 | head -5
-102. Bash: grep -rn "11-09 weekly\|9 November weekly\|for the 11-09" --include=*.md . | cut -c1-250 | head -8
-103. Bash: git commit -qam "PRD §4: the successor ships first, on its gates, whatever #77's state; bet 1's thin predecessor is the 11-09 weekly's; 3.6…
-104. Bash: grep -rn "format_version\|FORMAT_VERSION" src/insights.py scripts/report.py | grep -i "int(\|re\.\|sort\|\[1:\]\|lstrip" | head; grep -rn "…
-105. Bash: grep -rn "RELEASE_MIN_UPLOADS" src scripts | head -5; grep -rn '"v7"' src scripts tests | grep -v "^tests" | head -8
-106. Bash: sed -n 925,945p scripts/report.py
-107. Bash: git checkout -q reliability/model-successor && grep -rn "RELEASE_MIN_UPLOADS\|FORMAT_VERSION" tests/*.py | head -8; sed -n 108,116p src/con…
-108. Bash: sed -n 685,700p tests/test_llm.py; sed -n 1045,1052p tests/test_insights.py
-109. Bash: python3 - <<'EOF'
-110. Bash: grep -n "\`v7\` =\|v7 =\|^| v7\|\*\*v7\*\*" README.md PRD.md | head -5; grep -n "gemini-2.5-flash" PRD.md | awk -F: '$1>170' | cut -c1-200 …
-111. Bash: grep -n "^## 6" PRD.md; grep -n "thinking off\|thinking disabled\|thinkingBudget: 0\|thinking budget" PRD.md | cut -c1-220 | head -10
-112. Bash: awk 'NR>307' PRD.md | grep -n -i "2\.5-flash\|thinking" | cut -c1-260 | head -12
-113. Bash: awk 'NR>307' PRD.md | grep -n -i "2\.5 flash\|gemini flash\|flash" | cut -c1-200 | head -5; git commit -qam "config: FORMAT_VERSION v7s, v7…
-114. Bash: grep -o "; bump \`FORMAT_VERSION\`[^)]*)" PRD.md
-115. Bash: python3 - <<'EOF'
-116. Bash: sed -n 1,40p scripts/dry_run.py | head -45; grep -n "on:\|push:\|paths\|schedule\|cron\|concurrency" .github/workflows/dry-run.yml | head
-117. Bash: venv/bin/python scripts/dry_run.py next 2>&1 | tail -5; sed -n 40,80p .github/workflows/dry-run.yml | grep -n -i "hour\|slot\|upload\|sleep…
-118. Bash: git log --oneline -1 origin/reliability/model-successor && venv/bin/python scripts/dry_run.py request reliability/model-successor 2>&1 | ta…
-119. Bash: sed -n 96,100p WORKLOG.md; tail -3 WORKLOG.md; sed -n 136,140p WORKLOG.md
-120. Write: /tmp/worklog_draft.md
-121. Bash: python3 - <<'EOF'
-122. Bash: python3 - <<'EOF'
-123. Bash: python3 - <<'EOF'
-124. Bash: python3 - <<'EOF'
-125. Bash: git pull -q --rebase origin main && git log --oneline -3 && sed -n 8,12p .github/last-dry-run.md
-126. Bash: awk '/^## Open items/,0' TECH_DEBT.md | sed -n 60,80p
-127. Bash: python3 - <<'EOF'
-128. Bash: python3 - <<'EOF'
-129. Bash: sed -i 's/since its release then differs from the samples you saw\./since its release then differs from the samples the owner saw./' PRD.md…
-130. Bash: grep -rln "shuffl\|blind" scripts/ | head; git show origin/reliability/model-successor-v8:scripts/tag_trial.py | grep -n -i "blind\|shuffl\…
-131. Bash: git checkout -q reliability/model-successor-v8 && cat > scripts/tag_sheet.py <<'EOF'
-132. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add scripts/tag_sheet.py tests/test_tag_trial.py && git commit -qm "tag_sheet: sh…
-133. Bash: python3 - <<'EOF'
-134. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Successor's sample render (PASS eec1071) and the blind tag sheet too…
-135. Agent: Second-round candidate generation
-136. Bash: git fetch -q origin && for pair in "origin/main origin/reliability/model-successor" "origin/integration/preview origin/reliability/model-su…
-137. Bash: grep -n "^\*\*Google reroutes" PRD.md | cut -d: -f1 | xargs -I{} sed -n '{}p' PRD.md | grep -o "\*\*Second test.*" | fold -w 250 -s
-138. Bash: python3 - <<'EOF'
-139. Bash: python3 - <<'EOF'
-140. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -E "stale|✗|FAIL" | head -3; venv/bin/python scripts/backlog_status.py 2>&1 | head -3
-141. Bash: venv/bin/python scripts/context_budget.py --allocation 2>&1 | tail -6
-142. Bash: venv/bin/python -c "
-143. Bash: git show origin/reliability/model-successor-v8:scripts/tag_trial.py | sed -n 36,75p | grep -n '^ ("' ; git show --stat c8dac61 | head -12
-144. Bash: git log --all -S"Lunch delivery" --format="%h %ad %s" --date=short | tail -3; git grep -l "Lunch delivery" $(git rev-list --all -n 400) -- …
-145. Bash: git show 3887d50 --stat | head; git show 3887d50:tests/test_text_host.py 2>/dev/null | grep -n "Lunch delivery" -B8 -A8 | head -40
-146. Bash: f=$(git grep -l "Lunch delivery" origin/reliability/model-successor-v8 -- tests 2>/dev/null | head -1); echo "$f"; git grep -n "Lunch deliv…
-147. Bash: git show origin/reliability/model-successor-v8:tests/test_text_host.py | sed -n 395,420p; git show origin/reliability/model-successor-v8:te…
-148. Bash: git log -S'MODEL = "gemini' --format="%h %ad %s" --date=short -- src/llm.py src/*.py | tail -8
-149. Bash: git log -G'gemini-[0-9.]+-flash' --format="%h %ad %s" --date=short -- src/llm.py src/config.py src/generate.py 2>/dev/null | tail -6; git l…
-150. Bash: python3 - <<'EOF'
-151. Bash: python3 - <<'EOF'
-152. Bash: git commit -qam "Handover: back under its word budget" && git push -q origin main && git status --short | head -3; git log --oneline origin…
+27. Bash: grep -n -A12 'Audit 2026-11-05: the process works' TECH_DEBT.md | cut -c1-400
+28. Bash: sed -n 363,380p TECH_DEBT.md | cut -c1-400
+29. Bash: ls; ls logs 2>/dev/null | tail -5
+30. Bash: venv/bin/python scripts/report.py --help 2>&1 | grep -E '^\s+--' | cut -c1-120 | head -40
+31. Bash: timeout 90 venv/bin/python scripts/report.py --routes --offline 2>&1 | tail -25
+32. Bash: date -u +%H:%M:%S
+33. Bash: venv/bin/python scripts/escalations.py open 2>&1 | grep -E '^\s+#[0-9]+' | cut -c1-160
+34. Bash: gh issue view 77 --json body,comments --jq '.body, (.comments[] | .body)' | grep -noE 'https?://[^ )>"]*(sample-frames|actions/runs)[^ )>"]…
+35. Bash: gh run view 40176650537 --json headSha,headBranch,createdAt,displayTitle --jq '"\(.headSha[0:7]) \(.headBranch) \(.createdAt) \(.displayTit…
+36. Bash: date -u +%H:%M:%S; ls -la /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/tasks/ | tail -3
+37. ✗ Monitor: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents/agent-abbfada271… — 'prev' was tracked as literal '0' but condition may modify it (||/pipeline/unset/&&-short-circuit) — cannot prove downstream value
+38. Bash: venv/bin/python - <<'EOF'
+39. Bash: date -u +%H:%M:%S; stat -c '%s %y' /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6e…
+40. Grep: /home/runner/work/reddit-daily/reddit-daily/src
+41. Read: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+42. Bash: date -u +%H:%M:%S; venv/bin/python scripts/report.py --zeros --offline 2>&1 | tail -12
+43. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents/agent-abbfada271…
+44. Bash: git fetch -q origin && git branch -r | grep -iE 'successor|model' ; for b in reliability/model-successor; do echo "== $b"; git log -1 --for…
+45. Bash: date -u +%H:%M:%S; cat /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/tasks/bahvio67x.ou…
+46. Bash: timeout 300 venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -3; date -u +%H:%M:%S
+47. Bash: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/tasks/bahvio67x.output ]; do s…
+48. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents/agent-abbfada271…
+49. ✗ Bash: sed -n '/^## 2/,/^## 3/p' .claude/skills/backlog/SKILL.md | head -60 — This Bash command contains multiple operations. The following part requires approval: sed -n '/^## 2/,/^## 3/p' .claude/skills/backlog/SKIL…
+50. Grep: /home/runner/work/reddit-daily/reddit-daily/.claude/skills/backlog/SKILL.md
+51. Bash: f=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents/agent-abbfada271…
+52. Bash: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/tasks/bc8dp26an.output ]; do s…
+53. Agent: Rank candidates, forward order
+54. Agent: Rank candidates, reversed order
+55. Bash: git log --format='%h %ci %s' origin/integration/preview..origin/reliability/run-slot-log | head; git diff --stat origin/integration/preview…
+56. Bash: id=$(gh run list --workflow "Generate and Upload Reddit Video" --limit 3 --json databaseId,createdAt --jq '.[] | select(.createdAt|startswi…
+57. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; a=$d/agent-aba4…
+58. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; ls -la --time-s…
+59. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; ls -la --time-s…
+60. Bash: grep -nE '^def |^[A-Z_]+ = ' src/insights.py | head -80; wc -l src/insights.py scripts/report.py
+61. Grep: /home/runner/work/reddit-daily/reddit-daily
+62. Bash: for n in 170 182; do sed -n "${n}p" PRD.md | grep -oE '.{400}videos differ.{300}'; echo; done; gh issue view 80 --json body --jq .body | gr…
+63. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; b=$d/agent-a50b…
+64. Bash: venv/bin/python - <<'EOF'
+65. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; b=$d/agent-a50b…
+66. Bash: grep -n '^| 2 | parked' PRD.md | cut -d: -f1; grep '^| 2 | parked' PRD.md | fold -w 250; grep -n 'slate' analysis/experiments.csv | cut -c1…
+67. Bash: grep -n -iE 'fires on 5 of 20|firings alone|slate.{0,40}(fire|firing)|would have picked' PRD.md | cut -c1-120; venv/bin/python scripts/repo…
+68. Bash: grep -n -iE '2026-10-07.{0,200}(ranker|slate|fire)|R4\.4' PRD.md | cut -c1-200 | head -12; timeout 60 venv/bin/python scripts/report.py --s…
+69. Bash: sed -n 196p PRD.md | fold -w 300
+70. Bash: grep -n -iE 'def .*(slate|firing|fire)|FIRING|weak.tier|strong.tier' src/insights.py scripts/report.py src/*.py | cut -c1-180 | head -20
+71. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
+72. Bash: sed -n 80,100p src/config.py; date -u +%H:%M
+73. Bash: for id in $(gh run list --workflow "Generate and Upload Reddit Video" --limit 30 --json databaseId,createdAt --jq '.[] | select(.createdAt …
+74. Bash: venv/bin/python - <<'EOF'
+75. Bash: venv/bin/python - <<'EOF'
+76. Bash: grep -rn -i 'batman' --include=*.md --include=*.py . | grep -v venv | cut -c1-220 | head; sed -n 612,640p src/llm.py
+77. Bash: grep -n -iE 'jehovah|sentence_case|no-capitals arm|arm 0.s outro' PRD.md | cut -c1-200; grep -n '^#14,' analysis/experiments.csv | cut -c1-…
+78. Bash: sed -n 128p PRD.md | fold -w 300
+79. Bash: grep '^2026-11-05T07' upload_log.csv | cut -d, -f1-3; grep -n 'cta' src/llm.py | grep -n 'sentence_case' | head -3; date -u +%H:%M
+80. Bash: sed -n 128p PRD.md | tail -c 300
+81. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+82. Bash: venv/bin/python scripts/friction.py groups 2>&1 | head -20
+83. ✗ Bash: venv/bin/python scripts/friction.py add --function gm --task "Rank 7 generated candidates (two blind rankers); drop the topic-ranker rule" … — Exit code 1: friction.py add: refused
+84. Bash: venv/bin/python scripts/friction.py add --function gm --task "Rank 7 generated candidates (two blind rankers); drop the topic-ranker rule" …
+85. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+86. Bash: date -u +%H:%M; venv/bin/python scripts/check_docs.py 2>&1 | grep -vE '^\s+ok' | tail -5; venv/bin/python scripts/context_budget.py --check…
+87. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -vE '^\s+[0-9]+/[0-9]+\s+ok' | head -30
+88. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+89. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E 'PRD.md#0|All within|Over budget'
+90. Bash: git add PRD.md .github/friction.csv && git commit -q -m "PRD §4: one arm-0 title lower-cased its names past the 10-14 fix; 12th out of #14'…
+91. Agent: Second-round candidates, ship/earn
+92. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -iE 'worklog|entry' ; grep -n '^## 20' WORKLOG.md | head -12
+93. Bash: wc -l WORKLOG.md; tail -5 WORKLOG.md | cut -c1-150; sed -n 100,106p WORKLOG.md | cut -c1-200
+94. Bash: d=/home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/subagents; f=$d/agent-acc6…
+95. Bash: git log --since=2026-11-07T00:00 --format='%h %ci %s' | grep -iE 'health' | head -3; ls .github/escalations 2>/dev/null | tail -3; date -u …
+96. Bash: venv/bin/python scripts/context_budget.py --help 2>&1 | grep -A2 -- '--health'
+97. Bash: timeout 120 venv/bin/python scripts/context_budget.py --health 2>&1 | tail -25; git status --short
+98. Bash: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/ba68baa1-55d9-4ee8-a362-305e6ed60b7d/tasks/br2yl8i8a.output ]; do s…
+99. Bash: venv/bin/python scripts/friction.py add --function gm --task "Second generation round aimed at what we ship or earn (8 ideas, each premise …
+100. Bash: cat > /tmp/entry.md <<'EOF'
+101. Bash: timeout 200 venv/bin/python -m pytest tests/ -q 2>&1 | tail -2; venv/bin/python scripts/check_docs.py 2>&1 | grep -E 'No stale|STALE|FAIL' …
+102. Bash: venv/bin/python scripts/shift_report.py --help 2>&1 | head -8; timeout 60 venv/bin/python scripts/shift_report.py 2>&1 | head -12
+103. Bash: grep -n '^def build' -A12 scripts/shift_report.py | head -20
+104. Bash: timeout 60 venv/bin/python scripts/shift_report.py WORKLOG.md .github/shift-usage.csv "" 2>&1 | head -14
+105. Bash: git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover: nothing ready; two rounds found nothing above the bar; friction F216
+106. Bash: sed -i 's/^## 2026-11-07 (23:10) — Nothing was ready/## 2026-11-07 (23:07) — Nothing was ready/; s/So I handed over at 23:10 with nothing r…
