@@ -25,7 +25,7 @@ from . import content
 # for api version v1." That is the only reason this module is on v1beta.
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.8-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
 # with its own allowance, so a sample never spends MODEL's requests, which the
@@ -89,6 +89,13 @@ def _generate(prompt, thinking_budget=0, model=None):
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
         body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
+    # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
+    # metadata call took 34s of the 60s timeout, and five screen calls ran past
+    # 7 minutes. It refuses "minimal" with HTTP 400, so "low" is its nearest to
+    # off, and the screen's bounded budget gets it too. MODEL only: the
+    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
+    elif model == MODEL:
+        body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": "low"}}
     # The key goes in a header, not the URL: HTTP errors quote the URL, which
     # put the key in any log or file that recorded a failed request.
     resp = requests.post(
