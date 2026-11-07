@@ -86,6 +86,7 @@ and more useful than a confident guess.
   - changing bet 1's comparison now (Monday's review, as above)
   - keeping raw AI replies out of the public run log (it lands after bet 1, and is housekeeping)
   - logging why a title was refused (the log already says so)
+- A second round, aimed at anything that changes what we ship or earn, found nothing above the bar. Scoring today's model blind beside tomorrow's candidates fails because its lines for those three posts are not on record, and getting them would spend the uploads' own allowance. Checking whether a past model change moved watch time fails because the model has not changed since July. So I handed over at 17:22 with nothing ready.
 - All of this was fixes, tests and rules. None changes what we ship yet.
 
 ### Blocked
