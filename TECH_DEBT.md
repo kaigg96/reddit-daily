@@ -223,11 +223,20 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   screen), so `main` misses flags until `v8`. Left: `_excerpt` prints an
   unparseable reply raw to the public log, where `_clean_published` never
   echoes a refused field. **Merge rehearsed 10-26** (local, over `main`
-  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay (11-05):**
-  all 218 shipped titles come out identical through `main`'s and the
-  release's `_clean_published`, `_shock_bait` and `sentence_case` (2 refused
-  by both, for a swear word or emoji); closing lines have one logged row, and
-  host lines none, so neither is replayable yet. Its review's one gap: the
+  `5e96eb2`): no conflicts, 857 pass, no network. **Title replay:**
+  `scripts/replay_text.py main integration/preview`, re-run before the
+  merge (11-06: 220 of 220 titles identical through `_clean_published`,
+  `_shock_bait` and `sentence_case`; 13 refused by both, all shipped before
+  their guard); closing lines have three logged rows, and
+  host lines none, so neither is replayable yet. Brought current with `main`
+  the same night (`f046eba`): clean, 1,013 pass; the CTA is cased by
+  `main`'s 11-04 fix and the vote comment by `vote-comment-caps`, so #14's
+  no-capitals arm keeps capitals after the merge. **Two sentence-case rules (11-05).** The
+  vote comment's `content.sentence_case` (per sentence, any text) left "i"
+  and capped after "vs.", "u.s." and "...", bugs 003c9bb fixed in
+  `llm.sentence_case`: they disagreed on 19 of 420 lower-cased logged texts.
+  Fixed on the release (`5a44db0`, two reviews): now 5, all words starting
+  with a mark ("#shorts"), left alone by design. Left: two functions remain. Its review's one gap: the
   dose and own-words lines under `--release v8` (`render_host_lines`,
   `report.py` ~233) count every `v8` row, any age or subreddit, while the
   verdict reads AskReddit at 7 days, so "all lines on N of M" can name
@@ -262,15 +271,17 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   a sample after `v8`: **built 10-13 on `reliability/run-slot-log`**, stacked
   on `v8` (`run_slot`; the digest counts each upload for its scheduled day and
   times its delay from that slot; older rows keep the estimate; reviewed
-  twice, fixed). Merge it after `v8`, before the switch, on tests and review:
+  twice, fixed; brought current with `v8` 11-06, `dafaecf`, after three
+  unseen conflicts: main, then `v8`, then it merge cleanly, 1,027 pass).
+  Merge it after `v8`, before the switch, on tests and review:
   no sample reaches it (a dry run returns before the log), and `prev_post.txt`
   is written first, so a fault there cannot repeat an upload. **At the switch, keep
   `MAX_SCREENED_CANDIDATES` at 4:** PRD §2's cut to 2 was the free route for
   Gemini's worst case, which `v8`'s Groq fallback now answers, so the cut
-  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is not rising: weekly median 4.3–4.6h (W36–W38),
-  5.5h (W40), 5.9h (W41), then 4.6h over W42's 14 uploads (10-19; 6.5h was its
-  first 3), so the median run still lands before the next slot; the worst
-  (8.9h) does not. Runs are safe (`run_slot` takes
+  would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising again (upload times against their slot, 11-05): weekly
+  median 4.3–4.8h (W36–W39), 5.5–5.9h (W40–W41), 4.6–4.7h (W42–W43), 5.7h (W44),
+  then 6.7h with all 7 of W45's uploads over 6h (worst 9.5h), so at four a day the
+  median run now lands after the next slot is due. Runs are safe (`run_slot` takes
   the day from the cron line); the digest is what misreads. **If #4 goes
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
@@ -324,8 +335,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   Groq, no Gemini key, pass: setup, both reactions, screen 8/8). Left: the
   rescue fires on any Gemini exception, not only 429/5xx (harmless);
   `title_caps` is logged for Groq titles, so #10 and #14's reads must filter
-  on `meta_source` once any appear; 3 `test_llm` tests fail with `DRY_RUN=1`
-  in the shell (on `main` too; fixed on `reliability/run-slot-log`, after `v8`). **Switch on in `src/config.py`, never a
+  on `meta_source` once any appear. **Switch on in `src/config.py`, never a
   workflow or repo variable:** the release check re-runs only when code
   changes. Some log lines still say "Gemini" whichever route answered.
   **Since 10-18 the metadata call tries Gemini's second model before Groq**,
@@ -417,7 +427,7 @@ a list nobody can read is the same as no list.
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
   `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 66
-  rows on 10-26, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
+  rows on 10-26, unchanged 11-06, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
@@ -441,11 +451,9 @@ a list nobody can read is the same as no list.
   **185 of 735 video frames** differ by `framemd5`. Control (10.4.0 twice):
   0 differ, so the render is deterministic and **the override is a video
   change** — its own release with a real sample, after `v7`'s read.
-  **The runner image moves (2026-10-19):** `ubuntu-latest` becomes 26.04
-  between 10-19 and 11-19 (GitHub changelog, 09-17). Checked: no workflow
-  installs a system package or calls a system tool; `setup-python` has 3.12
-  for 26.04; ffmpeg and fonts ship with the repo's packages and assets. If
-  an upload fails in that window, suspect the image first; the fix is
+  **The runner image moved:** the 11-06 23:17 upload run ran on
+  `ubuntu-26.04` and succeeded, so the move is done (it was due 10-19 to
+  11-19). If a later upload fails on the image, the fix is
   `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
 - **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
@@ -497,8 +505,11 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
   replaced the 11-05 review, held it with five asks open): keep IDs and
-  statistics, drop the text columns at HEAD, leave history. **Closes when**
-  decided there.
+  statistics, drop the text columns at HEAD, leave history. **History also
+  holds** the plain Audio Library track (`73beb1c`, 2025-01-18; sealed at HEAD
+  10-10, whose script defers history to "a separate decision", never taken)
+  and two dead Google login tokens (a 2025 notebook's output; 11-06). Put
+  them in the same history question there. **Closes when** decided there.
 
 - **A failed upload run emails no one (found 2026-11-01, Reliability).**
   GitHub sends a scheduled workflow's failure email to the last editor of its
@@ -511,7 +522,7 @@ a list nobody can read is the same as no list.
   is owner-only, so no guard in code. **11-01 evening: premise very likely false.** GitHub's docs make the cron's
   changer the runs' `actor` and the email's recipient; every scheduled upload
   run since e3f5854 names the owner, as `APPLY_TOKEN` (needed to push
-  workflow files) is a personal token. #86 retitled "probably not needed". The lasting fix needs no
+  workflow files) is a personal token. #86 withdrawn 11-06 (its lasting piece is in #89). The lasting fix needs no
   GitHub rule: `scripts/upload_watch.py` (merged, reviewed) fails the shift
   job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
   scheduled run; its workflow patch is `upload-watch.patch` on

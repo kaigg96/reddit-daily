@@ -27,8 +27,8 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 **Bet 1 approved** (#70): make the format ours, viewers first (D14); no
 voice (#71, PRD #15). Bet 2
-approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled (W40: 1,762; `--metric engaged_views`)); price other routes
-and pilot the best (§1; Reddit's terms, §4). Bet 2 needs bet 1 merged by ~10-30–11-06 (PRD §4).
+approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
+and pilot the best (§1; Reddit's terms, §4). Bet 2 needs bet 1 by ~11-13–11-20 (PRD §4).
 
 ## 3. Work queue
 
@@ -37,7 +37,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C10 | blocked: the owner's label on #89; code merged 11-02, 3 replies queued | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy; rule: `C10-replies`. |
+| C10 | blocked: the owner's label on #89; its 3 queued replies expire 11-17: redraft | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy; rule: `C10-replies`. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it**: all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos; private ones go unmentioned. Exact copies: already private (PRD §4). Renaming is the owner's. Done when the owner has decided. |
 | C16 | blocked: 12-14, unless #82 has a date | Strategy | **A source after Reddit** | No registration date on #82 by 12-14: build #90's pick, else own questions (recommended, sized: PRD §4), merged off. Done when merged, or on #82's date. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response. Done when the owner reports a date. |

@@ -1,102 +1,102 @@
-## Shift trace — run 41889075101
+## Shift trace — run 42313755495
 
-**Ended:** success, is_error false, 211 turns, 50.3 min, stop end_turn; 2 permission denial(s): Write. **Tool calls:** 210, 2 failed. Helper agents made 67 more, 1 failed.
+**Ended:** success, is_error false, 199 turns, 39.0 min, stop end_turn. **Tool calls:** 196, 0 failed. Helper agents made 104 more, 0 failed.
 
 **Last message:**
 
-> I've pushed the handover to `main` at 19:28 (`ced9ef4`). Four fixes went live this shift, a fifth guard is waiting on the owner as #93, and all 760 tests pass on `main`.
+> I'm ending the shift at 00:23, about 20 minutes early. The one ready item, choosing the successor AI model, can't start until the 07:00 reset under the shift's AI-request rule. Two rounds of idea generation, plus the checks above, found nothing else worth doing tonight. Everything is committed and pushed, the working tree is clean, and no helper is still running.
 >
-> **Live on `main`:**
-> - **Title closing quote:** this morning's title shipped as "3 answers to 'House and Senate are Blue, how are we feeling?" with no closing quote. That was 1 of 217 uploads, and it can't recur. Before merging I replayed every published title and Reddit question through the old and new code. That caught two mistakes in my first versions that the tests had passed.
-> - **Capitals test skew:** in the title-capitals test, 11 of the 27 "no capitals" uploads ended on an all-lower-case closing line, against none of the other group's 20 and none of the 103 before the test.
->   - Viewers saw it in our posted comment and the optional captions. The on-screen captions are drawn in capitals, so the video looked the same. I first claimed it was visible on screen, then checked the caption rendering and corrected the records.
->   - It could still make capitals look slightly better, so the 23 November read must give the same answer with those 11 left out. I built the reporting option for that.
->   - The fix passed its sample video at 19:27 and is merged, with no format change since the picture doesn't change.
-> - **Closing line logged:** the upload log now records each closing line. Until now it only existed in run logs, which expire after 90 days, which is why this went unseen for four weeks.
-> - **Stale replies refused:** if the owner switches on replies to viewers (#89), drafts more than 14 days old are refused rather than posted late.
-> - **Bet 1's release branch:** the new log column clashed with it, which would have blocked its merge on the owner's label. I brought it up to date and its tests pass. Its release check now has to pass again on the new version at 08:17 tomorrow, before the 6 November target.
+> **Toward revenue:** nothing directly. Watch time is flat at 12 seconds, and bet 1 (#77) still waits on your label. The 6 November date that ask suggested has passed.
 >
-> **Needs the owner (#93):** the 10:54 shift lost its hour by putting its idea generator in the backgrou
+> **The main finding:**
+> - **The AI model that writes our titles is being swapped.** Google's model page says that from 1 December, every request to the model we use for titles, closing lines, host tags and the safety screen goes to gemini-3.5-flash-lite instead. That's the weaker model our sample videos use.
+> - **Nothing would have shown it.** The calls still succeed, so no failure gets logged, and it lands inside both bets' test windows.
+> - **What's in place now:** the upload log prints a line whenever Google answers from a different model than we asked for (merged after a fresh review). There's a ready item with its rule set before any test: switch to a successor we choose before 1 December, as its own version. It also has a ledger row due 30 November.
+> - **What the morning shift should know:** test candidates over bet 1's release too, since its metadata call is different. Google counts the free allowance per model, so testing a candidate doesn't use the uploads' allowance.
+> - **The other models are clean.** gemini-3.5-flash-lite and Groq's model have no shutdown notice, and the 7 December monthly re-reads all three pages. YouTube's API has no announced change that affects us.
+>
+> **Also done tonight (merged to main, all 787 tests pass):**
+> - **Old login tokens:** a search of the repository's full history found two YouTube login tokens in a 2025 notebook's saved output. Both are dead: Google's testing mode capped them at 7 days, and the matching clie
 
-### Tool calls (last 80 of 210)
+### Tool calls (last 80 of 196)
 
-131. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "OVER|WORKLOG|All within|TOTAL"; venv/bin/python scripts/check_docs.py 2>&…
-132. Bash: grep -n "^## 20" WORKLOG.md; wc -l WORKLOG.md
-133. Bash: sed -n 127,133p WORKLOG.md; tail -3 WORKLOG.md
-134. Bash: head -n 130 WORKLOG.md > /tmp/wl && mv /tmp/wl WORKLOG.md && tail -4 WORKLOG.md && venv/bin/python scripts/context_budget.py --check 2>&1 |…
-135. Bash: git add WORKLOG.md && git commit -q -m "Handover 2026-11-04 evening: title closing quote fixed; #14's lower-case closing lines found and fi…
-136. Bash: sed -n 1,80p src/log.py
-137. Bash: sed -n 206,245p src/run.py; grep -rn "upload_log" .github/workflows/*.yml scripts/*.sh 2>/dev/null | grep -v "git add\|#" | cut -c1-160 | h…
-138. Bash: grep -rn "log.FIELDS\|FIELDS\b" tests/*.py src/*.py scripts/*.py | grep -v "SCREEN_FIELDS\|FRICTION\|LEDGER\|_FIELDS =" | cut -c1-170 | hea…
-139. Bash: git checkout -q -b reliability/log-closing-line && grep -rn "append_upload_log\|_migrate_header" tests/*.py | head -5; grep -n "def append_…
-140. Bash: sed -n 1,30p tests/test_upload_log.py
-141. Edit: /home/runner/work/reddit-daily/reddit-daily/src/log.py
-142. Edit: /home/runner/work/reddit-daily/reddit-daily/src/run.py
-143. Bash: cat >> tests/test_upload_log.py <<'EOF'
-144. Bash: cp upload_log.csv /tmp/ul_copy.csv && venv/bin/python - <<'EOF'
-145. Bash: git commit -q -am "Log the closing line as shipped in the upload log (cta)
-146. Agent: Review closing-line log column diff
-147. Bash: git checkout -q main && git pull -q --ff-only && git merge -q --no-ff reliability/log-closing-line -m "Merge reliability/log-closing-line: …
-148. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-149. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-150. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Logged the closing line as shipped in the upload log" --outcome done…
-151. Bash: git checkout -q -b gm/shift-2026-11-04-evening-2 && git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover update: the closi…
-152. Bash: git merge-tree --write-tree main origin/product/cta-sentence-case >/dev/null && echo "cta branch merges cleanly"; gh issue list --state ope…
-153. Bash: gh issue view 93 --json body -q .body | grep -c "apply-patch"; sed -i 's/- \*\*New for you:\*\* label the background-work guard `approved`/…
-154. Bash: grep -n "def upload_text" -A40 src/run.py | head -50
-155. Bash: grep -n "class .*(str)\|author" src/content.py | head -12; grep -rn "u/\|asked by" tests/test_run*.py tests/*upload_text* 2>/dev/null | hea…
-156. Bash: venv/bin/python -c "
-157. Bash: wc -l scripts/post_replies.py && grep -n "def \|deleted\|queued\|created\|published\|age\|days" scripts/post_replies.py | head -40; head -2…
-158. Bash: cat scripts/post_replies.py; grep -rn "def post_queued\|def post_replies\|queued" src/replies.py 2>/dev/null | head -20; ls src/ | grep -i …
-159. Bash: sed -n 95,125p src/replies.py; sed -n 140,220p src/replies.py; grep -n "^[A-Z_]* = " src/replies.py
-160. Bash: git checkout -q main && git checkout -q -b audience/reply-age-limit && git stash list | head -2; git status --short; grep -n "def test.*due…
-161. Bash: sed -n 40,75p tests/test_replies.py; grep -n "^TODAY\|^NOW" tests/test_replies.py
-162. Bash: sed -n 1,32p src/replies.py | grep -n "^import\|^from"; grep -n "def post_due" src/replies.py
-163. Edit: /home/runner/work/reddit-daily/reddit-daily/src/replies.py
-164. Edit: /home/runner/work/reddit-daily/reddit-daily/src/replies.py
-165. Edit: /home/runner/work/reddit-daily/reddit-daily/src/replies.py
-166. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_replies.py
-167. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python -c "
-168. Bash: git add src/replies.py tests/test_replies.py && git commit -q -m "Replies: a reply queued over 14 days ago is refused, never posted late
-169. Agent: Review reply age-limit diff
-170. Bash: git stash -q && git checkout -q main && git pull -q --ff-only && git merge -q --no-ff audience/reply-age-limit -m "Merge audience/reply-age…
-171. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-172. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-173. Bash: sed -i 's/AI use: no Gemini requests, no Polly, no sample video. Four fresh reviews, all foreground./AI use: no Gemini requests, no Polly, …
-174. Bash: venv/bin/python scripts/check_docs.py 2>&1 | head -12
-175. Bash: git fetch -q origin integration/preview && git log -1 --format='%h %ad %s' --date=iso origin/integration/preview && git checkout -q -b inte…
-176. Bash: git add WORKLOG.md PRD.md .github/friction.csv && git commit -q -m "Handover update: reply age limit closed (PRD §4 gap), #93 cited; fricti…
-177. Bash: git diff src/log.py src/run.py | head -80
-178. Bash: grep -n "outro_text" src/run.py | head; venv/bin/python - <<'EOF'
-179. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -2; grep -n "cron" .github/workflows/validate-release.yml
-180. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | grep -E "FAILED|Error|assert" | head -8
-181. Bash: sed -n 255,268p tests/test_text_host.py
-182. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_text_host.py
-183. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A src/log.py src/run.py tests/test_text_host.py && git status --short | grep…
-184. Bash: git checkout -q main && git pull -q --ff-only && git fetch -q origin && venv/bin/python scripts/check_docs.py 2>&1 | grep -E "STALE|stale c…
-185. Bash: sed -n 15p PRD.md | cut -c1-900
-186. Bash: git checkout -q -b gm/shift-2026-11-04-evening-4 && venv/bin/python - <<'EOF'
-187. Bash: git log --since="2026-11-04T18:30" --all --format=%B | grep -i -c -E "co-authored|generated with|claude" ; git merge-tree --write-tree orig…
-188. Bash: git log --since="2026-11-04T18:30" --all --format='%h %s%n%b' | grep -i -B3 -E "co-authored|generated with|claude" | head -10
-189. Bash: git grep -n "sentence_case" origin/integration/preview -- src/ | cut -c1-200 | head -12
-190. Bash: git show origin/integration/preview:src/content.py | sed -n 80,100p; git show origin/integration/preview:src/run.py | sed -n 300,310p; git …
-191. Bash: grep -n "upper()" src/video.py | head; grep -n "def caption_clips" -A12 src/video.py | grep -n "upper\|text" | head
-192. Bash: git checkout -q -b gm/shift-2026-11-04-evening-5 && venv/bin/python - <<'EOF'
-193. Bash: git add PRD.md WORKLOG.md && git commit -q -m "Correct the closing-line finding: on-screen captions are in capitals
-194. Bash: sed -n 375,379p src/llm.py
-195. Edit: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
-196. Bash: venv/bin/python -m pytest tests/test_llm.py -q 2>&1 | tail -1 && git commit -q -am "CTA comment: the lower-case line showed in our comment …
-197. Bash: venv/bin/python scripts/dry_run.py --help 2>&1 | head -20; git status --short | head -3; git log origin/main -1 --format=%h
-198. Bash: venv/bin/python scripts/dry_run.py next 2>&1 | head -8; date -u +%H:%M
-199. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "OVER|All within"; ven…
-200. Bash: git checkout -q -b gm/shift-2026-11-04-evening-6 && venv/bin/python scripts/friction.py add --function product --task "Corrected the closin…
-201. Bash: venv/bin/python - <<'EOF'
-202. Bash: until [ "$(date -u +%H%M)" -ge 1924 ]; do sleep 10; done; date -u +%H:%M:%S
-203. Bash: gh run list --workflow run-reddit-video.yml --limit 1 2>&1 | head -1; git ls-remote origin product/cta-sentence-case | cut -c1-7; venv/bin/…
-204. Bash: git add .dry-run-requests/ .github/friction.csv WORKLOG.md && git commit -q -m "Request a dry run of product/cta-sentence-case (7225d18); h…
-205. Bash: until git fetch -q origin main 2>/dev/null && git show origin/main:.github/last-dry-run.md 2>/dev/null | grep -q "7225d18" || [ "$(date -u …
-206. Bash: git pull -q --ff-only && git merge -q --no-ff origin/product/cta-sentence-case -m "Merge product/cta-sentence-case: an all-lower-case closi…
-207. Bash: git checkout -q -b gm/shift-2026-11-04-evening-7 && venv/bin/python - <<'EOF'
-208. Bash: grep -n "03:17 shift" WORKLOG.md | cut -c1-260
-209. Bash: venv/bin/python - <<'EOF'
-210. Bash: git add WORKLOG.md PRD.md && git commit -q -m "Handover: the closing-line fix passed its dry run and is live; PRD §4 notes the fix and the …
+117. Bash: grep -n "66 rows" TECH_DEBT.md | cut -c1-120
+118. Bash: grep -n "fixes now at 13.0.0" TECH_DEBT.md; sed -n 430,433p TECH_DEBT.md
+119. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+120. Bash: cat > /tmp/entry.md <<'EOF'
+121. Bash: python3 - <<'EOF'
+122. Bash: python3 - <<'EOF'
+123. Bash: ls .escalations/ 2>/dev/null | head; grep -rl "upload-failure-emails" .escalations/ 2>/dev/null | head
+124. Bash: sed -i 's/ - a search-traffic measure (search is about 1% of views)/ - a search-traffic measure (search brings under 2% of views)/' WORKLOG…
+125. Bash: git status --short; venv/bin/python scripts/check_docs.py | tail -4
+126. Bash: sed -i 's/^SECOND_ROUND$/- A second round of ideas, aimed at the functions this shift did not touch, was still running at this writing./' W…
+127. Bash: sed -i 's/the login in use was made on 19 July 2026\./the login in use dates from 19 July 2026 or later./' WORKLOG.md && grep -c "19 July 2…
+128. Bash: venv/bin/python scripts/backlog_status.py 2>&1 | head -4; date -u +%H:%M
+129. Bash: tail -4 .github/friction.csv | cut -c1-140
+130. Bash: date -u +%H:%M:%S
+131. Bash: id=$(gh run list --workflow run-reddit-video.yml --limit 6 --json databaseId,conclusion,createdAt --jq '.[] | select(.conclusion=="success"…
+132. Bash: git log --all --format='%h %ad %s' --date=short -- assets/funk_bg_lower.mp3 assets/music/funk_bg_lower.mp3 | tail -3; sed -n 1,20p scripts/…
+133. Bash: sed -n 498,512p TECH_DEBT.md; grep -n "runner image moves" -A 7 TECH_DEBT.md | cut -c1-200
+134. Bash: python3 - <<'EOF'
+135. Bash: python3 - <<'EOF'
+136. Bash: gh issue view 80 --json body,comments --jq '.body[0:2200], "COMMENTS:", (.comments|length), (.comments[-1].body[0:900] // "")'
+137. Bash: grep -n "^def \|SAMPLES GITHUB DELETES\|def _expiring\|owner last acted" scripts/escalations.py | head -40; wc -l scripts/escalations.py; l…
+138. Bash: sed -n 225,340p scripts/escalations.py; grep -n "_expiring\|def test" tests/test_escalations.py | tail -12
+139. Bash: gh issue list --state open --label needs-owner --limit 30 --json number,body > /tmp/open.json && python3 - <<'EOF'
+140. Bash: git fetch -q origin && rm -rf /tmp/rehearse && git worktree add -q --detach /tmp/rehearse origin/main && cd /tmp/rehearse && git -c user.na…
+141. Bash: git worktree remove --force /tmp/rehearse && git worktree prune && sed -n 1,12p .github/last-shift-trace.md | cut -c1-200; grep -n "def \|m…
+142. Bash: sed -n 84,100p scripts/shift_trace.py; sed -n 169,190p scripts/shift_trace.py
+143. Bash: python3 - <<'EOF'
+144. Bash: sed -n 205,262p scripts/context_budget.py
+145. Bash: git log --format='%h %ad %s' --date=short -S'"TECH_DEBT.md": (r"^- \*\*", 25' -- scripts/context_budget.py | tail -3; git log --format='%h …
+146. Bash: git show 029201d --stat | head -12; git show 029201d -- scripts/context_budget.py | grep -n -i -B2 -A2 "TECH_DEBT" | head -20; git show 029…
+147. Bash: venv/bin/python scripts/friction.py add --function gm --task "Recorded a lost caption track and a history finding without new tech-debt ite…
+148. Bash: grep -n -i "shut down\|shutdown\|deprecat\|retire" PRD.md TECH_DEBT.md | grep -i -E "gemini|model|flash" | cut -c1-300 | head -6; grep -n "…
+149. ToolSearch: select:WebSearch
+150. WebSearch: gemini-2.5-flash shutdown date deprecation Gemini API
+151. Bash: grep -n -i "further notice\|16 October\|10-16 shutdown\|2.5-flash.*(shut\|served until\|actively used" PRD.md TECH_DEBT.md DECISIONS.md | c…
+152. Bash: head -1 upload_log.csv | tr ',' '\n' | grep -n -E "meta|source|model" ; venv/bin/python - <<'EOF'
+153. ToolSearch: select:WebFetch
+154. WebFetch: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash
+155. WebFetch: https://aistudio.google.com/docs/models/gemini-2.5-flash
+156. Bash: grep -n "^#### Next keepers" -A 8 PRD.md | cut -c1-220; grep -n "^## 4\.\|^### 4\|^## 2\.\|Findings" PRD.md | head -5
+157. Bash: python3 - <<'EOF'
+158. Bash: python3 - <<'EOF'
+159. Bash: python3 - <<'EOF'
+160. Bash: python3 - <<'EOF'
+161. Bash: grep -n "On your #77 label" WORKLOG.md | cut -c1-120
+162. Bash: python3 - <<'EOF'
+163. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Found Google reroutes gemini-2.5-flash to 3.5-flash-lite on 12-01 (s…
+164. WebFetch: https://ai.google.dev/gemini-api/docs/rate-limits
+165. WebFetch: https://aistudio.google.com/docs/rate-limits
+166. Bash: grep -n "def \|candidates\|modelVersion\|urlopen\|requests.post\|\.json()" src/llm.py | head -40
+167. Bash: sed -n 76,104p src/llm.py; git diff origin/main origin/integration/preview -- src/llm.py | grep -n "^@@" | head; git diff origin/main origi…
+168. Bash: git checkout -q -b reliability/gemini-served-model && grep -n "def test.*request_shape\|requests.post\|monkeypatch.setattr(.*post" tests/te…
+169. Bash: sed -n 30,60p tests/test_llm.py
+170. Bash: python3 - <<'EOF'
+171. Bash: timeout 200 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add src/llm.py tests/test_llm.py && git commit -q -m "llm: print when…
+172. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+173. Bash: python3 - <<'EOF'
+174. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+175. Bash: python3 - <<'EOF'
+176. Bash: sed -n 55,64p tests/test_llm.py | cat -A | cut -c1-60
+177. Bash: python3 - <<'EOF'
+178. Bash: git diff origin/main -- tests/test_llm.py | head -12; git add tests/test_llm.py && git commit -q -m "Tests: move the served-model test clea…
+179. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+180. Bash: tree=$(head -1 /tmp/mt.txt); git show $tree:tests/test_llm.py | grep -n -A12 '^<<<<<<<' | cut -c1-90 | head -30
+181. Bash: python3 -c "
+182. Agent: Review served-model log diff
+183. Bash: git checkout -q main && git pull -q --ff-only && git merge -q --no-ff reliability/gemini-served-model -m "Merge: print when Gemini answers …
+184. Bash: python3 - <<'EOF'
+185. Bash: head -1 analysis/experiments.csv; grep -E "^reddit-terms|^#13,|^bet-2," analysis/experiments.csv | cut -c1-400
+186. Bash: tail -c 200 analysis/experiments.csv | od -c | tail -3; python3 - <<'EOF'
+187. Bash: python3 - <<'EOF'
+188. Bash: ls scripts | grep -i -E "replay|screen"; grep -n "model\|MODEL\|argparse\|add_argument" scripts/replay_screen*.py 2>/dev/null | head -20
+189. Bash: sed -n 1,40p scripts/replay_screen.py; sed -n 85,110p scripts/replay_screen.py
+190. Bash: python3 - <<'EOF'
+191. Bash: python3 - <<'EOF'
+192. WebFetch: https://aistudio.google.com/docs/models/gemini-3.5-flash-lite
+193. WebFetch: https://console.groq.com/docs/deprecations
+194. Bash: python3 - <<'EOF'
+195. Bash: git add analysis/experiments.csv WORKLOG.md && git commit -q -m "Ledger: re-read every model page we call at the 12-07 monthly (11-07: only…
+196. WebSearch: YouTube Data API v3 revision history 2026 deprecation captions commentThreads videos.insert change

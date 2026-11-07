@@ -590,3 +590,31 @@ def test_the_replay_spends_nothing_when_given_arguments():
                          capture_output=True, text=True, env=env, timeout=60)
     assert out.returncode == 2
     assert "Replay the R4.6 screen" in out.stdout and "want=" not in out.stdout
+
+
+def test_a_replay_on_a_model_that_times_out_stops_at_its_cap(monkeypatch, capsys):
+    """2026-11-07: a candidate model timed out case after case, each timeout
+    retried, and the replay could spend twice its cases unseen. It now stops
+    at one request over its cases, and every case left reads inconclusive."""
+    import runpy
+    import sys
+    calls = []
+
+    def times_out(*args, **kwargs):
+        calls.append(1)
+        raise screen.llm.requests.Timeout()
+
+    monkeypatch.setattr(screen.llm, "_generate", times_out)
+    monkeypatch.setattr(screen.llm.time, "sleep", lambda s: None)          # the time module
+    monkeypatch.setattr(screen.llm.requests, "post", lambda *a, **k: 1 / 0)  # nothing leaves
+    monkeypatch.setattr(screen, "FALLBACK_MODEL", screen.FALLBACK_MODEL)      # restored after
+    monkeypatch.setattr(screen.config, "AI_PROVIDER", "gemini")
+    monkeypatch.setattr(screen.config, "DRY_RUN", False)
+    monkeypatch.setenv("GEMINI_API_KEY", "test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    monkeypatch.setattr(sys, "argv", ["replay_screen.py"])
+    with pytest.raises(SystemExit):
+        runpy.run_path("scripts/replay_screen.py", run_name="__main__")
+    out = capsys.readouterr().out
+    assert len(calls) == out.count("want=") + 1
+    assert f"{len(calls)} requests sent" in out and "inconclusive" in out

@@ -26,6 +26,7 @@ chosen silently: ask for it, and every answer carries its as-of date.
 
 import argparse
 import datetime
+import re
 import sys
 from pathlib import Path
 
@@ -659,6 +660,24 @@ def show_hit_rates(videos, key):
           "\n  question pre-committed, and within an era: eras differ in views.")
 
 
+def refuse_blind(args, ledger, today):
+    """Exit before any outcome loads when --by, --compare, --within or
+    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), unless
+    --unblind gives a reason."""
+    key = getattr(args, "release_key", None) if getattr(args, "release", None) else None
+    fields = [re.split(r"!?=", spec)[0].strip()
+              for spec in (args.by, args.compare, args.within, key) if spec]
+    blind = insights.blind_reads(fields, ledger, today)
+    for field, test, due in blind:
+        if not args.unblind:
+            sys.exit(f"{field} cuts by {test}'s coin, blind until {due} (its pre-committed "
+                     f"read). Its arms' balance stays open (--balance, assignments only). "
+                     f"To read it anyway, add --unblind \"<reason>\" and record the peek "
+                     f"beside {test} in analysis/experiments.csv.")
+        print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
+              f"ledger row.\n")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--by", help="group by an upload_log field (format_version, topic, ...)")
@@ -745,6 +764,9 @@ def main():
                    help="a randomized coin's arms against --by, from the upload log "
                         "alone: no outcome is read, so it runs before a read "
                         "(e.g. --balance title_caps --by subreddit --since 2026-10-15)")
+    p.add_argument("--unblind", metavar="REASON",
+                   help="read a blind test's field before its pre-committed date "
+                        "anyway; record the peek beside its ledger row")
     p.add_argument("--until", metavar="YYYY-MM-DD",
                    help="--balance: uploads published on or before this date, so it "
                         "counts what a read at 7 days sees (its snapshot's date less 7)")
@@ -800,6 +822,8 @@ def main():
     if args.balance:        # assignments only: returns before any outcome loads
         show_balance(args.balance, args.by, args.since, args.until)
         return
+
+    refuse_blind(args, insights.load_experiments(), now.date())
 
     if args.scorecard:     # many metrics; no single one can judge this channel
         show_scorecard(args)
