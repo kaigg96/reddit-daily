@@ -76,7 +76,7 @@ and more useful than a confident guess.
 - **Reliability (half tested):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", on today's code and on bet 1's; all tests pass on both.
 - **AI use, over the cap:** probably over a shift's 8 requests, up to 13, all on the candidate model, whose allowance uploads do not use. The test tool's retries caused it; the next item fixes that.
 - **Reliability (built, live):** the safety-screen test now shows each case's requests and time as it finishes, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
-- **Market intelligence (read):** Google's pages make 3.6 Flash the backup candidate, and the only migration change that touches us is the thinking setting, now handled.
+- **Market intelligence (read):** Google's pages make 3.6 Flash the backup; of its migration changes, only the thinking setting touches us.
 - **Reliability (checked):** all three uploads since the last shift landed; this morning's used the Reddit question as its title, because the shock-bait guard refused the AI's, as designed. The samples your asks link are kept permanently.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
 - **General management (ranking):** with nothing ready, a fresh helper proposed five ideas; I took four, without the usual two rankers (no time). Three corrected claims I wrote earlier today that tomorrow's timing decision relies on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks, which had dropped "shock refusals aside" and would have tripped at today's normal rate (3 of the last 30). The fourth is the data rule below. Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it).
@@ -87,11 +87,11 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
-- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash, which can turn thinking fully down; switching is one line. Then, on a later allowance, check its host lines over bet 1 against your bar, and decide the date.
+- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash, which can turn thinking fully down. A fresh review found no bugs; three pre-merge fixes are noted. Then, on a later allowance, check its host lines over bet 1 against your bar; decide the date.
 - **9 November weekly, later dates:** as last set; the switch done by 30 November.
 
 ### Better?
-- **Than last shift:** no for viewers. The forced switch is half-tested with a working setting; its test can't overspend.
+- **Than last shift:** no for viewers. The forced switch is half-tested, with a working setting.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
