@@ -73,13 +73,13 @@ and more useful than a confident guess.
 - **The 1 December swap may not be silent.** Our calls send settings the replacement model refused in September, so every call might fail and fall to the backup, using twice the requests. Switching first avoids it either way.
 
 ### Done
-- **Reliability (tested, half done):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", one on today's code and one on bet 1's; all tests pass on both. Not yet live.
+- **Reliability (half tested):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", on today's code and on bet 1's; all tests pass on both.
 - **AI use, over the cap:** probably over a shift's 8 requests, up to 13, all on the candidate model, whose allowance uploads do not use. The test tool's retries caused it; the next item fixes that.
 - **Reliability (built, live):** the safety-screen test now shows each case's requests and time as it finishes, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
 - **Market intelligence (read):** Google's pages make 3.6 Flash the backup candidate, and the only migration change that touches us is the thinking setting, now handled.
 - **Reliability (checked):** all three uploads since the last shift landed; this morning's used the Reddit question as its title, because the shock-bait guard refused the AI's, as designed. The samples your asks link are kept permanently.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
-- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas. The three I took corrected claims I had written earlier today, which tomorrow's timing decision would rely on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks. The ledger had dropped "shock refusals aside", so it would have tripped at today's normal rate (3 of the last 30). Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it).
+- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas; I took four, without the usual two rankers (no time). Three corrected claims I wrote earlier today that tomorrow's timing decision relies on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks, which had dropped "shock refusals aside" and would have tripped at today's normal rate (3 of the last 30). The fourth is the data rule below. Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it).
 - **Data (rule set before the read):** the capitals test's check without its 11 flawed uploads will hold about 25 in one group, under the main read's 30. Set now, from counts only: it is read at that size against its own chance margin, and a narrow lead there extends the test once.
 - All fixes and checks, apart from the forced model test. None changes what we ship yet.
 
@@ -91,7 +91,7 @@ and more useful than a confident guess.
 - **9 November weekly, and later dates:** as set in the last handover; the switch done by 30 November.
 
 ### Better?
-- **Than last shift:** no for viewers. The forced model switch is half-tested with a working setting, and the test can no longer overspend unseen.
+- **Than last shift:** no for viewers. The forced switch is half-tested with a working setting; its test can't overspend.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
