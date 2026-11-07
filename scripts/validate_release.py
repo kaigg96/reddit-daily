@@ -261,9 +261,9 @@ def check_metadata():
 def check_screen():
     """Five requests: does the R4.6 screen still reach the right verdicts?
 
-    Validates `named_wrongdoing` (open since 2026-09-09) and, since thinking is
-    now disabled for every Gemini call, whether the screen's JSON risk verdicts
-    survive without reasoning tokens. The screen is the one genuine judgment
+    Validates `named_wrongdoing` (open since 2026-09-09) and whether the
+    screen's JSON risk verdicts survive on its small reasoning budget (512
+    tokens on 2.5, level "low" on a 3.x MODEL). The screen is the one genuine judgment
     task in the pipeline, so this is the check most worth running.
     """
     note("### Gate 2 — R4.6 screen replay\n")

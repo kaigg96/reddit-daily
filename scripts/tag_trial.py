@@ -15,7 +15,8 @@ model reacted to 7 of 9 answers where the sample model and Groq mostly
 labelled (PRD §4). Score the output against §4's bar for a tag.
 
 `--model upload` spends the allowance live uploads share (20 a day; a shift
-may use 8, after 07:00 UTC and not within an hour of an upload), so it is
+may use 8, after 07:00 UTC and not within an hour of an upload; with
+`--gemini-model`, that candidate's own allowance instead), so it is
 capped at UPLOAD_CAP per run, one try each: a 503 is not retried. The sample
 model's own allowance is undocumented and is production's fallback, so it is
 capped too.
