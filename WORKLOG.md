@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-07 (23:10) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
+
+    Worked (% of the shift): gm 45 · editorial 20 · data 10 · reliability 10 · security 10 · product 5
+
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: what would move it still waits on your label on bet 1 (#77) or on tomorrow's model trial. Reading our published titles found one flaw that the capitals test's read would have missed. It is now excluded, by a rule set before any result.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds. Every change to what we ship waits on bet 1, on the capitals test running to 23 November, or on tomorrow's AI allowance.
+
+### Done
+- **Editorial (read, found):** I read every title, closing line and narrated answer of the last nine uploads. One title from 5 November came out in lower case where Reddit had capitals: "Why doesn't batman just end the joker? your theories." Our 14 October fix only catches titles with no capital at all. It is 1 of about 29 titles in the test's no-capitals half since that fix, and none in the other half, so it slightly favours capitals. It joins the 11 uploads that test is already re-read without, decided from the text alone. No fix while the test runs.
+- **General management (ranking):** nothing was ready. A fresh helper proposed seven ideas, and two rankers reading them in opposite orders agreed on none worth doing tonight:
+  - a rule for the topic-picking experiment (its deadline was false: the experiment is switched off, so no results accumulate; the plan now says so)
+  - a measure of how alike our videos are (it would only repeat what #80 already tells you: one music track on all 20 recent uploads, while clips and voices vary)
+  - building the replacement question source early (it can't finish tonight, and it gets ahead of your choice in #90)
+  - moving one logging change ahead of bet 1 (no sample video is possible before 05:15, and it would conflict with bet 1's release)
+  - researching music (the source is already your Audio Library task) and studying quiz channels (it shapes a build that waits on #90)
+- A second round, aimed only at what we ship or earn, checked each idea against the code and data first. None cleared the bar. No background clip meets the rule for retiring one. The title retry and the guard against repeat questions already exist. A subscribe ask would change the spoken closing line, and subscribers are not what holds us back; views are. Everything else waits on bet 1, the capitals test or you. So I handed over at 23:10 with nothing ready.
+- **Reliability (checked):** both of today's uploads landed and nothing has failed. The model switch still combines cleanly with today's code, and all 790 tests pass. GitHub deletes three sample downloads your open asks link over the next two days, but permanent copies were made on 3 November.
+- **Product (checked):** the safety screen acted on 3 of 17 posts this week, under its 15% bar, and both skips look right.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.18 this month, forecast $0.76 of $3).
+- All of this was checks and one recorded flaw. None changes what we ship.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
+
+### Next
+- Unchanged from the last shift: **8 November, after 07:00 and an hour clear of an upload,** the two-candidate host-line trial and its rule, shipping the switch that day if 3.6 Flash wins. **9 November weekly**, and the later dates, as listed there.
+
+### Better?
+- **Than last shift:** no. One flaw that would have tilted a test's read is set aside, which is small.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-07 (17:20) — The backup replacement for our title-writing AI passes its title and safety checks but wrote flatter host lines; we will switch to a replacement before bet 1, on a rule set tonight
 
     Worked (% of the shift): reliability 55 · gm 20 · strategy 10 · data 5 · market 5 · security 5
@@ -99,42 +135,6 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no for viewers. The replacement is one test from ready, its timing against bet 1 is settled, and a weaker host from 1 December is known three weeks ahead.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-07 (10:08) — The replacement for our title-writing AI is half-tested: it writes well but is slow as Google ships it, so tomorrow's test runs it at its lowest thinking setting
-
-    Worked (% of the shift): reliability 60 · product 10 · market 10 · gm 10 · data 5 · security 5
-
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift tested Google's suggested replacement for the AI that writes our titles and runs our safety screen, which Google swaps out on 1 December; tomorrow's shift finishes the test.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds.
-- **When to switch against bet 1 is now a real choice, set out for the next shift.** For switching first: bet 1's host lines run on the new model from 1 December whatever we do, so reading bet 1 wholly on today's model measures a setup that ends that day. Against: if the switch ships as its own version, bet 1's fair comparison needs about 20 days of it first, because our reporting tool otherwise mixes in all older versions. If that holds bet 1 past mid-November, bet 2 suffers, so the next shift weighs it with the test result.
-- **The 1 December swap may not be silent.** Our calls send settings the replacement model refused in September, so every call might fail and fall to the backup, using twice the requests. Switching first avoids it either way.
-
-### Done
-- **Reliability (half tested):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", on today's code and on bet 1's; all tests pass on both.
-- **AI use, over the cap:** probably over a shift's 8 requests, up to 13, all on the candidate model, whose allowance uploads do not use. The test tool's retries caused it; the next item fixes that.
-- **Reliability (built, live):** the safety-screen test now shows each case's requests and time as it finishes, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
-- **Market intelligence (read):** Google's pages make 3.6 Flash the backup; of its migration changes, only the thinking setting touches us.
-- **Reliability (checked):** all three uploads since the last shift landed; this morning's used the Reddit question as its title, because the shock-bait guard refused the AI's, as designed. The samples your asks link are kept permanently.
-- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
-- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas; I took four, without the usual two rankers (no time). Three corrected claims I wrote earlier today that tomorrow's timing decision relies on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks, which had dropped "shock refusals aside" and would have tripped at today's normal rate (3 of the last 30). The fourth is the data rule below. Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it).
-- **Data (rule set before the read):** the capitals test's check without its 11 flawed uploads will hold about 25 in one group, under the main read's 30. Set now, from counts only: it is read at that size against its own chance margin, and a narrow lead there extends the test once.
-- All fixes and checks, apart from the forced model test. None changes what we ship yet.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
-
-### Next
-- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash, which can turn thinking fully down. A fresh review found no bugs; three pre-merge fixes are noted. Then, on a later allowance, check its host lines over bet 1 against your bar; decide the date.
-- **9 November weekly, later dates:** as last set; the switch done by 30 November.
-
-### Better?
-- **Than last shift:** no for viewers. The forced switch is half-tested, with a working setting.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
