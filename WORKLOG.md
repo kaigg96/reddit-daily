@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-07 (10:08) — The replacement for our title-writing AI is half-tested: it writes well but is slow as Google ships it, so tomorrow's test runs it at its lowest thinking setting
+
+    Worked (% of the shift): reliability 60 · product 10 · market 10 · gm 15 · security 5
+
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift tested Google's suggested replacement for the AI that writes our titles and runs our safety screen, which Google swaps out on 1 December, and set it up so tomorrow's shift can finish the test within its allowance.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds.
+- **When to switch against bet 1 is now a real choice, set out for the next shift.** For switching first: bet 1's host lines run on the new model from 1 December whatever we do, so reading bet 1 wholly on today's model measures a setup that ends that day. Against: if the switch ships as its own version, bet 1's fair comparison needs about 20 days of it first, because our reporting tool otherwise mixes in all older versions. If that holds bet 1 past mid-November, bet 2 suffers, so the next shift weighs it with the test result.
+- **The 1 December swap may not be silent.** Our calls send settings the replacement model refused in September, so every call might fail and fall to the backup, using twice the requests. Switching first avoids it either way.
+
+### Done
+- **Reliability (tested, half done):** Google's suggested successor, Gemini 3.8 Flash, works on our free key and has no shutdown date. It wrote a good title, keywords and closing line, but took 34 of the 60 seconds allowed, because it thinks at length unless told not to. It refuses "off", so "low" is the nearest. The safety-screen test ran past 7 minutes and I stopped it unread. I built two test branches at "low", one on today's code and one on bet 1's; all tests pass on both. Not yet live.
+- **AI use, over the cap:** probably more than the 8 requests a shift may spend, up to 13. All went to the candidate model, whose daily allowance uploads do not use, so no upload was at risk. The test tool's retries on a slow model caused it, which the next item fixes.
+- **Reliability (built, live):** the safety-screen test now shows each case as it finishes, with its request count and time, and stops one request past its five cases. Before, a slow model could spend 10 requests unseen. A fresh review found that once the cap cut off later cases, the release check would have called a real wrong answer "inconclusive". Fixed before merging.
+- **Market intelligence (read):** Google's pages make 3.6 Flash the backup candidate, and the only migration change that touches us is the thinking setting, now handled.
+- **Reliability (checked):** all three uploads since the last shift landed; this morning's used the Reddit question as its title, because the shock-bait guard refused the AI's, as designed. The samples your asks link are kept permanently.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
+- **General management (ranking):** with nothing ready, a fresh helper proposed five ideas. The three I took corrected claims I had written earlier today, which tomorrow's timing decision would rely on: the 20-day point above, the 1 December failure risk, and the test ledger's bar for title fallbacks. The ledger had dropped "shock refusals aside", so it would have tripped at today's normal rate (3 of the last 30). Dropped: a new risk row for AI model changes (the plan's row and the 7 December re-read already cover it). Taken after the hand-over draft: the capitals test's cross-check size (below). No separate rankers: too little time left.
+- All of this was fixes and checks, apart from the model test, which is a forced change. None changes what we ship yet.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
+
+### Next
+- **8 November, after 07:00:** finish the successor test within 7 requests: the safety screen on one branch, the title check on both, timing every call. Any call over about 20 seconds, or an unexercised case, means trying 3.6 Flash instead. Then, on a later day's allowance, check its host lines over bet 1 against your bar, and decide the switch date.
+- **9 November weekly, and later dates:** as set in the last handover; the switch done by 30 November.
+
+### Better?
+- **Than last shift:** no for viewers. The forced model switch is half-tested with a working setting, and the test can no longer overspend unseen.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-07 (00:20) — Google silently swaps our title-writing AI on 1 December; choosing its successor first is now ready work
 
     Worked (% of the shift): gm 35 · security 30 · reliability 20 · strategy 10 · data 5
@@ -106,42 +141,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
-
-## 2026-11-06 (00:16) — The check bet 1's merge needs is now one command; the two blind tests can't be read early by accident
-
-    Worked (% of the shift): gm 30 · product 25 · data 20 · reliability 20 · security 5
-
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift made the day you label it shorter and safer, and made sure the sample you need to watch is still there after GitHub deletes its copy on 8 November.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds.
-- **Your bet 1 ask now points at a sample that lasts.** Its text linked only the copy GitHub deletes on 8 November; it now links the permanent one. Its deadline line said 30 October, which has passed; it now says 13–20 November, the date bet 2 needs. Editing sends no email.
-
-### Done
-- **Product (built, live):** the check that runs every published title through today's code and bet 1's is now one command. On 4 November this check, not the tests, caught two of a fix's own mistakes, but it was rebuilt by hand each time and went wrong twice in the same ways. Today: all 220 titles come out identical. A fresh review found it was checking closing lines the way bet 1 no longer writes them and skipping two title steps; both were fixed before merging.
-- **Data (built, live):** the reporting tool now refuses to read the capitals test or the voice test before 23 November, the dates set for them, unless the reader gives a reason, which it prints. Yesterday a helper read the capitals results early by accident; this stops it happening again. A fresh review found two side doors, including a title measure that matches the capitals coin on 49 of 50 uploads; both are closed.
-- **Reliability (fix, live):** three tests failed falsely in one test setup. The fix sat on a parked branch; it is now live.
-- **General management (fix, live):** the warning about sample videos GitHub is about to delete now says whether the link to fix is in an ask's text or only in a comment. Finding that by hand cost me time this morning.
-- **Product (checked):** bet 1's release still combines cleanly with today's code, including the changes above, and all 1,025 tests pass together. Your label can merge it.
-- **Reliability (fix, protects bet 2's timing):** the upload-slot logging that must merge between bet 1 and four uploads a day no longer combined with bet 1, and nothing said so; it would have cost time on the day it was needed. It is brought up to date: today's code, then bet 1, then it, combine cleanly and all 1,027 tests pass. A fresh review found nothing.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading in opposite orders put the same three first. Dropped:
-  - whether four "zero-view" uploads were age-restricted (they were under three days old on 2 November's figures, so the zeros were YouTube's reporting delay; 9 November reads them properly)
-  - a search tool for ideas already settled, and grouping the friction log (both the 9 November weekly's to rank)
-  - preparing the removal of stored YouTube text for the 7 December decision (four weeks early)
-- A second round, aimed at money, audience, distribution, editorial, market, legal, strategy and finance, found nothing: each idea was blocked on bet 1 or you, already dated, or already dropped. I also closed the 26 October weekly digest, which the 2 November one replaces; its findings are in the plan.
-- **Security:** no secret in the repository; the only workflow change since 20 October is the one you applied that day; money controls intact ($0.12 this month, forecast $0.72 of $3). Both 5 November uploads landed.
-- All five were fixes. None changes what we ship, because everything that would waits on bet 1.
-- AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
-
-### Next
-- **On your #77 label:** the title check (now one command), the usual gates, then merge.
-- **9 November weekly:** mark the two friction fixes from 2–3 November as fixed, re-read the zero-view uploads by subreddit, and rank the two friction items dropped above.
-- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is still unlabelled. 23 November, the capitals and voice reads; the reporting tool opens them that day.
-
-### Better?
-- **Than last shift:** no for viewers. Bet 1's merge day is shorter, and the two running tests can't be spoiled by accident.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
