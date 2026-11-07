@@ -164,11 +164,22 @@ def test_a_caller_can_still_opt_into_reasoning(captured):
 def test_a_3x_model_thinks_at_its_lowest_level(captured):
     """3.x refuses thinkingBudget, and 3.8-flash refuses "minimal" (HTTP 400,
     2026-09-26 and 11-07); left to itself it took 34s on one metadata call
-    (11-07). So MODEL on 3.x always asks for "low", the screen's budget included."""
+    (11-07). So MODEL on 3.x asks for its lowest level, the screen's budget included."""
     llm._generate("hello", model=llm.MODEL)
     llm._generate("hello", thinking_budget=512, model=llm.MODEL)
+    want = {"thinkingLevel": llm._LOWEST_THINKING[llm.MODEL]}
     for call in captured:
-        assert call["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
+        assert call["json"]["generationConfig"]["thinkingConfig"] == want
+
+
+@pytest.mark.parametrize("model, level", [("gemini-3.8-flash", "low"),
+                                          ("gemini-3.6-flash", "minimal")])
+def test_each_candidate_gets_the_lowest_level_it_takes(captured, monkeypatch, model, level):
+    """Switching candidate is the MODEL line alone; a level a model refuses
+    would cost a test day (3.8-flash and "minimal", 11-07)."""
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello")
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": level}
 
 
 def test_the_3x_sample_model_still_goes_out_without_a_thinking_config(captured):

@@ -24,6 +24,9 @@ from . import content
 #
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
+# The lowest thinking level each MODEL candidate takes (Google's thinking page,
+# 2026-11-07): 3.8-flash refuses "minimal" with HTTP 400; 3.6-flash takes it.
+_LOWEST_THINKING = {"gemini-3.8-flash": "low", "gemini-3.6-flash": "minimal"}
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
 MODEL = "gemini-3.8-flash"
@@ -100,11 +103,11 @@ def _generate(prompt, thinking_budget=0, model=None, schema=None):
         gen["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
     # metadata call took 34s of the 60s timeout, and five screen calls ran past
-    # 7 minutes. It refuses "minimal" with HTTP 400, so "low" is its nearest to
-    # off, and the screen's bounded budget gets it too. MODEL only: the
-    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
+    # 7 minutes. So MODEL asks for its lowest level, the screen's bounded budget
+    # included. MODEL only: the 3.5-flash-lite calls (samples, slate, fallback)
+    # are unchanged.
     elif model == MODEL:
-        gen["thinkingConfig"] = {"thinkingLevel": "low"}
+        gen["thinkingConfig"] = {"thinkingLevel": _LOWEST_THINKING.get(model, "low")}
     if schema:
         gen["responseMimeType"] = "application/json"
         gen["responseSchema"] = schema
