@@ -164,12 +164,20 @@ def test_a_caller_can_still_opt_into_reasoning(captured):
 def test_a_3x_model_thinks_at_its_lowest_level(captured):
     """3.x refuses thinkingBudget, and 3.8-flash refuses "minimal" (HTTP 400,
     2026-09-26 and 11-07); left to itself it took 34s on one metadata call
-    (11-07). So MODEL on 3.x asks for its lowest level, the screen's budget included."""
+    (11-07). So MODEL on 3.x asks for its lowest level."""
     llm._generate("hello", model=llm.MODEL)
-    llm._generate("hello", thinking_budget=512, model=llm.MODEL)
     want = {"thinkingLevel": llm._LOWEST_THINKING[llm.MODEL]}
-    for call in captured:
-        assert call["json"]["generationConfig"]["thinkingConfig"] == want
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == want
+
+
+@pytest.mark.parametrize("model", ["gemini-3.8-flash", "gemini-3.6-flash"])
+def test_the_screens_reasoning_budget_becomes_low_on_any_candidate(captured, monkeypatch, model):
+    """The screen's 512-token budget was deliberate: thinking near off once
+    passed the flirty case. A candidate's "minimal" must not reach it."""
+    from src import screen
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello", thinking_budget=screen.SCREEN_THINKING_BUDGET)
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
 
 
 @pytest.mark.parametrize("model, level", [("gemini-3.8-flash", "low"),
@@ -599,7 +607,7 @@ def _called_url(monkeypatch, dry_run):
 def test_production_calls_keep_the_production_model(monkeypatch):
     assert _called_url(monkeypatch, False) == (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        "gemini-3.8-flash:generateContent")
+        "gemini-3.6-flash:generateContent")
 
 
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
@@ -607,7 +615,7 @@ def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
 
 
-@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-3.8-flash")])
+@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-3.6-flash")])
 def test_a_dry_run_can_write_its_tags_on_the_upload_model(monkeypatch, switch, model):
     """#77: the owner judges tags in a narrated local render, a dry run. The
     sample model's tags were labels where the upload model's reacted

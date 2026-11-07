@@ -29,7 +29,7 @@ from . import content
 _LOWEST_THINKING = {"gemini-3.8-flash": "low", "gemini-3.6-flash": "minimal"}
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
-MODEL = "gemini-3.8-flash"
+MODEL = "gemini-3.6-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
 # with its own allowance, so a sample never spends MODEL's requests, which the
@@ -103,11 +103,13 @@ def _generate(prompt, thinking_budget=0, model=None, schema=None):
         gen["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
     # metadata call took 34s of the 60s timeout, and five screen calls ran past
-    # 7 minutes. So MODEL asks for its lowest level, the screen's bounded budget
-    # included. MODEL only: the 3.5-flash-lite calls (samples, slate, fallback)
-    # are unchanged.
+    # 7 minutes. So MODEL asks for its lowest level, except where a caller asks
+    # for reasoning: the screen's 512-token budget was deliberate, since thinking
+    # near off once passed the flirty case, so it gets "low". MODEL only: the
+    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
     elif model == MODEL:
-        gen["thinkingConfig"] = {"thinkingLevel": _LOWEST_THINKING.get(model, "low")}
+        level = "low" if thinking_budget else _LOWEST_THINKING.get(model, "low")
+        gen["thinkingConfig"] = {"thinkingLevel": level}
     if schema:
         gen["responseMimeType"] = "application/json"
         gen["responseSchema"] = schema
