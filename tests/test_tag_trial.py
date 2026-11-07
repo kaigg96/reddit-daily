@@ -20,7 +20,9 @@ def no_calls(monkeypatch):
 
 @pytest.mark.parametrize("argv", [["--help"], ["--model", "upload"],
                                   ["--model", "upload", "--posts", "1,2,3,4"],
-                                  ["--model", "sample", "--posts", "0"]])
+                                  ["--model", "sample", "--posts", "0"],
+                                  ["--model", "upload", "--gemini-model", "gemini-9-pro", "--posts", "1"],
+                                  ["--model", "sample", "--gemini-model", "gemini-3.8-flash", "--posts", "1"]])
 def test_it_refuses_before_spending(no_calls, argv):
     with pytest.raises(SystemExit):
         tt.main(argv)
@@ -128,3 +130,34 @@ def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypat
     assert row["setup"] == "The mystery" and row["setup_ships"] is False
     assert row["reactions"] == ["Oof.", "Spot on", "Wait, what?"]
     assert row["reactions_ship"] == [True, False, True]
+
+
+@pytest.mark.parametrize("candidate", sorted(llm._LOWEST_THINKING))
+def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, capsys, candidate):
+    """The successor trial (PRD §4, 11-07): one command per MODEL candidate,
+    the request going to that model, timed, at the level it takes."""
+    import json
+    from src import config
+    for name in ("MODEL", "FALLBACK_MODEL", "_reads_as_reaction", "_grades", "_TAG_EDITS",
+                 "generate_retrying"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    sent = []
+
+    class Reply:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            text = json.dumps({"title": "A title", "keywords": ["a", "b", "c"], "cta": "c"})
+            return {"candidates": [{"content": {"parts": [{"text": text}]}}]}
+
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: sent.append((url, kw["json"])) or Reply())
+    monkeypatch.setenv("GEMINI_API_KEY", "test")
+    tt.main(["--model", "upload", "--gemini-model", candidate, "--posts", "1"])
+    (url, body), = sent
+    assert f"/{candidate}:generateContent" in url
+    assert body["generationConfig"]["thinkingConfig"] == {"thinkingLevel": llm._LOWEST_THINKING[candidate]}
+    row = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    assert row["model"] == candidate and isinstance(row["seconds"], float)

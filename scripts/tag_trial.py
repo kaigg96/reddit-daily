@@ -8,6 +8,7 @@
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
     venv/bin/python scripts/tag_trial.py --model groq --setup specific
     venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
+    venv/bin/python scripts/tag_trial.py --model upload --gemini-model gemini-3.8-flash --posts 2,4,9
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
 model reacted to 7 of 9 answers where the sample model and Groq mostly
@@ -180,6 +181,11 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     return llm
 
 
+def llm_module():
+    from src import llm
+    return llm
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -193,7 +199,14 @@ def main(argv=None):
                          "REACTIONS_UNGRADED or REACTIONS_REACT_ONLY")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
+    # The successor trial (PRD §4, 11-07) reads each MODEL candidate on the same
+    # posts. Only a candidate with a known thinking level: a level a model
+    # refuses costs the run, and that model's allowance, for nothing.
+    ap.add_argument("--gemini-model", choices=sorted(llm_module()._LOWEST_THINKING),
+                    default=None, help="with --model upload: the MODEL candidate to read")
     args = ap.parse_args(argv)
+    if args.gemini_model and args.model != "upload":
+        raise SystemExit("--gemini-model reads a MODEL candidate: use it with --model upload")
     chosen = pick(args.posts)
     cap = {"upload": UPLOAD_CAP, "sample": SAMPLE_CAP}.get(args.model)
     if cap is not None and len(chosen) > cap:
@@ -205,13 +218,18 @@ def main(argv=None):
     from src import llm as gated
     ships, grades = gated._reads_as_reaction, gated._grades
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
+    if args.gemini_model:
+        llm.MODEL = args.gemini_model
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
             time.sleep(GROQ_SPACING)
         q, answers = POSTS[n - 1]
+        start = time.monotonic()
         meta = llm.get_metadata(q, answers, style="A", caps=True)
         h = meta.commentary
         print(json.dumps({"post": n, "source": meta.source,
+                          "model": llm.MODEL if args.model == "upload" else args.model,
+                          "seconds": round(time.monotonic() - start, 1),
                           "setup": h and h.setup,
                           "setup_ships": bool(h and h.setup and ships(h.setup)),
                           "reactions": h and h.reactions,
