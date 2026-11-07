@@ -239,6 +239,13 @@ def check_screen():
     # the keyword backstop are inconclusive rather than passing — treating them
     # as a pass is exactly how the 2026-09-19 run looked green while proving
     # almost nothing.
+    #
+    # A wrong verdict comes first: it is evidence even when later cases went
+    # unexercised, which the replay's request cap makes likelier (2026-11-07).
+    # Only a FAIL line counts: a keyless Groq route exits 1 as inconclusive.
+    if proc.returncode != 0 and "FAIL want=" in out:
+        note("\n- ❌ replay reported a wrong verdict")
+        return False
     if "inconclusive" in out:
         # Three states, not two. A case that fell to the keyword backstop
         # proved nothing, so it must never count as a pass -- but it is not
@@ -255,7 +262,7 @@ def check_screen():
              "way; the next scheduled run re-checks it.")
         return None
     if proc.returncode != 0:
-        note("\n- ❌ replay reported a wrong verdict")
+        note("\n- ❌ replay failed")
         return False
     note("\n- ✅ every case reached the expected verdict via Gemini")
     return True

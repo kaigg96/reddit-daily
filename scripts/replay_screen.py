@@ -103,8 +103,28 @@ if llm.provider() != config.AI_PROVIDER:
           "nothing was sent")
     sys.exit(1)
 
+# Every request is counted, timed and printed as it lands. On 2026-11-07 a
+# candidate model timed out case after case: each timeout retried, a pipe
+# buffered the output, and 7 minutes passed with no sign of how many requests
+# had gone. Past the cap a case falls to the backstop, so it reads inconclusive.
+MAX_REQUESTS = len(CASES) + 1
+sent = 0
+_send = llm._generate
+
+
+def _counted(*args, **kwargs):
+    global sent
+    if sent >= MAX_REQUESTS:
+        raise RuntimeError(f"replay request cap ({MAX_REQUESTS}) reached")
+    sent += 1
+    return _send(*args, **kwargs)
+
+
+llm._generate = _counted
+
 fails = skipped = 0
 for want, q, comments in CASES:
+    before, start = sent, time.monotonic()
     r = screen.screen(q, comments)
     got = "SKIP" if r.verdict == "skip_post" else "PASS"
     if r.source != config.AI_PROVIDER:
@@ -123,9 +143,11 @@ for want, q, comments in CASES:
         extra.append(f"drop={sorted(i+1 for i in r.unsafe)}")
     if r.category:
         extra.append(f"cat={r.category}")
-    print(f"{ok} want={want} got={got:4} {'|'.join(extra):45} {q[:58]}")
+    print(f"{ok} want={want} got={got:4} {'|'.join(extra):45} {q[:58]} "
+          f"[{sent - before} req, {time.monotonic() - start:.0f}s]", flush=True)
     time.sleep(2)
 checked = len(CASES) - skipped
-print(f"\n{checked - fails}/{checked} as expected"
+print(f"\n{sent} requests sent")
+print(f"{checked - fails}/{checked} as expected"
       + (f" ({skipped} inconclusive — fell through to the backstop)" if skipped else ""))
 sys.exit(1 if fails else 0)

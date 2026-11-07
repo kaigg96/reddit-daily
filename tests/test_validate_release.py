@@ -295,3 +295,24 @@ def test_the_detail_survives_an_unwritable_path(capsys):
     """It is diagnostics, never a reason to fail a release."""
     vr.write_detail(["anything"], path="no/such/dir/detail.md")
     assert "could not write" in capsys.readouterr().err
+
+
+def test_a_wrong_verdict_is_a_fail_even_beside_inconclusive_cases(monkeypatch):
+    """The replay's request cap can leave the last cases unexercised after an
+    earlier one answered wrongly; that wrong answer is still evidence."""
+    import subprocess
+    out = ("FAIL want=SKIP got=PASS  x\n??   want=PASS got=PASS  y\n"
+           "\n6 requests sent\n0/1 as expected (1 inconclusive — fell through to the backstop)")
+    monkeypatch.setattr(vr.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
+        a, 1, stdout=out, stderr=""))
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    assert vr.check_screen() is False
+
+
+def test_a_keyless_groq_replay_stays_inconclusive(monkeypatch):
+    import subprocess
+    out = "inconclusive: AI_PROVIDER=groq but its key is not set; nothing was sent"
+    monkeypatch.setattr(vr.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
+        a, 1, stdout=out, stderr=""))
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    assert vr.check_screen() is None
