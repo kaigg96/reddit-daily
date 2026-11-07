@@ -94,11 +94,13 @@ def _generate(prompt, thinking_budget=0, model=None):
         body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
     # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
     # metadata call took 34s of the 60s timeout, and five screen calls ran past
-    # 7 minutes. So MODEL asks for its lowest level, the screen's bounded budget
-    # included. MODEL only: the 3.5-flash-lite calls (samples, slate, fallback)
-    # are unchanged.
+    # 7 minutes. So MODEL asks for its lowest level, except where a caller asks
+    # for reasoning: the screen's 512-token budget was deliberate, since thinking
+    # near off once passed the flirty case, so it gets "low". MODEL only: the
+    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
     elif model == MODEL:
-        body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": _LOWEST_THINKING.get(model, "low")}}
+        level = "low" if thinking_budget else _LOWEST_THINKING.get(model, "low")
+        body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": level}}
     # The key goes in a header, not the URL: HTTP errors quote the URL, which
     # put the key in any log or file that recorded a failed request.
     resp = requests.post(
