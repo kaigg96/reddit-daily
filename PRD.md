@@ -33,7 +33,7 @@
 | ~~Election-week fallback~~ ✅ 2026-11-01 | done: dry run PASS at `88ecde5` | — | No bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
-| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | blocked: the 11-08 07:00 reset; first test 11-07 found 3.8-flash slow at its default thinking, branches built at `low` (§4) | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION` (it writes the closing line), judged by #13's rule. |
+| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | blocked: the 11-08 07:00 reset; test branches built (§4, 11-07) | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION` (it writes the closing line), judged by #13's rule. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
