@@ -39,8 +39,12 @@ CREDENTIAL_SHAPES = (
     r"gh[pousr]_[A-Za-z0-9][A-Za-z0-9_.]{19,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_\-]{10,}"
     r"|gsk_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_\-]{30,}|A[SK]IA[0-9A-Z]{16}"
     r"|1//0[0-9A-Za-z_\-]{30,}|GOCSPX-[0-9A-Za-z_\-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----")
+# A private key is redacted whole, header to footer (or to the end of a text
+# cut short), first: the header alone would leave the key's body in the trace.
+PRIVATE_KEY_BLOCK = (r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?"
+                     r"(?:-----END [A-Z ]*PRIVATE KEY-----|\Z)")
 TOKEN_SHAPES = re.compile(
-    CREDENTIAL_SHAPES
+    PRIVATE_KEY_BLOCK + "|" + CREDENTIAL_SHAPES
     + r"|x-access-token:[^@\s]+|(?i:(?<=bearer )\S{16,})|(?i:authorization: *basic +\S+)"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]*")
 # An AWS account id in an ARN: money_check.py prints only its last four digits.

@@ -2,7 +2,9 @@
 commits; the standing check "secrets never committed" was a reading by eye.
 On 2026-11-06 a history scan found two Google refresh tokens in a 2025
 notebook's saved output (dead, and the client secret was never committed),
-which no check had seen."""
+which no check had seen. It detects, it cannot prevent: the repo is public
+the moment a push lands, and guardrails.yml skips pushes touching only the
+handover files, so a leak there shows at the next push that runs it."""
 import os
 import re
 import subprocess
@@ -25,6 +27,8 @@ BINARY = (".mp4", ".mp3", ".wav", ".png", ".jpg", ".jpeg", ".gif", ".ttf",
 def _tracked():
     r = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, text=True)
     if r.returncode:
+        # In CI a checkout always has git, so failing to list is a fault, not a skip.
+        assert not os.environ.get("CI"), f"git ls-files failed: {r.stderr.strip()}"
         pytest.skip("not a git checkout")
     return [f for f in r.stdout.split("\0") if f]
 
@@ -44,12 +48,21 @@ def test_no_tracked_file_holds_a_credential():
     assert not found, "credential-shaped values are committed:\n" + "\n".join(found)
 
 
-# Built at run time, so this file never holds the shapes it scans for.
+# Built at run time, so this file never holds the shapes it scans for; named
+# ids, so pytest's own output never prints one either.
 @pytest.mark.parametrize("prefix, body", [
     ("1//0", "6" + "Fake-" * 8),
     ("GOCSPX", "-" + "Fake_" * 5),
     ("-----BEGIN RSA PRIVATE", " KEY-----"),
     ("AK", "IA" + "FAKE" * 4),
-])
+], ids=["google-refresh-token", "google-client-secret", "private-key", "aws-key-id"])
 def test_each_shape_is_recognised(prefix, body):
     assert CREDENTIAL.search(prefix + body)
+
+
+def test_the_redactor_removes_a_private_key_whole():
+    from scripts.shift_trace import redact
+    key = "-----BEGIN PRIVATE" + " KEY-----\\nMIIEvQIBADAN" + "Body" * 20 + "\\n-----END PRIVATE KEY-----"
+    out = redact('{"private_key": "' + key + '", "next": 1}', env={})
+    assert "MIIE" not in out and "Body" not in out and '"next": 1' in out
+    assert "Body" not in redact("start " + key[:60], env={})   # cut short by a line limit
