@@ -1,106 +1,102 @@
-## Shift trace — run 42135584908
+## Shift trace — run 42313755495
 
-**Ended:** success, is_error false, 141 turns, 42.4 min, stop end_turn. **Tool calls:** 140, 0 failed. Helper agents made 130 more, 0 failed.
+**Ended:** success, is_error false, 199 turns, 39.0 min, stop end_turn. **Tool calls:** 196, 0 failed. Helper agents made 104 more, 0 failed.
 
 **Last message:**
 
-> I'm ending the shift at 00:58, 18 minutes early. Nothing was ready, and two rounds of idea generation found nothing above the bar. The handover is committed and pushed, and the working tree is clean.
+> I'm ending the shift at 00:23, about 20 minutes early. The one ready item, choosing the successor AI model, can't start until the 07:00 reset under the shift's AI-request rule. Two rounds of idea generation, plus the checks above, found nothing else worth doing tonight. Everything is committed and pushed, the working tree is clean, and no helper is still running.
 >
-> **Toward revenue:** nothing directly. Watch time is flat at 12 seconds, and bet 1 (#77) still waits on your label.
+> **Toward revenue:** nothing directly. Watch time is flat at 12 seconds, and bet 1 (#77) still waits on your label. The 6 November date that ask suggested has passed.
 >
-> **Done (all live on main except the parked branch):**
-> - **#77 fixed (edited, no email sent):** the ask now links the permanent copy of bet 1's sample instead of the one GitHub deletes on 8 November. Its deadline now says bet 1 must merge by 13–20 November; it still said 30 October, which has passed.
-> - **Title check is one command (`scripts/replay_text.py`):** it runs every published title through today's code and bet 1's. Today all 220 come out identical. A fresh review found real faults in my first version, and I fixed them before merging.
-> - **Blind tests protected:** the reporting tool now refuses to read the capitals test or the voice test before 23 November unless given a reason. The review found two ways around this, and both are closed.
-> - **Bet 2's timing protected:** the upload-slot logging branch, which has to merge between bet 1 and four uploads a day, had three conflicts with bet 1 that nobody had noticed. I resolved them. In the real landing order everything combines cleanly and all 1,027 tests pass. It stays parked until bet 1 lands.
-> - **Smaller fixes:**
->   - Three tests that failed falsely in one setup now pass.
->   - The warning about expiring samples now says whether the link to fix is in the ask's text or only in a comment.
->   - I closed the 26 October weekly digest, which the 2 November one replaces.
-> - **Checked:** bet 1 still merges cleanly with today's code and all 1,025 tests pass together. The automatic release check passed on bet 1's current commit. Money controls are intact ($0.12 this month), no secrets are in the repository, and both 5 November uploads landed.
+> **The main finding:**
+> - **The AI model that writes our titles is being swapped.** Google's model page says that from 1 December, every request to the model we use for titles, closing lines, host tags and the safety screen goes to gemini-3.5-flash-lite instead. That's the weaker model our sample videos use.
+> - **Nothing would have shown it.** The calls still succeed, so no failure gets logged, and it lands inside both bets' test windows.
+> - **What's in place now:** the upload log prints a line whenever Google answers from a different model than we asked for (merged after a fresh review). There's a ready item with its rule set before any test: switch to a successor we choose before 1 December, as its own version. It also has a ledger row due 30 November.
+> - **What the morning shift should know:** test candidates over bet 1's release too, since its metadata call is different. Google counts the free allowance per model, so testing a candidate doesn't use the uploads' allowance.
+> - **The other models are clean.** gemini-3.5-flash-lite and Groq's model have no shutdown notice, and the 7 December monthly re-reads all three pages. YouTube's API has no announced change that affects us.
 >
-> **Dropped, with reasons in the work log:**
-> - The age-restriction check on 
+> **Also done tonight (merged to main, all 787 tests pass):**
+> - **Old login tokens:** a search of the repository's full history found two YouTube login tokens in a 2025 notebook's saved output. Both are dead: Google's testing mode capped them at 7 days, and the matching clie
 
-### Tool calls (last 80 of 140)
+### Tool calls (last 80 of 196)
 
-61. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-62. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-63. Bash: sed -n 650,662p scripts/report.py; grep -n "^import\|^from" scripts/report.py | head
-64. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-65. Bash: grep -n "^import re" scripts/report.py || sed -i 's/^import datetime$/import datetime\nimport re/' scripts/report.py; sed -n 27,31p scripts…
-66. Bash: grep -rn -E "(--by|--compare|--within)[ =]+(title_caps|voice)|report\.py[^\n]*(title_caps|voice)" .github/workflows/ scripts/ src/ tests/ -…
-67. Write: /home/runner/work/reddit-daily/reddit-daily/tests/test_blind_reads.py
-68. Bash: venv/bin/python -m pytest tests/test_blind_reads.py -q 2>&1 | tail -5 && timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; da…
-69. Bash: git add src/insights.py scripts/report.py tests/test_blind_reads.py && git commit -q -m "report.py refuses to cut by a blind test's field b…
-70. Agent: Fresh review of blind-guard diff
-71. Bash: grep -n "release_key\|\"--release-key\"" scripts/report.py | head -5; venv/bin/python - <<'EOF'
-72. Bash: venv/bin/python - <<'EOF'
-73. Bash: git checkout -q main && git pull -q --ff-only origin main && git merge -q --no-ff data/blind-test-guard -m "Merge: report.py keeps blind te…
-74. Bash: DRY_RUN=1 timeout 300 venv/bin/python -m pytest tests/test_llm.py -q 2>&1 | tail -8; grep -n -i "DRY_RUN" TECH_DEBT.md | head -5
-75. Bash: sed -n 330,340p TECH_DEBT.md; git log --oneline main..origin/reliability/run-slot-log -- tests/test_llm.py 2>/dev/null | head -3; sed -n 60…
-76. Bash: git show f11e7a5 --stat --format="%s%n%b" | head -20; git show f11e7a5 -- tests/test_llm.py | head -40
-77. Bash: git show 61f78a2 --stat --format="%s" | head -6; git show 61f78a2 -- tests/test_llm.py | head -30; git show origin/integration/preview:test…
-78. Bash: git checkout -q -b reliability/dryrun-test-fixture && git cherry-pick -x 61f78a2 >/dev/null && DRY_RUN=1 timeout 300 venv/bin/python -m pyt…
-79. Bash: git checkout -q --detach && git merge -q --no-ff -m tmp origin/integration/preview >/dev/null 2>&1; timeout 600 venv/bin/python -m pytest t…
-80. Agent: Review cherry-picked test fix
-81. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-82. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Bring the DRY_RUN=1 test-fixture fix onto main from its parked branc…
-83. Bash: grep -n -E "sample-frames|def .*expir|def .*sample|runs/|check it is this run" scripts/escalations.py | head -20
-84. Bash: sed -n 215,282p scripts/escalations.py; grep -n "_expiring\|_print_expiring" tests/*.py | head -8
-85. Bash: sed -n 290,345p tests/test_escalations.py
-86. Bash: git checkout -q -b gm/expiring-link-where && venv/bin/python - <<'EOF'
-87. Bash: venv/bin/python - <<'EOF'
-88. Bash: timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add scripts/escalations.py tests/test_escalations.py && git commit -q…
-89. Agent: Review expiring-link change
-90. Bash: git checkout -q main && git pull -q --ff-only origin main && git merge -q --no-ff gm/expiring-link-where -m "Merge: an expiring sample's wa…
-91. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | tail -15; venv/bin/python scripts/check_docs.py 2>&1 | tail -5; git status --short…
-92. Bash: grep -n "^## 2026-11-05 (19:15)" WORKLOG.md; date -u +%H:%M
-93. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-94. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-95. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|TOTAL|over|FAIL" | head; timeout 300 venv/bin/python -m pytest te…
-96. Bash: grep -n "^## \|^---" WORKLOG.md | tail -6; wc -l WORKLOG.md
-97. Bash: venv/bin/python - <<'EOF'
-98. Bash: git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover: bet 1's title check is one command; blind tests refuse early reads" …
-99. Bash: sed -n 153,215p TECH_DEBT.md | cut -c1-200
-100. Bash: awk 'NR>153' TECH_DEBT.md | grep -n "^- \*\*" | cut -c1-170
-101. Bash: sed -n 404,425p TECH_DEBT.md; sed -n 459,469p TECH_DEBT.md; date -u +%H:%M
-102. Bash: cat .github/friction-groups.csv | cut -c1-260
-103. Bash: sed -n 496,511p TECH_DEBT.md; sed -n 511,530p TECH_DEBT.md | head -14
-104. Bash: gh issue view 86 --json body,comments --jq '.body[0:1800], (.comments[] | .createdAt + " " + .author.login + ": " + (.body[0:600]))'
-105. Bash: gh issue view 89 --json body --jq .body | grep -n -iE "missed|upload_watch|28 h" | head -4
-106. Bash: date -u +%H:%M
-107. Bash: sed -n 257,290p TECH_DEBT.md
-108. Bash: git fetch -q origin reliability/run-slot-log && git log --oneline -1 origin/reliability/run-slot-log && git checkout -q --detach main && gi…
-109. Bash: for f in src/log.py src/run.py tests/test_text_host.py; do echo "== $f: $(grep -c '^<<<<<<<' $f) hunks"; done; git diff src/log.py | head -…
-110. Bash: git diff src/run.py | sed -n '/<<<<<<</,/>>>>>>>/p' | head -60
-111. Bash: git diff tests/test_text_host.py | sed -n '/<<<<<<</,/>>>>>>>/p' | head -60
-112. Bash: git merge --abort; git checkout -q -B reliability/run-slot-log origin/reliability/run-slot-log && git merge --no-ff -m "Bring current with …
-113. Bash: venv/bin/python - <<'EOF'
-114. Bash: timeout 600 venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -6; date -u +%H:%M
-115. Bash: timeout 600 venv/bin/python -m pytest tests/ -q -x 2>&1 | grep -E "^(FAILED|E )|def test|tests/.*py:[0-9]+" | head -12
-116. Bash: grep -rn "def test_the_log_records_the_slot_a_run_was_scheduled_for" tests/ ; f=$(grep -rln "def test_the_log_records_the_slot_a_run_was_sc…
-117. Bash: sed -n 86,135p src/log.py
-118. Bash: venv/bin/python - <<'EOF'
-119. Bash: git add src/log.py src/run.py tests/test_text_host.py tests/test_slate.py && git commit -q --no-edit && git commit -q --amend -m "Bring cur…
-120. Bash: git push -q origin reliability/run-slot-log 2>&1 | tail -2; git log --oneline -1 origin/reliability/run-slot-log
-121. Agent: Review slot-log conflict resolution
-122. Bash: git status --short | head -5; git branch --show-current; git fetch -q origin main; git rev-parse --short HEAD origin/main; date -u +%H:%M
-123. Bash: git rev-parse --short HEAD; git rev-parse --short origin/main; git status | head -3
-124. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-125. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-126. Bash: venv/bin/python - <<'EOF'
-127. Bash: git fetch -q origin 'refs/heads/*:refs/remotes/origin/*' 2>/dev/null; for b in $(git branch -r --format='%(refname:short)' | grep -vE "orig…
-128. Bash: git log --oneline origin/integration/preview..origin/product/host-line-fallback; git checkout -q --detach origin/integration/preview && git…
-129. Bash: git status --short | head -3; git branch --show-current; git log --oneline -1 origin/integration/preview -- src/llm.py; git log --oneline o…
-130. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -25; git status --short | head -5; date -u +%H:%M
-131. Bash: gh issue list --state all --search "Weekly digest in:title" --limit 8 --json number,state,title,closedAt --jq '.[] | "\(.number) \(.state) …
-132. Bash: gh api repos/kaigg96/reddit-daily/issues/79/events --jq '.[] | select(.event=="closed") | .actor.login' ; gh api repos/kaigg96/reddit-daily…
-133. Bash: gh issue close 83 --comment "Closed by a shift: the 2 November digest (#87) supersedes this one, and its zero-view uploads were examined in…
-134. Bash: git log --oneline -3 origin/integration/preview; git cat-file -t 5a44db0 2>&1; git merge-base --is-ancestor f046eba 5a44db0 && echo "f046eb…
-135. Agent: Second idea round, other functions
-136. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
-137. Bash: ls /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/memory/ 2>/dev/null; cat /home/runner/.claude/projects/-home-r…
-138. Write: /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/memory/commit-before-review-agents.md
-139. Write: /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-daily/memory/MEMORY.md
-140. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && git status --short | head -3; git log --oneline origin/main -1
+117. Bash: grep -n "66 rows" TECH_DEBT.md | cut -c1-120
+118. Bash: grep -n "fixes now at 13.0.0" TECH_DEBT.md; sed -n 430,433p TECH_DEBT.md
+119. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+120. Bash: cat > /tmp/entry.md <<'EOF'
+121. Bash: python3 - <<'EOF'
+122. Bash: python3 - <<'EOF'
+123. Bash: ls .escalations/ 2>/dev/null | head; grep -rl "upload-failure-emails" .escalations/ 2>/dev/null | head
+124. Bash: sed -i 's/ - a search-traffic measure (search is about 1% of views)/ - a search-traffic measure (search brings under 2% of views)/' WORKLOG…
+125. Bash: git status --short; venv/bin/python scripts/check_docs.py | tail -4
+126. Bash: sed -i 's/^SECOND_ROUND$/- A second round of ideas, aimed at the functions this shift did not touch, was still running at this writing./' W…
+127. Bash: sed -i 's/the login in use was made on 19 July 2026\./the login in use dates from 19 July 2026 or later./' WORKLOG.md && grep -c "19 July 2…
+128. Bash: venv/bin/python scripts/backlog_status.py 2>&1 | head -4; date -u +%H:%M
+129. Bash: tail -4 .github/friction.csv | cut -c1-140
+130. Bash: date -u +%H:%M:%S
+131. Bash: id=$(gh run list --workflow run-reddit-video.yml --limit 6 --json databaseId,conclusion,createdAt --jq '.[] | select(.conclusion=="success"…
+132. Bash: git log --all --format='%h %ad %s' --date=short -- assets/funk_bg_lower.mp3 assets/music/funk_bg_lower.mp3 | tail -3; sed -n 1,20p scripts/…
+133. Bash: sed -n 498,512p TECH_DEBT.md; grep -n "runner image moves" -A 7 TECH_DEBT.md | cut -c1-200
+134. Bash: python3 - <<'EOF'
+135. Bash: python3 - <<'EOF'
+136. Bash: gh issue view 80 --json body,comments --jq '.body[0:2200], "COMMENTS:", (.comments|length), (.comments[-1].body[0:900] // "")'
+137. Bash: grep -n "^def \|SAMPLES GITHUB DELETES\|def _expiring\|owner last acted" scripts/escalations.py | head -40; wc -l scripts/escalations.py; l…
+138. Bash: sed -n 225,340p scripts/escalations.py; grep -n "_expiring\|def test" tests/test_escalations.py | tail -12
+139. Bash: gh issue list --state open --label needs-owner --limit 30 --json number,body > /tmp/open.json && python3 - <<'EOF'
+140. Bash: git fetch -q origin && rm -rf /tmp/rehearse && git worktree add -q --detach /tmp/rehearse origin/main && cd /tmp/rehearse && git -c user.na…
+141. Bash: git worktree remove --force /tmp/rehearse && git worktree prune && sed -n 1,12p .github/last-shift-trace.md | cut -c1-200; grep -n "def \|m…
+142. Bash: sed -n 84,100p scripts/shift_trace.py; sed -n 169,190p scripts/shift_trace.py
+143. Bash: python3 - <<'EOF'
+144. Bash: sed -n 205,262p scripts/context_budget.py
+145. Bash: git log --format='%h %ad %s' --date=short -S'"TECH_DEBT.md": (r"^- \*\*", 25' -- scripts/context_budget.py | tail -3; git log --format='%h …
+146. Bash: git show 029201d --stat | head -12; git show 029201d -- scripts/context_budget.py | grep -n -i -B2 -A2 "TECH_DEBT" | head -20; git show 029…
+147. Bash: venv/bin/python scripts/friction.py add --function gm --task "Recorded a lost caption track and a history finding without new tech-debt ite…
+148. Bash: grep -n -i "shut down\|shutdown\|deprecat\|retire" PRD.md TECH_DEBT.md | grep -i -E "gemini|model|flash" | cut -c1-300 | head -6; grep -n "…
+149. ToolSearch: select:WebSearch
+150. WebSearch: gemini-2.5-flash shutdown date deprecation Gemini API
+151. Bash: grep -n -i "further notice\|16 October\|10-16 shutdown\|2.5-flash.*(shut\|served until\|actively used" PRD.md TECH_DEBT.md DECISIONS.md | c…
+152. Bash: head -1 upload_log.csv | tr ',' '\n' | grep -n -E "meta|source|model" ; venv/bin/python - <<'EOF'
+153. ToolSearch: select:WebFetch
+154. WebFetch: https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash
+155. WebFetch: https://aistudio.google.com/docs/models/gemini-2.5-flash
+156. Bash: grep -n "^#### Next keepers" -A 8 PRD.md | cut -c1-220; grep -n "^## 4\.\|^### 4\|^## 2\.\|Findings" PRD.md | head -5
+157. Bash: python3 - <<'EOF'
+158. Bash: python3 - <<'EOF'
+159. Bash: python3 - <<'EOF'
+160. Bash: python3 - <<'EOF'
+161. Bash: grep -n "On your #77 label" WORKLOG.md | cut -c1-120
+162. Bash: python3 - <<'EOF'
+163. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Found Google reroutes gemini-2.5-flash to 3.5-flash-lite on 12-01 (s…
+164. WebFetch: https://ai.google.dev/gemini-api/docs/rate-limits
+165. WebFetch: https://aistudio.google.com/docs/rate-limits
+166. Bash: grep -n "def \|candidates\|modelVersion\|urlopen\|requests.post\|\.json()" src/llm.py | head -40
+167. Bash: sed -n 76,104p src/llm.py; git diff origin/main origin/integration/preview -- src/llm.py | grep -n "^@@" | head; git diff origin/main origi…
+168. Bash: git checkout -q -b reliability/gemini-served-model && grep -n "def test.*request_shape\|requests.post\|monkeypatch.setattr(.*post" tests/te…
+169. Bash: sed -n 30,60p tests/test_llm.py
+170. Bash: python3 - <<'EOF'
+171. Bash: timeout 200 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add src/llm.py tests/test_llm.py && git commit -q -m "llm: print when…
+172. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+173. Bash: python3 - <<'EOF'
+174. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+175. Bash: python3 - <<'EOF'
+176. Bash: sed -n 55,64p tests/test_llm.py | cat -A | cut -c1-60
+177. Bash: python3 - <<'EOF'
+178. Bash: git diff origin/main -- tests/test_llm.py | head -12; git add tests/test_llm.py && git commit -q -m "Tests: move the served-model test clea…
+179. Bash: t=$(git merge-tree --write-tree origin/main origin/integration/preview | head -1); c=$(git -c user.name=p -c user.email=p@p commit-tree $t …
+180. Bash: tree=$(head -1 /tmp/mt.txt); git show $tree:tests/test_llm.py | grep -n -A12 '^<<<<<<<' | cut -c1-90 | head -30
+181. Bash: python3 -c "
+182. Agent: Review served-model log diff
+183. Bash: git checkout -q main && git pull -q --ff-only && git merge -q --no-ff reliability/gemini-served-model -m "Merge: print when Gemini answers …
+184. Bash: python3 - <<'EOF'
+185. Bash: head -1 analysis/experiments.csv; grep -E "^reddit-terms|^#13,|^bet-2," analysis/experiments.csv | cut -c1-400
+186. Bash: tail -c 200 analysis/experiments.csv | od -c | tail -3; python3 - <<'EOF'
+187. Bash: python3 - <<'EOF'
+188. Bash: ls scripts | grep -i -E "replay|screen"; grep -n "model\|MODEL\|argparse\|add_argument" scripts/replay_screen*.py 2>/dev/null | head -20
+189. Bash: sed -n 1,40p scripts/replay_screen.py; sed -n 85,110p scripts/replay_screen.py
+190. Bash: python3 - <<'EOF'
+191. Bash: python3 - <<'EOF'
+192. WebFetch: https://aistudio.google.com/docs/models/gemini-3.5-flash-lite
+193. WebFetch: https://console.groq.com/docs/deprecations
+194. Bash: python3 - <<'EOF'
+195. Bash: git add analysis/experiments.csv WORKLOG.md && git commit -q -m "Ledger: re-read every model page we call at the 12-07 monthly (11-07: only…
+196. WebSearch: YouTube Data API v3 revision history 2026 deprecation captions commentThreads videos.insert change
