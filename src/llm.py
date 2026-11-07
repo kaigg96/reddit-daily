@@ -99,7 +99,17 @@ def _generate(prompt, thinking_budget=0, model=None):
         timeout=_TIMEOUT,
     )
     resp.raise_for_status()
-    return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+    data = resp.json()
+    _note_served(model, data.get("modelVersion"))
+    return data["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def _note_served(asked, served):
+    """Print when Gemini answers from another model than the one asked. On
+    2026-12-01 Google routes every gemini-2.5-flash request to 3.5-flash-lite,
+    and the reply still succeeds (PRD §4, 11-07), so only `modelVersion` shows it."""
+    if served and not str(served).startswith(asked):
+        print(f"Gemini served {served} for a {asked} request")
 
 
 _GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"

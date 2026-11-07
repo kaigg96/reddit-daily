@@ -313,6 +313,31 @@ def test_an_all_lower_case_title_ships_in_sentence_case():
         assert (r.title, r.style, r.ok) == (shipped, "B", True)
 
 
+class ServedBy(FakeResponse):
+    def __init__(self, version):
+        super().__init__()
+        self._version = version
+
+    def json(self):
+        return {**super().json(), "modelVersion": self._version}
+
+
+@pytest.mark.parametrize("version, shown", [
+    ("gemini-3.5-flash-lite", True),          # 12-01's reroute (PRD §4, 11-07)
+    ("gemini-2.5-flash", False),
+    ("gemini-2.5-flash-001", False),          # a dated build of the model asked for
+    (None, False),                            # a reply without the field
+])
+def test_a_reply_from_another_model_is_printed(monkeypatch, capsys, version, shown):
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: ServedBy(version))
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    llm._generate("hello", model="gemini-2.5-flash")
+    out = capsys.readouterr().out
+    assert ("Gemini served gemini-3.5-flash-lite for a gemini-2.5-flash request" in out) is shown
+    assert ("Gemini served" in out) is shown
+
+
 def test_a_title_with_any_capital_is_left_as_the_model_wrote_it():
     """Capitals are #14's variable: only a title with none at all is touched,
     so neither arm's capitals are added to or taken away."""
