@@ -61,6 +61,48 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-07 (00:35) — Two old login tokens sat in the public history (both dead); the build now fails on any committed credential
+
+    Worked (% of the shift): gm 40 · security 35 · strategy 10 · reliability 10 · data 5
+
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label, and the 6 November date it asked for has passed. This shift found two old YouTube login tokens in the repository's public history, confirmed both are dead, and made the build fail if a credential is ever committed again.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds; every change that would move it waits on bet 1.
+- **Bet 2's fallback is now dated.** If bet 1 has not merged by 20 November, bet 2 is expected to miss at two uploads a day. That day a shift updates #80: four a day before bet 1 then becomes bet 2's only route, against the spam-policy risk #80 describes. The choice stays yours, and the 25 October rule for judging bet 2 stands as written.
+
+### Done
+- **Security (found, no harm):** a search of the full history found two YouTube login tokens printed into a notebook's saved output in February–March 2025. Both expired within 7 days, because Google's testing mode capped them at a week; the login in use was made on 19 July 2026. Neither works without the matching client secret, which was never committed. No action needed from you.
+- **Security (built, live):** the tests now fail if any committed file holds a credential: GitHub, AWS, Google, Groq or Anthropic keys, Google login tokens and secrets, or private keys. The tool that cleans each shift's public record now also removes Google login tokens and whole private keys. A fresh review found it removed only a private key's first line, plus two smaller faults; all were fixed before merging. It catches a leak after it is public, not before.
+- **Security (checked):** library advisories unchanged since 26 October (the image library's fix is still blocked by the video library). No workflow change since 20 October. Money controls intact ($0.15 this month, forecast $0.71 of $3).
+- **General management (built, live):** the start-of-shift tracker check now also trial-merges the two branches that must land right after bet 1. On 6 November one had silently stopped merging. Both merge cleanly today. A fresh review found a test gap and two small faults; all fixed before merging.
+- **General management (closed):** I withdrew #86. Its own correction had found it unnecessary, and its one lasting piece is in #89, so you have one ask fewer.
+- **Reliability (checked):** both 6 November uploads landed. The morning one went out without its separate caption track, which YouTube refused (the first since 22 September; 7 in September). The words are burned into the video, so viewers saw no difference; I built no retry.
+- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas; two rankers reading in opposite orders put the same two first: withdrawing #86, and bet 2's dated step. Dropped:
+  - a caption retry (one refusal in 45 days, and refusals like it usually repeat)
+  - asking for viewers' answers in our comment (it would disturb the capitals test and bet 1's vote)
+  - starting the replacement source early (dated 14 December; your label and #90 set its lead time)
+  - a search-traffic measure (search brings under 2% of views)
+  - re-reading YouTube's policy pages (read 3 November)
+- A second round of ideas, aimed at the functions this shift did not touch, was still running at this writing.
+- All of this was fixes and checks. None changes what we ship, because everything that would waits on bet 1.
+- AI use: none from the upload allowance, no Polly, no sample video. No helper was left running at hand-over.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
+
+### Next
+- **On your #77 label:** the title check, the usual gates, merge, then the two follow-on branches; the start-of-shift check says whether they still merge.
+- **9 November weekly:** as set: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items.
+- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step above if bet 1 is unmerged. 23 November, the capitals and voice reads.
+
+### Better?
+- **Than last shift:** no for viewers. The public repository is safer: a committed credential now fails the build.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-06 (00:16) — The check bet 1's merge needs is now one command; the two blind tests can't be read early by accident
 
     Worked (% of the shift): gm 30 · product 25 · data 20 · reliability 20 · security 5
@@ -97,45 +139,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no for viewers. Bet 1's merge day is shorter, and the two running tests can't be spoiled by accident.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-05 (19:15) — Bet 2's second target is now written down before anyone can read it; nothing else was ready
-
-    Worked (% of the shift): gm 50 · data 20 · product 15 · security 15
-
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: every change that would move it still waits on your label for bet 1 (#77). This shift fixed bet 2's second target as a number, and confirmed bet 1 can still merge the moment you label it.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds.
-
-### Done
-- **Data (fix):** bet 2's second measure counts only plays that get past the opening, the unit YouTube's Partner Program counts. Its rule was set on 14 October, but the number was never worked out. It is 9,412 over the quarter's last four weeks, double the 4,706 of 28 September to 25 October. It is harder than the views target: those four weeks were a typical month, while the views target was set against the weakest one. So if views pass and this misses, the cause is the starting points, not fewer viewers staying.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading in opposite orders both put the target first. A fresh review of my change found three things a later reader would misread; all were fixed before merging. Dropped:
-  - a test of whether one subreddit gets buried (already set for 9 November)
-  - a scan of similar channels (done 5 October, and you made a first-time viewer the test)
-  - deciding now what 23 November asks you (it needs that day's capitals result)
-  - a guide to re-running a failed Monday report (shifts can't start that job)
-  - counting uploads advertisers avoid (at about 691 times short of the bar, it changes nothing)
-- A second round, aimed at money, audience, distribution, editorial, market and legal, found only preparation for items waiting on you.
-- **Data (disclosed):** the idea helper looked at the capitals test's results by accident while the test is still blind. Its sample is under the test's minimum, and I drew nothing from it. The 23 November rule stands as set, and the peek is recorded beside it.
-- **Product (checked):** bet 1's release still combines cleanly with today's main code, all its tests pass, and today's automatic release check passed on its latest version. Your label can merge it.
-- **Security:** no secret in the repository, no workflow change since 20 October, money controls intact ($0.12 this month, forecast $0.72 of $3). The sample videos #77 and #90 point at already have permanent copies; GitHub deletes its own on 8–9 November.
-- Tonight's upload had not landed by 19:10. That is normal at today's seven-hour delay, and the next shift checks it.
-- AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, needed by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
-
-### Next
-- **6 November:** if #77 is still unlabelled, nothing ships.
-- **9 November weekly:** mark the two friction fixes from 2–3 November as fixed, and re-read the zero-view uploads by subreddit, as already set.
-- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is still unlabelled. 23 November, the capitals and voice reads.
-- **Tooling idea, logged:** the reporting tool could warn anyone who reads a blind test's results before its date.
-
-### Better?
-- **Than last shift:** no for viewers. Bet 2 can now be judged on both its measures without anyone picking a number after the fact.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
