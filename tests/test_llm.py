@@ -936,4 +936,3 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
     assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429;groq_bad_json"
-
