@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-07 (23:10) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
+## 2026-11-07 (23:07) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
 
     Worked (% of the shift): gm 45 · editorial 20 · data 10 · reliability 10 · security 10 · product 5
 
@@ -78,7 +78,7 @@ and more useful than a confident guess.
   - building the replacement question source early (it can't finish tonight, and it gets ahead of your choice in #90)
   - moving one logging change ahead of bet 1 (no sample video is possible before 05:15, and it would conflict with bet 1's release)
   - researching music (the source is already your Audio Library task) and studying quiz channels (it shapes a build that waits on #90)
-- A second round, aimed only at what we ship or earn, checked each idea against the code and data first. None cleared the bar. No background clip meets the rule for retiring one. The title retry and the guard against repeat questions already exist. A subscribe ask would change the spoken closing line, and subscribers are not what holds us back; views are. Everything else waits on bet 1, the capitals test or you. So I handed over at 23:10 with nothing ready.
+- A second round, aimed only at what we ship or earn, checked each idea against the code and data first. None cleared the bar. No background clip meets the rule for retiring one. The title retry and the guard against repeat questions already exist. A subscribe ask would change the spoken closing line, and subscribers are not what holds us back; views are. Everything else waits on bet 1, the capitals test or you. So I handed over at 23:07 with nothing ready.
 - **Reliability (checked):** both of today's uploads landed and nothing has failed. The model switch still combines cleanly with today's code, and all 790 tests pass. GitHub deletes three sample downloads your open asks link over the next two days, but permanent copies were made on 3 November.
 - **Product (checked):** the safety screen acted on 3 of 17 posts this week, under its 15% bar, and both skips look right.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.18 this month, forecast $0.76 of $3).
