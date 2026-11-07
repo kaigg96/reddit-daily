@@ -161,3 +161,25 @@ def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, c
     assert body["generationConfig"]["thinkingConfig"] == {"thinkingLevel": llm._LOWEST_THINKING[candidate]}
     row = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
     assert row["model"] == candidate and isinstance(row["seconds"], float)
+
+
+def test_a_blind_sheet_names_no_model_and_its_key_maps_every_row_back(tmp_path, capsys):
+    """The successor's tag trial is scored blind (PRD §4, 11-07)."""
+    import json
+    import scripts.tag_sheet as ts
+    runs = []
+    for model, tags in (("gemini-3.6-flash", ["Glass costs more", "Plastic crack hurts", ""]),
+                        ("gemini-3.8-flash", ["Ouch, lenses", "Wait, what?", "Yikes"])):
+        path = tmp_path / f"{model}.jsonl"
+        path.write_text("Gemini served x for a y request\n" + json.dumps(
+            {"post": 2, "model": model, "seconds": 1.0, "setup": "S", "reactions": tags}) + "\n")
+        runs.append(str(path))
+    key_path = tmp_path / "key.json"
+    ts.main([*runs, "--key", str(key_path), "--seed", "7"])
+    sheet = capsys.readouterr().out
+    assert "gemini" not in sheet and sheet.count("Tag: ") == 6 and "Tag: (none)" in sheet
+    key = json.loads(key_path.read_text())
+    assert sorted(r["model"] for r in key["rows"].values()) == ["gemini-3.6-flash"] * 3 + ["gemini-3.8-flash"] * 3
+    for n, r in key["rows"].items():
+        assert f"{n}. Q: {tt.POSTS[1][0]}" in sheet
+        assert tt.POSTS[1][1][r["answer"] - 1] in sheet
