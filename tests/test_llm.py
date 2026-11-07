@@ -523,7 +523,7 @@ def _called_url(monkeypatch, dry_run):
 def test_production_calls_keep_the_production_model(monkeypatch):
     assert _called_url(monkeypatch, False) == (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        "gemini-3.8-flash:generateContent")
+        "gemini-3.6-flash:generateContent")
 
 
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):

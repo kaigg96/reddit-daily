@@ -28,7 +28,7 @@ from . import content
 _LOWEST_THINKING = {"gemini-3.8-flash": "low", "gemini-3.6-flash": "minimal"}
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
-MODEL = "gemini-3.8-flash"
+MODEL = "gemini-3.6-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
 # with its own allowance, so a sample never spends MODEL's requests, which the
