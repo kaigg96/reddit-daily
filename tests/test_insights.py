@@ -1050,6 +1050,11 @@ def test_bet_1_is_read_at_its_pre_committed_size():
     assert insights.RELEASE_MIN_UPLOADS["v8"] == 20
 
 
+def test_models_successor_is_read_at_its_pre_committed_size():
+    """PRD §0's successor row, by #13's rule: >= 20 uploads at 7 days."""
+    assert insights.RELEASE_MIN_UPLOADS["v7s"] == 20
+
+
 def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
     """The owner on #39: longer videos gain watch-seconds and lose views, so a
     release that only lengthens them would read "keep" on watch-seconds alone."""

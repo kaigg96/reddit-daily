@@ -133,6 +133,7 @@ GROQ_FALLBACK = True
 
 # --- pipeline metadata (R0.2) ---
 FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and reactions on screen, the narrator speaks its vote
+# v7s = v7 on MODEL's successor (PRD §4, 11-07): titles, closing lines, the screen
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 

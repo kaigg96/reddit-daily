@@ -61,87 +61,81 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-07 (00:20) — Google silently swaps our title-writing AI on 1 December; choosing its successor first is now ready work
+## 2026-11-07 (23:07) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
 
-    Worked (% of the shift): gm 35 · security 30 · reliability 20 · strategy 10 · data 5
+    Worked (% of the shift): gm 45 · editorial 20 · data 10 · reliability 10 · security 10 · product 5
 
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label, and the 6 November date it asked for has passed. This shift found that Google will quietly replace the AI model that writes our titles and runs our safety screen on 1 December, inside both bets' test windows, so the next shift picks and tests a successor first. It also found two dead login tokens in the public history and made the build fail on any committed credential.
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: what would move it still waits on your label on bet 1 (#77) or on tomorrow's model trial. Reading our published titles found one flaw that the capitals test's read would have missed. It is now excluded, by a rule set before any result.
 
 ### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds; every change that would move it waits on bet 1.
-- **Bet 2's fallback is now dated.** If bet 1 has not merged by 20 November, bet 2 is expected to miss at two uploads a day. That day a shift updates #80: four a day before bet 1 then becomes bet 2's only route, against the spam-policy risk #80 describes. The choice stays yours, and the 25 October rule for judging bet 2 stands as written.
+- **Nothing directly.** Watch time is flat at 12 seconds. Every change to what we ship waits on bet 1, on the capitals test running to 23 November, or on tomorrow's AI allowance.
 
 ### Done
-- **Reliability (found, ready for the next shift):** Google's model page says that from 1 December every request to the model that writes our titles, closing lines and host tags, and runs the safety screen, goes to a cheaper model instead. That is the one our sample videos use, which mostly labelled where ours reacted. Nothing would show it: the calls still succeed. It falls inside bet 2's judging window and inside bet 1's test, so a switch nobody chose would muddy both. Rule set tonight, before any test: we switch to a successor we choose before 1 December, as its own version, judged by the rule already set for the other model switch. Testing candidates needs AI requests, so it waits for the 07:00 reset. No cost. Our other two models carry no such notice.
-- **Reliability (built, live):** until then, each upload's log now says when Google answers from a different model than the one we asked for, so a reroute can't pass unseen. A fresh review found no bugs. It still combines cleanly with bet 1.
-- **Security (found, no harm):** a search of the full history found two YouTube login tokens printed into a notebook's saved output in February–March 2025. Both expired within 7 days, because Google's testing mode capped them at a week; the login in use dates from 19 July 2026 or later. Neither works without the matching client secret, which was never committed. No action needed from you.
-- **Security (built, live):** the tests now fail if any committed file holds a credential: GitHub, AWS, Google, Groq or Anthropic keys, Google login tokens and secrets, or private keys. The tool that cleans each shift's public record now also removes Google login tokens and whole private keys. A fresh review found it removed only a private key's first line, plus two smaller faults; all were fixed before merging. It catches a leak after it is public, not before.
-- **Security (checked):** library advisories unchanged since 26 October (the image library's fix is still blocked by the video library). No workflow change since 20 October. Money controls intact ($0.15 this month, forecast $0.71 of $3).
-- **General management (built, live):** the start-of-shift tracker check now also trial-merges the two branches that must land right after bet 1. On 6 November one had silently stopped merging. Both merge cleanly today. A fresh review found a test gap and two small faults; all fixed before merging.
-- **Product (checked):** bet 1's release and its two follow-on branches still combine with tonight's code, new credential check included, and all 1,040 tests pass together. Your label can still merge it.
-- **General management (closed):** I withdrew #86. Its own correction had found it unnecessary, and its one lasting piece is in #89, so you have one ask fewer.
-- **Reliability (checked):** both 6 November uploads landed, the evening one on GitHub's new build machines, so their switch, due by 19 November, is done and harmless. The morning one went out without its separate caption track, which YouTube refused (the first since 22 September; 7 in September). The words are burned into the video, so viewers saw no difference; I built no retry.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas; two rankers reading in opposite orders put the same two first: withdrawing #86, and bet 2's dated step. Dropped:
-  - a caption retry (one refusal in 45 days, and refusals like it usually repeat)
-  - asking for viewers' answers in our comment (it would disturb the capitals test and bet 1's vote)
-  - starting the replacement source early (dated 14 December; your label and #90 set its lead time)
-  - a search-traffic measure (search brings under 2% of views)
-  - re-reading YouTube's policy pages (read 3 November)
-- A second round, aimed at money, audience, distribution, editorial, market, legal and finance, found nothing in those. On the security side it found that the plain music track, sealed on 10 October, can still be downloaded from the public history; no one ever took the history decision its sealing deferred. I added it, with the dead tokens, to the history question already set for the 7 December monthly, so it costs you no new ask. No viewer names, Reddit usernames beyond the public credits, or account numbers are kept in the repository.
-- All of this was fixes and checks. None changes what we ship, because everything that would waits on bet 1.
-- AI use: none from the upload allowance, no Polly, no sample video. No helper was left running at hand-over.
+- **Editorial (read, found):** I read every title, closing line and narrated answer of the last nine uploads. One title from 5 November came out in lower case where Reddit had capitals: "Why doesn't batman just end the joker? your theories." Our 14 October fix only catches titles with no capital at all. It is 1 of about 29 titles in the test's no-capitals half since that fix, and none in the other half, so it slightly favours capitals. It joins the 11 uploads that test is already re-read without, decided from the text alone. No fix while the test runs.
+- **General management (ranking):** nothing was ready. A fresh helper proposed seven ideas, and two rankers reading them in opposite orders agreed on none worth doing tonight:
+  - a rule for the topic-picking experiment (its deadline was false: the experiment is switched off, so no results accumulate; the plan now says so)
+  - a measure of how alike our videos are (it would only repeat what #80 already tells you: one music track on all 20 recent uploads, while clips and voices vary)
+  - building the replacement question source early (it can't finish tonight, and it gets ahead of your choice in #90)
+  - moving one logging change ahead of bet 1 (no sample video is possible before 05:15, and it would conflict with bet 1's release)
+  - researching music (the source is already your Audio Library task) and studying quiz channels (it shapes a build that waits on #90)
+- A second round, aimed only at what we ship or earn, checked each idea against the code and data first. None cleared the bar. No background clip meets the rule for retiring one. The title retry and the guard against repeat questions already exist. A subscribe ask would change the spoken closing line, and subscribers are not what holds us back; views are. Everything else waits on bet 1, the capitals test or you. So I handed over at 23:07 with nothing ready.
+- **Reliability (checked):** both of today's uploads landed and nothing has failed. The model switch still combines cleanly with today's code, and all 790 tests pass. GitHub deletes three sample downloads your open asks link over the next two days, but permanent copies were made on 3 November.
+- **Product (checked):** the safety screen acted on 3 of 17 posts this week, under its 15% bar, and both skips look right.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.18 this month, forecast $0.76 of $3).
+- All of this was checks and one recorded flaw. None changes what we ship.
 
 ### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
-- **Next shift, after 07:00:** pick the successor model and test it (the safety-screen replay and the release check), within the shift's AI allowance. Timing the switch against the capitals read (23 November) and bet 1 is the decision to make with the result.
-- **On your #77 label:** the title check, the usual gates, merge, then the two follow-on branches; the start-of-shift check says whether they still merge.
-- **9 November weekly:** as set: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items. Also, for you through that review: the technical-debt list's cap counts 12 old history notes as open items, so it reads full at 13 real ones. You set that cap on 19 September; the review should propose counting only open items, rather than a shift changing it.
-- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step above if bet 1 is unmerged. 23 November, the capitals and voice reads. 30 November, the model switch done at the latest.
+- Unchanged from the last shift: **8 November, after 07:00 and an hour clear of an upload,** the two-candidate host-line trial and its rule, shipping the switch that day if 3.6 Flash wins. **9 November weekly**, and the later dates, as listed there.
 
 ### Better?
-- **Than last shift:** no for viewers. A silent model swap that would have muddied both bets is now known 24 days ahead, and a committed credential now fails the build.
+- **Than last shift:** no. One flaw that would have tilted a test's read is set aside, which is small.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
 
-## 2026-11-06 (00:16) — The check bet 1's merge needs is now one command; the two blind tests can't be read early by accident
+## 2026-11-07 (17:20) — The backup replacement for our title-writing AI passes its title and safety checks but wrote flatter host lines; we will switch to a replacement before bet 1, on a rule set tonight
 
-    Worked (% of the shift): gm 30 · product 25 · data 20 · reliability 20 · security 5
+    Worked (% of the shift): reliability 55 · gm 20 · strategy 10 · data 5 · market 5 · security 5
 
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. This shift made the day you label it shorter and safer, and made sure the sample you need to watch is still there after GitHub deletes its copy on 8 November.
+**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. I tested Google's backup replacement for the AI that writes our titles and runs our safety screen a day early, on its own unused allowance. It is fast and safe, but on the one post tried it wrote flatter host lines than today's model, so tomorrow pits it against the other candidate on exactly that. When to switch, relative to bet 1, is now decided.
 
 ### Toward revenue
 - **Nothing directly.** Watch time is flat at 12 seconds.
-- **Your bet 1 ask now points at a sample that lasts.** Its text linked only the copy GitHub deletes on 8 November; it now links the permanent one. Its deadline line said 30 October, which has passed; it now says 13–20 November, the date bet 2 needs. Editing sends no email.
+- **A risk to bet 1, found three weeks early.** From 1 December, bet 1's host lines come from whichever replacement we pick. If neither candidate reacts the way today's model does, the host gets weaker on that date whatever we do. Tomorrow's test picks the better one, and if both fall short I will tell you in #77, since it changes what you would be approving.
+- **The switch goes first, whatever happens with #77.** Bet 1 needs about four weeks on its own before the next change, so a clean measurement needed it live by about 4 November. Switching first also avoids the risk that every request fails over to the backup on 1 December. If you label #77 before the switch, bet 1 waits a few days for it, not weeks. If the switch is not ready by 14 November, bet 1 goes first once you label it, and the switch follows by 28 November.
 
 ### Done
-- **Product (built, live):** the check that runs every published title through today's code and bet 1's is now one command. On 4 November this check, not the tests, caught two of a fix's own mistakes, but it was rebuilt by hand each time and went wrong twice in the same ways. Today: all 220 titles come out identical. A fresh review found it was checking closing lines the way bet 1 no longer writes them and skipping two title steps; both were fixed before merging.
-- **Data (built, live):** the reporting tool now refuses to read the capitals test or the voice test before 23 November, the dates set for them, unless the reader gives a reason, which it prints. Yesterday a helper read the capitals results early by accident; this stops it happening again. A fresh review found two side doors, including a title measure that matches the capitals coin on 49 of 50 uploads; both are closed.
-- **Reliability (fix, live):** three tests failed falsely in one test setup. The fix sat on a parked branch; it is now live.
-- **General management (fix, live):** the warning about sample videos GitHub is about to delete now says whether the link to fix is in an ask's text or only in a comment. Finding that by hand cost me time this morning.
-- **Product (checked):** bet 1's release still combines cleanly with today's code, including the changes above, and all 1,025 tests pass together. Your label can merge it.
-- **Reliability (fix, protects bet 2's timing):** the upload-slot logging that must merge between bet 1 and four uploads a day no longer combined with bet 1, and nothing said so; it would have cost time on the day it was needed. It is brought up to date: today's code, then bet 1, then it, combine cleanly and all 1,027 tests pass. A fresh review found nothing.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading in opposite orders put the same three first. Dropped:
-  - whether four "zero-view" uploads were age-restricted (they were under three days old on 2 November's figures, so the zeros were YouTube's reporting delay; 9 November reads them properly)
-  - a search tool for ideas already settled, and grouping the friction log (both the 9 November weekly's to rank)
-  - preparing the removal of stored YouTube text for the 7 December decision (four weeks early)
-- A second round, aimed at money, audience, distribution, editorial, market, legal, strategy and finance, found nothing: each idea was blocked on bet 1 or you, already dated, or already dropped. I also closed the 26 October weekly digest, which the 2 November one replaces; its findings are in the plan.
-- **Security:** no secret in the repository; the only workflow change since 20 October is the one you applied that day; money controls intact ($0.12 this month, forecast $0.72 of $3). Both 5 November uploads landed.
-- All five were fixes. None changes what we ship, because everything that would waits on bet 1.
-- AI use: none from the upload allowance, no Polly, no sample video. All helpers ran in the foreground.
+- **Reliability (tested, a day early):** the morning shift moved the rest of this test to tomorrow, but only the first candidate's allowance was used up. The backup, Gemini 3.6 Flash, has its own, and uploads never touch it. On it, a title, keywords and closing line took 2.3 seconds (the first candidate took 34). The safety screen got 5 of 5 cases right, each in 1 to 5 seconds, apart from one busy-server refusal that the built-in retry absorbed. The same check on bet 1's release passed. 8 AI requests, the shift's cap.
+- **Reliability (found):** on bet 1's release, 3.6 Flash's three host lines summarised the answers ("Glass costs more", "Per day cost"). Today's model, on the same post, has reacted with most of its lines in every daily check since 27 October ("Ouch, lenses", "Two hundred dollars?!"). That is one post, so it shows a direction, not a rate.
+- **Reliability (built, on test branches):** both test branches now run 3.6 Flash. The safety screen keeps a little reasoning on either candidate, as the last review asked. The switch has its own version label and a 20-video bar for its measurement. The host-line test tool now reads either candidate with one command and times each request. A fresh review found no bugs, only three wrong comments, all fixed. All tests pass on both branches. A sample video of the switch rendered and played correctly, its last routine check, so if 3.6 Flash wins tomorrow it can ship the same day. A small tool now mixes tomorrow's host lines into one shuffled sheet with the models hidden, so the scoring stays blind.
+- **Data (rule set before the result):** tomorrow both candidates write host lines for the same three posts, and a fresh helper scores all 18 blind, mixed together. Whichever reacts more is adopted, and a tie goes to 3.6 Flash. If the winner reacts on fewer than 5 of its 9, I tell you in #77 (today's model reacted on about 21 of 27).
+- **Strategy (rule set):** the timing above. One question goes to Monday's weekly review rather than a shift, because it changes how bet 1 is judged: whether the switch's videos may count with today's as bet 1's comparison. Without that, bet 1 approved soon after the switch would be compared with all past versions, a comparison we ruled out on 18 October.
+- **Market intelligence (read):** Google lists 3.6 Flash as a fixed model it does not repoint, with no shutdown date. Its daily limit is unpublished. Today's 8 requests drew no refusal, so it is at least 8, against the 4 to 10 a day production needs. The switch's first week watches for any limit refusal.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
+- **Reliability (checked):** this morning's upload landed, and nothing has failed since the last shift.
+- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading the list in opposite orders put the same three first: the timing rule, the daily-limit floor and the model-name check. All three are done. Dropped:
+  - a filter for summary-style host lines (its blind test needs tomorrow's lines)
+  - changing bet 1's comparison now (Monday's review, as above)
+  - keeping raw AI replies out of the public run log (it lands after bet 1, and is housekeeping)
+  - logging why a title was refused (the log already says so)
+- A second round, aimed at anything that changes what we ship or earn, found nothing above the bar. Scoring today's model blind beside tomorrow's candidates fails because its lines for those three posts are not on record, and getting them would spend the uploads' own allowance. Checking whether a past model change moved watch time fails because the model has not changed since July. So I handed over at 17:22 with nothing ready.
+- All of this was fixes, tests and rules. None changes what we ship yet.
 
 ### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #86, #65 (your reply to its corrected sentence), #80, #59. Nothing new.
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
-- **On your #77 label:** the title check (now one command), the usual gates, then merge.
-- **9 November weekly:** mark the two friction fixes from 2–3 November as fixed, re-read the zero-view uploads by subreddit, and rank the two friction items dropped above.
-- **Later dates:** 10 November, Reddit's terms. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is still unlabelled. 23 November, the capitals and voice reads; the reporting tool opens them that day.
+- **8 November, after 07:00 and an hour clear of an upload:** the two-candidate host-line trial (6 requests), then its rule. If 3.6 Flash wins, ship the switch that day: every check has passed. If 3.8 Flash wins, run its safety screen and title timing on a later day's allowance, then ship.
+- **9 November weekly:** whether the switch's videos may count with today's as bet 1's comparison (above). Also as set before: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items, and, for you through that review, a proposal that the technical-debt list's cap count only open items (12 old history notes fill it today).
+- **Later dates:** 10 November, Reddit's terms. 14 November, bet 1 may go first on your label if the switch is not ready. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step if bet 1 is unmerged. 23 November, the capitals and voice reads. 30 November, the switch done at the latest.
 
 ### Better?
-- **Than last shift:** no for viewers. Bet 1's merge day is shorter, and the two running tests can't be spoiled by accident.
+- **Than last shift:** no for viewers. The replacement is one test from ready, its timing against bet 1 is settled, and a weaker host from 1 December is known three weeks ahead.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
+
+---

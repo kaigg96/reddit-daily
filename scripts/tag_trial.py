@@ -16,7 +16,8 @@ labelled (PRD §4). Score the output against §4's bar for a tag.
 
 `--model upload` spends the allowance live uploads share (20 a day; a shift
 may use 8, after 07:00 UTC and not within an hour of an upload; with
-`--gemini-model`, that candidate's own allowance instead), so it is
+`--gemini-model`, that candidate's own allowance instead, unless it is
+`MODEL` itself: gemini-3.6-flash since 2026-11-08), so it is
 capped at UPLOAD_CAP per run, one try each: a 503 is not retried. The sample
 model's own allowance is undocumented and is production's fallback, so it is
 capped too.

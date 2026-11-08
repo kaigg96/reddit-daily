@@ -930,8 +930,9 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
-# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20).
-RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
+# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20;
+# `v7s`, MODEL's successor, 20 by #13's rule).
+RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20}
 
 # Each release's pre-committed cut (PRD §0), read when no --within is given.
 # Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was

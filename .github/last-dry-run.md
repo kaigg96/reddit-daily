@@ -6,26 +6,26 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `product/cta-sentence-case`
-- **Commit:** `7225d18`
-- **When:** 2026-11-04T19:27:24Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 26.9 s, audio, no dead air
+- **Branch:** `reliability/model-successor`
+- **Commit:** `eec1071`
+- **When:** 2026-11-07T17:14:49Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 18.6 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/41896592041)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/42395157981)
 
 What it picked:
 
 ```
-Selected post: What happens to Elon musk now that blue won?
-Slate topics (rank order): politics-news|politics-news|politics-news
-Title style C, caps arm 1: 3 Reddit answers on what happens to Elon now that Democrats REIGN
-CTA: What do you think happens to Elon now? Comment below.
-Assembled: 26.9s, bg=pexels_7565898.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/Many_Difficulty_490: What happens to Elon musk now that blue won?
+Selected post: Which popular brand has died that people barely remember?
+Slate topics (rank order): nostalgia|money-work|relationships-dating|humor-absurd|relationships-dating
+Title style A, caps arm 1: Dead brands everyone FORGOT existed
+CTA: What dead brand do you miss the most? Let me know.
+Assembled: 18.6s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Today's top AskReddit post, asked by u/ReyisME: Which popular brand has died that people barely remember?
 ```
 
 ## Last request
 
-- **Branch:** `product/cta-sentence-case`
-- **When:** 2026-11-04T19:27:24Z
+- **Branch:** `reliability/model-successor`
+- **When:** 2026-11-07T17:14:49Z
 - **Outcome:** rendered -- see above

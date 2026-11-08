@@ -812,9 +812,10 @@ Return ONLY a JSON object""" in prompt
 def test_a_vote_rule_cannot_ship_under_the_current_format_version():
     """Switching the vote on changes every video, so its uploads must log under
     a new FORMAT_VERSION or bet 1's read cannot tell them from v7's. Bet 1 is
-    the next release, so v7 is the version it must not share."""
+    the next release, so v7, and v7s (v7 on MODEL's successor), are the
+    versions it must not share."""
     if config.HOUSE_VOTE_RULE:
-        assert config.FORMAT_VERSION != "v7"
+        assert config.FORMAT_VERSION not in ("v7", "v7s")
 
 
 def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
