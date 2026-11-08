@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-11-08 · **Live format:** `v7s` (`v7`, which opens on the question, on `MODEL`'s successor `gemini-3.6-flash`, merged 2026-11-08; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
+**Last updated:** 2026-11-08 · **Live format:** `v7s` (`v7` on `gemini-3.6-flash`, merged 2026-11-08; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
 
 > **Two tracks** (2026-07-22), by whether we act on a change's own result: keepers ship fast; bets are isolated and baked under a pre-committed rule (§8).
 
@@ -33,7 +33,7 @@
 | ~~Election-week fallback~~ ✅ 2026-11-01 | done: dry run PASS at `88ecde5` | — | No bump: an empty top 10 reads the day's top 30; logs rank ≥ 11. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
-| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | baking: merged 2026-11-08 as `v7s` (`gemini-3.6-flash`, the tag trial's pick, §4); 20 uploads at 7 days ~11-25; its first week reads `meta_failure` for `http_429_day` | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION` (it writes the closing line), judged by #13's rule. Date: §4. |
+| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | baking: `v7s`, merged 11-08 (`gemini-3.6-flash`, §4); read ~11-25; first week, watch `http_429_day` | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION` (it writes the closing line), judged by #13's rule. Date: §4. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
