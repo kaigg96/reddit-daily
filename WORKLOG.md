@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-08 (17:35) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
 
-    Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 15 · security 5
+    Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 10 · editorial 5 · security 5
 
 **Summary:** Today's model test picked Gemini 3.6 Flash, and it is now live: this evening's upload is the first made with it. That protects every upload's title and safety screen past Google's 1 December change. But the new model's host lines for bet 1 react to the answer about half as often as the old model's, so I have told you on #77 and set up tomorrow's test to try to win them back.
 
@@ -79,6 +79,9 @@ and more useful than a confident guess.
 - **Product (built and planned):** the trial tool can now test the new model at a little more "thinking", which is the cheapest single change to try. Tomorrow's test (6 AI requests) compares that, and a wording that tells it only to react, against today's lines. Each is scored blind, and the rule for what ships was set tonight, before any result: 7 of 9 to go further, then 12 of 18 to ship. A fresh review found no bugs.
 - **Data (rule set before any result):** the capitals test and the voice test both run across the switch. Their groups are drawn at random per upload, so the switch hits both groups alike, and they will be read as planned, with no after-the-fact split by model.
 - **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading them in opposite orders both put the old-model check first; it is done. Dropped: a filter for summary-style lines (it would strip the host from most videos), a new sample video (needs paid narration and another ask of you), a combined request to you (each of these reports already ends with your list in order), and pre-filling the Reddit registration (the ask already names the page and what it needs, and the form would put our app's details in a public issue).
+- **Editorial (rule set before the first upload):** we already refuse titles that sell shock ("you won't believe"), and those refusals don't count against the switch's pass mark. So at its 20th upload I will count them: 5 or more of 20 (the old model: 2 of 30) puts a fix to the title instructions in the queue.
+- **Reliability (found):** Google's free AI allowance resets at midnight California time. Since the clocks changed on 1 November, that is 08:00 UTC, not the 07:00 our shift rules and sample-video gate assume. AI work in that hour draws on the previous day's allowance, which the uploads already used. The exposure is small: shifts start at 03:17, 11:17 and 19:17. It is logged for a fix; until then, tomorrow's test waits until after 08:00.
+- **General management (second round):** a fresh helper, aimed at what can be done today without the AI allowance or you, found the two items above and nothing else above the bar. A Reddit terms re-read waits for their 10 November update; the viewer replies wait on #89; preparing tomorrow's review now would be redone once Monday's figures arrive.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.20 this month, forecast $0.80 of $3).
 - **Reliability (checked):** this morning's upload landed. This morning's shift was cut off before it did anything, so today's test fell to this one.
 
@@ -86,7 +89,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; now with weaker host lines, see the comment), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
-- **9 November, after 07:00 and an hour clear of an upload:** stage 1 of the host-line test, under its rule. **The new model's first week:** check each upload's title came from it and none hit its daily limit.
+- **9 November, after 08:00 UTC and an hour clear of an upload:** stage 1 of the host-line test, under its rule. **The new model's first week:** check each upload's title came from it and none hit its daily limit.
 - **9 November weekly**, as listed in yesterday's entry, including whether the switch's videos may count with today's as bet 1's comparison.
 
 ### Better?
