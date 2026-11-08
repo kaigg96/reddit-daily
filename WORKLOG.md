@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-08 (23:50) — Tomorrow's host-line test moves a day so it can't use up an upload's AI allowance; a new test asks whether two uploads a day already split our views
+
+    Worked (% of the shift): reliability 30 · strategy 25 · data 20 · gm 20 · security 5
+
+**Summary:** I found that tomorrow's release check and the planned host-line test would both draw on the AI allowance our uploads now use, together enough to risk the next morning's title. So the test moves to 10 November. I also built a test of whether a video gets fewer views when another of ours goes out near it, which is what bet 2's four-a-day plan depends on.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds. The new spacing test bears on bet 2, the plan to double views. Its route is four uploads a day, which only works if each video keeps its views when more of ours share the feed.
+
+### Done
+- **Reliability (found, fixed in the plan):** since the switch, our daily release check runs on the same AI allowance as the uploads. Tomorrow it re-tests bet 1's release (6–8 requests), because that release changed tonight. Add the host-line test's 6 and the uploads' 4–10, and Google's day could reach 24 requests against the 20 we plan around. Its last upload, the next morning's, would then lose its AI title. So the test now waits for a day the check stays idle: 10 November at the earliest. The first week's check on the new model's daily limit now ignores days we spent from it ourselves. Otherwise our own spending would read as "the new model's allowance is too small" and send us to the model that failed every request it was sent today.
+- **Data (corrected):** on #77, the comment you will read when you decide on bet 1 still gave the old model's host lines as about 21 of 27 reacting, a figure scored by eye. It now gives the blind scores, 14 of 21 against the new model's 2 of 12. Editing a comment sends no email.
+- **Strategy and data (rule set before any view was read, then built):** do views per upload fall when another upload is near? Nearly every day since April 2025 had two uploads; about 45 had one. So our data can compare one a day with two, never two with four, and only a large effect would show. I wrote the rule down and published it before reading anything. It compares uploads alone against paired within the same month, so old and new eras never meet. Then I built the read with tests. It runs once a fresh review of the code is done, so no fix can be shaped by its result; until then it is unread.
+- **General management (ranking):** nothing was ready. A fresh helper, checking against the code and data, proposed the two items above and nothing else above the bar. Dropped: a tool to plan each day's AI requests (tonight's note in the plan covers the one case that matters this week); fixing the reset hour in the sample-video gate (since the switch, renders use a separate allowance from the uploads, so the wrong hour costs nothing); redrafting the three viewer replies (they lapse on 17 November, and nothing posts without your label on #89).
+- **Reliability (checked):** tonight's upload, the first on the new model, landed at 18:01 with an AI-written title and no errors. The sample copy #90 links is safe on its branch.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.20 this month, forecast $0.80 of $3).
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; its comment now carries the blind figures), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence, which still holds after the switch), #80, #59. Your last comment was on 20 October.
+
+### Next
+- **9 November:** the weekly review, and check that the morning's release check passed. **No host-line test that day.**
+- **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day (the plan says how to tell): stage 1 of the host-line test, under its rule.
+
+### Better?
+- **Than last shift:** slightly: an upload's title and a sound reading of the new model's limit are protected, and the owner's bet 1 issue now has the honest figure.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-08 (17:56) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
 
     Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 10 · editorial 5 · security 5
@@ -99,37 +130,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
-
-## 2026-11-07 (23:07) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
-
-    Worked (% of the shift): gm 45 · editorial 20 · data 10 · reliability 10 · security 10 · product 5
-
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: what would move it still waits on your label on bet 1 (#77) or on tomorrow's model trial. Reading our published titles found one flaw that the capitals test's read would have missed. It is now excluded, by a rule set before any result.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds. Every change to what we ship waits on bet 1, on the capitals test running to 23 November, or on tomorrow's AI allowance.
-
-### Done
-- **Editorial (read, found):** I read every title, closing line and narrated answer of the last nine uploads. One title from 5 November came out in lower case where Reddit had capitals: "Why doesn't batman just end the joker? your theories." Our 14 October fix only catches titles with no capital at all. It is 1 of about 29 titles in the test's no-capitals half since that fix, and none in the other half, so it slightly favours capitals. It joins the 11 uploads that test is already re-read without, decided from the text alone. No fix while the test runs.
-- **General management (ranking):** nothing was ready. A fresh helper proposed seven ideas, and two rankers reading them in opposite orders agreed on none worth doing tonight:
-  - a rule for the topic-picking experiment (its deadline was false: the experiment is switched off, so no results accumulate; the plan now says so)
-  - a measure of how alike our videos are (it would only repeat what #80 already tells you: one music track on all 20 recent uploads, while clips and voices vary)
-  - building the replacement question source early (it can't finish tonight, and it gets ahead of your choice in #90)
-  - moving one logging change ahead of bet 1 (no sample video is possible before 05:15, and it would conflict with bet 1's release)
-  - researching music (the source is already your Audio Library task) and studying quiz channels (it shapes a build that waits on #90)
-- A second round, aimed only at what we ship or earn, checked each idea against the code and data first. None cleared the bar. No background clip meets the rule for retiring one. The title retry and the guard against repeat questions already exist. A subscribe ask would change the spoken closing line, and subscribers are not what holds us back; views are. Everything else waits on bet 1, the capitals test or you. So I handed over at 23:07 with nothing ready.
-- **Reliability (checked):** both of today's uploads landed and nothing has failed. The model switch still combines cleanly with today's code, and all 790 tests pass. GitHub deletes three sample downloads your open asks link over the next two days, but permanent copies were made on 3 November.
-- **Product (checked):** the safety screen acted on 3 of 17 posts this week, under its 15% bar, and both skips look right.
-- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.18 this month, forecast $0.76 of $3).
-- All of this was checks and one recorded flaw. None changes what we ship.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
-
-### Next
-- Unchanged from the last shift: **8 November, after 07:00 and an hour clear of an upload,** the two-candidate host-line trial and its rule, shipping the switch that day if 3.6 Flash wins. **9 November weekly**, and the later dates, as listed there.
-
-### Better?
-- **Than last shift:** no. One flaw that would have tilted a test's read is set aside, which is small.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
