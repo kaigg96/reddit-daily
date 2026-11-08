@@ -609,6 +609,29 @@ def show_catalogue(args):
           "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
+def show_spacing(args):
+    """`--spacing`: R8, alone against paired uploads, month-matched (PRD §4)."""
+    videos, asof = insights.load_channel_videos_offline()
+    if not videos:
+        print("no snapshot with privacy status: no answer")
+        return
+    r = insights.spacing_read(videos, asof)
+    print(f"R8 — uploads with no other within {insights.SPACING_WINDOW_H}h against those with one,"
+          f" within each month\n  snapshot {asof.date()}, public, {insights.SPACING_SINCE} to"
+          f" {insights.SPACING_MIN_AGE_DAYS} days before it\n")
+    print(f"  {r.months} month(s) with >= 2 alone: {r.alone} alone, {r.paired} paired"
+          f" ({r.crowded} crowded, not judged)")
+    if r.ratio is not None:
+        gap = "n/a" if r.gap is None else f"{r.gap:.0%}"
+        print(f"  views, alone / paired (median of monthly medians): {r.ratio:.2f}  chance gap ±{gap}")
+        if r.watch_ratio is not None:
+            print(f"  watch-seconds, the same (beside it, never deciding): {r.watch_ratio:.2f}")
+    elif r.alone < insights.SPACING_MIN_ALONE:
+        print(f"  fewer than {insights.SPACING_MIN_ALONE} alone uploads: the row closes (R8's rule)")
+    print(f"\n  {r.verdict}")
+    print("  One against two a day only: it says nothing of six hours' spacing (#4).")
+
+
 def show_concentration(args):
     """`--concentration`: are the views earned by a few hits? (PRD §0 R4)"""
     age = args.at_age or 7
@@ -744,6 +767,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--spacing", action="store_true",
+                   help="R8: views of uploads with no other within 18h vs those "
+                        "with one, month-matched, from the committed snapshot")
     p.add_argument("--experiments", action="store_true",
                    help="the experiment ledger: rules read on time, keeps credited, "
                         "what is due next (PLAN C18)")
@@ -778,7 +804,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -977,6 +1003,10 @@ def main():
 
     if args.catalogue:      # the snapshot series, channel-wide
         show_catalogue(args)
+        return
+
+    if args.spacing:        # the committed snapshot, channel-wide
+        show_spacing(args)
         return
 
     if args.concentration and not args.by:  # the snapshot series, like --trajectory
