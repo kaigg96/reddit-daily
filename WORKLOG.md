@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-08 (23:50) — Tomorrow's host-line test moves a day so it can't use up an upload's AI allowance; a new test asks whether two uploads a day already split our views
 
-    Worked (% of the shift): reliability 30 · strategy 25 · data 20 · gm 20 · security 5
+    Worked (% of the shift): data 30 · strategy 30 · reliability 20 · gm 15 · security 5
 
 **Summary:** I found that tomorrow's release check and the planned host-line test would both draw on the AI allowance our uploads now use, together enough to risk the next morning's title. So the test moves to 10 November. A new test of our own history found no sign that a second daily upload takes views from the first, which supports bet 2's four-a-day plan.
 
