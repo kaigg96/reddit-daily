@@ -2110,8 +2110,122 @@ def load_channel_videos_offline():
         "published": r["published_at"],
         "title": titles.get(r["video_id"], ""),
         "views": int(float(r["views"] or 0)),
+        "watch_s": float(r.get("avg_view_duration_s") or 0),
         "privacy": r.get("privacy_status") or "unknown",
     } for r in rows], asof
+
+
+# ---------------------------------------------------------------- upload spacing (PRD §0 R8)
+
+# Bet 2's four a day doubles views only if a video's views do not shrink when
+# more of ours share the feed. Nearly every day since April 2025 had two
+# uploads ~12 hours apart, so the only contrast in our data is an upload beside
+# a missed slot against the regular rhythm (about 1.5 a day against 2, locally),
+# never four. The rule was set 2026-11-08 before any view was read, and amended
+# the same night, still unread, when "none within 18 hours" labelled 1 of 878
+# (PRD §4, R8); these defaults are that rule.
+SPACING_WINDOW_H = 18
+SPACING_SINCE = "2025-04-01"
+SPACING_MIN_AGE_DAYS = 60
+SPACING_MIN_SPARSE = 25
+
+
+def spacing_labels(videos, window_h=SPACING_WINDOW_H):
+    """{id: 'sparse' | 'regular' | 'dense'}: at most one other of our uploads
+    published under `window_h` hours either side, exactly two, or more. Every
+    video is someone's neighbour, privatised or not: it was in the feed when
+    published. A neighbour exactly `window_h` away is not near."""
+    times = sorted((_parse_ts(v["published"]), v["id"]) for v in videos if v.get("published"))
+    window = datetime.timedelta(hours=window_h)
+    labels = {}
+    for i, (t, vid) in enumerate(times):
+        near = 0
+        for j in range(i - 1, -1, -1):
+            if t - times[j][0] >= window:
+                break
+            near += 1
+        for j in range(i + 1, len(times)):
+            if times[j][0] - t >= window:
+                break
+            near += 1
+        labels[vid] = "sparse" if near <= 1 else "regular" if near == 2 else "dense"
+    return labels
+
+
+@dataclass
+class SpacingRead:
+    months: int            # months with >= 2 sparse uploads and a regular median above 0
+    sparse: int            # sparse uploads in those months
+    regular: int           # regular uploads in those months
+    dense: int             # dense uploads in the whole population: shown, never judged
+    ratio: float = None    # median over months of median(sparse) / median(regular) views
+    gap: float = None      # the 90th percentile of |ratio - 1| with labels shuffled within months
+    watch_ratio: float = None   # the same on watch-seconds: beside it, never deciding
+    verdict: str = "insufficient data"
+
+
+def _month_ratio(groups, key):
+    ratios = []
+    for sparse, regular in groups:
+        a, p = median([v[key] for v in sparse]), median([v[key] for v in regular])
+        if p:
+            ratios.append(a / p)
+    return median(ratios) if ratios else None
+
+
+def spacing_read(videos, asof, since=SPACING_SINCE, min_age_days=SPACING_MIN_AGE_DAYS,
+                 min_sparse=SPACING_MIN_SPARSE, shuffles=2000, quantile=0.9, seed=0):
+    """R8: do views per upload fall when another upload is near? Public
+    uploads from `since` to `min_age_days` before `asof`, sparse against
+    regular within each calendar month, so the channel's eras never compare
+    with each other. Lifetime views at the snapshot still mix ages within a
+    month, and missed slots include failed runs (both stated with the rule).
+    Watch-seconds is 0 for an upload nobody played; it never decides."""
+    import random
+    labels = spacing_labels(videos)
+    cutoff = asof - datetime.timedelta(days=min_age_days)
+    by_month, dense = {}, 0
+    for v in videos:
+        if v.get("privacy") != "public" or not v.get("published"):
+            continue
+        t = _parse_ts(v["published"])
+        if v["published"][:10] < since or t >= cutoff:
+            continue
+        label = labels[v["id"]]
+        if label == "dense":
+            dense += 1
+            continue
+        by_month.setdefault(v["published"][:7], {"sparse": [], "regular": []})[label].append(v)
+    groups = [(g["sparse"], g["regular"]) for _, g in sorted(by_month.items())
+              if len(g["sparse"]) >= 2 and g["regular"]
+              and median([v["views"] for v in g["regular"]])]
+    read = SpacingRead(months=len(groups), sparse=sum(len(a) for a, _ in groups),
+                       regular=sum(len(p) for _, p in groups), dense=dense)
+    if read.sparse < min_sparse:
+        return read
+    read.ratio = _month_ratio(groups, "views")
+    read.watch_ratio = _month_ratio(groups, "watch_s")
+    rng, deltas = random.Random(seed), []
+    for _ in range(shuffles):
+        shuffled = []
+        for sparse, regular in groups:
+            pool = sparse + regular
+            rng.shuffle(pool)
+            shuffled.append((pool[:len(sparse)], pool[len(sparse):]))
+        r = _month_ratio(shuffled, "views")
+        if r is not None:
+            deltas.append(abs(r - 1))
+    deltas.sort()
+    read.gap = deltas[min(len(deltas) - 1, int(quantile * len(deltas)))] if deltas else None
+    if read.ratio is None or read.gap is None:
+        read.verdict = "insufficient data"
+    elif read.ratio - 1 > read.gap:
+        read.verdict = "sparse leads beyond the gap: views dilute at this spacing"
+    elif 1 - read.ratio > read.gap:
+        read.verdict = "regular leads beyond the gap: recorded, nothing changes"
+    else:
+        read.verdict = "within the gap: no dilution detectable at this spacing"
+    return read
 
 
 # ---------------------------------------------------------------- traffic sources (R4.7)
