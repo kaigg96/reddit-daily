@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-08 (17:35) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
+## 2026-11-08 (17:56) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
 
     Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 10 · editorial 5 · security 5
 
@@ -89,6 +89,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; now with weaker host lines, see the comment), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
 
 ### Next
+- **First, tonight's upload:** the first on the new model had not started by 17:55. Check that it landed with a title the new model wrote, and no limit refusal.
 - **9 November, after 08:00 UTC and an hour clear of an upload:** stage 1 of the host-line test, under its rule. **The new model's first week:** check each upload's title came from it and none hit its daily limit.
 - **9 November weekly**, as listed in yesterday's entry, including whether the switch's videos may count with today's as bet 1's comparison.
 
