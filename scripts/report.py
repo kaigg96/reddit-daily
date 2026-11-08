@@ -815,6 +815,10 @@ def main():
     if args.within and (args.opening_reach or args.watch_reach or args.first_answer):
         # Each reads its pre-committed sample; a filter would be ignored silently.
         sys.exit("--opening-reach, --watch-reach and --first-answer take no --within")
+    if args.spacing and (args.within or args.at_age is not None or args.by or args.compare
+                         or args.metric != Metric.WATCH):
+        # R8 reads its pre-committed sample and metrics; an option would be ignored silently.
+        sys.exit("--spacing takes no other option: R8's sample and metrics are fixed")
     if args.until and not args.balance:
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
