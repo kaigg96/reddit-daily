@@ -93,7 +93,8 @@ def test_young_private_early_and_one_sparse_months_are_left_out():
 def test_report_refuses_options_spacing_would_ignore():
     import subprocess
     import sys
-    for extra in (["--within", "subreddit=AskReddit"], ["--metric", "views"], ["--at-age", "7"]):
+    for extra in (["--within", "subreddit=AskReddit"], ["--metric", "views"], ["--at-age", "7"],
+                  ["--min-uploads", "30"], ["--release-key", "voice"]):
         out = subprocess.run([sys.executable, "scripts/report.py", "--spacing", *extra],
                              capture_output=True, text=True,
                              cwd=insights.config.ROOT)

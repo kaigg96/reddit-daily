@@ -816,7 +816,8 @@ def main():
         # Each reads its pre-committed sample; a filter would be ignored silently.
         sys.exit("--opening-reach, --watch-reach and --first-answer take no --within")
     if args.spacing and (args.within or args.at_age is not None or args.by or args.compare
-                         or args.metric != Metric.WATCH):
+                         or args.metric != Metric.WATCH or args.min_uploads is not None
+                         or args.release_key != p.get_default("release_key")):
         # R8 reads its pre-committed sample and metrics; an option would be ignored silently.
         sys.exit("--spacing takes no other option: R8's sample and metrics are fixed")
     if args.until and not args.balance:
