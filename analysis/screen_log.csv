@@ -22,3 +22,4 @@ timestamp_utc,subreddit,post_title,action,category,reason,source,dropped_comment
 2026-11-03T19:39:17+00:00,AskReddit,"Girls who married the bad boys, how is your marriage?",drop_comments,unsafe_comments,"Question is about relationship experiences, not flagged content.",gemini,2
 2026-11-05T07:04:06+00:00,NoStupidQuestions,Why is Elon frantically deleting some of his tweets from twitter?,skip_post,named_wrongdoing,Solicits unproven misconduct allegations about a named real person.,gemini,4
 2026-11-05T07:04:13+00:00,NoStupidQuestions,"In terms of gender, what is non-trinary?",skip_insufficient_comments,unsafe_comments,none,gemini,6
+2026-11-08T06:22:47+00:00,AskReddit,"What is the best punchline to the old ""I like my men/women like I like my coffee.."" line?",skip_post,sexual_suggestive,invites suggestive punchlines about men/women,gemini,0
