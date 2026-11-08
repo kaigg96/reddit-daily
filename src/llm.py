@@ -19,13 +19,17 @@ from . import content
 # question instead of a generated title. Disabling thinking put the same call
 # at 0.6s. Every task here (keyword extraction, title rephrasing, a one-line
 # CTA, the R4.6 screen's JSON verdict) is a short transformation, not a
-# reasoning problem.
+# reasoning problem. Its 3.x successor thinks by default too, and is set by
+# level rather than budget (`_LOWEST_THINKING`, and the note in `_generate`).
 #
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
+# The lowest thinking level each MODEL candidate takes (Google's thinking page,
+# 2026-11-07): 3.8-flash refuses "minimal" with HTTP 400; 3.6-flash takes it.
+_LOWEST_THINKING = {"gemini-3.8-flash": "low", "gemini-3.6-flash": "minimal"}
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.6-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
 # with its own allowance, so a sample never spends MODEL's requests, which the
@@ -42,7 +46,8 @@ FALLBACK_MODEL = SAMPLE_MODEL
 FALLBACK_SOURCE = "gemini_fallback"
 
 # Generous because it is now only a backstop against a pathological response,
-# not a routine limit — with thinking off, calls land in about a second.
+# not a routine limit — at the lowest thinking level, calls land in a few
+# seconds (3.6-flash: 2.3s for a title, 11-07).
 # requests' timeout is per-read, not a total deadline, so this does not bound
 # total call duration; it only stops a stalled socket hanging the run.
 _TIMEOUT = 60
@@ -89,6 +94,15 @@ def _generate(prompt, thinking_budget=0, model=None):
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
         body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
+    # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
+    # metadata call took 34s of the 60s timeout, and five screen calls ran past
+    # 7 minutes. So MODEL asks for its lowest level, except where a caller asks
+    # for reasoning: the screen's 512-token budget was deliberate, since thinking
+    # near off once passed the flirty case, so it gets "low". MODEL only: the
+    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
+    elif model == MODEL:
+        level = "low" if thinking_budget else _LOWEST_THINKING.get(model, "low")
+        body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": level}}
     # The key goes in a header, not the URL: HTTP errors quote the URL, which
     # put the key in any log or file that recorded a failed request.
     resp = requests.post(

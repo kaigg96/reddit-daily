@@ -56,7 +56,7 @@ def captured(monkeypatch):
 
 def test_thinking_is_disabled_by_default(captured):
     """The fix itself. Default thinking is what blew the timeout."""
-    llm._generate("hello")
+    llm._generate("hello", model="gemini-2.5-flash")
     cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
     assert cfg["thinkingBudget"] == 0
 
@@ -68,7 +68,7 @@ def test_metadata_is_one_request_not_three(captured):
     llm.get_metadata("q", ["a", "b", "c"], style="B")
 
     assert len(captured) == 1
-    assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
+    assert "thinkingConfig" in captured[0]["json"]["generationConfig"]
 
 
 def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
@@ -81,9 +81,45 @@ def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
 def test_a_caller_can_still_opt_into_reasoning(captured):
     """The budget is a parameter, not a hardcode — a genuinely reasoning-heavy
     prompt can ask for it, deliberately and visibly."""
-    llm._generate("hello", thinking_budget=512)
+    llm._generate("hello", thinking_budget=512, model="gemini-2.5-flash")
     cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
     assert cfg["thinkingBudget"] == 512
+
+
+def test_a_3x_model_thinks_at_its_lowest_level(captured):
+    """3.x refuses thinkingBudget, and 3.8-flash refuses "minimal" (HTTP 400,
+    2026-09-26 and 11-07); left to itself it took 34s on one metadata call
+    (11-07). So MODEL on 3.x asks for its lowest level."""
+    llm._generate("hello", model=llm.MODEL)
+    want = {"thinkingLevel": llm._LOWEST_THINKING[llm.MODEL]}
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == want
+
+
+@pytest.mark.parametrize("model", ["gemini-3.8-flash", "gemini-3.6-flash"])
+def test_the_screens_reasoning_budget_becomes_low_on_any_candidate(captured, monkeypatch, model):
+    """The screen's 512-token budget was deliberate: thinking near off once
+    passed the flirty case. A candidate's "minimal" must not reach it."""
+    from src import screen
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello", thinking_budget=screen.SCREEN_THINKING_BUDGET)
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
+
+
+@pytest.mark.parametrize("model, level", [("gemini-3.8-flash", "low"),
+                                          ("gemini-3.6-flash", "minimal")])
+def test_each_candidate_gets_the_lowest_level_it_takes(captured, monkeypatch, model, level):
+    """Switching candidate is the MODEL line alone; a level a model refuses
+    would cost a test day (3.8-flash and "minimal", 11-07)."""
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello")
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": level}
+
+
+def test_the_3x_sample_model_still_goes_out_without_a_thinking_config(captured):
+    """Samples, the slate and the fallback are measured as they are; the
+    successor's setting must not change them."""
+    llm._generate("hello", model=llm.SAMPLE_MODEL)
+    assert "generationConfig" not in captured[0]["json"]
 
 
 def test_timeout_is_generous_enough_to_be_a_backstop(captured):
@@ -487,7 +523,7 @@ def _called_url(monkeypatch, dry_run):
 def test_production_calls_keep_the_production_model(monkeypatch):
     assert _called_url(monkeypatch, False) == (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        "gemini-2.5-flash:generateContent")
+        "gemini-3.6-flash:generateContent")
 
 
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
@@ -654,9 +690,10 @@ Return ONLY a JSON object""" in prompt
 def test_a_vote_rule_cannot_ship_under_the_current_format_version():
     """Switching the vote on changes every video, so its uploads must log under
     a new FORMAT_VERSION or bet 1's read cannot tell them from v7's. Bet 1 is
-    the next release, so v7 is the version it must not share."""
+    the next release, so v7, and v7s (v7 on MODEL's successor), are the
+    versions it must not share."""
     if config.HOUSE_VOTE_RULE:
-        assert config.FORMAT_VERSION != "v7"
+        assert config.FORMAT_VERSION not in ("v7", "v7s")
 
 
 def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):
