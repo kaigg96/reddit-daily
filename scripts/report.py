@@ -610,26 +610,27 @@ def show_catalogue(args):
 
 
 def show_spacing(args):
-    """`--spacing`: R8, alone against paired uploads, month-matched (PRD §4)."""
+    """`--spacing`: R8, uploads beside a missed slot against the regular
+    rhythm, month-matched (PRD §4)."""
     videos, asof = insights.load_channel_videos_offline()
     if not videos:
         print("no snapshot with privacy status: no answer")
         return
     r = insights.spacing_read(videos, asof)
-    print(f"R8 — uploads with no other within {insights.SPACING_WINDOW_H}h against those with one,"
-          f" within each month\n  snapshot {asof.date()}, public, {insights.SPACING_SINCE} to"
-          f" {insights.SPACING_MIN_AGE_DAYS} days before it\n")
-    print(f"  {r.months} month(s) with >= 2 alone: {r.alone} alone, {r.paired} paired"
-          f" ({r.crowded} crowded, not judged)")
+    print(f"R8 — uploads with at most one other within {insights.SPACING_WINDOW_H}h (sparse)"
+          f" against those with two (regular), within each month\n  snapshot {asof.date()},"
+          f" public, {insights.SPACING_SINCE} to {insights.SPACING_MIN_AGE_DAYS} days before it\n")
+    print(f"  {r.months} qualifying month(s): {r.sparse} sparse, {r.regular} regular;"
+          f" {r.dense} dense in the whole population, not judged")
     if r.ratio is not None:
         gap = "n/a" if r.gap is None else f"{r.gap:.0%}"
-        print(f"  views, alone / paired (median of monthly medians): {r.ratio:.2f}  chance gap ±{gap}")
+        print(f"  views, sparse / regular (median of monthly medians): {r.ratio:.2f}  chance gap ±{gap}")
         if r.watch_ratio is not None:
             print(f"  watch-seconds, the same (beside it, never deciding): {r.watch_ratio:.2f}")
-    elif r.alone < insights.SPACING_MIN_ALONE:
-        print(f"  fewer than {insights.SPACING_MIN_ALONE} alone uploads: the row closes (R8's rule)")
+    elif r.sparse < insights.SPACING_MIN_SPARSE:
+        print(f"  fewer than {insights.SPACING_MIN_SPARSE} sparse uploads: the row closes (R8's rule)")
     print(f"\n  {r.verdict}")
-    print("  One against two a day only: it says nothing of six hours' spacing (#4).")
+    print("  About 1.5 a day against 2, locally: it says nothing of six hours' spacing (#4).")
 
 
 def show_concentration(args):
@@ -768,8 +769,8 @@ def main():
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
     p.add_argument("--spacing", action="store_true",
-                   help="R8: views of uploads with no other within 18h vs those "
-                        "with one, month-matched, from the committed snapshot")
+                   help="R8: views of uploads beside a missed slot vs the regular "
+                        "rhythm, month-matched, from the committed snapshot")
     p.add_argument("--experiments", action="store_true",
                    help="the experiment ledger: rules read on time, keeps credited, "
                         "what is due next (PLAN C18)")
