@@ -34,7 +34,9 @@ def read_rows(paths):
                     continue
                 question, answers = POSTS[r["post"] - 1]
                 for i, tag in enumerate(r.get("reactions") or []):
-                    rows.append({"model": r.get("model") or path, "post": r["post"],
+                    # The run's file too: two arms on one model (a wording, a
+                    # thinking level) share the model, so only it tells them apart.
+                    rows.append({"model": r.get("model") or path, "run": path, "post": r["post"],
                                  "answer": i + 1, "question": question,
                                  "answer_text": answers[i], "tag": tag or "(none)"})
     return rows
@@ -48,7 +50,7 @@ def build(rows, seed):
     for n, i in enumerate(order, 1):
         r = rows[i]
         lines.append(f"{n}. Q: {r['question']}\n   Answer: {r['answer_text']}\n   Tag: {r['tag']}")
-        key["rows"][n] = {k: r[k] for k in ("model", "post", "answer", "tag")}
+        key["rows"][n] = {k: r[k] for k in ("model", "run", "post", "answer", "tag")}
     return "\n\n".join(lines) + "\n", key
 
 

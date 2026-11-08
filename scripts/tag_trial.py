@@ -9,6 +9,7 @@
     venv/bin/python scripts/tag_trial.py --model groq --setup specific
     venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
     venv/bin/python scripts/tag_trial.py --model upload --gemini-model gemini-3.8-flash --posts 2,4,9
+    venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --thinking low
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
 model reacted to 7 of 9 answers where the sample model and Groq mostly
@@ -206,9 +207,19 @@ def main(argv=None):
     # refuses costs the run, and that model's allowance, for nothing.
     ap.add_argument("--gemini-model", choices=sorted(llm_module()._LOWEST_THINKING),
                     default=None, help="with --model upload: the MODEL candidate to read")
+    # Whether 3.6-flash labels because it runs at its lowest level (PRD §4,
+    # 11-08: 4 of 9 reacted at "minimal"): one variable, the metadata call's level.
+    ap.add_argument("--thinking", choices=["minimal", "low"], default=None,
+                    help="with --model upload: MODEL's thinking level for the metadata call")
     args = ap.parse_args(argv)
+    if args.thinking and args.model != "upload":
+        raise SystemExit("--thinking sets MODEL's level: use it with --model upload")
     if args.gemini_model and args.model != "upload":
         raise SystemExit("--gemini-model reads a MODEL candidate: use it with --model upload")
+    # A level the model refuses (3.8-flash: "minimal", HTTP 400) costs a request.
+    target = args.gemini_model or llm_module().MODEL
+    if args.thinking == "minimal" and llm_module()._LOWEST_THINKING.get(target) != "minimal":
+        raise SystemExit(f"{target} does not take minimal thinking")
     chosen = pick(args.posts)
     cap = {"upload": UPLOAD_CAP, "sample": SAMPLE_CAP}.get(args.model)
     if cap is not None and len(chosen) > cap:
@@ -222,6 +233,8 @@ def main(argv=None):
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
     if args.gemini_model:
         llm.MODEL = args.gemini_model
+    if args.thinking:
+        llm._LOWEST_THINKING = dict(llm._LOWEST_THINKING, **{llm.MODEL: args.thinking})
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
             time.sleep(GROQ_SPACING)

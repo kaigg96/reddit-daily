@@ -22,7 +22,10 @@ def no_calls(monkeypatch):
                                   ["--model", "upload", "--posts", "1,2,3,4"],
                                   ["--model", "sample", "--posts", "0"],
                                   ["--model", "upload", "--gemini-model", "gemini-9-pro", "--posts", "1"],
-                                  ["--model", "sample", "--gemini-model", "gemini-3.8-flash", "--posts", "1"]])
+                                  ["--model", "sample", "--gemini-model", "gemini-3.8-flash", "--posts", "1"],
+                                  ["--model", "groq", "--thinking", "low", "--posts", "1"],
+                                  ["--model", "upload", "--gemini-model", "gemini-3.8-flash",
+                                   "--thinking", "minimal", "--posts", "1"]])
 def test_it_refuses_before_spending(no_calls, argv):
     with pytest.raises(SystemExit):
         tt.main(argv)
@@ -132,14 +135,16 @@ def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypat
     assert row["reactions_ship"] == [True, False, True]
 
 
-@pytest.mark.parametrize("candidate", sorted(llm._LOWEST_THINKING))
-def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, capsys, candidate):
+@pytest.mark.parametrize("candidate,thinking", [(c, None) for c in sorted(llm._LOWEST_THINKING)]
+                         + [("gemini-3.6-flash", "low")])
+def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, capsys, candidate,
+                                                                    thinking):
     """The successor trial (PRD §4, 11-07): one command per MODEL candidate,
     the request going to that model, timed, at the level it takes."""
     import json
     from src import config
     for name in ("MODEL", "FALLBACK_MODEL", "_reads_as_reaction", "_grades", "_TAG_EDITS",
-                 "generate_retrying"):
+                 "generate_retrying", "_LOWEST_THINKING"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
     for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
         monkeypatch.setattr(config, name, getattr(config, name))
@@ -155,10 +160,12 @@ def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, c
 
     monkeypatch.setattr(llm.requests, "post", lambda url, **kw: sent.append((url, kw["json"])) or Reply())
     monkeypatch.setenv("GEMINI_API_KEY", "test")
-    tt.main(["--model", "upload", "--gemini-model", candidate, "--posts", "1"])
+    level = thinking or llm._LOWEST_THINKING[candidate]
+    tt.main(["--model", "upload", "--gemini-model", candidate, "--posts", "1"]
+            + (["--thinking", thinking] if thinking else []))
     (url, body), = sent
     assert f"/{candidate}:generateContent" in url
-    assert body["generationConfig"]["thinkingConfig"] == {"thinkingLevel": llm._LOWEST_THINKING[candidate]}
+    assert body["generationConfig"]["thinkingConfig"] == {"thinkingLevel": level}
     row = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
     assert row["model"] == candidate and isinstance(row["seconds"], float)
 
@@ -183,3 +190,27 @@ def test_a_blind_sheet_names_no_model_and_its_key_maps_every_row_back(tmp_path, 
     for n, r in key["rows"].items():
         assert f"{n}. Q: {tt.POSTS[1][0]}" in sheet
         assert tt.POSTS[1][1][r["answer"] - 1] in sheet
+
+
+def test_two_arms_on_one_model_stay_apart_in_the_key(tmp_path, capsys):
+    """A wording or thinking-level trial runs both arms on MODEL (PRD §4,
+    11-08), so the key names each row's run, never only its model."""
+    import json
+    import scripts.tag_sheet as ts
+    runs = []
+    for arm, tags in (("shipped", ["Glass costs more", "Plastic crack hurts", "Per day cost"]),
+                      ("low", ["Ouch, lenses", "Wait, what?", "Yikes"])):
+        path = tmp_path / f"{arm}.jsonl"
+        path.write_text(json.dumps({"post": 2, "model": "gemini-3.6-flash", "seconds": 1.0,
+                                    "setup": "S", "reactions": tags}) + "\n")
+        runs.append(str(path))
+    key_path = tmp_path / "key.json"
+    ts.main([*runs, "--key", str(key_path), "--seed", "7"])
+    sheet = capsys.readouterr().out
+    assert "shipped" not in sheet and "low.jsonl" not in sheet
+    key = json.loads(key_path.read_text())
+    by_run = {}
+    for r in key["rows"].values():
+        by_run.setdefault(r["run"], []).append(r["tag"])
+    assert sorted(by_run[runs[1]]) == ["Ouch, lenses", "Wait, what?", "Yikes"]
+    assert len(by_run[runs[0]]) == 3
