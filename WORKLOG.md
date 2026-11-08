@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-08 (17:35) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
+
+    Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 15 · security 5
+
+**Summary:** Today's model test picked Gemini 3.6 Flash, and it is now live: this evening's upload is the first made with it. That protects every upload's title and safety screen past Google's 1 December change. But the new model's host lines for bet 1 react to the answer about half as often as the old model's, so I have told you on #77 and set up tomorrow's test to try to win them back.
+
+### Toward revenue
+- **Protects what we have, does not grow it.** Watch time is flat at 12 seconds. Without the switch, Google would have silently changed the AI writing our titles, closing lines and safety checks on 1 December, in the middle of bet 2's measurement window.
+- **A setback for bet 1, found before it ships.** Bet 1 is the company's main bet, and its host lines are now the most valuable thing to improve. Tomorrow's test is the next step.
+
+### Done
+- **Reliability (tested, then shipped):** the two-candidate test planned yesterday. Gemini 3.8 Flash didn't answer any of its three requests (twice the server was busy, once it timed out at a minute), which disqualifies it under yesterday's rule. Gemini 3.6 Flash answered all three in about two seconds each. 6 AI requests, from the two candidates' own allowances, not the uploads'.
+- **Reliability (shipped):** the switch went live as its own version, so its effect can be measured. All tests pass, two fresh reviews found no bugs yesterday, and its sample video played. It is judged around 25 November on watch time and failed titles, by the rule set before any upload. Bet 1's release now runs on the new model too, and I brought it back in line with the live code, so your label can still ship it in one step.
+- **Data (scored blind):** fresh helpers, never told which model wrote what, scored the host lines. 3.6 Flash reacted on 4 of 9 today, under yesterday's bar of 5, so as planned I told you on #77. The figure I gave you there for the old model (about 21 of 27) had been scored by eye. Scored the same blind way, the old model reacted on 14 of 21 and the new one on 2 of 12. So the drop is real; the old model's rate is nearer 2 in 3 than the 4 in 5 I quoted.
+- **Product (checked, free):** Groq's best free model, our legal fallback, reacted on 1 of 9 beside 3.6 Flash's 4 of 9. So moving to Groq still isn't the fix.
+- **Product (built and planned):** the trial tool can now test the new model at a little more "thinking", which is the cheapest single change to try. Tomorrow's test (6 AI requests) compares that, and a wording that tells it only to react, against today's lines. Each is scored blind, and the rule for what ships was set tonight, before any result: 7 of 9 to go further, then 12 of 18 to ship. A fresh review found no bugs.
+- **Data (rule set before any result):** the capitals test and the voice test both run across the switch. Their groups are drawn at random per upload, so the switch hits both groups alike, and they will be read as planned, with no after-the-fact split by model.
+- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading them in opposite orders both put the old-model check first; it is done. Dropped: a filter for summary-style lines (it would strip the host from most videos), a new sample video (needs paid narration and another ask of you), a combined request to you (each of these reports already ends with your list in order), and pre-filling the Reddit registration (the ask already names the page and what it needs, and the form would put our app's details in a public issue).
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.20 this month, forecast $0.80 of $3).
+- **Reliability (checked):** this morning's upload landed. This morning's shift was cut off before it did anything, so today's test fell to this one.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; now with weaker host lines, see the comment), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
+
+### Next
+- **9 November, after 07:00 and an hour clear of an upload:** stage 1 of the host-line test, under its rule. **The new model's first week:** check each upload's title came from it and none hit its daily limit.
+- **9 November weekly**, as listed in yesterday's entry, including whether the switch's videos may count with today's as bet 1's comparison.
+
+### Better?
+- **Than last shift:** yes, slightly: uploads are safe past 1 December, and bet 1's weaker host lines are known, measured fairly, and have a test lined up, all before it ships.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-07 (23:07) — Nothing was ready and two rounds of ideas found nothing worth doing tonight; one flawed title is now set aside before the capitals test is read
 
     Worked (% of the shift): gm 45 · editorial 20 · data 10 · reliability 10 · security 10 · product 5
@@ -94,48 +129,3 @@ and more useful than a confident guess.
 - **Than last shift:** no. One flaw that would have tilted a test's read is set aside, which is small.
 - **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-07 (17:20) — The backup replacement for our title-writing AI passes its title and safety checks but wrote flatter host lines; we will switch to a replacement before bet 1, on a rule set tonight
-
-    Worked (% of the shift): reliability 55 · gm 20 · strategy 10 · data 5 · market 5 · security 5
-
-**Summary:** Nothing viewers see changed, and the company is no closer to revenue: bet 1 (#77) still waits on your label. I tested Google's backup replacement for the AI that writes our titles and runs our safety screen a day early, on its own unused allowance. It is fast and safe, but on the one post tried it wrote flatter host lines than today's model, so tomorrow pits it against the other candidate on exactly that. When to switch, relative to bet 1, is now decided.
-
-### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds.
-- **A risk to bet 1, found three weeks early.** From 1 December, bet 1's host lines come from whichever replacement we pick. If neither candidate reacts the way today's model does, the host gets weaker on that date whatever we do. Tomorrow's test picks the better one, and if both fall short I will tell you in #77, since it changes what you would be approving.
-- **The switch goes first, whatever happens with #77.** Bet 1 needs about four weeks on its own before the next change, so a clean measurement needed it live by about 4 November. Switching first also avoids the risk that every request fails over to the backup on 1 December. If you label #77 before the switch, bet 1 waits a few days for it, not weeks. If the switch is not ready by 14 November, bet 1 goes first once you label it, and the switch follows by 28 November.
-
-### Done
-- **Reliability (tested, a day early):** the morning shift moved the rest of this test to tomorrow, but only the first candidate's allowance was used up. The backup, Gemini 3.6 Flash, has its own, and uploads never touch it. On it, a title, keywords and closing line took 2.3 seconds (the first candidate took 34). The safety screen got 5 of 5 cases right, each in 1 to 5 seconds, apart from one busy-server refusal that the built-in retry absorbed. The same check on bet 1's release passed. 8 AI requests, the shift's cap.
-- **Reliability (found):** on bet 1's release, 3.6 Flash's three host lines summarised the answers ("Glass costs more", "Per day cost"). Today's model, on the same post, has reacted with most of its lines in every daily check since 27 October ("Ouch, lenses", "Two hundred dollars?!"). That is one post, so it shows a direction, not a rate.
-- **Reliability (built, on test branches):** both test branches now run 3.6 Flash. The safety screen keeps a little reasoning on either candidate, as the last review asked. The switch has its own version label and a 20-video bar for its measurement. The host-line test tool now reads either candidate with one command and times each request. A fresh review found no bugs, only three wrong comments, all fixed. All tests pass on both branches. A sample video of the switch rendered and played correctly, its last routine check, so if 3.6 Flash wins tomorrow it can ship the same day. A small tool now mixes tomorrow's host lines into one shuffled sheet with the models hidden, so the scoring stays blind.
-- **Data (rule set before the result):** tomorrow both candidates write host lines for the same three posts, and a fresh helper scores all 18 blind, mixed together. Whichever reacts more is adopted, and a tie goes to 3.6 Flash. If the winner reacts on fewer than 5 of its 9, I tell you in #77 (today's model reacted on about 21 of 27).
-- **Strategy (rule set):** the timing above. One question goes to Monday's weekly review rather than a shift, because it changes how bet 1 is judged: whether the switch's videos may count with today's as bet 1's comparison. Without that, bet 1 approved soon after the switch would be compared with all past versions, a comparison we ruled out on 18 October.
-- **Market intelligence (read):** Google lists 3.6 Flash as a fixed model it does not repoint, with no shutdown date. Its daily limit is unpublished. Today's 8 requests drew no refusal, so it is at least 8, against the 4 to 10 a day production needs. The switch's first week watches for any limit refusal.
-- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.17 this month, forecast $0.76 of $3).
-- **Reliability (checked):** this morning's upload landed, and nothing has failed since the last shift.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading the list in opposite orders put the same three first: the timing rule, the daily-limit floor and the model-name check. All three are done. Dropped:
-  - a filter for summary-style host lines (its blind test needs tomorrow's lines)
-  - changing bet 1's comparison now (Monday's review, as above)
-  - keeping raw AI replies out of the public run log (it lands after bet 1, and is housekeeping)
-  - logging why a title was refused (the log already says so)
-- A second round, aimed at anything that changes what we ship or earn, found nothing above the bar. Scoring today's model blind beside tomorrow's candidates fails because its lines for those three posts are not on record, and getting them would spend the uploads' own allowance. Checking whether a past model change moved watch time fails because the model has not changed since July. So I handed over at 17:22 with nothing ready.
-- All of this was fixes, tests and rules. None changes what we ship yet.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your reply to its corrected sentence), #80, #59. You last acted on 27 October.
-
-### Next
-- **8 November, after 07:00 and an hour clear of an upload:** the two-candidate host-line trial (6 requests), then its rule. If 3.6 Flash wins, ship the switch that day: every check has passed. If 3.8 Flash wins, run its safety screen and title timing on a later day's allowance, then ship.
-- **9 November weekly:** whether the switch's videos may count with today's as bet 1's comparison (above). Also as set before: the friction fixes, the zero-view re-read by subreddit, the two dropped friction items, and, for you through that review, a proposal that the technical-debt list's cap count only open items (12 old history notes fill it today).
-- **Later dates:** 10 November, Reddit's terms. 14 November, bet 1 may go first on your label if the switch is not ready. 16 November, the view-swing read. 17 November, redraft the viewer replies if #89 is unlabelled. 20 November, bet 2's step if bet 1 is unmerged. 23 November, the capitals and voice reads. 30 November, the switch done at the latest.
-
-### Better?
-- **Than last shift:** no for viewers. The replacement is one test from ready, its timing against bet 1 is settled, and a weaker host from 1 December is known three weeks ahead.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
