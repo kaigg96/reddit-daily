@@ -456,15 +456,17 @@ a list nobody can read is the same as no list.
   11-19). If a later upload fails on the image, the fix is
   `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
-- **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
-  rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
-  local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
-  but every weekly diff is noisier than it needs to be. Noticed 2026-09-07
-  while shipping R4.7, which pinned LF on the *new* `traffic_sources.csv`.
-  Both writers are now pinned, so it will not worsen. **Normalizing the
-  existing rows is deliberately deferred:** it is a ~7,500-line mechanical diff
-  on a production data file, and worth doing on its own rather than buried in a
-  feature commit. Owner's call.
+- **Google's daily reset is 08:00 UTC from November to March (found 2026-11-08).**
+  The free tier clears at midnight Pacific time (`src/llm.py`'s 429 note), so
+  08:00 UTC since US daylight time ended on 1 November, and 07:00 again from
+  8 March. The shift skill (§6, "only after the 07:00 UTC reset") and
+  `dry-run.yml`'s gate (`-lt 7`, pinned by `scripts/dry_run.py`'s `RESET_HOUR`
+  and `tests/test_dry_run.py`) say 07:00 all year, so Gemini work or a render
+  between 07:00 and 08:00 UTC in winter spends the day the uploads already
+  used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
+  from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
+  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
+  after 08:00 UTC in winter; PRD §0's host-line row says so.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
