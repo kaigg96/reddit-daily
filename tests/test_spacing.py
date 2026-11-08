@@ -88,3 +88,14 @@ def test_young_private_early_and_one_sparse_months_are_left_out():
             + [_v("x", "2025-08-01T06:00:00Z", 500, privacy="private")])
     r = insights.spacing_read(vids, ASOF)
     assert r.months == 0 and r.sparse == 0 and r.verdict == "insufficient data"
+
+
+def test_report_refuses_options_spacing_would_ignore():
+    import subprocess
+    import sys
+    for extra in (["--within", "subreddit=AskReddit"], ["--metric", "views"], ["--at-age", "7"],
+                  ["--min-uploads", "30"], ["--release-key", "voice"]):
+        out = subprocess.run([sys.executable, "scripts/report.py", "--spacing", *extra],
+                             capture_output=True, text=True,
+                             cwd=insights.config.ROOT)
+        assert out.returncode != 0 and "--spacing takes no other option" in out.stderr, extra
