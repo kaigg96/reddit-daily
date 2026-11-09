@@ -61,6 +61,34 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-09 (12:25) — Shift helpers now see every recorded finding before proposing work, the biggest source of repeated work; Monday's figures had not arrived, so the weekly review falls to the evening shift
+
+    Worked (% of the shift): gm 55 · reliability 35 · security 5 · data 5
+
+**Summary:** I fixed the most common reason shifts redo work: the helpers that propose work now see a one-line list of every finding we have recorded. I also grouped a week of the friction log before it went stale. Monday's YouTube figures had not arrived by the end of the shift, so the weekly review moves to tonight's shift.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 12 seconds. Today's work makes shifts waste less time (the fix) and keeps the friction log's 7 December verdict readable. Bet 1 still waits on your label on #77, and tomorrow's host-line test is its next step.
+
+### Done
+- **General management (fixed):** the friction log had 44 rows nobody had sorted, and the oldest would have broken its 7-day rule tomorrow. All are now grouped. One group stands far above the rest: "recorded answers are hard to find, so work gets redone", 19 rows across 5 functions. Its main cause was that the helpers proposing work saw only recent drops and finished work, never the findings, so they kept re-proposing questions a finding had already answered. They now see all 56 finding headlines. A fresh review found no bugs, and it is live. It is the friction log's first fix, and its verdict on 7 December needs two that have held for 14 days.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.21 this month, forecast $0.75 of $3).
+- **Reliability (checked):** all 15 uploads since last Monday landed. Both made with the new model got AI-written titles, with no limit refusals. GitHub is starting our scheduled jobs four to seven hours late, and this morning's 03:17 shift never ran.
+
+### Blocked
+- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. Your last comment was on 20 October.
+
+### Next
+- **Tonight:** the weekly review, once Monday's figures land. It includes the zero-view re-read routed on 2 November.
+- **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day: stage 1 of the host-line test, under its rule.
+
+### Better?
+- **Than last shift:** slightly: shifts should now redo less work, and the friction log's verdict stays on track. Nothing reached viewers.
+- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-08 (23:30) — Tomorrow's host-line test moves a day so it can't use up an upload's AI allowance; our own history shows no sign that a second daily upload takes views from the first
 
     Worked (% of the shift): data 30 · strategy 30 · reliability 20 · gm 15 · security 5
@@ -92,41 +120,3 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-08 (17:56) — We switched to the replacement AI before Google retires ours, so uploads keep their titles past 1 December; it writes weaker host lines for bet 1, and tomorrow's test tries to win them back
-
-    Worked (% of the shift): reliability 40 · product 25 · data 15 · gm 10 · editorial 5 · security 5
-
-**Summary:** Today's model test picked Gemini 3.6 Flash, and it is now live: this evening's upload is the first made with it. That protects every upload's title and safety screen past Google's 1 December change. But the new model's host lines for bet 1 react to the answer about half as often as the old model's, so I have told you on #77 and set up tomorrow's test to try to win them back.
-
-### Toward revenue
-- **Protects what we have, does not grow it.** Watch time is flat at 12 seconds. Without the switch, Google would have silently changed the AI writing our titles, closing lines and safety checks on 1 December, in the middle of bet 2's measurement window.
-- **A setback for bet 1, found before it ships.** Bet 1 is the company's main bet, and its host lines are now the most valuable thing to improve. Tomorrow's test is the next step.
-
-### Done
-- **Reliability (tested, then shipped):** the two-candidate test planned yesterday. Gemini 3.8 Flash didn't answer any of its three requests (twice the server was busy, once it timed out at a minute), which disqualifies it under yesterday's rule. Gemini 3.6 Flash answered all three in about two seconds each. 6 AI requests, from the two candidates' own allowances, not the uploads'.
-- **Reliability (shipped):** the switch went live as its own version, so its effect can be measured. All tests pass, two fresh reviews found no bugs yesterday, and its sample video played. It is judged around 25 November on watch time and failed titles, by the rule set before any upload. Bet 1's release now runs on the new model too, and I brought it back in line with the live code, so your label can still ship it in one step.
-- **Data (scored blind):** fresh helpers, never told which model wrote what, scored the host lines. 3.6 Flash reacted on 4 of 9 today, under yesterday's bar of 5, so as planned I told you on #77. The figure I gave you there for the old model (about 21 of 27) had been scored by eye. Scored the same blind way, the old model reacted on 14 of 21 and the new one on 2 of 12. So the drop is real; the old model's rate is nearer 2 in 3 than the 4 in 5 I quoted.
-- **Product (checked, free):** Groq's best free model, our legal fallback, reacted on 1 of 9 beside 3.6 Flash's 4 of 9. So moving to Groq still isn't the fix.
-- **Product (built and planned):** the trial tool can now test the new model at a little more "thinking", which is the cheapest single change to try. Tomorrow's test (6 AI requests) compares that, and a wording that tells it only to react, against today's lines. Each is scored blind, and the rule for what ships was set tonight, before any result: 7 of 9 to go further, then 12 of 18 to ship. A fresh review found no bugs.
-- **Data (rule set before any result):** the capitals test and the voice test both run across the switch. Their groups are drawn at random per upload, so the switch hits both groups alike, and they will be read as planned, with no after-the-fact split by model.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas, and two rankers reading them in opposite orders both put the old-model check first; it is done. Dropped: a filter for summary-style lines (it would strip the host from most videos), a new sample video (needs paid narration and another ask of you), a combined request to you (each of these reports already ends with your list in order), and pre-filling the Reddit registration (the ask already names the page and what it needs, and the form would put our app's details in a public issue).
-- **Editorial (rule set before the first upload):** we already refuse titles that sell shock ("you won't believe"), and those refusals don't count against the switch's pass mark. So at its 20th upload I will count them: 5 or more of 20 (the old model: 2 of 30) puts a fix to the title instructions in the queue.
-- **Reliability (found):** Google's free AI allowance resets at midnight California time. Since the clocks changed on 1 November, that is 08:00 UTC, not the 07:00 our shift rules and sample-video gate assume. AI work in that hour draws on the previous day's allowance, which the uploads already used. The exposure is small: shifts start at 03:17, 11:17 and 19:17. It is logged for a fix; until then, tomorrow's test waits until after 08:00.
-- **General management (second round):** a fresh helper, aimed at what can be done today without the AI allowance or you, found the two items above and nothing else above the bar. A Reddit terms re-read waits for their 10 November update; the viewer replies wait on #89; preparing tomorrow's review now would be redone once Monday's figures arrive.
-- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.20 this month, forecast $0.80 of $3).
-- **Reliability (checked):** this morning's upload landed. This morning's shift was cut off before it did anything, so today's test fell to this one.
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; now with weaker host lines, see the comment), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. You last acted on 27 October.
-
-### Next
-- **First, tonight's upload:** the first on the new model had not started by 17:55. Check that it landed with a title the new model wrote, and no limit refusal.
-- **9 November, after 08:00 UTC and an hour clear of an upload:** stage 1 of the host-line test, under its rule. **The new model's first week:** check each upload's title came from it and none hit its daily limit.
-- **9 November weekly**, as listed in yesterday's entry, including whether the switch's videos may count with today's as bet 1's comparison.
-
-### Better?
-- **Than last shift:** yes, slightly: uploads are safe past 1 December, and bet 1's weaker host lines are known, measured fairly, and have a test lined up, all before it ships.
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
