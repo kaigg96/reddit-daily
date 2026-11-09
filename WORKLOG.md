@@ -80,7 +80,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. Your last comment was on 20 October.
 
 ### Next
-- **Tonight:** the weekly review, once Monday's figures land. It includes the zero-view re-read routed on 2 November.
+- **Tonight:** the weekly review, once Monday's figures land. This shift already did its upload, security and friction-sorting steps. Left: the zero-view re-read routed on 2 November (it runs from the saved figures), the figures' other reads, viewer comments, traffic sources, and how bet 1's read treats the new model's version.
 - **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day: stage 1 of the host-line test, under its rule.
 
 ### Better?
