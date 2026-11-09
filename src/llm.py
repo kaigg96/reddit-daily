@@ -250,7 +250,13 @@ def _failure_kind(exc):
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.HTTPError) and response is not None:
         kind = f"http_{response.status_code}"
-        return kind + _quota_window(response) if response.status_code == 429 else kind
+        if response.status_code != 429:
+            return kind
+        window = _quota_window(response)
+        cap = window == "_day" and _day_cap(response)
+        if cap:
+            print(f"Gemini daily cap: {cap[0]} requests ({cap[1] or 'model not named'})")
+        return kind + window
     if isinstance(exc, requests.Timeout):
         return "timeout"
     return type(exc).__name__
@@ -275,6 +281,27 @@ def _quota_window(response):
     if "perday" in flat:
         return "_day"
     return "_minute" if "perminute" in flat else ""
+
+
+def _day_cap(response):
+    """(requests, model) of the day cap a 429 names, else None. Never raises.
+
+    The 20 a day every plan budgets was read off a `gemini-2.5-flash` 429
+    (PRD §2), and Google's docs stopped listing free-tier caps (11-07), so
+    `gemini-3.6-flash`'s is unknown: its first day-cap 429 is the only place
+    the number appears. A number and a model name, so safe in a public log.
+    Google's JSON leaves a zero out, so a day cap with no value reads as 0: no
+    free tier on that model, which a silent log would hide."""
+    try:
+        for detail in response.json()["error"]["details"]:
+            for v in detail.get("violations", []):
+                value = str(v.get("quotaValue", "0"))
+                if "perday" in str(v.get("quotaId", "")).lower() and value.isascii() \
+                        and value.isdigit():
+                    return int(value), str((v.get("quotaDimensions") or {}).get("model") or "")
+    except Exception:
+        return None
+    return None
 
 
 _CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
