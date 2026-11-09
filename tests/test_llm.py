@@ -504,9 +504,20 @@ def test_no_cap_is_printed_unless_a_day_cap_names_its_number(capsys):
            '{"error": {"details": [{"violations": [{"quotaId": "PerDay", "quotaValue": "lots"}]}]}}',
            '{"error": {"message": "Rate limit reached on tokens per day (TPD)"}}', "[]"]
     assert llm._failure_kind(_quota_429(minute)) == "http_429_minute"
-    for body in odd:
-        assert llm._failure_kind(_quota_429(body)).startswith("http_429")
+    for body, label in zip(odd, ["http_429_day", "http_429", "http_429", "http_429_day",
+                                 "http_429_day", "http_429"]):
+        assert llm._failure_kind(_quota_429(body)) == label
     assert capsys.readouterr().out == ""
+
+
+def test_a_day_cap_with_no_value_reads_as_zero_and_a_null_model_as_unnamed(capsys):
+    """Google's JSON omits a zero quotaValue: a model with no free tier at all."""
+    body = ('{"error": {"details": [{"violations": [{"quotaId": '
+            '"GenerateRequestsPerDayPerProjectPerModel-FreeTier", '
+            '"quotaDimensions": {"model": null}}]}]}}')
+    assert llm._failure_kind(_quota_429(body)) == "http_429_day"
+    assert capsys.readouterr().out == "Gemini daily cap: 0 requests (model not named)\n"
+    assert llm._day_cap(_quota_429(body.replace("}}]", '}, "quotaValue": "²"}]')).response) is None
 
 
 def test_only_a_429_reads_the_body():

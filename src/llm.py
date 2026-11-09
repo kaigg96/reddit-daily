@@ -289,13 +289,16 @@ def _day_cap(response):
     The 20 a day every plan budgets was read off a `gemini-2.5-flash` 429
     (PRD §2), and Google's docs stopped listing free-tier caps (11-07), so
     `gemini-3.6-flash`'s is unknown: its first day-cap 429 is the only place
-    the number appears. A number and a model name, so safe in a public log."""
+    the number appears. A number and a model name, so safe in a public log.
+    Google's JSON leaves a zero out, so a day cap with no value reads as 0: no
+    free tier on that model, which a silent log would hide."""
     try:
         for detail in response.json()["error"]["details"]:
             for v in detail.get("violations", []):
-                value = str(v.get("quotaValue", ""))
-                if "perday" in str(v.get("quotaId", "")).lower() and value.isdigit():
-                    return int(value), str((v.get("quotaDimensions") or {}).get("model", ""))
+                value = str(v.get("quotaValue", "0"))
+                if "perday" in str(v.get("quotaId", "")).lower() and value.isascii() \
+                        and value.isdigit():
+                    return int(value), str((v.get("quotaDimensions") or {}).get("model") or "")
     except Exception:
         return None
     return None
