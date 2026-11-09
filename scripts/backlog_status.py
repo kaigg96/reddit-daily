@@ -225,9 +225,10 @@ _DATED = re.compile(r"\d{4}-\d{2}-\d{2}")
 def answered_in(text):
     """The headline of each finding in PRD §4, in the order written. Generators
     kept proposing what a finding had already answered (friction group G2: 19
-    rows by 11-09, among them question length, bet 1's late-merge rule and
-    per-video traffic sources) because only drops and done work were listed."""
-    m = re.search(r"^### Findings.*?(?=^## 5\.|\Z)", text, re.S | re.M)
+    rows by 11-09; F157, F168, F201) because only drops and done work were
+    listed. Headlines only: a topic a finding answers inside its body, or in
+    §6, is still the generator's to look up."""
+    m = re.search(r"^### Findings.*?(?=^## |\Z)", text, re.S | re.M)
     heads = (_FINDING.match(line) for line in (m.group(0) if m else "").splitlines())
     return [_clip(h.group(1).strip(), 200) for h in heads
             if h and _DATED.search(h.group(1))]
