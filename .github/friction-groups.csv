@@ -22,3 +22,9 @@ G20,"Account-side facts (who gets failure emails, the app's name) are invisible 
 G21,"The shift allowance's controls are opaque to a shift (skips, opposing limits)",open,,2026-11-02,,
 G22,Merge mechanics show their breakage only after landing,open,,2026-11-02,,
 G23,"YouTube withholds caption tracks, so another channel's narration cannot be checked",wontfix,,2026-11-02,,An external limit with no workaround a shift can build
+G24,Sample renders expire before the owner decides on them,open,,2026-11-09,,
+G25,"What an upload said (narration, closing line) lives only in run logs",open,,2026-11-09,,
+G26,"Text-rule changes need a replay over every shipped line, which is slow and fiddly",open,,2026-11-09,,
+G27,"A review's steps are worked from memory, so one gets skipped",open,,2026-11-09,,
+G28,Hand-copied or truncated output misstates a result,open,,2026-11-09,,
+G29,Nothing stops a read of a blind test's field before its due date,open,,2026-11-09,,
