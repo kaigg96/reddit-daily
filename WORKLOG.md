@@ -61,19 +61,19 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-09 (12:25) — Shift helpers now see every recorded finding before proposing work, the biggest source of repeated work; Monday's figures had not arrived, so the weekly review falls to the evening shift
+## 2026-11-09 (12:15) — Shift helpers now see every recorded finding before proposing work, the biggest source of repeated work; uploads will record the new AI's unpublished daily limit the first time they hit it
 
     Worked (% of the shift): gm 55 · reliability 35 · security 5 · data 5
 
-**Summary:** I fixed the most common reason shifts redo work: the helpers that propose work now see a one-line list of every finding we have recorded. I also grouped a week of the friction log before it went stale. Monday's YouTube figures had not arrived by the end of the shift, so the weekly review moves to tonight's shift.
+**Summary:** I fixed the most common reason shifts redo work: the helpers that propose work now see every finding we have recorded. Uploads also now record the new AI's daily limit the first time they hit it. Neither change reaches viewers, and the weekly review moves to tonight because Monday's figures had not arrived.
 
 ### Toward revenue
-- **Nothing directly.** Watch time is flat at 12 seconds. Today's work makes shifts waste less time (the fix) and keeps the friction log's 7 December verdict readable. Bet 1 still waits on your label on #77, and tomorrow's host-line test is its next step.
+- **Nothing directly.** Watch time is flat at 12 seconds. Shifts should waste less time, and bet 2's four-a-day plan will no longer rest on a daily limit nobody has seen once an upload hits it. Bet 1 still waits on your label on #77, and tomorrow's host-line test is its next step.
 
 ### Done
 - **General management (fixed):** the friction log had 44 rows nobody had sorted, and the oldest would have broken its 7-day rule tomorrow. All are now grouped, in about 8 minutes (the log's rule allows about 20 a week). One group stands far above the rest: "recorded answers are hard to find, so work gets redone", 19 rows across 5 functions. Its main cause was that the helpers proposing work saw only recent drops and finished work, never the findings, so they kept re-proposing questions a finding had already answered. They now see all 56 finding headlines. A fresh review found no bugs, and it is live. It is the friction log's first fix, and its verdict on 7 December needs two that have held for 14 days.
 - **Reliability (built, live):** the "20 AI requests a day" that every plan budgets on was read off the old model in September. Google no longer publishes the new model's figure, so four a day (bet 2's route) and each shift's budget rest on a number nobody has seen. Now, the first time an upload hits the new model's daily limit, its log records the limit. Logging only, so viewers see no change; a fresh review found no bugs.
-- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas; only the daily-limit log line above survived. A second helper, aimed at the functions this shift had not touched, found nothing above the bar. It was the first to use the new findings list, which settled three of its ideas in seconds. Dropped: a rule for how bet 1's read treats the new model's version (tonight's review decides it); pre-building the replacement source (dated 14 December); more background music (it would disturb two running tests); redrafting the viewer replies (nothing posts without your label on #89). Checked and changing nothing: Google's AI terms still let it learn from what we send (last changed 23 March), and YouTube's election rules end with the vote, so our election-week skip rightly lapses on 10 November.
+- **General management (ranking):** nothing was ready. A fresh helper proposed eight ideas; only the daily-limit log line above survived. A second helper, aimed at the functions this shift had not touched, found nothing above the bar. It was the first to use the new findings list, which settled three of its ideas in seconds. Dropped: a rule for how bet 1's read treats the new model's version (tonight's review decides it); pre-building the replacement source (dated 14 December); more background music (it would disturb two running tests); redrafting the viewer replies (nothing posts without your label on #89). Checked and changing nothing: Google's AI terms still let it learn from what we send (last changed 23 March), and YouTube's election rules end with the vote, so our election-week skip rightly lapses on 10 November. With nothing else above the bar, I waited for Monday's figures until 12:11 and handed over at 12:15, 16 minutes early.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.21 this month, forecast $0.75 of $3).
 - **Reliability (checked):** all 15 uploads since last Monday landed. Both made with the new model got AI-written titles, with no limit refusals. GitHub is starting our scheduled jobs four to eight hours late; this shift, at 11:31, was today's first.
 
@@ -82,7 +82,7 @@ and more useful than a confident guess.
 
 ### Next
 - **Tonight:** the weekly review, once Monday's figures land. This shift already did its upload, security and friction-sorting steps. Left: the zero-view re-read routed on 2 November (it runs from the saved figures), the figures' other reads, viewer comments, traffic sources, and how bet 1's read treats the new model's version.
-- **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day: stage 1 of the host-line test, under its rule.
+- **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day: stage 1 of the host-line test, under its rule. Leave bet 1's release untouched until then: any change to it makes that day's check run and spend the allowance again.
 
 ### Better?
 - **Than last shift:** slightly: shifts should now redo less work, and the friction log's verdict stays on track. Nothing reached viewers.
