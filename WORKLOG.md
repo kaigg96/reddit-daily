@@ -73,7 +73,7 @@ and more useful than a confident guess.
 ### Done
 - **General management (fixed):** the friction log had 44 rows nobody had sorted, and the oldest would have broken its 7-day rule tomorrow. All are now grouped. One group stands far above the rest: "recorded answers are hard to find, so work gets redone", 19 rows across 5 functions. Its main cause was that the helpers proposing work saw only recent drops and finished work, never the findings, so they kept re-proposing questions a finding had already answered. They now see all 56 finding headlines. A fresh review found no bugs, and it is live. It is the friction log's first fix, and its verdict on 7 December needs two that have held for 14 days.
 - **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.21 this month, forecast $0.75 of $3).
-- **Reliability (checked):** all 15 uploads since last Monday landed. Both made with the new model got AI-written titles, with no limit refusals. GitHub is starting our scheduled jobs four to seven hours late, and this morning's 03:17 shift never ran.
+- **Reliability (checked):** all 15 uploads since last Monday landed. Both made with the new model got AI-written titles, with no limit refusals. GitHub is starting our scheduled jobs four to eight hours late; this shift, at 11:31, was today's first.
 
 ### Blocked
 - **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence), #80, #59. Your last comment was on 20 October.
