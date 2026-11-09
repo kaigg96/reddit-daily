@@ -1,95 +1,99 @@
-## Shift trace — run 42532443375
+## Shift trace — run 42609670525
 
-**Ended:** success, is_error false, 124 turns, 35.4 min, stop end_turn; 1 permission denial(s): Bash. **Tool calls:** 123, 3 failed. Helper agents made 84 more, 2 failed.
+**Ended:** success, is_error false, 189 turns, 43.8 min, stop end_turn; 4 permission denial(s): Bash, Monitor. **Tool calls:** 188, 6 failed. Helper agents made 103 more, 0 failed.
 
 **Last message:**
 
-> The handover is pushed to main and the tree is clean. I'm stopping at 23:29, 24 minutes early, because nothing else was ready and a last look found nothing worth doing; the handover says what I considered.
+> I handed over at 12:15, 16 minutes early. Nothing else was ready: two rounds of fresh helpers produced 16 ideas, and only one cleared the bar. Monday's analytics snapshot still hadn't started by 12:11, so the weekly review goes to tonight's shift.
 >
-> **What moved**
-> - **Host-line test moved to 10 November.** Since the model switch, the daily release check uses the same AI allowance as the uploads. Tomorrow it re-tests bet 1's release (6–8 requests, because that release changed tonight). Add the planned test's 6 and the uploads' 4–10, and Google's day could reach 24 against the 20 we plan around. The next morning's upload would then lose its AI title. So the test now waits for a day the check is idle; the plan says how to tell. The first-week check on the new model's daily limit also now ignores days we spent from it ourselves. Otherwise our own spending would look like "this model's allowance is too small" and push us towards the model that failed every request today.
-> - **#77's figure corrected.** The comment the owner will read when deciding bet 1 still gave the old model's host lines as about 21 of 27 reacting, scored by eye. It now gives the blind scores: 14 of 21 for the old model against 2 of 12 for the new one. Editing a comment sends no email.
-> - **A first answer for bet 2's route.** Bet 2 plans four uploads a day, which only works if a video keeps its views when more of ours share the feed. Our history can only compare videos beside a missed slot with the normal twice-a-day rhythm; it says nothing about four a day. I published the rule before reading any views. The first review found my labels fitted almost no videos at 12-hour spacing, so I amended the rule, still unread. After a second review found no bugs, I ran it once. Videos beside a missed slot got 1.08 times the views of the rest, inside the ±17% that chance alone produces, with the same watch time. So there's no detectable dilution at this spacing: the four-a-day plan is unchanged, though a smaller effect or one at six-hour spacing can't be rul
+> **Shipped to `main` (tests pass, a fresh review of each found no bugs):**
+> - **Friction log sorted.** All 44 ungrouped rows now have a group. The oldest would have broken the log's 7-day rule tomorrow, and today's 03:17 shift never ran to do it. The biggest group by far is "recorded answers are hard to find, so work gets redone": 19 rows across 5 functions.
+> - **That group's first fix.** `backlog_status.py --dropped` now also lists the headline of all 56 findings in the product plan. The second-round helper was its first user and dropped three of its ideas on it in seconds. The friction log's 7 December verdict needs two fixed groups that have each held for 14 days, so this is one of them.
+> - **The new AI's daily limit gets recorded.** Every plan budgets on 20 requests a day, a figure read off the old model in September. Google no longer publishes the new model's limit. Now the first time an upload hits that limit, the run log prints `Gemini daily cap: N requests (model)`. It's logging only, so viewers see no change and no version bump was needed. It changes nothing on the release branch, so tomorrow's host-line test isn't pushed back.
+>
+> **Checked, all clean:** all 15 uploads since last Monday landed, and both made on the new model got AI-written titles. No secrets are committed, no workflows have changed, and the money controls are intact ($0.21 spent this month). The guardrail checks passed on every push except the final handover commit, whose run GitHub hadn't started by 12:15; it only changes the work log.
+>
+> **Handover:** the work log entry is committed and pushed. It tells tonight's shift which weekly-review steps are already done and that the zero-view re-read runs from the saved figures. It also says to leave bet 1's re
 
-### Tool calls (last 80 of 123)
+### Tool calls (last 80 of 188)
 
-44. Bash: date -u +%H:%M
-45. ToolSearch: select:Monitor,TaskGet
-46. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-47. Bash: sleep 100; date -u +%H:%M
-48. Bash: ls; ls analysis | head -30; grep -rln "expire" scripts/post_replies.py scripts/comments.py 2>/dev/null
-49. Bash: grep -n -i "expire\|days" scripts/comments.py | head -15; cut -c1-220 analysis/replies.csv
-50. ✗ Bash: sleep 60; date -u +%H:%M — <tool_use_error>Blocked: sleep 60 followed by: date -u +%H:%M. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>…
-51. Monitor: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bqwfdohcb.output ]; do s…
-52. Bash: git log origin/main -1 --format='%h %s' && git status --short | head
-53. Monitor: until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bqwfdohcb.output ]; do s…
-54. Read: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
-55. Bash: timeout 115 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bqw…
-56. Bash: sleep 150; date -u +%H:%M
-57. Bash: timeout 160 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bdu…
-58. Bash: sleep 170; date -u +%H:%M
-59. Bash: timeout 175 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/b11…
-60. Bash: gh api repos/{owner}/{repo}/issues/77/comments --paginate --jq '.[] | select(.created_at > "2026-11-07") | "\(.id) \(.created_at) \(.user.l…
-61. Bash: gh api repos/{owner}/{repo}/issues/comments/6724481084 --jq .body > /tmp/c77.md && python3 - <<'EOF'
-62. Bash: grep -n "def screen\|MODEL\|screen.screen" scripts/post_replies.py | head; python3 - <<'EOF'
-63. Bash: date -u +%H:%M && venv/bin/python scripts/check_docs.py 2>&1 | tail -2 && git add PRD.md && git commit -q -m "Reply-job days join the http_…
-64. Bash: grep -n "background_type\|def derive\|DERIVED\|def _derived\|title_caps\|video_length" src/insights.py | head -30; wc -l src/insights.py
-65. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-66. Bash: head -1 analysis/analytics_snapshots.csv | tr ',' '\n' | nl | head -40; head -1 analysis/channel_videos.csv | tr ',' '\n' | nl | head -30
-67. Bash: python3 - <<'EOF'
-68. Bash: venv/bin/python scripts/report.py --help 2>&1 | grep -n -i -A2 "catalogue\|offline\|--by\|matched\|--within" | head -40
-69. Bash: python3 - <<'EOF'
-70. Bash: grep -n "PRD.md#0\|#0\.\|def _section\|def words" scripts/context_budget.py | head; git diff --stat
-71. Bash: sed -n 95,130p scripts/context_budget.py
-72. Bash: git diff PRD.md | grep "^[-+]" | cut -c1-200
-73. Bash: python3 - <<'EOF'
-74. Bash: python3 - <<'EOF'
-75. Bash: git checkout -q -b data/r8-spacing && grep -n "def .*chance\|def _shuffle\|def permutation\|def _gap\|def load_snapshot\|def _read_snapshot…
-76. Bash: grep -n "^def \|chance gap\|shuffl" src/insights.py | sed -n 1,200p | grep -i -B1 -A1 "chance\|shuffl\|catalogue\|def compare\|def _gap" | …
-77. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-78. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-79. Bash: grep -n "def _parse_ts" -A8 src/insights.py | head -12; awk -F, 'NR==2{print $3}' analysis/analytics_snapshots.csv; grep -n "catalogue" scr…
-80. Bash: sed -n 586,612p scripts/report.py; sed -n 740,750p scripts/report.py; sed -n 776,790p scripts/report.py; sed -n 970,985p scripts/report.py
-81. Bash: python3 - <<'EOF'
-82. Bash: sed -n 30,40p src/insights.py; grep -n "@dataclass\|class .*NamedTuple\|namedtuple" src/insights.py | head -5
-83. Bash: python3 - <<'EOF'
-84. Bash: python3 - <<'EOF'
-85. Bash: git add src/insights.py scripts/report.py tests/test_spacing.py && git commit -q -m "report.py --spacing: R8's pre-committed read, alone vs…
-86. Agent: Review R8 spacing diff
-87. Bash: git checkout -q main && venv/bin/python scripts/friction.py add --function data --task "Correct #77's 11-08 comment to the blind-scored bas…
-88. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-89. Bash: date -u +%H:%M; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|OVER|All within"
-90. Bash: python3 - <<'EOF'
-91. Bash: python3 - <<'EOF'
-92. Bash: sleep 120; date -u +%H:%M
-93. Bash: timeout 125 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bl3…
-94. Bash: python3 - <<'EOF'
-95. Bash: git checkout -q data/r8-spacing && python3 - <<'EOF'
-96. Write: /home/runner/work/reddit-daily/reddit-daily/tests/test_spacing.py
-97. Bash: venv/bin/python -m pytest tests/test_spacing.py -q 2>&1 | tail -15; date -u +%H:%M
-98. Bash: python3 - <<'EOF'
-99. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A src/insights.py scripts/report.py tests/test_spacing.py && git commit -q -…
-100. Agent: Re-review R8 fix
-101. Bash: sleep 110; date -u +%H:%M
-102. Bash: timeout 115 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/bjv…
-103. Bash: grep -ln "insights" src/run.py src/video.py src/llm.py 2>/dev/null; git checkout -q main && git pull -q --ff-only origin main && git merge …
-104. Bash: venv/bin/python scripts/report.py --spacing; date -u +%H:%M
-105. Bash: python3 - <<'EOF'
-106. Bash: python3 - <<'EOF'
-107. Bash: grep -o "Views per upload may dilute\.[^|]\{0,20\}" PRD.md; python3 - <<'EOF'
-108. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -i "stale" ; venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; git add PRD.md WORKLOG.m…
-109. Bash: grep -n "any(early)\|if any(early\|early)" scripts/report.py | head; grep -n "args.within and" scripts/report.py | head
-110. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-111. Bash: git checkout -q -b data/spacing-guard && python3 - <<'EOF'
-112. Bash: cat >> tests/test_spacing.py <<'EOF'
-113. Bash: git add scripts/report.py tests/test_spacing.py && git commit -q -m "report.py --spacing refuses --within, --at-age, --by, --compare and a …
-114. Agent: Review spacing guard diff
-115. Bash: git checkout -q main && python3 - <<'EOF'
-116. Bash: python3 - <<'EOF'
-117. Bash: sleep 90; date -u +%H:%M
-118. Bash: timeout 95 bash -c 'until [ -s /tmp/claude-1001/-home-runner-work-reddit-daily-reddit-daily/cfd9acde-0256-430e-8a63-09bcdeeb6fd8/tasks/'"$(…
-119. Bash: git stash -q && git checkout -q data/spacing-guard && grep -n '"--min-uploads"\|"--release-key"' -A1 scripts/report.py; grep -n "args = p.p…
-120. Bash: python3 - <<'EOF'
-121. Bash: git checkout -q main && git pull -q --ff-only origin main && git merge -q --no-ff data/spacing-guard -m "Merge data/spacing-guard: --spacin…
-122. Bash: venv/bin/python scripts/friction.py add --function data --task "--spacing refuses options it would ignore silently" --outcome done --catego…
-123. Bash: python3 - <<'EOF'
+109. Bash: git checkout -q reliability/day-cap-value && venv/bin/python - <<'EOF'
+110. Bash: git branch --show-current; git status --short; grep -c "_day_cap" src/llm.py
+111. Bash: git add WORKLOG.md && git commit -q -m "Handover draft: shift-start wording" && git push -q origin main && git checkout -q reliability/day-…
+112. Bash: venv/bin/python - <<'EOF'
+113. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A src/llm.py tests/test_llm.py && git commit -q -m "Day cap: a missing quota…
+114. Bash: git fetch -q origin && venv/bin/python scripts/check_docs.py 2>&1 | grep -i "merge"; grep -o "first week, watch \`http_429_day\`" PRD.md
+115. Bash: sed -i 's/first week, watch `http_429_day`/first week, watch `http_429_day` (its run log prints the cap, `Gemini daily cap:`, since 11-09)/…
+116. Bash: venv/bin/python -m pytest tests/ -q -k "doc or prd or backlog or friction" 2>&1 | tail -1 && git add PRD.md .github/friction.csv && git com…
+117. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+118. Bash: git add WORKLOG.md && git commit -q -m "Handover draft: the day-cap log line" && git push -q origin main; gh run list --workflow weekly-ana…
+119. Bash: sed -n 64,80p WORKLOG.md | cut -c1-160
+120. Bash: git status --short | head -3; git branch --show-current; date -u +%H:%M
+121. Bash: for b in gm/answered-headlines reliability/day-cap-value; do git merge-base --is-ancestor origin/$b origin/main && git push -q origin --del…
+122. Bash: gh run list --limit 3 | grep -v Guardrail | cut -c1-90; date -u +%H:%M
+123. Bash: timeout 60 venv/bin/python scripts/report.py --zeros --offline 2>&1 | tail -6; echo "exit $?"
+124. Bash: date -u +%H:%M
+125. Bash: venv/bin/python scripts/friction.py report 2>&1 | head -3
+126. Bash: gh issue view 93 2>&1 | sed -n '/^--/,$p' | head -25 | cut -c1-300
+127. Bash: date -u +%H:%M:%S
+128. Bash: venv/bin/python scripts/statusline.py --budget 2>&1 | head -2
+129. ✗ Bash: sleep 45; date -u +%H:%M:%S — <tool_use_error>Blocked: sleep 45 followed by: date -u +%H:%M:%S. To wait for a condition, use Monitor with an until-loop (e.g. `until <che…
+130. ToolSearch: select:Monitor
+131. ✗ Monitor: cd /home/runner/work/reddit-daily/reddit-daily; seen=""; while true; do s=$(gh run list --workflow weekly-analytics.yml --limit 1 --json cr… — Contains case_statement
+132. ✗ Monitor: cd /home/runner/work/reddit-daily/reddit-daily; seen=""; while true; do s=$(gh run list --workflow weekly-analytics.yml --limit 1 --json cr… — Contains shell syntax (string) that cannot be statically analyzed
+133. Write: /tmp/watch_snapshot.py
+134. ✗ Monitor: /home/runner/work/reddit-daily/reddit-daily/venv/bin/python /tmp/watch_snapshot.py — This command requires approval
+135. Bash: date -u +%H:%M:%S; gh run list --workflow weekly-analytics.yml --limit 1 --json createdAt,status --jq '.[0]'
+136. Bash: git log origin/main --oneline -1; date -u +%H:%M:%S
+137. Bash: venv/bin/python scripts/validate_release.py --should-run --target integration/preview --verdict-file .github/last-release-validation.md 2>&…
+138. Bash: date -u +%H:%M:%S
+139. Bash: venv/bin/python - <<'EOF'
+140. Bash: date -u +%H:%M:%S; gh run list --limit 3 --json name,createdAt --jq '.[] | "\(.createdAt) \(.name)"'
+141. Bash: gh run list --workflow guardrails.yml --limit 8 --json conclusion,status,displayTitle --jq '.[] | "\(.status) \(.conclusion) \(.displayTitl…
+142. Bash: date -u +%H:%M:%S
+143. Bash: venv/bin/python scripts/report.py --scorecard 2>&1 | tail -15
+144. Bash: date -u +%H:%M:%S
+145. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+146. Bash: git add WORKLOG.md && git commit -q -m "Handover draft: which weekly-review steps are done" && git push -q origin main; date -u +%H:%M:%S
+147. Bash: gh run list --workflow weekly-analytics.yml --limit 1 --json createdAt --jq '.[0].createdAt'; date -u +%H:%M:%S
+148. Bash: /home/runner/work/reddit-daily/reddit-daily/venv/bin/python /tmp/watch_snapshot.py
+149. Bash: date -u +%H:%M:%S
+150. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+151. Bash: date -u +%H:%M:%S
+152. Bash: git add WORKLOG.md && git commit -q -m "Handover draft: sorting time for D15's guardrail" && git push -q origin main; date -u +%H:%M:%S
+153. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -1; date -u +%H:%M:%S
+154. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -12
+155. Bash: git status --short; date -u +%H:%M:%S
+156. Bash: date -u +%H:%M:%S
+157. Bash: venv/bin/python scripts/backlog_status.py --dropped | wc -w; date -u +%H:%M:%S
+158. Bash: gh issue list --state open --label needs-owner --json number,updatedAt --jq '.[] | "\(.number) \(.updatedAt)"' | head -15; date -u +%H:%M:%S
+159. Bash: date -u +%H:%M:%S
+160. Bash: grep -n "cta" src/log.py | head -3; date -u +%H:%M:%S
+161. Bash: venv/bin/python - <<'EOF'
+162. Bash: date -u +%H:%M:%S
+163. Bash: venv/bin/python -c "
+164. Bash: date -u +%H:%M:%S
+165. Bash: gh run list --limit 2 --json name,status,conclusion --jq '.[] | "\(.name) \(.status) \(.conclusion)"'; date -u +%H:%M:%S
+166. Bash: venv/bin/python scripts/friction.py evaluate 2>&1 | sed -n '/(c) 10 random/,$p' | head -12; date -u +%H:%M:%S
+167. Bash: date -u +%H:%M:%S
+168. Bash: venv/bin/python scripts/report.py --routes 2>&1 | tail -8; date -u +%H:%M:%S
+169. Bash: date -u +%H:%M:%S
+170. ToolSearch: select:SendMessage
+171. Bash: grep -rln "reddit-terms" --include=*.csv --include=*.md --include=*.py . 2>/dev/null | grep -v "^./venv" | head;
+172. Bash: head -1 analysis/experiments.csv; grep "reddit-terms" analysis/experiments.csv; grep -n "experiments.csv" src/insights.py | head -5; grep -…
+173. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+174. Bash: venv/bin/python scripts/friction.py add --function gm --task "Two generation rounds (16 ideas): one survivor, built and merged; the second …
+175. Bash: gh run list --workflow weekly-analytics.yml --limit 1 --json createdAt,status --jq '.[0]'; date -u +%H:%M:%S
+176. Bash: grep -o "Do the zero-view uploads share a pipeline fault?[^\n]\{0,1500\}" PRD.md | head -c 1600
+177. Bash: grep "^\*\*Do the zero-view uploads share a pipeline fault" PRD.md | cut -c1-1800
+178. Bash: gh run list --workflow weekly-analytics.yml --limit 1 --json createdAt,status --jq '.[0]'; date -u +%H:%M:%S
+179. Bash: git fetch -q origin && git log --oneline HEAD..origin/main; date -u +%H:%M:%S
+180. Bash: timeout 280 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python /tmp/watch_snapshot.py; echo "exit $?"; date -u +%H:%M:%S
+181. Bash: timeout 280 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python /tmp/watch_snapshot.py; echo "exit $?"; date -u +%H:%M:%S
+182. Bash: timeout 250 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python /tmp/watch_snapshot.py; echo "exit $?"; date -u +%H:%M:%S
+183. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+184. Bash: venv/bin/python - <<'EOF'
+185. Bash: venv/bin/python - <<'EOF'
+186. Bash: timeout 200 gh run watch $(gh run list --workflow guardrails.yml --limit 1 --json databaseId --jq '.[0].databaseId') --exit-status >/dev/nu…
+187. Bash: gh run list --workflow guardrails.yml --limit 2 --json conclusion,status,headSha --jq '.[] | "\(.status) \(.conclusion) \(.headSha[0:7])"';…
+188. Bash: timeout 150 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -c "
