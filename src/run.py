@@ -85,7 +85,7 @@ def main():
     def record_verdict(post_title, result, action):
         row = {
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-            "subreddit": subreddit_name,
+            "subreddit": "" if config.SOURCE == "own" else subreddit_name,  # PLAN C16
             "post_title": post_title,
             "action": action,
             # A demoted row's payload is the category we chose not to skip on.

@@ -86,7 +86,7 @@ def test_the_screen_runs_and_a_skip_or_a_dropped_take_refuses_the_episode(monkey
     post = ownquestions.select_post(screener=screener,
                                     on_verdict=lambda q, r, a: refused.append((q, a)))
     assert seen == [(GOOD["question"], GOOD["takes"]), (OTHER["question"], OTHER["takes"])]
-    assert refused == [(GOOD["question"], "skip_post")]
+    assert refused == [(GOOD["question"], "skip_unsafe_takes")]
     assert post.title == OTHER["question"] and post.topic == "money-work"
     assert post.screen_source == "gemini"
     with pytest.raises(RuntimeError):

@@ -94,8 +94,9 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
         if result and (result.verdict == "skip_post" or result.unsafe):
             print(f"Own question: the screen refused the {route}'s episode "
                   f"({result.category or 'unsafe takes'})")
-            if on_verdict:
-                on_verdict(question, result, "skip_post")
+            if on_verdict:   # the audit tells a skipped question from refused takes
+                on_verdict(question, result,
+                           "skip_post" if result.verdict == "skip_post" else "skip_unsafe_takes")
             continue
         print(f"Own question: written on the {route}")
         return PostContent(subreddit="", title=question, shortlink="",
