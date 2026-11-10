@@ -38,7 +38,10 @@ DRY_RUN = SAMPLE or SILENT_NARRATION or \
 # own question with three takes (src/ownquestions.py), the source after
 # Reddit's free API ends (PLAN C16), built switched off: only a label turns it
 # on. Any other value fails the run rather than falling back unseen.
-SOURCE = os.environ.get("SOURCE", "reddit").strip().lower() or "reddit"
+# RENDER-ONLY (strategy/own-questions-render, never merged): a branch render
+# runs under SILENT_NARRATION and dry-run.yml passes no SOURCE, so this branch
+# defaults to our own question there, as the 10-25 sample did (PRD §4, C16).
+SOURCE = os.environ.get("SOURCE", "own" if SILENT_NARRATION and not SAMPLE else "reddit").strip().lower() or "reddit"
 if SOURCE not in ("reddit", "own"):
     raise SystemExit(f"SOURCE={SOURCE!r} is not a source (reddit, own)")
 # Each answer's on-screen label. Our own takes say so: nobody else wrote them,
