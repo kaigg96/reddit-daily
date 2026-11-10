@@ -99,9 +99,11 @@ def main(argv=None):
     ap.add_argument("--sheet-path", default="sheet.md",
                     help="where the sheet will be saved, named in the scorer prompt")
     args = ap.parse_args(argv)
-    rows = (shipped_rows() if args.with_shipped else []) + read_rows(args.runs)
+    rows = read_rows(args.runs)
+    # Before the shipped nine join: a failed run must not pass as their sheet.
     if not rows:
         raise SystemExit("no reactions found in " + ", ".join(args.runs))
+    rows = (shipped_rows() if args.with_shipped else []) + rows
     seed = args.seed if args.seed is not None else random.SystemRandom().randrange(10**6)
     text, key = build(rows, seed)
     with open(args.key, "w") as f:

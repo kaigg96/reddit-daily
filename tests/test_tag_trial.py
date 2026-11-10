@@ -274,3 +274,11 @@ def test_the_shipped_nine_sit_beside_their_answers():
     assert len(rows) == 9 and {r["post"] for r in rows} == {2, 4, 9}
     for r in rows:
         assert r["answer_text"] == tt.POSTS[r["post"] - 1][1][r["answer"] - 1]
+
+
+def test_a_failed_run_is_refused_even_with_the_shipped_nine(tmp_path):
+    import scripts.tag_sheet as ts
+    run = tmp_path / "run.jsonl"
+    run.write_text("Error: quota\n")
+    with pytest.raises(SystemExit, match="no reactions found"):
+        ts.main([str(run), "--with-shipped", "--key", str(tmp_path / "k.json")])
