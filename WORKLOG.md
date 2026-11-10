@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-10 (03:00) — Weekly review: the rise in videos nobody is shown is still unexplained, and bet 1's test now has its comparison fixed before any of its uploads
+
+    Worked (% of the shift): data 50 · gm 20 · reliability 15 · security 10 · audience 5
+
+**Summary:** The weekly review read Monday's figures by the rules written for them in advance. Nothing moved toward revenue: watch time is flat, about one video in seven still gets no views for reasons we cannot find, and bet 1 still waits on you.
+
+### Toward revenue
+- **Nothing directly.** Watch time is flat at 11–12 seconds. One thing protects bet 1's result: when it ships, it will be judged against the videos made just before it, including the ones on the new AI model. Without this it would have been judged against the channel's whole history, which earlier analysis showed could let a worse version pass. I settled this before any bet 1 video exists, so the choice cannot be bent to fit its result.
+
+### Done
+- **Data (weekly review):**
+  - **Videos nobody is shown:** still about 1 in 7 recently, against 1 in 40 before. The rule set on 2 November said to check whether one of our two subreddits causes it. It does not: the difference is within chance. No background clip stands out either. So it goes to the December monthly, as the rule says.
+  - **Feed views:** 2,829 this week after 3,823. For ten weeks a high week was always followed by a low one, and this time it was not. The test of whether those swings are real viewers or a quirk of how the data arrives reads next Monday, so nothing is concluded yet. Subscribers went from 23 to 26.
+  - **Viewer comments:** none at all in the week, across the last 20 videos.
+  - **The new AI model:** three uploads so far, and none hit the daily limit. One title was refused by our shock-phrase filter and shipped the Reddit question instead. The old model had 2 such refusals in 30. The rule set on 8 November counts them at the new model's 20th upload.
+- **Data (built, live):** bet 1's comparison, above. A fresh review found no bugs, and it changes how no other test is read. It is reporting only, so viewers see nothing.
+- **Reliability (checked):** all 15 uploads since last Monday landed. Three went out with the Reddit question as their title: two old-model failures and the one refusal. Scheduled jobs still start hours late (last night's evening upload went up at 22:34), and the upload code handles that correctly.
+- **Security (checked):** no secret in the repository, no workflow change since 20 October, and the money controls are intact ($0.23 this month, forecast $0.74 of $3). Library warnings are unchanged (Pillow and oauthlib, already listed).
+- **General management:** the friction log had nothing unsorted.
+- AI use: none from the upload allowance; no Polly; no sample video.
+
+### Blocked
+- **For you, in order:** #77 (bet 1), #82, #89, #90, #91, #92, #93, #88, #65, #80, #59. Your last comment was on 20 October. Bet 2's window opens 30 November and needs bet 1 first.
+
+### Next
+- **Today after 08:00 UTC, an hour clear of an upload:** stage 1 of the host-line test, under its rule. Today's release check will skip (checked), because this shift touched nothing it tests.
+- **16 November:** the weekly review, including the test of whether weekly view swings are real.
+
+### Better?
+- **Than last shift:** slightly. Bet 1's test can no longer be judged against the wrong baseline. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat, bet 1 hasn't shipped, and more videos get no views.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-09 (12:15) — Shift helpers now see every recorded finding before proposing work, the biggest source of repeated work; uploads will record the new AI's unpublished daily limit the first time they hit it
 
     Worked (% of the shift): gm 55 · reliability 35 · security 5 · data 5
@@ -90,35 +125,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
-
-## 2026-11-08 (23:30) — Tomorrow's host-line test moves a day so it can't use up an upload's AI allowance; our own history shows no sign that a second daily upload takes views from the first
-
-    Worked (% of the shift): data 30 · strategy 30 · reliability 20 · gm 15 · security 5
-
-**Summary:** I found that tomorrow's release check and the planned host-line test would both draw on the AI allowance our uploads now use, together enough to risk the next morning's title. So the test moves to 10 November. A new test of our own history found no sign that a second daily upload takes views from the first, which supports bet 2's four-a-day plan.
-
-### Toward revenue
-- **A little evidence for bet 2's route, no revenue yet.** Watch time is flat at 12 seconds. Bet 2's route to doubling views is four uploads a day, which works only if each video keeps its views when more of ours share the feed. Our own history now says that held between one and two a day. Four a day still waits on bet 1 and your answer on #80.
-
-### Done
-- **Reliability (found, fixed in the plan):** since the switch, our daily release check runs on the same AI allowance as the uploads. Tomorrow it re-tests bet 1's release (6–8 requests), because that release changed tonight. Add the host-line test's 6 and the uploads' 4–10, and Google's day could reach 24 requests against the 20 we plan around. Its last upload, the next morning's, would then lose its AI title. So the test now waits for a day the check stays idle: 10 November at the earliest. The first week's check on the new model's daily limit now ignores days we spent from it ourselves. Otherwise our own spending would read as "the new model's allowance is too small" and send us to the model that failed every request it was sent today.
-- **Data (corrected):** on #77, the comment you will read when you decide on bet 1 still gave the old model's host lines as about 21 of 27 reacting, a figure scored by eye. It now gives the blind scores, 14 of 21 against the new model's 2 of 12. Editing a comment sends no email.
-- **Strategy and data (rule set before any view was read, then built):** do views per upload fall when another upload is near? Nearly every day since April 2025 had two uploads; about 45 had one. So our data can compare one a day with two, never two with four, and only a large effect would show. I wrote the rule down and published it before reading anything. It compares uploads alone against paired within the same month, so old and new eras never meet. Then I built the read with tests. A fresh review found my first wording labelled only 1 of 878 videos as alone, since uploads come 12 hours apart, so I amended the rule, still unread, to compare videos beside a missed slot with the regular rhythm. After a second review found no bugs, I ran it once: videos beside a missed slot got 1.08 times the views of the rest, inside the 17% that chance alone produces, and the same watch time. So there's no sign that a second daily upload takes views from the first. That supports four a day, though it can't rule out a smaller effect, or one at six-hour spacing.
-- **General management (ranking):** nothing was ready. A fresh helper, checking against the code and data, proposed the two items above and nothing else above the bar. Both were cheap and independent, so I took both without a separate ranking pass. Dropped: a tool to plan each day's AI requests (tonight's note in the plan covers the one case that matters this week); fixing the reset hour in the sample-video gate (since the switch, renders use a separate allowance from the uploads, so the wrong hour costs nothing); redrafting the three viewer replies (they lapse on 17 November, and nothing posts without your label on #89). A last look at 23:28, after the spacing result: telling you on #80 now that four a day might double views alone. Dropped: the result doesn't touch the spam-policy risk #80 is about, and this report already tells you. Nothing else was above the bar, so I handed over at 23:30.
-- **Reliability (checked):** tonight's upload, the first on the new model, landed at 18:01 with an AI-written title and no errors. The sample copy #90 links is safe on its branch.
-- **Security (checked):** no secret in the repository, no workflow change since 20 October, money controls intact ($0.20 this month, forecast $0.80 of $3).
-
-### Blocked
-- **For you, in order:** #77 (bet 1, by about 13–20 November for bet 2; its comment now carries the blind figures), #82, #89, #90, #91, #92, #93, #88, #65 (your "yes" to its corrected sentence, which still holds after the switch), #80, #59. Your last comment was on 20 October.
-
-### Next
-- **9 November:** the weekly review, and check that the morning's release check passed. **No host-line test that day.**
-- **10 November, after 08:00 UTC, an hour clear of an upload,** if the release check is idle that day (the plan says how to tell): stage 1 of the host-line test, under its rule.
-
-### Better?
-- **Than last shift:** slightly: an upload's title and a sound reading of the new model's limit are protected, bet 1's issue now has the honest figure, and bet 2's route has its first evidence from our own data (no dilution found from one upload a day to two).
-- **Than ~10 shifts ago:** no: watch time is flat at 12 seconds and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
