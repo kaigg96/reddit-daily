@@ -13,7 +13,7 @@ screen and a repeat check against every shipped title.
 import json
 import re
 
-from . import config, llm
+from . import config, content, llm
 from .content import Answer, PostContent
 
 PROMPT = (
@@ -47,7 +47,10 @@ def _usable(question, takes):
             and isinstance(takes, list) and len(takes) == 3
             and all(isinstance(t, str) and 0 < len(t.strip()) <= config.MAX_COMMENT_LENGTH
                     and not _STORY.search(t) for t in takes)
-            and len({t.strip().lower() for t in takes}) == 3)
+            and len({t.strip().lower() for t in takes}) == 3
+            # Narrated and captioned word for word, so the filters Reddit text
+            # passes apply too; the screen does not catch mild swearing.
+            and not any(content._profane(x) or content._has_emoji(x) for x in [question, *takes]))
 
 
 def parse(reply):
@@ -68,11 +71,13 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
     shipped title (a model writing questions repeats itself), or skipped by the
     R4.6 screen, whose dropped takes refuse the whole episode, as three takes
     are the show. Raises when neither route gives one, so the run fails loudly
-    rather than shipping a reading."""
+    rather than shipping a reading. Groq only while `GROQ_FALLBACK` is on, as
+    every other call. No model is named: a dry run writes on the sample model,
+    so a render never spends the uploads' allowance."""
     shipped = {t.strip().lower() for t in uploaded} | {prev_title.strip().lower()}
-    for route in ("upload model", "groq"):
+    for route in ("upload model",) + (("groq",) if config.GROQ_FALLBACK else ()):
         try:
-            reply = (llm.generate_retrying(PROMPT, model=llm.MODEL)
+            reply = (llm.generate_retrying(PROMPT)
                      if route == "upload model" else llm._generate_groq(PROMPT))
         except Exception as e:   # noqa: BLE001 -- the other route may still answer
             print(f"Own question: the {route} failed ({type(e).__name__})")

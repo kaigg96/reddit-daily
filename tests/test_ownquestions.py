@@ -38,6 +38,7 @@ def test_an_unusable_episode_is_refused_rather_than_narrated():
 
 def _routes(monkeypatch, upload, groq):
     asked = {}
+    monkeypatch.setattr(config, "GROQ_FALLBACK", True)
 
     def fake(prompt, **kw):
         asked.update(kw)
@@ -50,7 +51,7 @@ def _routes(monkeypatch, upload, groq):
 def test_the_upload_model_writes_it_and_no_one_is_credited(monkeypatch):
     asked = _routes(monkeypatch, GOOD, OTHER)
     post = ownquestions.select_post("an older question?")
-    assert asked == {"model": llm.MODEL}
+    assert asked == {}   # the sample model in a dry run, MODEL in an upload
     assert post.title == GOOD["question"] and list(post.comments) == GOOD["takes"]
     assert not any(c.author for c in post.comments) and not post.subreddit
 
@@ -96,20 +97,34 @@ def test_a_failed_route_falls_to_the_other(monkeypatch):
         raise TimeoutError
     monkeypatch.setattr(llm, "generate_retrying", boom)
     monkeypatch.setattr(llm, "_generate_groq", lambda prompt: json.dumps(GOOD))
+    monkeypatch.setattr(config, "GROQ_FALLBACK", True)
     assert ownquestions.select_post().title == GOOD["question"]
+    monkeypatch.setattr(config, "GROQ_FALLBACK", False)   # off, as every call
+    with pytest.raises(RuntimeError):
+        ownquestions.select_post()
+
+
+def test_swearing_or_an_emoji_refuses_an_episode():
+    for bad in ("Recline away, damn the person behind.", "Recline away \U0001F600"):
+        reply = json.dumps({**GOOD, "takes": GOOD["takes"][:2] + [bad]})
+        assert ownquestions.parse(reply) is None, bad
 
 
 def test_the_source_is_reddit_unless_switched_and_an_unknown_one_fails(monkeypatch):
     import importlib
-    for value, want in (("", "reddit"), ("reddit", "reddit"), (" Own ", "own")):
-        monkeypatch.setenv("SOURCE", value)
-        assert importlib.reload(config).SOURCE == want
-    assert config.ANSWER_LABEL == "TAKE"
-    monkeypatch.setenv("SOURCE", "stackexchange")
-    with pytest.raises(SystemExit):
+    monkeypatch.delenv("SAMPLE", raising=False)
+    try:
+        for value, want in (("", "reddit"), ("reddit", "reddit"), (" Own ", "own")):
+            monkeypatch.setenv("SOURCE", value)
+            assert importlib.reload(config).SOURCE == want
+        assert config.ANSWER_LABEL == "TAKE"
+        monkeypatch.setenv("SOURCE", "stackexchange")
+        with pytest.raises(SystemExit):
+            importlib.reload(config)
+    finally:
+        monkeypatch.delenv("SOURCE", raising=False)
         importlib.reload(config)
-    monkeypatch.delenv("SOURCE")
-    assert importlib.reload(config).ANSWER_LABEL == "ANSWER"
+    assert config.SOURCE == "reddit" and config.ANSWER_LABEL == "ANSWER"
 
 
 def test_our_own_question_credits_no_one_and_names_no_subreddit():

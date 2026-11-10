@@ -31,7 +31,7 @@ def upload_text(subreddit, post_title, comments, shortlink, keywords, asker=""):
         return f" (u/{name})" if name else ""
 
     if not subreddit:  # our own question (PLAN C16): nothing of Reddit's to credit
-        description = (f"Today's question: {post_title}\n\nThree takes:\n"
+        description = (f"Today's question: {post_title}\n\nTakes:\n"
                        + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
                        + "\n\nWhich take do you pick?\n#Shorts")
         return description, ["Shorts"] + keywords
