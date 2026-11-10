@@ -247,3 +247,30 @@ def test_two_arms_on_one_model_stay_apart_in_the_key(tmp_path, capsys):
         by_run.setdefault(r["run"], []).append(r["tag"])
     assert sorted(by_run[runs[1]]) == ["Ouch, lenses", "Wait, what?", "Yikes"]
     assert len(by_run[runs[0]]) == 3
+
+
+def test_a_sheet_with_the_shipped_nine_and_its_scorer_prompt(tmp_path, capsys):
+    """Every stage's sheet carries the shipped nine and is scored on stage 1's
+    prompt, so a scorer's strictness reads beside each arm (PRD §4, 11-10)."""
+    import json
+    import scripts.tag_sheet as ts
+    run = tmp_path / "run.jsonl"
+    run.write_text('not json\n{"post": 9, "reactions": ["Oof", "Ha", "Wait, what"]}\n')
+    key, prompt = tmp_path / "key.json", tmp_path / "prompt.txt"
+    ts.main([str(run), "--with-shipped", "--key", str(key), "--seed", "1",
+             "--sheet-path", "/tmp/s.md", "--scorer-prompt", str(prompt)])
+    sheet = capsys.readouterr().out
+    assert sheet.count("Tag:") == 12 and "Liquid gold baby" in sheet and "Wait, what" in sheet
+    runs = [r["run"] for r in json.loads(key.read_text())["rows"].values()]
+    assert runs.count("shipped-11-08") == 9
+    text = prompt.read_text()
+    assert "/tmp/s.md" in text and "It has 12 numbered rows" in text and "of 12`" in text
+    assert "shipped" not in sheet.lower()
+
+
+def test_the_shipped_nine_sit_beside_their_answers():
+    import scripts.tag_sheet as ts
+    rows = ts.shipped_rows()
+    assert len(rows) == 9 and {r["post"] for r in rows} == {2, 4, 9}
+    for r in rows:
+        assert r["answer_text"] == tt.POSTS[r["post"] - 1][1][r["answer"] - 1]
