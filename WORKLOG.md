@@ -83,7 +83,7 @@ and more useful than a confident guess.
 
 ### Next
 - **Tonight (19:17 shift):** request the own-questions sample video; its render copy is ready. The 18:23 slot makes no AI call, so it does not block the request, but check that the late evening upload is not running at that moment.
-- **11 November, after 08:00 UTC and before 11:23:** the worked-examples test (3 requests), blind-scored as today, then its rule. Look at Reddit's terms again the same day.
+- **11 November, after 08:00 UTC and an hour clear of an upload** (the 11:17 shift's first minutes, or the 19:17 shift): the worked-examples test (3 requests), blind-scored as today, then its rule. Look at Reddit's terms again the same day.
 - **16 November:** the weekly review.
 
 ### Better?
