@@ -132,3 +132,19 @@ def test_our_own_question_credits_no_one_and_names_no_subreddit():
     desc, tags = upload_text("", GOOD["question"], GOOD["takes"], "", ["planes"])
     assert "Reddit" not in desc and "u/" not in desc and "#Shorts" in desc
     assert all(t in desc for t in GOOD["takes"]) and tags == ["Shorts", "planes"]
+
+
+def test_the_metadata_call_never_passes_takes_off_as_peoples_answers(monkeypatch):
+    sent = []
+    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: sent.append(prompt) or "{}")
+    for style in "ABC":
+        monkeypatch.setattr(config, "SOURCE", "own")
+        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style)
+        monkeypatch.setattr(config, "SOURCE", "reddit")
+        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style)
+    own, reddit = sent[0::2], sent[1::2]
+    for p in own:
+        assert "Reddit question" not in p and "People Reveal" not in p
+        assert "never mention Reddit" in p and "not real people's answers" in p
+    assert all("Reddit question" in p for p in reddit)
+    assert "People Reveal" in reddit[2] and "never mention Reddit" not in reddit[2]
