@@ -239,3 +239,4 @@ F237,2026-11-10T11:25:59+00:00,42805448445,product,bet 1 host-line stage 1 (tag 
 F238,2026-11-10T11:25:59+00:00,42805448445,audience,#89 owner refusal recorded and closed,done,,none,none,none,0,
 F239,2026-11-10T11:32:04+00:00,42805448445,product,ranked the next host-line lever; built few-shot arm; #77 follow-up,done,,none,none,none,0,
 F240,2026-11-10T11:36:31+00:00,42805448445,engineering,PRD status edit,done,,mistake,"wrote a free-form status ('ready from 11-11') that the tracker test rejects, and pushed it to main before running the full suite","running the suite before every push that touches PRD §0, not only after code changes",3,
+F241,2026-11-10T11:46:47+00:00,42805448445,gm,"generation round after the handover (8 ideas, none survived)",done,,rederived,"the helper re-derived two items the tracker already settles (#90's spam condition, the old videos' share in C12)",none,4,
