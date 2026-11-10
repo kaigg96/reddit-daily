@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-10 (03:00) — Weekly review: the rise in videos nobody is shown is still unexplained, and bet 1's test now has its comparison fixed before any of its uploads
 
-    Worked (% of the shift): data 45 · gm 20 · reliability 10 · security 10 · editorial 5 · legal 5 · audience 5
+    Worked (% of the shift): data 40 · gm 20 · reliability 10 · security 10 · strategy 5 · editorial 5 · legal 5 · audience 5
 
 **Summary:** The weekly review read Monday's figures by the rules written for them in advance. Nothing moved toward revenue: watch time is flat, about one video in seven still gets no views for reasons we cannot find, and bet 1 still waits on you.
 
@@ -83,7 +83,8 @@ and more useful than a confident guess.
 - **Editorial (checked):** I read everything the new model has published so far: titles, closing lines and top comments. Nothing was wrong. All three closing lines end by asking viewers to comment, against 3 of the old model's last 8. Too few to call; it is counted again at the 20th upload, since YouTube's spam rules name sameness.
 - **Legal (checked):** Reddit was reported to be updating its terms on 10 November. Its two terms pages and its registration page are unchanged as of 02:30 UTC. That is still 9 November in the US, so the next shift looks again.
 - **Data (rule, before any data):** the rise in videos nobody is shown began on 15 October, the same day the capitals-in-titles test started. When that test is read on about 23 November, it will also say whether one of its two versions accounts for the rise. Nothing about it was read today, and the extra figure cannot change the test's verdict.
-- **General management (ranking):** nothing was ready after the review. A fresh helper proposed eight ideas; two survived (the model's text and Reddit's terms), and I added the third. A second helper ranked the three the same way forwards and backwards. Dropped: whether late-running uploads get fewer views (too few late ones, and they all fall in recent weeks); counting comments YouTube holds back (weekly counts already swing from 0 to 7); re-reading YouTube's money rules (read 3 November); a library upgrade (no risk to us). The friction log had nothing unsorted.
+- **Strategy (date moved):** uploads stop on 12 January unless our Reddit app is registered (#82). The backup plan was to start building our own questions on 14 December, which left four weeks for your label. That assumed your slowest label so far, 4 days. It has now been 21 days since you last replied, so the build starts now instead. Reddit's free access ends in March even if we register, so the work is needed either way. It costs nothing, ships switched off, and turning it on is still one label from you. #90 now says so (editing it sent no email).
+- **General management (ranking):** nothing was ready after the review. A fresh helper proposed eight ideas; two survived (the model's text and Reddit's terms), and I added the third. A second helper ranked the three the same way forwards and backwards. A second round, aimed at the functions not yet touched, found only the date change above. It dropped re-planning bet 2 (a shift updates #80 on 20 November), closing asks (all four checked are still accurate) and income outside YouTube (answered on 2 November). Dropped: whether late-running uploads get fewer views (too few late ones, and they all fall in recent weeks); counting comments YouTube holds back (weekly counts already swing from 0 to 7); re-reading YouTube's money rules (read 3 November); a library upgrade (no risk to us). The friction log had nothing unsorted.
 - AI use: none from the upload allowance; no Polly; no sample video.
 
 ### Blocked
@@ -91,6 +92,7 @@ and more useful than a confident guess.
 
 ### Next
 - **Today after 08:00 UTC, an hour clear of an upload:** stage 1 of the host-line test, under its rule. Today's release check will skip (checked), because this shift touched nothing it tests.
+- **The own-questions source** is now the only ready item: build it on the live version, merged switched off, with one sample video. Leave the bet 1 test version untouched on the day of a host-line stage.
 - **11 November:** look at Reddit's terms again (their reported update may land late on the 10th, US time).
 - **16 November:** the weekly review, including the test of whether weekly view swings are real.
 
