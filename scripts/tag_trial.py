@@ -144,7 +144,7 @@ REACTIONS_FEW_SHOT = (
 def copies_example(tag):
     """Whether `tag` is one of FEW_SHOT_TAGS, case and punctuation aside."""
     def norm(s):
-        return "".join(c for c in (s or "").lower() if c.isalnum() or c == " ").split()
+        return "".join(c if c.isalnum() else " " for c in (s or "").lower()).split()
     return any(norm(tag) == norm(e) for e in FEW_SHOT_TAGS)
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).

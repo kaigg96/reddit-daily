@@ -136,6 +136,8 @@ def test_a_tag_copying_an_example_is_flagged_case_and_punctuation_aside():
     assert tt.copies_example("same honestly") and tt.copies_example("OH NO, NO!")
     assert tt.copies_example("You paid that?!") and not tt.copies_example("You paid what?!")
     assert not tt.copies_example("Sure") and not tt.copies_example(None)
+    # Punctuation with no space beside it still separates words (review, 11-10).
+    assert tt.copies_example("Same\u2014honestly") and tt.copies_example("Oh no...no.")
 
 
 def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
