@@ -951,6 +951,15 @@ class ReleaseRead:
     triggers: tuple
     comparisons: list
     floors: dict
+    beside: list = field(default_factory=list)   # [(Comparison, floor)], never in the verdict
+
+
+# Read by `--release` beside its verdict, never inside it. Engaged share is the
+# measure tests set from 2026-11-10 are judged on (D9, #91), but
+# `release_verdict` reads every comparison it is given, so a side thin on it
+# (collected only from 2026-10-05) would turn the watch-seconds verdict, and
+# auto-revert with it, into NO VERDICT.
+BESIDE_VERDICT = (Metric.ENGAGED_SHARE,)
 
 
 def release_read(version, key="format_version", target_age=None, within_spec=None):
@@ -975,7 +984,23 @@ def release_read(version, key="format_version", target_age=None, within_spec=Non
     comparisons = [compare(a, b, f"{key}={version}", label, load.anchor, m)
                    for m in metrics]
     floors = {m: drift_floor(history, m) for m in metrics}
-    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
+    beside = [(compare(a, b, f"{key}={version}", label, load.anchor, m),
+               drift_floor(reported(history, m), m))
+              for m in BESIDE_VERDICT]
+    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors, beside)
+
+
+def render_beside(read):
+    """`release_read`'s beside-the-verdict metrics, each with its own limit."""
+    out = []
+    for c, floor in read.beside:
+        out.append(c.render())
+        limit = ("not measurable — too few uploads report it in the era before"
+                 if floor is None else
+                 f"{floor:.0%} — median move between consecutive groups of "
+                 f"{MIN_COHORT} uploads in the era before it")
+        out.append(f"    detection limit: {limit}. Beside the verdict: auto-revert never fires on it (#18); a rule may judge on it (D9).")
+    return "\n".join(out)
 
 
 def latest_releases(log_rows, key="format_version", n=2):
