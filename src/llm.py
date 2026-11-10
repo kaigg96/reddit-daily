@@ -237,8 +237,11 @@ def _own_wording(prompt):
                  ('"3 Answers That...", "3 People Reveal..."', '"3 Takes On..."'),
                  ("It features these answers:",
                   "It features the host's own three takes, not real people's answers:"),
-                 ("the nature of the answers", "the nature of the takes")):
+                 ("this discussion", "this question")):
         prompt = prompt.replace(a, b)
+    # Every other "answer" (style A's, C's count, the vote rule's) is a take.
+    prompt = re.sub(r"\b([Aa])nswer(s?)\b", lambda m: ("T" if m.group(1) == "A" else "t")
+                    + "ake" + m.group(2), prompt)
     return prompt + ("\nNever present the takes as real people's answers, stories or "
                      "confessions, and never mention Reddit or a subreddit, in any field.\n")
 

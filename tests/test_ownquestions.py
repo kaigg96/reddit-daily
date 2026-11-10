@@ -1,5 +1,6 @@
 """The own-questions source (src/ownquestions.py, PLAN C16)."""
 import json
+import re
 
 import pytest
 
@@ -139,12 +140,14 @@ def test_the_metadata_call_never_passes_takes_off_as_peoples_answers(monkeypatch
     monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: sent.append(prompt) or "{}")
     for style in "ABC":
         monkeypatch.setattr(config, "SOURCE", "own")
-        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style)
+        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style, caps=style == "B")
         monkeypatch.setattr(config, "SOURCE", "reddit")
-        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style)
+        llm.get_metadata(GOOD["question"], GOOD["takes"], style=style, caps=style == "B")
     own, reddit = sent[0::2], sent[1::2]
     for p in own:
-        assert "Reddit question" not in p and "People Reveal" not in p
-        assert "never mention Reddit" in p and "not real people's answers" in p
+        body, ban = p.rsplit("Never present", 1)
+        assert "Reddit" not in body and "People" not in body and "discussion" not in body
+        assert not re.search(r"\banswers?\b", body.replace("not real people's answers", ""), re.I)
+        assert "never mention Reddit" in ban
     assert all("Reddit question" in p for p in reddit)
     assert "People Reveal" in reddit[2] and "never mention Reddit" not in reddit[2]
