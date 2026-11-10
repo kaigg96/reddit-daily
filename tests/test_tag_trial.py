@@ -107,6 +107,37 @@ def test_react_only_drops_agreement_names_no_verdict_and_changes_the_reactions_o
     assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
 
 
+def test_few_shot_adds_examples_to_the_reactions_only(monkeypatch):
+    from src import config
+    monkeypatch.setattr(llm, "_TAG_EDITS", list(llm._TAG_EDITS))
+    monkeypatch.setattr(config, "HOST_TEXT", True)
+    monkeypatch.setattr(config, "HOST_TAGS", True)
+    for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
+        monkeypatch.setattr(llm, name, getattr(llm, name))
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    shipped = llm._commentary_ask(3)
+    tt.setup_model("sample", reactions="few-shot")
+    ask = llm._commentary_ask(3)
+    # One variable: the shipped wording stays, the examples are added to it.
+    assert "agreement" in ask and all(f'"{e}"' in ask for e in tt.FEW_SHOT_TAGS)
+    assert not any(e in shipped for e in tt.FEW_SHOT_TAGS)
+    assert ask.split('"reactions":', 1)[0] == shipped.split('"reactions":', 1)[0]
+    assert ask.split('"cta":', 1)[1] == shipped.split('"cta":', 1)[1]
+
+
+def test_few_shot_examples_come_from_no_trial_post():
+    words = " ".join(q + " " + " ".join(a) for q, a in tt.POSTS).lower()
+    for e in ("hall light", "ex's wedding", "lens cap", "learning opportunity"):
+        assert e not in words
+
+
+def test_a_tag_copying_an_example_is_flagged_case_and_punctuation_aside():
+    assert tt.copies_example("same honestly") and tt.copies_example("OH NO, NO!")
+    assert tt.copies_example("You paid that?!") and not tt.copies_example("You paid what?!")
+    assert not tt.copies_example("Sure") and not tt.copies_example(None)
+
+
 def test_groq_without_its_key_refuses_rather_than_spend_gemini(no_calls, monkeypatch):
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     with pytest.raises(SystemExit, match="GROQ_API_KEY"):

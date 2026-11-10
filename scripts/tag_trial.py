@@ -10,6 +10,7 @@
     venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
     venv/bin/python scripts/tag_trial.py --model upload --gemini-model gemini-3.8-flash --posts 2,4,9
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --thinking low
+    venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --reactions few-shot
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
 model reacted to 7 of 9 answers where the sample model and Groq mostly
@@ -126,6 +127,25 @@ REACTIONS_UNGRADED = '\n     Never grade the answer: "Spot on", "Deep insight" a
 # primed them. React-only drops agreement and names none: the vote alone takes
 # a side. Unread; read it on the upload model, a few posts a day.
 REACTIONS_REACT_ONLY = '\n     Only the vote takes a side: a tag reacts, and never judges the answer.'
+# Stage 1 (11-10, PRD §4): neither a thinking level nor react-only moved
+# 3.6-flash off labels (blind: 0 of 6 each, shipped 1 of 9), and both arms
+# repeated the shipped lines nearly word for word. Ranked next both ways:
+# worked examples, answer then tag, beside the labels they would get. None is
+# from POSTS. A tag that copies one is a label (copies_example), not a reaction.
+FEW_SHOT_TAGS = ("Same, honestly", "Oh no. No.", "You paid that?!", "Sure he did")
+REACTIONS_FEW_SHOT = (
+    '\n     More, each an answer and its tag: "I still sleep with the hall light on"'
+    '\n     gets "Same, honestly"; "He proposed at her ex\'s wedding" gets "Oh no. No.";'
+    '\n     "Two hundred dollars for a lens cap" gets "You paid that?!"; "My boss called'
+    '\n     the pay cut a learning opportunity" gets "Sure he did". "Fear of dark",'
+    '\n     "Bad timing", "Pricey gear" and "Corporate speak" would label those answers.')
+
+
+def copies_example(tag):
+    """Whether `tag` is one of FEW_SHOT_TAGS, case and punctuation aside."""
+    def norm(s):
+        return "".join(c for c in (s or "").lower() if c.isalnum() or c == " ").split()
+    return any(norm(tag) == norm(e) for e in FEW_SHOT_TAGS)
 # Groq's free tier allows ~8K tokens a minute and one metadata call is ~2K:
 # unspaced, the sixth of nine posts met its cap (2026-10-20).
 GROQ_SPACING = 15
@@ -157,6 +177,9 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
         assert "surprise, agreement," in new, "the shipped reactions' wording moved"
         new = new.replace("surprise, agreement,", "surprise,") + REACTIONS_REACT_ONLY
         llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new)] + llm._TAG_EDITS[2:]
+    if reactions == "few-shot":
+        old, new = llm._TAG_EDITS[1]
+        llm._TAG_EDITS = [llm._TAG_EDITS[0], (old, new + REACTIONS_FEW_SHOT)] + llm._TAG_EDITS[2:]
     if reactions == "ungraded":
         old, new = llm._TAG_EDITS[1]
         assert "surprise, agreement," in new, "the shipped reactions' wording moved"
@@ -196,10 +219,11 @@ def main(argv=None):
     ap.add_argument("--posts", default="", help='1-based, e.g. "2,4,9"; default all')
     ap.add_argument("--setup", choices=["shipped", *SETUPS], default="shipped",
                     help="the setup's wording: as shipped, or one of SETUPS")
-    ap.add_argument("--reactions", choices=["shipped", "spoken", "ungraded", "react-only"],
+    ap.add_argument("--reactions",
+                    choices=["shipped", "spoken", "ungraded", "react-only", "few-shot"],
                     default="shipped",
                     help="the reactions' wording: as shipped, or with REACTIONS_SPOKEN, "
-                         "REACTIONS_UNGRADED or REACTIONS_REACT_ONLY")
+                         "REACTIONS_UNGRADED, REACTIONS_REACT_ONLY or REACTIONS_FEW_SHOT")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
     # The successor trial (PRD §4, 11-07) reads each MODEL candidate on the same
@@ -249,6 +273,7 @@ def main(argv=None):
                           "setup_ships": bool(h and h.setup and ships(h.setup)),
                           "reactions": h and h.reactions,
                           "reactions_ship": h and [bool(r) and not grades(r) for r in h.reactions],
+                          "copies_example": h and [copies_example(r) for r in h.reactions],
                           "vote": h and h.verdict}, ensure_ascii=False), flush=True)
 
 
