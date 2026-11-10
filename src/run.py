@@ -11,7 +11,8 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, sample, screen, thumbnail, tts, video, youtube
+from . import (config, content, llm, log, ownquestions, sample, screen, thumbnail, tts,
+               video, youtube)
 
 
 def _probe_duration(path):
@@ -28,6 +29,12 @@ def upload_text(subreddit, post_title, comments, shortlink, keywords, asker=""):
     variable between them."""
     def by(name):
         return f" (u/{name})" if name else ""
+
+    if not subreddit:  # our own question (PLAN C16): nothing of Reddit's to credit
+        description = (f"Today's question: {post_title}\n\nThree takes:\n"
+                       + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
+                       + "\n\nWhich take do you pick?\n#Shorts")
+        return description, ["Shorts"] + keywords
 
     description = (
         f"Today's top {subreddit} post{', asked by u/' + asker if asker else ''}: {post_title}\n\n"
@@ -94,6 +101,9 @@ def main():
 
     if config.SAMPLE:
         post = sample.POST
+    elif config.SOURCE == "own":
+        post = ownquestions.select_post(prev_title, uploaded=log.uploaded_titles(),
+                                        screener=screen.screen, on_verdict=record_verdict)
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,

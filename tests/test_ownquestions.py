@@ -97,3 +97,23 @@ def test_a_failed_route_falls_to_the_other(monkeypatch):
     monkeypatch.setattr(llm, "generate_retrying", boom)
     monkeypatch.setattr(llm, "_generate_groq", lambda prompt: json.dumps(GOOD))
     assert ownquestions.select_post().title == GOOD["question"]
+
+
+def test_the_source_is_reddit_unless_switched_and_an_unknown_one_fails(monkeypatch):
+    import importlib
+    for value, want in (("", "reddit"), ("reddit", "reddit"), (" Own ", "own")):
+        monkeypatch.setenv("SOURCE", value)
+        assert importlib.reload(config).SOURCE == want
+    assert config.ANSWER_LABEL == "TAKE"
+    monkeypatch.setenv("SOURCE", "stackexchange")
+    with pytest.raises(SystemExit):
+        importlib.reload(config)
+    monkeypatch.delenv("SOURCE")
+    assert importlib.reload(config).ANSWER_LABEL == "ANSWER"
+
+
+def test_our_own_question_credits_no_one_and_names_no_subreddit():
+    from src.run import upload_text
+    desc, tags = upload_text("", GOOD["question"], GOOD["takes"], "", ["planes"])
+    assert "Reddit" not in desc and "u/" not in desc and "#Shorts" in desc
+    assert all(t in desc for t in GOOD["takes"]) and tags == ["Shorts", "planes"]
