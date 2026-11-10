@@ -387,8 +387,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   per-entry WORKLOG cap; the replay gate for shipped text; the env switch
   into #93; the re-raise patch (`process/reraise-replaces-ask`). **Left
   alone:** the shift cadence (#92) and the owner's queue. **Closes when**
-  those are raised, at the owner's return or the 12-07 monthly, or at the
-  next audit.
+  those are raised at the 12-07 monthly, or sooner once fewer than 5 asks
+  are unanswered, or at the next audit. **11-10:** the owner came back and
+  answered two (#93 landed, #89 refused); with 9 still unanswered, these are
+  held so #77 and #82 are read first. The env switch is moot: #93's hook is live.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
@@ -529,4 +531,7 @@ a list nobody can read is the same as no list.
   job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
   scheduled run; its workflow patch is `upload-watch.patch` on
   `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
-  as auto-apply refuses an edited one). **Closes when** that patch lands.
+  as auto-apply refuses an edited one). **11-10:** #89 was refused (the owner's
+  words were about replies), so the patch did not land; held so #77 and #82
+  are read first. **Closes when** it lands as its own ask, or is deleted with
+  reasoning at the 12-07 monthly.

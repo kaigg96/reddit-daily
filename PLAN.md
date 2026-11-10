@@ -37,7 +37,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C10 | blocked: the owner's label on #89; its 3 queued replies expire 11-17: redraft | Audience | **Publishing pipeline** | A shift drafts replies; a workflow posts them under ORG.md's publishing policy; rule: `C10-replies`. |
+| C10 | parked: the owner said no on #89 (11-10) | Audience | **Publishing pipeline** | Owner: drafts read as a bot's, too formulaic; first person only (PRD §4). Reopen with drafts the owner reads first. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it**: all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos; private ones go unmentioned. Exact copies: already private (PRD §4). Renaming is the owner's. Done when the owner has decided. |
 | C16 | ready: from 11-10 (PRD §4), unless #82 has a date | Strategy | **A source after Reddit** | Build #90's pick, else own questions (recommended, sized: PRD §4), merged off. Done when merged, or on #82's date. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response. Done when the owner reports a date. |
