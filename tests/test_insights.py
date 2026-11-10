@@ -2623,6 +2623,35 @@ def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
     assert value is None and base == old + prev[:19]
 
 
+def test_a_model_only_version_counts_with_the_format_it_reruns():
+    """`v8` after a thin `v7s` reads `v7s` and `v7` together, never the v2-v7s
+    pool (PRD §0 #15, 11-09 weekly); `v7s`'s own read still meets `v7` alone."""
+    def vids(version, n, start):
+        return [insights.Video(video_id=f"{version}{i}",
+                               published=start + datetime.timedelta(hours=12 * i),
+                               views=100, watch_seconds=10,
+                               meta={"format_version": version})
+                for i in range(n)]
+    t0 = datetime.datetime(2026, 8, 1, tzinfo=datetime.timezone.utc)
+    old = vids("v6", 40, t0)
+    v7 = vids("v7", 15, t0 + datetime.timedelta(days=30))
+    v7s = vids("v7s", 6, t0 + datetime.timedelta(days=40))
+    value, base = insights.predecessor(old + v7 + v7s, "format_version")
+    assert value == "v7s+v7" and base == v7 + v7s
+    full = vids("v7", 20, t0 + datetime.timedelta(days=30))
+    value, base = insights.predecessor(old + full, "format_version")
+    assert value == "v7" and base == full
+    # Together still too thin: the pool, as for any release.
+    value, base = insights.predecessor(old + v7[:10] + v7s, "format_version")
+    assert value is None and base == old + v7[:10] + v7s
+    # Only release versions pair up.
+    tagged = [insights.Video(video_id=v.video_id, published=v.published, views=100,
+                             watch_seconds=10, meta={"other": v.meta["format_version"]})
+              for v in old + v7 + v7s]
+    value, base = insights.predecessor(tagged, "other")
+    assert value is None
+
+
 def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monkeypatch):
     """One release is too short to measure the channel's drift, so the limit
     keeps reading every earlier upload while the comparison narrows."""
