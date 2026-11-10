@@ -491,6 +491,20 @@ def release_cohorts(videos, key, value):
 # with 10 at 7 days, is too thin to stand alone, so `v7` still reads its pool.
 PREDECESSOR_MIN_UPLOADS = 20
 
+# A version that changed only the AI model, mapped to the format it re-runs.
+# As a predecessor it counts together with that format: `v7s` gains ~1
+# AskReddit upload a day, so alone it is under 20 in `v8`'s cut for weeks, and
+# the pool of v2-v7 it would fall back to is the comparison 10-18 ruled out.
+# Pooled, not skipped: `v8` runs on `v7s`'s model, and `v7s`'s uploads are the
+# nearest in time (PRD §0 #15, decided at the 11-09 weekly, before any `v8`
+# upload). Its own read (#13's rule) still compares it with `v7` alone.
+MODEL_ONLY = {"v7s": "v7"}
+
+
+def _same_format(value):
+    base = MODEL_ONLY.get(value, value)
+    return {base} | {k for k, v in MODEL_ONLY.items() if v == base}
+
 
 def predecessor(before, key, min_uploads=None):
     """The release a new one replaced, and its uploads, from `release_cohorts`'
@@ -500,14 +514,20 @@ def predecessor(before, key, min_uploads=None):
     not "worse than what it replaced?": `v7` read +20% over its pool (12.0 vs
     10.0 s), so `v8` judged against v2-v7 could fall ~17% below `v7` and still
     clear a 13% limit (2026-10-18, before any `v8` upload). The drift floor
-    still reads the whole history, which a single release is too short for."""
+    still reads the whole history, which a single release is too short for.
+    A model-only version (`MODEL_ONLY`) and its format count as one release,
+    named newest first ("v7s+v7")."""
     if not before:
         return None, before
     latest = max(before, key=lambda v: v.true_published or v.published)
     value = str(latest.meta.get(key, "")).strip()
     if not value:
         return None, before
-    own = [v for v in before if str(v.meta.get(key, "")).strip() == value]
+    group = _same_format(value) if key == "format_version" else {value}
+    own = [v for v in before if str(v.meta.get(key, "")).strip() in group]
+    if len(group) > 1:
+        seen = {str(v.meta.get(key, "")).strip() for v in own}
+        value = "+".join([value] + sorted(seen - {value}))
     need = PREDECESSOR_MIN_UPLOADS if min_uploads is None else min_uploads
     return (value, own) if len(own) >= need else (None, before)
 
