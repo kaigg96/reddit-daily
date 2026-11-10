@@ -94,7 +94,7 @@ and more useful than a confident guess.
 
 ### Next
 - **Today after 08:00 UTC, an hour clear of an upload:** stage 1 of the host-line test, under its rule. Today's release check will skip (checked), because this shift touched nothing it tests.
-- **The own-questions source** is the only ready item and is mostly built: one sample video of it (the product plan says how), then merge it switched off. Leave the bet 1 test version untouched on the day of a host-line stage.
+- **The own-questions source** is the only ready item and is mostly built. After 08:00 UTC, an hour clear of an upload, request one sample video of it (its render copy is ready; the product plan says how), then merge it switched off. Leave the bet 1 test version untouched on the day of a host-line stage.
 - **11 November:** look at Reddit's terms again (their reported update may land late on the 10th, US time).
 - **16 November:** the weekly review, including the test of whether weekly view swings are real.
 
