@@ -531,4 +531,7 @@ a list nobody can read is the same as no list.
   job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
   scheduled run; its workflow patch is `upload-watch.patch` on
   `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
-  as auto-apply refuses an edited one). **Closes when** that patch lands.
+  as auto-apply refuses an edited one). **11-10:** #89 was refused (the owner's
+  words were about replies), so the patch did not land; held so #77 and #82
+  are read first. **Closes when** it lands as its own ask, or is deleted with
+  reasoning at the 12-07 monthly.
