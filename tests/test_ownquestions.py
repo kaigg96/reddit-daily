@@ -198,3 +198,16 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     monkeypatch.setattr(config, "SOURCE", "reddit")   # the show itself names Reddit freely
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert getattr(meta, field) and "reddit ama" in meta.keywords
+
+
+@pytest.mark.parametrize("title, dropped", [
+    ("What Your Coffee Order Reveals About You", False), ("The Most Revealing Morning Habit", False),
+    ("Gender Reveal Parties: Worth It?", False), ("Are R/C cars a waste of money?", False),
+    ("Do people still recline their seats?", False), ("3 Strangers On Reclining", True),
+    ("Real People Answer: Recline Or Not?", True), ("What people told us about reclining", True)])
+def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
+    reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
+    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
+    monkeypatch.setattr(config, "SOURCE", "own")
+    meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
+    assert (meta.title is None) == dropped

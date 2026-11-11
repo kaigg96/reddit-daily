@@ -471,8 +471,9 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
 # people's, and this is the check (11-11 review: prompt-only before). A title
 # or closing line that does falls back as a failed one does; a keyword is left out.
 _OWN_BANNED = re.compile(
-    r"reddit|\br/\w|\breveal|\bconfess|\b(people|users|strangers|folks)\s+"
-    r"(share|reveal|admit|say|tell|confess|explain)", re.I)
+    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
+    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
+    r"confess|explain|answer)\w*", re.I)
 
 
 def _own_fields(title, keywords, cta):
