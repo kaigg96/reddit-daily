@@ -36,3 +36,24 @@ def test_the_dose_counts_setup_and_vote_as_whole(no_reactions):
     rows = [{"format_version": "v8", "host_lines": n} for n in ("2", "1", "0", "2")]
     assert insights.render_host_lines(rows, "v8").endswith(
         "all 2 on 2 of 4 uploads, some on 1, none on 1")
+
+
+SETUP, VOTE = "Oof, deceptively hard.", "My hand goes to waiting tables. Which one gets your vote?"
+
+
+@pytest.mark.parametrize("reactions", [None, [], ["Brutal truth"] * 3, ["a", "b", "c", "d"],
+                                       ["Damn shit hell"] * 2, ["x " * 30] * 2])
+def test_hidden_reactions_never_cost_the_setup_or_the_vote(no_reactions, reactions):
+    data = {"setup": SETUP, "cta": VOTE}
+    if reactions is not None:
+        data["reactions"] = reactions
+    host = llm._clean_commentary(data, 2)
+    assert host is not None and host.setup == SETUP and host.verdict == VOTE
+    assert host.reactions == ["", ""]
+
+
+def test_the_vote_ships_alone_when_the_setup_drops(no_reactions):
+    host = llm._clean_commentary({"setup": "x " * 30, "reactions": ["Oof", "Ha"], "cta": VOTE}, 2)
+    assert host is not None and host.setup == "" and host.verdict == VOTE
+    assert llm._clean_commentary({"setup": "x " * 30, "reactions": ["Oof", "Ha"],
+                                  "cta": "y " * 40}, 2) is None

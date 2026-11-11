@@ -44,7 +44,8 @@ def test_a_setup_wording_reaches_the_prompt(monkeypatch, setup, words):
     monkeypatch.setattr(config, "HOST_TAGS", True)
     for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     shipped = llm._commentary_ask(3)
     tt.setup_model("sample", setup=setup)
@@ -61,7 +62,8 @@ def test_the_spoken_reactions_change_the_reactions_only(monkeypatch):
     monkeypatch.setattr(config, "HOST_TAGS", True)
     for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     shipped = llm._commentary_ask(3)
     tt.setup_model("sample", reactions="spoken")
@@ -78,7 +80,8 @@ def test_the_ungraded_reactions_drop_agreement_and_change_the_reactions_only(mon
     monkeypatch.setattr(config, "HOST_TAGS", True)
     for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     shipped = llm._commentary_ask(3)
     tt.setup_model("sample", reactions="ungraded")
@@ -96,7 +99,8 @@ def test_react_only_drops_agreement_names_no_verdict_and_changes_the_reactions_o
     monkeypatch.setattr(config, "HOST_TAGS", True)
     for name in ("FALLBACK_MODEL", "generate_retrying", "_reads_as_reaction", "_grades"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     shipped = llm._commentary_ask(3)
     tt.setup_model("sample", reactions="react-only")
@@ -119,7 +123,8 @@ def test_a_trial_prints_the_setup_as_written_and_whether_it_would_ship(monkeypat
     from src import config
     for name in ("FALLBACK_MODEL", "_reads_as_reaction", "_grades", "_TAG_EDITS"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     for name, on in (("COMMENTARY", True), ("HOST_TEXT", True), ("HOST_TAGS", True),
                      ("COMMENTARY_ANSWERS", 3)):
@@ -146,7 +151,8 @@ def test_a_candidate_is_read_on_its_own_model_at_its_lowest_level(monkeypatch, c
     for name in ("MODEL", "FALLBACK_MODEL", "_reads_as_reaction", "_grades", "_TAG_EDITS",
                  "generate_retrying", "_LOWEST_THINKING"):
         monkeypatch.setattr(llm, name, getattr(llm, name))
-    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL"):
+    for name in ("GROQ_FALLBACK", "AI_PROVIDER", "DRY_RUN", "METADATA_ON_UPLOAD_MODEL",
+                 "HOST_REACTIONS"):
         monkeypatch.setattr(config, name, getattr(config, name))
     sent = []
 

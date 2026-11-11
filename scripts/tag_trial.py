@@ -178,6 +178,7 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
     config.DRY_RUN = model == "sample"
     config.METADATA_ON_UPLOAD_MODEL = False
+    config.HOST_REACTIONS = True   # a trial reads the reactions, whatever ships (#77)
     if model != "groq":   # Groq is free: its per-minute cap is waited out
         retrying = llm.generate_retrying
         llm.generate_retrying = lambda prompt, tries=2, **kw: retrying(prompt, tries=1, **kw)

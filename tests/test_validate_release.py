@@ -188,6 +188,8 @@ def test_a_dropped_host_line_warns_but_passes(monkeypatch):
     """A line past its cap drops alone (#15): the upload keeps a host, so the
     gate passes, but the verdict file must show the prompt overran."""
     from src.llm import Commentary
+    from src import config
+    monkeypatch.setattr(config, "HOST_REACTIONS", True)   # bet 1 as sampled 10-25
     lines = []
     monkeypatch.setattr(vr, "note", lines.append)
     fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")

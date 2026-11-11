@@ -597,6 +597,12 @@ def _clean_commentary(data, n):
     closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
     raw_reactions = data.get("reactions")
+    # Off, nothing the model sent as reactions is shown, so none of it (a
+    # wrong count, a grade, a swear word) may cost the setup or the vote
+    # (#77, 2026-11-11 review): they are blank, and pass.
+    shown = config.HOST_REACTIONS or not config.HOST_TEXT
+    if not shown:
+        raw_reactions = [""] * n
     if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
         return None
     reactions = [_clean_str(r) for r in raw_reactions]
@@ -616,7 +622,7 @@ def _clean_commentary(data, n):
     setup_swore = tag_swore(data.get("setup"), setup)
     setup_ok = _usable(setup, "setup") and not setup_swore
     swore = [tag_swore(raw, r) for raw, r in zip(raw_reactions, reactions)]
-    ok = [_usable(r, "reaction") and not s for r, s in zip(reactions, swore)]
+    ok = [(_usable(r, "reaction") or not shown) and not s for r, s in zip(reactions, swore)]
     if setup_ok and vote_ok and all(ok):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
@@ -642,7 +648,8 @@ def _clean_commentary(data, n):
     setup = setup if setup_ok else ""
     reactions = [r if k else "" for r, k in zip(reactions, ok)]
     verdict = verdict if vote_ok else ""
-    if not (setup or any(reactions)):
+    # Without reactions the vote is the host's one other line, so it ships alone.
+    if not (setup or any(reactions) or (verdict and not shown)):
         return None
     print("Commentary: dropped only the line(s) named above")
     return Commentary(setup, reactions, verdict)
