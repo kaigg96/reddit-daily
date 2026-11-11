@@ -272,7 +272,17 @@ def _engaged_share_rows(path=None, at_age=7, tolerance=4):
     its snapshot nearest `at_age`, as `weekly_totals` requires of a sum. The
     column began 2026-10-05, so 2026-W39 kept 9 of 14 uploads, read at 8-11
     days, and its one step set the drift floor that read FALLING (two fresh
-    reviews, 11-11: a date cutoff only fitted `--at-age 7`)."""
+    reviews, 11-11: a date cutoff only fitted `--at-age 7`).
+
+    NOT MERGED: a third review (11-11) found three defects, unfixed. (1) The
+    newest week is kept half-read: uploads with no snapshot within tolerance
+    yet never mark their week, so W45 counts 8 of 14 read at 3-6 days; add
+    `weekly_totals`' Sunday-age guard (without W45: UNKNOWN; with it, FLAT at
+    7 days, FALLING at 5 and 8). (2) A zero-view nearest snapshot lets
+    `_read_at_age` fall back to a later one (JdkXzFoGYW8 at --at-age 8: 1 of
+    1, a share of 1.00); keep only rows at `nearest[vid][1]`. (3) `unread` is
+    channel-wide, so `--within` drops a week over uploads outside the filter;
+    compute it over the filtered ids. Then a fresh review before merging."""
     views_rows = _snapshot_metric_rows("views", path)
     views = {(r["video_id"], r["snapshot"]): r["value"] for r in views_rows}
     rows = [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
