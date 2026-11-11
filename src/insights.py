@@ -1237,6 +1237,57 @@ def two_week_rate(rows):
     return out[:len(rows)]
 
 
+# R4 (PRD §0), pre-committed 2026-10-26: snapshots dated 10-12 to 11-16.
+SWINGS_START = datetime.date(2026, 10, 12)
+SWINGS_END = datetime.date(2026, 11, 16)
+SWING_LOW = 0.60       # a low is under 60% of each week beside it
+SWING_STEADY = 0.30    # steady is every week within ±30% of the mean
+
+
+def swing_lows(rates, share=SWING_LOW):
+    """Positions of the rates under `share` of every neighbour beside them
+    (one neighbour at either end)."""
+    out = set()
+    for i, r in enumerate(rates):
+        sides = [rates[j] for j in (i - 1, i + 1) if 0 <= j < len(rates)]
+        if sides and all(r < share * s for s in sides):
+            out.add(i)
+    return out
+
+
+def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
+    """R4: are weekly view swings viewers or data?
+
+    `counter` is [(date, lifetime views)] from `channel_stats.csv`, the
+    channel's near-real-time counter; `recent` is `views_gained_by_age`'s rows,
+    whose recent column is the snapshots' lagged one. Both become per-day
+    gains for each interval ending on a snapshot dated after `start` up to
+    `end`, kept only where both series have it.
+
+    Returns (verdict, [(date, counter per day, recent per day)]). The verdict
+    is "viewers" when the counter's lows fall in exactly the recent column's
+    low weeks, at least one; "data" when every counter rate is within ±30% of
+    their mean; else "unclear". It is None until both series reach `end`,
+    so the rule is never read early."""
+    counter = sorted((d, v) for d, v in counter if start <= d <= end)
+    per_day = {d1: (v1 - v0) / (d1 - d0).days
+               for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
+    rec = {snap.date() if hasattr(snap, "date") else snap: r / days
+           for snap, _, r, days in recent if days}
+    weeks = [(d, per_day[d], rec[d]) for d in sorted(per_day)
+             if d in rec and start < d <= end]
+    if not weeks or weeks[-1][0] != end:
+        return None, weeks
+    ours = [c for _, c, _ in weeks]
+    lows = swing_lows(ours)
+    if lows and lows == swing_lows([r for _, _, r in weeks]):
+        return "viewers", weeks
+    mean = sum(ours) / len(ours)
+    if mean and all(abs(c - mean) <= SWING_STEADY * mean for c in ours):
+        return "data", weeks
+    return "unclear", weeks
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 

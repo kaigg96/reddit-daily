@@ -612,6 +612,37 @@ def show_catalogue(args):
           "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
+def show_swings(args):
+    """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
+    import csv as _csv
+    from src import config
+    with open(config.CHANNEL_LOG) as f:
+        counter = [(datetime.date.fromisoformat(r["snapshot_date"]), int(r["views"]))
+                   for r in _csv.DictReader(f) if r.get("views")]
+    verdict, weeks = insights.swing_read(
+        counter, insights.views_gained_by_age(_snapshot_metric_rows("views")))
+    if verdict is None:
+        have = weeks[-1][0] if weeks else "none"
+        print(f"R4 reads on the {insights.SWINGS_END} snapshot (pre-committed 2026-10-26); "
+              f"both series reach {have}. Not read early.")
+        return
+    print("R4: weekly view gains per day, the channel's own counter against the\n"
+          f"snapshots' recent uploads (snapshots {insights.SWINGS_START} to "
+          f"{insights.SWINGS_END})\n")
+    print(f"  {'snapshot':10} {'counter':>8}     {'recent':>8}")
+    lows_c = insights.swing_lows([c for _, c, _ in weeks])
+    lows_r = insights.swing_lows([r for _, _, r in weeks])
+    for i, (d, c, r) in enumerate(weeks):
+        print(f"  {d!s:10} {c:>8.0f}{' low' if i in lows_c else '    '}"
+              f" {r:>8.0f}{' low' if i in lows_r else ''}")
+    print(f"\n  Verdict: {verdict}. A low is under {insights.SWING_LOW:.0%} of each week"
+          f"\n  beside it; steady is within ±{insights.SWING_STEADY:.0%} of the mean.")
+    print({"viewers": "  The counter swings in the same weeks: the swings are viewers.",
+           "data": "  The counter is steady: the swings are the snapshots' timing,"
+                   "\n  so read snapshots at a fixed lag from now on.",
+           "unclear": "  Neither: the rule names no action (PRD §0, R4)."}[verdict])
+
+
 def show_spacing(args):
     """`--spacing`: R8, uploads beside a missed slot against the regular
     rhythm, month-matched (PRD §4)."""
@@ -771,6 +802,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--swings", action="store_true",
+                   help="R4: are weekly view swings viewers or data? The channel's "
+                        "counter against --catalogue's recent column (reads on 11-16)")
     p.add_argument("--spacing", action="store_true",
                    help="R8: views of uploads beside a missed slot vs the regular "
                         "rhythm, month-matched, from the committed snapshot")
@@ -808,7 +842,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -1012,6 +1046,10 @@ def main():
 
     if args.catalogue:      # the snapshot series, channel-wide
         show_catalogue(args)
+        return
+
+    if args.swings:         # R4: the snapshot series against the channel counter
+        show_swings(args)
         return
 
     if args.spacing:        # the committed snapshot, channel-wide

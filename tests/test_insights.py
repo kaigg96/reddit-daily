@@ -1981,6 +1981,37 @@ def test_two_week_rate_pools_each_snapshot_with_the_one_before():
     assert insights.two_week_rate([]) == []
 
 
+def test_swing_lows_are_under_60_percent_of_every_week_beside_them():
+    assert insights.swing_lows([500, 100, 600, 590, 200]) == {1, 4}
+    # 59% of one side but not the other is no low; an end needs only its one side
+    assert insights.swing_lows([1000, 590, 900]) == set()
+    assert insights.swing_lows([100, 1000]) == {0}
+    assert insights.swing_lows([]) == set()
+
+
+def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
+    d = lambda m, day: datetime.date(2026, m, day)
+    dates = [d(10, 12), d(10, 19), d(10, 26), d(11, 2), d(11, 9), d(11, 16)]
+    cum = lambda per_day: [(dt, sum(per_day[:i]) * 7) for i, dt in enumerate(dates)]
+    recent = lambda per_day: [(dt, 0, r * 7, 7) for dt, r in zip(dates[1:], per_day)]
+    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column
+    # the counter swings in the same weeks: viewers
+    verdict, weeks = insights.swing_read(cum([500, 130, 860, 630, 120]), recent(lagged))
+    assert verdict == "viewers" and [w[0] for w in weeks] == dates[1:]
+    assert weeks[0] == (d(10, 19), 500.0, 600.0)
+    # a low the recent column does not share is not in step
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(lagged))[0] == "unclear"
+    # steady within ±30% of the mean: data
+    assert insights.swing_read(cum([500, 450, 560, 520, 480]), recent(lagged))[0] == "data"
+    # before the 11-16 snapshot, or without the recent column there, no verdict
+    early = insights.swing_read(cum([500, 130, 860, 630, 120])[:-1], recent(lagged))
+    assert early[0] is None and early[1][-1][0] == d(11, 9)
+    assert insights.swing_read(cum([500, 130, 860, 630, 120]), recent(lagged)[:-1])[0] is None
+    # snapshots outside 10-12..11-16 are not read
+    late = cum([500, 130, 860, 630, 120]) + [(d(11, 23), 10 ** 7)]
+    assert insights.swing_read(late, recent(lagged))[1][-1][0] == d(11, 16)
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
