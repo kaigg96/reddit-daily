@@ -1271,17 +1271,22 @@ def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
     exactly the recent column's low weeks, and there are two or more, since
     one shared dip is not alternation (settled 11-11, before the 11-16 data);
     "data" when every counter rate is within ±30% of their mean; else
-    "unclear"; "insufficient" under three weeks. None until both series
-    reach `end`, so the rule is never read early."""
+    "unclear"; "insufficient" under three matched weeks. None until both
+    series reach `end`, so the rule is never read early; once either passes
+    the week after it unmatched, the matched weeks are read as they stand.
+    A week missing from either series makes the weeks beside it neighbours
+    in the low test, so a gap can turn an in-step read "unclear"."""
     as_date = lambda x: x.date() if isinstance(x, datetime.datetime) else x
     counter = sorted((d, v) for d, v in counter if d >= start)
     per_day = {(d0, d1): (v1 - v0) / (d1 - d0).days
                for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
     rec = {(as_date(snap) - datetime.timedelta(days=days), as_date(snap)): r / days
            for snap, _, r, days in recent if days}
+    week = datetime.timedelta(days=7)
     pairs = sorted(p for p in per_day if p in rec and p[0] >= start)
-    close = next((d1 for _, d1 in pairs if end <= d1 < end + datetime.timedelta(days=7)),
-                 None)
+    close = next((d1 for _, d1 in pairs if end <= d1 < end + week), None)
+    if close is None and any(d1 >= end + week for _, d1 in list(per_day) + list(rec)):
+        close = end + week - datetime.timedelta(days=1)   # the window passed unmatched
     weeks = [(d1, per_day[(d0, d1)], rec[(d0, d1)]) for d0, d1 in pairs
              if close is None or d1 <= close]
     if close is None:

@@ -2017,7 +2017,13 @@ def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
     rerun_recent = recent(lagged)[:-1] + [(d(11, 17), 0, 90 * 8, 8)]
     assert insights.swing_read(rerun, rerun_recent)[1][-1][0] == d(11, 17)
     late = swinging + [(d(11, 23), 10 ** 7)]
-    assert insights.swing_read(late, recent(lagged + [9]))[1][-1][0] == d(11, 16)
+    late_recent = recent(lagged) + [(d(11, 23), 0, 9 * 7, 7)]
+    assert insights.swing_read(late, late_recent)[1][-1][0] == d(11, 16)
+    # the two files missing 11-16 differently: once past 11-22, read what matched
+    split = swinging[:-1] + [(d(11, 17), 0), (d(11, 23), 0)]
+    split_recent = recent(lagged)[:-1] + [(d(11, 16), 0, 7, 7), (d(11, 17), 0, 1, 1)]
+    verdict, weeks = insights.swing_read(split, split_recent)
+    assert verdict is not None and weeks[-1][0] == d(11, 9)
     # a counter snapshot missed on 11-02: its 14 days never meet a 7-day recent week
     gap = [w for w in swinging if w[0] != d(11, 2)]
     assert [w[0] for w in insights.swing_read(gap, recent(lagged))[1]] == [

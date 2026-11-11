@@ -642,7 +642,7 @@ def show_swings(args):
            "data": "  The counter is steady: the swings are the snapshots' timing,"
                    "\n  so read snapshots at a fixed lag from now on.",
            "unclear": "  Neither: the rule names no action (PRD §0, R4).",
-           "insufficient": "  Insufficient data: under three weeks in both series."}[verdict])
+           "insufficient": "  Insufficient data: under three weeks matched in both series."}[verdict])
 
 
 def show_spacing(args):
