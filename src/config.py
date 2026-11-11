@@ -180,6 +180,11 @@ HOST_TEXT = True
 # said (owner, #77, 2026-10-19): a sentence shown mid-answer could not be read
 # while the answer was heard. False restores those notes (NOTE_LEAD).
 HOST_TAGS = True
+# Bet 1 without its per-answer reactions (#77, 2026-11-11): the setup note and
+# the vote stay, and no answer carries a tag. gemini-3.6-flash labels where
+# 2.5-flash reacted, and four fixes left it at 0-1 of 9 (PRD §4), so this is
+# the build #77 offers. True restores the reactions as the 10-25 sample.
+HOST_REACTIONS = False
 TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
 # The gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP. A
 # tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to

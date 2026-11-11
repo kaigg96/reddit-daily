@@ -65,7 +65,8 @@ def build_segments(post, outro_text, host, synth, host_voice):
     for i, comment in enumerate(answers, 1):
         segments.append(synth(f"comment_{i}", comment, kind="comment"))
         if text:
-            segments[-1].note = host.reactions[i - 1]
+            if config.HOST_REACTIONS:   # off: no tag, and never voiced instead
+                segments[-1].note = host.reactions[i - 1]
         elif host:
             segments.append(synth(f"reaction_{i}", host.reactions[i - 1], kind="host",
                                   speaker=host_voice))
