@@ -262,26 +262,32 @@ def _per_start_rows(path=None):
             if views.get((r["video_id"], r["snapshot"]))]
 
 
-def _engaged_share_rows(path=None, at_age=7):
+def _engaged_share_rows(path=None, at_age=7, tolerance=4):
     """`_snapshot_metric_rows` as engaged views / views, from the same snapshot
     row (`Video.engaged_share`): D9's measure for tests set from 2026-11-10.
     A zero-view row is left out, as zero-view uploads are counted apart; a
     blank engaged count is skipped upstream.
 
-    Only uploads whose ~`at_age`-day snapshot could carry the count: the
+    A publish-week counts only if every upload in it with views was read at
+    its snapshot nearest `at_age`, as `weekly_totals` requires of a sum. The
     column began 2026-10-05, so 2026-W39 kept 9 of 14 uploads, read at 8-11
-    days, and its one step set the drift floor that read FALLING (fresh
-    review, 11-11; without it, FLAT)."""
-    import datetime as _dt
-    views = {(r["video_id"], r["snapshot"]): r["value"]
-             for r in _snapshot_metric_rows("views", path)}
+    days, and its one step set the drift floor that read FALLING (two fresh
+    reviews, 11-11: a date cutoff only fitted `--at-age 7`)."""
+    views_rows = _snapshot_metric_rows("views", path)
+    views = {(r["video_id"], r["snapshot"]): r["value"] for r in views_rows}
     rows = [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
             for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)
             if views.get((r["video_id"], r["snapshot"]))]
-    if not rows:
-        return rows
-    since = min(r["snapshot"] for r in rows) - _dt.timedelta(days=at_age)
-    return [r for r in rows if r["published"] >= since]
+    nearest = {}
+    for r in views_rows:
+        off = abs((r["snapshot"] - r["published"]).days - at_age)
+        if off <= tolerance and off < nearest.get(r["video_id"], (tolerance + 1,))[0]:
+            nearest[r["video_id"]] = (off, r["snapshot"], r["published"])
+    have = {(r["video_id"], r["snapshot"]) for r in rows}
+    week = lambda pub: pub.strftime("%G-W%V")
+    unread = {week(pub) for vid, (_, snap, pub) in nearest.items()
+              if views[(vid, snap)] and (vid, snap) not in have}
+    return [r for r in rows if week(r["published"]) not in unread]
 
 
 def _fine_watch_rows(path=None, log_rows=None):

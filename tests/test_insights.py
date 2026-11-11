@@ -2228,6 +2228,31 @@ def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
     rows = report._engaged_share_rows(path=str(csv_path))
     assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [
         ("a", 0.333), ("a", 0.25), ("b", 0.0)]
+    # At 10 days z's nearest read is 10-05's (13 whole days, against 6), which has
+    # the count, so z's week stays, as a cutoff by date would not keep it.
+    rows = report._engaged_share_rows(path=str(csv_path), at_age=10)
+    assert "z" in {r["video_id"] for r in rows}
+
+
+def test_a_week_only_partly_read_drops_whole(tmp_path):
+    """W39: y's ~7-day read predates the column, so x, read at 8 days on the
+    first snapshot with it, does not stand for the week alone."""
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    csv_path = tmp_path / "snap.csv"
+    csv_path.write_text(
+        "snapshot_date,video_id,published_at,views,engaged_views\n"
+        "2026-09-28,y,2026-09-21T12:00:00Z,100,\n"
+        "2026-10-05,y,2026-09-21T12:00:00Z,120,40\n"
+        "2026-09-28,x,2026-09-26T12:00:00Z,10,\n"
+        "2026-10-05,x,2026-09-26T12:00:00Z,90,30\n"
+        "2026-10-05,w,2026-09-29T12:00:00Z,50,10\n")
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert {r["video_id"] for r in rows} == {"w"}
 
 
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():
