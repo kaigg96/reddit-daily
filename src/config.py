@@ -34,6 +34,16 @@ SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
 SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
 DRY_RUN = SAMPLE or SILENT_NARRATION or \
     os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# SOURCE: where the question comes from. "reddit" is the show; "own" is our
+# own question with three takes (src/ownquestions.py), the source after
+# Reddit's free API ends (PLAN C16), built switched off: only a label turns it
+# on. Any other value fails the run rather than falling back unseen.
+SOURCE = os.environ.get("SOURCE", "reddit").strip().lower() or "reddit"
+if SOURCE not in ("reddit", "own"):
+    raise SystemExit(f"SOURCE={SOURCE!r} is not a source (reddit, own)")
+# Each answer's on-screen label. Our own takes say so: nobody else wrote them,
+# so they must never pass for a real person's answer (PRD §4).
+ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30

@@ -228,6 +228,24 @@ _STYLE_GUIDANCE = {
 }
 
 
+def _own_wording(prompt):
+    """PLAN C16: our own question's takes are the host's, so the metadata call
+    must never present them as real people's answers ("3 People Reveal...")
+    or tag the video with Reddit's name (fresh review, 2026-11-10)."""
+    for a, b in (("the original Reddit question", "our own question"),
+                 ("the Reddit question", "our own question"),
+                 ('"3 Answers That...", "3 People Reveal..."', '"3 Takes On..."'),
+                 ("It features these answers:",
+                  "It features the host's own three takes, not real people's answers:"),
+                 ("this discussion", "this question")):
+        prompt = prompt.replace(a, b)
+    # Every other "answer" (style A's, C's count, the vote rule's) is a take.
+    prompt = re.sub(r"\b([Aa])nswer(s?)\b", lambda m: ("T" if m.group(1) == "A" else "t")
+                    + "ake" + m.group(2), prompt)
+    return prompt + ("\nNever present the takes as real people's answers, stories or "
+                     "confessions, and never mention Reddit or a subreddit, in any field.\n")
+
+
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
 # which all-None fields cannot. Both a spent quota and a prompt that produces
 # junk return None for every field, and the release gate has to tell them apart
@@ -387,6 +405,8 @@ Produce three things.
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
 """
+    if config.SOURCE == "own":
+        prompt = _own_wording(prompt)
     route, prior = provider(), ""
     try:
         raw = generate_retrying(prompt)
