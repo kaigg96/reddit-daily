@@ -1261,26 +1261,36 @@ def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
     `counter` is [(date, lifetime views)] from `channel_stats.csv`, the
     channel's near-real-time counter; `recent` is `views_gained_by_age`'s rows,
     whose recent column is the snapshots' lagged one. Both become per-day
-    gains for each interval ending on a snapshot dated after `start` up to
-    `end`, kept only where both series have it.
+    gains per interval between snapshots, kept only where both series cover
+    the same interval, so a missed snapshot never sets 14 days against 7.
+    The window runs from `start` to the first snapshot dated within a week
+    on or after `end` (a weekly job rerun a day late still closes it).
 
     Returns (verdict, [(date, counter per day, recent per day)]). The verdict
-    is "viewers" when the counter's lows fall in exactly the recent column's
-    low weeks, at least one; "data" when every counter rate is within ±30% of
-    their mean; else "unclear". It is None until both series reach `end`,
-    so the rule is never read early."""
-    counter = sorted((d, v) for d, v in counter if start <= d <= end)
-    per_day = {d1: (v1 - v0) / (d1 - d0).days
+    is "viewers" when the counter alternates in step: its lows fall in
+    exactly the recent column's low weeks, and there are two or more, since
+    one shared dip is not alternation (settled 11-11, before the 11-16 data);
+    "data" when every counter rate is within ±30% of their mean; else
+    "unclear"; "insufficient" under three weeks. None until both series
+    reach `end`, so the rule is never read early."""
+    as_date = lambda x: x.date() if isinstance(x, datetime.datetime) else x
+    counter = sorted((d, v) for d, v in counter if d >= start)
+    per_day = {(d0, d1): (v1 - v0) / (d1 - d0).days
                for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
-    rec = {snap.date() if hasattr(snap, "date") else snap: r / days
+    rec = {(as_date(snap) - datetime.timedelta(days=days), as_date(snap)): r / days
            for snap, _, r, days in recent if days}
-    weeks = [(d, per_day[d], rec[d]) for d in sorted(per_day)
-             if d in rec and start < d <= end]
-    if not weeks or weeks[-1][0] != end:
-        return None, weeks
+    pairs = sorted(p for p in per_day if p in rec and p[0] >= start)
+    close = next((d1 for _, d1 in pairs if end <= d1 < end + datetime.timedelta(days=7)),
+                 None)
+    weeks = [(d1, per_day[(d0, d1)], rec[(d0, d1)]) for d0, d1 in pairs
+             if close is None or d1 <= close]
+    if close is None:
+        return None, [w for w in weeks if w[0] < end]
+    if len(weeks) < 3:
+        return "insufficient", weeks
     ours = [c for _, c, _ in weeks]
     lows = swing_lows(ours)
-    if lows and lows == swing_lows([r for _, _, r in weeks]):
+    if len(lows) >= 2 and lows == swing_lows([r for _, _, r in weeks]):
         return "viewers", weeks
     mean = sum(ours) / len(ours)
     if mean and all(abs(c - mean) <= SWING_STEADY * mean for c in ours):

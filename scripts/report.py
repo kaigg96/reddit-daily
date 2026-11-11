@@ -636,11 +636,13 @@ def show_swings(args):
         print(f"  {d!s:10} {c:>8.0f}{' low' if i in lows_c else '    '}"
               f" {r:>8.0f}{' low' if i in lows_r else ''}")
     print(f"\n  Verdict: {verdict}. A low is under {insights.SWING_LOW:.0%} of each week"
-          f"\n  beside it; steady is within ±{insights.SWING_STEADY:.0%} of the mean.")
+          f"\n  beside it; in step is the same two or more low weeks in both;"
+          f"\n  steady is within ±{insights.SWING_STEADY:.0%} of the mean.")
     print({"viewers": "  The counter swings in the same weeks: the swings are viewers.",
            "data": "  The counter is steady: the swings are the snapshots' timing,"
                    "\n  so read snapshots at a fixed lag from now on.",
-           "unclear": "  Neither: the rule names no action (PRD §0, R4)."}[verdict])
+           "unclear": "  Neither: the rule names no action (PRD §0, R4).",
+           "insufficient": "  Insufficient data: under three weeks in both series."}[verdict])
 
 
 def show_spacing(args):

@@ -56,7 +56,7 @@ The source of ready work that never waits on a sample video or costs money. Belo
 
 | # | Status | Question | Test |
 |---|---|---|---|
-| R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. |
+| R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. **Read with `report.py --swings`** (11-11), which refuses before 11-16. "In step" settled 11-11, before the 11-16 data: the same low weeks in both series, two or more, as one shared dip is not alternation; weeks compared only over the same interval; under three weeks, insufficient. Through 11-09 both series dip in one week, 10-26, seen while testing the flag (a peek, no conclusion drawn). |
 | R7 | blocked: the 11-23 snapshot | **Does Stephen's voice lead on watch-seconds too?** A peek, not evidence | Pre-committed 11-05: §4 |
 
 #### Owner tasks (no version bump)

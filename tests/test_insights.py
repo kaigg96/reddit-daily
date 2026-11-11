@@ -1994,22 +1994,37 @@ def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
     dates = [d(10, 12), d(10, 19), d(10, 26), d(11, 2), d(11, 9), d(11, 16)]
     cum = lambda per_day: [(dt, sum(per_day[:i]) * 7) for i, dt in enumerate(dates)]
     recent = lambda per_day: [(dt, 0, r * 7, 7) for dt, r in zip(dates[1:], per_day)]
-    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column
-    # the counter swings in the same weeks: viewers
-    verdict, weeks = insights.swing_read(cum([500, 130, 860, 630, 120]), recent(lagged))
+    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column: lows 1, 4
+    swinging = cum([500, 130, 860, 630, 120])  # the counter: lows 1, 4
+    # the counter alternates in the same weeks: viewers
+    verdict, weeks = insights.swing_read(swinging, recent(lagged))
     assert verdict == "viewers" and [w[0] for w in weeks] == dates[1:]
     assert weeks[0] == (d(10, 19), 500.0, 600.0)
-    # a low the recent column does not share is not in step
+    # a counter low the recent column lacks, or the reverse, is not in step
+    one_low = [600, 80, 700, 650, 600]
+    assert insights.swing_read(swinging, recent(one_low))[0] == "unclear"
     assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(lagged))[0] == "unclear"
+    # one shared dip is not alternation
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(one_low))[0] == "unclear"
     # steady within ±30% of the mean: data
     assert insights.swing_read(cum([500, 450, 560, 520, 480]), recent(lagged))[0] == "data"
     # before the 11-16 snapshot, or without the recent column there, no verdict
-    early = insights.swing_read(cum([500, 130, 860, 630, 120])[:-1], recent(lagged))
+    early = insights.swing_read(swinging[:-1], recent(lagged))
     assert early[0] is None and early[1][-1][0] == d(11, 9)
-    assert insights.swing_read(cum([500, 130, 860, 630, 120]), recent(lagged)[:-1])[0] is None
-    # snapshots outside 10-12..11-16 are not read
-    late = cum([500, 130, 860, 630, 120]) + [(d(11, 23), 10 ** 7)]
-    assert insights.swing_read(late, recent(lagged))[1][-1][0] == d(11, 16)
+    assert insights.swing_read(swinging, recent(lagged)[:-1])[0] is None
+    # a weekly job rerun on 11-17 still closes the window; nothing after it is read
+    rerun = swinging[:-1] + [(d(11, 17), swinging[-1][1])]
+    rerun_recent = recent(lagged)[:-1] + [(d(11, 17), 0, 90 * 8, 8)]
+    assert insights.swing_read(rerun, rerun_recent)[1][-1][0] == d(11, 17)
+    late = swinging + [(d(11, 23), 10 ** 7)]
+    assert insights.swing_read(late, recent(lagged + [9]))[1][-1][0] == d(11, 16)
+    # a counter snapshot missed on 11-02: its 14 days never meet a 7-day recent week
+    gap = [w for w in swinging if w[0] != d(11, 2)]
+    assert [w[0] for w in insights.swing_read(gap, recent(lagged))[1]] == [
+        d(10, 19), d(10, 26), d(11, 16)]
+    # under three matched weeks: insufficient
+    thin = [w for w in swinging if w[0] in (d(10, 12), d(11, 9), d(11, 16))]
+    assert insights.swing_read(thin, recent(lagged))[0] == "insufficient"
 
 
 def test_clip_use_counts_each_broll_clip_in_log_order():
