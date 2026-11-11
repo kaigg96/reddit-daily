@@ -2804,3 +2804,21 @@ def test_interval_reading_names_what_is_ruled_out():
     assert insights.interval_reading((-0.8, -0.3), 0.3).startswith("a link of -0.3 or less")
     # 0.2996 prints as +0.30, so it must not read "rules out +0.3"
     assert "cannot rule out" in insights.interval_reading((-0.35, 0.2996), 0.3)
+
+
+def test_engaged_share_is_read_beside_the_release_verdict_never_inside_it(tmp_path, monkeypatch):
+    """C16's rule (2026-11-10) reads engaged share at `--release`, but
+    `release_verdict` reads every comparison it gets: a side with no engaged
+    share (collected only from 2026-10-05; this series has none) must not
+    turn the watch-seconds verdict into NO VERDICT, nor crash the limit."""
+    era = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", era), ("new", 60, "v5", era)])
+    read = insights.release_read("v5")
+    assert all(c.metric != insights.Metric.ENGAGED_SHARE for c in read.comparisons)
+    assert [c.metric for c, _ in read.beside] == [insights.Metric.ENGAGED_SHARE]
+    verdict = insights.release_verdict(read.comparisons, read.floors, read.triggers)
+    assert not verdict.startswith("NO VERDICT")
+    out = insights.render_beside(read)
+    assert "insufficient data" in out and "auto-revert never fires on it" in out
+    assert "not measurable" in out

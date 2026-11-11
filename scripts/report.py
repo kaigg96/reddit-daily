@@ -228,6 +228,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
               f"with what it replaced rather than with its own successors)")
     print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
     print(insights.render_duration(read.release, read.before))
+    beside = insights.render_beside(read)
+    if beside:
+        print(beside)
     import csv
     from src import config
     with open(config.UPLOAD_LOG) as f:
