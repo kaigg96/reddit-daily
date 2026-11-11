@@ -2222,12 +2222,11 @@ def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
         "2026-09-28,z,2026-09-21T12:00:00Z,100,\n"      # before the column
         "2026-10-05,z,2026-09-21T12:00:00Z,120,40\n"    # its ~7-day read had none
         "2026-10-05,a,2026-09-28T12:00:00Z,120,40\n"
-        "2026-10-12,a,2026-09-28T12:00:00Z,200,50\n"    # paired by snapshot too
+        "2026-10-12,a,2026-09-28T12:00:00Z,200,50\n"    # 13 days: not its nearest read
         "2026-10-05,b,2026-09-29T12:00:00Z,50,0\n"      # a real zero share stays
         "2026-10-05,c,2026-09-30T12:00:00Z,0,0\n")      # no views: counted apart
     rows = report._engaged_share_rows(path=str(csv_path))
-    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [
-        ("a", 0.333), ("a", 0.25), ("b", 0.0)]
+    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [("a", 0.333), ("b", 0.0)]
     # At 10 days z's nearest read is 10-05's (13 whole days, against 6), which has
     # the count, so z's week stays, as a cutoff by date would not keep it.
     rows = report._engaged_share_rows(path=str(csv_path), at_age=10)
@@ -2236,7 +2235,7 @@ def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
 
 def test_a_week_only_partly_read_drops_whole(tmp_path):
     """W39: y's ~7-day read predates the column, so x, read at 8 days on the
-    first snapshot with it, does not stand for the week alone."""
+    first snapshot with it, does not stand for the week alone (11-11)."""
     import importlib.util, pathlib, sys
     root = pathlib.Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
@@ -2252,7 +2251,15 @@ def test_a_week_only_partly_read_drops_whole(tmp_path):
         "2026-10-05,x,2026-09-26T12:00:00Z,90,30\n"
         "2026-10-05,w,2026-09-29T12:00:00Z,50,10\n")
     rows = report._engaged_share_rows(path=str(csv_path))
-    assert {r["video_id"] for r in rows} == {"w"}
+    assert rows == []                     # and W40 is still filling in: Sunday's is 1 day old
+    with open(csv_path, "a") as f:
+        f.write("2026-10-12,w,2026-09-29T12:00:00Z,80,20\n")
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert [(r["video_id"], r["value"]) for r in rows] == [("w", 0.2)]   # its 6-day read
+    assert report._engaged_share_rows(path=str(csv_path), ids={"y"}) == []
+    # Under --within, only the filter's uploads decide a week: without y, x's W39 is whole.
+    assert {r["video_id"] for r in report._engaged_share_rows(
+        path=str(csv_path), ids={"x", "w"})} == {"x", "w"}
 
 
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():

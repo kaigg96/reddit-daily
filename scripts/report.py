@@ -262,41 +262,49 @@ def _per_start_rows(path=None):
             if views.get((r["video_id"], r["snapshot"]))]
 
 
-def _engaged_share_rows(path=None, at_age=7, tolerance=4):
+def _engaged_share_rows(path=None, at_age=7, tolerance=4, ids=None):
     """`_snapshot_metric_rows` as engaged views / views, from the same snapshot
     row (`Video.engaged_share`): D9's measure for tests set from 2026-11-10.
-    A zero-view row is left out, as zero-view uploads are counted apart; a
-    blank engaged count is skipped upstream.
+    Each upload is read at its snapshot nearest `at_age`, only there; a
+    zero-view reading is left out, as zero-view uploads are counted apart.
 
-    A publish-week counts only if every upload in it with views was read at
-    its snapshot nearest `at_age`, as `weekly_totals` requires of a sum. The
-    column began 2026-10-05, so 2026-W39 kept 9 of 14 uploads, read at 8-11
-    days, and its one step set the drift floor that read FALLING (two fresh
-    reviews, 11-11: a date cutoff only fitted `--at-age 7`).
-
-    NOT MERGED: a third review (11-11) found three defects, unfixed. (1) The
-    newest week is kept half-read: uploads with no snapshot within tolerance
-    yet never mark their week, so W45 counts 8 of 14 read at 3-6 days; add
-    `weekly_totals`' Sunday-age guard (without W45: UNKNOWN; with it, FLAT at
-    7 days, FALLING at 5 and 8). (2) A zero-view nearest snapshot lets
-    `_read_at_age` fall back to a later one (JdkXzFoGYW8 at --at-age 8: 1 of
-    1, a share of 1.00); keep only rows at `nearest[vid][1]`. (3) `unread` is
-    channel-wide, so `--within` drops a week over uploads outside the filter;
-    compute it over the filtered ids. Then a fresh review before merging."""
-    views_rows = _snapshot_metric_rows("views", path)
+    A publish-week counts only if every upload in it (of `ids`, under
+    `--within`) has that reading, and its Sunday upload is old enough to,
+    as `weekly_totals` requires of a sum. The column began 2026-10-05, so
+    2026-W39 kept 9 of 14 uploads, read at 8-11 days, and its one step set
+    the drift floor that read FALLING; the newest week counted 8 of 14
+    (three fresh reviews, 11-11)."""
+    import datetime as _dt
+    views_rows = [r for r in _snapshot_metric_rows("views", path)
+                  if ids is None or r["video_id"] in ids]
+    if not views_rows:
+        return []
     views = {(r["video_id"], r["snapshot"]): r["value"] for r in views_rows}
-    rows = [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
-            for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)
-            if views.get((r["video_id"], r["snapshot"]))]
-    nearest = {}
+    engaged = {(r["video_id"], r["snapshot"]): r["value"]
+               for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)}
+    newest = (max(r["snapshot"] for r in views_rows)
+              - _dt.timedelta(days=at_age - tolerance)).date()
+    week = lambda pub: pub.strftime("%G-W%V")
+    nearest, known = {}, {}
     for r in views_rows:
+        known.setdefault(week(r["published"]), set()).add(r["video_id"])
         off = abs((r["snapshot"] - r["published"]).days - at_age)
         if off <= tolerance and off < nearest.get(r["video_id"], (tolerance + 1,))[0]:
             nearest[r["video_id"]] = (off, r["snapshot"], r["published"])
-    have = {(r["video_id"], r["snapshot"]) for r in rows}
-    week = lambda pub: pub.strftime("%G-W%V")
-    unread = {week(pub) for vid, (_, snap, pub) in nearest.items()
-              if views[(vid, snap)] and (vid, snap) not in have}
+    rows, unread = [], set()
+    for period, vids in known.items():
+        if any(v not in nearest for v in vids):
+            unread.add(period)
+    for vid, (_, snap, pub) in nearest.items():
+        sunday = (pub - _dt.timedelta(days=pub.weekday() - 6)).date()
+        if sunday > newest:
+            unread.add(week(pub))
+        elif views[(vid, snap)]:
+            if (vid, snap) not in engaged:
+                unread.add(week(pub))
+            else:
+                rows.append({"video_id": vid, "published": pub, "snapshot": snap,
+                             "value": engaged[(vid, snap)] / views[(vid, snap)]})
     return [r for r in rows if week(r["published"]) not in unread]
 
 
@@ -551,7 +559,8 @@ def show_trajectory(args):
     share = args.metric == Metric.ENGAGED_SHARE
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
-            else _engaged_share_rows(at_age=args.at_age or 7) if share
+            else _engaged_share_rows(at_age=args.at_age or 7, ids=insights.ids_within(args.within)
+                                     if args.within else None) if share
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
     # Minutes come whole, so an upload under ~30 views reads 0 per play start:
