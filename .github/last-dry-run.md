@@ -6,31 +6,26 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `strategy/own-questions-render`
-- **Commit:** `7ef6b78`
-- **When:** 2026-11-10T18:46:37Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 19.1 s, audio, no dead air
+- **Branch:** `strategy/own-questions-source`
+- **Commit:** `deb4fda`
+- **When:** 2026-11-11T11:01:28Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 26.5 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/42878212014)
-
-Failed soft (the video still passed):
-
-```
-Slate topics (rank order): (not collected)
-```
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/43008138907)
 
 What it picked:
 
 ```
-Selected post: How should people spend a completely free Saturday?
-Slate topics (rank order): (not collected)
-Title style C, caps arm 0: 3 takes on how to spend a free Saturday
-CTA: Which take is yours? Drop your Saturday plan in the comments.
-Assembled: 19.1s, bg=pexels_7565434.mp4, music=funk_bg_lower.mp3
+Selected post: Is it strictly prohibited for a therapist to tell your parents?
+Slate topics (rank order): life-advice|sex-adjacent|health-body|politics-news|money-work
+Title style B, caps arm 1: Can your therapist REALLY tell your parents everything you say?
+CTA: Would your therapist tell your parents? Drop your thoughts below.
+Assembled: 26.5s, bg=pexels_12488544.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/VerifiedHeroo: Is it strictly prohibited for a therapist to tell your parents?
 ```
 
 ## Last request
 
-- **Branch:** `strategy/own-questions-render`
-- **When:** 2026-11-10T18:46:37Z
+- **Branch:** `strategy/own-questions-source`
+- **When:** 2026-11-11T11:01:28Z
 - **Outcome:** rendered -- see above
