@@ -497,7 +497,6 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     )
 
 
-
 def _rescue_metadata(prompt, prior):
     """Once MODEL has failed: one try on FALLBACK_MODEL, then Groq's (PRD §0
     #13): (reply, route, failure). Two 503s 30s apart cost the 2026-10-18 16:02
