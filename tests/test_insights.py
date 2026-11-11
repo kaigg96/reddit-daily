@@ -2219,12 +2219,15 @@ def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
     csv_path = tmp_path / "snap.csv"
     csv_path.write_text(
         "snapshot_date,video_id,published_at,views,engaged_views\n"
-        "2026-09-28,a,2026-09-21T12:00:00Z,100,\n"      # before the column
-        "2026-10-05,a,2026-09-21T12:00:00Z,120,40\n"
+        "2026-09-28,z,2026-09-21T12:00:00Z,100,\n"      # before the column
+        "2026-10-05,z,2026-09-21T12:00:00Z,120,40\n"    # its ~7-day read had none
+        "2026-10-05,a,2026-09-28T12:00:00Z,120,40\n"
+        "2026-10-12,a,2026-09-28T12:00:00Z,200,50\n"    # paired by snapshot too
         "2026-10-05,b,2026-09-29T12:00:00Z,50,0\n"      # a real zero share stays
         "2026-10-05,c,2026-09-30T12:00:00Z,0,0\n")      # no views: counted apart
     rows = report._engaged_share_rows(path=str(csv_path))
-    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [("a", 0.333), ("b", 0.0)]
+    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [
+        ("a", 0.333), ("a", 0.25), ("b", 0.0)]
 
 
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():

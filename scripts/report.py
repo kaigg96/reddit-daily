@@ -262,16 +262,26 @@ def _per_start_rows(path=None):
             if views.get((r["video_id"], r["snapshot"]))]
 
 
-def _engaged_share_rows(path=None):
+def _engaged_share_rows(path=None, at_age=7):
     """`_snapshot_metric_rows` as engaged views / views, from the same snapshot
     row (`Video.engaged_share`): D9's measure for tests set from 2026-11-10.
     A zero-view row is left out, as zero-view uploads are counted apart; a
-    blank engaged count is skipped upstream, so weeks before 2026-10-05 thin."""
+    blank engaged count is skipped upstream.
+
+    Only uploads whose ~`at_age`-day snapshot could carry the count: the
+    column began 2026-10-05, so 2026-W39 kept 9 of 14 uploads, read at 8-11
+    days, and its one step set the drift floor that read FALLING (fresh
+    review, 11-11; without it, FLAT)."""
+    import datetime as _dt
     views = {(r["video_id"], r["snapshot"]): r["value"]
              for r in _snapshot_metric_rows("views", path)}
-    return [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
+    rows = [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
             for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)
             if views.get((r["video_id"], r["snapshot"]))]
+    if not rows:
+        return rows
+    since = min(r["snapshot"] for r in rows) - _dt.timedelta(days=at_age)
+    return [r for r in rows if r["published"] >= since]
 
 
 def _fine_watch_rows(path=None, log_rows=None):
@@ -525,7 +535,7 @@ def show_trajectory(args):
     share = args.metric == Metric.ENGAGED_SHARE
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
-            else _engaged_share_rows() if share
+            else _engaged_share_rows(at_age=args.at_age or 7) if share
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
     # Minutes come whole, so an upload under ~30 views reads 0 per play start:
@@ -559,7 +569,7 @@ def show_trajectory(args):
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
         print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
-    if verdict == "flat":
+    if verdict == "flat" and not share:
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
 
