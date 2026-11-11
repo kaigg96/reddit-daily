@@ -247,9 +247,10 @@ def check_metadata():
                 shown("setup", host.setup)
             else:
                 note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
-            if not config.HOST_REACTIONS:   # #77, 11-11: never shown, so never read
+            reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
+            if not reacts:   # #77, 11-11: never shown, so never read
                 note("- host reactions: off (the setup and the vote are the host)")
-            for i, line in enumerate(host.reactions if config.HOST_REACTIONS else (), 1):
+            for i, line in enumerate(host.reactions if reacts else (), 1):
                 shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
             if not host.verdict:   # a swear word now drops it too (the run log says which)
                 note("- ⚠️ host vote: dropped, past its cap or a swear word"

@@ -249,8 +249,9 @@ def main():
         print("Commentary: no usable host lines -- shipping today's reading")
     if host:
         print(f"Commentary setup: {host.setup or '(dropped)'}")
-        for i, line in enumerate(host.reactions, 1):
-            print(f"Commentary reaction {i}: {line or '(dropped)'}")
+        if config.HOST_REACTIONS or not config.HOST_TEXT:   # off: none to report (#77)
+            for i, line in enumerate(host.reactions, 1):
+                print(f"Commentary reaction {i}: {line or '(dropped)'}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta = closing_line(meta, host)

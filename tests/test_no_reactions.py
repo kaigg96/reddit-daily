@@ -57,3 +57,10 @@ def test_the_vote_ships_alone_when_the_setup_drops(no_reactions):
     assert host is not None and host.setup == "" and host.verdict == VOTE
     assert llm._clean_commentary({"setup": "x " * 30, "reactions": ["Oof", "Ha"],
                                   "cta": "y " * 40}, 2) is None
+
+
+def test_a_voiced_host_still_counts_its_reactions(no_reactions, monkeypatch):
+    # The switch is the text host's: spoken, reactions are heard (llm._clean_commentary).
+    monkeypatch.setattr(config, "HOST_TEXT", False)
+    rows = [{"format_version": "v8", "host_lines": n} for n in ("4", "2")]
+    assert insights.render_host_lines(rows, "v8").endswith("all 4 on 1 of 2 uploads, some on 1, none on 0")
