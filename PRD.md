@@ -32,7 +32,7 @@
 | ~~Refuse shock-phrase titles in code~~ ✅ 2026-10-26 (PLAN §4) | done | R2.2 | Falls back like a failed title (style blank); no bump. |
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
-| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | baking: `v7s`, merged 11-08 (`gemini-3.6-flash`, §4); read ~11-25; first week, watch `http_429_day` (its run log prints the cap, `Gemini daily cap:`, since 11-09) | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION`, judged by #13's rule. |
+| **`MODEL`'s successor before Google's 12-01 reroute (§4)** | baking: `v7s`, merged 11-08 (`gemini-3.6-flash`, §4); read ~11-25; first week, watch `http_429_day` (its run log prints the cap, `Gemini daily cap:`, since 11-09); its 20th upload: §4's title count (11-11) | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION`, judged by #13's rule. |
 | **Bet 1's host lines on `gemini-3.6-flash` (§4, 11-08)** | done: no fix 11-11 (few-shot 0 of 9, §4); #77 told | R3.2 | **Pre-committed 11-08:** §4. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
