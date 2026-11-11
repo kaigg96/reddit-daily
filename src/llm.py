@@ -456,17 +456,34 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         print(f"{route} metadata returned unparseable JSON (all fields fall back)")
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
-    return MetadataResult(
-        title=_clean_published(data.get("title")),
-        keywords=_clean_keywords(data.get("keywords")),
-        # The capitals test's "no capitals" arm leaks into this line as it did
-        # into titles: 11 of its 27 uploads to 11-02 ended on an all-lower-case
-        # line, posted as our comment and in the closed captions (on screen it
-        # is upper-cased anyway) (0 of 123 others).
-        cta=sentence_case(_clean_published(data.get("cta"))),
-        source=route,
-        failure=prior,
-    )
+    title, keywords = _clean_published(data.get("title")), _clean_keywords(data.get("keywords"))
+    # The capitals test's "no capitals" arm leaks into this line as it did
+    # into titles: 11 of its 27 uploads to 11-02 ended on an all-lower-case
+    # line, posted as our comment and in the closed captions (on screen it
+    # is upper-cased anyway) (0 of 123 others).
+    cta = sentence_case(_clean_published(data.get("cta")))
+    if config.SOURCE == "own":
+        title, keywords, cta = _own_fields(title, keywords, cta)
+    return MetadataResult(title=title, keywords=keywords, cta=cta, source=route, failure=prior)
+
+
+# PLAN C16: the prompt forbids naming Reddit or passing the takes off as
+# people's, and this is the check (11-11 review: prompt-only before). A title
+# or closing line that does falls back as a failed one does; a keyword is left out.
+_OWN_BANNED = re.compile(
+    r"reddit|\br/\w|\breveal|\bconfess|\b(people|users|strangers|folks)\s+"
+    r"(share|reveal|admit|say|tell|confess|explain)", re.I)
+
+
+def _own_fields(title, keywords, cta):
+    def ok(field, line):
+        if line and _OWN_BANNED.search(line):
+            print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
+            return False
+        return True
+    return (title if ok("title", title) else None,
+            None if keywords is None else [k for k in keywords if ok("keyword", k)],
+            cta if ok("closing line", cta) else None)
 
 
 def _rescue_metadata(prompt, prior):
