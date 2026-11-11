@@ -1237,6 +1237,72 @@ def two_week_rate(rows):
     return out[:len(rows)]
 
 
+# R4 (PRD §0), pre-committed 2026-10-26: snapshots dated 10-12 to 11-16.
+SWINGS_START = datetime.date(2026, 10, 12)
+SWINGS_END = datetime.date(2026, 11, 16)
+SWING_LOW = 0.60       # a low is under 60% of each week beside it
+SWING_STEADY = 0.30    # steady is every week within ±30% of the mean
+
+
+def swing_lows(rates, share=SWING_LOW):
+    """Positions of the rates under `share` of every neighbour beside them
+    (one neighbour at either end)."""
+    out = set()
+    for i, r in enumerate(rates):
+        sides = [rates[j] for j in (i - 1, i + 1) if 0 <= j < len(rates)]
+        if sides and all(r < share * s for s in sides):
+            out.add(i)
+    return out
+
+
+def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
+    """R4: are weekly view swings viewers or data?
+
+    `counter` is [(date, lifetime views)] from `channel_stats.csv`, the
+    channel's near-real-time counter; `recent` is `views_gained_by_age`'s rows,
+    whose recent column is the snapshots' lagged one. Both become per-day
+    gains per interval between snapshots, kept only where both series cover
+    the same interval, so a missed snapshot never sets 14 days against 7.
+    The window runs from `start` to the first snapshot dated within a week
+    on or after `end` (a weekly job rerun a day late still closes it).
+
+    Returns (verdict, [(date, counter per day, recent per day)]). The verdict
+    is "viewers" when the counter alternates in step: its lows fall in
+    exactly the recent column's low weeks, and there are two or more, since
+    one shared dip is not alternation (settled 11-11, before the 11-16 data);
+    "data" when every counter rate is within ±30% of their mean; else
+    "unclear"; "insufficient" under three matched weeks. None until both
+    series reach `end`, so the rule is never read early; once either passes
+    the week after it unmatched, the matched weeks are read as they stand.
+    A week missing from either series makes the weeks beside it neighbours
+    in the low test, so a gap can turn an in-step read "unclear"."""
+    as_date = lambda x: x.date() if isinstance(x, datetime.datetime) else x
+    counter = sorted((d, v) for d, v in counter if d >= start)
+    per_day = {(d0, d1): (v1 - v0) / (d1 - d0).days
+               for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
+    rec = {(as_date(snap) - datetime.timedelta(days=days), as_date(snap)): r / days
+           for snap, _, r, days in recent if days}
+    week = datetime.timedelta(days=7)
+    pairs = sorted(p for p in per_day if p in rec and p[0] >= start)
+    close = next((d1 for _, d1 in pairs if end <= d1 < end + week), None)
+    if close is None and any(d1 >= end + week for _, d1 in list(per_day) + list(rec)):
+        close = end + week - datetime.timedelta(days=1)   # the window passed unmatched
+    weeks = [(d1, per_day[(d0, d1)], rec[(d0, d1)]) for d0, d1 in pairs
+             if close is None or d1 <= close]
+    if close is None:
+        return None, [w for w in weeks if w[0] < end]
+    if len(weeks) < 3:
+        return "insufficient", weeks
+    ours = [c for _, c, _ in weeks]
+    lows = swing_lows(ours)
+    if len(lows) >= 2 and lows == swing_lows([r for _, _, r in weeks]):
+        return "viewers", weeks
+    mean = sum(ours) / len(ours)
+    if mean and all(abs(c - mean) <= SWING_STEADY * mean for c in ours):
+        return "data", weeks
+    return "unclear", weeks
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 

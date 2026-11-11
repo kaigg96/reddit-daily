@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-11 (00:03) — Reddit's terms are unchanged; the backup show is ready for its last check this morning, and Monday's views question can now be answered by our tools
+
+    Worked (% of the shift): data 40 · gm 25 · legal 20 · strategy 10 · security 5
+
+**Summary:** A night shift with no AI allowance and no sample videos, so it did the checks and preparation that need neither. Nothing reached viewers. The backup show is set for its final check after 08:00 this morning, and Reddit's terms show no change that would move our January deadline.
+
+### Toward revenue
+- **Keeping uploads going after January.** The backup show's code now matches the live code exactly, so this morning's sample tests what will actually merge. On a pass it merges switched off, the same day.
+- **Reddit's terms, read late in the afternoon of the 10th, California time:** unchanged. The reminder to developers that Reddit announced for the 10th has not been reported anywhere I could find. Registering our app (#82) is still what keeps uploads going past 12 January.
+- Bet 1 (#77) still waits on you; nothing tonight changes that.
+
+### Done
+- **Legal:** read Reddit's three terms pages live, and all three are unchanged. The same news reports say Reddit's feeds for news readers end on 13 November. I checked our code: we read Reddit only through its official connection, never those feeds, so uploads are unaffected. That check is now closed in our test ledger.
+- **Strategy:** brought the backup show's copy of the code up to date with today's live code. All 823 tests pass, and it will merge without conflict.
+- **Data (correction):** Monday's review wrote that our report on videos nobody is shown could not run without a login. It can, and I ran it. The five such videos since 15 October all went up between 15 and 26 October, and none since. Four newer ones are too young to judge until Monday. Counts only; nothing concluded.
+- **Data (built, live):** Monday's question, whether our weekly view swings are real viewers or a quirk of when our figures are collected, is now one command. It refuses to answer before Monday's figures arrive, as the rule set on 26 October requires. Two fresh reviews found five problems, all fixed before merging. My first version would have called one shared dip a pattern; it now needs two. While testing it I saw the figures so far, which show one shared dip. I drew no conclusion and wrote that down where the rule lives. Reporting only, so viewers see nothing.
+- **General management (ranking):** with one item ready, a fresh helper proposed eight ideas and two more ranked them, forwards and backwards. Both put the terms check and the correction near the top. The backup-show update split them, because one ranker took it for a merge. The views tool came last both ways; I built it because time remained and Monday's review needs it. A second round, aimed at money, distribution, naming and reliability, found nothing above the bar. Our distance to YouTube's bar moved from 691× to 677× short, too little to change a decision. This week's longest scheduled-upload delay was 10 hours, and a fix is already built for after bet 1. So I handed over at 00:37, 25 minutes early: everything else waits on this morning's reset, the sample limit, or you.
+- **Security and reliability (checked):** both of yesterday's uploads landed, and the money controls are intact ($0.25 this month, forecast $0.75 of $3). No secret is in the repository, and nothing in the workflows has changed since yesterday's patch of yours.
+- AI use: none; no Polly; no sample video.
+
+### Blocked
+- **For you, in order:** #77 (bet 1), #82 (register the Reddit app by 12 January), #88 (one command), #90, #65 (your "yes" to its corrected sentence), #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **11 November, after 08:00 UTC:** request the backup show's sample; on a pass naming its current commit, merge it switched off. Then bet 1's worked-examples test (3 requests), blind-scored, and its rule. If the morning upload runs late, after 08:00, it shares the same AI allowance; there is room for all three, but check first.
+- **16 November:** the weekly review, which now answers the view-swings question with one command.
+
+### Better?
+- **Than last shift:** about the same. The backup show is one step closer to merging, and Monday's read is ready. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-10 (18:40) — Your three decisions are carried out; the own-questions show's sample video passed, and it can merge switched off after one more check tomorrow
 
     Worked (% of the shift): gm 30 · strategy 25 · data 25 · legal 10 · security 5 · reliability 5
@@ -93,37 +127,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** slightly. The backup source passed its sample and three of your decisions are carried out. Nothing new reached viewers.
-- **Than ~10 shifts ago:** no. Watch time is flat and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-10 (11:17) — Your "no" on viewer replies is done; the first two fixes for bet 1's host lines failed a blind test, and one more runs tomorrow
-
-    Worked (% of the shift): product 45 · audience 15 · gm 15 · reliability 10 · strategy 10 · security 5
-
-**Summary:** Thanks for your two decisions. The reply job stays off with its queued replies withdrawn, and your label on #93 applied itself this morning. Two fixes for bet 1's host lines failed a blind test; a third runs tomorrow, and #77 now spells out what your label trades.
-
-### Toward revenue
-- **Nothing directly.** Bet 1, our main bet on originality, still waits on your label (#77). Today's comment there puts the choice plainly: label it now with weaker host lines, or reply "without reactions".
-
-### Done
-- **Audience (your decision on #89):** the reply job stays off, and the three queued replies are withdrawn, so nothing will ever post them. The missed-upload check bundled with it stays off too. Your rule is recorded where any future attempt will see it: first person, never "we", not formulaic, and drafts shown to you first. Our videos' closing line says "us" on 7 of the last 12 and "I" on none; your rule was about replies, so I changed nothing.
-- **Product (bet 1's host lines, under the rule set on 8 November):** on the new AI model I tried two fixes on the same three test posts: making it think harder, and a wording that forbids labels. A fresh scorer, not told which line came from which version, found 1 reaction in the 9 lines from 8 November and 0 in 6 for each fix. Thinking harder was also too slow. So nothing ships. Two fresh helpers then ranked what to try next, one reading the list forwards and one backwards. Both put the same two first: showing the model worked examples, and shipping bet 1 without the per-answer reactions. The examples version is built, and reviews found two defects, both fixed. It runs tomorrow under a rule set before any result, scored with today's exact instructions so the two results compare. If it fails, the next shift recommends bet 1 without reactions on #77.
-- **Strategy (the source after Reddit):** I could not request its sample video this shift: it would have rendered within an hour of the 12:23 upload slot, which our rules forbid. It still merges cleanly with today's code and passes every test, so tonight's shift can request it.
-- **Reliability and security (checked):** all three uploads since yesterday morning landed. The money controls are intact ($0.24 this month, forecast $0.75 of $3). No secret is in the repository, and the only workflow change is your #93 patch, which adds one setting and no new permission. The new model has written all 4 of its uploads' titles without an error; today's overload errors were in my test, which tries only once.
-- **General management:** I pushed one tracker edit that broke a test on the live code line for about five minutes. It is fixed; no upload ran in between. The 5 November audit's four process proposals were due to come to you on your return. I am holding them so #77 and #82 get read first. With nothing else runnable, a fresh helper proposed eight more ideas; none cleared the bar (two were already settled in the plan, the rest answered by earlier findings or too thin to read). So I handed over at 11:50, 21 minutes early.
-- AI use: 7 of the shift's 8 requests (the test); no Polly; no sample video.
-
-### Blocked
-- **For you, in order:** #77 (bet 1; each week past about 20 November costs bet 2 a week at four uploads a day), #82 (register the Reddit app by 12 January or uploads stop), #90, #91, #92, #88, #65 (your "yes" to its corrected sentence), #80, #59.
-
-### Next
-- **Tonight (19:17 shift):** request the own-questions sample video; its render copy is ready. The 18:23 slot makes no AI call, so it does not block the request, but check that the late evening upload is not running at that moment.
-- **11 November, after 08:00 UTC and an hour clear of an upload** (the 11:17 shift's first minutes, or the 19:17 shift): the worked-examples test (3 requests), blind-scored as today, then its rule. Look at Reddit's terms again the same day.
-- **16 November:** the weekly review.
-
-### Better?
-- **Than last shift:** slightly. Your two decisions are carried out, and bet 1's host-line question is down to one last test with its fallback already chosen. Nothing reached viewers.
 - **Than ~10 shifts ago:** no. Watch time is flat and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.

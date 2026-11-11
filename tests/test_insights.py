@@ -1981,6 +1981,58 @@ def test_two_week_rate_pools_each_snapshot_with_the_one_before():
     assert insights.two_week_rate([]) == []
 
 
+def test_swing_lows_are_under_60_percent_of_every_week_beside_them():
+    assert insights.swing_lows([500, 100, 600, 590, 200]) == {1, 4}
+    # 59% of one side but not the other is no low; an end needs only its one side
+    assert insights.swing_lows([1000, 590, 900]) == set()
+    assert insights.swing_lows([100, 1000]) == {0}
+    assert insights.swing_lows([]) == set()
+
+
+def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
+    d = lambda m, day: datetime.date(2026, m, day)
+    dates = [d(10, 12), d(10, 19), d(10, 26), d(11, 2), d(11, 9), d(11, 16)]
+    cum = lambda per_day: [(dt, sum(per_day[:i]) * 7) for i, dt in enumerate(dates)]
+    recent = lambda per_day: [(dt, 0, r * 7, 7) for dt, r in zip(dates[1:], per_day)]
+    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column: lows 1, 4
+    swinging = cum([500, 130, 860, 630, 120])  # the counter: lows 1, 4
+    # the counter alternates in the same weeks: viewers
+    verdict, weeks = insights.swing_read(swinging, recent(lagged))
+    assert verdict == "viewers" and [w[0] for w in weeks] == dates[1:]
+    assert weeks[0] == (d(10, 19), 500.0, 600.0)
+    # a counter low the recent column lacks, or the reverse, is not in step
+    one_low = [600, 80, 700, 650, 600]
+    assert insights.swing_read(swinging, recent(one_low))[0] == "unclear"
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(lagged))[0] == "unclear"
+    # one shared dip is not alternation
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(one_low))[0] == "unclear"
+    # steady within ±30% of the mean: data
+    assert insights.swing_read(cum([500, 450, 560, 520, 480]), recent(lagged))[0] == "data"
+    # before the 11-16 snapshot, or without the recent column there, no verdict
+    early = insights.swing_read(swinging[:-1], recent(lagged))
+    assert early[0] is None and early[1][-1][0] == d(11, 9)
+    assert insights.swing_read(swinging, recent(lagged)[:-1])[0] is None
+    # a weekly job rerun on 11-17 still closes the window; nothing after it is read
+    rerun = swinging[:-1] + [(d(11, 17), swinging[-1][1])]
+    rerun_recent = recent(lagged)[:-1] + [(d(11, 17), 0, 90 * 8, 8)]
+    assert insights.swing_read(rerun, rerun_recent)[1][-1][0] == d(11, 17)
+    late = swinging + [(d(11, 23), 10 ** 7)]
+    late_recent = recent(lagged) + [(d(11, 23), 0, 9 * 7, 7)]
+    assert insights.swing_read(late, late_recent)[1][-1][0] == d(11, 16)
+    # the two files missing 11-16 differently: once past 11-22, read what matched
+    split = swinging[:-1] + [(d(11, 17), 0), (d(11, 23), 0)]
+    split_recent = recent(lagged)[:-1] + [(d(11, 16), 0, 7, 7), (d(11, 17), 0, 1, 1)]
+    verdict, weeks = insights.swing_read(split, split_recent)
+    assert verdict is not None and weeks[-1][0] == d(11, 9)
+    # a counter snapshot missed on 11-02: its 14 days never meet a 7-day recent week
+    gap = [w for w in swinging if w[0] != d(11, 2)]
+    assert [w[0] for w in insights.swing_read(gap, recent(lagged))[1]] == [
+        d(10, 19), d(10, 26), d(11, 16)]
+    # under three matched weeks: insufficient
+    thin = [w for w in swinging if w[0] in (d(10, 12), d(11, 9), d(11, 16))]
+    assert insights.swing_read(thin, recent(lagged))[0] == "insufficient"
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
