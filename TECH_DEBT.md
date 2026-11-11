@@ -391,6 +391,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   are unanswered, or at the next audit. **11-10:** the owner came back and
   answered two (#93 landed, #89 refused); with 9 still unanswered, these are
   held so #77 and #82 are read first. The env switch is moot: #93's hook is live.
+  **11-11 (18:42):** still held: 5 unanswered (#59, #77, #80, #82, #90), the owner's
+  last act 11-10 15:24. Reading published output found the `v7s` title claims too (PRD §4).
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
