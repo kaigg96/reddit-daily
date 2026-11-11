@@ -61,18 +61,18 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-11 (18:42) — Two of the new AI model's latest five titles claim more than the question did; a weekly read of the share of plays past the opening is built but not yet trustworthy
+## 2026-11-11 (18:42) — Two of the new AI model's latest five titles claim more than the question did; a weekly read of the share of plays past the opening is live, and says there is not enough history yet
 
     Worked (% of the shift): editorial 35 · data 40 · gm 20 · security 5
 
-**Summary:** An evening shift with nothing ready and everything that changes the videos waiting on you, so I made new work and did the two items that ranked best. Nothing reached viewers. Two of the five titles the new AI model has written put a claim in the question's mouth, so that count is now part of its scheduled check.
+**Summary:** An evening shift with nothing ready and everything that changes the videos waiting on you, so I made new work and finished the two items that ranked best. Nothing reached viewers. Two of the five titles the new AI model has written put a claim in the question's mouth, so that count is now part of its scheduled check.
 
 ### Toward revenue
 - **Nothing directly**, because every step that changes what we ship waits on you (#77, #90). One indirect step: YouTube's rules count misleading titles against a channel, and its monetization review reads them, so titles that overclaim or accuse are a risk to earning. A check is now set before we know how often it happens.
 
 ### Done
 - **Editorial (a check, not a fix):** I read the three latest uploads as published. "Why do YOU think people fake autism online?" asked viewers whether people are faking a disability, though the question never said fake. "3 Sports Where Women ACTUALLY Have The Genetic Advantage" stated as fact what its answers only guessed. A fresh helper, not told which model wrote what, checked 12 recent titles: 2 of the new model's 5 added a claim, against 1 of the old model's 7. That is too few to act on, and I found it by looking. So the rule is set first: at the new model's 20th upload, the same check on all 20; 5 or more puts a title-instruction fix in line after the capitals test is read on 23 November. It is never a reason to undo the model change.
-- **Data (built, not merged):** our weekly "are we improving?" read uses watch time. Since your #91 decision, tests are judged on the share of plays that get past the opening, so I added that measure too. Three fresh reviews each found a real flaw, mostly in how a partly-measured week is counted, and the verdict swung with them: flat, falling, rising or "not enough data". A tool that swings like that would mislead the next shift, so it waits, with its three remaining fixes written on it. Nothing to conclude: on the reading we normally use, the share is flat.
+- **Data (built, live):** our weekly "are we improving?" read uses watch time. Since your #91 decision, tests are judged on the share of plays that get past the opening, so I added that measure too. The first three fresh reviews each found a real flaw, mostly in how a partly-measured week is counted, and the verdict swung with them, from "falling" to "flat" to "rising". After all the fixes, a fourth review found nothing wrong, and I merged it. Its answer today is "not enough history": we have only five full weeks of this figure, and it needs six. Reporting only, so viewers see nothing.
 - **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The title check came second both ways and the weekly read third, so I did those. The other three split: a pre-set plan for bet 2 if #77 stays unanswered (one ranker found it already written on 6 November), a slice of the process audit, and a re-read of YouTube's policy pages (read 3 November).
 - **Security and reliability (checked):** this morning's upload landed. The midday run found nothing to do, and the evening one has not started yet. The money controls are intact ($0.25 this month, forecast $0.75 of $3), no secret is in the repository, and the workflows are unchanged. The morning upload's topic-sorting step hit an overload error. It is logging only, never touches the upload, and has happened 3 times in 91 runs.
 - **Your approvals #88 and #65** are still open. #88 waits on you applying its patch (shifts cannot write those files). #65 waits on your "yes" to its corrected sentence.
@@ -84,7 +84,6 @@ and more useful than a confident guess.
 ### Next
 - **From about 23:00 UTC tonight**, when the sample limit clears: request the sample of the backup show's fixes, and merge on a pass.
 - **The process audit is due:** 13 shifts since the 5 November one, against about ten.
-- **The weekly read of plays past the opening:** make its three written fixes, then a fresh review, then merge.
 - **16 November:** the weekly review.
 
 ### Better?
