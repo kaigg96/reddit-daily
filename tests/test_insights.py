@@ -1509,6 +1509,16 @@ def test_a_decline_is_reported_as_falling():
     assert verdict == "falling"
 
 
+def test_a_share_moving_beyond_its_drift_is_not_read_as_flat():
+    """Engaged share lives on 0-1, so the half-second default for a move too
+    small to call would read every share series as flat (2026-11-11)."""
+    series = [(f"w{i}", 10, v) for i, v in enumerate([0.35, 0.35, 0.35, 0.26, 0.26, 0.26])]
+    assert insights.trajectory_verdict(series, floor=0.07)[0] == "flat"   # the old default
+    verdict, why = insights.trajectory_verdict(series, floor=0.07, min_change=0.02, digits=2)
+    assert verdict == "falling" and "0.35 → 0.26" in why
+    assert insights.trajectory_verdict(series, floor=0.1, min_change=0.02)[0] == "flat"
+
+
 def test_too_little_history_says_unknown_rather_than_guessing():
     series = [(f"w{i}", 10, 10.0) for i in range(3)]
     verdict, _ = insights.trajectory_verdict(series, floor=1.0)
@@ -2197,6 +2207,24 @@ def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path
         ("a", 40.0), ("b", 0.0), ("c", 0.0)]
     views = report._snapshot_metric_rows("views", path=str(csv_path))
     assert len(views) == 4
+
+
+def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    csv_path = tmp_path / "snap.csv"
+    csv_path.write_text(
+        "snapshot_date,video_id,published_at,views,engaged_views\n"
+        "2026-09-28,a,2026-09-21T12:00:00Z,100,\n"      # before the column
+        "2026-10-05,a,2026-09-21T12:00:00Z,120,40\n"
+        "2026-10-05,b,2026-09-29T12:00:00Z,50,0\n"      # a real zero share stays
+        "2026-10-05,c,2026-09-30T12:00:00Z,0,0\n")      # no views: counted apart
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [("a", 0.333), ("b", 0.0)]
 
 
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():

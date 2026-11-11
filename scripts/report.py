@@ -15,6 +15,7 @@ Usage:
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
+  venv/bin/python scripts/report.py --trajectory --metric engaged_share   # D9's test measure, by week
   venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
   venv/bin/python scripts/report.py --balance title_caps --by subreddit   # a coin's arms; no outcome read
 
@@ -261,6 +262,18 @@ def _per_start_rows(path=None):
             if views.get((r["video_id"], r["snapshot"]))]
 
 
+def _engaged_share_rows(path=None):
+    """`_snapshot_metric_rows` as engaged views / views, from the same snapshot
+    row (`Video.engaged_share`): D9's measure for tests set from 2026-11-10.
+    A zero-view row is left out, as zero-view uploads are counted apart; a
+    blank engaged count is skipped upstream, so weeks before 2026-10-05 thin."""
+    views = {(r["video_id"], r["snapshot"]): r["value"]
+             for r in _snapshot_metric_rows("views", path)}
+    return [dict(r, value=r["value"] / views[(r["video_id"], r["snapshot"])])
+            for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)
+            if views.get((r["video_id"], r["snapshot"]))]
+
+
 def _fine_watch_rows(path=None, log_rows=None):
     """`_snapshot_metric_rows` in fractional watch-seconds: percentage viewed x
     the upload's logged length (`Video.watch_seconds_fine`). An upload with no
@@ -504,19 +517,24 @@ def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
-    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START):
-        print(f"--trajectory reads watch-seconds (whole, fine or per play start), views or "
-              f"engaged_views, not {args.metric}")
+    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START,
+                           Metric.ENGAGED_SHARE):
+        print(f"--trajectory reads watch-seconds (whole, fine or per play start), engaged_share, "
+              f"views or engaged_views, not {args.metric}")
         return
+    share = args.metric == Metric.ENGAGED_SHARE
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
+            else _engaged_share_rows() if share
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
     # Minutes come whole, so an upload under ~30 views reads 0 per play start:
     # a reading (its zero-view rows are already out), kept so the weakest
-    # uploads do not drop from their week's median (review, 10-23).
+    # uploads do not drop from their week's median (review, 10-23). So is an
+    # engaged share of 0 on an upload with views.
     series = insights.trajectory(rows, at_age=args.at_age or 7,
-                                 keep_zero=args.metric == Metric.WATCH_PER_START)
+                                 keep_zero=args.metric in (Metric.WATCH_PER_START,
+                                                           Metric.ENGAGED_SHARE))
     if not series:
         print("not enough comparable history yet")
         return
@@ -524,18 +542,23 @@ def show_trajectory(args):
             " pre-committed rules read whole seconds)" if args.metric == Metric.WATCH_FINE else "")
     name = ("seconds watched per play start (estimated minutes x 60 / views, swipe-aways"
             " included; a diagnostic, never a trigger)"
-            if args.metric == Metric.WATCH_PER_START else f"watch-seconds{fine}")
+            if args.metric == Metric.WATCH_PER_START
+            else "engaged share (engaged views / views; reported since 2026-10-05; D9's"
+                 " measure for tests, read per test with --release, never a trigger here)"
+            if share else f"watch-seconds{fine}")
+    unit, digits = ("", 2) if share else ("s", 1)
     print(f"Median {name}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
-        print(f"  {period:10} {n:>4} {med:>7.1f}s")
+        print(f"  {period:10} {n:>4} {med:>7.{digits}f}{unit}")
 
     floor = insights.median([abs(b[2] - a[2])
                             for a, b in zip(series, series[1:])]) or None
-    verdict, why = insights.trajectory_verdict(series, floor=floor)
+    verdict, why = insights.trajectory_verdict(series, floor=floor, digits=digits,
+                                               min_change=0.02 if share else 0.5)
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
-        print(f"  (week-to-week drift on this channel is ~{floor:.1f}s)")
+        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
     if verdict == "flat":
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
