@@ -228,20 +228,35 @@ _STYLE_GUIDANCE = {
 }
 
 
-def _own_wording(prompt):
+def _own_wording(prompt, verbatim=()):
     """PLAN C16: our own question's takes are the host's, so the metadata call
     must never present them as real people's answers ("3 People Reveal...")
-    or tag the video with Reddit's name (fresh review, 2026-11-10)."""
+    or tag the video with Reddit's name (fresh review, 2026-11-10).
+
+    Only our instructions are rewritten. `verbatim` (the question and its
+    takes) and the replacements themselves pass through untouched: the
+    11-11 review found "the best answer to small talk?" reaching the model as
+    "the best take to", and "not real people's answers" as "...takes"."""
+    kept = []
+
+    def keep(text):
+        kept.append(text)
+        return f"\x00{len(kept) - 1}\x00"
+
+    for text in sorted({t for t in verbatim if t}, key=len, reverse=True):
+        prompt = prompt.replace(text, keep(text))
     for a, b in (("the original Reddit question", "our own question"),
                  ("the Reddit question", "our own question"),
                  ('"3 Answers That...", "3 People Reveal..."', '"3 Takes On..."'),
                  ("It features these answers:",
                   "It features the host's own three takes, not real people's answers:"),
                  ("this discussion", "this question")):
-        prompt = prompt.replace(a, b)
+        if a in prompt:
+            prompt = prompt.replace(a, keep(b))
     # Every other "answer" (style A's, C's count, the vote rule's) is a take.
     prompt = re.sub(r"\b([Aa])nswer(s?)\b", lambda m: ("T" if m.group(1) == "A" else "t")
                     + "ake" + m.group(2), prompt)
+    prompt = re.sub("\x00(\\d+)\x00", lambda m: kept[int(m.group(1))], prompt)
     return prompt + ("\nNever present the takes as real people's answers, stories or "
                      "confessions, and never mention Reddit or a subreddit, in any field.\n")
 
@@ -406,7 +421,7 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
 """
     if config.SOURCE == "own":
-        prompt = _own_wording(prompt)
+        prompt = _own_wording(prompt, verbatim=(reddit_title, *comments[:3]))
     route, prior = provider(), ""
     try:
         raw = generate_retrying(prompt)

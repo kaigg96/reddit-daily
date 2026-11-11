@@ -151,3 +151,32 @@ def test_the_metadata_call_never_passes_takes_off_as_peoples_answers(monkeypatch
         assert "never mention Reddit" in ban
     assert all("Reddit question" in p for p in reddit)
     assert "People Reveal" in reddit[2] and "never mention Reddit" not in reddit[2]
+
+
+def test_only_our_instructions_are_reworded_never_the_question_or_its_takes(monkeypatch):
+    # 11-11 review: the answer->take swap reached the question ("the best take
+    # to small talk") and the swap's own "not real people's answers".
+    sent = []
+    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: sent.append(prompt) or "{}")
+    monkeypatch.setattr(config, "SOURCE", "own")
+    question = "What is the best answer to small talk in this discussion?"
+    takes = ["Answers should be short.", "Ask a question back.", "Answer honestly, then move on."]
+    for style in "ABC":
+        llm.get_metadata(question, takes, style=style, caps=style == "B")
+    for p in sent:
+        assert question in p and all(t in p for t in takes)
+        assert "not real people's answers:" in p and "\x00" not in p
+        body = p.rsplit("Never present", 1)[0]
+        for kept in (question, *takes, "not real people's answers"):
+            body = body.replace(kept, "")
+        assert not re.search(r"\banswers?\b", body, re.I) and "discussion" not in body
+
+
+def test_a_demoted_post_risk_is_logged_as_on_the_reddit_path(monkeypatch):
+    _routes(monkeypatch, GOOD, OTHER)
+    logged = []
+    ownquestions.select_post(
+        screener=lambda q, t: ScreenResult("pass", topic="other", source="gemini",
+                                           demoted="named_wrongdoing"),
+        on_verdict=lambda q, r, a: logged.append((q, a)))
+    assert logged == [(GOOD["question"], "demoted_post_risk")]

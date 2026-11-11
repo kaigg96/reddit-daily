@@ -91,6 +91,10 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
             print(f"Own question: the {route} repeated a shipped question: {question[:60]}")
             continue
         result = screener(question, takes) if screener else None
+        # A post-level risk demoted to the takes, logged as the Reddit path
+        # does (content.py), so the weekly audit sees it here too.
+        if result and result.demoted and on_verdict:
+            on_verdict(question, result, "demoted_post_risk")
         if result and (result.verdict == "skip_post" or result.unsafe):
             print(f"Own question: the screen refused the {route}'s episode "
                   f"({result.category or 'unsafe takes'})")
