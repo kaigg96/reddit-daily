@@ -261,6 +261,32 @@ def _own_wording(prompt, verbatim=()):
                      "confessions, and never mention Reddit or a subreddit, in any field.\n")
 
 
+# PLAN C16: the prompt forbids naming Reddit or passing the takes off as
+# people's, and this is the check (11-11 review: prompt-only before). A title
+# or closing line that does falls back as a failed one does; a keyword is left out.
+_OWN_BANNED = re.compile(
+    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
+    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
+    r"confess|explain|answer)\w*", re.I)
+
+
+def _own_fields(data):
+    """The reply with any such field dropped, before it is cleaned: on the
+    reply, so a vote read from the same "cta" drops with it."""
+    def ok(field, line):
+        if isinstance(line, str) and _OWN_BANNED.search(line):
+            print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
+            return False
+        return True
+    data = dict(data)
+    for key, field in (("title", "title"), ("cta", "closing line")):
+        if not ok(field, data.get(key)):
+            data[key] = None
+    if isinstance(data.get("keywords"), list):
+        data["keywords"] = [k for k in data["keywords"] if ok("keyword", k)]
+    return data
+
+
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
 # which all-None fields cannot. Both a spent quota and a prompt that produces
 # junk return None for every field, and the release gate has to tell them apart
@@ -470,31 +496,6 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         failure=prior,
     )
 
-
-# PLAN C16: the prompt forbids naming Reddit or passing the takes off as
-# people's, and this is the check (11-11 review: prompt-only before). A title
-# or closing line that does falls back as a failed one does; a keyword is left out.
-_OWN_BANNED = re.compile(
-    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
-    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
-    r"confess|explain|answer)\w*", re.I)
-
-
-def _own_fields(data):
-    """The reply with any such field dropped, before it is cleaned: on the
-    reply, so a vote read from the same "cta" drops with it."""
-    def ok(field, line):
-        if isinstance(line, str) and _OWN_BANNED.search(line):
-            print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
-            return False
-        return True
-    data = dict(data)
-    for key, field in (("title", "title"), ("cta", "closing line")):
-        if not ok(field, data.get(key)):
-            data[key] = None
-    if isinstance(data.get("keywords"), list):
-        data["keywords"] = [k for k in data["keywords"] if ok("keyword", k)]
-    return data
 
 
 def _rescue_metadata(prompt, prior):
