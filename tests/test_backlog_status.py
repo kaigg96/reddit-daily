@@ -224,3 +224,27 @@ def test_the_worklog_template_in_a_fence_is_not_a_done_entry():
     text = ("```\n## 2026-10-06 — one line\n### Done\n- **Engineering:** x.\n```\n"
             "## 2026-10-21 (16:50) — real\n### Done\n- **Data:** y.\n")
     assert b.done_in(text) == [("2026-10-21 (16:50) — real", ["Data: y."])]
+
+
+def test_findings_headlines_are_listed_so_an_answered_question_is_not_proposed():
+    text = ("## 4. Objectives\n\n**Not a finding (2026-01-01).**\n\n"
+            "### Findings — data reviews\n\n"
+            "**A long first answer costs no watch time (2026-10-21, Data; noise).** Detail.\n\n"
+            "**The one real sensitivity:** no date, so a label inside a finding.\n"
+            "- **A bullet (2026-10-02).** inside a finding, not its headline.\n"
+            "**Review 1 (2026-07-27, n=14) — superseded.**\n\n"
+            "## 5. Constraints\n\n**After the section (2026-10-03).**\n")
+    assert b.answered_in(text) == [
+        "A long first answer costs no watch time (2026-10-21, Data; noise).",
+        "Review 1 (2026-07-27, n=14) — superseded."]
+    assert b.answered_in("no findings here") == []
+    assert b.answered_in("### Findings\n**Last, no §5 after it (2026-11-09).**\n") == [
+        "Last, no §5 after it (2026-11-09)."]
+
+
+def test_the_real_findings_read_and_the_dropped_listing_prints_them(capsys):
+    heads = b.answered_in(b._read(b.PRD))
+    assert len(heads) >= 20 and all(len(h) <= 202 for h in heads)
+    b.main(["--dropped"])
+    out = capsys.readouterr().out
+    assert all(f"  - {h}\n" in out for h in heads)

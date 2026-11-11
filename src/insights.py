@@ -491,6 +491,20 @@ def release_cohorts(videos, key, value):
 # with 10 at 7 days, is too thin to stand alone, so `v7` still reads its pool.
 PREDECESSOR_MIN_UPLOADS = 20
 
+# A version that changed only the AI model, mapped to the format it re-runs.
+# As a predecessor it counts together with that format: `v7s` gains ~1
+# AskReddit upload a day, so alone it is under 20 in `v8`'s cut for weeks, and
+# the pool of v2-v7 it would fall back to is the comparison 10-18 ruled out.
+# Pooled, not skipped: `v8` runs on `v7s`'s model, and `v7s`'s uploads are the
+# nearest in time (PRD §0 #15, decided at the 11-09 weekly, before any `v8`
+# upload). Its own read (#13's rule) still compares it with `v7` alone.
+MODEL_ONLY = {"v7s": "v7"}
+
+
+def _same_format(value):
+    base = MODEL_ONLY.get(value, value)
+    return {base} | {k for k, v in MODEL_ONLY.items() if v == base}
+
 
 def predecessor(before, key, min_uploads=None):
     """The release a new one replaced, and its uploads, from `release_cohorts`'
@@ -500,14 +514,20 @@ def predecessor(before, key, min_uploads=None):
     not "worse than what it replaced?": `v7` read +20% over its pool (12.0 vs
     10.0 s), so `v8` judged against v2-v7 could fall ~17% below `v7` and still
     clear a 13% limit (2026-10-18, before any `v8` upload). The drift floor
-    still reads the whole history, which a single release is too short for."""
+    still reads the whole history, which a single release is too short for.
+    A model-only version (`MODEL_ONLY`) and its format count as one release,
+    named newest first ("v7s+v7")."""
     if not before:
         return None, before
     latest = max(before, key=lambda v: v.true_published or v.published)
     value = str(latest.meta.get(key, "")).strip()
     if not value:
         return None, before
-    own = [v for v in before if str(v.meta.get(key, "")).strip() == value]
+    group = _same_format(value) if key == "format_version" else {value}
+    own = [v for v in before if str(v.meta.get(key, "")).strip() in group]
+    if len(group) > 1:
+        seen = {str(v.meta.get(key, "")).strip() for v in own}
+        value = "+".join([value] + sorted(seen - {value}))
     need = PREDECESSOR_MIN_UPLOADS if min_uploads is None else min_uploads
     return (value, own) if len(own) >= need else (None, before)
 
@@ -952,6 +972,15 @@ class ReleaseRead:
     triggers: tuple
     comparisons: list
     floors: dict
+    beside: list = field(default_factory=list)   # [(Comparison, floor)], never in the verdict
+
+
+# Read by `--release` beside its verdict, never inside it. Engaged share is the
+# measure tests set from 2026-11-10 are judged on (D9, #91), but
+# `release_verdict` reads every comparison it is given, so a side thin on it
+# (collected only from 2026-10-05) would turn the watch-seconds verdict, and
+# auto-revert with it, into NO VERDICT.
+BESIDE_VERDICT = (Metric.ENGAGED_SHARE,)
 
 
 def release_read(version, key="format_version", target_age=None, within_spec=None):
@@ -976,7 +1005,23 @@ def release_read(version, key="format_version", target_age=None, within_spec=Non
     comparisons = [compare(a, b, f"{key}={version}", label, load.anchor, m)
                    for m in metrics]
     floors = {m: drift_floor(history, m) for m in metrics}
-    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
+    beside = [(compare(a, b, f"{key}={version}", label, load.anchor, m),
+               drift_floor(reported(history, m), m))
+              for m in BESIDE_VERDICT]
+    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors, beside)
+
+
+def render_beside(read):
+    """`release_read`'s beside-the-verdict metrics, each with its own limit."""
+    out = []
+    for c, floor in read.beside:
+        out.append(c.render())
+        limit = ("not measurable — too few uploads report it in the era before"
+                 if floor is None else
+                 f"{floor:.0%} — median move between consecutive groups of "
+                 f"{MIN_COHORT} uploads in the era before it")
+        out.append(f"    detection limit: {limit}. Beside the verdict: auto-revert never fires on it (#18); a rule may judge on it (D9).")
+    return "\n".join(out)
 
 
 def latest_releases(log_rows, key="format_version", n=2):
@@ -1211,6 +1256,72 @@ def two_week_rate(rows):
     for (_, _, r0, d0), (_, _, r1, d1) in zip(rows, rows[1:]):
         out.append((r0 + r1) / (d0 + d1) if d0 + d1 else None)
     return out[:len(rows)]
+
+
+# R4 (PRD §0), pre-committed 2026-10-26: snapshots dated 10-12 to 11-16.
+SWINGS_START = datetime.date(2026, 10, 12)
+SWINGS_END = datetime.date(2026, 11, 16)
+SWING_LOW = 0.60       # a low is under 60% of each week beside it
+SWING_STEADY = 0.30    # steady is every week within ±30% of the mean
+
+
+def swing_lows(rates, share=SWING_LOW):
+    """Positions of the rates under `share` of every neighbour beside them
+    (one neighbour at either end)."""
+    out = set()
+    for i, r in enumerate(rates):
+        sides = [rates[j] for j in (i - 1, i + 1) if 0 <= j < len(rates)]
+        if sides and all(r < share * s for s in sides):
+            out.add(i)
+    return out
+
+
+def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
+    """R4: are weekly view swings viewers or data?
+
+    `counter` is [(date, lifetime views)] from `channel_stats.csv`, the
+    channel's near-real-time counter; `recent` is `views_gained_by_age`'s rows,
+    whose recent column is the snapshots' lagged one. Both become per-day
+    gains per interval between snapshots, kept only where both series cover
+    the same interval, so a missed snapshot never sets 14 days against 7.
+    The window runs from `start` to the first snapshot dated within a week
+    on or after `end` (a weekly job rerun a day late still closes it).
+
+    Returns (verdict, [(date, counter per day, recent per day)]). The verdict
+    is "viewers" when the counter alternates in step: its lows fall in
+    exactly the recent column's low weeks, and there are two or more, since
+    one shared dip is not alternation (settled 11-11, before the 11-16 data);
+    "data" when every counter rate is within ±30% of their mean; else
+    "unclear"; "insufficient" under three matched weeks. None until both
+    series reach `end`, so the rule is never read early; once either passes
+    the week after it unmatched, the matched weeks are read as they stand.
+    A week missing from either series makes the weeks beside it neighbours
+    in the low test, so a gap can turn an in-step read "unclear"."""
+    as_date = lambda x: x.date() if isinstance(x, datetime.datetime) else x
+    counter = sorted((d, v) for d, v in counter if d >= start)
+    per_day = {(d0, d1): (v1 - v0) / (d1 - d0).days
+               for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
+    rec = {(as_date(snap) - datetime.timedelta(days=days), as_date(snap)): r / days
+           for snap, _, r, days in recent if days}
+    week = datetime.timedelta(days=7)
+    pairs = sorted(p for p in per_day if p in rec and p[0] >= start)
+    close = next((d1 for _, d1 in pairs if end <= d1 < end + week), None)
+    if close is None and any(d1 >= end + week for _, d1 in list(per_day) + list(rec)):
+        close = end + week - datetime.timedelta(days=1)   # the window passed unmatched
+    weeks = [(d1, per_day[(d0, d1)], rec[(d0, d1)]) for d0, d1 in pairs
+             if close is None or d1 <= close]
+    if close is None:
+        return None, [w for w in weeks if w[0] < end]
+    if len(weeks) < 3:
+        return "insufficient", weeks
+    ours = [c for _, c, _ in weeks]
+    lows = swing_lows(ours)
+    if len(lows) >= 2 and lows == swing_lows([r for _, _, r in weeks]):
+        return "viewers", weeks
+    mean = sum(ours) / len(ours)
+    if mean and all(abs(c - mean) <= SWING_STEADY * mean for c in ours):
+        return "data", weeks
+    return "unclear", weeks
 
 
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
@@ -2131,8 +2242,122 @@ def load_channel_videos_offline():
         "published": r["published_at"],
         "title": titles.get(r["video_id"], ""),
         "views": int(float(r["views"] or 0)),
+        "watch_s": float(r.get("avg_view_duration_s") or 0),
         "privacy": r.get("privacy_status") or "unknown",
     } for r in rows], asof
+
+
+# ---------------------------------------------------------------- upload spacing (PRD §0 R8)
+
+# Bet 2's four a day doubles views only if a video's views do not shrink when
+# more of ours share the feed. Nearly every day since April 2025 had two
+# uploads ~12 hours apart, so the only contrast in our data is an upload beside
+# a missed slot against the regular rhythm (about 1.5 a day against 2, locally),
+# never four. The rule was set 2026-11-08 before any view was read, and amended
+# the same night, still unread, when "none within 18 hours" labelled 1 of 878
+# (PRD §4, R8); these defaults are that rule.
+SPACING_WINDOW_H = 18
+SPACING_SINCE = "2025-04-01"
+SPACING_MIN_AGE_DAYS = 60
+SPACING_MIN_SPARSE = 25
+
+
+def spacing_labels(videos, window_h=SPACING_WINDOW_H):
+    """{id: 'sparse' | 'regular' | 'dense'}: at most one other of our uploads
+    published under `window_h` hours either side, exactly two, or more. Every
+    video is someone's neighbour, privatised or not: it was in the feed when
+    published. A neighbour exactly `window_h` away is not near."""
+    times = sorted((_parse_ts(v["published"]), v["id"]) for v in videos if v.get("published"))
+    window = datetime.timedelta(hours=window_h)
+    labels = {}
+    for i, (t, vid) in enumerate(times):
+        near = 0
+        for j in range(i - 1, -1, -1):
+            if t - times[j][0] >= window:
+                break
+            near += 1
+        for j in range(i + 1, len(times)):
+            if times[j][0] - t >= window:
+                break
+            near += 1
+        labels[vid] = "sparse" if near <= 1 else "regular" if near == 2 else "dense"
+    return labels
+
+
+@dataclass
+class SpacingRead:
+    months: int            # months with >= 2 sparse uploads and a regular median above 0
+    sparse: int            # sparse uploads in those months
+    regular: int           # regular uploads in those months
+    dense: int             # dense uploads in the whole population: shown, never judged
+    ratio: float = None    # median over months of median(sparse) / median(regular) views
+    gap: float = None      # the 90th percentile of |ratio - 1| with labels shuffled within months
+    watch_ratio: float = None   # the same on watch-seconds: beside it, never deciding
+    verdict: str = "insufficient data"
+
+
+def _month_ratio(groups, key):
+    ratios = []
+    for sparse, regular in groups:
+        a, p = median([v[key] for v in sparse]), median([v[key] for v in regular])
+        if p:
+            ratios.append(a / p)
+    return median(ratios) if ratios else None
+
+
+def spacing_read(videos, asof, since=SPACING_SINCE, min_age_days=SPACING_MIN_AGE_DAYS,
+                 min_sparse=SPACING_MIN_SPARSE, shuffles=2000, quantile=0.9, seed=0):
+    """R8: do views per upload fall when another upload is near? Public
+    uploads from `since` to `min_age_days` before `asof`, sparse against
+    regular within each calendar month, so the channel's eras never compare
+    with each other. Lifetime views at the snapshot still mix ages within a
+    month, and missed slots include failed runs (both stated with the rule).
+    Watch-seconds is 0 for an upload nobody played; it never decides."""
+    import random
+    labels = spacing_labels(videos)
+    cutoff = asof - datetime.timedelta(days=min_age_days)
+    by_month, dense = {}, 0
+    for v in videos:
+        if v.get("privacy") != "public" or not v.get("published"):
+            continue
+        t = _parse_ts(v["published"])
+        if v["published"][:10] < since or t >= cutoff:
+            continue
+        label = labels[v["id"]]
+        if label == "dense":
+            dense += 1
+            continue
+        by_month.setdefault(v["published"][:7], {"sparse": [], "regular": []})[label].append(v)
+    groups = [(g["sparse"], g["regular"]) for _, g in sorted(by_month.items())
+              if len(g["sparse"]) >= 2 and g["regular"]
+              and median([v["views"] for v in g["regular"]])]
+    read = SpacingRead(months=len(groups), sparse=sum(len(a) for a, _ in groups),
+                       regular=sum(len(p) for _, p in groups), dense=dense)
+    if read.sparse < min_sparse:
+        return read
+    read.ratio = _month_ratio(groups, "views")
+    read.watch_ratio = _month_ratio(groups, "watch_s")
+    rng, deltas = random.Random(seed), []
+    for _ in range(shuffles):
+        shuffled = []
+        for sparse, regular in groups:
+            pool = sparse + regular
+            rng.shuffle(pool)
+            shuffled.append((pool[:len(sparse)], pool[len(sparse):]))
+        r = _month_ratio(shuffled, "views")
+        if r is not None:
+            deltas.append(abs(r - 1))
+    deltas.sort()
+    read.gap = deltas[min(len(deltas) - 1, int(quantile * len(deltas)))] if deltas else None
+    if read.ratio is None or read.gap is None:
+        read.verdict = "insufficient data"
+    elif read.ratio - 1 > read.gap:
+        read.verdict = "sparse leads beyond the gap: views dilute at this spacing"
+    elif 1 - read.ratio > read.gap:
+        read.verdict = "regular leads beyond the gap: recorded, nothing changes"
+    else:
+        read.verdict = "within the gap: no dilution detectable at this spacing"
+    return read
 
 
 # ---------------------------------------------------------------- traffic sources (R4.7)

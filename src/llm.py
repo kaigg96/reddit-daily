@@ -262,6 +262,24 @@ _STYLE_GUIDANCE = {
 }
 
 
+def _own_wording(prompt):
+    """PLAN C16: our own question's takes are the host's, so the metadata call
+    must never present them as real people's answers ("3 People Reveal...")
+    or tag the video with Reddit's name (fresh review, 2026-11-10)."""
+    for a, b in (("the original Reddit question", "our own question"),
+                 ("the Reddit question", "our own question"),
+                 ('"3 Answers That...", "3 People Reveal..."', '"3 Takes On..."'),
+                 ("It features these answers:",
+                  "It features the host's own three takes, not real people's answers:"),
+                 ("this discussion", "this question")):
+        prompt = prompt.replace(a, b)
+    # Every other "answer" (style A's, C's count, the vote rule's) is a take.
+    prompt = re.sub(r"\b([Aa])nswer(s?)\b", lambda m: ("T" if m.group(1) == "A" else "t")
+                    + "ake" + m.group(2), prompt)
+    return prompt + ("\nNever present the takes as real people's answers, stories or "
+                     "confessions, and never mention Reddit or a subreddit, in any field.\n")
+
+
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
 # which all-None fields cannot. Both a spent quota and a prompt that produces
 # junk return None for every field, and the release gate has to tell them apart
@@ -290,7 +308,13 @@ def _failure_kind(exc):
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.HTTPError) and response is not None:
         kind = f"http_{response.status_code}"
-        return kind + _quota_window(response) if response.status_code == 429 else kind
+        if response.status_code != 429:
+            return kind
+        window = _quota_window(response)
+        cap = window == "_day" and _day_cap(response)
+        if cap:
+            print(f"Gemini daily cap: {cap[0]} requests ({cap[1] or 'model not named'})")
+        return kind + window
     if isinstance(exc, requests.Timeout):
         return "timeout"
     return type(exc).__name__
@@ -315,6 +339,27 @@ def _quota_window(response):
     if "perday" in flat:
         return "_day"
     return "_minute" if "perminute" in flat else ""
+
+
+def _day_cap(response):
+    """(requests, model) of the day cap a 429 names, else None. Never raises.
+
+    The 20 a day every plan budgets was read off a `gemini-2.5-flash` 429
+    (PRD §2), and Google's docs stopped listing free-tier caps (11-07), so
+    `gemini-3.6-flash`'s is unknown: its first day-cap 429 is the only place
+    the number appears. A number and a model name, so safe in a public log.
+    Google's JSON leaves a zero out, so a day cap with no value reads as 0: no
+    free tier on that model, which a silent log would hide."""
+    try:
+        for detail in response.json()["error"]["details"]:
+            for v in detail.get("violations", []):
+                value = str(v.get("quotaValue", "0"))
+                if "perday" in str(v.get("quotaId", "")).lower() and value.isascii() \
+                        and value.isdigit():
+                    return int(value), str((v.get("quotaDimensions") or {}).get("model") or "")
+    except Exception:
+        return None
+    return None
 
 
 _CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
@@ -700,6 +745,8 @@ Produce three things.
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {_commentary_shape(len(comments)) if commentary else _PLAIN_SHAPE}
 """
+    if config.SOURCE == "own":
+        prompt = _own_wording(prompt)
     route, prior = provider(), ""
     schema = _reply_schema(len(comments) if commentary else None)
     model = MODEL if config.METADATA_ON_UPLOAD_MODEL else None

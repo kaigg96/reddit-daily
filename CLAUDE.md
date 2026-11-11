@@ -99,7 +99,8 @@ any default attribution behaviour.
 ## 6. Answer performance questions with `scripts/report.py`
 
 Never ad-hoc analysis. It encodes the rules ad-hoc scripts kept getting wrong:
-watch-seconds is primary, cohorts must be age-matched, thin cohorts get
+watch-seconds is primary (engaged share for tests set from 2026-11-10, with
+watch-seconds as their gate: D9), cohorts must be age-matched, thin cohorts get
 "insufficient data", zero-view videos are counted separately. **If it refuses a
 comparison, that refusal is the answer.** New capability goes in
 `src/insights.py` with a test, not inline.

@@ -1981,6 +1981,58 @@ def test_two_week_rate_pools_each_snapshot_with_the_one_before():
     assert insights.two_week_rate([]) == []
 
 
+def test_swing_lows_are_under_60_percent_of_every_week_beside_them():
+    assert insights.swing_lows([500, 100, 600, 590, 200]) == {1, 4}
+    # 59% of one side but not the other is no low; an end needs only its one side
+    assert insights.swing_lows([1000, 590, 900]) == set()
+    assert insights.swing_lows([100, 1000]) == {0}
+    assert insights.swing_lows([]) == set()
+
+
+def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
+    d = lambda m, day: datetime.date(2026, m, day)
+    dates = [d(10, 12), d(10, 19), d(10, 26), d(11, 2), d(11, 9), d(11, 16)]
+    cum = lambda per_day: [(dt, sum(per_day[:i]) * 7) for i, dt in enumerate(dates)]
+    recent = lambda per_day: [(dt, 0, r * 7, 7) for dt, r in zip(dates[1:], per_day)]
+    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column: lows 1, 4
+    swinging = cum([500, 130, 860, 630, 120])  # the counter: lows 1, 4
+    # the counter alternates in the same weeks: viewers
+    verdict, weeks = insights.swing_read(swinging, recent(lagged))
+    assert verdict == "viewers" and [w[0] for w in weeks] == dates[1:]
+    assert weeks[0] == (d(10, 19), 500.0, 600.0)
+    # a counter low the recent column lacks, or the reverse, is not in step
+    one_low = [600, 80, 700, 650, 600]
+    assert insights.swing_read(swinging, recent(one_low))[0] == "unclear"
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(lagged))[0] == "unclear"
+    # one shared dip is not alternation
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(one_low))[0] == "unclear"
+    # steady within ±30% of the mean: data
+    assert insights.swing_read(cum([500, 450, 560, 520, 480]), recent(lagged))[0] == "data"
+    # before the 11-16 snapshot, or without the recent column there, no verdict
+    early = insights.swing_read(swinging[:-1], recent(lagged))
+    assert early[0] is None and early[1][-1][0] == d(11, 9)
+    assert insights.swing_read(swinging, recent(lagged)[:-1])[0] is None
+    # a weekly job rerun on 11-17 still closes the window; nothing after it is read
+    rerun = swinging[:-1] + [(d(11, 17), swinging[-1][1])]
+    rerun_recent = recent(lagged)[:-1] + [(d(11, 17), 0, 90 * 8, 8)]
+    assert insights.swing_read(rerun, rerun_recent)[1][-1][0] == d(11, 17)
+    late = swinging + [(d(11, 23), 10 ** 7)]
+    late_recent = recent(lagged) + [(d(11, 23), 0, 9 * 7, 7)]
+    assert insights.swing_read(late, late_recent)[1][-1][0] == d(11, 16)
+    # the two files missing 11-16 differently: once past 11-22, read what matched
+    split = swinging[:-1] + [(d(11, 17), 0), (d(11, 23), 0)]
+    split_recent = recent(lagged)[:-1] + [(d(11, 16), 0, 7, 7), (d(11, 17), 0, 1, 1)]
+    verdict, weeks = insights.swing_read(split, split_recent)
+    assert verdict is not None and weeks[-1][0] == d(11, 9)
+    # a counter snapshot missed on 11-02: its 14 days never meet a 7-day recent week
+    gap = [w for w in swinging if w[0] != d(11, 2)]
+    assert [w[0] for w in insights.swing_read(gap, recent(lagged))[1]] == [
+        d(10, 19), d(10, 26), d(11, 16)]
+    # under three matched weeks: insufficient
+    thin = [w for w in swinging if w[0] in (d(10, 12), d(11, 9), d(11, 16))]
+    assert insights.swing_read(thin, recent(lagged))[0] == "insufficient"
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
@@ -2632,6 +2684,35 @@ def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
     assert value is None and base == old + prev[:19]
 
 
+def test_a_model_only_version_counts_with_the_format_it_reruns():
+    """`v8` after a thin `v7s` reads `v7s` and `v7` together, never the v2-v7s
+    pool (PRD §0 #15, 11-09 weekly); `v7s`'s own read still meets `v7` alone."""
+    def vids(version, n, start):
+        return [insights.Video(video_id=f"{version}{i}",
+                               published=start + datetime.timedelta(hours=12 * i),
+                               views=100, watch_seconds=10,
+                               meta={"format_version": version})
+                for i in range(n)]
+    t0 = datetime.datetime(2026, 8, 1, tzinfo=datetime.timezone.utc)
+    old = vids("v6", 40, t0)
+    v7 = vids("v7", 15, t0 + datetime.timedelta(days=30))
+    v7s = vids("v7s", 6, t0 + datetime.timedelta(days=40))
+    value, base = insights.predecessor(old + v7 + v7s, "format_version")
+    assert value == "v7s+v7" and base == v7 + v7s
+    full = vids("v7", 20, t0 + datetime.timedelta(days=30))
+    value, base = insights.predecessor(old + full, "format_version")
+    assert value == "v7" and base == full
+    # Together still too thin: the pool, as for any release.
+    value, base = insights.predecessor(old + v7[:10] + v7s, "format_version")
+    assert value is None and base == old + v7[:10] + v7s
+    # Only release versions pair up.
+    tagged = [insights.Video(video_id=v.video_id, published=v.published, views=100,
+                             watch_seconds=10, meta={"other": v.meta["format_version"]})
+              for v in old + v7 + v7s]
+    value, base = insights.predecessor(tagged, "other")
+    assert value is None
+
+
 def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monkeypatch):
     """One release is too short to measure the channel's drift, so the limit
     keeps reading every earlier upload while the comparison narrows."""
@@ -2784,3 +2865,21 @@ def test_interval_reading_names_what_is_ruled_out():
     assert insights.interval_reading((-0.8, -0.3), 0.3).startswith("a link of -0.3 or less")
     # 0.2996 prints as +0.30, so it must not read "rules out +0.3"
     assert "cannot rule out" in insights.interval_reading((-0.35, 0.2996), 0.3)
+
+
+def test_engaged_share_is_read_beside_the_release_verdict_never_inside_it(tmp_path, monkeypatch):
+    """C16's rule (2026-11-10) reads engaged share at `--release`, but
+    `release_verdict` reads every comparison it gets: a side with no engaged
+    share (collected only from 2026-10-05; this series has none) must not
+    turn the watch-seconds verdict into NO VERDICT, nor crash the limit."""
+    era = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", era), ("new", 60, "v5", era)])
+    read = insights.release_read("v5")
+    assert all(c.metric != insights.Metric.ENGAGED_SHARE for c in read.comparisons)
+    assert [c.metric for c, _ in read.beside] == [insights.Metric.ENGAGED_SHARE]
+    verdict = insights.release_verdict(read.comparisons, read.floors, read.triggers)
+    assert not verdict.startswith("NO VERDICT")
+    out = insights.render_beside(read)
+    assert "insufficient data" in out and "auto-revert never fires on it" in out
+    assert "not measurable" in out

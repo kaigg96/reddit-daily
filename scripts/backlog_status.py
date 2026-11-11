@@ -8,7 +8,8 @@ video. Supply is work whose next step can be taken now; this counts it.
 
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
-    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped
+    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped,
+                                                        # did, and PRD §4 answers
 
 Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
 other function of the company, ORG.md). Every row of a table with a Status
@@ -120,6 +121,9 @@ def main(argv=None):
         for heading, bullets in recently_dropped(extract=done_in):
             print(heading[:110])
             print("".join(f"  - {b}\n" for b in bullets.split(" | ")))
+        print("ANSWERED in PRD §4's findings (each headline), so a candidate on "
+              "one of these topics reads its finding before it is proposed:\n")
+        print("".join(f"  - {h}\n" for h in answered_in(_read(PRD))))
         return 0
     counts = {s: 0 for s in STATUSES}
     for label, text, section in sources():
@@ -136,7 +140,8 @@ def main(argv=None):
               "first (/backlog §1-2). Research questions tested against existing "
               "data are always available, and the risk register (PLAN.md §4) "
               "names what no function is yet answering. What the last ten "
-              "shifts already dropped, and why, and what they did: --dropped.")
+              "shifts already dropped, and why, what they did, and what the "
+              "findings already answer: --dropped.")
     for line in short_shifts():
         print(line)
     return 0
@@ -209,6 +214,24 @@ def done_in(text):
         else:
             inside = False
     return [(h, [_clip(b, 240) for b in bs]) for h, bs in out]
+
+
+# A finding opens its paragraph on a bold headline that carries its date; the
+# bold labels inside one ("**Caveats that travel with the number:**") carry none.
+_FINDING = re.compile(r"^\*\*(.+?)\*\*")
+_DATED = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def answered_in(text):
+    """The headline of each finding in PRD §4, in the order written. Generators
+    kept proposing what a finding had already answered (friction group G2: 19
+    rows by 11-09; F157, F168, F201) because only drops and done work were
+    listed. Headlines only: a topic a finding answers inside its body, or in
+    §6, is still the generator's to look up."""
+    m = re.search(r"^### Findings.*?(?=^## |\Z)", text, re.S | re.M)
+    heads = (_FINDING.match(line) for line in (m.group(0) if m else "").splitlines())
+    return [_clip(h.group(1).strip(), 200) for h in heads
+            if h and _DATED.search(h.group(1))]
 
 
 def _clip(text, width):

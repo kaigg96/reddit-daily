@@ -387,8 +387,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   per-entry WORKLOG cap; the replay gate for shipped text; the env switch
   into #93; the re-raise patch (`process/reraise-replaces-ask`). **Left
   alone:** the shift cadence (#92) and the owner's queue. **Closes when**
-  those are raised, at the owner's return or the 12-07 monthly, or at the
-  next audit.
+  those are raised at the 12-07 monthly, or sooner once fewer than 5 asks
+  are unanswered, or at the next audit. **11-10:** the owner came back and
+  answered two (#93 landed, #89 refused); with 9 still unanswered, these are
+  held so #77 and #82 are read first. The env switch is moot: #93's hook is live.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every
@@ -427,7 +429,7 @@ a list nobody can read is the same as no list.
 - **Pillow is ageing out.** (Python moved to 3.12 on 2026-10-07, #63; the
   next upload ran on it and README follows. requests 2.33.1 merged 2026-09-30.)
   `pip-audit` finds published advisories against **Pillow 10.4.0** (33+; 66
-  rows on 10-26, unchanged 11-06, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
+  rows on 10-26, unchanged 11-06 and 11-10, fixes now at 13.0.0; oauthlib's now PYSEC-2026-4114).
   Exposure is low: Pillow only ever decodes our own fonts, b-roll and
   generated frames, never an untrusted image.
   **Pillow is blocked by moviepy 2.1.2, which requires `pillow<11.0`** (pip
@@ -456,15 +458,17 @@ a list nobody can read is the same as no list.
   11-19). If a later upload fails on the image, the fix is
   `runs-on: ubuntu-24.04`, a workflow patch for the owner.
 
-- **`analysis/analytics_snapshots.csv` has mixed line endings** — ~6,600 CRLF
-  rows and ~890 LF, because it is appended from both CI (`autocrlf` off) and
-  local runs (`autocrlf=input`, which normalizes on add). Harmless to parse,
-  but every weekly diff is noisier than it needs to be. Noticed 2026-09-07
-  while shipping R4.7, which pinned LF on the *new* `traffic_sources.csv`.
-  Both writers are now pinned, so it will not worsen. **Normalizing the
-  existing rows is deliberately deferred:** it is a ~7,500-line mechanical diff
-  on a production data file, and worth doing on its own rather than buried in a
-  feature commit. Owner's call.
+- **Google's daily reset is 08:00 UTC from November to March (found 2026-11-08).**
+  The free tier clears at midnight Pacific time (`src/llm.py`'s 429 note), so
+  08:00 UTC since US daylight time ended on 1 November, and 07:00 again from
+  8 March. The shift skill (§6, "only after the 07:00 UTC reset") and
+  `dry-run.yml`'s gate (`-lt 7`, pinned by `scripts/dry_run.py`'s `RESET_HOUR`
+  and `tests/test_dry_run.py`) say 07:00 all year, so Gemini work or a render
+  between 07:00 and 08:00 UTC in winter spends the day the uploads already
+  used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
+  from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
+  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
+  after 08:00 UTC in winter; PRD §0's host-line row says so.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
@@ -527,4 +531,7 @@ a list nobody can read is the same as no list.
   job, whose schedule is the owner's, on under 2 uploads in 28 h or a failed
   scheduled run; its workflow patch is `upload-watch.patch` on
   `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
-  as auto-apply refuses an edited one). **Closes when** that patch lands.
+  as auto-apply refuses an edited one). **11-10:** #89 was refused (the owner's
+  words were about replies), so the patch did not land; held so #77 and #82
+  are read first. **Closes when** it lands as its own ask, or is deleted with
+  reasoning at the 12-07 monthly.
