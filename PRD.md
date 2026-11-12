@@ -57,7 +57,6 @@ The source of ready work that never waits on a sample video or costs money. Belo
 | # | Status | Question | Test |
 |---|---|---|---|
 | R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. **Read: `report.py --swings`** (in step: two or more shared lows). Peeked 11-11 (one shared dip), no conclusion. |
-| R9 | ready | **Would bet 1's health skip bias its read?** (11-12: by topic it would have skipped 5 of 84 uploads since October) | **Pre-committed 11-12, before the read:** `--offline --at-age 7 --compare topic=health-body`. Beyond the chance gap printed, either way: bet 1's read adds the cut `--within topic!=health-body` beside its verdict, never in place of it. Inside it, or refused as thin: nothing changes. |
 | R7 | blocked: the 11-23 snapshot | **Does Stephen's voice lead on watch-seconds too?** A peek, not evidence | Pre-committed 11-05: §4 |
 
 #### Owner tasks (no version bump)

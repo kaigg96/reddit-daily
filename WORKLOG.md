@@ -85,7 +85,7 @@ and more useful than a confident guess.
 ### Next
 - **Tomorrow's 11:17 shift:** request bet 1's sample video whether or not #77 is labelled, the first render the 12-hour limit allows. Then "sample" costs you no wait, and a label meets every merge check but the review.
 - **If #77 is labelled:** merge on tomorrow's release check, that sample and a fresh review of the whole release.
-- **Bet 1's health skip is larger than planned:** the plan says it skips 1–2 uploads in 100. By topic alone it would have skipped 5 of 84 since October and 3 of 23 this month. Bet 1's read should state the real rate beside its verdict.
+- **Bet 1's health skip is larger than planned:** the plan says it skips 1–2 uploads in 100. By topic alone it would have skipped 5 of 84 since October and 3 of 23 this month. Bet 1's read should state the real rate beside its verdict. Whether health threads do better or worse than the rest can't be told yet: only 3 are measurable, and the report tool needs 8.
 - **16 November:** the weekly review.
 
 ### Better?
