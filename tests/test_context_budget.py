@@ -121,3 +121,13 @@ def test_a_restamp_that_also_rewords_is_counted_once_by_its_summary():
         + entry("2026-10-18 (14:35)", "another shift", "Something else happened.")
     labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
     assert labels == ["2026-10-19 (09:50)", "2026-10-18 (14:35)", "2026-10-18 (08:50)"]
+
+
+def test_open_items_count_only_under_their_heading():
+    raw = ("## Pass 1\n\n- **Done thing.** x\n- **Deferred thing.** y\n\n"
+           "## Open items (logged between passes)\n\n- **Open one.** a\n### Sub\n- **Open two.** b\n"
+           "```\n- **In a fence.** c\n```\n\n## Later\n\n- **Not open.** d\n")
+    assert context_budget.count_items(raw, r"^- \*\*", "## Open items") == 2
+    assert context_budget.count_items(raw, r"^- \*\*") == 5
+    assert context_budget.count_items(raw, r"^- \*\*", "## Missing") == 0
+    assert context_budget.CORPUS["TECH_DEBT.md"][4] == "## Open items"

@@ -434,6 +434,7 @@ entries would come from the template, which is what the owner reads. Left as is.
 **Re-reviewed 2026-10-28 (audit):** (1) false for WORKLOG: ~1,000-word entries mean its word budget keeps two and the ten-entry cap never binds; (3) strained: TECH_DEBT at 24 of 25.
 **Re-reviewed 2026-11-05 (audit):** (1) still false for WORKLOG (entries ~940 words, two fit); (3) strained: TECH_DEBT and DECISIONS at their caps, PLAN at its word cap (a 12-word rule took five trims, F172), and PRD §4 at ~15,050 words, unbudgeted, up 24% since 10-28.
 **Re-reviewed 2026-11-12 (audit):** worse: PRD §4 grew 15,317 → 20,714 words in a week, unbudgeted; PLAN and PRD §0 sit at their caps. A §4 budget touches no protected file, so it is shift work, not an ask.
+**Corrected 2026-11-12 (shift):** TECH_DEBT's count included 12 bullets from passes 1–2's done and deferred lists, so "26 of 25" meant 14 open, and the cheap way under was deleting history. It now counts only the open list, cap 13: the same pressure, set when those 12 were counted.
 
 ## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
 
