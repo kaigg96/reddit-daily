@@ -96,8 +96,9 @@ ORIENT = {
 # (backlog_status.answered_in). Set at that day's size: a finding added means
 # another compressed, a superseded one to a line and a pointer to git.
 # 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
-# 20310 -> 19735 the same evening: two more (the 09-25 topic read, R4's 10-10).
-REFERENCE = {"PRD.md#4. Objectives": 19735}
+# 20310 -> 19130 the same evening: four more (the 09-25 topic read, R4's 10-10,
+# R8, the zero-view pipeline check, which now carries R11's result).
+REFERENCE = {"PRD.md#4. Objectives": 19130}
 
 
 def words(text):
