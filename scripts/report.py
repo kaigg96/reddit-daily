@@ -670,6 +670,30 @@ def show_catalogue(args):
           "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
+def show_themes(args):
+    """`--themes`: R11, do buried uploads share a sensitive theme (PRD §0)?"""
+    import json as _json
+    labels = _json.loads((Path(__file__).resolve().parent.parent / "analysis"
+                         / "theme_labels.json").read_text())
+    load = insights.load_videos_at_age()
+    vids = [v for v in load.videos if (v.true_published or v.published) >= insights.THEME_SINCE]
+    buried, rows = insights.theme_buried(vids, labels)
+    print(f"R11: buried (<= {insights.BURIED_VIEWS} views at ~7 days) by theme tag, uploads "
+          f"since {insights.THEME_SINCE.date()} ({buried} buried of "
+          f"{sum(1 for v in vids if v.video_id in labels)} labelled)\n")
+    print(f"  {'tag':13} {'tagged':>11} {'rest':>11} {'lift':>5} {'p':>6}")
+    for tag, ha, na, hb, nb, lift, p, lead in rows:
+        lift = "-" if lift is None else f"{lift:.1f}"
+        print(f"  {tag:13} {ha:>4}/{na:<6} {hb:>4}/{nb:<6} {lift:>5} {p:>6.3f}{'  LEAD' if lead else ''}")
+    if buried < insights.THEME_MIN_BURIED:
+        print(f"\n  Insufficient data: under {insights.THEME_MIN_BURIED} buried uploads.")
+        return
+    print(f"\n  A lead: 'any' under p {insights.THEME_ANY_P}, or one tag under "
+          f"{insights.THEME_ONE_P}, at {insights.THEME_LIFT:.0f}x or more (pre-committed 11-12).")
+    print("  " + ("A lead is a candidate screen category, needing its own rule and the owner's call."
+                  if any(r[-1] for r in rows) else "No lead: no theme explains the buried uploads."))
+
+
 def show_swings(args):
     """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
     import csv as _csv
@@ -862,6 +886,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--themes", action="store_true",
+                   help="R11: do buried uploads share a sensitive theme? Blind "
+                        "theme tags (analysis/theme_labels.json) against burial")
     p.add_argument("--swings", action="store_true",
                    help="R4: are weekly view swings viewers or data? The channel's "
                         "counter against --catalogue's recent column (reads on 11-16)")
@@ -902,7 +929,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.swings, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -1108,6 +1135,9 @@ def main():
         show_catalogue(args)
         return
 
+    if args.themes:         # R11: blind theme tags against burial
+        show_themes(args)
+        return
     if args.swings:         # R4: the snapshot series against the channel counter
         show_swings(args)
         return

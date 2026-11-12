@@ -2937,3 +2937,18 @@ def test_engaged_share_is_read_beside_the_release_verdict_never_inside_it(tmp_pa
     out = insights.render_beside(read)
     assert "insufficient data" in out and "auto-revert never fires on it" in out
     assert "not measurable" in out
+
+
+def test_theme_buried_flags_a_tag_buried_twice_as_often():
+    pub = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    vids = ([Video(video_id=f"s{i}", published=pub, views=0 if i < 8 else 50) for i in range(10)]
+            + [Video(video_id=f"c{i}", published=pub, views=0 if i < 4 else 50) for i in range(60)])
+    labels = {**{f"s{i}": ["sexual"] for i in range(10)}, **{f"c{i}": [] for i in range(60)}}
+    buried, rows = insights.theme_buried(vids, labels)
+    assert buried == 12
+    row = {r[0]: r for r in rows}
+    assert row["sexual"][1:5] == (8, 10, 4, 60) and row["sexual"][-1]
+    assert row["any"][-1] and not row["profanity"][-1]
+    # Under THEME_MIN_BURIED buried, nothing is a lead.
+    few = {k: v for k, v in labels.items() if k.startswith("c")}
+    assert not any(r[-1] for r in insights.theme_buried(vids, few)[1])
