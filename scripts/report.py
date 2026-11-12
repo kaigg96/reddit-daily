@@ -673,6 +673,9 @@ def show_catalogue(args):
 def show_themes(args):
     """`--themes`: R11, do buried uploads share a sensitive theme (PRD §0)?"""
     import json as _json
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--themes reads R11's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
     labels = _json.loads((Path(__file__).resolve().parent.parent / "analysis"
                          / "theme_labels.json").read_text())
     load = insights.load_videos_at_age()
