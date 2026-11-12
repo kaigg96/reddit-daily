@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-12 (19:28) — No theme in the questions explains why some uploads get buried; every scheduled job here runs as late as the uploads
 
-    Worked (% of the shift): data 45 · gm 30 · reliability 15 · security 5 · product 5
+    Worked (% of the shift): data 40 · gm 25 · reliability 15 · strategy 10 · security 5 · product 5
 
 **Summary:** The shift started with nothing ready. It ranked eight new ideas, answered two questions from our own data, and gave the backup show's title check a fixed test. None of it changes what we ship, and nothing reached viewers, so the company is no closer to revenue tonight.
 
