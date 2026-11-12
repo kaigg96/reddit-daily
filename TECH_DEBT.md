@@ -416,6 +416,15 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
   you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
   when** #14 is read (~11-23).
+- **The own-question title check drops ordinary titles (merged off 2026-11-12,
+  PLAN C16; left by the merge's fresh review).** `llm._OWN_BANNED` matches
+  "people say/tell/explain…" anywhere, so "Why do people say sorry so much?" or
+  "3 People You Meet at Every Wedding" falls back to the question itself, which
+  carries the same words, logging `title_ok=False` and costing #10's and #14's
+  arms that run. It misses "/r/tifu", "Redditors reveal", "3 Answers That…" and
+  "Commenters reveal". Live path untouched (`SOURCE=reddit`). Fixing it changes
+  the commit, so it needed a second render the 12-hour limit refused. **Closes
+  when** fixed with tests, before `SOURCE=own` turns on.
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
   (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
