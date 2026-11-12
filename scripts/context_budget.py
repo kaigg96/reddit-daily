@@ -95,7 +95,8 @@ ORIENT = {
 # 11-12 with no budget (D4, audit 11-12), and idea helpers read it
 # (backlog_status.answered_in). Set at that day's size: a finding added means
 # another compressed, a superseded one to a line and a pointer to git.
-REFERENCE = {"PRD.md#4. Objectives": 20714}
+# 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
+REFERENCE = {"PRD.md#4. Objectives": 20310}
 
 
 def words(text):
