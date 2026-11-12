@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-12 (19:28) — No theme in the questions explains why some uploads get buried; every scheduled job here runs as late as the uploads
+
+    Worked (% of the shift): data 45 · gm 30 · reliability 15 · security 5 · product 5
+
+**Summary:** The shift started with nothing ready. It ranked eight new ideas and answered the top questions from our own data. Neither one changes what we ship, and nothing reached viewers, so the company is no closer to revenue tonight.
+
+### Toward revenue
+- **Nothing directly.** Every step that changes the videos still waits on you, bet 1 (#77) first. Tonight ruled out one suspect for the rise in buried uploads. It also showed that a fix for late-running jobs, which four uploads a day needs, has to come from outside GitHub's schedule.
+
+### Done
+- **Data (a question answered: no):** one in seven of the last three weeks' uploads is barely shown (5 views or fewer after a week), up from one in forty. I set the rule before looking. A fresh helper then tagged all 130 uploads since September against YouTube's advertiser-sensitive themes (sex, swearing, violence, politics and so on), without seeing their views. Tagged uploads were buried slightly *less* often than the rest (7 of 42 against 18 of 88), and no single theme came near the bar. So the questions' content doesn't explain it. Earlier checks ruled out pipeline faults and subreddit, and the cause is still unknown. The check is saved, so anyone can rerun it.
+- **Data (dropped, my mistake):** I asked whether the fall in plays that get past the opening (43 to 34 in 100) is YouTube's doing, by reading old videos' new views. Old videos earn about 3 views a day, which our findings already said, so the test could never clear its floor (73 new views against 300). I recorded the slip and kept the code out of the live repository.
+- **Reliability (a finding):** I measured each scheduled job's real start against its scheduled time over six weeks. Shifts, the morning release check and Monday's figures job all run 4–9 hours late, and all of them later since late October, just like the uploads. So the cause is GitHub's scheduler, not our upload job. Moving the upload times won't help; only a trigger from outside GitHub would, and that needs a token from you. That matters only once four a day is on the table.
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both orders put the same two first. Dropped: making the voice-only test the next release if #77 waits (that release needs you to sample the real voice, and it would push back bet 1); shrinking the findings record and fixing the approval check (neither moves revenue, and there was no time to do them well); and the case for more frequent sample videos (it is due at the 7 December review).
+- **Security and reliability (checked):** this morning's upload landed, and tonight's has not run yet. The money controls are intact ($0.31 this month, forecast $0.79 of $3). No secret is in the repository, and the workflows are unchanged.
+- **Your approvals #88 and #65 are still open.** #88 waits on you applying its patch, because shifts cannot write those files. #65 waits on your "yes" to its corrected sentence.
+- AI use: none on uploads; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **Tomorrow's 11:17 shift:** request bet 1's sample video whether or not #77 is labelled (the morning shift's plan stands).
+- **The count of open findings is wrong:** it counts 12 records of past code-health passes as open findings, so it reads 26 of 25 when 14 are open. Fix the counter and lower the cap by the same 12, so the pressure stays the same.
+- **Buried uploads:** what's left to test is YouTube's side, through the weekly figures. The 16 November snapshot reads the four newest.
+- **16 November:** the weekly review.
+
+### Better?
+- **Than last shift:** no. Two questions answered, both "no", and nothing shipped.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-12 (11:52) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
 
     Worked (% of the shift): strategy 30 · product 30 · gm 20 · data 15 · security 5
@@ -92,40 +126,3 @@ and more useful than a confident guess.
 - **Than last shift:** yes, a little. The decision that blocks revenue is now cheaper for you to make, and what it ships is staged. Nothing reached viewers.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-12 (02:14) — The process audit found why shifts kept re-proposing ideas they had already dropped, and fixed it; nothing reached viewers
-
-    Worked (% of the shift): gm 75 · strategy 5 · data 10 · reliability 5 · security 5
-
-**Summary:** The process audit, due after 16 shifts since the last one, ran this shift. Its main find: since 4 November the helpers that propose work could not see what earlier shifts had rejected, which explains most of the repeated work the last two audits complained of, and it is now fixed. Nothing reached viewers, and the company is no closer to revenue directly.
-
-### Toward revenue
-- **Nothing directly**, because every step that changes what we ship still waits on you (#77, #90). Indirectly, shift time wasted re-proposing rejected ideas is time not spent on work that could move revenue, and that waste had a mechanical cause, now removed.
-
-### Done
-- **General management (the process audit):** 16 shifts since 5 November. Half began with nothing ready, they averaged 38 of 60 minutes, and about 40 fixes and checks ran against 8 bets. One change reached viewers, the forced switch of our AI model. All 16 answered "no" to "better than ten shifts ago". The numbers agree: watch time is flat, and the share of videos nobody is shown, 14.7%, is still past its limit. Fresh reviews caught about 50 faults before merging. The sample videos and release checks passed every time and caught nothing, and the faults viewers could see were again found only by reading what we published. The rules held: no AI credit lines, no unapproved process changes, and production data was touched only by the upload job. You answered five quick asks on 10 November and passed over the five needing a watch, a direction call or your hands. That is the pattern that decides what ships.
-- **General management (fixed, live):** the idea helpers read a list of what recent shifts rejected. Since 4 November shifts have written that label in a different style, so the list stopped at 3 November and about seven rejected ideas came back. The list now shows all ten recent shifts. The same reading fault showed two shifts twice in our time-by-function table and left two others out, and that is fixed too. Each fix had a fresh review: the first two reviews each caught a real flaw in my first version, and both flaws are fixed.
-- **General management (one new ask, #95):** the tool that runs shifts asks every shift to add an AI credit line to each commit, which our rules forbid. Our check only catches it after the push. A one-line setting switches the request off, and your label applies it.
-- **General management (a cap, then a cut):** our findings record grew by about a third in a week with no limit. It now has a word limit that can only go down. I then shortened five findings that were closed and already acted on, about 400 words, keeping each headline, and moved the limit down with them. A fresh review found nothing lost.
-- **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The top two in both orders were already settled. Bet 2's views gap is due on 20 November, and the rule for reading four new unseen videos was set on 10 November. So I did the fourth, the cap above. A per-entry length cap for this report ranked last both times and is dropped. The last idea, a way to depend less on YouTube's Shorts feed, repeats a recorded finding that every such route needs bet 1 first. With nothing above the bar left, I handed over at 02:16.
-- **Strategy:** brought the backup show's fixes up to date with the live code twice, the second time at 02:13 after my own changes, and all 848 tests pass. Its sample cannot run before 07:00, when the sample job starts taking requests.
-- **Data (a question, no answer yet):** the share of plays that get past the opening fell from 43 to 34 per 100. Split by topic, only three topics have enough videos, and none stands out. Split by subreddit it is within chance. Split by voice, the report tool won't show it until that test is read on 23 November, and that refusal is the answer. So it stays unexplained for now.
-- **Security and reliability (checked):** both of yesterday's uploads landed. The money controls are intact ($0.25 this month, forecast $0.75 of $3). No secret is in the repository, and the workflows are unchanged. Monday's weekly figures job installs three Google libraries at whatever version is newest. Today's newest still install and set up both YouTube connections, so nothing released so far puts Monday's figures at risk.
-- AI use: none on uploads; no Polly; no sample video.
-
-### Blocked
-- **For you, in order:** #77 (bet 1: reply "without reactions", or label it as it stands), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
-
-### Next
-- **From 07:00 UTC:** request the backup show's fixes' sample (the branch is current as of 02:13), and merge on a pass.
-- **Keep shrinking the findings record:** the larger findings still feed tests that haven't been read yet. Compress each as its test is read: the capitals test on about 23 November, the new AI model on about 25 November.
-- **16 November:** the weekly review.
-
-### Better?
-- **Than last shift:** a little, in process only. The idea helpers can see what was rejected again, which removes the main source of repeated work two audits found. Nothing reached viewers.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, the share of videos nobody is shown is still too high, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
