@@ -277,3 +277,4 @@ F275,2026-11-12T19:12:39+00:00,43284869380,data,"R10: is the engaged-share fall 
 F276,2026-11-12T19:23:29+00:00,43284869380,data,"R11: do buried uploads share a sensitive theme? Rule, blind tags, read, merged",done,,none,,,0,
 F277,2026-11-12T19:24:43+00:00,43284869380,reliability,"Are only uploads late, or every cron? Scheduled starts against crons, W40-W46",done,,none,,,0,
 F278,2026-11-12T19:29:37+00:00,43284869380,strategy,A fixed case set grading the backup show's title check,done,,none,,,0,
+F279,2026-11-12T19:32:42+00:00,43284869380,gm,"The open-items count read 12 historical bullets as open; fixed, cap lowered by 12",done,,tool,"The cap read 26 of 25 when 14 were open, so the cheapest way under was deleting pass history or a real finding",A count test pinned to the section it means,3,
