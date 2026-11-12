@@ -281,7 +281,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising again (upload times against their slot, 11-05): weekly
   median 4.3–4.8h (W36–W39), 5.5–5.9h (W40–W41), 4.6–4.7h (W42–W43), 5.7h (W44),
   then 6.7h with all 7 of W45's uploads over 6h (worst 9.5h), so at four a day the
-  median run now lands after the next slot is due. Runs are safe (`run_slot` takes
+  median run now lands after the next slot is due. **Every cron here is as late
+  (11-12, scheduled runs' start against their cron, weekly medians W40→W46):**
+  shifts 4.6→7.4h, the release check 6.6→8.3h, the weekly job 6.3→8.7h, all
+  rising from W43. So it is GitHub's scheduler, not the upload workflow; no
+  edit to its cron fixes it, and only a trigger outside GitHub's schedule would
+  (a token: the owner's). Runs are safe (`run_slot` takes
   the day from the cron line); the digest is what misreads. **If #4 goes
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
