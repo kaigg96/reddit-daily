@@ -1,100 +1,100 @@
-## Shift trace — run 42928140502
+## Shift trace — run 43080207953
 
-**Ended:** success, is_error false, 129 turns, 34.2 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 128, 4 failed. Helper agents made 80 more, 1 failed.
+**Ended:** success, is_error false, 116 turns, 43.4 min, stop end_turn; 2 permission denial(s): Bash, Task. **Tool calls:** 114, 1 failed. Helper agents made 121 more, 2 failed.
 
 **Last message:**
 
-> I handed over at 00:37, 25 minutes early. Two rounds of looking for more work found nothing worth doing tonight, and the rest waits on the 08:00 AI reset, the 12-hour sample limit, or you. Nothing reached viewers, and the shift used no AI requests, no Polly and no sample video.
+> Shift over. The handover is committed and pushed to main (last commit `505348d`, at 19:25), and all 828 tests pass. Nothing reached viewers this shift: every step that changes the videos is still waiting on you.
 >
-> **Done, all on `main`:**
-> - **Reddit's terms:** all three terms pages are unchanged as of 16:15 California time on the 10th. I found no report of what Reddit's 10 November developer reminder said. The same reports say Reddit's RSS feeds end on 13 November. That doesn't affect us: we read Reddit only through its official API, and nothing in the repo uses RSS. The ledger check is closed.
-> - **Backup show (our own questions):** its branch now matches today's live code (`4d62a70`, 823 tests pass) and will merge without conflict. This morning's sample will test exactly what merges.
-> - **Zero-view correction:** Monday's review wrote that the zero-view report couldn't run without credentials. It can, and I ran it. The five such videos since 15 October all went up between 15 and 26 October, with none since. Four newer ones are too young to judge until 16 November.
-> - **Monday's views question:** whether weekly view swings are real viewers or a quirk of when figures are collected is now one command, `report.py --swings`. It refuses to answer before the 16 November figures. Two fresh reviews found five bugs and I fixed all of them before merging. The main one: my first version counted a single shared dip as a pattern, and it now needs two. While testing it I saw the figures so far, which show one shared dip. I recorded that as a peek with no conclusion drawn, where the rule lives.
-> - **Checks:** both uploads on the 10th landed and `prev_post` is intact. The money controls are intact ($0.25 this month, forecast $0.75 of $3). No secrets are committed, and the workflows haven't changed since your #93 patch.
+> **What got done**
+> - **Titles on the new AI model (editorial; a check, not a fix):** I read the three latest uploads as published. Two of the new model's titles claim more than the question did:
+>   - "Why do YOU think people fake autism online?" accuses people of faking, though the question never said fake.
+>   - "3 Sports Where Women ACTUALLY Have The Genetic Advantage" states as fact what the answers only guessed.
 >
-> **Next shift (after 08:00 UTC):**
-> - Request the backup show's sample, and on a pass naming the branch'
+>   A fresh helper, not told which model wrote which title, scored 12 recent titles: 2 of the new model's 5 added a claim, against 1 of the old model's 7. That's too few to act on, and I found it by looking. So I set the rule first: at the new model's 20th upload, the same check runs on all 20. If 5 or more fail, a fix to the title instructions gets queued after the capitals test is read on 23 November.
+> - **Weekly "are we improving?" report (data; live):** it can now report the share of plays that get past the opening, which is what tests are judged on since #91. The first three fresh reviews each found a real flaw in how partly-measured weeks were counted, and the verdict swung between falling, flat and rising as I fixed them. After all the fixes, a fourth review found nothing wrong and I merged it. Its honest answer today is "not enough history": only five full weeks of this figure exist, and it needs six. Viewers see nothing from it.
+> - **YouTube's policy pages (legal):** the monetization and spam pages are unchanged since 3 November, and the risk rows are dated. The spam rule bars "maliciously misleading" titles, which ours are not, so the handover says so.
+> - **Process audit (general management, first check):** the five process proposals held on 5 November stay held. They wait until fewer than five questions to you are unanswered, and five still a
 
-### Tool calls (last 80 of 128)
+### Tool calls (last 80 of 114)
 
-49. Bash: cd /tmp/wt-src && git status --short | head -3; sed -n '/^on:/,/^[a-z]/p' .github/workflows/dry-run.yml | head -15; grep -l "own-questions\…
-50. Bash: cd /tmp/wt-src && git push -q origin strategy/own-questions-source 2>&1 | tail -2; git log -1 --format=%h origin/strategy/own-questions-sou…
-51. Bash: venv/bin/python scripts/friction.py add --function strategy --task "C16: source branch brought up to date with main (4d62a70, 823 pass), so…
-52. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-53. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-54. Bash: venv/bin/python scripts/report.py --zeros --offline 2>&1 | head -50
-55. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-56. Bash: grep -n "zeros" .claude/skills/review/SKILL.md | head -5; date -u +%H:%M
-57. Bash: grep -n "scorecard\|report.py" .claude/skills/review/SKILL.md | head -8; grep -n "zero" .claude/skills/review/SKILL.md | head
-58. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-59. Bash: git checkout -q -b data/zeros-offline-correction && venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/check_docs.…
-60. Bash: venv/bin/python scripts/check_docs.py 2>&1 | head -12
-61. Bash: venv/bin/python scripts/friction.py add --function data --task "11-09 zero-view finding corrected: --zeros reads offline; 5 isolated zeros …
-62. Bash: grep -n "R4\b\|weekly view swings\|viewers or data" PRD.md | cut -c1-160 | head; grep -n "^| R4 " PRD.md | cut -c1-1500
-63. Bash: head -3 analysis/channel_stats.csv; wc -l analysis/channel_stats.csv; tail -12 analysis/channel_stats.csv | cut -d, -f1-6; venv/bin/python …
-64. Bash: grep -n "alternat" PRD.md | cut -c1-120; n=$(grep -n "alternat" PRD.md | grep -i "10-26\|counter" | head -1 | cut -d: -f1); echo "line $n"
-65. Bash: sed -n 154p PRD.md | grep -oE "[^.]*(swing|counter|R4|channel_stats|alternat|fixed lag)[^.]*\." | head -12; sed -n 146p PRD.md | grep -oE "…
-66. Bash: date -u +%H:%M; grep -n "def .*catalogue\|channel_stats\|def load_channel\|def render_catalogue\|recent, 2 wks" src/insights.py | head -20;…
-67. Bash: sed -n 585,615p scripts/report.py; grep -n "def catalogue_gains\|def back_catalogue\|catalogue_split\|def .*gains" src/insights.py | head
-68. Bash: grep -n "def views_gained_by_age\|def two_week_rate\|def load_channel_stats\|CHANNEL_STATS" src/insights.py scripts/report.py | head; n=$(g…
-69. Bash: grep -rn "channel_stats" src/ scripts/report.py | head -8; grep -n "^def _snapshot_metric_rows" -A12 scripts/report.py | head -16; grep -n …
-70. Bash: grep -rn "CHANNEL_LOG" src/ scripts/*.py | grep -v pycache | head -8; sed -n 1,30p src/insights.py | head -30
-71. Bash: sed -n 465,500p scripts/report.py
-72. Bash: sed -n 768,776p scripts/report.py; sed -n 805,816p scripts/report.py; sed -n 1008,1018p scripts/report.py; grep -n "def test_.*two_week\|de…
-73. Bash: sed -n 1955,1990p tests/test_insights.py; date -u +%H:%M
-74. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-75. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-76. Bash: grep -n "^import\|^from" scripts/report.py | head -12
-77. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-78. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-79. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-80. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
-81. Bash: venv/bin/python -m pytest tests/test_insights.py -q -k "swing" 2>&1 | tail -15; venv/bin/python scripts/report.py --swings --offline 2>&1 |…
-82. Bash: venv/bin/python - <<'EOF' 2>&1 | tail -14
-83. Bash: venv/bin/python - <<'EOF' 2>&1 | tail -14
-84. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-85. Bash: git checkout -q -b data/r4-swings-read && venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; git diff --stat; date -u +%H:%M
-86. Bash: git add -A && git commit -q -m "report.py --swings: R4's pre-committed read (viewers or data) as code, refusing until the 11-16 snapshot
-87. Agent: Fresh-context review of R4 diff
-88. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-89. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-90. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-91. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
-92. Bash: venv/bin/python -m pytest tests/test_insights.py -q -k "swing" 2>&1 | tail -15; venv/bin/python scripts/report.py --swings --offline 2>&1 |…
-93. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-94. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-95. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/check_docs.py 2>&1 | tail -3 | head -1; venv/bin/python scripts…
-96. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | tail -8
-97. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -iE "over|PRD|TOTAL|✗|FAIL" | head -8
-98. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-99. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD.md#0" | head -2; awk '/^## 0/,/^## 1/' PRD.md | grep -n "" | awk -F: …
-100. Bash: for ref in 2596956 HEAD; do git show $ref:PRD.md | awk '/^## 0/,/^## 1/' | wc -w; done; awk '/^## 0/,/^## 1/' PRD.md | wc -w
-101. Bash: awk '/^## 0/,/^## 1/' PRD.md | sed -n '31p;36p;37p' | cut -c1-1300
-102. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-103. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-104. Bash: awk '/^## 0/,/^## 1/' PRD.md | wc -w; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD.md#0|All within" | head -2; ven…
-105. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-106. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD.md#0|All within|TOTAL" | head -3; venv/bin/python -m pytest tests/ -q…
-107. Bash: git add -A && git commit -q -m "PRD §0: R4 points at --swings, its 'in step' reading and the peek, in budget (row 13's restated reason for …
-108. ToolSearch: select:SendMessage
-109. Agent: Verify R4 review fixes
-110. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-111. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-112. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-113. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
-114. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -3; venv/bin/python scripts/report.py --swings --offline 2>&1 | tail -1; venv/bin/python sc…
-115. Bash: git add -A && git commit -q -m "--swings, second review: the window closes once either series passes 11-22 unmatched (else a split miss lef…
-116. Agent: Second-round candidate generation
-117. Bash: git log --since=2026-11-10T00:00 --format='%h %ci %s' -- .github/workflows/ | head; echo ---; git ls-files | grep -iE "\.env$|credentials|t…
-118. Bash: venv/bin/python scripts/friction.py add --function gm --task "Second generation round (monetization, distribution, finance, editorial, mark…
-119. Bash: git stash -q && git checkout -q main && git pull -q --ff-only origin main && git stash pop -q && git log -1 --format=%h && git status --sho…
-120. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-121. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-122. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-123. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-124. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|OVER|All within|TOTAL" | head -4; venv/bin/python scripts/context…
-125. Bash: n=$(grep -n "^## 2026-11-10 (11:17)" WORKLOG.md | cut -d: -f1); total=$(wc -l < WORKLOG.md); echo "$n of $total"; sed -n "$((n-3)),$((n-1))…
-126. Bash: python3 - <<'EOF'
-127. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && venv/bin/python scripts/check_docs.py 2>&1 | grep -E "stale|FAIL|✗" | head -3 && git …
-128. Bash: sed -i 's/So I handed over at about 00:40, about 20 minutes early:/So I handed over at 00:37, 25 minutes early:/' WORKLOG.md && git diff --…
+35. Bash: date -u +%H:%M && printf '%s\n' 'v7s-title-claims,"v7s titles and closing lines that assert what the question does not (a blind count, besi…
+36. Bash: grep -n "^## 4\|^## 5" PRD.md; awk 'NR>=110 && NR<=123' PRD.md | cut -c1-300
+37. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+38. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+39. Bash: date -u +%H:%M && venv/bin/python -m pytest tests/ -q -x 2>&1 | tail -3 && venv/bin/python scripts/check_docs.py 2>&1 | tail -3
+40. Bash: git add PRD.md analysis/experiments.csv && git commit -q -m "v7s titles: 2 of 5 add a claim the question did not make (blind, exploratory);…
+41. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -20
+42. Bash: tail -3 analysis/friction.csv 2>/dev/null | cut -c1-300; ls analysis | grep -i fric
+43. Bash: grep -n "CATEGOR\|OUTCOME\|csv\|\.md" scripts/friction.py | head -15
+44. Bash: sed -n 54,70p scripts/friction.py; tail -2 .github/friction.csv | cut -c1-300
+45. Bash: venv/bin/python scripts/friction.py add --function editorial --task "Read v7s uploads 4-6 in their run logs; blind-scored 12 titles for add…
+46. Bash: date -u +%H:%M; grep -n "trajectory\|TRAJECTORY" scripts/report.py | head -30; grep -n "def trajectory\|def _trajectory\|TRAJECTORY_METRICS…
+47. Bash: sed -n 495,545p scripts/report.py; sed -n 1080,1130p src/insights.py
+48. Bash: sed -n 270,345p scripts/report.py; sed -n 100,125p src/insights.py
+49. Bash: sed -n 1422,1470p src/insights.py; grep -n "TRAJECTORY_HALF\s*=\|TRAJECTORY_MIN_N\s*=\|TRAJECTORY_AT_AGE\s*=" src/insights.py; grep -n '"--…
+50. Bash: date -u +%H:%M; venv/bin/python - <<'EOF'
+51. Bash: grep -n "def _per_start_rows" -A22 scripts/report.py; grep -rln "_per_start_rows\|show_trajectory\|trajectory_verdict" tests/
+52. Bash: grep -rln "import report\|scripts.report\|from report" tests/*.py | head; grep -n "trajectory_verdict" tests/test_insights.py | head
+53. Bash: sed -n 1488,1520p tests/test_insights.py; grep -n "import report\|report\._\|def _report\|load_report" tests/test_insights.py | head -8
+54. Bash: sed -n 2180,2205p tests/test_insights.py; git checkout -q -b data/engaged-share-trajectory && echo ok
+55. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
+56. Bash: venv/bin/python - <<'EOF'
+57. Bash: venv/bin/python - <<'EOF'
+58. Bash: sed -n 14,19p scripts/report.py; grep -n '"--trajectory"' -A3 scripts/report.py
+59. Bash: venv/bin/python - <<'EOF'
+60. Bash: git add scripts/report.py src/insights.py tests/test_insights.py && git commit -q -m "report.py --trajectory --metric engaged_share: D9's t…
+61. Agent: Fresh review of trajectory diff
+62. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
+63. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "Engaged-share trajectory: leave out uploads whose ~7-day read predate…
+64. Agent: Second review of the fix commit
+65. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
+66. Bash: venv/bin/python -m pytest tests/test_insights.py -q -k engaged_share_rows 2>&1 | grep -E "^E|assert" | head -12
+67. Bash: venv/bin/python - <<'EOF'
+68. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
+69. Bash: venv/bin/python - <<'EOF'
+70. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | grep -E "^E |FAILED" | head -6
+71. Bash: venv/bin/python - <<'EOF'
+72. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "Engaged-share trajectory: drop a publish-week whole unless every uplo…
+73. Agent: Third review of week-coverage fix
+74. Bash: date -u +%H:%M; git checkout -q main && git status --short | head; grep -n "Open items" TECH_DEBT.md | head -3; awk '/Open items/{f=1} f' T…
+75. Bash: grep -n "^- \*\*" TECH_DEBT.md | awk -F: '$1>153' | tail -4 | cut -c1-160; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i…
+76. Bash: git stash -q && git checkout -q data/engaged-share-trajectory && venv/bin/python - <<'EOF'
+77. Bash: venv/bin/python scripts/friction.py add --function data --task "Engaged share in report.py --trajectory (branch data/engaged-share-trajecto…
+78. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+79. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+80. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+81. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+82. Bash: date -u +%H:%M; gh run view 43039707969 --log 2>/dev/null | sed 's/^[^\t]*\t[^\t]*\t[0-9TZ:.-]* //' | grep -iE "skip|already|slot|not due|n…
+83. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -iE "worklog|over|TOTAL" | head -6
+84. Bash: venv/bin/python - <<'EOF'
+85. Bash: venv/bin/python - <<'EOF'
+86. Bash: git add WORKLOG.md PRD.md .github/friction.csv && git commit -q -m "Handover (18:42): v7s title-claims rule set; engaged-share trajectory p…
+87. Bash: grep -n "def weekly_totals" src/insights.py; sed -n "$(grep -n 'def weekly_totals' src/insights.py | cut -d: -f1),+45p" src/insights.py | g…
+88. Bash: sed -n 1140,1162p src/insights.py
+89. Bash: git checkout -q data/engaged-share-trajectory && venv/bin/python - <<'EOF'
+90. Bash: venv/bin/python -m pytest tests/test_insights.py -q 2>&1 | grep -E "^E |FAILED|^>" | head -10
+91. Bash: venv/bin/python - <<'EOF'
+92. Bash: venv/bin/python - <<'EOF'
+93. Bash: venv/bin/python - <<'EOF'
+94. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "Engaged-share trajectory: the third review's three fixes
+95. Agent: Fourth review of trajectory branch
+96. Bash: git checkout -q main && git pull -q --ff-only origin main 2>&1 | tail -1; git merge -q --no-ff data/engaged-share-trajectory -m "Merge data…
+97. Bash: venv/bin/python - <<'EOF'
+98. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover update: engaged…
+99. ToolSearch: select:WebFetch
+100. Bash: grep -n "reused-content policy\|spam policy" PLAN.md | cut -c1-900 | head -4; grep -rn "support.google.com/youtube/answer" PLAN.md PRD.md D…
+101. WebFetch: https://support.google.com/youtube/answer/1311392
+102. WebFetch: https://support.google.com/youtube/answer/2801973
+103. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
+104. Bash: sed -i 's/without adding anything of your own" (11-03; unchanged 11-11)/without adding anything of your own" (11-03, 11-11)/' PLAN.md && ve…
+105. Bash: grep -n "11-05\|5 November" TECH_DEBT.md | cut -c1-200 | head -8; grep -n "audit" PLAN.md | cut -c1-250 | head -5
+106. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+107. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+108. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+109. Bash: date -u +%H:%M
+110. Bash: venv/bin/python - <<'EOF'
+111. Bash: gh run list --workflow "Generate and Upload Reddit Video" --limit 2; gh run list --limit 4 | cut -c1-140
+112. Bash: gh run list --limit 2 --workflow "Guardrail integrity" | cut -c1-120; date -u +%H:%M
+113. Bash: id=$(gh run list --commit 505348d --json databaseId,workflowName --jq '.[] | select(.workflowName=="Guardrail integrity") | .databaseId' | …
+114. Bash: git fetch -q origin && git log --oneline -1 origin/main; gh run list --limit 3 | cut -c1-130
