@@ -154,10 +154,11 @@ _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
 # (found 10-24). Short, so a bold headline that says "dropped" is not one.
 # Since 11-04 the label is plain ("... nothing else. Dropped: a, b"), so the
 # generator saw nothing newer than 11-03 and re-proposed about seven dropped
-# ideas (audit 11-12); a plain one needs its colon, so prose that says
-# "dropped" is not one either.
+# ideas (audit 11-12). A plain one is a label, capitalised with its colon:
+# prose ("the idea, X, I dropped: your label would...") names the reason, not
+# the idea, after its colon.
 _DROPPED = re.compile(r"(?<!\S)\*\*(?:\w+\s+){0,3}dropped(?:\s+\w+){0,2}:?\*\*"
-                      r"|\bdropped:", re.I)
+                      r"|(?-i:\b(?:Also d|D)ropped:)", re.I)
 
 
 def _dropped_part(bullet):

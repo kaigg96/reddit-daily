@@ -190,9 +190,13 @@ def test_a_plain_dropped_label_is_read_but_prose_saying_dropped_is_not():
             "  effect, 09-30); affiliate links.\n"
             "- **Product:** the ledger had dropped \"shock refusals aside\", now fixed.\n"
             "- **Editorial:** a title naming Reddit is now dropped in code.\n"
+            "- **Gm:** its one idea, attaching it to #90, I dropped: your label\n"
+            "  would apply it (dropped: it bites later).\n"
+            "- **Data:** one ranked. Also dropped: a tool.\n"
             "- Dropped: a risk row for model changes.\n")
     assert b.dropped_in(text) == [("2026-11-10 (11:17) — X", [
         "Dropped: late uploads (no effect, 09-30); affiliate links.",
+        "Also dropped: a tool.",
         "Dropped: a risk row for model changes."])]
     done = b.done_in(text)[0][1]
     assert any(d.startswith("Product: the ledger") for d in done)
