@@ -276,3 +276,4 @@ F274,2026-11-12T11:45:39+00:00,43206562674,product,bet 1's health-skip rate chec
 F275,2026-11-12T19:12:39+00:00,43284869380,data,"R10: is the engaged-share fall YouTube's or ours, read from old videos' new views",abandoned,,rederived,"The rule was set and built before checking PRD §4, which already says the back catalogue earns ~3 views a day (0.9%), so the test could never clear its 300-view floor (late window: 73)",The idea helper and the shift checking §4's catalogue figure before designing any test that uses old videos as a control,12,
 F276,2026-11-12T19:23:29+00:00,43284869380,data,"R11: do buried uploads share a sensitive theme? Rule, blind tags, read, merged",done,,none,,,0,
 F277,2026-11-12T19:24:43+00:00,43284869380,reliability,"Are only uploads late, or every cron? Scheduled starts against crons, W40-W46",done,,none,,,0,
+F278,2026-11-12T19:29:37+00:00,43284869380,strategy,A fixed case set grading the backup show's title check,done,,none,,,0,
