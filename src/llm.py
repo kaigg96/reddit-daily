@@ -266,22 +266,33 @@ def _own_wording(prompt, verbatim=()):
 # or closing line that does falls back as a failed one does; a keyword is left out.
 # Two exemptions, from the merge review (2026-11-12): a count of people
 # followed by a list word ("3 People You Meet") is a list, not answers; and
-# people telling, in a line that opens as a question ("Why do so many people
-# say sorry?"), asks about people rather than quoting them.
-_PEOPLE = r"(people|strangers|users|folks|commenters)"
+# people telling in the present tense, inside a line's opening question ("Why
+# do so many people say sorry?"), asks about people rather than quoting them.
+# Past tense ("How people answered") or a reveal after the question ("Should
+# you recline? Strangers weigh in") still drops: the fix's own review.
+_PEOPLE = r"(people|strangers|users|folks|commenters|viewers)"
+_COUNT = r"(\d+|two|three|four|five|six|seven|eight|nine|ten)"
 _OWN_BANNED = re.compile(
-    r"reddit|(?<!\w)r/[a-z]\w{2,}|\basked\s+(\d+\s+)?" + _PEOPLE + r"\b|"
-    r"\b\d+\s+" + _PEOPLE + r"\b(?!\s+(you|who|to|that|at|in|with)\b)", re.I)
+    r"reddit|(?<!\w)r/[a-z]\w{2,}|\basked\s+(" + _COUNT + r"\s+)?" + _PEOPLE + r"\b|"
+    r"\b" + _COUNT + r"\s+" + _PEOPLE + r"\b(?!\s+(you|to|that|at|in|with)\b)", re.I)
 _OWN_TELLING = re.compile(
-    r"\b" + _PEOPLE + r"(['’]s|s['’])?\s+(share|reveal|admit|say|said|tell|told|confess|"
+    r"\b" + _PEOPLE + r"(['’]s|['’])?\s+(share|reveal|admit|say|said|tell|told|confess|"
     r"explain|answer|weigh|vote)\w*", re.I)
-_OWN_ASKS = re.compile(r"^\W*(why|how|do|does|did|don['’]t|can|could|should|would|will|"
-                       r"is|are|when|where)\b", re.I)
+_OWN_ASKS = re.compile(r"^\W*(why|how (do|does|did|can|could|would|should)|do|does|did|"
+                       r"don['’]t|can|could|should|would|will|is|are|when|where)\b", re.I)
 
 
 def _own_banned(line):
-    return bool(_OWN_BANNED.search(line)
-                or (_OWN_TELLING.search(line) and not _OWN_ASKS.match(line)))
+    if _OWN_BANNED.search(line):
+        return True
+    asks = _OWN_ASKS.match(line)
+    opening = re.search(r"[?!:.]", line)
+    for m in _OWN_TELLING.finditer(line):
+        verb = m.group(0).split()[-1].lower()
+        present = not (verb.endswith("ed") or verb in ("said", "told"))
+        if not (asks and present and (opening is None or m.start() < opening.start())):
+            return True
+    return False
 
 
 def _own_fields(data):

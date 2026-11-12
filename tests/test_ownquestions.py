@@ -214,7 +214,13 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     ("Why don’t people say thanks anymore?", False), ("Can people tell when you're lying?", False),
     ("3 People's Hot Takes On Reclining", True), ("3 Strangers Weigh In", True),
     ("We Asked 100 People About Reclining", True), ("People’s Answers On Reclining", True),
-    ("3 People, 3 Takes On Reclining", True), ("Strangers Vote: Recline?", True)])
+    ("3 People, 3 Takes On Reclining", True), ("Strangers Vote: Recline?", True),
+    # the fix's own review: a reveal after the question, or past tense, still drops
+    ("Should you recline? Strangers weigh in", True), ("How 3 strangers answered", True),
+    ("Is this what people said?", True), ("Strangers' Answers On Reclining", True),
+    ("3 People Who Admit They Recline", True), ("Three People's Hot Takes", True),
+    ("Do you think people should recline? Drop your thoughts below.", False),
+    ("How People Vote On Reclining", True), ("How do people tell if a seat reclines?", False)])
 def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
     reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
     monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
