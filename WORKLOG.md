@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-12 (11:58) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
+## 2026-11-12 (11:52) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
 
     Worked (% of the shift): strategy 30 · product 30 · gm 20 · data 15 · security 5
 
@@ -75,7 +75,7 @@ and more useful than a confident guess.
 - **Product (staged, not shipped):** the version your label ships is now the release in waiting, so tomorrow morning's automatic check tests exactly it. All 1,121 tests pass. One follow-on branch stopped merging cleanly with it, and I fixed that (1,123 pass).
 - **Strategy (merged, switched off):** the backup show's fixes passed their sample at 11:15 (27 seconds, playable) and all 848 tests. A fresh review found the live show untouched. It found one fault that matters only once the backup show is on: the check that stops titles passing the AI's takes off as real people's also drops ordinary titles like "Why do people say sorry so much?". I fixed it on a separate branch. Three fresh reviews in a row each found new wordings it gets wrong, so I stopped. I recorded that a different kind of check is worth weighing before the backup show is switched on.
 - **Data (a question answered: no):** I set the rule before looking. Neither video length nor the background clip explains the fall in the share of plays that get past the opening (43 to 34 per 100). Long videos trail by 28%, where chance alone gives 30%, and every clip sits inside its own chance range. So nothing we can read before 23 November explains the fall.
-- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both put the #77 rewrite first and the split above second. Dropped: getting four uploads a day ready ahead of bet 1 (it needs a sample, and none can render until tomorrow); checking new brand names and a plan for Shorts series (both come after bet 1, by earlier decisions); stripping two characters YouTube refuses in titles (none in 2,300 so far); and working out which Claude plan we are on (the status line can't tell).
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both put the #77 rewrite first and the split above second. Dropped: getting four uploads a day ready ahead of bet 1 (it needs a sample, and none can render until tomorrow); checking new brand names and a plan for Shorts series (both come after bet 1, by earlier decisions); stripping two characters YouTube refuses in titles (none in 2,300 so far); and working out which Claude plan we are on (the status line can't tell). Later, also dropped: a fourth round on the backup show's title check (recorded instead), a better closing line for when the host's pick drops (it needs AI requests, and none may run this close to an upload), and the pick's casing in closed captions (rarely seen).
 - **Security and reliability (checked):** yesterday's two uploads and this morning's landed. The money controls are intact ($0.30 this month, forecast $0.79 of $3), no secret is in the repository, and the workflows are unchanged.
 - AI use: none by the shift itself; one sample video (test model, silent); no Polly.
 
