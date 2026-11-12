@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-12 (11:58) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
 
-    Worked (% of the shift): strategy 35 · product 25 · gm 20 · data 15 · security 5
+    Worked (% of the shift): strategy 30 · product 30 · gm 20 · data 15 · security 5
 
 **Summary:** The decision that gates every revenue step, bet 1 (#77), is rewritten so one label settles it from a phone. Tomorrow's automatic release check will test exactly the version that label ships. Nothing reached viewers, and the company is closer to revenue only once you label it.
 
