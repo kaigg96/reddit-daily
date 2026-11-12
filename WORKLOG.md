@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-12 (02:30) — The process audit found why shifts kept re-proposing ideas they had already dropped, and fixed it; nothing reached viewers
 
-    Worked (% of the shift): gm 80 · strategy 5 · data 5 · reliability 5 · security 5
+    Worked (% of the shift): gm 75 · strategy 5 · data 10 · reliability 5 · security 5
 
 **Summary:** The process audit, due after 16 shifts since the last one, ran this shift. Its main find: since 4 November the helpers that propose work could not see what earlier shifts had rejected, which explains most of the repeated work the last two audits complained of, and it is now fixed. Nothing reached viewers, and the company is no closer to revenue directly.
 
@@ -76,7 +76,8 @@ and more useful than a confident guess.
 - **General management (one new ask, #95):** the tool that runs shifts asks every shift to add an AI credit line to each commit, which our rules forbid. Our check only catches it after the push. A one-line setting switches the request off, and your label applies it.
 - **General management (a cap, then a cut):** our findings record grew by about a third in a week with no limit. It now has a word limit that can only go down. I then shortened five findings that were closed and already acted on, about 400 words, keeping each headline, and moved the limit down with them. A fresh review found nothing lost.
 - **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The top two in both orders were already settled. Bet 2's views gap is due on 20 November, and the rule for reading four new unseen videos was set on 10 November. So I did the fourth, the cap above. A per-entry length cap for this report ranked last both times and is dropped.
-- **Strategy:** brought the backup show's fixes up to date with the live code, and all 842 tests pass. Its sample cannot run before 07:00, when the sample job starts taking requests.
+- **Strategy:** brought the backup show's fixes up to date with the live code twice, the second time at 02:13 after my own changes, and all 848 tests pass. Its sample cannot run before 07:00, when the sample job starts taking requests.
+- **Data (a question, no answer yet):** the share of plays that get past the opening fell from 43 to 34 per 100. Split by topic, only three topics have enough videos, and none stands out. Split by subreddit it is within chance. Split by voice, the report tool won't show it until that test is read on 23 November, and that refusal is the answer. So it stays unexplained for now.
 - **Security and reliability (checked):** both of yesterday's uploads landed. The money controls are intact ($0.25 this month, forecast $0.75 of $3). No secret is in the repository, and the workflows are unchanged.
 - AI use: none on uploads; no Polly; no sample video.
 
@@ -84,7 +85,7 @@ and more useful than a confident guess.
 - **For you, in order:** #77 (bet 1: reply "without reactions", or label it as it stands), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
 
 ### Next
-- **From 07:00 UTC:** bring the backup show's fixes up to date again, request their sample, and merge on a pass.
+- **From 07:00 UTC:** request the backup show's fixes' sample (the branch is current as of 02:13), and merge on a pass.
 - **Keep shrinking the findings record:** the larger findings still feed tests that haven't been read yet. Compress each as its test is read: the capitals test on about 23 November, the new AI model on about 25 November.
 - **16 November:** the weekly review.
 
