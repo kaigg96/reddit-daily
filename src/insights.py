@@ -1441,24 +1441,27 @@ def totals_change(series, weeks=4):
     return prior, recent, (recent / prior if prior else None)
 
 
-def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):
+def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF, min_change=0.5, digits=1):
     """Rising, flat or falling — against the channel's own noise, not zero.
 
     A flat verdict is the actionable one and the whole point: it means the work
     being done is not moving the outcome, which no amount of process metrics
     would reveal. `floor` is the ordinary between-batch swing (see
     `drift_floor`); without it a 1s wobble reads as progress.
+
+    `min_change` and `digits` are in the metric's own units: the 0.5 default
+    is half a second, which on a 0-1 share would read every move as flat.
     """
     if len(series) < half * 2:
         return "unknown", f"only {len(series)} comparable periods"
     recent = median([m for _, _, m in series[-half:]])
     prior = median([m for _, _, m in series[-half * 2:-half]])
     change = recent - prior
-    span = f"{prior:.1f} → {recent:.1f}"
+    span = f"{prior:.{digits}f} → {recent:.{digits}f}"
     if floor is not None and abs(change) <= floor:
         return "flat", (f"{span} over {half * 2} periods — inside the "
-                        f"channel's own {floor:.1f} drift")
-    if abs(change) < 0.5:
+                        f"channel's own {floor:.{digits}f} drift")
+    if abs(change) < min_change:
         return "flat", f"{span} over {half * 2} periods"
     return ("rising" if change > 0 else "falling"), f"{span} over {half * 2} periods"
 

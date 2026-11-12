@@ -182,6 +182,36 @@ def test_drops_listed_inside_a_bullet_are_read_from_their_label_on():
     assert not any(d.startswith("Dropped after") for d in done)
 
 
+def test_a_plain_dropped_label_is_read_but_prose_saying_dropped_is_not():
+    """Since 11-04 shifts write "Dropped:" unbolded, so nothing newer than
+    11-03 was listed and dropped ideas came back (audit 11-12)."""
+    text = ("## 2026-11-10 (11:17) — X\n\n### Done\n"
+            "- **General management:** two survived. Dropped: late uploads (no\n"
+            "  effect, 09-30); affiliate links.\n"
+            "- **Product:** the ledger had dropped \"shock refusals aside\", now fixed.\n"
+            "- **Editorial:** a title naming Reddit is now dropped in code.\n"
+            "- **Gm:** its one idea, attaching it to #90, I dropped: your label\n"
+            "  would apply it (dropped: it bites later).\n"
+            "- **Data:** one ranked. Also dropped: a tool.\n"
+            "- Dropped: a risk row for model changes.\n")
+    assert b.dropped_in(text) == [("2026-11-10 (11:17) — X", [
+        "Dropped: late uploads (no effect, 09-30); affiliate links.",
+        "Also dropped: a tool.",
+        "Dropped: a risk row for model changes."])]
+    done = b.done_in(text)[0][1]
+    assert any(d.startswith("Product: the ledger") for d in done)
+    assert not any(d.startswith("Dropped: a risk") for d in done)
+
+
+def test_a_restamp_that_rewrote_the_headline_end_is_still_one_shift():
+    def v(time, rest):
+        return (f"## 2026-11-09 ({time}) — Shift helpers now see every recorded "
+                f"finding before proposing work; {rest}\n- **Considered and dropped:** a.\n")
+    got = b.recently_dropped(versions=[v("12:25", "the weekly falls to the evening"),
+                                       v("12:15", "uploads will record the limit")])
+    assert [h[:18] for h, _ in got] == ["2026-11-09 (12:25)"]
+
+
 def test_a_chain_of_edits_to_time_and_headline_is_still_one_shift():
     def v(time, headline):
         return f"## 2026-10-17 ({time}) — {headline}\n- **Considered and dropped:** a.\n"
