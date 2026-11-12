@@ -11,7 +11,8 @@ import sys
 
 from moviepy import AudioFileClip
 
-from . import config, content, llm, log, sample, screen, thumbnail, tts, video, youtube
+from . import (config, content, llm, log, ownquestions, sample, screen, thumbnail, tts,
+               video, youtube)
 
 
 def _probe_duration(path):
@@ -28,6 +29,12 @@ def upload_text(subreddit, post_title, comments, shortlink, keywords, asker=""):
     variable between them."""
     def by(name):
         return f" (u/{name})" if name else ""
+
+    if not subreddit:  # our own question (PLAN C16): nothing of Reddit's to credit
+        description = (f"Today's question: {post_title}\n\nTakes:\n"
+                       + "\n".join(f"{i}. {c}" for i, c in enumerate(comments, 1))
+                       + "\n\nWhich take do you pick?\n#Shorts")
+        return description, ["Shorts"] + keywords
 
     description = (
         f"Today's top {subreddit} post{', asked by u/' + asker if asker else ''}: {post_title}\n\n"
@@ -58,7 +65,8 @@ def build_segments(post, outro_text, host, synth, host_voice):
     for i, comment in enumerate(answers, 1):
         segments.append(synth(f"comment_{i}", comment, kind="comment"))
         if text:
-            segments[-1].note = host.reactions[i - 1]
+            if config.HOST_REACTIONS:   # off: no tag, and never voiced instead
+                segments[-1].note = host.reactions[i - 1]
         elif host:
             segments.append(synth(f"reaction_{i}", host.reactions[i - 1], kind="host",
                                   speaker=host_voice))
@@ -171,7 +179,7 @@ def main():
     def record_verdict(post_title, result, action):
         row = {
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-            "subreddit": subreddit_name,
+            "subreddit": "" if config.SOURCE == "own" else subreddit_name,  # PLAN C16
             "post_title": post_title,
             "action": action,
             # A demoted row's payload is the category we chose not to skip on.
@@ -187,6 +195,9 @@ def main():
 
     if config.SAMPLE:
         post = sample.POST
+    elif config.SOURCE == "own":
+        post = ownquestions.select_post(prev_title, uploaded=log.uploaded_titles(),
+                                        screener=screen.screen, on_verdict=record_verdict)
     else:
         post = content.select_post(
             content.make_reddit(), prev_title,
@@ -238,8 +249,9 @@ def main():
         print("Commentary: no usable host lines -- shipping today's reading")
     if host:
         print(f"Commentary setup: {host.setup or '(dropped)'}")
-        for i, line in enumerate(host.reactions, 1):
-            print(f"Commentary reaction {i}: {line or '(dropped)'}")
+        if config.HOST_REACTIONS or not config.HOST_TEXT:   # off: none to report (#77)
+            for i, line in enumerate(host.reactions, 1):
+                print(f"Commentary reaction {i}: {line or '(dropped)'}")
 
     # R3.1a: question-specific outro CTA (fail-soft to the generic line)
     cta = closing_line(meta, host)
@@ -354,6 +366,7 @@ def main():
         "own_words_share": own_words,
         "meta_source": meta.source,
         "host_lines": host_lines,
+        "cta": outro_text,
     })
 
 

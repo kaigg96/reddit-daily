@@ -47,12 +47,16 @@ def captured(monkeypatch):
 
     monkeypatch.setattr(llm.requests, "post", fake_post)
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    # These pin production's request shape. A shell's DRY_RUN=1 (how a dry run
+    # is started) routes to SAMPLE_MODEL's instead and failed three of them;
+    # nothing leaves the process here, so the live route is safe to read.
+    monkeypatch.setattr(config, "DRY_RUN", False)
     return calls
 
 
 def test_thinking_is_disabled_by_default(captured):
     """The fix itself. Default thinking is what blew the timeout."""
-    llm._generate("hello")
+    llm._generate("hello", model="gemini-2.5-flash")
     cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
     assert cfg["thinkingBudget"] == 0
 
@@ -64,7 +68,7 @@ def test_metadata_is_one_request_not_three(captured):
     llm.get_metadata("q", ["a", "b", "c"], style="B")
 
     assert len(captured) == 1
-    assert captured[0]["json"]["generationConfig"]["thinkingConfig"]["thinkingBudget"] == 0
+    assert "thinkingConfig" in captured[0]["json"]["generationConfig"]
 
 
 def test_metadata_asks_gemini_for_its_exact_shape(captured):
@@ -74,7 +78,7 @@ def test_metadata_asks_gemini_for_its_exact_shape(captured):
     llm.get_metadata("q", ["a", "b", "c"], style="B")
     cfg = captured[0]["json"]["generationConfig"]
     assert cfg["responseMimeType"] == "application/json"
-    assert cfg["thinkingConfig"]["thinkingBudget"] == 0
+    assert "thinkingConfig" in cfg
     reactions = cfg["responseSchema"]["properties"]["reactions"]
     assert reactions["minItems"] == reactions["maxItems"] == llm.config.COMMENTARY_ANSWERS
     assert cfg["responseSchema"]["required"] == ["title", "keywords", "setup", "reactions", "cta"]
@@ -152,9 +156,45 @@ def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
 def test_a_caller_can_still_opt_into_reasoning(captured):
     """The budget is a parameter, not a hardcode — a genuinely reasoning-heavy
     prompt can ask for it, deliberately and visibly."""
-    llm._generate("hello", thinking_budget=512)
+    llm._generate("hello", thinking_budget=512, model="gemini-2.5-flash")
     cfg = captured[0]["json"]["generationConfig"]["thinkingConfig"]
     assert cfg["thinkingBudget"] == 512
+
+
+def test_a_3x_model_thinks_at_its_lowest_level(captured):
+    """3.x refuses thinkingBudget, and 3.8-flash refuses "minimal" (HTTP 400,
+    2026-09-26 and 11-07); left to itself it took 34s on one metadata call
+    (11-07). So MODEL on 3.x asks for its lowest level."""
+    llm._generate("hello", model=llm.MODEL)
+    want = {"thinkingLevel": llm._LOWEST_THINKING[llm.MODEL]}
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == want
+
+
+@pytest.mark.parametrize("model", ["gemini-3.8-flash", "gemini-3.6-flash"])
+def test_the_screens_reasoning_budget_becomes_low_on_any_candidate(captured, monkeypatch, model):
+    """The screen's 512-token budget was deliberate: thinking near off once
+    passed the flirty case. A candidate's "minimal" must not reach it."""
+    from src import screen
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello", thinking_budget=screen.SCREEN_THINKING_BUDGET)
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
+
+
+@pytest.mark.parametrize("model, level", [("gemini-3.8-flash", "low"),
+                                          ("gemini-3.6-flash", "minimal")])
+def test_each_candidate_gets_the_lowest_level_it_takes(captured, monkeypatch, model, level):
+    """Switching candidate is the MODEL line alone; a level a model refuses
+    would cost a test day (3.8-flash and "minimal", 11-07)."""
+    monkeypatch.setattr(llm, "MODEL", model)
+    llm._generate("hello")
+    assert captured[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": level}
+
+
+def test_the_3x_sample_model_still_goes_out_without_a_thinking_config(captured):
+    """Samples, the slate and the fallback are measured as they are; the
+    successor's setting must not change them."""
+    llm._generate("hello", model=llm.SAMPLE_MODEL)
+    assert "generationConfig" not in captured[0]["json"]
 
 
 def test_timeout_is_generous_enough_to_be_a_backstop(captured):
@@ -264,6 +304,19 @@ def test_metadata_strips_the_junk_llms_add(monkeypatch):
     assert meta.cta == "Bold line"
 
 
+def test_an_all_lower_case_closing_line_ships_in_sentence_case(monkeypatch):
+    """Shipped on 2026-10-15 in #14's no-capitals arm, captioned and posted as
+    our comment. A line with any capital is the model's and stays as written."""
+    for cta, expected in (("what do you think happens next? share your prediction below.",
+                           "What do you think happens next? Share your prediction below."),
+                          ("cats vs. dogs: which side are you on?",
+                           "Cats vs. dogs: which side are you on?"),
+                          ("If YOU woke up in 2020, what's YOUR move?",
+                           "If YOU woke up in 2020, what's YOUR move?")):
+        monkeypatch.setattr(llm, "_generate", lambda *a, **k: json.dumps({"cta": cta}))
+        assert llm.get_metadata("q", ["a", "b", "c"]).cta == expected
+
+
 def test_resolve_title_blanks_the_style_when_generation_failed():
     """The R2.2 contamination fix.
 
@@ -291,6 +344,64 @@ def test_resolve_title_treats_whitespace_only_as_a_failure():
     assert r.ok is False
 
 
+def test_a_shock_phrase_title_ships_as_a_failed_one():
+    """The prompt's ban leaked on 2026-10-20; the title falls back and claims
+    no style, so it is evidence about neither #10's nor #14's arms."""
+    for title in ("Animals' chilling genius will surprise you",
+                  "You WON'T Believe These Rare Possessions!",
+                  "3 Shocking Answers: Friends for Life?",
+                  "3 Surprising Answers: How Dating a Pro Athlete Went",
+                  "This is jaw-dropping", "Mind blowing facts", "An INSANE story"):
+        r = llm.resolve_title(title, style="B", fallback="Raw?", caps=True)
+        assert (r.title, r.style, r.ok) == ("Raw?", "", False), title
+
+
+def test_a_title_near_a_shock_phrase_still_ships():
+    for title in ("What surprised YOU most about moving abroad?",
+                  "What World War II fact SHOCKED you?", "Which Dumb Death Shocks YOU Most?",
+                  "Culture shock: what hit you hardest?",
+                  "Would YOU believe a stranger?", "Chill pills that work?",
+                  "Shockwave? No, a sonic boom"):
+        assert llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+EXPECTED_REFUSED = [
+    "Did YOU know THESE chilling 9/11 facts?",
+    "3 Surprising Answers: How Dating a Pro Athlete Went",
+    "You'll Never Guess These Harder-Than-You-Think Degrees!",
+    "3 Shocking Answers: Homeschooling Parents Who Barely Passed High School?",
+    "Divorce Horrors: Lawyers Reveal Their Shocking Cases",
+    "You Won't Believe What We Miss From The 2000s!",
+    "You WON'T Believe These Rare Possessions!",
+    "3 Shocking Answers: Friends for Life?",
+    "You Won't Believe WHY Asia Has Almost No Homeless!",
+    "Early Risers: The SHOCKING Truth Behind Waking Up Early",
+    "Animals' chilling genius will surprise you",
+]
+
+
+def test_a_shock_word_the_asker_used_is_not_refused():
+    r = llm.resolve_title("The most SHOCKING Epstein detail?", style="B", fallback="Raw?",
+                          source="What is the most shocking detail in the Epstein files?")
+    assert r.ok and r.style == "B"
+    for title in ("This will shock you", "You'll be shocked", "You'll never guess",
+                  "Unbelievable answers", "Mind\u2011blowing facts"):
+        assert not llm.resolve_title(title, style="A", fallback="Raw?").ok, title
+
+
+def test_the_logged_titles_it_refuses_are_the_known_shock_ones():
+    """False refusals checked by eye on 2026-10-26; widening the pattern must
+    re-check them, so this names the set rather than counting it."""
+    import csv
+    from src import config
+    with open(config.UPLOAD_LOG, encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r["timestamp_utc"] < "2026-10-26T12"]
+    refused = sorted(r["video_title"] for r in rows
+                     if llm._shock_bait(r["video_title"], r["post_title"]))
+    assert len(rows) == 199
+    assert refused == sorted(EXPECTED_REFUSED)
+
+
 def test_an_all_lower_case_title_ships_in_sentence_case():
     """PRD §0 #14: the no-capitals arm came back with no capitals at all."""
     cases = {
@@ -311,6 +422,31 @@ def test_an_all_lower_case_title_ships_in_sentence_case():
     for generated, shipped in cases.items():
         r = llm.resolve_title(generated, style="B", fallback="Raw?")
         assert (r.title, r.style, r.ok) == (shipped, "B", True)
+
+
+class ServedBy(FakeResponse):
+    def __init__(self, version):
+        super().__init__()
+        self._version = version
+
+    def json(self):
+        return {**super().json(), "modelVersion": self._version}
+
+
+@pytest.mark.parametrize("version, shown", [
+    ("gemini-3.5-flash-lite", True),          # 12-01's reroute (PRD §4, 11-07)
+    ("gemini-2.5-flash", False),
+    ("gemini-2.5-flash-001", False),          # a dated build of the model asked for
+    (None, False),                            # a reply without the field
+])
+def test_a_reply_from_another_model_is_printed(monkeypatch, capsys, version, shown):
+    monkeypatch.setattr(llm.requests, "post", lambda url, **kw: ServedBy(version))
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    llm._generate("hello", model="gemini-2.5-flash")
+    out = capsys.readouterr().out
+    assert ("Gemini served gemini-3.5-flash-lite for a gemini-2.5-flash request" in out) is shown
+    assert ("Gemini served" in out) is shown
 
 
 def test_a_title_with_any_capital_is_left_as_the_model_wrote_it():
@@ -334,6 +470,30 @@ def test_sanitize_title_falls_back_when_generation_failed():
     assert llm.sanitize_title(None, fallback="Raw question?") == "Raw question?"
     assert llm.sanitize_title('  "Quoted"  ', fallback="x") == "Quoted"
     assert len(llm.sanitize_title("z" * 200, fallback="x")) == 100
+
+
+def test_a_quote_the_title_uses_is_kept():
+    """Shipped 2026-11-04 as "3 answers to 'House and Senate are Blue, how are
+    we feeling?": stripping every end quote took the closing one too."""
+    for title in ("3 answers to 'House and Senate are Blue, how are we feeling?'",
+                  '3 answers to "Why do cats knead?"',
+                  "'Dream' careers you'd regret",
+                  "Is your 'dream' career on this list?"):
+        assert llm.sanitize_title(title, fallback="x") == title
+        assert llm._clean_str(title) == title
+        assert llm.resolve_title(title, style="C", fallback="x").title == title
+
+
+def test_wrapping_and_stray_quotes_still_go():
+    for reply, expected in (('"Quoted"', "Quoted"), ("'Quoted'", "Quoted"),
+                            ("\"'Both'\"", "Both"), ("'Lone", "Lone"),
+                            ("Lone'", "Lone"), ("\"He said 'no'\"", "He said 'no'"),
+                            ("'Which 'Dumb' choice?'", "Which 'Dumb' choice?"),
+                            ("'Your Pets' secret?'", "Your Pets' secret?"),
+                            ("Their 'DON'T TOUCH' item!'", "Their 'DON'T TOUCH' item!"),
+                            ("'", ""), ('""', "")):
+        assert llm._strip_quotes(reply) == expected
+    assert llm.sanitize_title("'", fallback="Raw?") == "Raw?"
 
 
 def _raises(exc):
@@ -396,6 +556,45 @@ def test_a_429_names_which_cap_it_hit():
     assert llm._failure_kind(_quota_429("Too Many Requests")) == "http_429"
 
 
+def test_a_day_cap_429_prints_the_cap_it_names(capsys):
+    """3.6-flash's daily cap is published nowhere (11-07); its first day-cap 429
+    is the only place the number shows, and the plans budget on 2.5-flash's 20."""
+    day = ('{"error": {"code": 429, "details": [{"@type": "QuotaFailure", "violations": '
+           '[{"quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier", "quotaValue": "10"}, '
+           '{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier", '
+           '"quotaDimensions": {"location": "global", "model": "gemini-3.6-flash"}, '
+           '"quotaValue": "250"}]}, {"@type": "RetryInfo", "retryDelay": "33s"}]}}')
+    assert llm._failure_kind(_quota_429(day)) == "http_429_day"
+    assert capsys.readouterr().out == "Gemini daily cap: 250 requests (gemini-3.6-flash)\n"
+    unnamed = day.replace('"quotaDimensions": {"location": "global", "model": "gemini-3.6-flash"}, ', "")
+    assert llm._day_cap(_quota_429(unnamed).response) == (250, "")
+    llm._failure_kind(_quota_429(unnamed))
+    assert capsys.readouterr().out == "Gemini daily cap: 250 requests (model not named)\n"
+
+
+def test_no_cap_is_printed_unless_a_day_cap_names_its_number(capsys):
+    minute = ('{"error": {"details": [{"violations": [{"quotaId": '
+              '"GenerateRequestsPerMinutePerProjectPerModel", "quotaValue": "10"}]}]}}')
+    odd = ['"quotaId": "PerDayPerModel"', "not json", '{"error": {"details": ["x", 3]}}',
+           '{"error": {"details": [{"violations": [{"quotaId": "PerDay", "quotaValue": "lots"}]}]}}',
+           '{"error": {"message": "Rate limit reached on tokens per day (TPD)"}}', "[]"]
+    assert llm._failure_kind(_quota_429(minute)) == "http_429_minute"
+    for body, label in zip(odd, ["http_429_day", "http_429", "http_429", "http_429_day",
+                                 "http_429_day", "http_429"]):
+        assert llm._failure_kind(_quota_429(body)) == label
+    assert capsys.readouterr().out == ""
+
+
+def test_a_day_cap_with_no_value_reads_as_zero_and_a_null_model_as_unnamed(capsys):
+    """Google's JSON omits a zero quotaValue: a model with no free tier at all."""
+    body = ('{"error": {"details": [{"violations": [{"quotaId": '
+            '"GenerateRequestsPerDayPerProjectPerModel-FreeTier", '
+            '"quotaDimensions": {"model": null}}]}]}}')
+    assert llm._failure_kind(_quota_429(body)) == "http_429_day"
+    assert capsys.readouterr().out == "Gemini daily cap: 0 requests (model not named)\n"
+    assert llm._day_cap(_quota_429(body.replace("}}]", '}, "quotaValue": "²"}]')).response) is None
+
+
 def test_only_a_429_reads_the_body():
     resp = llm.requests.Response()
     resp.status_code = 503
@@ -447,7 +646,7 @@ def _called_url(monkeypatch, dry_run):
 def test_production_calls_keep_the_production_model(monkeypatch):
     assert _called_url(monkeypatch, False) == (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        "gemini-2.5-flash:generateContent")
+        "gemini-3.6-flash:generateContent")
 
 
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
@@ -455,7 +654,7 @@ def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
 
 
-@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-2.5-flash")])
+@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-3.6-flash")])
 def test_a_dry_run_can_write_its_tags_on_the_upload_model(monkeypatch, switch, model):
     """#77: the owner judges tags in a narrated local render, a dry run. The
     sample model's tags were labels where the upload model's reacted
@@ -652,9 +851,10 @@ Return ONLY a JSON object""" in prompt
 def test_a_vote_rule_cannot_ship_under_the_current_format_version():
     """Switching the vote on changes every video, so its uploads must log under
     a new FORMAT_VERSION or bet 1's read cannot tell them from v7's. Bet 1 is
-    the next release, so v7 is the version it must not share."""
+    the next release, so v7, and v7s (v7 on MODEL's successor), are the
+    versions it must not share."""
     if config.HOUSE_VOTE_RULE:
-        assert config.FORMAT_VERSION != "v7"
+        assert config.FORMAT_VERSION not in ("v7", "v7s")
 
 
 def test_a_vote_rule_turns_the_closing_line_into_the_hosts_vote(monkeypatch):

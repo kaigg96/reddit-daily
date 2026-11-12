@@ -20,17 +20,24 @@ from . import content
 # question instead of a generated title. Disabling thinking put the same call
 # at 0.6s. Every task here (keyword extraction, title rephrasing, a one-line
 # CTA, the R4.6 screen's JSON verdict) is a short transformation, not a
-# reasoning problem.
+# reasoning problem. Its 3.x successor thinks by default too, and is set by
+# level rather than budget (`_LOWEST_THINKING`, and the note in `_generate`).
 #
 # thinkingConfig requires v1beta: v1 rejects it with "Thinking is not enabled
 # for api version v1." That is the only reason this module is on v1beta.
+# The lowest thinking level each MODEL candidate takes (Google's thinking page,
+# 2026-11-07): 3.8-flash refuses "minimal" with HTTP 400; 3.6-flash takes it.
+_LOWEST_THINKING = {"gemini-3.8-flash": "low", "gemini-3.6-flash": "minimal"}
 _ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
              "{model}:generateContent")
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.6-flash"
 # The free tier is counted per model (our 429 names the quota
 # GenerateRequestsPerDayPerProjectPerModel). A dry run's calls go to a model
-# with its own allowance, so a sample never spends the requests the next
-# upload needs -- the 07:00 window also pays for the following 05:00 upload.
+# with its own allowance, so a sample never spends MODEL's requests, which the
+# next upload needs -- the 07:00 window also pays for the following 05:00
+# upload. That allowance is not production-free: the slate call has drawn on
+# it since 2026-09-26, and the upload's one-try fallback (FALLBACK_MODEL,
+# below) since 2026-10-18.
 # Release validation does not set DRY_RUN, so it still tests MODEL.
 SAMPLE_MODEL = "gemini-3.5-flash-lite"  # 2.5-flash-lite: 404 "no longer available to new users" (2026-09-26)
 # One try on this model once MODEL has failed, for the screen and the metadata
@@ -40,7 +47,8 @@ FALLBACK_MODEL = SAMPLE_MODEL
 FALLBACK_SOURCE = "gemini_fallback"
 
 # Generous because it is now only a backstop against a pathological response,
-# not a routine limit — with thinking off, calls land in about a second.
+# not a routine limit — at the lowest thinking level, calls land in a few
+# seconds (3.6-flash: 2.3s for a title, 11-07).
 # requests' timeout is per-read, not a total deadline, so this does not bound
 # total call duration; it only stops a stalled socket hanging the run.
 _TIMEOUT = 60
@@ -95,6 +103,15 @@ def _generate(prompt, thinking_budget=0, model=None, schema=None):
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
         gen["thinkingConfig"] = {"thinkingBudget": thinking_budget}
+    # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
+    # metadata call took 34s of the 60s timeout, and five screen calls ran past
+    # 7 minutes. So MODEL asks for its lowest level, except where a caller asks
+    # for reasoning: the screen's 512-token budget was deliberate, since thinking
+    # near off once passed the flirty case, so it gets "low". MODEL only: the
+    # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
+    elif model == MODEL:
+        level = "low" if thinking_budget else _LOWEST_THINKING.get(model, "low")
+        gen["thinkingConfig"] = {"thinkingLevel": level}
     if schema:
         gen["responseMimeType"] = "application/json"
         gen["responseSchema"] = schema
@@ -110,7 +127,17 @@ def _generate(prompt, thinking_budget=0, model=None, schema=None):
         timeout=_TIMEOUT,
     )
     resp.raise_for_status()
-    return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+    data = resp.json()
+    _note_served(model, data.get("modelVersion"))
+    return data["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def _note_served(asked, served):
+    """Print when Gemini answers from another model than the one asked. On
+    2026-12-01 Google routes every gemini-2.5-flash request to 3.5-flash-lite,
+    and the reply still succeeds (PRD §4, 11-07), so only `modelVersion` shows it."""
+    if served and not str(served).startswith(asked):
+        print(f"Gemini served {served} for a {asked} request")
 
 
 _GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
@@ -235,6 +262,65 @@ _STYLE_GUIDANCE = {
 }
 
 
+def _own_wording(prompt, verbatim=()):
+    """PLAN C16: our own question's takes are the host's, so the metadata call
+    must never present them as real people's answers ("3 People Reveal...")
+    or tag the video with Reddit's name (fresh review, 2026-11-10).
+
+    Only our instructions are rewritten. `verbatim` (the question and its
+    takes) and the replacements themselves pass through untouched: the
+    11-11 review found "the best answer to small talk?" reaching the model as
+    "the best take to", and "not real people's answers" as "...takes"."""
+    kept = []
+
+    def keep(text):
+        kept.append(text)
+        return f"\x00{len(kept) - 1}\x00"
+
+    for text in sorted({t for t in verbatim if t}, key=len, reverse=True):
+        prompt = prompt.replace(text, keep(text))
+    for a, b in (("the original Reddit question", "our own question"),
+                 ("the Reddit question", "our own question"),
+                 ('"3 Answers That...", "3 People Reveal..."', '"3 Takes On..."'),
+                 ("It features these answers:",
+                  "It features the host's own three takes, not real people's answers:"),
+                 ("this discussion", "this question")):
+        if a in prompt:
+            prompt = prompt.replace(a, keep(b))
+    # Every other "answer" (style A's, C's count, the vote rule's) is a take.
+    prompt = re.sub(r"\b([Aa])nswer(s?)\b", lambda m: ("T" if m.group(1) == "A" else "t")
+                    + "ake" + m.group(2), prompt)
+    prompt = re.sub("\x00(\\d+)\x00", lambda m: kept[int(m.group(1))], prompt)
+    return prompt + ("\nNever present the takes as real people's answers, stories or "
+                     "confessions, and never mention Reddit or a subreddit, in any field.\n")
+
+
+# PLAN C16: the prompt forbids naming Reddit or passing the takes off as
+# people's, and this is the check (11-11 review: prompt-only before). A title
+# or closing line that does falls back as a failed one does; a keyword is left out.
+_OWN_BANNED = re.compile(
+    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
+    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
+    r"confess|explain|answer)\w*", re.I)
+
+
+def _own_fields(data):
+    """The reply with any such field dropped, before it is cleaned: on the
+    reply, so a vote read from the same "cta" drops with it."""
+    def ok(field, line):
+        if isinstance(line, str) and _OWN_BANNED.search(line):
+            print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
+            return False
+        return True
+    data = dict(data)
+    for key, field in (("title", "title"), ("cta", "closing line")):
+        if not ok(field, data.get(key)):
+            data[key] = None
+    if isinstance(data.get("keywords"), list):
+        data["keywords"] = [k for k in data["keywords"] if ok("keyword", k)]
+    return data
+
+
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
 # which all-None fields cannot. Both a spent quota and a prompt that produces
 # junk return None for every field, and the release gate has to tell them apart
@@ -263,7 +349,13 @@ def _failure_kind(exc):
     response = getattr(exc, "response", None)
     if isinstance(exc, requests.HTTPError) and response is not None:
         kind = f"http_{response.status_code}"
-        return kind + _quota_window(response) if response.status_code == 429 else kind
+        if response.status_code != 429:
+            return kind
+        window = _quota_window(response)
+        cap = window == "_day" and _day_cap(response)
+        if cap:
+            print(f"Gemini daily cap: {cap[0]} requests ({cap[1] or 'model not named'})")
+        return kind + window
     if isinstance(exc, requests.Timeout):
         return "timeout"
     return type(exc).__name__
@@ -288,6 +380,27 @@ def _quota_window(response):
     if "perday" in flat:
         return "_day"
     return "_minute" if "perminute" in flat else ""
+
+
+def _day_cap(response):
+    """(requests, model) of the day cap a 429 names, else None. Never raises.
+
+    The 20 a day every plan budgets was read off a `gemini-2.5-flash` 429
+    (PRD §2), and Google's docs stopped listing free-tier caps (11-07), so
+    `gemini-3.6-flash`'s is unknown: its first day-cap 429 is the only place
+    the number appears. A number and a model name, so safe in a public log.
+    Google's JSON leaves a zero out, so a day cap with no value reads as 0: no
+    free tier on that model, which a silent log would hide."""
+    try:
+        for detail in response.json()["error"]["details"]:
+            for v in detail.get("violations", []):
+                value = str(v.get("quotaValue", "0"))
+                if "perday" in str(v.get("quotaId", "")).lower() and value.isascii() \
+                        and value.isdigit():
+                    return int(value), str((v.get("quotaDimensions") or {}).get("model") or "")
+    except Exception:
+        return None
+    return None
 
 
 _CTA_ASK = """3. CTA — a spoken outro line of AT MOST 12 words asking viewers to comment
@@ -525,6 +638,12 @@ def _clean_commentary(data, n):
     closing line. With no note left, the upload is today's reading."""
     setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
     raw_reactions = data.get("reactions")
+    # Off, nothing the model sent as reactions is shown, so none of it (a
+    # wrong count, a grade, a swear word) may cost the setup or the vote
+    # (#77, 2026-11-11 review): they are blank, and pass.
+    shown = config.HOST_REACTIONS or not config.HOST_TEXT
+    if not shown:
+        raw_reactions = [""] * n
     if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
         return None
     reactions = [_clean_str(r) for r in raw_reactions]
@@ -544,7 +663,7 @@ def _clean_commentary(data, n):
     setup_swore = tag_swore(data.get("setup"), setup)
     setup_ok = _usable(setup, "setup") and not setup_swore
     swore = [tag_swore(raw, r) for raw, r in zip(raw_reactions, reactions)]
-    ok = [_usable(r, "reaction") and not s for r, s in zip(reactions, swore)]
+    ok = [(_usable(r, "reaction") or not shown) and not s for r, s in zip(reactions, swore)]
     if setup_ok and vote_ok and all(ok):
         return Commentary(setup, reactions, verdict)
     # Which line, and how long: the vote ran past the notes' cap on 4 of 12
@@ -570,7 +689,8 @@ def _clean_commentary(data, n):
     setup = setup if setup_ok else ""
     reactions = [r if k else "" for r, k in zip(reactions, ok)]
     verdict = verdict if vote_ok else ""
-    if not (setup or any(reactions)):
+    # Without reactions the vote is the host's one other line, so it ships alone.
+    if not (setup or any(reactions) or (verdict and not shown)):
         return None
     print("Commentary: dropped only the line(s) named above")
     return Commentary(setup, reactions, verdict)
@@ -673,6 +793,8 @@ Produce three things.
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
 {_commentary_shape(len(comments)) if commentary else _PLAIN_SHAPE}
 """
+    if config.SOURCE == "own":
+        prompt = _own_wording(prompt, verbatim=(reddit_title, *comments[:3]))
     route, prior = provider(), ""
     schema = _reply_schema(len(comments) if commentary else None)
     model = MODEL if config.METADATA_ON_UPLOAD_MODEL else None
@@ -715,10 +837,16 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
               f"{e}; near it: {_excerpt(raw, at)}")
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
+    if config.SOURCE == "own":
+        data = _own_fields(data)
     return MetadataResult(
         title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
-        cta=_clean_published(data.get("cta")),
+        # The capitals test's "no capitals" arm leaks into this line as it did
+        # into titles: 11 of its 27 uploads to 11-02 ended on an all-lower-case
+        # line, posted as our comment and in the closed captions (on screen it
+        # is upper-cased anyway) (0 of 123 others).
+        cta=sentence_case(_clean_published(data.get("cta"))),
         source=route,
         failure=prior,
         commentary=_clean_commentary(data, len(comments)) if commentary else None,
@@ -791,8 +919,67 @@ def _clean_str(value):
     if not isinstance(value, str):
         return None
     value = re.sub(r"[*_`]", "", value)                    # markdown emphasis
-    value = re.sub(r"\s+", " ", value).strip().strip('"').strip("'").strip()
+    value = _strip_quotes(re.sub(r"\s+", " ", value))
     return value or None
+
+
+def _strip_quotes(value):
+    """Take off the quotes a reply comes wrapped in, keeping any the text uses.
+
+    `.strip('"').strip("'")` took the closing quote off a title that ends on a
+    quoted question: "3 answers to 'House and Senate are Blue, how are we
+    feeling?" shipped on 2026-11-04. A quote at either end now goes only when
+    it wraps the whole text or has no partner inside it, so an apostrophe
+    ("you'd") is never read as one. Still wrong, none seen in the upload log:
+    a text that opens and closes on its own quotes loses both ("'Dream' jobs
+    that are a 'nightmare'"), and a stray end quote stays after an apostrophe
+    that starts a word ("Best of the '90s'")."""
+    value, before = value.strip(), None
+    while value != before:
+        before = value
+        # A matching pair is peeled even when it could be the text's own: a
+        # plural possessive ("Pets' secret") reads as a closing quote, so
+        # pairing would leave a wrapped title its opening quote.
+        if len(value) >= 2 and value[0] in "\"'" and value[-1] == value[0]:
+            value = value[1:-1].strip()
+        if value and value[0] in "\"'" and _partner(value) is None:
+            value = value[1:].strip()
+        if value and value[-1] in "\"'" and not _left_open(value):
+            value = value[:-1].strip()
+    return value
+
+
+def _quote_kind(value, i):
+    """A quote opens at the start or after a space or bracket and closes before
+    the end, a space or punctuation; the one in "you'd" does neither."""
+    before, after = value[i - 1:i], value[i + 1:i + 2]
+    if (not before or before in " ([:\"'") and after and not after.isspace() and after not in "\"'":
+        return 1
+    if before and not before.isspace() and (not after or after in " .,?!:;)]\"'"):
+        return -1
+    return 0
+
+
+def _partner(value):
+    """Where the quote at value[0] is closed, or None. A single quote after an
+    s may be a plural possessive ("'Pets' toys"), so it closes nothing."""
+    depth = 0
+    for i in range(1, len(value)):
+        if value[i] == value[0]:
+            kind = _quote_kind(value, i)
+            if kind < 0 and not depth and not (value[0] == "'" and value[i - 1] in "sS"):
+                return i
+            depth = max(0, depth + kind)
+    return None
+
+
+def _left_open(value):
+    """Whether a quote like the last character is still open before it."""
+    depth = 0
+    for i in range(len(value) - 1):
+        if value[i] == value[-1]:
+            depth = max(0, depth + _quote_kind(value, i))
+    return depth > 0
 
 
 def _clean_published(value):
@@ -847,9 +1034,12 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     # ok follows the cleaned title: a reply that cleans to nothing (a lone
     # quote) ships the fallback, so it must not claim a style.
     cleaned = sanitize_title(generated, "", max_len)
+    if cleaned and _shock_bait(cleaned, source):
+        print("Title fallback: a shock phrase was refused")  # not echoed, as swear words
+        cleaned = ""
     ok = bool(cleaned)
-    if ok and caps is False:
-        cleaned = drop_emphasis_caps(cleaned, source)
+    if ok and caps is not None:
+        cleaned = drop_emphasis_caps(cleaned, source, spare=1 if caps else 0)
     return TitleResult(
         title=sentence_case(cleaned) if ok else sanitize_title(None, fallback, max_len),
         style=style if ok else "",
@@ -857,18 +1047,39 @@ def resolve_title(generated, style, fallback, max_len=100, caps=None, source="")
     )
 
 
+# The prompt bans shock phrases, since YouTube refuses content "designed to
+# shock or surprise viewers for the sole purpose of getting views" (PLAN.md §4),
+# but one shipped on 2026-10-20 ("Animals' chilling genius will surprise you").
+# Narrow on purpose: it refuses a title that sells its content as shocking,
+# not one asking what shocked or surprised you, nor a word the asker used. A
+# refused title ships as a failed one (title_ok 0 with meta_failure blank).
+_SHOCK_PHRASE = re.compile(
+    r"\b(?:shock(?:ing|ingly)|(?:will|['’]ll)\s+shock\s+you|you['’]ll\s+be\s+shocked"
+    r"|(?:won['’]?t|will\s+not)\s+believe|unbelievabl[ey]|never\s+guess|insane(?:ly)?"
+    r"|chilling|surprise\s+you|surprising(?:ly)?|jaw[-\s\u2010-\u2015]?dropping"
+    r"|mind[-\s\u2010-\u2015]?blowing|blow\s+your\s+mind)\b", re.I)
+
+
+def _shock_bait(title, source=""):
+    """A shock phrase in `title` that the Reddit text did not already use:
+    refusing the asker's own word ships the same word in the raw question."""
+    said = source.lower()
+    return any(m.group(0).lower() not in said for m in _SHOCK_PHRASE.finditer(title))
+
 _CAPS_WORD = re.compile(r"\b[A-Z]{2,}(?:['’][A-Za-z]+)?\b")
 
 
-def drop_emphasis_caps(title, source=""):
-    """Hold PRD §0 #14's no-capitals arm to its word; the prompt alone leaked.
+def drop_emphasis_caps(title, source="", spare=0):
+    """Hold PRD §0 #14's arms to their word; the prompt alone leaked.
 
-    1 of the arm's 9 titles from 10-10 to 10-16 shipped a word in capitals
-    ("What's YOUR unforgetable deathbed confession?"): the other arm's
+    1 of the no-capitals arm's 9 titles from 10-10 to 10-16 shipped a word in
+    capitals ("What's YOUR unforgetable deathbed confession?"): the other arm's
     treatment, which shrinks the lead the test has to show. A word in capitals
     stays when it is a known acronym or the Reddit text writes it in capitals
     ("ICU nurses"); any other takes the case of the words around it. Emphasis
     copied from the Reddit text ("I was SO angry") passes as written there.
+    The one-word arm keeps its first (`spare=1`): on 10-24 it shipped "Which
+    Halloween costume will YOU see the MOST?", 1 of its 11 titles since 10-10.
     """
     keep = config.TITLE_ACRONYMS | set(re.findall(r"\b([A-Z]{2,})s?\b", source))
     # Title Case when three in four words after the first are capitalised; a
@@ -876,10 +1087,14 @@ def drop_emphasis_caps(title, source=""):
     words = [w for w in re.findall(r"[A-Za-z][\w'’]*", title)
              if not _CAPS_WORD.fullmatch(w)][1:]
     titled = bool(words) and sum(w[0].isupper() for w in words) * 4 >= len(words) * 3
+    spared = []
 
     def recase(m):
         word = m.group(0)
         if re.split("['’]", word)[0] in keep:
+            return word
+        if len(spared) < spare:
+            spared.append(word)
             return word
         starts = re.search(r"(^[\d\W]*|[.?!:]\s+\W*)$", title[:m.start()]) is not None
         return word.capitalize() if titled or starts else word.lower()
@@ -900,8 +1115,8 @@ def sentence_case(title):
     if not title or any(c.isupper() for c in title):
         return title
     # A sentence ends at ? or !, or at a full stop after a word of two or more
-    # letters: not an ellipsis ("self... and why") or "i.e." / "a.i.".
-    title = re.sub(r"(^\W*|(?:(?<=\w\w)\.|[?!])\s+\W*)([a-z])",
+    # letters: not an ellipsis ("self... and why"), "i.e." / "a.i." or "vs.".
+    title = re.sub(r"(^\W*|(?:(?<=\w\w)(?<!\bvs)\.|[?!])\s+\W*)([a-z])",
                    lambda m: m.group(1) + m.group(2).upper(), title)
     return re.sub(r"(?<![./])\bi\b(?![./])", "I", title)
 
@@ -910,7 +1125,7 @@ def sanitize_title(title, fallback, max_len=100):
     """Strip LLM artifacts (R0.5). 100 is YouTube's title limit."""
     if not title:
         return fallback[:max_len]
-    title = re.sub(r"\s+", " ", title).strip().strip('"').strip("'").strip()
+    title = _strip_quotes(re.sub(r"\s+", " ", title))
     if not title:
         return fallback[:max_len]
     return title[:max_len]

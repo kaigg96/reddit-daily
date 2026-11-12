@@ -114,6 +114,25 @@ def _git_gated_code_changed(target_ref):
     return changed
 
 
+def _resolve_ref(target):
+    """The ref naming `target` in this clone, preferring the remote's copy.
+
+    CI's checkout makes a local branch for `main` only, so `integration/preview`
+    exists there as `origin/integration/preview` alone. Passed bare, rev-parse
+    printed nothing and `git diff` exited 128, which reads as "gated code
+    changed": the gates re-ran an unchanged `ec2f077` every day from 2026-10-25
+    to 10-30, 6 of production's 20 requests each time. The remote's copy comes
+    first because it is what the workflow checks out and records.
+    """
+    for ref in (f"origin/{target}", target):
+        found = subprocess.run(
+            ["git", "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+            cwd=ROOT, capture_output=True)
+        if found.returncode == 0:
+            return ref
+    return target  # unresolvable: the diff fails, which validates
+
+
 def should_run_cli(args):
     """`--should-run`: decide, print `proceed=` for the workflow, spend nothing."""
     try:
@@ -122,10 +141,11 @@ def should_run_cli(args):
     except OSError:
         verdict_text = ""
 
-    target_sha = subprocess.run(["git", "rev-parse", "--short", args.target],
+    ref = _resolve_ref(args.target)
+    target_sha = subprocess.run(["git", "rev-parse", "--short", ref],
                                 cwd=ROOT, capture_output=True, text=True).stdout.strip()
     proceed, why = should_validate(verdict_text, target_sha,
-                                   _git_gated_code_changed(args.target))
+                                   _git_gated_code_changed(ref))
 
     print(f"{'validating' if proceed else 'skipping'}: {why}")
     out = os.environ.get("GITHUB_OUTPUT")
@@ -227,7 +247,10 @@ def check_metadata():
                 shown("setup", host.setup)
             else:
                 note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
-            for i, line in enumerate(host.reactions, 1):
+            reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
+            if not reacts:   # #77, 11-11: never shown, so never read
+                note("- host reactions: off (the setup and the vote are the host)")
+            for i, line in enumerate(host.reactions if reacts else (), 1):
                 shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
             if not host.verdict:   # a swear word now drops it too (the run log says which)
                 note("- ⚠️ host vote: dropped, past its cap or a swear word"
@@ -241,9 +264,9 @@ def check_metadata():
 def check_screen():
     """Five requests: does the R4.6 screen still reach the right verdicts?
 
-    Validates `named_wrongdoing` (open since 2026-09-09) and, since thinking is
-    now disabled for every Gemini call, whether the screen's JSON risk verdicts
-    survive without reasoning tokens. The screen is the one genuine judgment
+    Validates `named_wrongdoing` (open since 2026-09-09) and whether the
+    screen's JSON risk verdicts survive on its small reasoning budget (512
+    tokens on 2.5, level "low" on a 3.x MODEL). The screen is the one genuine judgment
     task in the pipeline, so this is the check most worth running.
     """
     note("### Gate 2 — R4.6 screen replay\n")
@@ -256,6 +279,13 @@ def check_screen():
     # the keyword backstop are inconclusive rather than passing — treating them
     # as a pass is exactly how the 2026-09-19 run looked green while proving
     # almost nothing.
+    #
+    # A wrong verdict comes first: it is evidence even when later cases went
+    # unexercised, which the replay's request cap makes likelier (2026-11-07).
+    # Only a FAIL line counts: a keyless Groq route exits 1 as inconclusive.
+    if proc.returncode != 0 and "FAIL want=" in out:
+        note("\n- ❌ replay reported a wrong verdict")
+        return False
     if "inconclusive" in out:
         # Three states, not two. A case that fell to the keyword backstop
         # proved nothing, so it must never count as a pass -- but it is not
@@ -272,7 +302,7 @@ def check_screen():
              "way; the next scheduled run re-checks it.")
         return None
     if proc.returncode != 0:
-        note("\n- ❌ replay reported a wrong verdict")
+        note("\n- ❌ replay failed")
         return False
     note("\n- ✅ every case reached the expected verdict via Gemini")
     return True

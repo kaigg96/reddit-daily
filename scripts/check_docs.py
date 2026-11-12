@@ -47,20 +47,41 @@ def check_live_format():
     return True, f"live format {code.group(1)} agrees with the code"
 
 
-def check_merged_branches():
-    """Docs describing a branch as pending when it has already merged."""
-    prd = _read("PRD.md")
+def check_merged_branches(root=ROOT, prd=None):
+    """Docs describing a branch as pending when it has already merged.
+
+    Until 2026-10-30 this could not fire: it matched prefixes the repo stopped
+    using (branches are `product/`, `data/`, `reliability/`…), and looked up
+    local branches, of which a shift's clone has only `main`, so every branch
+    was "gone". The remote's copy now comes first, as the release check does;
+    a name that is a file (`analysis/screen_log.csv`) is not a branch."""
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+
+    def ref(name):
+        for r in (f"origin/{name}", name):
+            if run("rev-parse", "--verify", "--quiet", f"{r}^{{commit}}").returncode == 0:
+                return r
+        return None
+
+    prd = _read("PRD.md") if prd is None else prd
+    base = ref("main")
     stale = []
-    for branch in set(re.findall(r"`((?:feature|integration|fix|chore|analysis)/[\w.\-/]+)`", prd)):
+    for branch in set(re.findall(
+            r"`((?:feature|integration|fix|chore|analysis|product|data|reliability"
+            r"|security|gm|engineering|legal|editorial|release|strategy|process)"
+            r"/[\w.\-/]+)`", prd)):
+        if os.path.exists(os.path.join(root, branch)):
+            continue
         # Merged into main, or gone entirely -> describing it as pending is stale.
-        merged = _git("branch", "--merged", "main", "--list", branch)
-        exists = _git("rev-parse", "--verify", "--quiet", branch)
-        if merged or not exists:
-            near = " ".join(
-                l for l in prd.splitlines() if branch in l)[:160].lower()
-            if any(re.search(rf"\b{w}\b", near) for w in (
-                    "pending", "awaiting", "do not start", "not yet", "blocked on")):
-                stale.append(branch)
+        found = ref(branch)
+        merged = bool(found and base) and run(
+            "merge-base", "--is-ancestor", found, base).returncode == 0
+        # Near the citation, as for issues: a paragraph's first 160 characters
+        # read its opening sentence, not what it says of a branch cited later.
+        if (merged or not found) and _said_near(
+                prd, rf"`{re.escape(branch)}`", PENDING_WORDS):
+            stale.append(branch)
     if stale:
         return False, ("described as pending but already merged or gone: "
                        + ", ".join(sorted(stale)))
@@ -84,18 +105,27 @@ OPEN_WORDS = ("awaiting", "waiting on", "open", "reopened", "pending")
 NEAR = 80   # characters either side of a citation
 
 
+PENDING_WORDS = ("pending", "awaiting", "do not start", "not yet", "blocked on")
+
+
 def describes_as_open(text, n):
     """Whether a mention of #n sits near a word calling it open. A whole line
     was too wide: a PRD §0 row is one long line, so a row citing closed #18
     and titled "Open on the hook" read as describing #18 as open (2026-09-29).
     Nor does it cross a table cell: "keep while #74 is open) | **Bet 1's next
     step, under #71's limits" read as describing #71 as open (2026-10-13)."""
-    for m in re.finditer(rf"#{n}\b", text):
+    return _said_near(text, rf"#{n}\b", OPEN_WORDS)
+
+
+def _said_near(text, pattern, words):
+    """Whether a match of `pattern` sits within NEAR characters of one of
+    `words`, in its own table cell."""
+    for m in re.finditer(pattern, text):
         before = text[max(0, m.start() - NEAR):m.start()].rsplit("|", 1)[-1]
         after = text[m.end():m.end() + NEAR].split("|", 1)[0]
         near = (before + m.group() + after).lower()
         # Whole words: "spending" is not "pending" (2026-10-08).
-        if any(re.search(rf"\b{w}\b", near) for w in OPEN_WORDS):
+        if any(re.search(rf"\b{w}\b", near) for w in words):
             return True
     return False
 
@@ -166,14 +196,81 @@ def check_next_release_merges(root=ROOT, base="origin/main",
     2026-10-14 a morning handover said bet 1's branch "still merges cleanly";
     that shift's own reporting work then conflicted with it on main, and the
     claim stood until a later shift tried the merge."""
-    def run(*args):
-        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+    run = _runner(root)
     if any(run("rev-parse", "--verify", "--quiet", ref).returncode for ref in (base, head)):
         return None, f"{head} or {base} is not fetched here"
+    ok, out = _try_merge(run, base, head)
+    if ok is True:
+        return True, f"{head} merges into {base} cleanly (as of the last fetch)"
+    if ok is None:
+        return None, out
+    return False, (f"{head} no longer merges into {base}: conflicts in {out}"
+                   "; bring it current before the owner's label")
+
+
+# Branches built on the next release, promised to merge straight after it
+# (TECH_DEBT.md). Listed by hand: discovering them picks up abandoned
+# branches built on it too, and a stale one of those is no finding.
+AFTER_RELEASE = ("origin/data/v8-dose-verdict-uploads", "origin/reliability/run-slot-log")
+
+
+def check_after_release_merges(root=ROOT, base="origin/main",
+                               release="origin/integration/preview", after=AFTER_RELEASE):
+    """Each branch promised to merge right after the release still does, over both.
+
+    On 2026-11-06 the upload-slot logging, which must merge between bet 1 and
+    four uploads a day, no longer merged over them, and nothing said so; a
+    trial merge by hand found it. A merged-and-deleted branch is skipped."""
+    run = _runner(root)
+    if any(run("rev-parse", "--verify", "--quiet", ref).returncode for ref in (base, release)):
+        return None, f"{release} or {base} is not fetched here"
+    present = [b for b in after
+               if not run("rev-parse", "--verify", "--quiet", b).returncode]
+    if not present:
+        return None, "no branch promised after the release is fetched here"
+    r = run("merge-tree", "--write-tree", base, release)
+    if r.returncode == 1:
+        return None, "the release itself does not merge cleanly (the check above)"
+    if r.returncode != 0:
+        return None, f"could not try the merge (git exit {r.returncode})"
+    tree = r.stdout.splitlines()[0].strip()
+    # A throwaway commit of main plus the release, to merge each branch over.
+    # It is an unreferenced object, so git's garbage collection removes it. Its
+    # own identity, so a checkout with no user configured can still build it.
+    c = run("-c", "user.name=check_docs", "-c", "user.email=check_docs@invalid",
+            "commit-tree", tree, "-p", base, "-p", release, "-m", "check_docs probe")
+    if c.returncode != 0:
+        return None, "could not build main plus the release to merge over"
+    probe = c.stdout.strip()
+    stale, unknown = [], []
+    for b in present:
+        ok, out = _try_merge(run, probe, b)
+        if ok is False:
+            stale.append(f"{b} (conflicts in {out})")
+        elif ok is None:
+            unknown.append(f"{b} ({out})")
+    if stale:
+        return False, ("no longer merges over main plus the release: " + "; ".join(stale)
+                       + ". Bring it current before the owner's label"
+                       + (f"; also untried: {'; '.join(unknown)}" if unknown else ""))
+    if unknown:
+        return None, "; ".join(unknown)
+    return True, (f"{', '.join(present)} merge cleanly over {base} plus {release}"
+                  " (as of the last fetch)")
+
+
+def _runner(root):
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+    return run
+
+
+def _try_merge(run, base, head):
+    """(True, ""), (False, the conflicted paths) or (None, why it is unknown)."""
     r = run("-c", "core.quotePath=false", "merge-tree", "--write-tree", "--name-only",
             base, head)
     if r.returncode == 0:
-        return True, f"{head} merges into {base} cleanly (as of the last fetch)"
+        return True, ""
     if r.returncode != 1:
         # 128: a shallow clone, unrelated histories or missing objects; 129:
         # a git older than 2.38. Either way the answer is unknown, not clean.
@@ -184,9 +281,7 @@ def check_next_release_merges(root=ROOT, base="origin/main",
         if not line.strip():
             break
         files.append(line.strip())
-    return False, (f"{head} no longer merges into {base}: conflicts in "
-                   + (", ".join(files) or "files git did not list")
-                   + "; bring it current before the owner's label")
+    return False, ", ".join(files) or "files git did not list"
 
 
 CHECKS = [
@@ -194,6 +289,7 @@ CHECKS = [
     ("live format", check_live_format),
     ("merged branches", check_merged_branches),
     ("next release merges", check_next_release_merges),
+    ("after-release branches merge", check_after_release_merges),
     ("cohort sizes", check_upload_counts),
     ("issue references", check_open_escalations),
 ]

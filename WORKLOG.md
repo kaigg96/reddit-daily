@@ -61,69 +61,68 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-10-24 (08:50) — Rewording the host's prompt made its grading worse, so a filter now removes grading tags before they reach the screen; it waits for one sample render
+## 2026-11-12 (02:14) — The process audit found why shifts kept re-proposing ideas they had already dropped, and fixed it; nothing reached viewers
 
-    Worked (% of the shift): product 50 · data 20 · gm 15 · legal 5 · reliability 5 · security 5
+    Worked (% of the shift): gm 75 · strategy 5 · data 10 · reliability 5 · security 5
 
-**Summary:** The weakness that held bet 1's sample back from you, tags that grade the answers ("Spot on", "Good point"), is not confined to advice posts, and rewording the prompt made it worse. A filter now drops the stock kind of grading tag before it reaches the screen; it waits for one sample render, and catches about 7 of every 12.
-
-### Toward revenue
-- **Bet 1 is one render closer.** Every route to revenue needs bet 1, and its last gate is you watching a sample whose tags react rather than grade. Last night's sample was held back for grading. The filter stops the stock verdicts, so the next sample should repeat your 19 October feedback far less, though not never.
-
-### Done
-- **Product (a bet, read and not kept):** last night's reworded prompt on three more trial posts, on the model uploads use, one request each. About 4 of 9 tags reacted, against about 21 of 27 for the shipped wording. Three still graded the answer ("Ah, makes sense" on a politics answer, "Sad but true", "Good point"). So grading is a general habit, and naming it in the prompt does not stop it. Not read on the other six posts: even a perfect score there would leave it only one tag ahead of what ships.
-- **Product (a fix, on a branch beside the release):** a check that drops a host tag that grades its answer, leaving that answer untagged. It was built from the 9 verdicts on record. It drops none of the 27 reactions or 15 labels on record. On 62 tags it had not seen, scored blind by a fresh agent, it dropped 7, all verdicts. It let 5 of 12 verdicts through, in new wordings ("Actually helpful", "Too honest"). It also drops "Ouch, true", half a wince. A question counts as doubt, a reaction, so it ships ("Is that true?!"). A fresh review found 8 kinds of reaction it wrongly dropped and a dozen verdicts it missed. A second review found two more. All are fixed.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas and four survived. Two rankers, in opposite orders, put the same two on top: the filter (done) and whether the free AI could judge tags by meaning, catching what a word list misses. **Dropped:** a sample of the "our own questions" show (cannot be watched until a render, and it waits behind bet 1's); another prompt rewording (it would spend today's last safe AI requests, and the last rewording failed; it is built for tomorrow instead); asking for three opening tags in one request and showing the first that reacts (it changes what the AI returns, so not in the time left; the opening tag shows on only about 1 upload in 6–8).
-- **Data (a research question, answered no):** can the free AI judge tags? The bar was set before reading: agree with the blind scores on 90% of tags and pass no verdict. It agreed on 36 of 62, and called 7 of 12 verdicts reactions, including "Sad but true" and "Direct hit", which the filter catches. The second free model's answer could not be lined up with the tags. So the filter stays, and nothing replaces it.
-- **Legal (a finding, for the 5 November review):** a second round of ideas, aimed at the functions no recent shift has worked, found one. A data file in the project keeps our videos' titles and their Reddit answers, as read from YouTube, longer than the 30 days YouTube allows for anything but statistics. It is our own published text, so the risk is low. Removing it rewrites production data, which is your call, so it is recorded with a recommendation (keep the numbers, drop the text) rather than raised now.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.69 this month, forecast $0.86 of $3).
-- **Process:** the idea generator first read an out-of-date list of past drops, because the working copy was on a side branch, where that list is older. It noticed and read the live copy itself; a shift asking for ideas from a branch should point it there.
-- Mostly a fix, plus two reads. AI use: three requests on the upload model, 26 free Groq requests; no Polly, no render (the next render slot opens at 10:17). Handed over about 15 minutes early: the second round's one survivor is recorded, and nothing else could finish in the time left without the AI allowance tomorrow's 05:00 upload needs, or the render slot.
-
-### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
-
-### Next
-- **After 10:17 UTC:** as planned, render the swear-word filter branch and, on a pass naming its commit, merge it into the live branch (no version bump). It still merges cleanly into today's live code, tests passing.
-- **The render slot after:** render the branch that already combines the tag filter with the vote-and-tags swear guard (all tests pass; a local silent render completes), and post the sample to #77 if its tags react. Then fold it into the release branch.
-- The shipped prompt still lists "agreement" among the reactions it asks for. A trial wording without it, which names no verdicts and leaves taking sides to the vote, is ready to run. Read it on about three trial posts a day with the upload model's allowance before folding it in.
-- 26 October weekly read, then the opening-reach read once.
-
-### Better?
-- **Than last shift:** Yes, slightly. More than half of the defect that held the sample back is now stopped in code rather than left to the prompt, tested on every tag on record and 62 it had not seen.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
-
-## 2026-10-23 (22:55) — Bet 1's first spoken sample plays, but its host tags praised the answers instead of reacting, so I held it back from you; a reworded prompt shows promise
-
-    Worked (% of the shift): product 40 · reliability 25 · data 15 · gm 15 · security 5
-
-**Summary:** Sample videos now speak on the build machine, and tonight's played end to end. But on tonight's post the host's three tags praised the answers ("Spot on", "Deep insight") instead of reacting to them, the weakness you flagged on 19 October. So I did not ask you to watch it. A reworded prompt fixed that post on a first try, and needs a wider check before you see a new sample.
+**Summary:** The process audit, due after 16 shifts since the last one, ran this shift. Its main find: since 4 November the helpers that propose work could not see what earlier shifts had rejected, which explains most of the repeated work the last two audits complained of, and it is now fixed. Nothing reached viewers, and the company is no closer to revenue directly.
 
 ### Toward revenue
-- **Bet 1 is closer, not shipped.** Every route to revenue needs bet 1, and its last gate is you watching a narrated sample. Tonight's sample showed a gap the trials had missed. On personal advice questions ("Why does my friend act like this?"), about one upload in eight, the host grades the answers. Showing you that would have cost you a viewing to repeat your own feedback.
+- **Nothing directly**, because every step that changes what we ship still waits on you (#77, #90). Indirectly, shift time wasted re-proposing rejected ideas is time not spent on work that could move revenue, and that waste had a mechanical cause, now removed.
 
 ### Done
-- **Product (a bet):** the free stand-in voice rendered on the build machine. It passed every check and is now on the release branch, so future samples speak. Your own render command is unchanged by it. The tags were "Direct hit", "Spot on" and "Deep insight", all verdicts. The first answer also only made sense with the post's body, which viewers never see. None of the nine trial posts was a personal advice question; two now are. If you want to see it anyway, the sample stays on tonight's render page for 14 days (https://github.com/kaigg96/reddit-daily/actions/runs/40032165271). It is not an ask.
-- **Product (the fix, a bet):** the reworded prompt drops "agreement" from the reactions it invites and names grading as a verdict. On the upload model, one request per post: tonight's post went from 0 of 3 reactions to 2 of 3 ("Wait, what?", "Oof, direct"). A second advice post scored 2 of 3 either way. A direction, not a rate; it stays out of the release until it holds on the other nine posts.
-- **Reliability (a fix, built on bet 1):** the swear-word filter now also covers the host's vote and its on-screen tags. They spare "Oh god", "Hell no" and "OMG" but refuse "Holy shit". This was the gap a review found yesterday where the filter fix meets bet 1. Reviewed; it joins the release after the filter's own render.
-- **Data (a research question):** is the flat 12 seconds hiding gains at the opening? Our watch-time figure leaves out most viewers who swipe away early, so I added seconds watched per play start, swipe-aways included, and fixed the rule before reading. Across all uploads it rose from 3.7 to 5.3 seconds. Among longer videos it was flat, and the rule needed both, so **it is not a finding**: the rise may come from the mix of lengths. Reviewed and merged as a diagnostic. It never decides a revert.
-- **Data:** bet 1's revert check measures total watch time in a way that runs about 2.5× YouTube's own minutes. Recounted from minutes, no past keep-or-revert decision changes, so no change is proposed.
-- **General management:** nothing was ready. A fresh agent proposed eight ideas and six survived. Two rankers, in opposite orders, put the same three on top: the watch-time read and the revert check (done above), then the swear-word gap (done). **Dropped:** whether any Shorts money comes before the Partner Program (the plan already answers it); amending the rule for staying on Reddit (your #60 call covers it); a dependency audit (run: Pillow's known flaws grew, still unreachable as we never open outside images).
-- **General management (second round):** the three running tests were checked against their own sizes, and none is due: the title-style test has 13 and 5 uploads of the 15 and 8 it needs, the subreddit test 7 and 9 of 15 each, the capitals test almost none. No uploads are newly buried. Handed over about 25 minutes early: nothing else was finishable without the AI allowance, which the 05:00 upload needs, or the next render slot.
-- **Process:** three scheduled shifts were skipped from last night to this afternoon because the week's shift allowance ran out a day before Friday's reset. The guard worked as designed, but it is why last night's planned render waited a day.
-- **Security:** the standing check is clean. No secrets in the project, no workflow changes, you remain the only collaborator, and the money controls are in place ($0.68 this month, forecast $0.98 of $3).
-- Mostly bets, with one fix. AI use: one sample render (one upload-model request), three upload-model requests for the tag trial, four free Groq requests (the reworded prompt does not help the backup AI); no Polly. #77's description of the release branch is corrected, without an email.
+- **General management (the process audit):** 16 shifts since 5 November. Half began with nothing ready, they averaged 38 of 60 minutes, and about 40 fixes and checks ran against 8 bets. One change reached viewers, the forced switch of our AI model. All 16 answered "no" to "better than ten shifts ago". The numbers agree: watch time is flat, and the share of videos nobody is shown, 14.7%, is still past its limit. Fresh reviews caught about 50 faults before merging. The sample videos and release checks passed every time and caught nothing, and the faults viewers could see were again found only by reading what we published. The rules held: no AI credit lines, no unapproved process changes, and production data was touched only by the upload job. You answered five quick asks on 10 November and passed over the five needing a watch, a direction call or your hands. That is the pattern that decides what ships.
+- **General management (fixed, live):** the idea helpers read a list of what recent shifts rejected. Since 4 November shifts have written that label in a different style, so the list stopped at 3 November and about seven rejected ideas came back. The list now shows all ten recent shifts. The same reading fault showed two shifts twice in our time-by-function table and left two others out, and that is fixed too. Each fix had a fresh review: the first two reviews each caught a real flaw in my first version, and both flaws are fixed.
+- **General management (one new ask, #95):** the tool that runs shifts asks every shift to add an AI credit line to each commit, which our rules forbid. Our check only catches it after the push. A one-line setting switches the request off, and your label applies it.
+- **General management (a cap, then a cut):** our findings record grew by about a third in a week with no limit. It now has a word limit that can only go down. I then shortened five findings that were closed and already acted on, about 400 words, keeping each headline, and moved the limit down with them. A fresh review found nothing lost.
+- **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The top two in both orders were already settled. Bet 2's views gap is due on 20 November, and the rule for reading four new unseen videos was set on 10 November. So I did the fourth, the cap above. A per-entry length cap for this report ranked last both times and is dropped. The last idea, a way to depend less on YouTube's Shorts feed, repeats a recorded finding that every such route needs bet 1 first. With nothing above the bar left, I handed over at 02:16.
+- **Strategy:** brought the backup show's fixes up to date with the live code twice, the second time at 02:13 after my own changes, and all 848 tests pass. Its sample cannot run before 07:00, when the sample job starts taking requests.
+- **Data (a question, no answer yet):** the share of plays that get past the opening fell from 43 to 34 per 100. Split by topic, only three topics have enough videos, and none stands out. Split by subreddit it is within chance. Split by voice, the report tool won't show it until that test is read on 23 November, and that refusal is the answer. So it stays unexplained for now.
+- **Security and reliability (checked):** both of yesterday's uploads landed. The money controls are intact ($0.25 this month, forecast $0.75 of $3). No secret is in the repository, and the workflows are unchanged. Monday's weekly figures job installs three Google libraries at whatever version is newest. Today's newest still install and set up both YouTube connections, so nothing released so far puts Monday's figures at risk.
+- AI use: none on uploads; no Polly; no sample video.
 
 ### Blocked
-- **For you, in order:** #82 (register our Reddit app, by 12 January; sooner is safer); #80 (one label, by about 1 November); #50 (four commands, which unblocks #65); #59 (the account checks). #77 needs nothing from you until a sample is posted there.
+- **For you, in order:** #77 (bet 1: reply "without reactions", or label it as it stands), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
 
 ### Next
-- **After about 10:17 UTC tomorrow:** render the swear-word filter branch; on a pass naming its commit, merge it into the live branch (no version bump). Then fold the vote-and-tags guard into the release branch.
-- **The tag check:** the reworded prompt on the other nine trial posts, upload model. The daily release check and both uploads share its allowance, so about three requests a day fit safely; it spans a few days. If it reacts at least as often as before (14 of 18, 21 October), fold it into the release, render, and post that sample to #77.
-- 26 October weekly read, then the opening-reach read once.
+- **From 07:00 UTC:** request the backup show's fixes' sample (the branch is current as of 02:13), and merge on a pass.
+- **Keep shrinking the findings record:** the larger findings still feed tests that haven't been read yet. Compress each as its test is read: the capitals test on about 23 November, the new AI model on about 25 November.
+- **16 November:** the weekly review.
 
 ### Better?
-- **Than last shift:** Slightly. Samples speak without you, and a tag weakness reaching about one upload in eight was found before shipping, not after.
-- **Than ~10 shifts ago:** No for viewers: watch time is flat at 12 seconds and bet 1 has not shipped.
-- **Than ~100 shifts ago:** Too early to say.
+- **Than last shift:** a little, in process only. The idea helpers can see what was rejected again, which removes the main source of repeated work two audits found. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, the share of videos nobody is shown is still too high, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
+## 2026-11-11 (18:42) — Two of the new AI model's latest five titles claim more than the question did; a weekly read of the share of plays past the opening is live, and says there is not enough history yet
+
+    Worked (% of the shift): editorial 30 · data 45 · gm 15 · legal 5 · security 5
+
+**Summary:** An evening shift with nothing ready and everything that changes the videos waiting on you, so I made new work and finished the two items that ranked best. Nothing reached viewers. Two of the five titles the new AI model has written put a claim in the question's mouth, so that count is now part of its scheduled check.
+
+### Toward revenue
+- **Nothing directly**, because every step that changes what we ship waits on you (#77, #90). One indirect step: YouTube's monetization review reads our titles, and its rules bar titles that are "maliciously misleading". Ours are far milder than that, but a title that accuses or overclaims is a step in that direction. A check is now set before we know how often it happens.
+
+### Done
+- **Editorial (a check, not a fix):** I read the three latest uploads as published. "Why do YOU think people fake autism online?" asked viewers whether people are faking a disability, though the question never said fake. "3 Sports Where Women ACTUALLY Have The Genetic Advantage" stated as fact what its answers only guessed. A fresh helper, not told which model wrote what, checked 12 recent titles: 2 of the new model's 5 added a claim, against 1 of the old model's 7. That is too few to act on, and I found it by looking. So the rule is set first: at the new model's 20th upload, the same check on all 20; 5 or more puts a title-instruction fix in line after the capitals test is read on 23 November. It is never a reason to undo the model change.
+- **Data (built, live):** our weekly "are we improving?" read uses watch time. Since your #91 decision, tests are judged on the share of plays that get past the opening, so I added that measure too. The first three fresh reviews each found a real flaw, mostly in how a partly-measured week is counted, and the verdict swung with them, from "falling" to "flat" to "rising". After all the fixes, a fourth review found nothing wrong, and I merged it. Its answer today is "not enough history": we have only five full weeks of this figure, and it needs six. Reporting only, so viewers see nothing.
+- **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The title check came second both ways and the weekly read third, so I did those. The other three split: a pre-set plan for bet 2 if #77 stays unanswered (one ranker found it already written on 6 November), a slice of the process audit, and a re-read of YouTube's policy pages. With time left I did the re-read: the monetization and spam pages are unchanged since 3 November.
+- **Security and reliability (checked):** this morning's upload landed. The midday run found nothing to do, and the evening one has not started yet. The money controls are intact ($0.25 this month, forecast $0.75 of $3), no secret is in the repository, and the workflows are unchanged. The morning upload's topic-sorting step hit an overload error. It is logging only, never touches the upload, and has happened 3 times in 91 runs.
+- **General management (the process audit, first check):** the five process proposals held on 5 November stay held. They wait until fewer than five of my questions to you are unanswered, and five still are. The audit itself is due and is the next shift's work.
+- **Your approvals #88 and #65** are still open. #88 waits on you applying its patch (shifts cannot write those files). #65 waits on your "yes" to its corrected sentence.
+- AI use: none; no Polly; no sample video.
+
+### Blocked
+- **For you, in order:** #77 (bet 1: reply "without reactions", or label it as it stands), #82 (register the Reddit app by 12 January), #88 (one command), #90, #65, #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **From about 23:00 UTC tonight**, when the sample limit clears: request the sample of the backup show's fixes, and merge on a pass.
+- **The process audit is due:** 13 shifts since the 5 November one, against about ten.
+- **16 November:** the weekly review.
+
+### Better?
+- **Than last shift:** about the same. A new risk in the titles is now measured, not guessed at. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.

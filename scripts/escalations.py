@@ -11,6 +11,9 @@ approved escalation is a **work item**, not a question.
                                      # also lists recent refusals
     escalations.py close <n> "what was done"
 
+Both listings first flag any sample render an open ask links whose download
+GitHub deletes within a week, so the evidence outlives the decision.
+
 Needs GH_TOKEN (locally, from .env) or GITHUB_TOKEN (in CI).
 """
 import json
@@ -172,8 +175,121 @@ def _answered_in_comment(issues):
     return out
 
 
+OWNER_ACTS = {"labeled", "unlabeled", "closed", "reopened"}
+
+
+def _owner_last_action():
+    """(when, what) the owner last did on any issue, or None.
+
+    D13 revisits when a label-only ask waits over three days, and asks first
+    whether the owner is away or passing it over. Each of its re-reviews
+    (10-11 to 10-28) dug that up by hand; on 10-28 the answer was that they
+    had labelled #84 and #85 within hours while #77 and #80 waited.
+
+    Only deliberate acts count. A `referenced` event names whoever's token
+    pushed the commit, and the auto-apply job pushes with the owner's: an
+    unattended run would read as the owner here (review, 10-28)."""
+    owner = REPO.split("/")[0]
+    seen = []
+    for e in _api(f"/repos/{REPO}/issues/events?per_page=100") or []:
+        if (e.get("event") in OWNER_ACTS and (e.get("actor") or {}).get("login") == owner
+                and e.get("created_at")):
+            label = (e.get("label") or {}).get("name")
+            seen.append((e["created_at"], f"{e.get('event', '?')}{' ' + label if label else ''}"
+                                          f" #{(e.get('issue') or {}).get('number', '?')}"))
+    for c in _api(f"/repos/{REPO}/issues/comments?sort=created&direction=desc&per_page=100") or []:
+        if c.get("author_association") == "OWNER" and c.get("created_at"):
+            seen.append((c["created_at"], f"commented on #{(c.get('issue_url') or '?').rsplit('/', 1)[-1]}"))
+    return max(seen) if seen else None
+
+
+def _print_owner_last_action(now=None):
+    """One line, and never the reason the listing fails: it is context."""
+    try:
+        last = _owner_last_action()
+    except Exception as e:
+        print(f"The owner's last action could not be read ({type(e).__name__}).")
+        return
+    if not last:
+        print("The owner's last action: none in the newest issue events and comments.")
+        return
+    when, what = last
+    now = now or datetime.now(timezone.utc)
+    hours = (now - datetime.strptime(when, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)) / timedelta(hours=1)
+    print(f"The owner last acted {hours:.0f} hours ago ({when[:16].replace('T', ' ')} UTC: {what}). "
+          "An ask waiting longer than that waited while they were here (D13).")
+
+
+# A render's download lasts 14 days (dry-run.yml's retention-days), and the
+# owner's decision on one can take longer: on 2026-11-03 the three samples #77
+# and #90 rest on had five days left, and nothing said so. A week's warning
+# outlasts the two dark days a spent weekly allowance has caused.
+EXPIRY_WARN_DAYS = 7
+_RUN_LINK = re.compile(r"/actions/runs/(\d+)")
+
+
+def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
+    """(issue, run, deletion time, copy linked?, where) for each render an
+    open ask links whose download GitHub deletes within `days`. `where` is
+    "body" when the ask's own text links the run, the line to edit (F192: a
+    shift had to read body and comments by hand to find it), else "comments". Asks with no run link
+    cost no artifact request. A run GitHub no longer has (404, 410) is
+    skipped; any other failure raises, for `_print_expiring` to report."""
+    now = now or datetime.now(timezone.utc)
+    out = []
+    for i, _ in issues:
+        body = i.get("body") or ""
+        text = "\n".join([body] + [c.get("body") or "" for c in
+                                   (_comments(i) if i.get("comments") else [])])
+        in_body = set(_RUN_LINK.findall(body))
+        # Per ask, not per run: the warning still prints, and says to check.
+        kept = "sample-frames" in text and ".mp4" in text
+        for run in sorted(set(_RUN_LINK.findall(text))):
+            try:
+                resp = _api(f"/repos/{REPO}/actions/runs/{run}/artifacts")
+            except urllib.error.HTTPError as e:
+                if e.code in (404, 410):
+                    continue
+                raise
+            for a in (resp.get("artifacts") or [] if isinstance(resp, dict) else []):
+                if a.get("expired"):
+                    continue
+                when = datetime.fromisoformat(str(a.get("expires_at") or "").replace("Z", "+00:00"))
+                if when.tzinfo is None:
+                    when = when.replace(tzinfo=timezone.utc)
+                if when - now <= timedelta(days=days):
+                    out.append((i, run, when, kept, "body" if run in in_body else "comments"))
+    return out
+
+
+def _print_expiring(issues, now=None):
+    """Context, never the reason the listing fails: a failure says so in one
+    line, so silence always means nothing is about to be deleted."""
+    try:
+        expiring = _expiring(issues, now)
+    except Exception as e:
+        print(f"Sample renders linked from open asks could not be checked for deletion "
+              f"({type(e).__name__}); look before trusting that none is expiring.")
+        return
+    if not expiring:
+        return
+    print(f"SAMPLES GITHUB DELETES WITHIN {EXPIRY_WARN_DAYS} DAYS, linked from an open ask. "
+          "Keep each video on the sample-frames branch and link the copy in the ask "
+          "(an edit sends no email; never edit a body that carries a patch, or "
+          "apply-approved refuses it):")
+    for i, run, when, kept, where in expiring:
+        place = "in the ask's body" if where == "body" else "in comments only"
+        todo = ("the ask links a sample-frames video: check it is this run's" if kept
+                else "no kept copy: keep the video, then link it in the body")
+        print(f"  #{i['number']}  run {run}: deleted {when:%Y-%m-%d %H:%M} UTC, linked "
+              f"{place}; {todo}")
+
+
 def show(want_approved):
     issues = _issues()
+    _print_expiring(issues)
+    if not want_approved:
+        _print_owner_last_action()
     rows = [(i, l) for i, l in issues if ("approved" in l) == want_approved]
     if want_approved:
         answered = _answered_in_comment(issues)

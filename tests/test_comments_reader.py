@@ -53,3 +53,10 @@ def test_a_short_or_odd_row_still_prints_and_escapes_are_dropped():
     out = comments.render(rows, {}).splitlines()
     assert out[3] == "  [ · 0 likes] hi[2K evil"
     assert out[-1] == "End of viewer comments."
+
+
+def test_render_prints_the_comment_id_a_reply_targets():
+    rows = [{"video_id": "abc", "comment_id": "Ugx1\x1b[2K", "published_at": "2026-11-01T00:00:00Z",
+             "likes": "1", "text": "Nice"}]
+    out = comments.render(rows, {"abc": "Our title"}).splitlines()
+    assert out[3] == "  [2026-11-01 · 1 likes · Ugx1[2K] Nice"

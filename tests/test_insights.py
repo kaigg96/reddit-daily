@@ -207,6 +207,38 @@ def test_zero_at_the_edge_of_a_cold_spell_is_still_cold_spell():
     assert "edge" in [v["id"] for v in got["cold_spell"]]
 
 
+def test_the_digests_channel_call_retries_a_server_error(monkeypatch):
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    monkeypatch.setattr(wd.analytics, "list_uploaded_videos", lambda yt, part: [])
+
+    class YT:
+        def channels(self): return self
+        def list(self, **kw): return self
+        def execute(self, num_retries=0):
+            self.num_retries = num_retries
+            return {"items": [{"statistics": {"subscriberCount": "22"}}]}
+
+    yt = YT()
+    assert wd.fetch_channel(yt)[0] == 22
+    assert yt.num_retries == wd.analytics.SERVER_RETRIES >= 1
+
+
+def test_the_digest_names_columns_the_snapshot_could_not_collect():
+    """10-26: subscribers were refused on every row and the digest said
+    "Analytics data: current"."""
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    why = "refused: HttpError: <HttpError 500>"
+    rows = [{"views": "3", "subs_gained": why, "watch_ratio_10": ""},
+            {"views": "4", "subs_gained": why, "watch_ratio_10": why},
+            {"views": "5", "subs_gained": "1", "watch_ratio_10": "0.9"}]
+    assert wd.refused_columns(rows) == {"subs_gained": 2, "watch_ratio_10": 1}
+    assert wd.refused_columns(rows[2:]) == {}
+
+
 # --- publish drift (2026-09-07: 4.5h drift ran unnoticed for 10 days) --------
 
 def test_publish_drift_is_measured_forward_from_the_latest_slot_across_midnight():
@@ -315,7 +347,8 @@ def test_second_weekly_append_extends_the_file_without_a_repeated_header():
         """Mimics the one report shape R4.7 queries."""
         def reports(self): return self
         def query(self, **kw): self.kw = kw; return self
-        def execute(self):
+        def execute(self, num_retries=0):
+            assert num_retries == wa.SERVER_RETRIES
             return {"columnHeaders": [{"name": "insightTrafficSourceType"},
                                       {"name": "views"},
                                       {"name": "estimatedMinutesWatched"}],
@@ -702,6 +735,22 @@ def _era(prefix, start_day, n, fv, views, watch, snapshot_gap=7):
     return uploads, snaps
 
 
+def test_a_refused_metric_at_that_age_is_a_caveat_not_thin_data(tmp_path, monkeypatch):
+    """10-26: subscribers refused on every row read as "insufficient data"."""
+    from src import config
+    uploads, snaps = _era("v", 0, 3, "v7", 100, 12.0)
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    snap = config.ANALYTICS_SNAPSHOTS
+    rows = snap.read_text().splitlines()
+    why = "refused: HttpError: <HttpError 500>"
+    snap.write_text("\n".join([rows[0] + ",subs_gained"]
+                              + [r + ("," + why if i else ",2") for i, r in enumerate(rows[1:])]) + "\n")
+    load = insights.load_videos_at_age()
+    assert load.refused == {"subs_gained": 2}
+    assert any("2 upload(s) had subs_gained refused" in c for c in load.caveats())
+    assert [v.subs_gained for v in load.videos] == [2.0, None, None]
+
+
 def _two_eras(tmp_path, monkeypatch, new_views=200, new_watch=10.0,
               old_views=200, old_watch=10.0, n=10):
     old_u, old_s = _era("old", 0, n, "v4", old_views, old_watch)
@@ -890,6 +939,23 @@ def test_ids_within_filters_the_trajectory_on_logged_fields():
         insights.ids_within("bg_clip!=pexels_1", log)
 
 
+def test_a_read_can_leave_out_a_list_of_uploads():
+    """#14's read must hold without the 11 uploads whose closing line shipped
+    all lower case (PRD §4, 2026-11-04), which no logged field marks."""
+    log = [{"video_id": i, "post_title": t} for i, t in
+           (("a", "Why, though?"), ("b", "q"), ("c", "q"), ("d", "q"))]
+    assert insights.ids_within("video_id!=a,c", log) == {"b", "d"}
+    assert insights.ids_within("video_id=a, c", log) == {"a", "c"}
+    # A value that itself holds a comma still matches whole
+    assert insights.ids_within("post_title=Why, though?", log) == {"a"}
+    # One mistyped id in the list is refused, not silently kept in
+    with pytest.raises(ValueError, match="video_id=x"):
+        insights.ids_within("video_id!=a,x", log)
+    for blanks in (",", " , ", ",,"):
+        with pytest.raises(ValueError):
+            insights.ids_within(f"video_id!={blanks}", log)
+
+
 def test_a_release_that_shifts_video_length_says_so():
     """R2: the b-roll switch moved median length 19.3s -> 20.4s, and longer
     videos hold more watch-seconds, so the verdict line must carry it."""
@@ -982,6 +1048,11 @@ def test_bet_1_is_read_at_its_pre_committed_size():
     """PRD §0 #15: `v8` at 7 days on >= 20 uploads. Unlisted, the Monday
     digest would answer at 8 and pre-empt the rule."""
     assert insights.RELEASE_MIN_UPLOADS["v8"] == 20
+
+
+def test_models_successor_is_read_at_its_pre_committed_size():
+    """PRD §0's successor row, by #13's rule: >= 20 uploads at 7 days."""
+    assert insights.RELEASE_MIN_UPLOADS["v7s"] == 20
 
 
 def test_a_release_that_shifts_length_must_also_hold_total_watch_time():
@@ -1438,6 +1509,16 @@ def test_a_decline_is_reported_as_falling():
     assert verdict == "falling"
 
 
+def test_a_share_moving_beyond_its_drift_is_not_read_as_flat():
+    """Engaged share lives on 0-1, so the half-second default for a move too
+    small to call would read every share series as flat (2026-11-11)."""
+    series = [(f"w{i}", 10, v) for i, v in enumerate([0.35, 0.35, 0.35, 0.26, 0.26, 0.26])]
+    assert insights.trajectory_verdict(series, floor=0.07)[0] == "flat"   # the old default
+    verdict, why = insights.trajectory_verdict(series, floor=0.07, min_change=0.02, digits=2)
+    assert verdict == "falling" and "0.35 → 0.26" in why
+    assert insights.trajectory_verdict(series, floor=0.1, min_change=0.02)[0] == "flat"
+
+
 def test_too_little_history_says_unknown_rather_than_guessing():
     series = [(f"w{i}", 10, 10.0) for i in range(3)]
     verdict, _ = insights.trajectory_verdict(series, floor=1.0)
@@ -1697,6 +1778,42 @@ def test_scorecard_zero_rate_drops_a_privatised_zero_as_the_offline_loaders_do(t
     assert abs(now["zero_rate"] - 100.0 / 17) < 1e-9
 
 
+def test_scorecard_skips_reads_under_four_days_which_analytics_has_not_caught_up_on(tmp_path):
+    """Only the newest week's Thursday uploads are ever read at 3 days, and a
+    3-day zero later shows a view half the time (10-31): two of them made the
+    10-26 zero_rate breach. They wait for the next snapshot instead."""
+    import datetime as dt, importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    (tmp_path / "analysis").mkdir()
+    (tmp_path / "upload_log.csv").write_text("video_id,duration_s\n")
+    rows = ["snapshot_date,video_id,published_at,views,avg_view_duration_s,"
+            "avg_view_pct,privacy_status"]
+    monday = dt.date(2026, 8, 3)
+    newest = monday + dt.timedelta(weeks=5, days=7)          # the last week's Monday after
+    for week in range(6):
+        for i in range(6):
+            pub = monday + dt.timedelta(weeks=week, days=i)
+            snap = pub + dt.timedelta(days=7)
+            views = 100
+            if week == 5 and i == 2:                      # Wednesday: read at 4 days, kept
+                snap = newest
+            if week == 5 and i == 3:                      # Thursday: read at 3 days, a soft zero
+                snap, views = newest, 0
+            # its reading, then the newest snapshot (too old to be read), which
+            # holds every upload, so none reads as made private
+            for s in (snap, dt.date(2026, 9, 28)):
+                rows.append(f"{s},w{week}v{i},{pub}T12:00:00Z,{views},{10 if views else 0},50,public")
+    (tmp_path / "analysis" / "analytics_snapshots.csv").write_text("\n".join(rows) + "\n")
+    _, now, _, n_now = report._period_metrics(root=str(tmp_path))
+    assert n_now == 17 and now["zero_rate"] == 0.0
+    _, now, _, n_now = report._period_metrics(root=str(tmp_path), min_age=0)
+    assert n_now == 18 and now["zero_rate"] > 0
+
+
 def test_replay_share_counts_only_over_100_pct_among_videos_with_enough_views():
     videos = [
         v("a", 10, views=50, pct=120.0),   # replaying
@@ -1866,6 +1983,66 @@ def test_views_gained_by_age_splits_the_catalogue_from_recent_uploads():
     assert insights.views_gained(rows) == [(d(9, 8), 61, 7)]
 
 
+def test_two_week_rate_pools_each_snapshot_with_the_one_before():
+    rows = [("a", 0, 700, 7), ("b", 0, 70, 7), ("c", 5, 1400, 7), ("d", 0, 0, 0)]
+    # (700 + 70) / 14 = 55; (70 + 1400) / 14 = 105; the old column is ignored
+    assert insights.two_week_rate(rows) == [None, 55.0, 105.0, 200.0]
+    assert insights.two_week_rate(rows[:1]) == [None]
+    assert insights.two_week_rate([]) == []
+
+
+def test_swing_lows_are_under_60_percent_of_every_week_beside_them():
+    assert insights.swing_lows([500, 100, 600, 590, 200]) == {1, 4}
+    # 59% of one side but not the other is no low; an end needs only its one side
+    assert insights.swing_lows([1000, 590, 900]) == set()
+    assert insights.swing_lows([100, 1000]) == {0}
+    assert insights.swing_lows([]) == set()
+
+
+def test_swing_read_applies_r4s_rule_only_once_it_reaches_11_16():
+    d = lambda m, day: datetime.date(2026, m, day)
+    dates = [d(10, 12), d(10, 19), d(10, 26), d(11, 2), d(11, 9), d(11, 16)]
+    cum = lambda per_day: [(dt, sum(per_day[:i]) * 7) for i, dt in enumerate(dates)]
+    recent = lambda per_day: [(dt, 0, r * 7, 7) for dt, r in zip(dates[1:], per_day)]
+    lagged = [600, 80, 700, 650, 90]           # the snapshots' recent column: lows 1, 4
+    swinging = cum([500, 130, 860, 630, 120])  # the counter: lows 1, 4
+    # the counter alternates in the same weeks: viewers
+    verdict, weeks = insights.swing_read(swinging, recent(lagged))
+    assert verdict == "viewers" and [w[0] for w in weeks] == dates[1:]
+    assert weeks[0] == (d(10, 19), 500.0, 600.0)
+    # a counter low the recent column lacks, or the reverse, is not in step
+    one_low = [600, 80, 700, 650, 600]
+    assert insights.swing_read(swinging, recent(one_low))[0] == "unclear"
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(lagged))[0] == "unclear"
+    # one shared dip is not alternation
+    assert insights.swing_read(cum([500, 130, 860, 630, 600]), recent(one_low))[0] == "unclear"
+    # steady within ±30% of the mean: data
+    assert insights.swing_read(cum([500, 450, 560, 520, 480]), recent(lagged))[0] == "data"
+    # before the 11-16 snapshot, or without the recent column there, no verdict
+    early = insights.swing_read(swinging[:-1], recent(lagged))
+    assert early[0] is None and early[1][-1][0] == d(11, 9)
+    assert insights.swing_read(swinging, recent(lagged)[:-1])[0] is None
+    # a weekly job rerun on 11-17 still closes the window; nothing after it is read
+    rerun = swinging[:-1] + [(d(11, 17), swinging[-1][1])]
+    rerun_recent = recent(lagged)[:-1] + [(d(11, 17), 0, 90 * 8, 8)]
+    assert insights.swing_read(rerun, rerun_recent)[1][-1][0] == d(11, 17)
+    late = swinging + [(d(11, 23), 10 ** 7)]
+    late_recent = recent(lagged) + [(d(11, 23), 0, 9 * 7, 7)]
+    assert insights.swing_read(late, late_recent)[1][-1][0] == d(11, 16)
+    # the two files missing 11-16 differently: once past 11-22, read what matched
+    split = swinging[:-1] + [(d(11, 17), 0), (d(11, 23), 0)]
+    split_recent = recent(lagged)[:-1] + [(d(11, 16), 0, 7, 7), (d(11, 17), 0, 1, 1)]
+    verdict, weeks = insights.swing_read(split, split_recent)
+    assert verdict is not None and weeks[-1][0] == d(11, 9)
+    # a counter snapshot missed on 11-02: its 14 days never meet a 7-day recent week
+    gap = [w for w in swinging if w[0] != d(11, 2)]
+    assert [w[0] for w in insights.swing_read(gap, recent(lagged))[1]] == [
+        d(10, 19), d(10, 26), d(11, 16)]
+    # under three matched weeks: insufficient
+    thin = [w for w in swinging if w[0] in (d(10, 12), d(11, 9), d(11, 16))]
+    assert insights.swing_read(thin, recent(lagged))[0] == "insufficient"
+
+
 def test_clip_use_counts_each_broll_clip_in_log_order():
     rows = [{"timestamp_utc": f"2026-09-{d:02d}T05:00:00+00:00", "bg_clip": c}
             for d, c in [(5, "a.mp4"), (1, "a.mp4"), (2, "procedural:7"),
@@ -1922,6 +2099,17 @@ def test_subscriber_rate_is_per_1000_views_summed_and_refuses_a_thin_cohort():
     assert _ins.subscriber_rate(rows, since) == (20, 10000, 40, 4.0)
     assert _ins.subscriber_rate([new] * 19) == (19, 9500, 38, None)
     assert _ins.subscriber_rate([{"views": "0", "subs_gained": "0"}] * 30)[3] is None
+
+
+def test_a_refused_column_is_told_apart_from_a_thin_one():
+    """10-26: an HTTP 500 left subscribers on no row; "insufficient data"
+    would be read as the answer rather than as a failed collection."""
+    from src import insights as _ins
+    why = "refused: HttpError: <HttpError 500 ... Internal error encountered.>"
+    rows = [{"views": "10", "subs_gained": why}] * 30 + [{"views": "10", "subs_gained": ""}]
+    assert _ins.subscriber_rate(rows)[3] is None
+    assert _ins.refused(rows, "subs_gained") == why
+    assert _ins.refused([{"views": "10", "subs_gained": "2"}, {"views": "1"}], "subs_gained") is None
 
 
 def test_route_distances_count_engaged_views_where_the_route_does():
@@ -2021,6 +2209,59 @@ def test_snapshot_rows_skip_a_blank_engaged_count_rather_than_read_zero(tmp_path
     assert len(views) == 4
 
 
+def test_engaged_share_rows_leave_out_zero_views_and_blank_counts(tmp_path):
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    csv_path = tmp_path / "snap.csv"
+    csv_path.write_text(
+        "snapshot_date,video_id,published_at,views,engaged_views\n"
+        "2026-09-28,z,2026-09-21T12:00:00Z,100,\n"      # before the column
+        "2026-10-05,z,2026-09-21T12:00:00Z,120,40\n"    # its ~7-day read had none
+        "2026-10-05,a,2026-09-28T12:00:00Z,120,40\n"
+        "2026-10-12,a,2026-09-28T12:00:00Z,200,50\n"    # 13 days: not its nearest read
+        "2026-10-05,b,2026-09-29T12:00:00Z,50,0\n"      # a real zero share stays
+        "2026-10-05,c,2026-09-30T12:00:00Z,0,0\n")      # no views: counted apart
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert [(r["video_id"], round(r["value"], 3)) for r in rows] == [("a", 0.333), ("b", 0.0)]
+    # At 10 days z's nearest read is 10-05's (13 whole days, against 6), which has
+    # the count, so z's week stays, as a cutoff by date would not keep it.
+    rows = report._engaged_share_rows(path=str(csv_path), at_age=10)
+    assert "z" in {r["video_id"] for r in rows}
+
+
+def test_a_week_only_partly_read_drops_whole(tmp_path):
+    """W39: y's ~7-day read predates the column, so x, read at 8 days on the
+    first snapshot with it, does not stand for the week alone (11-11)."""
+    import importlib.util, pathlib, sys
+    root = pathlib.Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location("report", root / "scripts" / "report.py")
+    report = importlib.util.module_from_spec(spec)
+    sys.modules["report"] = report
+    spec.loader.exec_module(report)
+    csv_path = tmp_path / "snap.csv"
+    csv_path.write_text(
+        "snapshot_date,video_id,published_at,views,engaged_views\n"
+        "2026-09-28,y,2026-09-21T12:00:00Z,100,\n"
+        "2026-10-05,y,2026-09-21T12:00:00Z,120,40\n"
+        "2026-09-28,x,2026-09-26T12:00:00Z,10,\n"
+        "2026-10-05,x,2026-09-26T12:00:00Z,90,30\n"
+        "2026-10-05,w,2026-09-29T12:00:00Z,50,10\n")
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert rows == []                     # and W40 is still filling in: Sunday's is 1 day old
+    with open(csv_path, "a") as f:
+        f.write("2026-10-12,w,2026-09-29T12:00:00Z,80,20\n")
+    rows = report._engaged_share_rows(path=str(csv_path))
+    assert [(r["video_id"], r["value"]) for r in rows] == [("w", 0.2)]   # its 6-day read
+    assert report._engaged_share_rows(path=str(csv_path), ids={"y"}) == []
+    # Under --within, only the filter's uploads decide a week: without y, x's W39 is whole.
+    assert {r["video_id"] for r in report._engaged_share_rows(
+        path=str(csv_path), ids={"x", "w"})} == {"x", "w"}
+
+
 def test_engaged_per_100_needs_every_viewed_row_to_carry_the_count():
     from src import insights as _ins
     full = [{"views": "100", "engaged_views": "30"}, {"views": "50", "engaged_views": "30"},
@@ -2051,6 +2292,29 @@ def test_the_digest_line_reads_each_release_at_its_committed_size(tmp_path, monk
     monkeypatch.setitem(insights.RELEASE_MIN_UPLOADS, "v5", 20)
     assert "`v5`: NO VERDICT — 10 measurable release uploads, the rule commits to 20" in (
         insights.release_digest_line(rows))
+
+
+def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch):
+    """Bet 1's rule reads `v8` inside AskReddit (#15); the Monday digest read it
+    pooled across subreddits, so its verdict would also judge the mix."""
+    seen = {}
+
+    def fake_read(version, key="format_version", target_age=None, within_spec=None):
+        seen[version] = within_spec
+
+    monkeypatch.setattr(insights, "release_read", fake_read)
+    rows = [{"format_version": v} for v in ("v7", "v8")]
+    line = insights.release_digest_line(rows)
+    assert seen == {"v8": "subreddit=AskReddit", "v7": None}
+    assert "`v8` (within subreddit=AskReddit): NO VERDICT" in line
+    assert "`v7`: NO VERDICT" in line
+
+
+def test_each_committed_release_cut_names_a_logged_field_and_value():
+    """A misspelt cut would filter every upload out, and the digest would print
+    NO VERDICT rather than fail (review, 2026-10-25)."""
+    for version, spec in insights.RELEASE_WITHIN.items():
+        assert insights.ids_within(spec), (version, spec)   # raises on an unknown value
 
 
 def test_slate_firing_counts_a_weak_top_with_a_strong_candidate_in_the_top_three():
@@ -2250,6 +2514,22 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
         report.main()
     assert "--by format_version --metric engaged_share --at-age 7" in str(exc.value)
     assert not called
+    # v8's verdict reads AskReddit, but its avg % viewed is committed to long
+    # videos since 10-07: the redirect must not hand a diagnostic the
+    # verdict's cut, and keeps a --within the reader gave.
+    monkeypatch.setattr(report.insights, "RELEASE_WITHIN", {"v9": "subreddit=AskReddit"})
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v9", "--offline",
+                                      "--metric", "avg_view_pct"])
+    with pytest.raises(SystemExit) as exc:
+        report.main()
+    assert "--at-age 7; add the --within and --since" in str(exc.value)
+    assert "(subreddit=AskReddit is the watch-seconds verdict's cut)" in str(exc.value)
+    monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v9", "--offline", "--metric",
+                                      "avg_view_pct", "--within", "video_length=long"])
+    with pytest.raises(SystemExit) as exc:
+        report.main()
+    assert "--at-age 7 --within video_length=long; add the --within and --since" \
+        in str(exc.value)
     for extra in ([], ["--metric", "views"]):   # views is printed beside the rule
         monkeypatch.setattr(sys, "argv", ["report.py", "--release", "v7", "--offline"] + extra)
         report.main()
@@ -2306,6 +2586,7 @@ def test_own_words_skips_a_malformed_value_rather_than_crash_the_read():
 
 def test_host_lines_report_the_dose_of_the_release(monkeypatch):
     monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 2)   # whole: two notes, setup, vote
+    monkeypatch.setattr(insights.config, "HOST_REACTIONS", True)
     rows = [{"format_version": "v8", "host_lines": n} for n in ("4", "4", "3", "0", "1")]
     rows += [{"format_version": "v8", "host_lines": ""}, {"format_version": "v7", "host_lines": "4"}]
     line = insights.render_host_lines(rows, "v8")
@@ -2330,15 +2611,16 @@ def test_the_release_read_passes_the_dose_the_verdicts_uploads(monkeypatch, tmp_
                    "a,v8,5,0.6\nb,v8,0,0.6\nc,v8,0,0.6\n")
     monkeypatch.setattr(insights.config, "UPLOAD_LOG", str(log))
     monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 3)   # whole: 5
+    monkeypatch.setattr(insights.config, "HOST_REACTIONS", True)    # with reactions
     def vid(i, d):
         return Video(i, NOW, views=10, watch_seconds=10.0,
                      true_published=NOW + d * datetime.timedelta(days=1))
     read = types.SimpleNamespace(release=[vid("a", 0)], before=[vid("c", -9)], unset=0, later=0,
-                                 comparisons=[], floors={}, triggers=(),
+                                 comparisons=[], floors={}, triggers=(), beside=[],
                                  load=types.SimpleNamespace(caveats=lambda: []))
     monkeypatch.setattr(insights, "release_read", lambda *a, **k: read)
     for name in ("render_release", "render_duration", "render_within_length",
-                 "render_without_near_zero", "render_vote_diagnostics"):
+                 "render_without_near_zero", "render_vote_diagnostics", "render_beside"):
         monkeypatch.setattr(insights, name, lambda *a, **k: "")
     report.release("v8", "format_version", 7, min_uploads=20)
     out = capsys.readouterr().out
@@ -2510,6 +2792,35 @@ def test_a_release_is_judged_against_the_release_it_replaced(monkeypatch):
     assert value is None and base == old + prev[:19]
 
 
+def test_a_model_only_version_counts_with_the_format_it_reruns():
+    """`v8` after a thin `v7s` reads `v7s` and `v7` together, never the v2-v7s
+    pool (PRD §0 #15, 11-09 weekly); `v7s`'s own read still meets `v7` alone."""
+    def vids(version, n, start):
+        return [insights.Video(video_id=f"{version}{i}",
+                               published=start + datetime.timedelta(hours=12 * i),
+                               views=100, watch_seconds=10,
+                               meta={"format_version": version})
+                for i in range(n)]
+    t0 = datetime.datetime(2026, 8, 1, tzinfo=datetime.timezone.utc)
+    old = vids("v6", 40, t0)
+    v7 = vids("v7", 15, t0 + datetime.timedelta(days=30))
+    v7s = vids("v7s", 6, t0 + datetime.timedelta(days=40))
+    value, base = insights.predecessor(old + v7 + v7s, "format_version")
+    assert value == "v7s+v7" and base == v7 + v7s
+    full = vids("v7", 20, t0 + datetime.timedelta(days=30))
+    value, base = insights.predecessor(old + full, "format_version")
+    assert value == "v7" and base == full
+    # Together still too thin: the pool, as for any release.
+    value, base = insights.predecessor(old + v7[:10] + v7s, "format_version")
+    assert value is None and base == old + v7[:10] + v7s
+    # Only release versions pair up.
+    tagged = [insights.Video(video_id=v.video_id, published=v.published, views=100,
+                             watch_seconds=10, meta={"other": v.meta["format_version"]})
+              for v in old + v7 + v7s]
+    value, base = insights.predecessor(tagged, "other")
+    assert value is None
+
+
 def test_the_noise_limit_reads_the_whole_history_not_the_baseline(tmp_path, monkeypatch):
     """One release is too short to measure the channel's drift, so the limit
     keeps reading every earlier upload while the comparison narrows."""
@@ -2586,6 +2897,17 @@ def test_answer_log_parse_counts_words_and_needs_an_upload():
     assert (video, words) == ("hTnnhF9DaRQ", {1: 3, 2: 2, 3: 1})
 
 
+def test_answer_lengths_help_prints_usage_and_reads_nothing(monkeypatch, capsys):
+    """Asking for usage ran the whole collection and appended rows (2026-10-25)."""
+    import pytest
+    mod = _answer_lengths()
+    monkeypatch.setattr(mod.subprocess, "run", lambda *a, **k: pytest.fail("ran gh"))
+    with pytest.raises(SystemExit) as exit_:
+        mod.main(["--help"])
+    assert exit_.value.code == 0
+    assert "answer_lengths.csv" in capsys.readouterr().out
+
+
 def test_answer_log_parse_keeps_the_first_print_of_each_answer():
     mod = _answer_lengths()
     log = ("x\ty\t2026-10-21T05:00:01.2Z   comment 1: a b\n"
@@ -2609,3 +2931,63 @@ def test_first_answer_verdict_applies_the_rule_as_written():
     assert insights.first_answer_verdict(-0.3, 0.05).startswith("noise")
     assert insights.first_answer_verdict(-0.29, 0.001).startswith("noise")
     assert insights.first_answer_verdict(0.6, 0.001).startswith("noise")
+
+
+def test_watch_reach_verdict_applies_the_rule_as_written():
+    v = insights.watch_reach_verdict
+    assert v(None, None).startswith("insufficient data")
+    assert v(0.3, 0.049).startswith("tracks")
+    assert v(0.3, 0.049, (0.1, 0.5)).startswith("tracks")      # one tracks age: not both
+    assert v(0.3, 0.049, (0.29, 0.5)).startswith("tracks")
+    assert v(0.3, 0.049, (None, 0.5)).startswith("tracks")
+    assert v(0.3, 0.049, (0.3, 0.4)).startswith("confounded")
+    assert v(0.3, 0.049, (-0.3, -0.4)).startswith("confounded")
+    assert v(0.3, 0.049, (0.4, -0.4)).startswith("tracks")     # opposite: age pushes rho down
+    assert v(0.3, 0.05).startswith("no link")
+    assert v(0.29, 0.001).startswith("no link")
+    assert v(-0.3, 0.049).startswith("inverse")
+    assert v(-0.29, 0.001).startswith("no link")
+    assert v(-0.3, 0.049, (0.5, 0.5)).startswith("inverse")    # age guards only a link
+
+
+def test_rank_corr_interval_reads_r5_and_narrows_with_n():
+    lo, hi = insights.rank_corr_interval(-0.228, 38)
+    assert lo < -0.228 < hi
+    assert round(lo, 2) == -0.51 and round(hi, 2) == 0.10     # 11-02's R5 read
+    lo2, hi2 = insights.rank_corr_interval(-0.228, 380)
+    assert hi2 - lo2 < hi - lo
+    assert insights.rank_corr_interval(None, 38) is None
+    assert insights.rank_corr_interval(0.2, 3) is None
+    assert insights.rank_corr_interval(float("nan"), 38) is None
+    lo, hi = insights.rank_corr_interval(1.0, 30)               # a perfect link stays finite
+    assert hi <= 1 and lo > 0.9
+
+
+def test_interval_reading_names_what_is_ruled_out():
+    assert insights.interval_reading((-0.2, 0.2), 0.3) == "rules out a link of 0.3 either way"
+    assert insights.interval_reading((-0.51, 0.10), 0.3).startswith("rules out +0.3 or more")
+    assert insights.interval_reading((-0.1, 0.5), 0.3).startswith("rules out -0.3 or less")
+    assert "cannot rule out" in insights.interval_reading((-0.4, 0.4), 0.3)
+    assert insights.interval_reading(None, 0.3).startswith("no interval")
+    assert insights.interval_reading((0.44, 0.72), 0.3).startswith("a link of +0.3 or more")
+    assert insights.interval_reading((-0.8, -0.3), 0.3).startswith("a link of -0.3 or less")
+    # 0.2996 prints as +0.30, so it must not read "rules out +0.3"
+    assert "cannot rule out" in insights.interval_reading((-0.35, 0.2996), 0.3)
+
+
+def test_engaged_share_is_read_beside_the_release_verdict_never_inside_it(tmp_path, monkeypatch):
+    """C16's rule (2026-11-10) reads engaged share at `--release`, but
+    `release_verdict` reads every comparison it gets: a side with no engaged
+    share (collected only from 2026-10-05; this series has none) must not
+    turn the watch-seconds verdict into NO VERDICT, nor crash the limit."""
+    era = [("20.0", 10.0)] * 20
+    _write_series_with_length(tmp_path, monkeypatch,
+                              [("old", 0, "v4", era), ("new", 60, "v5", era)])
+    read = insights.release_read("v5")
+    assert all(c.metric != insights.Metric.ENGAGED_SHARE for c in read.comparisons)
+    assert [c.metric for c, _ in read.beside] == [insights.Metric.ENGAGED_SHARE]
+    verdict = insights.release_verdict(read.comparisons, read.floors, read.triggers)
+    assert not verdict.startswith("NO VERDICT")
+    out = insights.render_beside(read)
+    assert "insufficient data" in out and "auto-revert never fires on it" in out
+    assert "not measurable" in out

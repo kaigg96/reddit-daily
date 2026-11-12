@@ -41,6 +41,7 @@ opinion.** Process churn is as costly as code churn.
 - `scripts/context_budget.py --session --allocation` — what a session spent,
   and where each shift's time went, by function.
 - `PLAN.md` — whether the reviews ran (§5) and what the coverage says (§1).
+- `scripts/friction.py report` — what shifts found hard, and which fixes held.
 
 ## Re-test the decisions
 
@@ -89,6 +90,12 @@ gates should have stopped?
 **Is the authorization boundary right?** Escalations are the data. Too many on
 trivia means the boundary is drawn too tight. None at all, over many shifts,
 probably means shifts are deciding things they shouldn't.
+
+**Can each process tell whether it works?** Every standing process — the
+queue, the reviews, the experiments, the friction log — needs an outcome
+recorded each time it runs, a scheduled read of that record, and a
+keep/change/stop rule set before the data (D15). One missing any of the three
+is a finding.
 
 **Does the handover work?** Could a cold session resume from `WORKLOG.md` and
 `PRD.md` §0 alone, or did recent shifts re-derive state that should have been

@@ -110,7 +110,8 @@ and capacity used against capacity available.
 | Report to the owner: shift reports, the monthly packet, escalations with recommendations | Shift, monthly | Act |
 | Carry out the owner's decisions and close them | Shift | Act |
 | Keep the trackers true and closed: PRD §0, `TECH_DEBT.md`, `DECISIONS.md`, branches | Shift, weekly | Act |
-| Process health: friction, `/audit`, the context budget | Trigger: about every ten shifts | Propose |
+| The friction log: sort each week's rows, queue the fixes with most leverage, read its rule when due (D15) | Weekly | Act |
+| Process health: `/audit`, the context budget, whether each process can tell that it works | Trigger: about every ten shifts | Propose |
 
 **Reads:** everything, shallowly.
 **Produces:** the queue, the reports and the escalations.

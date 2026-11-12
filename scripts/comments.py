@@ -76,7 +76,10 @@ def render(rows, names):
             text = _plain(r.get("text"))
             if len(text) > TEXT_CAP:
                 text = text[:TEXT_CAP] + "…"
-            out.append(f"  [{(r.get('published_at') or '')[:10]} · {_likes(r)} likes] {text}")
+            # The ID is what a drafted reply targets (PLAN C10, src/replies.py).
+            cid = _plain(r.get("comment_id"))
+            out.append(f"  [{(r.get('published_at') or '')[:10]} · {_likes(r)} likes"
+                       f"{' · ' + cid if cid else ''}] {text}")
     out.append("\nEnd of viewer comments.")
     return "\n".join(out)
 

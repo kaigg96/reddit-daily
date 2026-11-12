@@ -111,3 +111,113 @@ def test_unrelated_histories_are_unknown_not_clean(tmp_path):
 def test_a_missing_release_branch_is_skipped_not_failed(tmp_path):
     _repo(tmp_path)
     assert c.check_next_release_merges(str(tmp_path), "main", "nope")[0] is None
+
+
+def _stacked(tmp_path):
+    """`next` is the release; `after` is built on it and touches s.txt."""
+    git = _repo(tmp_path)
+    git("checkout", "-q", "-b", "after", "next")
+    (tmp_path / "s.txt").write_text("after\n")
+    git("add", "."); git("commit", "-q", "-m", "after adds s")
+    git("checkout", "-q", "main")
+    return git
+
+
+@needs_merge_tree
+def test_a_branch_stacked_on_the_release_that_still_merges_passes(tmp_path):
+    git = _stacked(tmp_path)
+    (tmp_path / "g.txt").write_text("other\n")
+    git("add", "."); git("commit", "-q", "-m", "unrelated")
+    ok, why = c.check_after_release_merges(str(tmp_path), "main", "next", ("after",))
+    assert ok is True, why
+
+
+@needs_merge_tree
+def test_a_stacked_branch_that_conflicts_only_with_main_is_caught(tmp_path):
+    """11-06: the slot logging no longer merged over main plus bet 1, while bet 1
+    itself still merged; only a trial merge by hand found it."""
+    git = _stacked(tmp_path)
+    (tmp_path / "s.txt").write_text("main\n")
+    git("add", "."); git("commit", "-q", "-m", "main adds s")
+    assert c.check_next_release_merges(str(tmp_path), "main", "next")[0] is True
+    ok, why = c.check_after_release_merges(str(tmp_path), "main", "next", ("after",))
+    assert ok is False and "after (conflicts in s.txt)" in why
+
+
+@needs_merge_tree
+def test_a_stacked_branch_behind_the_release_tip_is_merged_over_the_release(tmp_path):
+    """The branch forked from an older release; the release then edited the
+    same line. Over main alone it merges, so only main plus the release shows it."""
+    git = _stacked(tmp_path)
+    git("checkout", "-q", "after")
+    (tmp_path / "f.txt").write_text("after\n")
+    git("commit", "-qam", "after edits f")
+    git("checkout", "-q", "next")
+    (tmp_path / "f.txt").write_text("next again\n")
+    git("commit", "-qam", "release edits f again")
+    git("checkout", "-q", "main")
+    (tmp_path / "g.txt").write_text("other\n")
+    git("add", "."); git("commit", "-q", "-m", "unrelated")
+    ok, why = c.check_after_release_merges(str(tmp_path), "main", "next", ("after",))
+    assert ok is False and "after (conflicts in f.txt)" in why
+
+
+def test_a_merged_and_deleted_stacked_branch_is_skipped(tmp_path):
+    _stacked(tmp_path)
+    assert c.check_after_release_merges(str(tmp_path), "main", "next", ("gone",))[0] is None
+
+
+@needs_merge_tree
+def test_a_release_that_conflicts_leaves_the_stacked_check_unknown(tmp_path):
+    git = _stacked(tmp_path)
+    (tmp_path / "f.txt").write_text("main\n")
+    git("commit", "-qam", "main moved f")
+    ok, why = c.check_after_release_merges(str(tmp_path), "main", "next", ("after",))
+    assert ok is None and "release itself" in why
+
+
+def _clone_with_remote_branches(tmp_path):
+    """A shift's clone: local `main` only; `product/done` merged into main,
+    `product/next` not, both only on the remote."""
+    import subprocess
+    up = tmp_path / "up"
+    up.mkdir()
+    git = _repo(up)
+    git("checkout", "-q", "-b", "product/done", "next")
+    git("checkout", "-q", "main")
+    git("merge", "-q", "--no-ff", "-m", "merge done", "product/done")
+    git("checkout", "-q", "-b", "product/next")
+    (up / "n.txt").write_text("unmerged\n")
+    git("add", "."); git("commit", "-q", "-m", "unmerged")
+    git("checkout", "-q", "main")
+    clone = tmp_path / "clone"
+    subprocess.run(["git", "clone", "-q", "-b", "main", str(up), str(clone)],
+                   check=True, capture_output=True)
+    return clone
+
+
+def test_a_merged_branch_only_the_remote_has_is_caught(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    ok, why = c.check_merged_branches(str(clone), "Built on `product/done`, awaiting merge.")
+    assert ok is False and "product/done" in why
+
+
+def test_an_unmerged_branch_only_the_remote_has_is_not_gone(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    assert c.check_merged_branches(str(clone), "On `product/next`, awaiting the label.")[0]
+
+
+def test_pending_is_read_beside_the_branch_not_at_the_paragraphs_start(tmp_path):
+    """PRD paragraphs are single lines of thousands of characters."""
+    clone = _clone_with_remote_branches(tmp_path)
+    opens = "Not yet read. " + "detail " * 60
+    assert c.check_merged_branches(str(clone), opens + "merged as `product/done`.")[0]
+    late = "detail " * 60 + "`product/done`, awaiting merge."
+    assert c.check_merged_branches(str(clone), late)[0] is False
+
+
+def test_a_file_path_is_not_a_branch(tmp_path):
+    clone = _clone_with_remote_branches(tmp_path)
+    (clone / "analysis").mkdir()
+    (clone / "analysis" / "log.csv").write_text("x\n")
+    assert c.check_merged_branches(str(clone), "`analysis/log.csv` is pending a read.")[0]

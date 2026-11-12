@@ -28,6 +28,7 @@ import math
 import os
 import re
 import statistics
+from collections import Counter
 from dataclasses import dataclass, field
 
 from . import config
@@ -396,7 +397,14 @@ def matches(meta, spec):
     "not X" would mix history in (the trap `split_cohorts` names)."""
     key, value, negate = _parse_spec(spec)
     got = str(meta.get(key, "")).strip()
-    return bool(got) and (got == value) != negate
+    return bool(got) and (got in _spec_values(value)) != negate
+
+
+def _spec_values(value):
+    """The values a spec names: one, or a comma-separated list, so a read can
+    leave out named uploads (`video_id!=a,b`; PRD §4, #14's closing line). The
+    whole string counts too, for a field whose own values hold a comma."""
+    return {value} | {v.strip() for v in value.split(",") if v.strip()}
 
 
 # A derived field's possible values, so a filter can name one no upload has
@@ -409,10 +417,15 @@ def _require_value(metas, spec):
     """Refuse a filter whose value no upload has. "!=" with a typo would
     otherwise keep every upload and print as if it had filtered."""
     key, value, _ = _parse_spec(spec)
-    if value in _DERIVED_VALUES.get(key, ()):
+    have = {str(m.get(key, "")).strip() for m in metas} | _DERIVED_VALUES.get(key, set())
+    if value in have:
         return
-    if not any(str(m.get(key, "")).strip() == value for m in metas):
-        raise ValueError(f"no logged upload has {key}={value}: check the spelling")
+    # Each value of a list, so one mistyped id cannot stay in unnoticed.
+    # A list of blanks ("$A,$B" with both unset) names nothing, so it is refused.
+    parts = _spec_values(value) - {value}
+    missing = sorted(parts - have) if parts else [value]
+    if missing:
+        raise ValueError(f"no logged upload has {key}={', '.join(missing)}: check the spelling")
 
 
 def within(videos, spec):
@@ -478,6 +491,20 @@ def release_cohorts(videos, key, value):
 # with 10 at 7 days, is too thin to stand alone, so `v7` still reads its pool.
 PREDECESSOR_MIN_UPLOADS = 20
 
+# A version that changed only the AI model, mapped to the format it re-runs.
+# As a predecessor it counts together with that format: `v7s` gains ~1
+# AskReddit upload a day, so alone it is under 20 in `v8`'s cut for weeks, and
+# the pool of v2-v7 it would fall back to is the comparison 10-18 ruled out.
+# Pooled, not skipped: `v8` runs on `v7s`'s model, and `v7s`'s uploads are the
+# nearest in time (PRD §0 #15, decided at the 11-09 weekly, before any `v8`
+# upload). Its own read (#13's rule) still compares it with `v7` alone.
+MODEL_ONLY = {"v7s": "v7"}
+
+
+def _same_format(value):
+    base = MODEL_ONLY.get(value, value)
+    return {base} | {k for k, v in MODEL_ONLY.items() if v == base}
+
 
 def predecessor(before, key, min_uploads=None):
     """The release a new one replaced, and its uploads, from `release_cohorts`'
@@ -487,14 +514,20 @@ def predecessor(before, key, min_uploads=None):
     not "worse than what it replaced?": `v7` read +20% over its pool (12.0 vs
     10.0 s), so `v8` judged against v2-v7 could fall ~17% below `v7` and still
     clear a 13% limit (2026-10-18, before any `v8` upload). The drift floor
-    still reads the whole history, which a single release is too short for."""
+    still reads the whole history, which a single release is too short for.
+    A model-only version (`MODEL_ONLY`) and its format count as one release,
+    named newest first ("v7s+v7")."""
     if not before:
         return None, before
     latest = max(before, key=lambda v: v.true_published or v.published)
     value = str(latest.meta.get(key, "")).strip()
     if not value:
         return None, before
-    own = [v for v in before if str(v.meta.get(key, "")).strip() == value]
+    group = _same_format(value) if key == "format_version" else {value}
+    own = [v for v in before if str(v.meta.get(key, "")).strip() in group]
+    if len(group) > 1:
+        seen = {str(v.meta.get(key, "")).strip() for v in own}
+        value = "+".join([value] + sorted(seen - {value}))
     need = PREDECESSOR_MIN_UPLOADS if min_uploads is None else min_uploads
     return (value, own) if len(own) >= need else (None, before)
 
@@ -801,9 +834,10 @@ def render_host_lines(log_rows, version, key="format_version", ids=None):
     one) or none. Never a trigger: it
     says how much of the change the verdict measured, so `ids` limits it to
     the verdict's uploads (its cut and age; PRD §4, pre-committed 2026-10-26).
-    Whole is a note per answer read, the setup and the vote. Empty when
-    nothing logs a count."""
-    whole = config.COMMENTARY_ANSWERS + 2
+    Whole is a note per answer read (while `HOST_REACTIONS`), the setup and
+    the vote. Empty when nothing logs a count."""
+    reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
+    whole = (config.COMMENTARY_ANSWERS if reacts else 0) + 2
     counts = []
     for r in log_rows:
         n = (r.get("host_lines") or "").strip()
@@ -930,8 +964,16 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
-# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20).
-RELEASE_MIN_UPLOADS = {"v7": 20, "v8": 20}
+# that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20;
+# `v7s`, MODEL's successor, 20 by #13's rule).
+RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20}
+
+# Each release's pre-committed cut (PRD §0), read when no --within is given.
+# Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was
+# 42 of 60 AskReddit and `v8` will be about half, so a pooled read would
+# judge the subreddit mix as well as the host (pre-mortem, 2026-10-25). The
+# rule says "while #3 runs": revisit this entry when #3 is read.
+RELEASE_WITHIN = {"v8": "subreddit=AskReddit"}
 
 
 @dataclass
@@ -944,6 +986,15 @@ class ReleaseRead:
     triggers: tuple
     comparisons: list
     floors: dict
+    beside: list = field(default_factory=list)   # [(Comparison, floor)], never in the verdict
+
+
+# Read by `--release` beside its verdict, never inside it. Engaged share is the
+# measure tests set from 2026-11-10 are judged on (D9, #91), but
+# `release_verdict` reads every comparison it is given, so a side thin on it
+# (collected only from 2026-10-05) would turn the watch-seconds verdict, and
+# auto-revert with it, into NO VERDICT.
+BESIDE_VERDICT = (Metric.ENGAGED_SHARE,)
 
 
 def release_read(version, key="format_version", target_age=None, within_spec=None):
@@ -968,7 +1019,23 @@ def release_read(version, key="format_version", target_age=None, within_spec=Non
     comparisons = [compare(a, b, f"{key}={version}", label, load.anchor, m)
                    for m in metrics]
     floors = {m: drift_floor(history, m) for m in metrics}
-    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors)
+    beside = [(compare(a, b, f"{key}={version}", label, load.anchor, m),
+               drift_floor(reported(history, m), m))
+              for m in BESIDE_VERDICT]
+    return ReleaseRead(load, a, b, unset, later, triggers, comparisons, floors, beside)
+
+
+def render_beside(read):
+    """`release_read`'s beside-the-verdict metrics, each with its own limit."""
+    out = []
+    for c, floor in read.beside:
+        out.append(c.render())
+        limit = ("not measurable — too few uploads report it in the era before"
+                 if floor is None else
+                 f"{floor:.0%} — median move between consecutive groups of "
+                 f"{MIN_COHORT} uploads in the era before it")
+        out.append(f"    detection limit: {limit}. Beside the verdict: auto-revert never fires on it (#18); a rule may judge on it (D9).")
+    return "\n".join(out)
 
 
 def latest_releases(log_rows, key="format_version", n=2):
@@ -991,13 +1058,14 @@ def release_digest_line(log_rows, target_age=None):
     target_age = AGE_MATCH_TARGET_DAYS if target_age is None else target_age
     parts = []
     for version in latest_releases(log_rows):
-        read = release_read(version, target_age=target_age)
+        cut = RELEASE_WITHIN.get(version)
+        read = release_read(version, target_age=target_age, within_spec=cut)
         if read is None:
             verdict = f"NO VERDICT — no upload has a snapshot at ~{target_age:g} days old"
         else:
             verdict = release_verdict(read.comparisons, read.floors, read.triggers,
                                       RELEASE_MIN_UPLOADS.get(version, MIN_COHORT))
-        parts.append(f"`{version}`: {verdict}")
+        parts.append(f"`{version}`" + (f" (within {cut})" if cut else "") + f": {verdict}")
     return (f"**Release checks** (auto-revert, every upload read at ~{target_age:g} days) — "
             + (" · ".join(parts) if parts else "no release logged"))
 
@@ -1190,6 +1258,86 @@ def views_gained_by_age(snapshot_rows, old_days=60):
     return out
 
 
+def two_week_rate(rows):
+    """Per-day rate of `views_gained_by_age`'s recent column over each interval
+    and the one before it, aligned with `rows` (None for the first). Two weekly
+    snapshots make two weeks; a skipped snapshot makes it longer.
+
+    Weekly gains alternated low and high for eight snapshots running (PRD §4,
+    2026-10-26) while two-week totals were steadier, so a single week's low is
+    read against this before it is called a drop."""
+    out = [None]
+    for (_, _, r0, d0), (_, _, r1, d1) in zip(rows, rows[1:]):
+        out.append((r0 + r1) / (d0 + d1) if d0 + d1 else None)
+    return out[:len(rows)]
+
+
+# R4 (PRD §0), pre-committed 2026-10-26: snapshots dated 10-12 to 11-16.
+SWINGS_START = datetime.date(2026, 10, 12)
+SWINGS_END = datetime.date(2026, 11, 16)
+SWING_LOW = 0.60       # a low is under 60% of each week beside it
+SWING_STEADY = 0.30    # steady is every week within ±30% of the mean
+
+
+def swing_lows(rates, share=SWING_LOW):
+    """Positions of the rates under `share` of every neighbour beside them
+    (one neighbour at either end)."""
+    out = set()
+    for i, r in enumerate(rates):
+        sides = [rates[j] for j in (i - 1, i + 1) if 0 <= j < len(rates)]
+        if sides and all(r < share * s for s in sides):
+            out.add(i)
+    return out
+
+
+def swing_read(counter, recent, start=SWINGS_START, end=SWINGS_END):
+    """R4: are weekly view swings viewers or data?
+
+    `counter` is [(date, lifetime views)] from `channel_stats.csv`, the
+    channel's near-real-time counter; `recent` is `views_gained_by_age`'s rows,
+    whose recent column is the snapshots' lagged one. Both become per-day
+    gains per interval between snapshots, kept only where both series cover
+    the same interval, so a missed snapshot never sets 14 days against 7.
+    The window runs from `start` to the first snapshot dated within a week
+    on or after `end` (a weekly job rerun a day late still closes it).
+
+    Returns (verdict, [(date, counter per day, recent per day)]). The verdict
+    is "viewers" when the counter alternates in step: its lows fall in
+    exactly the recent column's low weeks, and there are two or more, since
+    one shared dip is not alternation (settled 11-11, before the 11-16 data);
+    "data" when every counter rate is within ±30% of their mean; else
+    "unclear"; "insufficient" under three matched weeks. None until both
+    series reach `end`, so the rule is never read early; once either passes
+    the week after it unmatched, the matched weeks are read as they stand.
+    A week missing from either series makes the weeks beside it neighbours
+    in the low test, so a gap can turn an in-step read "unclear"."""
+    as_date = lambda x: x.date() if isinstance(x, datetime.datetime) else x
+    counter = sorted((d, v) for d, v in counter if d >= start)
+    per_day = {(d0, d1): (v1 - v0) / (d1 - d0).days
+               for (d0, v0), (d1, v1) in zip(counter, counter[1:]) if (d1 - d0).days}
+    rec = {(as_date(snap) - datetime.timedelta(days=days), as_date(snap)): r / days
+           for snap, _, r, days in recent if days}
+    week = datetime.timedelta(days=7)
+    pairs = sorted(p for p in per_day if p in rec and p[0] >= start)
+    close = next((d1 for _, d1 in pairs if end <= d1 < end + week), None)
+    if close is None and any(d1 >= end + week for _, d1 in list(per_day) + list(rec)):
+        close = end + week - datetime.timedelta(days=1)   # the window passed unmatched
+    weeks = [(d1, per_day[(d0, d1)], rec[(d0, d1)]) for d0, d1 in pairs
+             if close is None or d1 <= close]
+    if close is None:
+        return None, [w for w in weeks if w[0] < end]
+    if len(weeks) < 3:
+        return "insufficient", weeks
+    ours = [c for _, c, _ in weeks]
+    lows = swing_lows(ours)
+    if len(lows) >= 2 and lows == swing_lows([r for _, _, r in weeks]):
+        return "viewers", weeks
+    mean = sum(ours) / len(ours)
+    if mean and all(abs(c - mean) <= SWING_STEADY * mean for c in ours):
+        return "data", weeks
+    return "unclear", weeks
+
+
 def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, top=0.10):
     """How much of the views the best uploads earn, each read at the same age.
 
@@ -1206,6 +1354,41 @@ def views_concentration(snapshot_rows, at_age=TRAJECTORY_AT_AGE, tolerance=4, to
         return None
     top_n = max(1, round(len(values) * top))
     return len(values), sum(values), top_n, sum(values[:top_n]), values[0]
+
+
+def assignment_balance(coin, against, since=None, rows=None, until=None):
+    """(arms, levels, counts, p) for a randomized `coin` against `against`,
+    from the upload log alone. No outcome is read, so it may run before a
+    coin's read without peeking (PRD §0 #14, R2). counts[arm][level] is a
+    count; p[level] the two-sided Fisher p that both arms hold that level at
+    one rate (that level against the rest). Uploads with the coin unset are
+    left out; a coin with other than two arms raises ValueError."""
+    rows = [_with_derived_dimensions(r)        # slot, title_writer, ...: no outcome
+            for r in (_read_upload_log() if rows is None else rows)]
+    if since:
+        rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
+    if until:   # a read at 7 days sees uploads up to its snapshot's date less 7
+        rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] <= until.isoformat()]
+    rows = [r for r in rows if (r.get(coin) or "").strip()]
+    arms = sorted({r[coin].strip() for r in rows})
+    if len(arms) != 2:
+        raise ValueError(f"{coin} has {len(arms)} arm(s) here "
+                         f"({', '.join(arms) or 'none'}); balance reads two")
+
+    def level(r):
+        return str(r.get(against) or "").strip() or "(unset)"
+
+    levels = sorted({level(r) for r in rows})
+    if len(levels) < 2 or levels == ["(unset)"]:
+        # A typo or a field the log lacks would otherwise print one row at p 1.
+        raise ValueError(f"{against} takes {len(levels)} value(s) ({', '.join(levels)}) "
+                         f"over these uploads, so there is no mix to compare")
+    counts = {a: dict.fromkeys(levels, 0) for a in arms}
+    for r in rows:
+        counts[r[coin].strip()][level(r)] += 1
+    (a, b), n = arms, {arm: sum(counts[arm].values()) for arm in arms}
+    p = {lv: buried_rate_p(counts[a][lv], n[a], counts[b][lv], n[b]) for lv in levels}
+    return arms, levels, counts, p
 
 
 def hit_rates(videos, key, top=0.10):
@@ -1271,24 +1454,27 @@ def totals_change(series, weeks=4):
     return prior, recent, (recent / prior if prior else None)
 
 
-def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF):
+def trajectory_verdict(series, floor=None, half=TRAJECTORY_HALF, min_change=0.5, digits=1):
     """Rising, flat or falling — against the channel's own noise, not zero.
 
     A flat verdict is the actionable one and the whole point: it means the work
     being done is not moving the outcome, which no amount of process metrics
     would reveal. `floor` is the ordinary between-batch swing (see
     `drift_floor`); without it a 1s wobble reads as progress.
+
+    `min_change` and `digits` are in the metric's own units: the 0.5 default
+    is half a second, which on a 0-1 share would read every move as flat.
     """
     if len(series) < half * 2:
         return "unknown", f"only {len(series)} comparable periods"
     recent = median([m for _, _, m in series[-half:]])
     prior = median([m for _, _, m in series[-half * 2:-half]])
     change = recent - prior
-    span = f"{prior:.1f} → {recent:.1f}"
+    span = f"{prior:.{digits}f} → {recent:.{digits}f}"
     if floor is not None and abs(change) <= floor:
         return "flat", (f"{span} over {half * 2} periods — inside the "
-                        f"channel's own {floor:.1f} drift")
-    if abs(change) < 0.5:
+                        f"channel's own {floor:.{digits}f} drift")
+    if abs(change) < min_change:
         return "flat", f"{span} over {half * 2} periods"
     return ("rising" if change > 0 else "falling"), f"{span} over {half * 2} periods"
 
@@ -1852,6 +2038,7 @@ class AgeMatchedLoad:
     no_coverage: list = field(default_factory=list)  # old, but no snapshot at that age
     non_public: list = field(default_factory=list)   # zero-view and privatised: excluded
     privacy_known: bool = False                      # a snapshot recorded privacy
+    refused: dict = field(default_factory=dict)      # column -> uploads it was refused for
 
     def caveats(self):
         if not self.videos:
@@ -1866,6 +2053,11 @@ class AgeMatchedLoad:
             out.append(f"{len(self.no_coverage)} older upload(s) have no snapshot at that "
                        f"age (they predate the weekly series) — excluded")
         out.append(_privacy_caveat(self.non_public, self.privacy_known))
+        for col, n in self.refused.items():
+            # 10-26: subscribers refused on every row; a read of that metric
+            # would otherwise say "insufficient data" and be taken as the answer.
+            out.append(f"{n} upload(s) had {col} refused by the API at that age — "
+                       f"missing from any read of it, a failed collection, not thin data")
         return out
 
 
@@ -1912,6 +2104,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
     rows = _read_upload_log()
 
     videos, not_yet, no_coverage, non_public = [], [], [], []
+    refused = Counter()
     for row in rows:
         published = _parse_ts(row["timestamp_utc"])
         best = None
@@ -1932,6 +2125,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
         if _privatised_zero(row["video_id"], float(s.get("views") or 0), privacy):
             non_public.append(row["video_id"])
             continue
+        refused.update(k for k, v in s.items() if str(v or "").startswith("refused:"))
         meta = _with_derived_dimensions(row)
         videos.append(Video(
             video_id=row["video_id"],
@@ -1949,7 +2143,7 @@ def load_videos_at_age(target_age_days=AGE_MATCH_TARGET_DAYS,
             **{m: _optional_float(s.get(m)) for m in Metric.RETENTION},
         ))
     return AgeMatchedLoad(videos, anchor, target_age_days, not_yet, no_coverage,
-                          non_public, bool(privacy))
+                          non_public, bool(privacy), dict(sorted(refused.items())))
 
 
 # ---------------------------------------------------------------- zero-view analysis
@@ -2065,8 +2259,122 @@ def load_channel_videos_offline():
         "published": r["published_at"],
         "title": titles.get(r["video_id"], ""),
         "views": int(float(r["views"] or 0)),
+        "watch_s": float(r.get("avg_view_duration_s") or 0),
         "privacy": r.get("privacy_status") or "unknown",
     } for r in rows], asof
+
+
+# ---------------------------------------------------------------- upload spacing (PRD §0 R8)
+
+# Bet 2's four a day doubles views only if a video's views do not shrink when
+# more of ours share the feed. Nearly every day since April 2025 had two
+# uploads ~12 hours apart, so the only contrast in our data is an upload beside
+# a missed slot against the regular rhythm (about 1.5 a day against 2, locally),
+# never four. The rule was set 2026-11-08 before any view was read, and amended
+# the same night, still unread, when "none within 18 hours" labelled 1 of 878
+# (PRD §4, R8); these defaults are that rule.
+SPACING_WINDOW_H = 18
+SPACING_SINCE = "2025-04-01"
+SPACING_MIN_AGE_DAYS = 60
+SPACING_MIN_SPARSE = 25
+
+
+def spacing_labels(videos, window_h=SPACING_WINDOW_H):
+    """{id: 'sparse' | 'regular' | 'dense'}: at most one other of our uploads
+    published under `window_h` hours either side, exactly two, or more. Every
+    video is someone's neighbour, privatised or not: it was in the feed when
+    published. A neighbour exactly `window_h` away is not near."""
+    times = sorted((_parse_ts(v["published"]), v["id"]) for v in videos if v.get("published"))
+    window = datetime.timedelta(hours=window_h)
+    labels = {}
+    for i, (t, vid) in enumerate(times):
+        near = 0
+        for j in range(i - 1, -1, -1):
+            if t - times[j][0] >= window:
+                break
+            near += 1
+        for j in range(i + 1, len(times)):
+            if times[j][0] - t >= window:
+                break
+            near += 1
+        labels[vid] = "sparse" if near <= 1 else "regular" if near == 2 else "dense"
+    return labels
+
+
+@dataclass
+class SpacingRead:
+    months: int            # months with >= 2 sparse uploads and a regular median above 0
+    sparse: int            # sparse uploads in those months
+    regular: int           # regular uploads in those months
+    dense: int             # dense uploads in the whole population: shown, never judged
+    ratio: float = None    # median over months of median(sparse) / median(regular) views
+    gap: float = None      # the 90th percentile of |ratio - 1| with labels shuffled within months
+    watch_ratio: float = None   # the same on watch-seconds: beside it, never deciding
+    verdict: str = "insufficient data"
+
+
+def _month_ratio(groups, key):
+    ratios = []
+    for sparse, regular in groups:
+        a, p = median([v[key] for v in sparse]), median([v[key] for v in regular])
+        if p:
+            ratios.append(a / p)
+    return median(ratios) if ratios else None
+
+
+def spacing_read(videos, asof, since=SPACING_SINCE, min_age_days=SPACING_MIN_AGE_DAYS,
+                 min_sparse=SPACING_MIN_SPARSE, shuffles=2000, quantile=0.9, seed=0):
+    """R8: do views per upload fall when another upload is near? Public
+    uploads from `since` to `min_age_days` before `asof`, sparse against
+    regular within each calendar month, so the channel's eras never compare
+    with each other. Lifetime views at the snapshot still mix ages within a
+    month, and missed slots include failed runs (both stated with the rule).
+    Watch-seconds is 0 for an upload nobody played; it never decides."""
+    import random
+    labels = spacing_labels(videos)
+    cutoff = asof - datetime.timedelta(days=min_age_days)
+    by_month, dense = {}, 0
+    for v in videos:
+        if v.get("privacy") != "public" or not v.get("published"):
+            continue
+        t = _parse_ts(v["published"])
+        if v["published"][:10] < since or t >= cutoff:
+            continue
+        label = labels[v["id"]]
+        if label == "dense":
+            dense += 1
+            continue
+        by_month.setdefault(v["published"][:7], {"sparse": [], "regular": []})[label].append(v)
+    groups = [(g["sparse"], g["regular"]) for _, g in sorted(by_month.items())
+              if len(g["sparse"]) >= 2 and g["regular"]
+              and median([v["views"] for v in g["regular"]])]
+    read = SpacingRead(months=len(groups), sparse=sum(len(a) for a, _ in groups),
+                       regular=sum(len(p) for _, p in groups), dense=dense)
+    if read.sparse < min_sparse:
+        return read
+    read.ratio = _month_ratio(groups, "views")
+    read.watch_ratio = _month_ratio(groups, "watch_s")
+    rng, deltas = random.Random(seed), []
+    for _ in range(shuffles):
+        shuffled = []
+        for sparse, regular in groups:
+            pool = sparse + regular
+            rng.shuffle(pool)
+            shuffled.append((pool[:len(sparse)], pool[len(sparse):]))
+        r = _month_ratio(shuffled, "views")
+        if r is not None:
+            deltas.append(abs(r - 1))
+    deltas.sort()
+    read.gap = deltas[min(len(deltas) - 1, int(quantile * len(deltas)))] if deltas else None
+    if read.ratio is None or read.gap is None:
+        read.verdict = "insufficient data"
+    elif read.ratio - 1 > read.gap:
+        read.verdict = "sparse leads beyond the gap: views dilute at this spacing"
+    elif 1 - read.ratio > read.gap:
+        read.verdict = "regular leads beyond the gap: recorded, nothing changes"
+    else:
+        read.verdict = "within the gap: no dilution detectable at this spacing"
+    return read
 
 
 # ---------------------------------------------------------------- traffic sources (R4.7)
@@ -2263,6 +2571,18 @@ def subscriber_rate(snapshot_rows, published_since=None):
     return n, views, subs, subs / views * 1000
 
 
+def refused(snapshot_rows, column):
+    """Why a snapshot's `column` was not collected, as weekly_analytics writes
+    it ("refused: ..."), or None. A refused column leaves a cohort as empty as
+    a thin one, but the data exists and the query failed: on 2026-10-26 an
+    HTTP 500 left subscribers on 0 of 1,082 rows, and the reports said
+    "insufficient data", which a shift takes as the answer (CLAUDE.md §6)."""
+    for r in snapshot_rows:
+        if str(r.get(column) or "").startswith("refused:"):
+            return r[column]
+    return None
+
+
 # Each revenue route's bar, as PLAN §1 sources and dates it: (route, views
 # needed in its window, window in days, engaged views only, followers needed,
 # on YouTube). The distances are computed by `route_distances`, so PLAN's
@@ -2372,6 +2692,71 @@ def attach_answer_lengths(videos, path=ANSWER_LENGTHS):
     return sum(v.first_answer_words is not None for v in videos)
 
 
+# Watch time and reach (PRD §4, pre-committed 2026-11-01, before the 11-02
+# snapshot and before any number was read): every bet is judged on
+# watch-seconds (D9), but the revenue bar counts views. Do uploads watched
+# longer earn more views? Uploads since 2026-10-05 read at ~7 days with 10+
+# views, Spearman rho between watch-seconds and views, as R3 read the opening.
+# Observational: reach can also bring colder viewers who leave sooner, so a
+# missing or inverse link changes what a watch-seconds gain is credited with,
+# never the metric itself. Read once.
+WATCH_REACH_RHO = 0.3
+WATCH_REACH_SINCE = datetime.date(2026, 10, 5)
+
+
+def watch_reach_verdict(rho, p_value, age_rhos=(None, None)):
+    """The pre-committed rule above, applied as written. `age_rhos` is each
+    metric's rho against reading age (views, watch-seconds): a link both
+    share with age, in the same direction, is age, not watching -- read again
+    at the next snapshot. Opposite directions would push rho down, not up."""
+    if rho is None:
+        return "insufficient data: read at the next snapshot"
+    if p_value < 0.05 and rho >= WATCH_REACH_RHO:
+        a, b = age_rhos
+        if (a is not None and b is not None and min(abs(a), abs(b)) >= WATCH_REACH_RHO
+                and a * b > 0):
+            return "confounded: both track reading age; read again at the next snapshot"
+        return "tracks: uploads watched longer earn more views; D9's assumption 2 holds on this count"
+    if p_value < 0.05 and rho <= -WATCH_REACH_RHO:
+        return ("inverse: uploads watched longer earn fewer views; the November monthly "
+                "takes it to D9 and to the owner")
+    return ("no link at this size: a watch-seconds gain is not credited as reach; "
+            "the November monthly takes it to D9")
+
+
+def rank_corr_interval(rho, n, z=1.96):
+    """A 95% interval for Spearman's rho: Fisher's z with Bonett and Wright's
+    variance (1 + rho^2/2) / (n - 3). It never changes a verdict; it says
+    whether "no link" rules a link of the rule's size out or only failed to
+    see one at this n (2026-11-02, for D9 at the monthly). None when rho is
+    unread or n under 4."""
+    if rho is None or n is None or n < 4 or math.isnan(rho):
+        return None
+    r = max(-0.999999, min(0.999999, rho))
+    centre, se = math.atanh(r), math.sqrt((1 + r * r / 2) / (n - 3))
+    return math.tanh(centre - z * se), math.tanh(centre + z * se)
+
+
+def interval_reading(interval, bar):
+    """Which links of size `bar` the interval excludes, in words. Decided on
+    the two decimals report.py prints, so the words never contradict them."""
+    if interval is None:
+        return "no interval: too few uploads"
+    lo, hi = (round(x, 2) for x in interval)
+    if lo >= bar:
+        return f"a link of +{bar} or more: weaker ones ruled out"
+    if hi <= -bar:
+        return f"a link of -{bar} or less: weaker ones ruled out"
+    above, below = hi < bar, lo > -bar
+    if above and below:
+        return f"rules out a link of {bar} either way"
+    if above:
+        return f"rules out +{bar} or more; cannot rule out -{bar}"
+    if below:
+        return f"rules out -{bar} or less; cannot rule out +{bar}"
+    return f"cannot rule out a link of {bar} either way: too few uploads to tell"
+
+
 def first_answer_verdict(rho, p_value):
     """The pre-committed rule above, applied as written."""
     if rho is None:
@@ -2379,3 +2764,159 @@ def first_answer_verdict(rho, p_value):
     if rho <= FIRST_ANSWER_LEAD_RHO and p_value < 0.05:
         return "lead: a long first answer loses watch time (a candidate, not a change)"
     return "noise: no loss from a long first answer at this size"
+
+
+# The experiment ledger (PLAN.md C18, D15's pattern): every pre-committed
+# rule, when it was set, due and read, and what it found. D15 generalized the
+# friction log's lesson: a standing process needs an outcome recorded each
+# time it runs, a scheduled read, and a rule set in advance. The experiment
+# process had rules but no record of itself, so whether it can tell a change
+# that works from one that does not was never asked. A read is on time within
+# a week of its due date, the snapshot's cadence.
+EXPERIMENTS = config.ROOT / "analysis" / "experiments.csv"
+LEDGER_GRACE_DAYS = 7
+
+
+def load_experiments(path=EXPERIMENTS):
+    if not os.path.exists(path):
+        return []
+    with open(path, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def _ledger_date(value):
+    try:
+        return datetime.date.fromisoformat((value or "").strip())
+    except ValueError:
+        return None
+
+
+# A coin's outcome stays unread until its pre-committed date. On 11-05 an idea
+# generator cut views by title_caps with #14 still baking (n=18/12), and
+# nothing stopped it. Each field names the ledger row whose `due` and `read`
+# say whether it is still blind; --balance, which reads assignments only, is
+# never refused. `title_hype` (a derived dimension) matches #14's arm on 49
+# of its first 50 uploads, so it is the same cut. It opens at 00:00 UTC on the
+# due date, hours before that day's 06:00 snapshot: an --offline read then
+# still sees the week before, which is the read's to check, not a peek.
+BLIND_FIELDS = {"title_caps": "#14", "title_hype": "#14", "voice": "R7-voice-watch"}
+
+
+def blind_reads(fields, rows, today):
+    """[(field, ledger id, due)] for each of `fields` whose ledger row is
+    unread and due after `today`. A field with no row, or a row already read
+    or with no due date, is open."""
+    by_id = {r.get("id"): r for r in rows}
+    blind = []
+    for field in dict.fromkeys(fields):
+        row = by_id.get(BLIND_FIELDS.get(field))
+        if not row or (row.get("read") or "").strip():
+            continue
+        due = _ledger_date(row.get("due"))
+        if due and today < due:
+            blind.append((field, row["id"], due))
+    return blind
+
+
+def _percent(value):
+    """The signed first percentage in a cell: '+20% (12.0 vs 10.0)' -> 20,
+    '−39%' -> -39, '~18%' -> 18. None when there is none, or when the cell is
+    a decision threshold ('bar ...') rather than a measured effect or limit."""
+    value = (value or "").strip().replace("−", "-")
+    if value.startswith("bar"):
+        return None
+    m = re.search(r"(-?)\s*(\d+(?:\.\d+)?)\s*%", value)
+    return (-1 if m.group(1) else 1) * float(m.group(2)) if m else None
+
+
+def experiment_ledger(rows, today):
+    """What the ledger says about the experiment process itself.
+
+    Returns counts and lists: reads on time, late, and overdue; verdicts; and
+    the keeps whose effect cleared the detection limit printed beside them
+    (credited) against those that did not -- a keep inside the limit is the
+    absence of a detected harm, never evidence the change worked (§4,
+    2026-09-21). `upcoming` is each unread rule's smallest detectable effect
+    and when it is due."""
+    out = {"total": len(rows), "read": [], "on_time": [], "late": [],
+           "overdue": [], "pending": [], "closed_unread": [], "undated": [],
+           "verdicts": {},
+           "credited": [], "not_credited": [], "unmeasured_keeps": [],
+           "upcoming": [], "set_to_read_days": []}
+    for r in rows:
+        due, read, rule_set = (_ledger_date(r.get(k)) for k in ("due", "read", "rule_set"))
+        verdict = (r.get("verdict") or "").strip() or "pending"
+        out["verdicts"][verdict] = out["verdicts"].get(verdict, 0) + 1
+        if read:
+            out["read"].append(r)
+            if rule_set:
+                out["set_to_read_days"].append((read - rule_set).days)
+            if due:
+                late = (read - due).days > LEDGER_GRACE_DAYS
+                out["late" if late else "on_time"].append(r)
+            else:
+                out["undated"].append(r)
+        elif verdict != "pending":
+            out["closed_unread"].append(r)      # dropped before any read
+        else:
+            out["pending"].append(r)
+            if due and (today - due).days > LEDGER_GRACE_DAYS:
+                out["overdue"].append(r)
+            out["upcoming"].append((r.get("id"), r.get("detectable") or "?",
+                                    due.isoformat() if due else "?"))
+        if verdict == "keep":
+            # The record's own call wins (v7: "Not credited", its lead was
+            # mostly length); otherwise a gain beyond the limit printed beside it.
+            said = (r.get("credited") or "").strip()
+            effect, limit = _percent(r.get("effect")), _percent(r.get("detectable"))
+            if said in ("yes", "no"):
+                out["credited" if said == "yes" else "not_credited"].append(r)
+            elif effect is None or limit is None:
+                out["unmeasured_keeps"].append(r)
+            elif effect > abs(limit):
+                out["credited"].append(r)
+            else:
+                out["not_credited"].append(r)
+    return out
+
+
+def render_experiment_ledger(summary):
+    """The ledger read as text, for `report.py --experiments`."""
+    s = summary
+    if not s["total"]:
+        return "No experiment ledger (analysis/experiments.csv)."
+    dated = len(s["on_time"]) + len(s["late"])
+    lines = [f"EXPERIMENT LEDGER — {s['total']} pre-committed rules, "
+             f"{len(s['read'])} read, {len(s['pending'])} not yet, "
+             f"{len(s['closed_unread'])} closed without a read",
+             "  verdicts: " + ", ".join(f"{k} {v}" for k, v in sorted(s["verdicts"].items())),
+             f"  reads with a due date: {len(s['on_time'])} of {dated} on time "
+             f"(within {LEDGER_GRACE_DAYS} days); {len(s['undated'])} read with none set"]
+    if s["late"]:
+        lines.append("    late: " + ", ".join(r["id"] for r in s["late"]))
+    if s["overdue"]:
+        lines.append("  OVERDUE, unread past their due date: "
+                     + ", ".join(r["id"] for r in s["overdue"]))
+    if s["set_to_read_days"]:
+        lines.append(f"  rule set to read: median "
+                     f"{statistics.median(s['set_to_read_days']):g} days")
+    keeps = len(s["credited"]) + len(s["not_credited"]) + len(s["unmeasured_keeps"])
+    lines.append(f"  keeps: {keeps}; effect beyond the limit printed beside it: "
+                 f"{len(s['credited'])}; inside it, or not credited by the record: "
+                 f"{len(s['not_credited'])}; no percentage limit recorded: "
+                 f"{len(s['unmeasured_keeps'])}")
+    lines.append("    (a keep inside its limit is no detected harm, not a "
+                 "measured gain)")
+    reverts = [r["id"] for r in s["read"] if (r.get("verdict") or "").strip() == "revert"]
+    if reverts:
+        lines.append(f"  reverts: {len(reverts)} ({', '.join(reverts)}); "
+                     "the source column says whether each stood")
+    elif keeps:
+        lines.append("  no rule has ever reverted a change: the ledger cannot yet "
+                     "show the rules would catch one that hurt")
+    if s["upcoming"]:
+        lines.append("  next reads (smallest detectable effect, due; '?' = "
+                     "not recorded, or due on an upload count):")
+        lines += [f"    {i}: {d}, {due}" for i, d, due in
+                  sorted(s["upcoming"], key=lambda x: (x[2] == "?", x[2]))]
+    return "\n".join(lines)

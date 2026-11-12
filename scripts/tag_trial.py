@@ -8,13 +8,17 @@
     venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --setup blurt
     venv/bin/python scripts/tag_trial.py --model groq --setup specific
     venv/bin/python scripts/tag_trial.py --model groq --groq-model qwen/qwen3.8-27b
+    venv/bin/python scripts/tag_trial.py --model upload --gemini-model gemini-3.8-flash --posts 2,4,9
+    venv/bin/python scripts/tag_trial.py --model upload --posts 2,4,9 --thinking low
 
 The models differ, so read the one that matters: on 2026-10-20 the upload
 model reacted to 7 of 9 answers where the sample model and Groq mostly
 labelled (PRD §4). Score the output against §4's bar for a tag.
 
 `--model upload` spends the allowance live uploads share (20 a day; a shift
-may use 8, after 07:00 UTC and not within an hour of an upload), so it is
+may use 8, after 07:00 UTC and not within an hour of an upload; with
+`--gemini-model`, that candidate's own allowance instead, unless it is
+`MODEL` itself: gemini-3.6-flash since 2026-11-08), so it is
 capped at UPLOAD_CAP per run, one try each: a 503 is not retried. The sample
 model's own allowance is undocumented and is production's fallback, so it is
 capped too.
@@ -174,9 +178,15 @@ def setup_model(model, setup="shipped", groq_model=None, reactions="shipped"):
     config.AI_PROVIDER = "groq" if model == "groq" else "gemini"
     config.DRY_RUN = model == "sample"
     config.METADATA_ON_UPLOAD_MODEL = False
+    config.HOST_REACTIONS = True   # a trial reads the reactions, whatever ships (#77)
     if model != "groq":   # Groq is free: its per-minute cap is waited out
         retrying = llm.generate_retrying
         llm.generate_retrying = lambda prompt, tries=2, **kw: retrying(prompt, tries=1, **kw)
+    return llm
+
+
+def llm_module():
+    from src import llm
     return llm
 
 
@@ -193,7 +203,24 @@ def main(argv=None):
                          "REACTIONS_UNGRADED or REACTIONS_REACT_ONLY")
     ap.add_argument("--groq-model", default=None,
                     help="with --model groq: e.g. qwen/qwen3.8-27b")
+    # The successor trial (PRD §4, 11-07) reads each MODEL candidate on the same
+    # posts. Only a candidate with a known thinking level: a level a model
+    # refuses costs the run, and that model's allowance, for nothing.
+    ap.add_argument("--gemini-model", choices=sorted(llm_module()._LOWEST_THINKING),
+                    default=None, help="with --model upload: the MODEL candidate to read")
+    # Whether 3.6-flash labels because it runs at its lowest level (PRD §4,
+    # 11-08: 4 of 9 reacted at "minimal"): one variable, the metadata call's level.
+    ap.add_argument("--thinking", choices=["minimal", "low"], default=None,
+                    help="with --model upload: MODEL's thinking level for the metadata call")
     args = ap.parse_args(argv)
+    if args.thinking and args.model != "upload":
+        raise SystemExit("--thinking sets MODEL's level: use it with --model upload")
+    if args.gemini_model and args.model != "upload":
+        raise SystemExit("--gemini-model reads a MODEL candidate: use it with --model upload")
+    # A level the model refuses (3.8-flash: "minimal", HTTP 400) costs a request.
+    target = args.gemini_model or llm_module().MODEL
+    if args.thinking == "minimal" and llm_module()._LOWEST_THINKING.get(target) != "minimal":
+        raise SystemExit(f"{target} does not take minimal thinking")
     chosen = pick(args.posts)
     cap = {"upload": UPLOAD_CAP, "sample": SAMPLE_CAP}.get(args.model)
     if cap is not None and len(chosen) > cap:
@@ -205,13 +232,20 @@ def main(argv=None):
     from src import llm as gated
     ships, grades = gated._reads_as_reaction, gated._grades
     llm = setup_model(args.model, args.setup, args.groq_model, args.reactions)
+    if args.gemini_model:
+        llm.MODEL = args.gemini_model
+    if args.thinking:
+        llm._LOWEST_THINKING = dict(llm._LOWEST_THINKING, **{llm.MODEL: args.thinking})
     for i, n in enumerate(chosen):
         if args.model == "groq" and i:
             time.sleep(GROQ_SPACING)
         q, answers = POSTS[n - 1]
+        start = time.monotonic()
         meta = llm.get_metadata(q, answers, style="A", caps=True)
         h = meta.commentary
         print(json.dumps({"post": n, "source": meta.source,
+                          "model": llm.MODEL if args.model == "upload" else args.model,
+                          "seconds": round(time.monotonic() - start, 1),
                           "setup": h and h.setup,
                           "setup_ships": bool(h and h.setup and ships(h.setup)),
                           "reactions": h and h.reactions,

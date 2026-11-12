@@ -83,9 +83,20 @@ ORIENT = {
     # Added 2026-10-05 with the company reframe (D12): the company's goal, its
     # queue outside the channel product, its risks and the review dates. Read
     # at shift start, like PRD §0, so it is budgeted like it.
-    "PLAN.md": 1300,
+    # 1300 -> 1400 on 2026-10-27: the queue gained the process's own work,
+    # the friction log and the experiment-process review (D15). PLAN sat at
+    # 1300/1300 with every row accurate and none closable; shifts trimmed it
+    # twice on 10-26 just to stay under (friction G15).
+    "PLAN.md": 1400,
     ".claude/skills/pickup/SKILL.md": 700,
 }
+# Read on demand, so outside the total above, but budgeted so they can only
+# shrink. PRD §4, the findings, grew 15,317 -> 20,714 words in the week to
+# 11-12 with no budget (D4, audit 11-12), and idea helpers read it
+# (backlog_status.answered_in). Set at that day's size: a finding added means
+# another compressed, a superseded one to a line and a pointer to git.
+# 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
+REFERENCE = {"PRD.md#4. Objectives": 20310}
 
 
 def words(text):
@@ -256,8 +267,9 @@ FUNCTIONS = ["strategy", "gm", "market", "audience", "distribution", "monetizati
              "finance", "legal", "security"]
 
 
-def allocation_entries(raw):
+def allocation_entries(raw, full_heading=False):
     """(heading, {function or old lane: % of the shift}) per entry, newest first.
+    The heading is cut to 28 characters unless `full_heading`.
 
     Fenced blocks are dropped first: the header's template is itself an entry,
     and until 2026-09-29 it was read as the newest shift."""
@@ -279,11 +291,12 @@ def allocation_entries(raw):
                 hit = re.match(r"\s*([a-z]+)\s*(\d+)\s*→\s*(\d+)", part.strip())
                 if hit:
                     row[hit.group(1)] = int(hit.group(3))
-        entries.append((block.split("\n")[0].strip()[:28], row))
+        heading = block.split("\n")[0].strip()
+        entries.append((heading if full_heading else heading[:28], row))
     return entries
 
 
-def worklog_history(commits=40):
+def worklog_history(commits=200):
     """allocation_entries over WORKLOG.md now and in its recent commits, one
     per heading, newest first. The log keeps ~10 entries; older ones are still
     in git history (shift.yml checks out in full)."""
@@ -300,17 +313,55 @@ def worklog_history(commits=40):
                                         capture_output=True, text=True).stdout)
     except (OSError, subprocess.CalledProcessError):
         pass                                    # no git: the current file is all there is
-    # Keyed on the date and time: a shift may reword its headline or even its
-    # time, so only entries older than the current file's oldest were dropped.
-    seen, oldest = {}, None
+    return merge_versions(texts)
+
+
+def _summaries(raw):
+    """{full heading: its Summary's first 100 characters}. A shift that changed
+    both its time and its headline (10-18 08:50, then 08:45) kept its summary."""
+    raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)
+    out = {}
+    for block in raw.split("\n## ")[1:]:
+        m = re.search(r"\*\*Summary:\*\*\s*(.{1,100})", block)
+        if m:
+            out[block.split("\n")[0].strip()] = m.group(1).strip()
+    return out
+
+
+def merge_versions(texts):
+    """One allocation entry per shift across WORKLOG versions, current first.
+
+    Keyed on the date and time: a shift may reword its headline or even its
+    time, so only entries older than the current file's oldest were dropped.
+    A shift that re-stamps its time keeping its headline (10-24 09:05, then
+    08:50) is one shift, as in `backlog_status.recently_dropped`; the 10-25
+    audit found it counted twice, pushing another shift out of the window.
+    A headline is its first 60 characters, as there: 11-09 12:15 became 12:25
+    with the headline's second half and the summary rewritten (audit 11-12).
+    A summary links only with the same time split: three 11-07 shifts opened
+    on one stock sentence and two were read as one, while 10-18's re-stamp
+    kept only its summary's first sentence (audit 11-12)."""
+    seen, oldest, links = {}, None, set()
     for i, text in enumerate(texts):            # current file first, so its edits win
-        for label, row in allocation_entries(text):
-            key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", label).group(0)
+        summaries = _summaries(text)
+        for heading, row in allocation_entries(text, full_heading=True):
+            key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", heading).group(0)
+            headline = heading.split("—", 1)[1].strip()[:60] if "—" in heading else ""
+            summary = summaries.get(heading, "")
+            mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set()) \
+                | ({("s", key[:10], summary, tuple(sorted(row.items())))} if summary else set())
+            restamped = key not in seen and bool(mine & links)
+            links |= mine
+            if restamped:
+                continue
             if i == 0 or oldest is None or key < oldest:
-                seen.setdefault(key, (label, row))
+                seen.setdefault(key, (heading[:28], row))
         if i == 0 and seen:
             oldest = min(seen)
     return [seen[k] for k in sorted(seen, reverse=True)]
+
+
+ALLOCATION_SHIFTS = 20
 
 
 def allocation_history():
@@ -318,8 +369,10 @@ def allocation_history():
 
     A function that never gets time is not by itself a problem -- the reviews
     give every function its turn (cadence.py) -- but a function with ready work
-    in the queue that never gets time is a ranking problem worth reading for."""
-    entries = worklog_history()
+    in the queue that never gets time is a ranking problem worth reading for.
+    The newest ALLOCATION_SHIFTS: two audits' worth, so "never worked" names a
+    window an audit can compare, whatever depth of git history it reads."""
+    entries = worklog_history()[:ALLOCATION_SHIFTS]
     if not entries:
         print("\nno time records in WORKLOG.md yet")
         return
@@ -432,6 +485,28 @@ def health(raise_issues=False):
             "Find why shifts are not taking the due review (cadence.py "
             "puts it ahead of the queue) and fix that."))
 
+    # D15 (a): the work log's friction notes stopped on 10-08 and no one
+    # noticed for three weeks. This is the owner's, not SHIFT_OWNED: a silent
+    # stop is the failure it exists to catch.
+    import friction
+    try:
+        silent = friction.silent_run(ledger=LEDGER)
+    except (ValueError, UnicodeDecodeError, csv.Error) as err:
+        # A bad byte in the log must not cost the other checks their run.
+        print(f"\nFRICTION CHECK FAILED, not read today: {err}")
+        silent = 0
+    if silent >= friction.SILENT_RUN:
+        problems.append((
+            "process-friction-silent",
+            "Shifts have stopped logging friction",
+            f"The last {silent} completed shifts logged no row in the friction "
+            f"log (friction.py gaps). DECISIONS.md D15 says {friction.SILENT_RUN} "
+            "silent shifts in a row come to you: the work log's friction notes "
+            "stopped the same way on 10-08 and went unnoticed for three weeks.",
+            "Find why shifts stopped calling friction.py add (the shift skill "
+            "asks for a row as each item finishes) and fix that; the weekly "
+            "review reads D15's rule if the cause is the rule itself."))
+
     if not problems:
         print("\nPROCESS HEALTH: ok")
         return []
@@ -469,6 +544,7 @@ def main():
     orient = measure(ORIENT)
     blocking = report(always, "ALWAYS LOADED (every session, whatever the task)")
     advisory = report(orient, "READ AT STARTUP (every shift)")
+    advisory += report(measure(REFERENCE), "READ ON DEMAND (budgeted to shrink, not in the total)")
     corpus_over = corpus_health()
 
     total = sum(n for _, n, _ in always + orient if n)

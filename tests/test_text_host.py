@@ -38,6 +38,13 @@ from src import llm, run
 from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_until
 
 
+@pytest.fixture(autouse=True)
+def reactions_on(monkeypatch):
+    """This file pins bet 1 as sampled 10-25, a note per answer;
+    test_no_reactions.py pins the build without them (#77, 11-11)."""
+    monkeypatch.setattr(config, "HOST_REACTIONS", True)
+
+
 @pytest.fixture
 def text_host(monkeypatch):
     """The mechanics below count nothing, so they reuse the two-answer
@@ -130,6 +137,18 @@ def test_the_posted_vote_starts_each_sentence_with_a_capital():
     # stop, and a contraction is still a plain word.
     assert content.sentence_case("nope. sorry. which?") == "Nope. Sorry. Which?"
     assert content.sentence_case("i'd pick it. don’t you?") == "I'd pick it. Don’t you?"
+    # 2026-11-05: "i" alone is a capital, and "vs.", "u.s." and an ellipsis
+    # end no sentence, as in llm.sentence_case.
+    assert content.sentence_case("can i pick both? so do i. which?") == "Can I pick both? So do I. Which?"
+    assert content.sentence_case("cats vs. dogs: which wins?") == "Cats vs. dogs: which wins?"
+    assert content.sentence_case("the u.s. president? the job... for you?") == (
+        "The u.s. president? The job... for you?")
+    assert content.sentence_case("this one, i.e. the cat") == "This one, i.e. the cat"
+    # Its review: one-letter words, digits and closing marks still end one.
+    assert content.sentence_case("option a. option b. so do I. which?") == (
+        "Option a. Option b. So do I. Which?")
+    assert content.sentence_case("pick 5. cats (obviously). you?") == "Pick 5. Cats (obviously). You?"
+    assert content.sentence_case("web 3.0. ios 17.1. which?") == "Web 3.0. Ios 17.1. Which?"
     for kept in ("iPhone people, again. YouTube knows.", "r/AskReddit agrees. 3 votes so far!",
                  "Raising my hand for yes. Which gets your vote?", ""):
         assert content.sentence_case(kept) == kept
@@ -262,7 +281,7 @@ def test_the_guard_does_not_pay_twice_for_a_generic_close(monkeypatch):
 def test_the_upload_log_carries_the_host_line_count():
     import inspect
     from src import log
-    assert log.FIELDS[-1] == "host_lines"
+    assert "host_lines" in log.FIELDS[log.FIELDS.index("title_caps"):]   # appended, not inserted
     assert '"host_lines": host_lines' in inspect.getsource(run.main)
 
 
