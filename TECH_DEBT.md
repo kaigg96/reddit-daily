@@ -435,7 +435,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   To…" and singular "A stranger told me" pass (as on `main`); spelled counts
   newly drop "Should two people split the bill?"; "How often/What do people
   say…" drop. A word list keeps leaking, so before switch-on weigh a different
-  check (the screen call judging the title), not a fourth round. **Closes
+  check (the screen call judging the title), not a fourth round. **Graded
+  from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
+  `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
