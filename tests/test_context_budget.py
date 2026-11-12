@@ -78,12 +78,17 @@ def test_two_shifts_whose_summaries_open_alike_stay_two():
     """Three 11-07 shifts opened on the same stock sentence; two were merged."""
     stock = ("Nothing viewers see changed, and the company is no closer to revenue: "
              "bet 1 (#77) still waits on your label")
-    def entry(stamp, headline, rest):
-        return _entry(stamp, headline, "gm 100") + f"\n**Summary:** {stock}. {rest}\n"
+    def entry(stamp, headline, worked, rest=""):
+        return _entry(stamp, headline, worked) + f"\n**Summary:** {stock}. {rest}\n"
     current = "# Work log\n" + _entry("2026-11-08 (17:56)", "newest", "product 100")
-    old = current + entry("2026-11-07 (10:08)", "half-tested", "This shift tested it.") \
-        + entry("2026-11-07 (00:20)", "Google swaps", "This shift found the swap.")
+    old = current + entry("2026-11-07 (10:08)", "half-tested", "reliability 60 · gm 40") \
+        + entry("2026-11-07 (00:20)", "Google swaps", "gm 35 · security 65")
     assert len(context_budget.merge_versions([current, old])) == 3
+    # 11-07's 00:35 draft became 00:20, rewriting time, headline and the
+    # summary's end; its opening and its split stayed, so it is one shift.
+    draft = current + entry("2026-11-07 (00:35)", "Two old tokens", "gm 35 · security 65", "Draft.")
+    labels = [label[:18] for label, _ in context_budget.merge_versions([current, old, draft])]
+    assert labels == ["2026-11-08 (17:56)", "2026-11-07 (10:08)", "2026-11-07 (00:20)"]
 
 
 def test_two_shifts_on_one_day_stay_two():
