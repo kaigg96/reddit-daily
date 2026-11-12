@@ -264,22 +264,31 @@ def _own_wording(prompt, verbatim=()):
 # PLAN C16: the prompt forbids naming Reddit or passing the takes off as
 # people's, and this is the check (11-11 review: prompt-only before). A title
 # or closing line that does falls back as a failed one does; a keyword is left out.
-# A count of people only with a telling word or "on" after it ("3 People You
-# Meet" is a list, not answers), and no people-telling in a question about
-# people ("Why do people say sorry?"): the merge review, 2026-11-12.
-_TELL = r"(share|reveal|admit|say|said|tell|told|confess|explain|answer)\w*"
+# Two exemptions, from the merge review (2026-11-12): a count of people
+# followed by a list word ("3 People You Meet") is a list, not answers; and
+# people telling, in a line that opens as a question ("Why do so many people
+# say sorry?"), asks about people rather than quoting them.
+_PEOPLE = r"(people|strangers|users|folks|commenters)"
 _OWN_BANNED = re.compile(
-    r"reddit|(?<!\w)r/[a-z]\w{2,}|"
-    r"\b\d+\s+(people|strangers|users|folks)\s+(on\b|" + _TELL + ")|"
-    r"(?<!\bdo )(?<!\bdoes )(?<!\bdid )(?<!\bdon't )"
-    r"\b(people|users|strangers|folks)('s|s')?\s+" + _TELL, re.I)
+    r"reddit|(?<!\w)r/[a-z]\w{2,}|\basked\s+(\d+\s+)?" + _PEOPLE + r"\b|"
+    r"\b\d+\s+" + _PEOPLE + r"\b(?!\s+(you|who|to|that|at|in|with)\b)", re.I)
+_OWN_TELLING = re.compile(
+    r"\b" + _PEOPLE + r"(['’]s|s['’])?\s+(share|reveal|admit|say|said|tell|told|confess|"
+    r"explain|answer|weigh|vote)\w*", re.I)
+_OWN_ASKS = re.compile(r"^\W*(why|how|do|does|did|don['’]t|can|could|should|would|will|"
+                       r"is|are|when|where)\b", re.I)
+
+
+def _own_banned(line):
+    return bool(_OWN_BANNED.search(line)
+                or (_OWN_TELLING.search(line) and not _OWN_ASKS.match(line)))
 
 
 def _own_fields(data):
     """The reply with any such field dropped, before it is cleaned: on the
     reply, so a vote read from the same "cta" drops with it."""
     def ok(field, line):
-        if isinstance(line, str) and _OWN_BANNED.search(line):
+        if isinstance(line, str) and _own_banned(line):
             print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
             return False
         return True

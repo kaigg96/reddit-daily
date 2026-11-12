@@ -210,7 +210,11 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     ("3 People You Meet at Every Wedding", False), ("Why don't people say thanks anymore?", False),
     ("3 People Reveal Their Seat Etiquette", True), ("5 Strangers Share Their Recline Rules", True),
     ("People Share Their Worst Flight", True), ("Redditors weigh in on reclining", True),
-    ("Post yours on /r/tifu", True)])
+    ("Post yours on /r/tifu", True), ("Why do so many people say sorry?", False),
+    ("Why don’t people say thanks anymore?", False), ("Can people tell when you're lying?", False),
+    ("3 People's Hot Takes On Reclining", True), ("3 Strangers Weigh In", True),
+    ("We Asked 100 People About Reclining", True), ("People’s Answers On Reclining", True),
+    ("3 People, 3 Takes On Reclining", True), ("Strangers Vote: Recline?", True)])
 def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
     reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
     monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
