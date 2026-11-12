@@ -447,7 +447,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   attribution term ever turns on it, add an upload-log column (asker credited,
   answers credited of shown) through a sample run, then tune the word floor.
 
-**Retention — open items must close, not accumulate** (cap: 25, checked by
+**Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
 `PRD.md` §0's backlog if it is really product work, or **deleted with
