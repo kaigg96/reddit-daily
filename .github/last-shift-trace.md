@@ -1,103 +1,103 @@
-## Shift trace — run 43135130889
+## Shift trace — run 43206562674
 
-**Ended:** success, is_error false, 118 turns, 43.6 min, stop end_turn; 4 permission denial(s): Task. **Tool calls:** 117, 4 failed. Helper agents made 183 more, 4 failed.
+**Ended:** success, is_error false, 144 turns, 40.4 min, stop end_turn; 2 permission denial(s): Bash, Task. **Tool calls:** 142, 4 failed. Helper agents made 73 more, 3 failed.
 
 **Last message:**
 
-> I handed over at 02:16 and the handover is pushed to main. I stopped 16 minutes early because nothing above the bar was left. Nothing reached viewers this shift.
+> I'm handing over at 11:49, 19 minutes early: nothing is ready, and the ideas I generated and ranked were either done or dropped with reasons in the handover. The handover is pushed and `main` is clean. Nothing reached viewers this shift.
 >
-> **What moved:**
-> - **The process audit, due after 16 shifts, is done.** Its main finding: since 4 November the helpers that propose work could not see what earlier shifts had rejected. Shifts started writing that label without bold, and the reader only matched the bold form. That is why about seven rejected ideas kept coming back, the repeat-work problem the last two audits flagged. It's fixed and live. The same kind of fault in the time-by-function table counted two shifts twice and left two out; that's fixed too. Fresh reviews caught a real flaw in my first version of each fix, and both were corrected before merging.
-> - **The audit's other findings:**
->   - Half the 16 shifts started with nothing ready.
->   - Only one change reached viewers: the forced switch to the new AI model.
->   - Watch time is flat at 11 seconds, and the share of videos nobody is shown is still past its limit (14.7%).
->   - Fresh reviews caught about 50 faults before merging. The sample videos and release checks have passed every time without catching anything, three audit windows running.
->   - Every rule held, and every decision got a dated re-review.
-> - **One new ask for the owner, #95:** a one-line setting that stops the tool asking each shift to add an AI credit line to commits, which our rules forbid. A label applies it.
-> - **Findings record:** it grew by about a third in a week with no limit. It now has a word limit that only goes down, and I shortened five closed findings (about 400 words). A review confirmed nothing was lost.
-> - **Checks:** both of yesterday's uploads landed. The money controls are intact ($0.25 so far this month). The backup show's fixes are up to date and all 848 tests pass. Monday's weekly figures job still installs and connects with today's newest library versions.
-> - **One question with no answer yet:** why the share
+> **Done:**
+> - **Bet 1's decision (#77) now takes one label from a phone.** The ask is one label that ships bet 1 without the weak short reaction after each answer. "sample" or "with reactions" in a comment are the other options. The audit found the owner skips asks that need a watch, which is why this one changed.
+> - **I sent the owner one wrong claim and corrected it.** My first #77 message said viewers would see "nothing else new". A check of the release code afterwards found smaller changes:
+>   - when the host's pick is dropped, the video closes on the stock "Like, subscribe…" line;
+>   - health threads are skipped;
+>   - the pause after a host note is longer;
+>   - the pinned comment becomes the host's pick;
+>   - narration costs a few cents a month more.
+>
+>   A second email went out listing them. It quoted the plan's old figure that health skips affect 1–2 uploads in 100. The real rate is about 6% by topic alone (13% this month). I fixed that by editing the comment, which sent no third email, so the second email itself still shows the old figure. The figure is also noted in bet 1's plan, beside the rule its read will quote.
+> - **Bet 1's release is ready to ship.** The no-reactions version is now the release in waiting, so tomorrow's automatic release check tests exactly what the label ships. 1,121 tests pass. One follow-on branch stopped merging cleanly, and I fixed it.
+> - **Backup show fixes are merged, still switched off.** The sample render passed on the current commit, 848 tests passed, and a fresh review confirmed the live show is untouched. It found a flaw that only matters once the backup show is on: the title check drops ordinary titles like "Why do people say sorry so much?". My fix branch (not merged) went through three fresh review
 
-### Tool calls (last 80 of 117)
+### Tool calls (last 80 of 142)
 
-38. Agent: Fresh review of dropped-label fix
-39. Bash: grep -n "^## D\|Re-review\|re-review" DECISIONS.md | head -60
-40. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/backlog_status.py
-41. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_backlog_status.py
-42. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/backlog_status.py --dropped 2>&1 | sed -n 1,4p | cut -c1-200; d…
-43. Bash: git commit -q -am "Backlog generator, review fix: a plain drop label is capitalised 'Dropped:' or 'Also dropped:'
-44. Agent: Re-review dropped-label fix
-45. Bash: cat .github/workflows/shift-settings.json; echo ---; git log -3 --format='%h %ad %s' --date=short origin/process/reraise-replaces-ask 2>/de…
-46. Bash: git fetch -q origin && git checkout -q main && git pull -q --ff-only origin main && git merge -q --ff-only gm/dropped-plain-label 2>&1 || g…
-47. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -25; echo ---; venv/bin/python scripts/escalate.py --help 2>&1 | head -30
-48. Bash: python3 - <<'EOF'
-49. Bash: venv/bin/python scripts/escalate.py --title "Stop the shift tool asking for an AI credit line on every commit (one-line settings change)" -…
-50. Bash: git add .escalations/ && git commit -q -m "Escalate: turn off the tool's attribution request at source (audit 11-12)" && git push -q origin…
-51. Bash: venv/bin/python scripts/friction.py add --function gm --task "audit 11-12: generator blind to plain Dropped: labels, fixed and merged" --ou…
-52. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-53. Bash: venv/bin/python scripts/context_budget.py --allocation 2>&1 | head -30
-54. Bash: git checkout -q -b gm/allocation-restamp && grep -n "def test.*restamp\|merge_versions" tests/test_context_budget.py | head
-55. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-56. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-57. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-58. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --allocation 2>&1 | sed -n '/TIME BY/,$p' | c…
-59. Bash: c=$(git log --since=2026-11-07T10:00 --until=2026-11-07T17:00 --format=%h -- WORKLOG.md | head -1); git show $c:WORKLOG.md | grep -nE "^## …
-60. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-61. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-62. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --allocation 2>&1 | sed -n '/TIME BY/,$p' | c…
-63. Bash: head -1 .github/shift-usage.csv; grep "2026-11-0[67]" .github/shift-usage.csv | cut -c1-120; git log --format='%h %ad %s' --date=format:'%m…
-64. Bash: git commit -q -am "Time-by-function table: one re-stamped shift once, two shifts with a stock summary opening twice
-65. Agent: Fresh review of allocation fix
-66. Bash: cat > /tmp/audit_item.md <<'EOF'
-67. Bash: git stash -q && git checkout -q gm/allocation-restamp && git stash list | head -2
-68. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-69. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-70. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-71. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-72. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --allocation 2>&1 | sed -n '/TIME BY/,$p' | c…
-73. Bash: git commit -q -am "Time-by-function table, review fix: a summary links two versions only with the same time split
-74. Agent: Re-review allocation fix
-75. Bash: python3 - <<'EOF'
-76. Bash: python3 - <<'EOF'
-77. Bash: git push -q origin main 2>&1 | tail -1; git log --oneline -4; venv/bin/python scripts/friction.py add --function gm --task "audit 11-12: --…
-78. Bash: git fetch -q origin && git log --oneline HEAD..origin/main && git merge --no-edit -q origin/main && venv/bin/python -m pytest tests/ -q 2>&…
-79. Bash: awk '/^## 1/,/^## 3/' .claude/skills/backlog/SKILL.md | head -80; gh issue list --state open --limit 3 --json number,title | head -5
-80. Agent: Generate 8 candidate work items
-81. Agent: Rank candidates forward
-82. Agent: Rank candidates reversed
-83. Bash: date -u +%H:%M; venv/bin/python scripts/report.py --zeros --offline 2>&1 | head -40; grep -n -i "zero-view\|zero_rate\|zeros" PRD.md | grep…
-84. Bash: grep -n "^## " PRD.md | head -12; grep -n "ORIENT\b\|def main\|report(measure" scripts/context_budget.py | head -20
-85. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-86. Bash: git checkout -q -b gm/prd-findings-budget && venv/bin/python -c "
-87. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-88. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/context_budget.py
-89. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-90. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/context_budget.py --check 2>&1 | sed -n '/READ ON DEMAND/,/TOTA…
-91. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | grep -E "FAILED|Error|assert" | head -10
-92. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_context_budget.py
-93. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git commit -q -am "PRD 4, the findings, gets a word budget set at its size so it can …
-94. Agent: Review PRD §4 budget change
-95. Bash: git show --stat bd05c00 | tail -5; git checkout -q main && git status --short; date -u +%H:%M
-96. Bash: git fetch -q origin && git merge -q --no-edit origin/main 2>&1|tail -1; git merge -q --no-edit gm/prd-findings-budget && python3 - <<'EOF'
-97. Bash: venv/bin/python scripts/friction.py add --function gm --task "ranking round 11-12: top two both already settled (bet 2 gap due 11-20; zero-…
-98. Bash: venv/bin/python scripts/friction.py add --function gm --task "ranking round 11-12: top two both already settled (bet 2 gap due 11-20; zero-…
-99. Bash: grep -n "^## 2026-11-11 (10:57)\|^---$" WORKLOG.md | head; wc -l WORKLOG.md
-100. Bash: cat > /tmp/entry.md <<'EOF'
+63. Bash: git pull -q --rebase origin main && git log --oneline -4 && git push -q origin main && date -u +%H:%M
+64. Bash: venv/bin/python scripts/report.py --help 2>&1 | head -60
+65. Bash: git show bec543e --stat --format=%B | head -30; grep -n "43 to 34\|43→34\|0\.43.*0\.34\|engaged share fell\|engaged-share fall" PRD.md TECH…
+66. Bash: git show bec543e | grep "^[-+]" | grep -i "engaged\|opening" | cut -c1-700; grep -n -i "engaged.share.*trajectory\|trajectory.*engaged" scr…
+67. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+68. Bash: git add PRD.md && git commit -q -m "R8 pre-committed: does video length or the clip explain the engaged-share fall? (rule before the split)…
+69. Bash: venv/bin/python scripts/report.py --at-age 7 --since 2026-10-05 --metric engaged_share --by bg_clip 2>&1 | grep -v "^AGE-MATCHED" | tail -15
+70. Bash: for c in pexels_7565898.mp4 pexels_12488544.mp4 pexels_7565434.mp4 pexels_9668945.mp4; do venv/bin/python scripts/report.py --at-age 7 --si…
+71. Bash: python3 - <<'EOF'
+72. Bash: git fetch -q origin && git log --oneline origin/integration/preview..origin/product/bet1-no-reactions; echo ---; git log --oneline origin/p…
+73. Bash: git worktree remove --force /tmp/wt-fixes 2>/dev/null; rm -rf /tmp/wt-ip && git worktree add -q -b ip-local /tmp/wt-ip origin/integration/p…
+74. Bash: cd /tmp/wt-ip && timeout 400 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest -q -x 2>&1 | tail -2; grep -n "^HOST_REA…
+75. Bash: git log --oneline -3 origin/data/v8-dose-verdict-uploads; git log --oneline origin/integration/preview..origin/data/v8-dose-verdict-uploads…
+76. Bash: rm -rf /tmp/wt-dose && git worktree add -q -b dose-local /tmp/wt-dose origin/data/v8-dose-verdict-uploads && cd /tmp/wt-dose && git merge -…
+77. Bash: cd /tmp/wt-dose && python3 - <<'EOF'
+78. Bash: cd /tmp/wt-dose && timeout 400 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest -q -x 2>&1 | grep -E "^(FAILED|E )|ass…
+79. Bash: cd /tmp/wt-dose && sed -n 1020,1036p src/insights.py; grep -n "def test_the_release_read_passes_the_dose_the_verdicts_uploads" -A40 tests/t…
+80. Bash: cd /tmp/wt-dose && sed -n 2604,2640p tests/test_insights.py
+81. Bash: cd /tmp/wt-dose && python3 - <<'EOF'
+82. Bash: cd /tmp/wt-dose && timeout 400 /home/runner/work/reddit-daily/reddit-daily/venv/bin/python -m pytest -q 2>&1 | grep -E "^FAILED|^E " | head…
+83. Bash: cd /tmp/wt-dose && git add src/insights.py tests/test_insights.py && git commit -q --no-edit -m "Merge integration/preview (bet 1 without r…
+84. Bash: date -u +%H:%M && git push -q origin ip-local:integration/preview && git push -q origin dose-local:data/v8-dose-verdict-uploads && git fetc…
+85. Bash: python3 - <<'EOF'
+86. Bash: grep -n "_OWN_BANNED\|_own_fields\|own_banned\|People Reveal\|people's answers" tests/test_ownquestions.py | head -20
+87. Bash: sed -n 178,225p tests/test_ownquestions.py
+88. Bash: git checkout -q -b strategy/own-title-check && grep -n "_OWN_BANNED = re.compile" -A4 src/llm.py
+89. Edit: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+90. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_ownquestions.py
+91. Bash: venv/bin/python -m pytest -q tests/test_ownquestions.py 2>&1 | tail -3
+92. Bash: venv/bin/python -m pytest -q 2>&1 | tail -1 && git add src/llm.py tests/test_ownquestions.py && git commit -q -m "C16 own-title check, the …
+93. Agent: Fresh review of own-title fix
+94. Edit: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+95. Bash: grep -n "_OWN_BANNED.search" src/llm.py
+96. Bash: sed -i '291s/_OWN_BANNED.search(line)/_own_banned(line)/' src/llm.py && sed -n 289,293p src/llm.py && python3 - <<'EOF'
+97. Bash: venv/bin/python -m pytest -q 2>&1 | tail -1 && git add src/llm.py tests/test_ownquestions.py && git commit -q -m "C16 own-title check, revi…
+98. Agent: Second review of own-title fix
+99. Edit: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+100. Bash: python3 - <<'EOF'
 101. Bash: python3 - <<'EOF'
-102. Agent: Find superseded PRD §4 findings
-103. Bash: date -u +%H:%M; for n in 146 150 154 160 264; do echo "=== $n"; sed -n "${n}p" PRD.md | cut -c1-600; done; sed -n 147p PRD.md | cut -c1-80;…
-104. Bash: sed -n 150p PRD.md | cut -c600-1400; echo; echo ===; sed -n 154p PRD.md | cut -c560-1200; echo; sed -n 85p PRD.md | cut -c1-300
-105. Bash: git checkout -q -b gm/compress-findings && python3 - <<'EOF'
-106. Bash: python3 - <<'EOF'
-107. Agent: Review findings compression
-108. Bash: git checkout -q main && git fetch -q origin && git merge -q --no-edit origin/main && git merge -q --no-edit gm/compress-findings && python3…
-109. Bash: git checkout -q strategy/own-questions-fixes && git pull -q --ff-only origin strategy/own-questions-fixes 2>/dev/null; git merge --no-edit …
-110. Bash: gh issue view 95 --json body -q .body | grep -c "apply-patch\|patch-sha256"; venv/bin/python scripts/report.py --help 2>&1 | grep -E "metri…
-111. Bash: timeout 120 venv/bin/python scripts/report.py --offline --by topic --metric engaged_share --since 2026-10-05 2>&1 | head -30
-112. Bash: python3 - <<'EOF'
-113. Bash: grep -n "pip install" .github/workflows/weekly-analytics.yml; git log -1 --format='%ad' --date=iso -- analysis/ 2>/dev/null | head -1
-114. Bash: cd /tmp && rm -rf wa-venv && timeout 150 python3 -m venv wa-venv && timeout 150 wa-venv/bin/pip install -q google-api-python-client google-…
-115. Bash: grep -n "build(" scripts/weekly_analytics.py src/*.py | head -5; /tmp/wa-venv/bin/python -c "
-116. Bash: rm -rf /tmp/wa-venv && T=$(date -u +%H:%M) && python3 - "$T" <<'EOF'
-117. Bash: python3 - <<'EOF'
+102. Agent: Third review of own-title fix
+103. Bash: git checkout -q main && git pull -q --rebase origin main && git log --oneline -1 && grep -n "The own-question title check drops ordinary ti…
+104. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+105. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+106. Bash: venv/bin/python scripts/friction.py add --function strategy --task "own-title check fix: three rounds, three fresh reviews" --outcome parti…
+107. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -20; git status --short | head
+108. Bash: python3 - <<'EOF'
+109. Bash: python3 - <<'EOF'
+110. Bash: cat > /tmp/wl.md <<'EOF'
+111. Bash: python3 - <<'EOF'
+112. Bash: venv/bin/python -m pytest -q 2>&1 | tail -1 && venv/bin/python scripts/check_docs.py 2>&1 | tail -3 && git add WORKLOG.md PRD.md && git com…
+113. Bash: awk 'NR>=158 && NR<=360' TECH_DEBT.md | grep -n -i "closes when\|^- \*\*" | cut -c1-220
+114. Bash: sed -n 158,175p TECH_DEBT.md; echo ...; sed -n 240,256p TECH_DEBT.md; echo ...; sed -n 291,300p TECH_DEBT.md; echo; sed -n 340,350p TECH_DE…
+115. Agent: Verify #77 claims against release code
+116. Bash: gh issue view 77 --json body --jq .body > /tmp/i77-cur.md && python3 - <<'EOF'
+117. Bash: venv/bin/python scripts/escalate.py --title "Bet 1: one label ships it, without the per-answer reactions (nothing to watch)" --key bet1-thr…
+118. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+119. ✗ Bash: venv/bin/python scripts/friction.py add --function gm --task "#77 claims checked against the release code" --outcome done --category mistak… — Exit code 1: logged F273
+120. Bash: sleep 5; git pull -q --rebase origin main && git push -q origin main && git log --oneline -4 && git status --short | head -3; date -u +%H:%M
+121. Bash: git show origin/integration/preview:src/content.py | sed -n 270,330p
+122. Bash: git show origin/integration/preview:src/content.py | grep -n "def is_medical" -A22 | head -40
+123. Bash: venv/bin/python scripts/report.py --by topic --since 2026-10-01 2>&1 | grep -v "^AGE-MATCHED" | head -20
+124. Bash: venv/bin/python scripts/report.py --offline --by topic --since 2026-10-01 2>&1 | grep -v "^AGE-MATCHED" | head -16; grep -n -i "medical ski…
+125. Bash: python3 - <<'EOF'
+126. Bash: gh issue view 77 --json body --jq .body > /tmp/i77-cur.md && python3 - <<'EOF'
+127. Bash: python3 - <<'EOF'
+128. Bash: git log --oneline --since="2026-11-11 18:00" -- .github/workflows/ | head; echo "workflow commits since last evening: $(git log --oneline -…
+129. Bash: cd /tmp/wt-ip && git fetch -q origin && git status -sb | head -1 && grep -n '^FORMAT_VERSION' src/config.py && sed -i 's|^FORMAT_VERSION = …
+130. Bash: cd /tmp/wt-ip && git commit -q -am "v8's FORMAT_VERSION note: reactions are off (HOST_REACTIONS), so the note on screen is the setup's alon…
+131. Bash: python3 - <<'EOF'
+132. Bash: python3 - <<'EOF'
+133. Bash: git show origin/main:.github/last-release-validation.md | grep -n -i "vote\|cta\|host" | head -20
+134. Bash: for c in $(git log --since=2026-11-08 --format=%h -- .github/last-release-validation.md); do d=$(git show -s --format=%cs $c); line=$(git s…
+135. Bash: python3 - <<'EOF'
+136. Bash: git add WORKLOG.md && git commit -q -m "Handover: time split includes the release verification" && git pull -q --rebase origin main && git …
+137. Bash: grep -o "Its medical skip[^.]*\." PRD.md; grep -o "read \`--within subreddit=AskReddit\` while subreddits rotate, #3's read or not (restate…
+138. Bash: python3 - <<'EOF'
+139. Bash: venv/bin/python -m pytest -q 2>&1 | tail -1 && venv/bin/python scripts/check_docs.py 2>&1 | tail -3 | head -1 && venv/bin/python scripts/ba…
+140. Bash: gh issue view 77 --json title,body --jq '.title, .body' | sed -n 1,45p
+141. Bash: gh issue view 77 --json body --jq .body > /tmp/i77-cur.md && sed -i 's/(corrected at 11:50 on 12 November;/(corrected at 11:45 on 12 Novemb…
+142. Bash: git add WORKLOG.md && git commit -q -m "Handover: late drops recorded; hand-over time" && git pull -q --rebase origin main && git push -q o…
