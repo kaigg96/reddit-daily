@@ -328,16 +328,21 @@ def merge_versions(texts):
     time, so only entries older than the current file's oldest were dropped.
     A shift that re-stamps its time keeping its headline (10-24 09:05, then
     08:50) is one shift, as in `backlog_status.recently_dropped`; the 10-25
-    audit found it counted twice, pushing another shift out of the window."""
+    audit found it counted twice, pushing another shift out of the window.
+    A headline is its first 60 characters, as there: 11-09 12:15 became 12:25
+    with the headline's second half and the summary rewritten (audit 11-12).
+    A summary links only with the same time split: three 11-07 shifts opened
+    on one stock sentence and two were read as one, while 10-18's re-stamp
+    kept only its summary's first sentence (audit 11-12)."""
     seen, oldest, links = {}, None, set()
     for i, text in enumerate(texts):            # current file first, so its edits win
         summaries = _summaries(text)
         for heading, row in allocation_entries(text, full_heading=True):
             key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", heading).group(0)
-            headline = heading.split("—", 1)[1].strip() if "—" in heading else ""
+            headline = heading.split("—", 1)[1].strip()[:60] if "—" in heading else ""
             summary = summaries.get(heading, "")
             mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set()) \
-                | ({("s", key[:10], summary)} if summary else set())
+                | ({("s", key[:10], summary, tuple(sorted(row.items())))} if summary else set())
             restamped = key not in seen and bool(mine & links)
             links |= mine
             if restamped:
