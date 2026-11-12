@@ -57,6 +57,7 @@ The source of ready work that never waits on a sample video or costs money. Belo
 | # | Status | Question | Test |
 |---|---|---|---|
 | R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. **Read: `report.py --swings`** (in step: two or more shared lows). Peeked 11-11 (one shared dip), no conclusion. |
+| R8 | ready | **Do video length or the background clip explain the fall in engaged share** (43 → 34 per 100 plays, 11-12; topic and subreddit did not)? | **Pre-committed 11-12, before either split:** `--at-age 7 --since 2026-10-05 --metric engaged_share`, `--compare video_length=long`, then `--compare bg_clip=<clip>` for each clip the tool will read. One explains it only if it trails beyond the chance gap printed **and** its share of uploads rose from W41–W43 to W44–W45; a refusal is "insufficient data". A clip peeked at 0.24 vs 0.43 (n=9/10) counts only under this rule. Either way a candidate, never acted on this shift. |
 | R7 | blocked: the 11-23 snapshot | **Does Stephen's voice lead on watch-seconds too?** A peek, not evidence | Pre-committed 11-05: §4 |
 
 #### Owner tasks (no version bump)
