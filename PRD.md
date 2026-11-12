@@ -14,8 +14,6 @@
 
 **Last updated:** 2026-11-12 · **Live format:** `v7s` (`v7` on `gemini-3.6-flash`, merged 2026-11-08; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
 
-> **Two tracks** (2026-07-22), by whether we act on a change's own result: keepers ship fast; bets are isolated and baked under a pre-committed rule (§8).
-
 <a name="delivery-plan"></a>
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*
 
@@ -33,7 +31,6 @@
 | ~~Make sample videos free~~ ✅ 2026-09-25 | done | — | `SAMPLE=1 venv/bin/python -m src.run`: a fixed post, silent, no Reddit, Gemini or Polly call; proves a **render** change only. Other paths need `dry_run.py request`. |
 | ~~Retention points in the weekly snapshot~~ | done: first filled 10-19 | R4.2 (ext) | Per upload under 30 days old, the share still watching at 10–100% (`watch_ratio_*`), swipe-aways excluded (§4). **Never a trigger.** |
 | **`MODEL`'s successor before Google's 12-01 reroute (§4)** | baking: `v7s`, merged 11-08 (`gemini-3.6-flash`, §4); read ~11-25; first week, watch `http_429_day` (its run log prints the cap, `Gemini daily cap:`, since 11-09); its 20th upload: §4's title count (11-11) | R2.1, R4.6 | **Pre-committed 11-07:** switch before 12-01, as its own `FORMAT_VERSION`, judged by #13's rule. |
-| **Bet 1's host lines on `gemini-3.6-flash` (§4, 11-08)** | done: no fix 11-11 (few-shot 0 of 9, §4); #77 told | R3.2 | **Pre-committed 11-08:** §4. |
 
 #### Experiment backlog (isolated, pre-committed decision rule, ≥20-upload / ~2-week bake)
 
@@ -52,12 +49,13 @@
 
 #### Research questions (answerable from data we already have)
 
-The source of ready work that never waits on a sample video or costs money. Below the ready floor `backlog_status.py` prints, add questions here (`/backlog` §1); each result becomes a finding (§4), a new question, or a backlog item, and **the row is removed once answered** (a test fails a push that leaves one).
+Ready work that needs no sample or spend (`/backlog` §1). **The row is removed once answered** (a test fails a push that leaves one).
 
 | # | Status | Question | Test |
 |---|---|---|---|
 | R4 | blocked: the 11-16 snapshot | **Are weekly view swings viewers or data?** (§4, 10-26) | **Pre-committed 10-26:** weekly gains of `channel_stats.csv`'s views (near-real-time) against `--catalogue`'s recent column, 10-12 to 11-16. Counter alternating in step (lows under 60% of the highs beside them) → viewers; counter within ±30% of its mean → data, then read snapshots at a fixed lag. Else unclear. **Read: `report.py --swings`** (in step: two or more shared lows). Peeked 11-11 (one shared dip), no conclusion. |
 | R7 | blocked: the 11-23 snapshot | **Does Stephen's voice lead on watch-seconds too?** A peek, not evidence | Pre-committed 11-05: §4 |
+| R11 | ready | **Do buried uploads (≤5 views at 7 days) share a sensitive theme?** Neither pipeline fields nor subreddit explained the breach (§4) | **Pre-committed 11-12, before any label:** uploads since 09-01, `--offline --at-age 7`; a fresh agent, blind to views, tags each question and title with YouTube's advertiser-friendly categories. Any tag, buried against the rest, `buried_rate_p` under 0.05 at 2×+: a candidate screen category (its own rule; the owner's). One category: under 0.007. Under 10 buried: insufficient |
 
 #### Owner tasks (no version bump)
 - **Music variety** (R1.6), after bet 1's read, before #4 (#80): 2–3 more Audio Library tracks in `assets/music/`, sealed (public repo): `git rm` the `.enc` files, then re-run `scripts/seal_assets.sh` with every plain track in place. Today's track then drops out unless copied in (`video._pick_music`).
