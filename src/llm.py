@@ -264,10 +264,15 @@ def _own_wording(prompt, verbatim=()):
 # PLAN C16: the prompt forbids naming Reddit or passing the takes off as
 # people's, and this is the check (11-11 review: prompt-only before). A title
 # or closing line that does falls back as a failed one does; a keyword is left out.
+# A count of people only with a telling word or "on" after it ("3 People You
+# Meet" is a list, not answers), and no people-telling in a question about
+# people ("Why do people say sorry?"): the merge review, 2026-11-12.
+_TELL = r"(share|reveal|admit|say|said|tell|told|confess|explain|answer)\w*"
 _OWN_BANNED = re.compile(
-    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
-    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
-    r"confess|explain|answer)\w*", re.I)
+    r"reddit|(?<!\w)r/[a-z]\w{2,}|"
+    r"\b\d+\s+(people|strangers|users|folks)\s+(on\b|" + _TELL + ")|"
+    r"(?<!\bdo )(?<!\bdoes )(?<!\bdid )(?<!\bdon't )"
+    r"\b(people|users|strangers|folks)('s|s')?\s+" + _TELL, re.I)
 
 
 def _own_fields(data):
