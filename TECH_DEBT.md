@@ -391,8 +391,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **11-05's held proposals, resolved:** the env switch dropped (moot since
   #93); the title-replay gate dropped as a rule (one command since 11-06,
   used when text code changed; reopen if a shipped-text change merges
-  without it); PRD §4's budget and a per-entry WORKLOG cap touch no
-  protected file, so they are shift work, not asks; the re-raise patch held
+  without it); PRD §4's budget touched no protected file, so a shift
+  added it (11-12, set at 20,714 so it only shrinks; compressing it is
+  next); a per-entry WORKLOG cap was ranked last twice and dropped; the re-raise patch held
   to the 12-07 monthly while five asks are unanswered. **Left alone:** the
   shift cadence (#92 declined), the owner's queue.
 
