@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-12 (11:58) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
+
+    Worked (% of the shift): strategy 35 · product 25 · gm 20 · data 15 · security 5
+
+**Summary:** The decision that gates every revenue step, bet 1 (#77), is rewritten so one label settles it from a phone. Tomorrow's automatic release check will test exactly the version that label ships. Nothing reached viewers, and the company is closer to revenue only once you label it.
+
+### Toward revenue
+- **Bet 1 is one label away.** The audit found you answer quick asks and pass over ones that need a watch. #77 needed a watch, a reply, then another watch. It now asks for one label, which ships bet 1 without the weak per-answer reactions, and it says in a few lines what a viewer would see change. Bet 2 needs bet 1 by about 20 November.
+
+### Done
+- **General management (#77 rewritten):** the issue now holds one ask: label it to ship bet 1 without the short reaction after each answer. Viewers would see the closing line become the host's pick ("My hand goes to the glorified lunch driver. Which ruined dream gets your vote?") and, now and then, a short host note under the question. A comment saying "sample" or "with reactions" keeps your other options open.
+- **Product (staged, not shipped):** the version your label ships is now the release in waiting, so tomorrow morning's automatic check tests exactly it. All 1,121 tests pass. One follow-on branch stopped merging cleanly with it, and I fixed that (1,123 pass).
+- **Strategy (merged, switched off):** the backup show's fixes passed their sample at 11:15 (27 seconds, playable) and all 848 tests. A fresh review found the live show untouched. It found one fault that matters only once the backup show is on: the check that stops titles passing the AI's takes off as real people's also drops ordinary titles like "Why do people say sorry so much?". I fixed it on a separate branch. Three fresh reviews in a row each found new wordings it gets wrong, so I stopped. I recorded that a different kind of check is worth weighing before the backup show is switched on.
+- **Data (a question answered: no):** I set the rule before looking. Neither video length nor the background clip explains the fall in the share of plays that get past the opening (43 to 34 per 100). Long videos trail by 28%, where chance alone gives 30%, and every clip sits inside its own chance range. So nothing we can read before 23 November explains the fall.
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both put the #77 rewrite first and the split above second. Dropped: getting four uploads a day ready ahead of bet 1 (it needs a sample, and none can render until tomorrow); checking new brand names and a plan for Shorts series (both come after bet 1, by earlier decisions); stripping two characters YouTube refuses in titles (none in 2,300 so far); and working out which Claude plan we are on (the status line can't tell).
+- **Security and reliability (checked):** yesterday's two uploads and this morning's landed. The money controls are intact ($0.30 this month, forecast $0.79 of $3), no secret is in the repository, and the workflows are unchanged.
+- AI use: none by the shift itself; one sample video (test model, silent); no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label now), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **Tomorrow's 11:17 shift:** request bet 1's sample video whether or not #77 is labelled, the first render the 12-hour limit allows. Then "sample" costs you no wait, and a label meets every merge check but the review.
+- **If #77 is labelled:** merge on tomorrow's release check, that sample and a fresh review of the whole release.
+- **16 November:** the weekly review.
+
+### Better?
+- **Than last shift:** yes, a little. The decision that blocks revenue is now cheaper for you to make, and what it ships is staged. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-12 (02:14) — The process audit found why shifts kept re-proposing ideas they had already dropped, and fixed it; nothing reached viewers
 
     Worked (% of the shift): gm 75 · strategy 5 · data 10 · reliability 5 · security 5
@@ -95,34 +128,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
-
-## 2026-11-11 (18:42) — Two of the new AI model's latest five titles claim more than the question did; a weekly read of the share of plays past the opening is live, and says there is not enough history yet
-
-    Worked (% of the shift): editorial 30 · data 45 · gm 15 · legal 5 · security 5
-
-**Summary:** An evening shift with nothing ready and everything that changes the videos waiting on you, so I made new work and finished the two items that ranked best. Nothing reached viewers. Two of the five titles the new AI model has written put a claim in the question's mouth, so that count is now part of its scheduled check.
-
-### Toward revenue
-- **Nothing directly**, because every step that changes what we ship waits on you (#77, #90). One indirect step: YouTube's monetization review reads our titles, and its rules bar titles that are "maliciously misleading". Ours are far milder than that, but a title that accuses or overclaims is a step in that direction. A check is now set before we know how often it happens.
-
-### Done
-- **Editorial (a check, not a fix):** I read the three latest uploads as published. "Why do YOU think people fake autism online?" asked viewers whether people are faking a disability, though the question never said fake. "3 Sports Where Women ACTUALLY Have The Genetic Advantage" stated as fact what its answers only guessed. A fresh helper, not told which model wrote what, checked 12 recent titles: 2 of the new model's 5 added a claim, against 1 of the old model's 7. That is too few to act on, and I found it by looking. So the rule is set first: at the new model's 20th upload, the same check on all 20; 5 or more puts a title-instruction fix in line after the capitals test is read on 23 November. It is never a reason to undo the model change.
-- **Data (built, live):** our weekly "are we improving?" read uses watch time. Since your #91 decision, tests are judged on the share of plays that get past the opening, so I added that measure too. The first three fresh reviews each found a real flaw, mostly in how a partly-measured week is counted, and the verdict swung with them, from "falling" to "flat" to "rising". After all the fixes, a fourth review found nothing wrong, and I merged it. Its answer today is "not enough history": we have only five full weeks of this figure, and it needs six. Reporting only, so viewers see nothing.
-- **General management (ranking):** a fresh helper proposed eight ideas and two others ranked them, forwards and reversed. The title check came second both ways and the weekly read third, so I did those. The other three split: a pre-set plan for bet 2 if #77 stays unanswered (one ranker found it already written on 6 November), a slice of the process audit, and a re-read of YouTube's policy pages. With time left I did the re-read: the monetization and spam pages are unchanged since 3 November.
-- **Security and reliability (checked):** this morning's upload landed. The midday run found nothing to do, and the evening one has not started yet. The money controls are intact ($0.25 this month, forecast $0.75 of $3), no secret is in the repository, and the workflows are unchanged. The morning upload's topic-sorting step hit an overload error. It is logging only, never touches the upload, and has happened 3 times in 91 runs.
-- **General management (the process audit, first check):** the five process proposals held on 5 November stay held. They wait until fewer than five of my questions to you are unanswered, and five still are. The audit itself is due and is the next shift's work.
-- **Your approvals #88 and #65** are still open. #88 waits on you applying its patch (shifts cannot write those files). #65 waits on your "yes" to its corrected sentence.
-- AI use: none; no Polly; no sample video.
-
-### Blocked
-- **For you, in order:** #77 (bet 1: reply "without reactions", or label it as it stands), #82 (register the Reddit app by 12 January), #88 (one command), #90, #65, #80, #59, and the shift allowance setting (on #92).
-
-### Next
-- **From about 23:00 UTC tonight**, when the sample limit clears: request the sample of the backup show's fixes, and merge on a pass.
-- **The process audit is due:** 13 shifts since the 5 November one, against about ten.
-- **16 November:** the weekly review.
-
-### Better?
-- **Than last shift:** about the same. A new risk in the titles is now measured, not guessed at. Nothing reached viewers.
-- **Than ~10 shifts ago:** no. Watch time is flat and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
