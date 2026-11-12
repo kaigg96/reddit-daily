@@ -90,6 +90,12 @@ ORIENT = {
     "PLAN.md": 1400,
     ".claude/skills/pickup/SKILL.md": 700,
 }
+# Read on demand, so outside the total above, but budgeted so they can only
+# shrink. PRD §4, the findings, grew 15,317 -> 20,714 words in the week to
+# 11-12 with no budget (D4, audit 11-12), and idea helpers read it
+# (backlog_status.answered_in). Set at that day's size: a finding added means
+# another compressed, a superseded one to a line and a pointer to git.
+REFERENCE = {"PRD.md#4. Objectives": 20714}
 
 
 def words(text):
@@ -537,6 +543,7 @@ def main():
     orient = measure(ORIENT)
     blocking = report(always, "ALWAYS LOADED (every session, whatever the task)")
     advisory = report(orient, "READ AT STARTUP (every shift)")
+    advisory += report(measure(REFERENCE), "READ ON DEMAND (budgeted to shrink, not in the total)")
     corpus_over = corpus_health()
 
     total = sum(n for _, n, _ in always + orient if n)

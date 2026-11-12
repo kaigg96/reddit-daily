@@ -46,6 +46,19 @@ def test_every_function_in_org_md_is_known():
     assert len(re.findall(r"^#### ", org, re.M)) == len(context_budget.FUNCTIONS) == 14
 
 
+def test_every_reference_budget_names_a_section_that_exists():
+    """A renamed heading would read as missing, and the budget would hold nothing."""
+    assert all(n is not None for _, n, _ in context_budget.measure(context_budget.REFERENCE))
+
+
+def test_a_reference_budget_never_fails_the_build(monkeypatch, capsys):
+    monkeypatch.setattr(context_budget, "REFERENCE", {"PRD.md#4. Objectives": 1})
+    monkeypatch.setattr(sys, "argv", ["context_budget.py", "--check"])
+    assert context_budget.main() == 0
+    over = capsys.readouterr().out.split("advisory, does not fail the build:")[-1]
+    assert "- PRD.md#4. Objectives: " in over
+
+
 def _entry(stamp, headline, worked):
     return f"\n## {stamp} — {headline}\n\n    Worked (% of the shift): {worked}\n"
 
