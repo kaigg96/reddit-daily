@@ -423,7 +423,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   carries the same words, logging `title_ok=False` and costing #10's and #14's
   arms that run. It misses "/r/tifu", "Redditors reveal", "3 Answers That…" and
   "Commenters reveal". Live path untouched (`SOURCE=reddit`). Fixing it changes
-  the commit, so it needed a second render the 12-hour limit refused. **Closes
+  the commit, so it needed a second render the 12-hour limit refused.
+  **Fixed in part on `strategy/own-title-check` (11-12, 875 pass, unmerged):**
+  three rounds, each reviewed fresh, and each review found new wordings. Its
+  third leaves: "People's Hot Takes", "Hot Takes From Strangers", "People React
+  To…" and singular "A stranger told me" pass (as on `main`); spelled counts
+  newly drop "Should two people split the bill?"; "How often/What do people
+  say…" drop. A word list keeps leaking, so before switch-on weigh a different
+  check (the screen call judging the title), not a fourth round. **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
