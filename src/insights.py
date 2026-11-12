@@ -266,6 +266,38 @@ def is_buried(v):
     return v.views <= BURIED_VIEWS
 
 
+# R11 (PRD §0, pre-committed 2026-11-12, before any label): do buried uploads
+# share a sensitive theme? `analysis/theme_labels.json` holds a fresh agent's
+# tags, given each question and title blind to views, from YouTube's
+# advertiser-friendly categories grouped into THEME_TAGS.
+THEME_TAGS = ("sexual", "profanity", "violence", "drugs", "controversial",
+              "demeaning", "dangerous")
+THEME_SINCE = datetime.datetime(2026, 9, 1, tzinfo=datetime.timezone.utc)
+THEME_ANY_P, THEME_ONE_P, THEME_LIFT, THEME_MIN_BURIED = 0.05, 0.007, 2.0, 10
+
+
+def theme_buried(videos, labels):
+    """R11's read: per tag, and for any tag, the buried rate of tagged uploads
+    against the rest. Only labelled uploads count. Returns (n buried, rows),
+    each row (tag, buried tagged, tagged, buried rest, rest, lift, p, lead)."""
+    vs = [v for v in videos if v.video_id in labels]
+    buried = sum(1 for v in vs if is_buried(v))
+    rows = []
+    for tag in ("any",) + THEME_TAGS:
+        has = [bool(labels[v.video_id]) if tag == "any" else tag in labels[v.video_id]
+               for v in vs]
+        a = [v for v, h in zip(vs, has) if h]
+        b = [v for v, h in zip(vs, has) if not h]
+        ha, hb = sum(map(is_buried, a)), sum(map(is_buried, b))
+        lift = (ha / len(a)) / (hb / len(b)) if a and b and hb else None
+        p = buried_rate_p(ha, len(a), hb, len(b))
+        bar = THEME_ANY_P if tag == "any" else THEME_ONE_P
+        lead = (buried >= THEME_MIN_BURIED and p < bar
+                and (lift is None and ha > 0 or lift is not None and lift >= THEME_LIFT))
+        rows.append((tag, ha, len(a), hb, len(b), lift, p, lead))
+    return buried, rows
+
+
 def buried_strata(videos_a, videos_b, key="format_version", hit=is_buried):
     """(hit_a, n_a, hit_b, n_b) for each value of `key` both cohorts share.
     `hit` defaults to buried; `top_share_hits` gives the other tail."""
