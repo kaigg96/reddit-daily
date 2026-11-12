@@ -348,51 +348,54 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`integration/preview`): the second model first, given the main call's
   reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
 
-- **Audit 2026-11-05: the process works at the margin; the owner's absence
-  binds (last act 10-27 21:20).** Thirteen shifts since 10-28, plus one that
-  lost its hour to background work (11-04 10:54) and six skipped on the weekly
-  allowance (10-28 to 10-30). 8 began with nothing ready; mean ~40 of 60 minutes,
-  about as before (38). ~26 fixes to 6 bets; only 11-04's two fixes reached viewers; ~8
-  items were internal tooling, and 11-04 00:25 only re-planned. Time: gm 28%,
-  reliability and data 16% each, product 3% (0 in 11 of 13), distribution 0:
-  not a ranking failure, as every product item waits on #77. "Than ~10 shifts
-  ago" read No in 13 of 13; from 11-01 entries lead "a little" on protective
-  fixes, so 10-25's self-grading fix is fading. Scorecard WORSE (zero-rate
-  2.4% → 17.6%); watch time 12.0 s, flat. **Gates:** fresh reviews caught ~19
-  defects; four dry runs and eight release checks caught none. Both
-  viewer-facing defects (11-04) were found by reading published output (the
-  narration log, 151 run logs), which no gate requires, and a replay of every
-  logged title through old and new code caught the fix's own regressions
-  (F159): for any change to shipped text, that replay is the gate that works. **Escalations:** 7 opened since 10-28, none answered, 2 trivial (#86
-  retracted, #88). Too tight on files, not decisions: `.claude/` and workflows
-  turn finished guards into asks (#89, #93). **Of 10-28's findings:** (1)
-  PRD §4 worse, 12,162 → ~15,050 words (+24%), unbudgeted, carried by two monthlies;
-  (2) entries still ~940 words; (3) dropped ideas re-proposed six or more
-  times, and the generator re-derived settled items again (F168); (4) an
-  unchecked premise reached the owner again (#86, retracted the same day);
-  (5) no recurrence seen. **Decisions** (inline): D13 false (absence); D8
-  strained, so not graduated; D2, D4, D5, D9, D11, D12 strained or false.
-  **Rules:** no attribution trailer, though the session harness still asks
-  for one each shift, so the CI guard is what holds it. **Outward (docs read
-  11-05):** the headless docs describe background work at exit and an env
-  switch, `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS`: a one-line alternative to
-  #93's 40-line hook in `shift.yml`. The pinned 2.1.280 binary carries the
-  switch (checked 11-05); #93's tested hook does the same job, so no new ask:
-  prefer the switch if #93 is ever redone. A `Stop` hook could hold an unattended shift to its hand-over
-  time (`.claude/settings.json`, which shifts cannot write). Rejected:
-  `/clear` inside a shift (one non-interactive prompt); `/doctor` cuts (not
-  in the docs). Done: skills well under 500 lines. **Changed:** the
-  re-reviews; C16's default source (PLAN). **Proposed, not raised** (another
-  ask to an absent owner only adds email): budget and compress PRD §4; a
-  per-entry WORKLOG cap; the replay gate for shipped text; the env switch
-  into #93; the re-raise patch (`process/reraise-replaces-ask`). **Left
-  alone:** the shift cadence (#92) and the owner's queue. **Closes when**
-  those are raised at the 12-07 monthly, or sooner once fewer than 5 asks
-  are unanswered, or at the next audit. **11-10:** the owner came back and
-  answered two (#93 landed, #89 refused); with 9 still unanswered, these are
-  held so #77 and #82 are read first. The env switch is moot: #93's hook is live.
-  **11-11 (18:42):** still held: 5 unanswered (#59, #77, #80, #82, #90), the owner's
-  last act 11-10 15:24. Reading published output found the `v7s` title claims too (PRD §4).
+- **Audit 2026-11-12: working at the margin; the owner's selective answers
+  decide what ships (last act 11-10 15:24).** 16 shifts since 11-05 (one
+  killed 11-08; two 11-06 slots never ran). 8 began with nothing ready; mean
+  38 of 60 minutes, five handed over 16–25 minutes early. ~40 fixes, checks
+  or tooling to ~8 bets (~15 internal tooling); one change reached viewers,
+  the forced `v7s` switch (11-08). Time: gm 25%, reliability and data 18%
+  each, product and strategy 10%; distribution, monetization, finance 0
+  (nothing of theirs ready; the 11-03 monthly gave them their turn). "Than
+  ~10 shifts ago": No in 16 of 16 (29 running). Scorecard WORSE (zero-rate
+  14.7%, from 17.6%, breached; watch-seconds 12.0 → 10.0 s), trajectory FLAT
+  (11.0 s): they agree, as every step that changes what we ship waits on
+  #77/#90. **Cause found, fixed (finding 3 of both earlier audits):** ~7
+  dropped ideas came back because `--dropped` matched only bold labels and
+  every entry since 11-04 writes plain "Dropped:", so the generator saw
+  nothing after 11-03; one re-stamped shift also listed twice (`6fc8b29`).
+  `--allocation` had the same re-stamp fault and merged two 11-07 shifts on a
+  stock summary opening; fixed too (11-07 00:35's draft, which
+  also changed its split, still lists twice). Reopen if a generator
+  re-proposes a drop `--dropped` lists. **Gates:** fresh reviews caught ~50
+  defects across 16 changes (9 clean); 3 dry runs and 3 release checks
+  passed and caught nothing, a third window. Viewer-facing faults again
+  surfaced only by reading published output (11-07 lower-cased title, 11-11
+  `v7s` title claims, now a scheduled check). Main's tests broke twice for
+  2–4 minutes on pushes without a test run (F240, F255). 0 reverts, 0
+  attribution trailers, 1 protected change (`Approved-In: #91`).
+  **Escalations:** none opened (11-05's hold); the owner answered five
+  label-only asks on 11-10 and passed over the five needing a watch, a
+  direction call or hands (#59, #77, #80, #82, #90). Tight on files (#88,
+  #65 approved, awaiting hands), not decisions. **Decisions** (inline): D13,
+  D11, D5 false; D4 worse (PRD §4 15,317 → 20,714 words in a week); D2, D8,
+  D9 (amended, #91), D12 strained; D6, D14 hold a third audit: graduation
+  candidates. **Outward (docs 11-12):** the `attribution` setting turns off
+  the harness's credit-line request at source: raised with its patch
+  (`attribution-setting-off`). A Stop hook in `shift-settings.json` could
+  hold a shift to its hand-over time: held, as early hand-overs are
+  supply-bound and the owner's standing instruction covers the rest. `--bare`
+  may become `-p`'s default and would skip CLAUDE.md, skills and hooks:
+  check the trace at the action's next pin bump. `/doctor prompt-audit` now
+  exists (11-05 said not), untested under `-p`. Rejected: `--max-budget-usd`
+  (a capped run ends with no handover); skill frontmatter (nothing to gain).
+  **11-05's held proposals, resolved:** the env switch dropped (moot since
+  #93); the title-replay gate dropped as a rule (one command since 11-06,
+  used when text code changed; reopen if a shipped-text change merges
+  without it); PRD §4's budget touched no protected file, so a shift
+  added it (11-12, set at 20,714 so it only shrinks; compressing it is
+  next); a per-entry WORKLOG cap was ranked last twice and dropped; the re-raise patch held
+  to the 12-07 monthly while five asks are unanswered. **Left alone:** the
+  shift cadence (#92 declined), the owner's queue.
 
 - **The weekly snapshot job installs its libraries unpinned (2026-10-14).**
   `weekly-analytics.yml` names three Google packages in `pip install`; every

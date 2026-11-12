@@ -152,7 +152,13 @@ _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
 # bullet: since 10-20 a shift lists its drops inside its General management
 # bullet, and a match only at the opening showed the generator nothing newer
 # (found 10-24). Short, so a bold headline that says "dropped" is not one.
-_DROPPED = re.compile(r"(?<!\S)\*\*(?:\w+\s+){0,3}dropped(?:\s+\w+){0,2}:?\*\*", re.I)
+# Since 11-04 the label is plain ("... nothing else. Dropped: a, b"), so the
+# generator saw nothing newer than 11-03 and re-proposed about seven dropped
+# ideas (audit 11-12). A plain one is a label, capitalised with its colon:
+# prose ("the idea, X, I dropped: your label would...") names the reason, not
+# the idea, after its colon.
+_DROPPED = re.compile(r"(?<!\S)\*\*(?:\w+\s+){0,3}dropped(?:\s+\w+){0,2}:?\*\*"
+                      r"|(?-i:\b(?:Also d|D)ropped:)", re.I)
 
 
 def _dropped_part(bullet):
@@ -277,12 +283,15 @@ def recently_dropped(limit=10, commits=200, versions=None, extract=None):
     is read from the newest version that has it. A shift that re-stamps its
     heading (08:24, then 08:28) or rewords its headline is still one entry:
     a heading repeating an earlier one's date and time, or date and headline,
-    is the same shift. `extract=done_in` lists what they did instead."""
+    is the same shift. A headline is its first 60 characters: a re-stamp that
+    also rewrote the headline's second half (11-08 23:35 to 23:50, 11-09
+    12:15 to 12:25) listed one shift twice, and the ten held eight (audit
+    11-12). `extract=done_in` lists what they did instead."""
     out, keys = [], set()
     for text in (versions if versions is not None else _worklog_versions(commits)):
         for heading, bullets in (extract or dropped_in)(text):
             date, time, headline = _heading_parts(heading)
-            mine = {(date, "h", headline)} | ({(date, "t", time)} if time else set())
+            mine = {(date, "h", headline[:60])} | ({(date, "t", time)} if time else set())
             seen = bool(mine & keys)
             keys |= mine      # even when skipped, so a chain of edits links up
             if not seen:
