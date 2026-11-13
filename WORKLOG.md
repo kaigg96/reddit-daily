@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-13 (01:00) — The capitals test can no longer be read on too few videos; the security ask now opens with two five-minute checks
+
+    Worked (% of the shift): data 55 · gm 20 · security 20 · reliability 5
+
+**Summary:** The shift started with nothing ready. It made sure our one live test of a views lever, capitals in titles, is read only once both halves hold the 30 videos its rule needs. It also cut the start of the security ask that guards our one fatal risk down to two five-minute checks. Nothing reached viewers, so the company is no closer to revenue tonight.
+
+### Toward revenue
+- **Nothing directly.** Every step that changes the videos still waits on you, bet 1 (#77) first. The capitals test is our only live test of a views lever, the measure bet 2 is judged on, and its verdict decides whether every title gets a capitalised word. Tonight's fix keeps that verdict from being taken on too few videos.
+
+### Done
+- **Data (fixed, live):** the capitals test's rule says it is read at 30 videos per half. The lock that stops anyone peeking opened on its date, 23 November, whatever the halves held, and the capitals half was on course to fall one or two short. The lock now stays shut until both halves hold 30 in the exact set of videos the read uses. It counts only which half each video was in, never how it did. On today's numbers the read most likely still happens on 23 November; there is about a 1-in-5 chance it moves to 30 November. I wrote that into the plan before anyone looked at a result. Three fresh reviews checked it. The first two each found I had counted the read's videos wrongly, and I fixed both before merging. All 864 tests pass.
+- **Security (an existing ask made easier, not a new one):** the quarterly account check (#59) is the only guard on our one fatal risk: losing the Google account, and with it the channel. It has waited on you since 6 October. It now opens with the two checks that matter most, about five minutes together: 2-step sign-in on the Google account, and the list of apps connected to it. The other four follow, unchanged. I edited the issue rather than commenting, so it sent you no email.
+- **General management (ranking):** a fresh helper proposed eight ideas from our data and plans, and two others ranked them, forwards and reversed. The capitals-test fix came in the top two both ways, so I did it first. The security rewrite split them (first and fourth), so I did it second. Dropped: a tool to read the new AI model's titles from the run logs (shifts can't read those logs); whether the new model lets through more questions about named people's misconduct (about 10 uploads, too few to tell); titling the backup show with our own question (it needs a sample video and a product choice); fixing in advance how the 20 November bet-2 update is worked out (its rule already says, and one command gives the figure); a test run before each push (it needs files only you can change); and sorting the friction log (Monday's review does it).
+- **Data (a figure, not a finding):** views over the last four weeks were 12,238, against 9,158 over the four before. That is ×1.34, under the doubling our report counts as a change, and it comes mostly from one strong week. At this pace, two uploads a day reach about three-quarters of bet 2's 16,600 bar.
+- **Security and reliability (checked):** both of yesterday's uploads landed. The money controls are intact ($0.31 this month, forecast $0.79 of $3). No secret is in the repository, and the workflows are unchanged.
+- **General management:** my rule took the product plan's status section 49 words over its limit, so I shortened it back under. The open code-findings list is still one over its cap, as it was at the start. Neither item that could close is ready to, and I added none.
+- AI use: none; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59 (now five minutes for the two checks that matter), and the shift allowance setting (on #92).
+
+### Next
+- **This morning's 11:17 shift:** request bet 1's sample video whether or not #77 is labelled (yesterday morning's plan stands). In winter, Gemini work waits until after 08:00 UTC.
+- **16 November:** the weekly review; it sorts the friction log's 26 ungrouped entries.
+- **23 November:** the capitals test's read, if the lock opens. If it stays shut, move the test's due date to 30 November and read it then.
+
+### Better?
+- **Than last shift:** no, not toward revenue. A verdict on a views lever can no longer be read too early, and the fatal-risk ask costs you less. Nothing reached viewers.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-12 (19:28) — No theme in the questions explains why some uploads get buried; every scheduled job here runs as late as the uploads
 
     Worked (% of the shift): data 40 · gm 25 · reliability 15 · strategy 10 · security 5 · product 5
@@ -92,39 +125,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no. Two questions answered, both "no", and nothing reached viewers. The backup show is a little closer to switch-on.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-12 (11:52) — Bet 1 now ships on one label with nothing to watch, and the version that label ships is staged; the backup show's fixes are merged, switched off
-
-    Worked (% of the shift): strategy 30 · product 30 · gm 20 · data 15 · security 5
-
-**Summary:** The decision that gates every revenue step, bet 1 (#77), is rewritten so one label settles it from a phone. Tomorrow's automatic release check will test exactly the version that label ships. Nothing reached viewers, and the company is closer to revenue only once you label it.
-
-### Toward revenue
-- **Bet 1 is one label away.** The audit found you answer quick asks and pass over ones that need a watch. #77 needed a watch, a reply, then another watch. It now asks for one label, which ships bet 1 without the weak per-answer reactions, and it says in a few lines what a viewer would see change. Bet 2 needs bet 1 by about 20 November.
-
-### Done
-- **General management (#77 rewritten):** the issue now holds one ask: label it to ship bet 1 without the short reaction after each answer. Viewers would see the closing line become the host's pick ("My hand goes to the glorified lunch driver. Which ruined dream gets your vote?") and, now and then, a short host note under the question. A comment saying "sample" or "with reactions" keeps your other options open. **A correction followed at 11:45:** I had written that viewers would see nothing else new. A check of the release's code then found smaller changes. When the host's pick is dropped, the video closes on our stock line. The pause after a note is longer. The pinned comment becomes the pick. Health threads are skipped, more often than the plan says (below). Narration costs a few cents a month more. The issue now lists them all.
-- **Product (staged, not shipped):** the version your label ships is now the release in waiting, so tomorrow morning's automatic check tests exactly it. All 1,121 tests pass. One follow-on branch stopped merging cleanly with it, and I fixed that (1,123 pass).
-- **Strategy (merged, switched off):** the backup show's fixes passed their sample at 11:15 (27 seconds, playable) and all 848 tests. A fresh review found the live show untouched. It found one fault that matters only once the backup show is on: the check that stops titles passing the AI's takes off as real people's also drops ordinary titles like "Why do people say sorry so much?". I fixed it on a separate branch. Three fresh reviews in a row each found new wordings it gets wrong, so I stopped. I recorded that a different kind of check is worth weighing before the backup show is switched on.
-- **Data (a question answered: no):** I set the rule before looking. Neither video length nor the background clip explains the fall in the share of plays that get past the opening (43 to 34 per 100). Long videos trail by 28%, where chance alone gives 30%, and every clip sits inside its own chance range. So nothing we can read before 23 November explains the fall.
-- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both put the #77 rewrite first and the split above second. Dropped: getting four uploads a day ready ahead of bet 1 (it needs a sample, and none can render until tomorrow); checking new brand names and a plan for Shorts series (both come after bet 1, by earlier decisions); stripping two characters YouTube refuses in titles (none in 2,300 so far); and working out which Claude plan we are on (the status line can't tell). Later, also dropped: a fourth round on the backup show's title check (recorded instead), a better closing line for when the host's pick drops (it needs AI requests, and none may run this close to an upload), and the pick's casing in closed captions (rarely seen).
-- **Security and reliability (checked):** yesterday's two uploads and this morning's landed. The money controls are intact ($0.30 this month, forecast $0.79 of $3), no secret is in the repository, and the workflows are unchanged.
-- AI use: none by the shift itself; one sample video (test model, silent); no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label now), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59, and the shift allowance setting (on #92).
-
-### Next
-- **Tomorrow's 11:17 shift:** request bet 1's sample video whether or not #77 is labelled, the first render the 12-hour limit allows. Then "sample" costs you no wait, and a label meets every merge check but the review.
-- **If #77 is labelled:** merge on tomorrow's release check, that sample and a fresh review of the whole release.
-- **Bet 1's health skip is larger than planned:** the plan says it skips 1–2 uploads in 100. By topic alone it would have skipped 5 of 84 since October and 3 of 23 this month. Bet 1's read should state the real rate beside its verdict. Whether health threads do better or worse than the rest can't be told yet: only 3 are measurable, and the report tool needs 8.
-- **16 November:** the weekly review.
-
-### Better?
-- **Than last shift:** yes, a little. The decision that blocks revenue is now cheaper for you to make, and what it ships is staged. Nothing reached viewers.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
