@@ -263,7 +263,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   length-guard drop while the vote shows synthesizes the stock line as a sixth
   Polly call (~94 characters, `run.py` ~120). Each branch render spends one
   `MODEL` request (`METADATA_ON_UPLOAD_MODEL`), so #65's sentence needs
-  rewording before it lands (noted on its body). With reactions off, the ask and
+  rewording before it lands (noted on its body). Once `v8` merges, the shift skill's
+  §6 line that a branch renders "over silent narration" is false (Kokoro
+  stand-in, `STAND_IN_VOICE`): for the monthly's bundle of skill changes. With reactions off, the ask and
   schema still request three (tokens only).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
