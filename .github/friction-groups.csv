@@ -1,6 +1,6 @@
 group,title,status,item,opened,resolved,note
 G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true. 11-02: `dry_run.py next` computes the slot (F112's share); the 12-hour cap and #65 remain
-G2,"Recorded answers are hard to find, so work gets redone",open,,2026-09-26,,seeded 2026-10-27 from the work log's notes; check it is still true
+G2,"Recorded answers are hard to find, so work gets redone",fixed,backlog_status.py --dropped,2026-09-26,2026-11-09,"11-09: --dropped, which generation reads, now lists every PRD §4 finding's headline (F157, F168, F201: generators re-proposed answered findings). Other causes in the group (a number never written down, F187; one answer spread over three places, F210) are untouched, so a recurrence there counts against this fix"
 G3,The views-never-revert rule hid side-by-side findings,open,,2026-09-28,,seeded 2026-10-27 from the work log's notes; check it is still true
 G4,The work log's word budget fights the retention it asks for,open,,2026-09-29,,seeded 2026-10-27 from the work log's notes; check it is still true
 G5,report.py could not produce a needed count,fixed,report.py,2026-09-29,2026-09-29,
@@ -22,3 +22,9 @@ G20,"Account-side facts (who gets failure emails, the app's name) are invisible 
 G21,"The shift allowance's controls are opaque to a shift (skips, opposing limits)",open,,2026-11-02,,
 G22,Merge mechanics show their breakage only after landing,open,,2026-11-02,,
 G23,"YouTube withholds caption tracks, so another channel's narration cannot be checked",wontfix,,2026-11-02,,An external limit with no workaround a shift can build
+G24,Sample renders expire before the owner decides on them,open,,2026-11-09,,
+G25,"What an upload said (narration, closing line) lives only in run logs",open,,2026-11-09,,"11-09: the closing line is in the upload log since (its cta column, F162's ask); the narration is still only in run logs (F154, F160)"
+G26,"Text-rule changes need a replay over every shipped line, which is slow and fiddly",open,,2026-11-09,,
+G27,"A review's steps are worked from memory, so one gets skipped",open,,2026-11-09,,
+G28,Hand-copied or truncated output misstates a result,open,,2026-11-09,,
+G29,Nothing stops a read of a blind test's field before its due date,open,,2026-11-09,,

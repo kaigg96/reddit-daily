@@ -38,6 +38,13 @@ from src import llm, run
 from tests.test_commentary import HOST, POST_ANSWERS, _Post, _synth, _too_long_until
 
 
+@pytest.fixture(autouse=True)
+def reactions_on(monkeypatch):
+    """This file pins bet 1 as sampled 10-25, a note per answer;
+    test_no_reactions.py pins the build without them (#77, 11-11)."""
+    monkeypatch.setattr(config, "HOST_REACTIONS", True)
+
+
 @pytest.fixture
 def text_host(monkeypatch):
     """The mechanics below count nothing, so they reuse the two-answer

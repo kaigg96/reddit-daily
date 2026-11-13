@@ -56,6 +56,16 @@ METADATA_ON_UPLOAD_MODEL = os.environ.get(
 # narrated renders (#77): each timing tweak cost a Polly run (TECH_DEBT).
 REUSE_NARRATION = DRY_RUN and os.environ.get(
     "REUSE_NARRATION", "").lower() in ("1", "true", "yes")
+# SOURCE: where the question comes from. "reddit" is the show; "own" is our
+# own question with three takes (src/ownquestions.py), the source after
+# Reddit's free API ends (PLAN C16), built switched off: only a label turns it
+# on. Any other value fails the run rather than falling back unseen.
+SOURCE = os.environ.get("SOURCE", "reddit").strip().lower() or "reddit"
+if SOURCE not in ("reddit", "own"):
+    raise SystemExit(f"SOURCE={SOURCE!r} is not a source (reddit, own)")
+# Each answer's on-screen label. Our own takes say so: nobody else wrote them,
+# so they must never pass for a real person's answer (PRD §4).
+ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
@@ -132,7 +142,8 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_FALLBACK = True
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup and reactions on screen, the narrator speaks its vote
+FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup note on screen (reactions off: HOST_REACTIONS), the narrator speaks its vote
+# v7s = v7 on MODEL's successor (PRD §4, 11-07): titles, closing lines, the screen
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
@@ -169,6 +180,11 @@ HOST_TEXT = True
 # said (owner, #77, 2026-10-19): a sentence shown mid-answer could not be read
 # while the answer was heard. False restores those notes (NOTE_LEAD).
 HOST_TAGS = True
+# Bet 1 without its per-answer reactions (#77, 2026-11-11): the setup note and
+# the vote stay, and no answer carries a tag. gemini-3.6-flash labels where
+# 2.5-flash reacted, and four fixes left it at 0-1 of 9 (PRD §4), so this is
+# the build #77 offers. True restores the reactions as the 10-25 sample.
+HOST_REACTIONS = False
 TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
 # The gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP. A
 # tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to

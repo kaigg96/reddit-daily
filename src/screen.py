@@ -175,7 +175,9 @@ def _backstop(question, comments, failure=""):
 # `sexual_suggestive` shape as the confirmed zeroed upload VDH3pSafyE0 ("...hints
 # someone's excellent in bed?"). Caught by the 2026-09-20 CI gate.
 #
-# Keywords, titles and CTAs are transformations and stay at zero — this budget
+# Keywords, titles and CTAs are transformations and stay at the model's lowest
+# thinking (zero on 2.5; on a MODEL candidate this budget becomes level
+# "low", and the 3.5-flash-lite fallback takes its default) — this budget
 # buys reasoning only where it demonstrably changes the verdict. It is small
 # because latency is what broke this module before: default thinking spent 546
 # tokens and 33s on a title, past the old 30s timeout.

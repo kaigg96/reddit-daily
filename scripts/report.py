@@ -15,6 +15,7 @@ Usage:
   venv/bin/python scripts/report.py --offline --by topic   # no YouTube credentials
   venv/bin/python scripts/report.py --at-age 7 --compare topic=dark-morbid
   venv/bin/python scripts/report.py --trajectory --metric views   # total weekly views (bet 2)
+  venv/bin/python scripts/report.py --trajectory --metric engaged_share   # D9's test measure, by week
   venv/bin/python scripts/report.py --routes           # each revenue route's distance (PLAN §1)
   venv/bin/python scripts/report.py --balance title_caps --by subreddit   # a coin's arms; no outcome read
 
@@ -26,6 +27,7 @@ chosen silently: ask for it, and every answer carries its as-of date.
 
 import argparse
 import datetime
+import re
 import sys
 from pathlib import Path
 
@@ -227,6 +229,9 @@ def release(version, key, target_age, min_uploads=None, within_spec=None):
               f"with what it replaced rather than with its own successors)")
     print(insights.render_release(read.comparisons, read.floors, read.triggers, min_uploads))
     print(insights.render_duration(read.release, read.before))
+    beside = insights.render_beside(read)
+    if beside:
+        print(beside)
     import csv
     from src import config
     with open(config.UPLOAD_LOG) as f:
@@ -257,6 +262,52 @@ def _per_start_rows(path=None):
     return [dict(r, value=r["value"] * 60 / views[(r["video_id"], r["snapshot"])])
             for r in _snapshot_metric_rows("est_minutes_watched", path)
             if views.get((r["video_id"], r["snapshot"]))]
+
+
+def _engaged_share_rows(path=None, at_age=7, tolerance=4, ids=None):
+    """`_snapshot_metric_rows` as engaged views / views, from the same snapshot
+    row (`Video.engaged_share`): D9's measure for tests set from 2026-11-10.
+    Each upload is read at its snapshot nearest `at_age`, only there; a
+    zero-view reading is left out, as zero-view uploads are counted apart.
+
+    A publish-week counts only if every upload in it (of `ids`, under
+    `--within`) has that reading, and its Sunday upload is old enough to,
+    as `weekly_totals` requires of a sum. The column began 2026-10-05, so
+    2026-W39 kept 9 of 14 uploads, read at 8-11 days, and its one step set
+    the drift floor that read FALLING; the newest week counted 8 of 14
+    (three fresh reviews, 11-11)."""
+    import datetime as _dt
+    views_rows = [r for r in _snapshot_metric_rows("views", path)
+                  if ids is None or r["video_id"] in ids]
+    if not views_rows:
+        return []
+    views = {(r["video_id"], r["snapshot"]): r["value"] for r in views_rows}
+    engaged = {(r["video_id"], r["snapshot"]): r["value"]
+               for r in _snapshot_metric_rows(Metric.ENGAGED_VIEWS, path)}
+    newest = (max(r["snapshot"] for r in views_rows)
+              - _dt.timedelta(days=at_age - tolerance)).date()
+    week = lambda pub: pub.strftime("%G-W%V")
+    nearest, known = {}, {}
+    for r in views_rows:
+        known.setdefault(week(r["published"]), set()).add(r["video_id"])
+        off = abs((r["snapshot"] - r["published"]).days - at_age)
+        if off <= tolerance and off < nearest.get(r["video_id"], (tolerance + 1,))[0]:
+            nearest[r["video_id"]] = (off, r["snapshot"], r["published"])
+    rows, unread = [], set()
+    for period, vids in known.items():
+        if any(v not in nearest for v in vids):
+            unread.add(period)
+    for vid, (_, snap, pub) in nearest.items():
+        sunday = (pub - _dt.timedelta(days=pub.weekday() - 6)).date()
+        if sunday > newest:
+            unread.add(week(pub))
+        elif views[(vid, snap)]:
+            if (vid, snap) not in engaged:
+                unread.add(week(pub))
+            else:
+                rows.append({"video_id": vid, "published": pub, "snapshot": snap,
+                             "value": engaged[(vid, snap)] / views[(vid, snap)]})
+    return [r for r in rows if week(r["published"]) not in unread]
 
 
 def _fine_watch_rows(path=None, log_rows=None):
@@ -502,19 +553,25 @@ def show_trajectory(args):
     """`--trajectory`: is the channel actually getting better?"""
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
-    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START):
-        print(f"--trajectory reads watch-seconds (whole, fine or per play start), views or "
-              f"engaged_views, not {args.metric}")
+    if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START,
+                           Metric.ENGAGED_SHARE):
+        print(f"--trajectory reads watch-seconds (whole, fine or per play start), engaged_share, "
+              f"views or engaged_views, not {args.metric}")
         return
+    share = args.metric == Metric.ENGAGED_SHARE
     rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
+            else _engaged_share_rows(at_age=args.at_age or 7, ids=insights.ids_within(args.within)
+                                     if args.within else None) if share
             else _snapshot_metric_rows())
     rows = _within_rows(rows, args.within)
     # Minutes come whole, so an upload under ~30 views reads 0 per play start:
     # a reading (its zero-view rows are already out), kept so the weakest
-    # uploads do not drop from their week's median (review, 10-23).
+    # uploads do not drop from their week's median (review, 10-23). So is an
+    # engaged share of 0 on an upload with views.
     series = insights.trajectory(rows, at_age=args.at_age or 7,
-                                 keep_zero=args.metric == Metric.WATCH_PER_START)
+                                 keep_zero=args.metric in (Metric.WATCH_PER_START,
+                                                           Metric.ENGAGED_SHARE))
     if not series:
         print("not enough comparable history yet")
         return
@@ -522,19 +579,24 @@ def show_trajectory(args):
             " pre-committed rules read whole seconds)" if args.metric == Metric.WATCH_FINE else "")
     name = ("seconds watched per play start (estimated minutes x 60 / views, swipe-aways"
             " included; a diagnostic, never a trigger)"
-            if args.metric == Metric.WATCH_PER_START else f"watch-seconds{fine}")
+            if args.metric == Metric.WATCH_PER_START
+            else "engaged share (engaged views / views; reported since 2026-10-05; D9's"
+                 " measure for tests, read per test with --release, never a trigger here)"
+            if share else f"watch-seconds{fine}")
+    unit, digits = ("", 2) if share else ("s", 1)
     print(f"Median {name}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
-        print(f"  {period:10} {n:>4} {med:>7.1f}s")
+        print(f"  {period:10} {n:>4} {med:>7.{digits}f}{unit}")
 
     floor = insights.median([abs(b[2] - a[2])
                             for a, b in zip(series, series[1:])]) or None
-    verdict, why = insights.trajectory_verdict(series, floor=floor)
+    verdict, why = insights.trajectory_verdict(series, floor=floor, digits=digits,
+                                               min_change=0.02 if share else 0.5)
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
-        print(f"  (week-to-week drift on this channel is ~{floor:.1f}s)")
-    if verdict == "flat":
+        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
+    if verdict == "flat" and not share:
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
 
@@ -610,6 +672,90 @@ def show_catalogue(args):
           "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
+def show_themes(args):
+    """`--themes`: R11, do buried uploads share a sensitive theme (PRD §0)?"""
+    import json as _json
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--themes reads R11's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
+    labels = _json.loads((Path(__file__).resolve().parent.parent / "analysis"
+                         / "theme_labels.json").read_text())
+    load = insights.load_videos_at_age()
+    vids = [v for v in load.videos if (v.true_published or v.published) >= insights.THEME_SINCE]
+    buried, rows = insights.theme_buried(vids, labels)
+    print(f"R11: buried (<= {insights.BURIED_VIEWS} views at ~7 days) by theme tag, uploads "
+          f"since {insights.THEME_SINCE.date()} ({buried} buried of "
+          f"{sum(1 for v in vids if v.video_id in labels)} labelled)\n")
+    print(f"  {'tag':13} {'tagged':>11} {'rest':>11} {'lift':>5} {'p':>6}")
+    for tag, ha, na, hb, nb, lift, p, lead in rows:
+        lift = "-" if lift is None else f"{lift:.1f}"
+        print(f"  {tag:13} {ha:>4}/{na:<6} {hb:>4}/{nb:<6} {lift:>5} {p:>6.3f}{'  LEAD' if lead else ''}")
+    if buried < insights.THEME_MIN_BURIED:
+        print(f"\n  Insufficient data: under {insights.THEME_MIN_BURIED} buried uploads.")
+        return
+    print(f"\n  A lead: 'any' under p {insights.THEME_ANY_P}, or one tag under "
+          f"{insights.THEME_ONE_P}, at {insights.THEME_LIFT:.0f}x or more (pre-committed 11-12).")
+    print("  " + ("A lead is a candidate screen category, needing its own rule and the owner's call."
+                  if any(r[-1] for r in rows) else "No lead: no theme explains the buried uploads."))
+
+
+def show_swings(args):
+    """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
+    import csv as _csv
+    from src import config
+    with open(config.CHANNEL_LOG) as f:
+        counter = [(datetime.date.fromisoformat(r["snapshot_date"]), int(r["views"]))
+                   for r in _csv.DictReader(f) if r.get("views")]
+    verdict, weeks = insights.swing_read(
+        counter, insights.views_gained_by_age(_snapshot_metric_rows("views")))
+    if verdict is None:
+        have = weeks[-1][0] if weeks else "none"
+        print(f"R4 reads on the {insights.SWINGS_END} snapshot (pre-committed 2026-10-26); "
+              f"both series reach {have}. Not read early.")
+        return
+    print("R4: weekly view gains per day, the channel's own counter against the\n"
+          f"snapshots' recent uploads (snapshots {insights.SWINGS_START} to "
+          f"{insights.SWINGS_END})\n")
+    print(f"  {'snapshot':10} {'counter':>8}     {'recent':>8}")
+    lows_c = insights.swing_lows([c for _, c, _ in weeks])
+    lows_r = insights.swing_lows([r for _, _, r in weeks])
+    for i, (d, c, r) in enumerate(weeks):
+        print(f"  {d!s:10} {c:>8.0f}{' low' if i in lows_c else '    '}"
+              f" {r:>8.0f}{' low' if i in lows_r else ''}")
+    print(f"\n  Verdict: {verdict}. A low is under {insights.SWING_LOW:.0%} of each week"
+          f"\n  beside it; in step is the same two or more low weeks in both;"
+          f"\n  steady is within ±{insights.SWING_STEADY:.0%} of the mean.")
+    print({"viewers": "  The counter swings in the same weeks: the swings are viewers.",
+           "data": "  The counter is steady: the swings are the snapshots' timing,"
+                   "\n  so read snapshots at a fixed lag from now on.",
+           "unclear": "  Neither: the rule names no action (PRD §0, R4).",
+           "insufficient": "  Insufficient data: under three weeks matched in both series."}[verdict])
+
+
+def show_spacing(args):
+    """`--spacing`: R8, uploads beside a missed slot against the regular
+    rhythm, month-matched (PRD §4)."""
+    videos, asof = insights.load_channel_videos_offline()
+    if not videos:
+        print("no snapshot with privacy status: no answer")
+        return
+    r = insights.spacing_read(videos, asof)
+    print(f"R8 — uploads with at most one other within {insights.SPACING_WINDOW_H}h (sparse)"
+          f" against those with two (regular), within each month\n  snapshot {asof.date()},"
+          f" public, {insights.SPACING_SINCE} to {insights.SPACING_MIN_AGE_DAYS} days before it\n")
+    print(f"  {r.months} qualifying month(s): {r.sparse} sparse, {r.regular} regular;"
+          f" {r.dense} dense in the whole population, not judged")
+    if r.ratio is not None:
+        gap = "n/a" if r.gap is None else f"{r.gap:.0%}"
+        print(f"  views, sparse / regular (median of monthly medians): {r.ratio:.2f}  chance gap ±{gap}")
+        if r.watch_ratio is not None:
+            print(f"  watch-seconds, the same (beside it, never deciding): {r.watch_ratio:.2f}")
+    elif r.sparse < insights.SPACING_MIN_SPARSE:
+        print(f"  fewer than {insights.SPACING_MIN_SPARSE} sparse uploads: the row closes (R8's rule)")
+    print(f"\n  {r.verdict}")
+    print("  About 1.5 a day against 2, locally: it says nothing of six hours' spacing (#4).")
+
+
 def show_concentration(args):
     """`--concentration`: are the views earned by a few hits? (PRD §0 R4)"""
     age = args.at_age or 7
@@ -657,6 +803,35 @@ def show_hit_rates(videos, key):
         print(f"  {label:24} {n:>4} {hits:>5} {hits / n:>6.0%} {p:>9.3f}")
     print("\n  p is each group against the rest, two-sided. Read it at the bar its "
           "\n  question pre-committed, and within an era: eras differ in views.")
+
+
+def refuse_blind(args, ledger, today, log_rows=None, snapshots=None):
+    """Exit before any outcome loads when --by, --compare, --within or
+    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), before
+    its due date or, past it, while its arms are under their floor
+    (insights.BLIND_FLOORS), unless --unblind gives a reason."""
+    key = getattr(args, "release_key", None) if getattr(args, "release", None) else None
+    fields = [re.split(r"!?=", spec)[0].strip()
+              for spec in (args.by, args.compare, args.within, key) if spec]
+    blind = insights.blind_reads(fields, ledger, today)
+    for field, test, due in blind:
+        if not args.unblind:
+            sys.exit(f"{field} cuts by {test}'s coin, blind until {due} (its pre-committed "
+                     f"read). Its arms' balance stays open (--balance, assignments only). "
+                     f"To read it anyway, add --unblind \"<reason>\" and record the peek "
+                     f"beside {test} in analysis/experiments.csv.")
+        print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
+              f"ledger row.\n")
+    for field, test, smaller, floor in insights.blind_arms(fields, ledger, today, log_rows,
+                                                           snapshots):
+        if not args.unblind:
+            sys.exit(f"{field} cuts by {test}'s coin, blind until each arm holds {floor} uploads "
+                     f"in the newest snapshot's --at-age 7 read; the smaller holds {smaller}. "
+                     f"Its rule moves the read to the first snapshot with both (PRD §0), so move "
+                     f"its due date in analysis/experiments.csv there; --balance stays open. To "
+                     f"read it anyway, add --unblind \"<reason>\" and record the peek beside {test}.")
+        print(f"UNBLINDED {test} under its floor ({smaller} of {floor} per arm): "
+              f"{args.unblind}. Record it beside its ledger row.\n")
 
 
 def main():
@@ -727,6 +902,15 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--themes", action="store_true",
+                   help="R11: do buried uploads share a sensitive theme? Blind "
+                        "theme tags (analysis/theme_labels.json) against burial")
+    p.add_argument("--swings", action="store_true",
+                   help="R4: are weekly view swings viewers or data? The channel's "
+                        "counter against --catalogue's recent column (reads on 11-16)")
+    p.add_argument("--spacing", action="store_true",
+                   help="R8: views of uploads beside a missed slot vs the regular "
+                        "rhythm, month-matched, from the committed snapshot")
     p.add_argument("--experiments", action="store_true",
                    help="the experiment ledger: rules read on time, keeps credited, "
                         "what is due next (PLAN C18)")
@@ -745,9 +929,12 @@ def main():
                    help="a randomized coin's arms against --by, from the upload log "
                         "alone: no outcome is read, so it runs before a read "
                         "(e.g. --balance title_caps --by subreddit --since 2026-10-15)")
+    p.add_argument("--unblind", metavar="REASON",
+                   help="read a blind test's field before its pre-committed date "
+                        "anyway; record the peek beside its ledger row")
     p.add_argument("--until", metavar="YYYY-MM-DD",
-                   help="--balance: uploads published on or before this date, so it "
-                        "counts what a read at 7 days sees (its snapshot's date less 7)")
+                   help="--balance: uploads published on or before this date, inclusive "
+                        "(an --at-age 7 read takes uploads 3.5 days old on its snapshot)")
     args = p.parse_args()
     if args.within:
         try:
@@ -758,7 +945,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -768,6 +955,11 @@ def main():
     if args.within and (args.opening_reach or args.watch_reach or args.first_answer):
         # Each reads its pre-committed sample; a filter would be ignored silently.
         sys.exit("--opening-reach, --watch-reach and --first-answer take no --within")
+    if args.spacing and (args.within or args.at_age is not None or args.by or args.compare
+                         or args.metric != Metric.WATCH or args.min_uploads is not None
+                         or args.release_key != p.get_default("release_key")):
+        # R8 reads its pre-committed sample and metrics; an option would be ignored silently.
+        sys.exit("--spacing takes no other option: R8's sample and metrics are fixed")
     if args.until and not args.balance:
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
@@ -800,6 +992,8 @@ def main():
     if args.balance:        # assignments only: returns before any outcome loads
         show_balance(args.balance, args.by, args.since, args.until)
         return
+
+    refuse_blind(args, insights.load_experiments(), now.date())
 
     if args.scorecard:     # many metrics; no single one can judge this channel
         show_scorecard(args)
@@ -955,6 +1149,17 @@ def main():
 
     if args.catalogue:      # the snapshot series, channel-wide
         show_catalogue(args)
+        return
+
+    if args.themes:         # R11: blind theme tags against burial
+        show_themes(args)
+        return
+    if args.swings:         # R4: the snapshot series against the channel counter
+        show_swings(args)
+        return
+
+    if args.spacing:        # the committed snapshot, channel-wide
+        show_spacing(args)
         return
 
     if args.concentration and not args.by:  # the snapshot series, like --trajectory

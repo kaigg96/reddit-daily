@@ -90,6 +90,15 @@ ORIENT = {
     "PLAN.md": 1400,
     ".claude/skills/pickup/SKILL.md": 700,
 }
+# Read on demand, so outside the total above, but budgeted so they can only
+# shrink. PRD §4, the findings, grew 15,317 -> 20,714 words in the week to
+# 11-12 with no budget (D4, audit 11-12), and idea helpers read it
+# (backlog_status.answered_in). Set at that day's size: a finding added means
+# another compressed, a superseded one to a line and a pointer to git.
+# 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
+# 20310 -> 19130 the same evening: four more (the 09-25 topic read, R4's 10-10,
+# R8, the zero-view pipeline check, which now carries R11's result).
+REFERENCE = {"PRD.md#4. Objectives": 19130}
 
 
 def words(text):
@@ -218,12 +227,30 @@ def session_cost():
 # extending" -- but it is advisory. Blocking on it would make silence cheaper
 # than recording a finding, which is worse than a long list.
 CORPUS = {
-    "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them"),
+    "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them", None),
     "DECISIONS.md": (r"^## D\d+ ", 15, "decisions",
-                     "compress superseded ones to a line; graduate stable ones into the rules"),
-    "TECH_DEBT.md": (r"^- \*\*", 25, "open items",
-                     "fix, promote to PRD §0's backlog, or delete with reasoning"),
+                     "compress superseded ones to a line; graduate stable ones into the rules",
+                     None),
+    # Only its open list: the passes above it record what each pass did, and
+    # 12 of their bullets were counted as open until 2026-11-12, so the cap
+    # fell by the same 12 (D4).
+    "TECH_DEBT.md": (r"^- \*\*", 13, "open items",
+                     "fix, promote to PRD §0's backlog, or delete with reasoning",
+                     "## Open items"),
 }
+
+
+def count_items(raw, pattern, section=None):
+    """Items matching `pattern` in `raw`, only under the `section` heading when
+    given (to the next heading of its level), outside fenced blocks."""
+    raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)   # e.g. WORKLOG's template
+    if section:
+        start = raw.find("\n" + section)
+        if start == -1:
+            return 0
+        end = raw.find("\n" + section.split()[0] + " ", start + 1)
+        raw = raw[start:end if end != -1 else len(raw)]
+    return len(re.findall(pattern, raw, re.M))
 
 
 def corpus_health():
@@ -232,13 +259,12 @@ def corpus_health():
     """
     print("\nCORPUS (read on demand — counted as open items, not words)")
     over = []
-    for path, (pattern, cap, noun, fix) in CORPUS.items():
+    for path, (pattern, cap, noun, fix, section) in CORPUS.items():
         try:
             raw = open(os.path.join(ROOT, path), encoding="utf-8").read()
         except OSError:
             continue
-        raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)   # e.g. WORKLOG's template
-        n = len(re.findall(pattern, raw, re.M))
+        n = count_items(raw, pattern, section)
         flag = "OVER" if n > cap else "ok"
         bar = "#" * min(int(n / cap * 20), 30)
         print(f"  {n:>6}/{cap:<5} {flag:4} {bar:<22} {path}  ({noun})")
@@ -328,16 +354,21 @@ def merge_versions(texts):
     time, so only entries older than the current file's oldest were dropped.
     A shift that re-stamps its time keeping its headline (10-24 09:05, then
     08:50) is one shift, as in `backlog_status.recently_dropped`; the 10-25
-    audit found it counted twice, pushing another shift out of the window."""
+    audit found it counted twice, pushing another shift out of the window.
+    A headline is its first 60 characters, as there: 11-09 12:15 became 12:25
+    with the headline's second half and the summary rewritten (audit 11-12).
+    A summary links only with the same time split: three 11-07 shifts opened
+    on one stock sentence and two were read as one, while 10-18's re-stamp
+    kept only its summary's first sentence (audit 11-12)."""
     seen, oldest, links = {}, None, set()
     for i, text in enumerate(texts):            # current file first, so its edits win
         summaries = _summaries(text)
         for heading, row in allocation_entries(text, full_heading=True):
             key = re.match(r"[\d-]+(?: \(\d\d:\d\d\))?", heading).group(0)
-            headline = heading.split("—", 1)[1].strip() if "—" in heading else ""
+            headline = heading.split("—", 1)[1].strip()[:60] if "—" in heading else ""
             summary = summaries.get(heading, "")
             mine = {("t", key)} | ({("h", key[:10], headline)} if headline else set()) \
-                | ({("s", key[:10], summary)} if summary else set())
+                | ({("s", key[:10], summary, tuple(sorted(row.items())))} if summary else set())
             restamped = key not in seen and bool(mine & links)
             links |= mine
             if restamped:
@@ -532,6 +563,7 @@ def main():
     orient = measure(ORIENT)
     blocking = report(always, "ALWAYS LOADED (every session, whatever the task)")
     advisory = report(orient, "READ AT STARTUP (every shift)")
+    advisory += report(measure(REFERENCE), "READ ON DEMAND (budgeted to shrink, not in the total)")
     corpus_over = corpus_health()
 
     total = sum(n for _, n, _ in always + orient if n)

@@ -46,6 +46,19 @@ def test_every_function_in_org_md_is_known():
     assert len(re.findall(r"^#### ", org, re.M)) == len(context_budget.FUNCTIONS) == 14
 
 
+def test_every_reference_budget_names_a_section_that_exists():
+    """A renamed heading would read as missing, and the budget would hold nothing."""
+    assert all(n is not None for _, n, _ in context_budget.measure(context_budget.REFERENCE))
+
+
+def test_a_reference_budget_never_fails_the_build(monkeypatch, capsys):
+    monkeypatch.setattr(context_budget, "REFERENCE", {"PRD.md#4. Objectives": 1})
+    monkeypatch.setattr(sys, "argv", ["context_budget.py", "--check"])
+    assert context_budget.main() == 0
+    over = capsys.readouterr().out.split("advisory, does not fail the build:")[-1]
+    assert "- PRD.md#4. Objectives: " in over
+
+
 def _entry(stamp, headline, worked):
     return f"\n## {stamp} — {headline}\n\n    Worked (% of the shift): {worked}\n"
 
@@ -59,6 +72,36 @@ def test_a_restamped_shift_is_counted_once():
         + _entry("2026-10-23 (22:55)", "a different shift", "data 100")
     labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
     assert labels == ["2026-10-25 (08:25)", "2026-10-24 (08:50)", "2026-10-23 (22:55)"]
+
+
+def test_a_restamp_that_rewrote_the_headline_end_and_summary_is_counted_once():
+    """11-09 12:15 became 12:25, its headline's second half and its summary
+    rewritten; the 11-12 audit found it listed twice."""
+    start = "Shift helpers now see every recorded finding before proposing work"
+    def entry(stamp, rest, summary):
+        return _entry(stamp, f"{start}; {rest}", "gm 100") + f"\n**Summary:** {summary}\n"
+    current = "# Work log\n" + _entry("2026-11-10 (03:00)", "newest", "product 100")
+    newer = current + entry("2026-11-09 (12:25)", "the weekly falls to the evening", "B.")
+    older = current + entry("2026-11-09 (12:15)", "uploads record the limit", "A.")
+    labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
+    assert labels == ["2026-11-10 (03:00)", "2026-11-09 (12:25)"]
+
+
+def test_two_shifts_whose_summaries_open_alike_stay_two():
+    """Three 11-07 shifts opened on the same stock sentence; two were merged."""
+    stock = ("Nothing viewers see changed, and the company is no closer to revenue: "
+             "bet 1 (#77) still waits on your label")
+    def entry(stamp, headline, worked, rest=""):
+        return _entry(stamp, headline, worked) + f"\n**Summary:** {stock}. {rest}\n"
+    current = "# Work log\n" + _entry("2026-11-08 (17:56)", "newest", "product 100")
+    old = current + entry("2026-11-07 (10:08)", "half-tested", "reliability 60 · gm 40") \
+        + entry("2026-11-07 (00:20)", "Google swaps", "gm 35 · security 65")
+    assert len(context_budget.merge_versions([current, old])) == 3
+    # 11-07's 00:35 draft became 00:20, rewriting time, headline and the
+    # summary's end; its opening and its split stayed, so it is one shift.
+    draft = current + entry("2026-11-07 (00:35)", "Two old tokens", "gm 35 · security 65", "Draft.")
+    labels = [label[:18] for label, _ in context_budget.merge_versions([current, old, draft])]
+    assert labels == ["2026-11-08 (17:56)", "2026-11-07 (10:08)", "2026-11-07 (00:20)"]
 
 
 def test_two_shifts_on_one_day_stay_two():
@@ -78,3 +121,13 @@ def test_a_restamp_that_also_rewords_is_counted_once_by_its_summary():
         + entry("2026-10-18 (14:35)", "another shift", "Something else happened.")
     labels = [label[:18] for label, _ in context_budget.merge_versions([current, newer, older])]
     assert labels == ["2026-10-19 (09:50)", "2026-10-18 (14:35)", "2026-10-18 (08:50)"]
+
+
+def test_open_items_count_only_under_their_heading():
+    raw = ("## Pass 1\n\n- **Done thing.** x\n- **Deferred thing.** y\n\n"
+           "## Open items (logged between passes)\n\n- **Open one.** a\n### Sub\n- **Open two.** b\n"
+           "```\n- **In a fence.** c\n```\n\n## Later\n\n- **Not open.** d\n")
+    assert context_budget.count_items(raw, r"^- \*\*", "## Open items") == 2
+    assert context_budget.count_items(raw, r"^- \*\*") == 5
+    assert context_budget.count_items(raw, r"^- \*\*", "## Missing") == 0
+    assert context_budget.CORPUS["TECH_DEBT.md"][4] == "## Open items"

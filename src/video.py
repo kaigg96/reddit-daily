@@ -235,7 +235,7 @@ def assemble(question, segments, rng):
             answer_i += 1
             sfx_times.append(t)
             overlays.append(
-                overlay_text(f"ANSWER {answer_i}/{n_answers}", t, display_dur, 56, 330, color=config.BRAND_ORANGE)
+                overlay_text(f"{config.ANSWER_LABEL} {answer_i}/{n_answers}", t, display_dur, 56, 330, color=config.BRAND_ORANGE)
             )
             overlays += caption_clips(groups, t, font_size=112, y=700)
         elif seg.kind == "host":  # bet 1 (#70): the host's own words

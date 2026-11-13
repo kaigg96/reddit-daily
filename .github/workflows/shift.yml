@@ -147,6 +147,10 @@ jobs:
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Refuses background agents and commands (foreground_in_ci.py): on
+          # 2026-11-04 a shift sent its idea generator to the background and
+          # ended its turn to wait, which ended the job with no handover.
+          settings: ${{ github.workspace }}/.github/workflows/shift-settings.json
           prompt: |
             ${{ inputs.prompt || '/shift' }}
 

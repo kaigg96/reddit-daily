@@ -229,15 +229,19 @@ _RUN_LINK = re.compile(r"/actions/runs/(\d+)")
 
 
 def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
-    """(issue, run, deletion time, copy linked?) for each render an open ask
-    links whose download GitHub deletes within `days`. Asks with no run link
+    """(issue, run, deletion time, copy linked?, where) for each render an
+    open ask links whose download GitHub deletes within `days`. `where` is
+    "body" when the ask's own text links the run, the line to edit (F192: a
+    shift had to read body and comments by hand to find it), else "comments". Asks with no run link
     cost no artifact request. A run GitHub no longer has (404, 410) is
     skipped; any other failure raises, for `_print_expiring` to report."""
     now = now or datetime.now(timezone.utc)
     out = []
     for i, _ in issues:
-        text = "\n".join([i.get("body") or ""] + [c.get("body") or "" for c in
-                                                  (_comments(i) if i.get("comments") else [])])
+        body = i.get("body") or ""
+        text = "\n".join([body] + [c.get("body") or "" for c in
+                                   (_comments(i) if i.get("comments") else [])])
+        in_body = set(_RUN_LINK.findall(body))
         # Per ask, not per run: the warning still prints, and says to check.
         kept = "sample-frames" in text and ".mp4" in text
         for run in sorted(set(_RUN_LINK.findall(text))):
@@ -254,7 +258,7 @@ def _expiring(issues, now=None, days=EXPIRY_WARN_DAYS):
                 if when.tzinfo is None:
                     when = when.replace(tzinfo=timezone.utc)
                 if when - now <= timedelta(days=days):
-                    out.append((i, run, when, kept))
+                    out.append((i, run, when, kept, "body" if run in in_body else "comments"))
     return out
 
 
@@ -273,9 +277,12 @@ def _print_expiring(issues, now=None):
           "Keep each video on the sample-frames branch and link the copy in the ask "
           "(an edit sends no email; never edit a body that carries a patch, or "
           "apply-approved refuses it):")
-    for i, run, when, kept in expiring:
-        print(f"  #{i['number']}  run {run}: deleted {when:%Y-%m-%d %H:%M} UTC"
-              + ("  (the ask links a sample-frames video; check it is this run's)" if kept else ""))
+    for i, run, when, kept, where in expiring:
+        place = "in the ask's body" if where == "body" else "in comments only"
+        todo = ("the ask links a sample-frames video: check it is this run's" if kept
+                else "no kept copy: keep the video, then link it in the body")
+        print(f"  #{i['number']}  run {run}: deleted {when:%Y-%m-%d %H:%M} UTC, linked "
+              f"{place}; {todo}")
 
 
 def show(want_approved):
