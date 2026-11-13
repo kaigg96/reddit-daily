@@ -253,6 +253,17 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   since 10-18 took that path (10-26 05:05, `meta_failure=http_503`). The
   release check sets `FALLBACK_MODEL = None`, so it never sees it. If the
   owner asks on #77, drop host tags when the route is not `gemini`.
+  **Whole-release review (11-13, `b1190de`, main merged in; sampled PASS on
+  that commit): no blockers.** Left: a thread skipped as medical by its screen
+  topic spends one of the 4 screened slots (`content.py` ~317), rightly, as
+  its screen request was spent; so a day of such threads plus R4.6 skips can
+  end a run with no post (no upload, no state touched; ~1 in 400 runs if
+  skips were independent, against ~1 in 1,200 from R4.6 alone). Any fix spends
+  Gemini (`MAX_SCREENED_CANDIDATES`): act only if a run ends with no post. A
+  length-guard drop while the vote shows synthesizes the stock line as a sixth
+  Polly call (~94 characters, `run.py` ~120). Each branch render spends one
+  `MODEL` request (`METADATA_ON_UPLOAD_MODEL`). With reactions off, the ask and
+  schema still request three (tokens only).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
