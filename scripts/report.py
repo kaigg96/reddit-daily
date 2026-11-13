@@ -700,16 +700,18 @@ def show_themes(args):
 def show_topic_mix(args):
     """`--topic-mix`: R12, does a change in topic mix explain the fall in
     engaged share (PRD §0)?"""
-    if args.at_age is not None or args.within or args.by:
+    if args.at_age is not None or args.within or args.by not in (None, "subreddit"):
         sys.exit("--topic-mix reads R12's fixed sample at ~7 days; it takes no "
-                 "--at-age, --within or --by")
-    r = insights.topic_mix(insights.load_videos_at_age().videos)
+                 "--at-age or --within, and --by only as subreddit (R15)")
+    key = args.by or "topic"
+    r = insights.topic_mix(insights.load_videos_at_age().videos, key=key,
+                           min_groups=2 if key == "subreddit" else insights.TOPIC_MIX_MIN_GROUPS)
     split = insights.TOPIC_MIX_SPLIT.date()
-    print(f"R12: engaged share at ~7 days by topic, uploads from "
+    print(f"{'R15' if key == 'subreddit' else 'R12'}: engaged share at ~7 days by {key}, uploads from "
           f"{insights.TOPIC_MIX_START.date()} and before {split} against "
-          f"from it ({r['n_early']} and {r['n_late']} with a reading and a topic; "
+          f"from it ({r['n_early']} and {r['n_late']} with a reading and a {key}; "
           f"zero-view uploads apart: {r['zero_early']} and {r['zero_late']})\n")
-    print(f"  {'topic':22} {'early':>11} {'late':>11}")
+    print(f"  {key:22} {'early':>11} {'late':>11}")
     pct = lambda x: "-" if x is None else f"{x * 100:.1f}"
     for g, ne, nl, me, ml in r["groups"]:
         print(f"  {g:22} {ne:>3} {pct(me):>7} {nl:>3} {pct(ml):>7}")
@@ -721,8 +723,8 @@ def show_topic_mix(args):
           f"{pct(r['fall'])} points); early reweighted to the late mix {pct(r['counterfactual'])}, "
           f"so the mix accounts for {pct(r['mix'])} points of it.")
     print("  Rule (pre-committed 11-13): half the fall or more a lead, under a quarter "
-          "'not topic mix', a fall under 3 points nothing to explain.")
-    print(f"  Verdict: {r['verdict']}.")
+          f"'not {key} mix', a fall under 3 points nothing to explain.")
+    print(f"  Verdict: {r['verdict'].replace('topic', key)}.")
 
 
 def show_near_repeats(args):
