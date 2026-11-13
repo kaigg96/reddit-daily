@@ -697,6 +697,34 @@ def show_themes(args):
                   if any(r[-1] for r in rows) else "No lead: no theme explains the buried uploads."))
 
 
+def show_topic_mix(args):
+    """`--topic-mix`: R12, does a change in topic mix explain the fall in
+    engaged share (PRD §0)?"""
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--topic-mix reads R12's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
+    r = insights.topic_mix(insights.load_videos_at_age().videos)
+    split = insights.TOPIC_MIX_SPLIT.date()
+    print(f"R12: engaged share at ~7 days by topic, uploads from "
+          f"{insights.TOPIC_MIX_START.date()} and before {split} against "
+          f"from it ({r['n_early']} and {r['n_late']} with a reading and a topic; "
+          f"zero-view uploads apart: {r['zero_early']} and {r['zero_late']})\n")
+    print(f"  {'topic':22} {'early':>11} {'late':>11}")
+    pct = lambda x: "-" if x is None else f"{x * 100:.1f}"
+    for g, ne, nl, me, ml in r["groups"]:
+        print(f"  {g:22} {ne:>3} {pct(me):>7} {nl:>3} {pct(ml):>7}")
+    if r["verdict"] == "insufficient":
+        print(f"\n  Insufficient data: a period under {insights.TOPIC_MIX_MIN_N}, under "
+              f"{insights.TOPIC_MIX_MIN_GROUPS} groups, or a late group with no early uploads.")
+        return
+    print(f"\n  Mean: early {pct(r['mean_early'])}, late {pct(r['mean_late'])} (fall "
+          f"{pct(r['fall'])} points); early reweighted to the late mix {pct(r['counterfactual'])}, "
+          f"so the mix accounts for {pct(r['mix'])} points of it.")
+    print("  Rule (pre-committed 11-13): half the fall or more a lead, under a quarter "
+          "'not topic mix', a fall under 3 points nothing to explain.")
+    print(f"  Verdict: {r['verdict']}.")
+
+
 def show_swings(args):
     """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
     import csv as _csv
@@ -903,6 +931,9 @@ def main():
     p.add_argument("--themes", action="store_true",
                    help="R11: do buried uploads share a sensitive theme? Blind "
                         "theme tags (analysis/theme_labels.json) against burial")
+    p.add_argument("--topic-mix", action="store_true",
+                   help="R12: does a change in topic mix explain the fall in "
+                        "engaged share? Early per-topic means reweighted to the late mix")
     p.add_argument("--swings", action="store_true",
                    help="R4: are weekly view swings viewers or data? The channel's "
                         "counter against --catalogue's recent column (reads on 11-16)")
@@ -943,7 +974,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.swings, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.topic_mix, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -1151,6 +1182,9 @@ def main():
 
     if args.themes:         # R11: blind theme tags against burial
         show_themes(args)
+        return
+    if args.topic_mix:      # R12: topic mix against the fall in engaged share
+        show_topic_mix(args)
         return
     if args.swings:         # R4: the snapshot series against the channel counter
         show_swings(args)

@@ -2952,3 +2952,57 @@ def test_theme_buried_flags_a_tag_buried_twice_as_often():
     # Under THEME_MIN_BURIED buried, nothing is a lead.
     few = {k: v for k, v in labels.items() if k.startswith("c")}
     assert not any(r[-1] for r in insights.theme_buried(vids, few)[1])
+
+
+def _mix_videos(spec):
+    """Videos from (late?, topic, engaged share, count) tuples, 100 views each."""
+    early = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    late = datetime.datetime(2026, 11, 1, tzinfo=datetime.timezone.utc)
+    vids = []
+    for is_late, topic, share, n in spec:
+        for _ in range(n):
+            vids.append(Video(video_id=f"v{len(vids)}", published=late if is_late else early,
+                              views=100, engaged_views=share * 100, meta={"topic": topic}))
+    return vids
+
+
+def test_topic_mix_credits_a_fall_made_by_the_mix_alone():
+    # Each topic holds its share; the late period leans to the low one.
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 5), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 15), (True, "c", 0.4, 5)])
+    r = insights.topic_mix(vids)
+    assert (r["n_early"], r["n_late"]) == (25, 25)
+    assert r["mix"] == pytest.approx(r["fall"]) and r["fall"] == pytest.approx(0.08)
+    assert r["verdict"] == "lead"
+
+
+def test_topic_mix_rules_out_a_fall_within_every_topic():
+    # Same mix both periods; every topic falls by 0.1.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.4, 10), (True, "b", 0.2, 10), (True, "c", 0.3, 5)])
+    r = insights.topic_mix(vids)
+    assert r["mix"] == pytest.approx(0) and r["verdict"] == "not topic mix"
+
+
+def test_topic_mix_pools_thin_topics_and_refuses_thin_reads():
+    # "d" has 4 late uploads: it pools into "rest" with "e", below 5 either side.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "d", 0.4, 6),
+                        (False, "e", 0.4, 2), (True, "a", 0.5, 10), (True, "b", 0.3, 10),
+                        (True, "d", 0.4, 4), (True, "e", 0.4, 2)])
+    groups = {g[0]: g[1:3] for g in insights.topic_mix(vids)["groups"]}
+    assert groups == {"a": (10, 10), "b": (10, 10), "rest": (8, 6)}
+    # An unlogged topic or a missing reading is left out, never read as zero.
+    vids += [Video(video_id="x", published=vids[0].published, views=100, engaged_views=0,
+                   meta={"topic": ""}),
+             Video(video_id="y", published=vids[0].published, views=100, meta={"topic": "a"})]
+    assert insights.topic_mix(vids)["n_early"] == 28
+    # A zero-view upload is counted apart, not read as a share of 0.
+    zero = Video(video_id="z", published=vids[0].published, views=0, engaged_views=0,
+                 meta={"topic": "a"})
+    r = insights.topic_mix(vids + [zero])
+    assert (r["n_early"], r["zero_early"], r["zero_late"]) == (28, 1, 0)
+    # Under 20 a period, or under 3 groups: no verdict.
+    assert insights.topic_mix(vids[:28])["verdict"] == "insufficient"
+    two = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 15),
+                       (True, "a", 0.5, 15), (True, "b", 0.3, 15)])
+    assert insights.topic_mix(two)["verdict"] == "insufficient"
