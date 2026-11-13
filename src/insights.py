@@ -2818,30 +2818,35 @@ def blind_reads(fields, rows, today):
 # A coin's read waits for its arms as well as its date. #14's rule reads "at
 # 30 per arm", and its blind lock opened on the due date whatever the arms
 # held. Each test here stays blind past its due date until both arms hold this
-# many uploads in the cohort an `--at-age` read of the newest snapshot takes:
-# every upload at least AGE_MATCH_TARGET_DAYS - AGE_MATCH_TOLERANCE_DAYS old on
-# that snapshot's date (`load_videos_at_age`). So it cannot open in the hours
-# before a due day's snapshot lands. Assignments only: no outcome is read, so
-# an upload with no views counts here and the printed n can run lower.
+# many uploads in the cohort an `--at-age` read takes: each with a snapshot
+# within AGE_MATCH_TOLERANCE_DAYS of AGE_MATCH_TARGET_DAYS old, as
+# `load_videos_at_age` selects. So it cannot open in the hours before a due
+# day's snapshot lands, nor count a week a missed snapshot left unmeasured.
+# Assignments and snapshot dates only: no outcome is read, so an upload with
+# no views counts here and the printed n can run lower.
 BLIND_FLOORS = {"#14": ("title_caps", datetime.date(2026, 10, 15), 30)}
 
 
-def newest_snapshot():
-    """The newest weekly snapshot's date as `load_videos_at_age`'s anchor, or
-    None. A date is not an outcome, so a blind check may read it."""
+def snapshot_dates():
+    """{video_id: [snapshot datetimes]} from the weekly series: when each upload
+    was measured, never what. A blind check may read it."""
     if not config.ANALYTICS_SNAPSHOTS.exists():
-        return None
+        return {}
+    by_video = {}
     with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
-        dates = [r["snapshot_date"] for r in csv.DictReader(f) if r.get("snapshot_date")]
-    return (datetime.datetime.fromisoformat(max(dates)).replace(tzinfo=datetime.timezone.utc)
-            if dates else None)
+        for r in csv.DictReader(f):
+            if r.get("snapshot_date") and r.get("video_id"):
+                by_video.setdefault(r["video_id"], []).append(datetime.datetime.fromisoformat(
+                    r["snapshot_date"]).replace(tzinfo=datetime.timezone.utc))
+    return by_video
 
 
-def blind_arms(fields, rows, today, log_rows=None, snapshot=None):
+def blind_arms(fields, rows, today, log_rows=None, snapshots=None):
     """[(field, ledger id, smaller arm, floor)] for each of `fields` whose
     ledger row is unread and due by `today`, but whose coin's arms are under
-    BLIND_FLOORS' size in the cohort an `--at-age` read of `snapshot` (by
-    default the newest on disk) takes."""
+    BLIND_FLOORS' size among the uploads `load_videos_at_age` would take from
+    `snapshots` ({video_id: [dates]}, by default the series on disk): those
+    with a snapshot within the tolerance of the target age."""
     by_id = {r.get("id"): r for r in rows}
     short = []
     for field in dict.fromkeys(fields):
@@ -2853,14 +2858,19 @@ def blind_arms(fields, rows, today, log_rows=None, snapshot=None):
         if not due or today < due:
             continue                    # open, or blind_reads already refuses it
         coin, start, per_arm = floor
-        anchor = newest_snapshot() if snapshot is None else snapshot
+        if snapshots is None:
+            snapshots = snapshot_dates()
         if log_rows is None:
             log_rows = _read_upload_log() if config.UPLOAD_LOG.exists() else []
-        youngest = datetime.timedelta(days=AGE_MATCH_TARGET_DAYS - AGE_MATCH_TOLERANCE_DAYS)
+
+        def measured(r):
+            published = _parse_ts(r["timestamp_utc"])
+            return any(abs((s - published).total_seconds() / 86400 - AGE_MATCH_TARGET_DAYS)
+                       <= AGE_MATCH_TOLERANCE_DAYS for s in snapshots.get(r.get("video_id"), []))
+
         arms = Counter((r.get(coin) or "").strip() for r in log_rows
-                       if anchor and (r.get("timestamp_utc") or "")[:10] >= start.isoformat()
-                       and anchor - _parse_ts(r["timestamp_utc"]) >= youngest)
-        arms.pop("", None)              # a title that fell back was never assigned
+                       if (r.get("timestamp_utc") or "")[:10] >= start.isoformat()
+                       and (r.get(coin) or "").strip() and measured(r))
         smaller = min(arms.values()) if len(arms) == 2 else 0
         if smaller < per_arm:
             short.append((field, test, smaller, per_arm))

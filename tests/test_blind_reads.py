@@ -54,60 +54,77 @@ def test_unblind_reads_and_says_so(capsys):
     report.refuse_blind(_args(release="v8"), LEDGER, D(2026, 11, 6))  # format_version
 
 
-SNAP_23 = datetime.datetime(2026, 11, 23, tzinfo=datetime.timezone.utc)
-SNAP_16 = datetime.datetime(2026, 11, 16, tzinfo=datetime.timezone.utc)
+WEEKS = ("2026-10-19", "2026-10-26", "2026-11-02", "2026-11-09", "2026-11-16", "2026-11-23")
+_ids = iter(range(10 ** 6))
 
 
 def _log(arm_sizes, when="2026-11-10T07:00:00+00:00"):
-    rows = [{"timestamp_utc": "2026-10-14T07:00:00+00:00", "title_caps": "1"}]  # before 10-15
+    rows = [{"video_id": f"v{next(_ids)}", "timestamp_utc": "2026-10-14T07:00:00+00:00",
+             "title_caps": "1"}]                                          # before 10-15
     for arm, n in arm_sizes.items():
-        rows += [{"timestamp_utc": when, "title_caps": arm}] * n
-    return rows + [{"timestamp_utc": when, "title_caps": ""}] * 5   # fell back: unassigned
+        rows += [{"video_id": f"v{next(_ids)}", "timestamp_utc": when, "title_caps": arm}
+                 for _ in range(n)]
+    return rows + [{"video_id": f"v{next(_ids)}", "timestamp_utc": when, "title_caps": ""}
+                   for _ in range(5)]                                     # fell back: unassigned
+
+
+def _snaps(log, weeks=WEEKS):
+    """The weekly series writes a row for every upload on each snapshot date."""
+    when = [datetime.datetime.fromisoformat(w).replace(tzinfo=datetime.timezone.utc)
+            for w in weeks]
+    return {r["video_id"]: when for r in log}
 
 
 def test_past_due_stays_blind_while_an_arm_is_under_its_floor():
     log = _log({"0": 32, "1": 29})
     assert insights.blind_arms(["title_caps", "title_hype"], LEDGER, D(2026, 11, 23), log,
-                               SNAP_23) == [("title_caps", "#14", 29, 30),
-                                            ("title_hype", "#14", 29, 30)]
+                               _snaps(log)) == [("title_caps", "#14", 29, 30),
+                                                ("title_hype", "#14", 29, 30)]
     with pytest.raises(SystemExit) as e:
-        report.refuse_blind(_args(compare="title_caps=1"), LEDGER, D(2026, 11, 23), log, SNAP_23)
+        report.refuse_blind(_args(compare="title_caps=1"), LEDGER, D(2026, 11, 23), log,
+                            _snaps(log))
     assert "the smaller holds 29" in str(e.value) and "--unblind" in str(e.value)
 
 
-def test_floor_counts_the_cohort_the_newest_snapshots_read_takes():
-    # An --at-age 7 read takes uploads 3.5 days old or more on its snapshot's
-    # date: 11-19 07:00 is in 11-23's read, 11-19 19:00 is not.
-    log = (_log({"0": 30, "1": 28}) + _log({"1": 2}, when="2026-11-19T07:00:00+00:00")
-           + _log({"0": 9}, when="2026-11-19T19:00:00+00:00"))
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, SNAP_23) == []
-    # Before 11-23's snapshot lands, the newest is 11-16's, which reads to 11-12 12:00.
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, SNAP_16) == [
+def test_floor_counts_the_cohort_an_at_age_read_takes():
+    # An --at-age 7 read takes an upload 3.5 days old or more on a snapshot:
+    # 11-19 07:00 is in 11-23's read, 11-19 19:00 is not (both in the short arm).
+    late = _log({"1": 9}, when="2026-11-19T19:00:00+00:00")
+    log = _log({"0": 30, "1": 28}) + late
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == [
         ("title_caps", "#14", 28, 30)]
-    log = _log({"0": 30, "1": 30}, when="2026-11-12T11:00:00+00:00")
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, SNAP_16) == []
+    log += _log({"1": 2}, when="2026-11-19T07:00:00+00:00")
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == []
+    # Before 11-23's snapshot lands, the newest is 11-16's, which reads to 11-12 12:00.
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log,
+                               _snaps(log, WEEKS[:-1])) == [("title_caps", "#14", 28, 30)]
 
 
-def test_no_snapshot_on_disk_keeps_it_shut(monkeypatch):
-    monkeypatch.setattr(insights, "newest_snapshot", lambda: None)
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), _log({"0": 30, "1": 30})
-                               ) == [("title_caps", "#14", 0, 30)]
+def test_a_missed_snapshot_leaves_its_week_out_of_the_count():
+    log = _log({"0": 30, "1": 30})          # 11-10: measured at 11-16 (5.7 days) only
+    missed = tuple(w for w in WEEKS if w != "2026-11-16")
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == []
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log,
+                               _snaps(log, missed)) == [("title_caps", "#14", 0, 30)]
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, {}) == [
+        ("title_caps", "#14", 0, 30)]       # no series at all: nothing can be read
 
 
 def test_floor_met_read_row_or_before_due_leaves_it_to_blind_reads():
     log = _log({"0": 30, "1": 30})
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, SNAP_23) == []
-    report.refuse_blind(_args(by="title_caps"), LEDGER, D(2026, 11, 23), log, SNAP_23)  # open
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == []
+    report.refuse_blind(_args(by="title_caps"), LEDGER, D(2026, 11, 23), log, _snaps(log))
     read = [{"id": "#14", "due": "2026-11-23", "read": "2026-11-23"}]
     few = _log({"0": 3})
-    assert insights.blind_arms(["title_caps"], read, D(2026, 11, 23), few, SNAP_23) == []
-    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 6), few, SNAP_23) == []
-    assert insights.blind_arms(["voice"], LEDGER, D(2026, 11, 23), few, SNAP_23) == []
+    assert insights.blind_arms(["title_caps"], read, D(2026, 11, 23), few, _snaps(few)) == []
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 6), few, _snaps(few)) == []
+    assert insights.blind_arms(["voice"], LEDGER, D(2026, 11, 23), few, _snaps(few)) == []
 
 
 def test_unblind_reads_under_the_floor_and_says_so(capsys):
+    log = _log({"0": 32})
     report.refuse_blind(_args(by="title_caps", unblind="owner asked"), LEDGER,
-                        D(2026, 11, 23), _log({"0": 32}), SNAP_23)
+                        D(2026, 11, 23), log, _snaps(log))
     assert "UNBLINDED #14 under its floor (0 of 30 per arm): owner asked" in capsys.readouterr().out
 
 
