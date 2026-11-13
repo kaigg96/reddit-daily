@@ -3035,3 +3035,13 @@ def test_near_repeats_buried_stratifies_by_release_and_needs_eight():
     # Buried less often than expected is never a lead.
     calm = vids("n", "v7", 0, 10)
     assert insights.near_repeats_buried(calm + rest, overlap)["verdict"] == "no"
+
+
+def test_topic_mix_reads_subreddit_with_two_groups():
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 10),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 20)])
+    for v in vids:
+        v.meta["subreddit"] = v.meta.pop("topic")
+    assert insights.topic_mix(vids)["verdict"] == "insufficient"   # no topic logged
+    r = insights.topic_mix(vids, key="subreddit", min_groups=2)
+    assert r["verdict"] == "lead" and r["mix"] == pytest.approx(r["fall"])

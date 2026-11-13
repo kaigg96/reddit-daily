@@ -284,9 +284,11 @@ TOPIC_MIX_SPLIT = datetime.datetime(2026, 10, 19, tzinfo=datetime.timezone.utc)
 TOPIC_MIX_MIN, TOPIC_MIX_MIN_N, TOPIC_MIX_MIN_GROUPS, TOPIC_MIX_MIN_FALL = 5, 20, 3, 0.03
 
 
-def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE):
+def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE, key="topic",
+              min_groups=TOPIC_MIX_MIN_GROUPS):
     """R12's read: how much of the fall in mean `metric` from uploads before
-    `split` to those from it the topic mix alone explains. The early period's
+    `split` to those from it the topic mix alone explains (R15: `key` subreddit,
+    two groups allowed). The early period's
     per-topic means, reweighted to the late period's mix, give what the late
     mean would have been had only the mix changed. Uploads with no logged
     topic or no reading are left out, and zero-view uploads are counted apart
@@ -297,7 +299,7 @@ def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE):
     rows, zeros = [], [0, 0]
     for v in videos:
         pub = v.true_published or v.published
-        topic, value = str(v.meta.get("topic") or "").strip(), getattr(v, metric)
+        topic, value = str(v.meta.get(key) or "").strip(), getattr(v, metric)
         if not topic or pub < TOPIC_MIX_START:
             continue
         if not v.views:
@@ -318,7 +320,7 @@ def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE):
            "zero_early": zeros[0], "zero_late": zeros[1], "verdict": "insufficient"}
     # Every late group needs an early mean to be reweighted.
     if (len(early) < TOPIC_MIX_MIN_N or len(late) < TOPIC_MIX_MIN_N
-            or len(by) < TOPIC_MIX_MIN_GROUPS or any(l and not e for e, l in by.values())):
+            or len(by) < min_groups or any(l and not e for e, l in by.values())):
         return out
     out["counterfactual"] = sum(len(l) / len(late) * mean(e) for e, l in by.values() if l)
     out["fall"] = out["mean_early"] - out["mean_late"]
