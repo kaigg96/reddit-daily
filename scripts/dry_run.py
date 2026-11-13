@@ -212,10 +212,12 @@ DRY_RUN_BANNER = "=== DRY RUN"
 # subreddit needs its screen replayed before it ships (PRD §6 R4.1), and the
 # log that shows the replay is otherwise readable only in Actions.
 # Bet 1's host lines, its vote and the length are read here too (#70): a
-# branch's sample is silent, so the verdict is the only place a shift sees them.
+# branch's sample has no real narrator, so the verdict is the only place a shift sees them.
 # "CTA:" prints before the length guard, which can swap the vote; its lines say so.
+# "Narration:" says whether the sample is silent or read by `v8`'s free stand-in
+# voice: a shift told the owner a voiced sample was silent (2026-11-13, #77).
 PICKED = re.compile(r"^(Selected post:|Screen:|Slate topics|Title style|Today's top |"
-                    r"Commentary|CTA:|Duration guard|Assembled:)")
+                    r"Commentary|CTA:|Duration guard|Narration:|Assembled:)")
 
 
 def record(args):

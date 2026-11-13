@@ -130,7 +130,7 @@ def test_a_pass_shows_what_the_screen_picked_and_skipped(tmp_path, monkeypatch):
 
 
 def test_a_pass_shows_the_hosts_lines_vote_and_length(tmp_path, monkeypatch):
-    """Bet 1's lines are judged from here: a branch's sample is silent (#70)."""
+    """Bet 1's lines are judged from here, and whether the sample has a voice (#70)."""
     (tmp_path / "check.txt").write_text("PASS -- playable")
     (tmp_path / "run.log").write_text("Selected post: q\n"
                                       "Commentary setup: a setup\n"
@@ -138,12 +138,13 @@ def test_a_pass_shows_the_hosts_lines_vote_and_length(tmp_path, monkeypatch):
                                       "CTA: my hand goes up\n"
                                       "Commentary: our own words are 0.56 of the narration\n"
                                       "Duration guard: dropped the host's setup\n"
+                                      "Narration: stand-in voice (Kokoro), not Polly\n"
                                       "Assembled: 33.6s, bg=x, music=y\n")
     out = record(tmp_path, monkeypatch, "--branch", "b", "--commit", "abc1234",
                  "--render-code", "0", "--check-file", "check.txt", "--log", "run.log",
                  "--run-url", "u")
     for line in ("a setup", "a reaction", "my hand goes up", "0.56", "33.6s",
-                 "dropped the host's setup"):
+                 "dropped the host's setup", "stand-in voice (Kokoro)"):
         assert line in out, line
 
 
