@@ -725,6 +725,34 @@ def show_topic_mix(args):
     print(f"  Verdict: {r['verdict']}.")
 
 
+def show_near_repeats(args):
+    """`--near-repeats`: R13, are reworded repeats of earlier questions buried
+    more often (PRD §0)?"""
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--near-repeats reads R13's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
+    overlap = insights.near_repeat_overlap(insights._read_upload_log())
+    r = insights.near_repeats_buried(insights.load_videos_at_age().videos, overlap)
+    near, rest = r["near"], r["rest"]
+    rate = lambda vs: f"{sum(map(insights.is_buried, vs))}/{len(vs)}"
+    print(f"R13: buried (<= {insights.BURIED_VIEWS} views at ~7 days), uploads whose question "
+          f"overlaps an earlier one by {insights.NEAR_REPEAT_JACCARD} or more against the rest\n")
+    print(f"  near-repeats {rate(near):>8}    rest {rate(rest):>8}")
+    print(f"  by format_version (buried near, near, buried rest, rest): {r['strata']}\n")
+    for v in sorted(near, key=lambda v: -overlap[v.video_id][0]):
+        o, earlier = overlap[v.video_id]
+        print(f"  {o:.2f} {v.views:>5.0f} views  {v.meta.get('post_title', '')[:60]!r}"
+              f"  <- {earlier[:60]!r}")
+    if r["verdict"] == "insufficient":
+        print(f"\n  Insufficient data: under {insights.NEAR_REPEAT_MIN} near-repeats.")
+        return
+    print(f"\n  Pooled p {r['p']:.3f}; near-repeats buried "
+          f"{'more' if r['higher'] else 'no more'} than expected.")
+    print(f"  Rule (pre-committed 11-13): pooled p under {insights.NEAR_REPEAT_P} with the "
+          "near-repeats higher is a lead; else no.")
+    print(f"  Verdict: {r['verdict']}.")
+
+
 def show_swings(args):
     """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
     import csv as _csv
@@ -934,6 +962,9 @@ def main():
     p.add_argument("--topic-mix", action="store_true",
                    help="R12: does a change in topic mix explain the fall in "
                         "engaged share? Early per-topic means reweighted to the late mix")
+    p.add_argument("--near-repeats", action="store_true",
+                   help="R13: are reworded repeats of earlier questions buried "
+                        "more often? Word overlap with earlier logged questions")
     p.add_argument("--swings", action="store_true",
                    help="R4: are weekly view swings viewers or data? The channel's "
                         "counter against --catalogue's recent column (reads on 11-16)")
@@ -974,7 +1005,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.topic_mix, args.swings, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.topic_mix, args.near_repeats, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -1185,6 +1216,9 @@ def main():
         return
     if args.topic_mix:      # R12: topic mix against the fall in engaged share
         show_topic_mix(args)
+        return
+    if args.near_repeats:   # R13: reworded repeats against burial
+        show_near_repeats(args)
         return
     if args.swings:         # R4: the snapshot series against the channel counter
         show_swings(args)

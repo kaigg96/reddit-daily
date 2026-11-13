@@ -3006,3 +3006,32 @@ def test_topic_mix_pools_thin_topics_and_refuses_thin_reads():
     two = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 15),
                        (True, "a", 0.5, 15), (True, "b", 0.3, 15)])
     assert insights.topic_mix(two)["verdict"] == "insufficient"
+
+
+def test_near_repeat_overlap_scores_against_earlier_questions_only():
+    rows = [{"video_id": "b", "timestamp_utc": "2026-10-02", "post_title": "What is the best pizza topping?"},
+            {"video_id": "a", "timestamp_utc": "2026-10-01", "post_title": "What's the best pizza topping ever?"},
+            {"video_id": "c", "timestamp_utc": "2026-10-03", "post_title": "Why do cats knock things over?"}]
+    o = insights.near_repeat_overlap(rows)
+    assert o["a"] == (0.0, "")                       # the first has nothing earlier
+    assert o["b"][0] == pytest.approx(3 / 4) and o["b"][1].startswith("What's the best")
+    assert o["c"][0] == 0.0
+    assert insights.question_words("What\u2019s the BEST of it?") == {"best"}
+
+
+def test_near_repeats_buried_stratifies_by_release_and_needs_eight():
+    pub = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    def vids(prefix, fv, buried, n):
+        return [Video(video_id=f"{prefix}{i}", published=pub, views=0 if i < buried else 50,
+                      meta={"format_version": fv}) for i in range(n)]
+    near = vids("n", "v7", 6, 10)
+    rest = vids("r", "v7", 2, 40) + vids("o", "v6", 0, 40)
+    overlap = {**{v.video_id: (0.6, "q") for v in near}, **{v.video_id: (0.1, "") for v in rest}}
+    r = insights.near_repeats_buried(near + rest, overlap)
+    assert r["strata"] == [(6, 10, 2, 40)]           # v6 has no near-repeat: not compared
+    assert r["higher"] and r["p"] < 0.05 and r["verdict"] == "lead"
+    few = {k: (0.1, "") if k in {"n0", "n1", "n2"} else v for k, v in overlap.items()}
+    assert insights.near_repeats_buried(near + rest, few)["verdict"] == "insufficient"
+    # Buried less often than expected is never a lead.
+    calm = vids("n", "v7", 0, 10)
+    assert insights.near_repeats_buried(calm + rest, overlap)["verdict"] == "no"
