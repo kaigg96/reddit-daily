@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-13 (11:58) — Bet 1 has passed every check a shift can run; your label now ships it within about a day
 
-    Worked (% of the shift): product 45 · gm 20 · reliability 15 · engineering 15 · security 5
+    Worked (% of the shift): product 40 · gm 20 · reliability 15 · engineering 15 · data 5 · security 5
 
 **Summary:** Bet 1, the step every revenue plan waits on, now has its sample video and a fresh review of the exact version your label (#77) ships, and neither found a problem. Only the daily automatic check is left, so your label is the only thing between bet 1 and viewers. Nothing reached viewers today.
 
@@ -76,6 +76,7 @@ and more useful than a confident guess.
 - **Reliability (a check, all clear):** the new AI model's first week was to be watched for running out of its daily allowance. Its 10 uploads so far never hit any limit. Two hit Google's brief overload errors, and both still uploaded.
 - **Engineering (ready for after bet 1):** two follow-on changes must go in right after bet 1. One logs which time slot each upload was meant for, which four uploads a day needs. The other fixes how bet 1's verdict counts its videos. I brought both up to date and checked that bet 1 and both of them merge into the live code cleanly, with all 1,141 tests passing.
 - **General management (ranking):** a fresh helper proposed eight ideas from our data and plans, and two others ranked the survivors, forwards and reversed. Both put the allowance check first, then the follow-on changes. Dropped: an early count of the new model's over-claiming titles (its rule forbids a count before the 20th upload, about 18 November); two new data questions (the open ones are answered or wait on snapshots not yet taken, and morning against evening uploads was answered earlier); a fourth attempt at the backup show's title check (over an hour, and needs AI requests); deleting YouTube text we keep too long (needs you, set for the 7 December review); a closing line asking for subscribers (our findings say no subscriber lever reads within a quarter); posting to TikTok (new platforms are yours). One more I checked: our single music track can't explain the rise in buried uploads, since every upload since July used it.
+- **Data (a gap in bet 1's rules closed before any data):** two side measures in bet 1's rules, how much of each video people watch and where they leave, didn't say what bet 1 is compared with: the older format alone, or the new AI model's weeks too, as its main verdict is. Picking after the figures arrive would let us pick the answer we like. They now compare with both pooled, matching the verdict. No bet 1 video exists yet, so no result could have swayed it.
 - **Security and reliability (checked):** yesterday's two uploads and this morning's landed. The money controls are intact ($0.33 this month, forecast $0.78 of $3). No secret is in the repository, and the workflows are unchanged.
 - AI use: one sample video (silent; a few AI requests, one from the uploads' allowance); no Polly.
 
@@ -85,7 +86,7 @@ and more useful than a confident guess.
 ### Next
 - **If #77 is labelled:** merge bet 1 on this afternoon's automatic check (it runs about 16:00–17:00 UTC on the sampled version). Don't update the release with the live code before then: a new version would need a fresh sample. Then merge the verdict-counting fix right away. The time-slot logging goes in after bet 1, before four a day.
 - **If the automatic check can't reach Google again,** it retries the next day. That is not a failure.
-- **16 November:** the weekly review. Before any bet 1 video is a week old, it should settle one gap in bet 1's rules: two side measures (how much of each video people watch) don't say whether bet 1 is compared with the older format alone or with the new-model weeks too, as its main verdict is. Deciding after the figures arrive would let us pick the answer we like. **About 18 November:** the new model's 20th upload, and the title counts set for it. **23 November:** the capitals test's read, if its lock opens.
+- **16 November:** the weekly review. **About 18 November:** the new model's 20th upload, and the title counts set for it. **23 November:** the capitals test's read, if its lock opens.
 
 ### Better?
 - **Than last shift:** yes, a little. A label on #77 no longer starts a day of checks: the sample and the review are done. Nothing reached viewers.
