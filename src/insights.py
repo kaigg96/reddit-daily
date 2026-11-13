@@ -2815,6 +2815,41 @@ def blind_reads(fields, rows, today):
     return blind
 
 
+# A coin's read waits for its arms as well as its date. #14's rule reads "at
+# 30 per arm", and on 11-13 its capitals arm (25 of 53 assigned since 10-15)
+# projected to ~29 by the 11-23 snapshot, so the lock would have opened one
+# short. Each test here stays blind past its due date until both arms hold
+# this many uploads a 7-day read sees (to the read's date less 7, as
+# `assignment_balance`'s `until`). Assignments only: no outcome is read.
+BLIND_FLOORS = {"#14": ("title_caps", datetime.date(2026, 10, 15), 30)}
+
+
+def blind_arms(fields, rows, today, log_rows=None):
+    """[(field, ledger id, smaller arm, floor)] for each of `fields` whose
+    ledger row is unread and due by `today`, but whose coin's arms are under
+    BLIND_FLOORS' size among the uploads a 7-day read on `today` sees."""
+    by_id = {r.get("id"): r for r in rows}
+    short = []
+    for field in dict.fromkeys(fields):
+        test = BLIND_FIELDS.get(field)
+        row, floor = by_id.get(test), BLIND_FLOORS.get(test)
+        if not row or not floor or (row.get("read") or "").strip():
+            continue
+        due = _ledger_date(row.get("due"))
+        if not due or today < due:
+            continue                    # open, or blind_reads already refuses it
+        coin, start, per_arm = floor
+        until = (today - datetime.timedelta(days=7)).isoformat()
+        log = _read_upload_log() if log_rows is None else log_rows
+        arms = Counter((r.get(coin) or "").strip() for r in log
+                       if start.isoformat() <= (r.get("timestamp_utc") or "")[:10] <= until)
+        arms.pop("", None)              # a title that fell back was never assigned
+        smaller = min(arms.values()) if len(arms) == 2 else 0
+        if smaller < per_arm:
+            short.append((field, test, smaller, per_arm))
+    return short
+
+
 def _percent(value):
     """The signed first percentage in a cell: '+20% (12.0 vs 10.0)' -> 20,
     '−39%' -> -39, '~18%' -> 18. None when there is none, or when the cell is
