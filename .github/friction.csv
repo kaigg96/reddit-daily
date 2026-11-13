@@ -298,3 +298,4 @@ F296,2026-11-13T18:53:59+00:00,43483433524,reliability,upload_watch false-alarm 
 F297,2026-11-13T18:55:17+00:00,43483433524,data,pre-register 11-16 burial-field test,done,,docs,"PRD §0's research table was at its word limit (1947/1950), so the rule went in the ledger instead",the ledger's next-reads list surfaces it at the weekly review by due date,3,
 F298,2026-11-13T18:59:32+00:00,43483433524,gm,TECH_DEBT back to cap (C15 note to code),done,,none,none,none,0,
 F299,2026-11-13T19:01:41+00:00,43483433524,data,R15 subreddit mix vs engaged-share fall,done,,mistake,csv.writer's default CRLF line ending slipped into the ledger on R14's append; caught only by a diff stat,a ledger test that refuses CR characters,4,
+F300,2026-11-13T19:06:43+00:00,43483433524,gm,safe route for shifts to land approved skill edits,done,,access,the .claude/ write lock is outside permission rules; only a mode that drops every check lifts it,knowing this when #88 first hit the lock (11-10),3,
