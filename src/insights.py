@@ -1364,7 +1364,7 @@ def assignment_balance(coin, against, since=None, rows=None, until=None):
             for r in (_read_upload_log() if rows is None else rows)]
     if since:
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
-    if until:   # a read at 7 days sees uploads up to its snapshot's date less 7
+    if until:   # inclusive; an --at-age 7 read also takes uploads 3.5 days old (blind_arms)
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] <= until.isoformat()]
     rows = [r for r in rows if (r.get(coin) or "").strip()]
     arms = sorted({r[coin].strip() for r in rows})
@@ -2816,18 +2816,32 @@ def blind_reads(fields, rows, today):
 
 
 # A coin's read waits for its arms as well as its date. #14's rule reads "at
-# 30 per arm", and on 11-13 its capitals arm (25 of 53 assigned since 10-15)
-# projected to ~29 by the 11-23 snapshot, so the lock would have opened one
-# short. Each test here stays blind past its due date until both arms hold
-# this many uploads a 7-day read sees (to the read's date less 7, as
-# `assignment_balance`'s `until`). Assignments only: no outcome is read.
+# 30 per arm", and its blind lock opened on the due date whatever the arms
+# held. Each test here stays blind past its due date until both arms hold this
+# many uploads in the cohort an `--at-age` read of the newest snapshot takes:
+# every upload at least AGE_MATCH_TARGET_DAYS - AGE_MATCH_TOLERANCE_DAYS old on
+# that snapshot's date (`load_videos_at_age`). So it cannot open in the hours
+# before a due day's snapshot lands. Assignments only: no outcome is read, so
+# an upload with no views counts here and the printed n can run lower.
 BLIND_FLOORS = {"#14": ("title_caps", datetime.date(2026, 10, 15), 30)}
 
 
-def blind_arms(fields, rows, today, log_rows=None):
+def newest_snapshot():
+    """The newest weekly snapshot's date as `load_videos_at_age`'s anchor, or
+    None. A date is not an outcome, so a blind check may read it."""
+    if not config.ANALYTICS_SNAPSHOTS.exists():
+        return None
+    with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
+        dates = [r["snapshot_date"] for r in csv.DictReader(f) if r.get("snapshot_date")]
+    return (datetime.datetime.fromisoformat(max(dates)).replace(tzinfo=datetime.timezone.utc)
+            if dates else None)
+
+
+def blind_arms(fields, rows, today, log_rows=None, snapshot=None):
     """[(field, ledger id, smaller arm, floor)] for each of `fields` whose
     ledger row is unread and due by `today`, but whose coin's arms are under
-    BLIND_FLOORS' size among the uploads a 7-day read on `today` sees."""
+    BLIND_FLOORS' size in the cohort an `--at-age` read of `snapshot` (by
+    default the newest on disk) takes."""
     by_id = {r.get("id"): r for r in rows}
     short = []
     for field in dict.fromkeys(fields):
@@ -2839,10 +2853,13 @@ def blind_arms(fields, rows, today, log_rows=None):
         if not due or today < due:
             continue                    # open, or blind_reads already refuses it
         coin, start, per_arm = floor
-        until = (today - datetime.timedelta(days=7)).isoformat()
-        log = _read_upload_log() if log_rows is None else log_rows
-        arms = Counter((r.get(coin) or "").strip() for r in log
-                       if start.isoformat() <= (r.get("timestamp_utc") or "")[:10] <= until)
+        anchor = newest_snapshot() if snapshot is None else snapshot
+        if log_rows is None:
+            log_rows = _read_upload_log() if config.UPLOAD_LOG.exists() else []
+        youngest = datetime.timedelta(days=AGE_MATCH_TARGET_DAYS - AGE_MATCH_TOLERANCE_DAYS)
+        arms = Counter((r.get(coin) or "").strip() for r in log_rows
+                       if anchor and (r.get("timestamp_utc") or "")[:10] >= start.isoformat()
+                       and anchor - _parse_ts(r["timestamp_utc"]) >= youngest)
         arms.pop("", None)              # a title that fell back was never assigned
         smaller = min(arms.values()) if len(arms) == 2 else 0
         if smaller < per_arm:

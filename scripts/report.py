@@ -803,7 +803,7 @@ def show_hit_rates(videos, key):
           "\n  question pre-committed, and within an era: eras differ in views.")
 
 
-def refuse_blind(args, ledger, today, log_rows=None):
+def refuse_blind(args, ledger, today, log_rows=None, snapshot=None):
     """Exit before any outcome loads when --by, --compare, --within or
     --release-key cuts by a blind test's field (insights.BLIND_FIELDS), before
     its due date or, past it, while its arms are under their floor
@@ -820,13 +820,14 @@ def refuse_blind(args, ledger, today, log_rows=None):
                      f"beside {test} in analysis/experiments.csv.")
         print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
               f"ledger row.\n")
-    for field, test, smaller, floor in insights.blind_arms(fields, ledger, today, log_rows):
+    for field, test, smaller, floor in insights.blind_arms(fields, ledger, today, log_rows,
+                                                           snapshot):
         if not args.unblind:
-            sys.exit(f"{field} cuts by {test}'s coin, blind until each arm holds {floor} "
-                     f"uploads a 7-day read sees; the smaller holds {smaller} (its rule: the "
-                     f"read moves to the first snapshot with both, PRD §0). Move its due date "
-                     f"in analysis/experiments.csv to that snapshot; --balance stays open. To read "
-                     f"it anyway, add --unblind \"<reason>\" and record the peek beside {test}.")
+            sys.exit(f"{field} cuts by {test}'s coin, blind until each arm holds {floor} uploads "
+                     f"in the newest snapshot's --at-age 7 read; the smaller holds {smaller}. "
+                     f"Its rule moves the read to the first snapshot with both (PRD §0), so move "
+                     f"its due date in analysis/experiments.csv there; --balance stays open. To "
+                     f"read it anyway, add --unblind \"<reason>\" and record the peek beside {test}.")
         print(f"UNBLINDED {test} under its floor ({smaller} of {floor} per arm): "
               f"{args.unblind}. Record it beside its ledger row.\n")
 
