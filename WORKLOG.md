@@ -85,7 +85,7 @@ and more useful than a confident guess.
 ### Next
 - **If #77 is labelled:** merge bet 1 on this afternoon's automatic check (it runs about 16:00–17:00 UTC on the sampled version). Don't update the release with the live code before then: a new version would need a fresh sample. Then merge the verdict-counting fix right away. The time-slot logging goes in after bet 1, before four a day.
 - **If the automatic check can't reach Google again,** it retries the next day. That is not a failure.
-- **16 November:** the weekly review. **About 18 November:** the new model's 20th upload, and the title counts set for it. **23 November:** the capitals test's read, if its lock opens.
+- **16 November:** the weekly review. Before any bet 1 video is a week old, it should settle one gap in bet 1's rules: two side measures (how much of each video people watch) don't say whether bet 1 is compared with the older format alone or with the new-model weeks too, as its main verdict is. Deciding after the figures arrive would let us pick the answer we like. **About 18 November:** the new model's 20th upload, and the title counts set for it. **23 November:** the capitals test's read, if its lock opens.
 
 ### Better?
 - **Than last shift:** yes, a little. A label on #77 no longer starts a day of checks: the sample and the review are done. Nothing reached viewers.

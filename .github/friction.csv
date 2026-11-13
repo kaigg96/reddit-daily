@@ -286,3 +286,5 @@ F284,2026-11-13T11:06:40+00:00,43413218739,product,"bet 1 sample render: main me
 F285,2026-11-13T11:12:01+00:00,43413218739,reliability,"v7s first-week 429 read: 0 of 10 upload runs hit a 429 (either window), two 503s",done,,none,,,0,
 F286,2026-11-13T11:20:01+00:00,43413218739,product,"whole-release fresh review of bet 1 at b1190de: no blockers, four notes recorded under bet 1's code-health item",done,,none,,,0,
 F287,2026-11-13T11:23:40+00:00,43413218739,engineering,brought run-slot-log and v8-dose-verdict-uploads current with bet 1 (b1190de); rehearsed all three over main,done,,none,,,0,
+F288,2026-11-13T11:31:49+00:00,43413218739,gm,second idea round (merge day): found PRD's live-format line goes stale on v8's merge (the merging shift's loop covers it) and an unstated baseline in #15's avg-% diagnostics (to the weekly review),done,,none,,,0,
+F289,2026-11-13T11:31:49+00:00,43413218739,product,"frame check of bet 1's sample: header, answer counter, captions and the pick's words all render; 'Channel Name' is the branch-render placeholder",done,,none,,,0,
