@@ -334,6 +334,60 @@ def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE):
     return out
 
 
+# R13 (PRD §0, pre-committed 2026-11-13, before any overlap): are reworded
+# repeats of earlier questions buried more often? `select_post` refuses only
+# exact repeats.
+NEAR_REPEAT_JACCARD, NEAR_REPEAT_MIN, NEAR_REPEAT_P = 0.5, 8, 0.05
+_NEAR_REPEAT_STOP = frozenset(
+    "the and for are you your what who why how was were has have had does did "
+    "that this with from they their them there would could should about into "
+    "been its it's not but any all one what's who's how's that's don't doesn't "
+    "isn't can't you're".split())
+
+
+def question_words(text):
+    """A question's words for R13: lower case, 3+ letters, stopwords out."""
+    text = str(text or "").lower().replace("\u2019", "'")
+    return frozenset(w for w in re.findall(r"[a-z0-9']+", text)
+                     if len(w) >= 3 and w not in _NEAR_REPEAT_STOP)
+
+
+def near_repeat_overlap(rows):
+    """{video_id: (overlap, earlier question)}: each logged upload's question's
+    highest Jaccard word overlap with any earlier logged question (0.0 and ""
+    for the first, or a question with no words)."""
+    out, seen = {}, []
+    for r in sorted(rows, key=lambda r: r.get("timestamp_utc") or ""):
+        words = question_words(r.get("post_title"))
+        best = (0.0, "")
+        for w, title in seen:
+            if words and w:
+                best = max(best, (len(words & w) / len(words | w), title))
+        out[r["video_id"]] = best
+        seen.append((words, r.get("post_title") or ""))
+    return out
+
+
+def near_repeats_buried(videos, overlap):
+    """R13's read on uploads in `overlap`: near-repeats (overlap of
+    NEAR_REPEAT_JACCARD or more) against the rest, buried, stratified by
+    format_version. Returns a dict: near, rest (videos), strata, p, higher
+    (near-repeats buried more than expected, pooled) and verdict
+    ("insufficient", "lead" or "no")."""
+    vs = [v for v in videos if v.video_id in overlap]
+    near = [v for v in vs if overlap[v.video_id][0] >= NEAR_REPEAT_JACCARD]
+    rest = [v for v in vs if overlap[v.video_id][0] < NEAR_REPEAT_JACCARD]
+    strata = buried_strata(near, rest)
+    p = buried_rate_p_pooled(strata)
+    higher = sum(ha - na * (ha + hb) / (na + nb) for ha, na, hb, nb in strata) > 0
+    if len(near) < NEAR_REPEAT_MIN:
+        verdict = "insufficient"
+    else:
+        verdict = "lead" if p < NEAR_REPEAT_P and higher else "no"
+    return {"near": near, "rest": rest, "strata": strata, "p": p, "higher": higher,
+            "verdict": verdict}
+
+
 def theme_buried(videos, labels):
     """R11's read: per tag, and for any tag, the buried rate of tagged uploads
     against the rest. Only labelled uploads count. Returns (n buried, rows),
