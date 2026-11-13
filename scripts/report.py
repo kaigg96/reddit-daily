@@ -803,10 +803,11 @@ def show_hit_rates(videos, key):
           "\n  question pre-committed, and within an era: eras differ in views.")
 
 
-def refuse_blind(args, ledger, today):
+def refuse_blind(args, ledger, today, log_rows=None, snapshots=None):
     """Exit before any outcome loads when --by, --compare, --within or
-    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), unless
-    --unblind gives a reason."""
+    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), before
+    its due date or, past it, while its arms are under their floor
+    (insights.BLIND_FLOORS), unless --unblind gives a reason."""
     key = getattr(args, "release_key", None) if getattr(args, "release", None) else None
     fields = [re.split(r"!?=", spec)[0].strip()
               for spec in (args.by, args.compare, args.within, key) if spec]
@@ -819,6 +820,16 @@ def refuse_blind(args, ledger, today):
                      f"beside {test} in analysis/experiments.csv.")
         print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
               f"ledger row.\n")
+    for field, test, smaller, floor in insights.blind_arms(fields, ledger, today, log_rows,
+                                                           snapshots):
+        if not args.unblind:
+            sys.exit(f"{field} cuts by {test}'s coin, blind until each arm holds {floor} uploads "
+                     f"in the newest snapshot's --at-age 7 read; the smaller holds {smaller}. "
+                     f"Its rule moves the read to the first snapshot with both (PRD §0), so move "
+                     f"its due date in analysis/experiments.csv there; --balance stays open. To "
+                     f"read it anyway, add --unblind \"<reason>\" and record the peek beside {test}.")
+        print(f"UNBLINDED {test} under its floor ({smaller} of {floor} per arm): "
+              f"{args.unblind}. Record it beside its ledger row.\n")
 
 
 def main():
@@ -920,8 +931,8 @@ def main():
                    help="read a blind test's field before its pre-committed date "
                         "anyway; record the peek beside its ledger row")
     p.add_argument("--until", metavar="YYYY-MM-DD",
-                   help="--balance: uploads published on or before this date, so it "
-                        "counts what a read at 7 days sees (its snapshot's date less 7)")
+                   help="--balance: uploads published on or before this date, inclusive "
+                        "(an --at-age 7 read takes uploads 3.5 days old on its snapshot)")
     args = p.parse_args()
     if args.within:
         try:

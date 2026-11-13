@@ -1364,7 +1364,7 @@ def assignment_balance(coin, against, since=None, rows=None, until=None):
             for r in (_read_upload_log() if rows is None else rows)]
     if since:
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] >= since.isoformat()]
-    if until:   # a read at 7 days sees uploads up to its snapshot's date less 7
+    if until:   # inclusive; an --at-age 7 read also takes uploads 3.5 days old (blind_arms)
         rows = [r for r in rows if (r.get("timestamp_utc") or "")[:10] <= until.isoformat()]
     rows = [r for r in rows if (r.get(coin) or "").strip()]
     arms = sorted({r[coin].strip() for r in rows})
@@ -2813,6 +2813,68 @@ def blind_reads(fields, rows, today):
         if due and today < due:
             blind.append((field, row["id"], due))
     return blind
+
+
+# A coin's read waits for its arms as well as its date. #14's rule reads "at
+# 30 per arm", and its blind lock opened on the due date whatever the arms
+# held. Each test here stays blind past its due date until both arms hold this
+# many uploads in the cohort an `--at-age` read takes: each with a snapshot
+# within AGE_MATCH_TOLERANCE_DAYS of AGE_MATCH_TARGET_DAYS old, as
+# `load_videos_at_age` selects. So it cannot open in the hours before a due
+# day's snapshot lands, nor count a week a missed snapshot left unmeasured.
+# Assignments and snapshot dates only: no outcome is read, so an upload with
+# no views counts here and the printed n can run lower.
+BLIND_FLOORS = {"#14": ("title_caps", datetime.date(2026, 10, 15), 30)}
+
+
+def snapshot_dates():
+    """{video_id: [snapshot datetimes]} from the weekly series: when each upload
+    was measured, never what. A blind check may read it."""
+    if not config.ANALYTICS_SNAPSHOTS.exists():
+        return {}
+    by_video = {}
+    with open(config.ANALYTICS_SNAPSHOTS, newline="") as f:
+        for r in csv.DictReader(f):
+            if r.get("snapshot_date") and r.get("video_id"):
+                by_video.setdefault(r["video_id"], []).append(datetime.datetime.fromisoformat(
+                    r["snapshot_date"]).replace(tzinfo=datetime.timezone.utc))
+    return by_video
+
+
+def blind_arms(fields, rows, today, log_rows=None, snapshots=None):
+    """[(field, ledger id, smaller arm, floor)] for each of `fields` whose
+    ledger row is unread and due by `today`, but whose coin's arms are under
+    BLIND_FLOORS' size among the uploads `load_videos_at_age` would take from
+    `snapshots` ({video_id: [dates]}, by default the series on disk): those
+    with a snapshot within the tolerance of the target age."""
+    by_id = {r.get("id"): r for r in rows}
+    short = []
+    for field in dict.fromkeys(fields):
+        test = BLIND_FIELDS.get(field)
+        row, floor = by_id.get(test), BLIND_FLOORS.get(test)
+        if not row or not floor or (row.get("read") or "").strip():
+            continue
+        due = _ledger_date(row.get("due"))
+        if not due or today < due:
+            continue                    # open, or blind_reads already refuses it
+        coin, start, per_arm = floor
+        if snapshots is None:
+            snapshots = snapshot_dates()
+        if log_rows is None:
+            log_rows = _read_upload_log() if config.UPLOAD_LOG.exists() else []
+
+        def measured(r):
+            published = _parse_ts(r["timestamp_utc"])
+            return any(abs((s - published).total_seconds() / 86400 - AGE_MATCH_TARGET_DAYS)
+                       <= AGE_MATCH_TOLERANCE_DAYS for s in snapshots.get(r.get("video_id"), []))
+
+        arms = Counter((r.get(coin) or "").strip() for r in log_rows
+                       if (r.get("timestamp_utc") or "")[:10] >= start.isoformat()
+                       and (r.get(coin) or "").strip() and measured(r))
+        smaller = min(arms.values()) if len(arms) == 2 else 0
+        if smaller < per_arm:
+            short.append((field, test, smaller, per_arm))
+    return short
 
 
 def _percent(value):
