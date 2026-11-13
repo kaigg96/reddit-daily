@@ -100,6 +100,15 @@ def test_floor_counts_the_cohort_an_at_age_read_takes():
                                _snaps(log, WEEKS[:-1])) == [("title_caps", "#14", 28, 30)]
 
 
+def test_floor_counts_from_the_coins_first_day():
+    # Two real uploads went up on 10-15; _log's 10-14 row (arm 1) never counts.
+    log = _log({"0": 30, "1": 29})
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == [
+        ("title_caps", "#14", 29, 30)]
+    log += _log({"1": 1}, when="2026-10-15T07:00:00+00:00")
+    assert insights.blind_arms(["title_caps"], LEDGER, D(2026, 11, 23), log, _snaps(log)) == []
+
+
 def test_a_missed_snapshot_leaves_its_week_out_of_the_count():
     log = _log({"0": 30, "1": 30})          # 11-10: measured at 11-16 (5.7 days) only
     missed = tuple(w for w in WEEKS if w != "2026-11-16")
