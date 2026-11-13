@@ -262,7 +262,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   Gemini (`MAX_SCREENED_CANDIDATES`): act only if a run ends with no post. A
   length-guard drop while the vote shows synthesizes the stock line as a sixth
   Polly call (~94 characters, `run.py` ~120). Each branch render spends one
-  `MODEL` request (`METADATA_ON_UPLOAD_MODEL`). With reactions off, the ask and
+  `MODEL` request (`METADATA_ON_UPLOAD_MODEL`), so #65's sentence needs
+  rewording before it lands (noted on its body). With reactions off, the ask and
   schema still request three (tokens only).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
