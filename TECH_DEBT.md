@@ -281,7 +281,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   would cost screen depth for nothing (10-13). Raise `CANDIDATE_LIMIT` as §4 says. The delay is rising again (upload times against their slot, 11-05): weekly
   median 4.3–4.8h (W36–W39), 5.5–5.9h (W40–W41), 4.6–4.7h (W42–W43), 5.7h (W44),
   then 6.7h with all 7 of W45's uploads over 6h (worst 9.5h), so at four a day the
-  median run now lands after the next slot is due. Runs are safe (`run_slot` takes
+  median run now lands after the next slot is due. **Every cron here is as late
+  (11-12, scheduled runs' start against their cron, weekly medians W40→W46):**
+  shifts 4.6→7.4h, the release check 6.6→8.3h, the weekly job 6.3→8.7h, all
+  rising from W43. So it is GitHub's scheduler, not the upload workflow; no
+  edit to its cron fixes it, and only a trigger outside GitHub's schedule would
+  (a token: the owner's). Runs are safe (`run_slot` takes
   the day from the cron line); the digest is what misreads. **If #4 goes
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
@@ -423,7 +428,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   carries the same words, logging `title_ok=False` and costing #10's and #14's
   arms that run. It misses "/r/tifu", "Redditors reveal", "3 Answers That…" and
   "Commenters reveal". Live path untouched (`SOURCE=reddit`). Fixing it changes
-  the commit, so it needed a second render the 12-hour limit refused. **Closes
+  the commit, so it needed a second render the 12-hour limit refused.
+  **Fixed in part on `strategy/own-title-check` (11-12, 875 pass, unmerged):**
+  three rounds, each reviewed fresh, and each review found new wordings. Its
+  third leaves: "People's Hot Takes", "Hot Takes From Strangers", "People React
+  To…" and singular "A stranger told me" pass (as on `main`); spelled counts
+  newly drop "Should two people split the bill?"; "How often/What do people
+  say…" drop. A word list keeps leaking, so before switch-on weigh a different
+  check (the screen call judging the title), not a fourth round. **Graded
+  from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
+  `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
 - **C15's name credits drop silently (2026-10-06).** `content.credit_name`
   leaves out deleted, profane and over-matched names: the substring check
@@ -433,7 +447,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   attribution term ever turns on it, add an upload-log column (asker credited,
   answers credited of shown) through a sample run, then tune the word floor.
 
-**Retention — open items must close, not accumulate** (cap: 25, checked by
+**Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
 `PRD.md` §0's backlog if it is really product work, or **deleted with
