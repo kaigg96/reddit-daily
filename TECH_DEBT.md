@@ -453,13 +453,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
   `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
-- **C15's name credits drop silently (2026-10-06).** `content.credit_name`
-  leaves out deleted, profane and over-matched names: the substring check
-  (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
-  Grape, by design, since a missed credit beats printing a slur. Nothing
-  records how often it fires. If the
-  attribution term ever turns on it, add an upload-log column (asker credited,
-  answers credited of shown) through a sample run, then tune the word floor.
 
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
