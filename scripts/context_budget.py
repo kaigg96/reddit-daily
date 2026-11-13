@@ -96,7 +96,9 @@ ORIENT = {
 # (backlog_status.answered_in). Set at that day's size: a finding added means
 # another compressed, a superseded one to a line and a pointer to git.
 # 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
-REFERENCE = {"PRD.md#4. Objectives": 20310}
+# 20310 -> 19130 the same evening: four more (the 09-25 topic read, R4's 10-10,
+# R8, the zero-view pipeline check, which now carries R11's result).
+REFERENCE = {"PRD.md#4. Objectives": 19130}
 
 
 def words(text):
@@ -225,12 +227,30 @@ def session_cost():
 # extending" -- but it is advisory. Blocking on it would make silence cheaper
 # than recording a finding, which is worse than a long list.
 CORPUS = {
-    "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them"),
+    "WORKLOG.md": (r"^## \d{4}-", 10, "shift entries", "delete the oldest; git keeps them", None),
     "DECISIONS.md": (r"^## D\d+ ", 15, "decisions",
-                     "compress superseded ones to a line; graduate stable ones into the rules"),
-    "TECH_DEBT.md": (r"^- \*\*", 25, "open items",
-                     "fix, promote to PRD §0's backlog, or delete with reasoning"),
+                     "compress superseded ones to a line; graduate stable ones into the rules",
+                     None),
+    # Only its open list: the passes above it record what each pass did, and
+    # 12 of their bullets were counted as open until 2026-11-12, so the cap
+    # fell by the same 12 (D4).
+    "TECH_DEBT.md": (r"^- \*\*", 13, "open items",
+                     "fix, promote to PRD §0's backlog, or delete with reasoning",
+                     "## Open items"),
 }
+
+
+def count_items(raw, pattern, section=None):
+    """Items matching `pattern` in `raw`, only under the `section` heading when
+    given (to the next heading of its level), outside fenced blocks."""
+    raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)   # e.g. WORKLOG's template
+    if section:
+        start = raw.find("\n" + section)
+        if start == -1:
+            return 0
+        end = raw.find("\n" + section.split()[0] + " ", start + 1)
+        raw = raw[start:end if end != -1 else len(raw)]
+    return len(re.findall(pattern, raw, re.M))
 
 
 def corpus_health():
@@ -239,13 +259,12 @@ def corpus_health():
     """
     print("\nCORPUS (read on demand — counted as open items, not words)")
     over = []
-    for path, (pattern, cap, noun, fix) in CORPUS.items():
+    for path, (pattern, cap, noun, fix, section) in CORPUS.items():
         try:
             raw = open(os.path.join(ROOT, path), encoding="utf-8").read()
         except OSError:
             continue
-        raw = re.sub(r"^```.*?^```", "", raw, flags=re.S | re.M)   # e.g. WORKLOG's template
-        n = len(re.findall(pattern, raw, re.M))
+        n = count_items(raw, pattern, section)
         flag = "OVER" if n > cap else "ok"
         bar = "#" * min(int(n / cap * 20), 30)
         print(f"  {n:>6}/{cap:<5} {flag:4} {bar:<22} {path}  ({noun})")

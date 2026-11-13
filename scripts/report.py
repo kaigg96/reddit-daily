@@ -675,6 +675,33 @@ def show_catalogue(args):
           "\n  single week's low against the two-week column (PRD §4, 2026-10-26).")
 
 
+def show_themes(args):
+    """`--themes`: R11, do buried uploads share a sensitive theme (PRD §0)?"""
+    import json as _json
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--themes reads R11's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
+    labels = _json.loads((Path(__file__).resolve().parent.parent / "analysis"
+                         / "theme_labels.json").read_text())
+    load = insights.load_videos_at_age()
+    vids = [v for v in load.videos if (v.true_published or v.published) >= insights.THEME_SINCE]
+    buried, rows = insights.theme_buried(vids, labels)
+    print(f"R11: buried (<= {insights.BURIED_VIEWS} views at ~7 days) by theme tag, uploads "
+          f"since {insights.THEME_SINCE.date()} ({buried} buried of "
+          f"{sum(1 for v in vids if v.video_id in labels)} labelled)\n")
+    print(f"  {'tag':13} {'tagged':>11} {'rest':>11} {'lift':>5} {'p':>6}")
+    for tag, ha, na, hb, nb, lift, p, lead in rows:
+        lift = "-" if lift is None else f"{lift:.1f}"
+        print(f"  {tag:13} {ha:>4}/{na:<6} {hb:>4}/{nb:<6} {lift:>5} {p:>6.3f}{'  LEAD' if lead else ''}")
+    if buried < insights.THEME_MIN_BURIED:
+        print(f"\n  Insufficient data: under {insights.THEME_MIN_BURIED} buried uploads.")
+        return
+    print(f"\n  A lead: 'any' under p {insights.THEME_ANY_P}, or one tag under "
+          f"{insights.THEME_ONE_P}, at {insights.THEME_LIFT:.0f}x or more (pre-committed 11-12).")
+    print("  " + ("A lead is a candidate screen category, needing its own rule and the owner's call."
+                  if any(r[-1] for r in rows) else "No lead: no theme explains the buried uploads."))
+
+
 def show_swings(args):
     """`--swings`: R4, are weekly view swings viewers or data (PRD §0)?"""
     import csv as _csv
@@ -781,10 +808,11 @@ def show_hit_rates(videos, key):
           "\n  question pre-committed, and within an era: eras differ in views.")
 
 
-def refuse_blind(args, ledger, today):
+def refuse_blind(args, ledger, today, log_rows=None, snapshots=None):
     """Exit before any outcome loads when --by, --compare, --within or
-    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), unless
-    --unblind gives a reason."""
+    --release-key cuts by a blind test's field (insights.BLIND_FIELDS), before
+    its due date or, past it, while its arms are under their floor
+    (insights.BLIND_FLOORS), unless --unblind gives a reason."""
     key = getattr(args, "release_key", None) if getattr(args, "release", None) else None
     fields = [re.split(r"!?=", spec)[0].strip()
               for spec in (args.by, args.compare, args.within, key) if spec]
@@ -797,6 +825,16 @@ def refuse_blind(args, ledger, today):
                      f"beside {test} in analysis/experiments.csv.")
         print(f"UNBLINDED {test} before {due}: {args.unblind}. Record it beside its "
               f"ledger row.\n")
+    for field, test, smaller, floor in insights.blind_arms(fields, ledger, today, log_rows,
+                                                           snapshots):
+        if not args.unblind:
+            sys.exit(f"{field} cuts by {test}'s coin, blind until each arm holds {floor} uploads "
+                     f"in the newest snapshot's --at-age 7 read; the smaller holds {smaller}. "
+                     f"Its rule moves the read to the first snapshot with both (PRD §0), so move "
+                     f"its due date in analysis/experiments.csv there; --balance stays open. To "
+                     f"read it anyway, add --unblind \"<reason>\" and record the peek beside {test}.")
+        print(f"UNBLINDED {test} under its floor ({smaller} of {floor} per arm): "
+              f"{args.unblind}. Record it beside its ledger row.\n")
 
 
 def main():
@@ -867,6 +905,9 @@ def main():
     p.add_argument("--catalogue", action="store_true",
                    help="views gained between snapshots, back catalogue (60+ days "
                         "old) vs recent uploads: did a drop hit the whole channel?")
+    p.add_argument("--themes", action="store_true",
+                   help="R11: do buried uploads share a sensitive theme? Blind "
+                        "theme tags (analysis/theme_labels.json) against burial")
     p.add_argument("--swings", action="store_true",
                    help="R4: are weekly view swings viewers or data? The channel's "
                         "counter against --catalogue's recent column (reads on 11-16)")
@@ -895,8 +936,8 @@ def main():
                    help="read a blind test's field before its pre-committed date "
                         "anyway; record the peek beside its ledger row")
     p.add_argument("--until", metavar="YYYY-MM-DD",
-                   help="--balance: uploads published on or before this date, so it "
-                        "counts what a read at 7 days sees (its snapshot's date less 7)")
+                   help="--balance: uploads published on or before this date, inclusive "
+                        "(an --at-age 7 read takes uploads 3.5 days old on its snapshot)")
     args = p.parse_args()
     if args.within:
         try:
@@ -907,7 +948,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.swings, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -1113,6 +1154,9 @@ def main():
         show_catalogue(args)
         return
 
+    if args.themes:         # R11: blind theme tags against burial
+        show_themes(args)
+        return
     if args.swings:         # R4: the snapshot series against the channel counter
         show_swings(args)
         return
