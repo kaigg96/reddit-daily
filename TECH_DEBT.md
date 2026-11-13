@@ -245,8 +245,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`. **Rehearsed again 10-28** over `main` `ef6aec7`: both merge
-  cleanly, 936 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  after `v8`. **Rehearsed again 11-13** over `main` `ae729f3`: `v8`, this
+  branch and `reliability/run-slot-log` merge cleanly, 1,141 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
   fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
   (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
   the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
@@ -282,8 +282,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   a sample after `v8`: **built 10-13 on `reliability/run-slot-log`**, stacked
   on `v8` (`run_slot`; the digest counts each upload for its scheduled day and
   times its delay from that slot; older rows keep the estimate; reviewed
-  twice, fixed; brought current with `v8` 11-06, `dafaecf`, after three
-  unseen conflicts: main, then `v8`, then it merge cleanly, 1,027 pass).
+  twice, fixed; brought current with `v8` (`b1190de`) 11-13, `e37d656`: clean,
+  1,139 pass).
   Merge it after `v8`, before the switch, on tests and review:
   no sample reaches it (a dry run returns before the log), and `prev_post.txt`
   is written first, so a fault there cannot repeat an upload. **At the switch, keep
