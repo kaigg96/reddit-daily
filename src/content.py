@@ -50,7 +50,14 @@ _NAME_WORDS = sorted({str(w) for w in profanity.CENSOR_WORDSET
 
 def credit_name(author):
     """A Reddit username we may print, else "". Names are untrusted input:
-    deleted accounts and profane names are left uncredited."""
+    deleted accounts and profane names are left uncredited.
+
+    The substring check (list words of 4+ letters) also drops "hell" in
+    Michelle and "rape" in Grape, by design: a missed credit beats printing a
+    slur. Nothing records how often it fires (C15, 2026-10-06). If Reddit's
+    attribution term ever turns on it, add an upload-log column (asker
+    credited, answers credited of shown) through a sample run, then tune the
+    word floor."""
     name = str(getattr(author, "name", "") or "")
     if name in ("", "[deleted]", "[removed]"):
         return ""
