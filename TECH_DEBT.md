@@ -575,5 +575,9 @@ a list nobody can read is the same as no list.
   `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
   as auto-apply refuses an edited one). **11-10:** #89 was refused (the owner's
   words were about replies), so the patch did not land; held so #77 and #82
-  are read first. **Closes when** it lands as its own ask, or is deleted with
-  reasoning at the 12-07 monthly.
+  are read first. **11-13 replay** (`problems()` at all 129 scheduled shift
+  starts 09-20 to 11-13, the late-cron weeks included): alarms only at 10-06's
+  two, the real miss. Closest otherwise: 26.7 h of 28 (11-02 20:46), so a
+  shift landing just before an evening upload about 1.3 h later than any yet
+  would false-alarm; re-run the replay before the patch lands. **Closes when**
+  it lands as its own ask, or is deleted with reasoning at the 12-07 monthly.

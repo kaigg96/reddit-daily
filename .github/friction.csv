@@ -293,3 +293,4 @@ F291,2026-11-13T11:35:09+00:00,43413218739,product,told the owner on #77 the bet
 F292,2026-11-13T11:35:37+00:00,43413218739,gm,"#65 body: its corrected sentence goes false once v8 merges (branch renders' metadata on MODEL); noted, no email",done,,none,,,0,
 F293,2026-11-13T11:37:55+00:00,43413218739,reliability,"dry-run verdict lists the Narration line (merged, reviewed, no blockers)",done,,none,,,0,
 F294,2026-11-13T18:46:59+00:00,43483433524,data,R12 topic mix vs engaged-share fall,done,,tool,PRD §4's budget figure did not fall word-for-word with cuts: four rounds of trimming to clear 121 over after one finding,context_budget.py saying how its section figure is counted,6,
+F295,2026-11-13T18:52:32+00:00,43483433524,data,R13 reworded repeats vs burial,done,,none,the ledger's verdict vocabulary has no 'insufficient'; found by the full test run,none needed: the test caught it in seconds,2,
