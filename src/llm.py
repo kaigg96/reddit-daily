@@ -316,8 +316,16 @@ def _own_judged(data):
     lines = "\n".join(f'{k}: {json.dumps(data[k], ensure_ascii=False)}' for k in keys)
     shape = ", ".join(f'"{k}": "yes" or "no"' for k in keys)
     verdict = {}
+    prompt = _OWN_JUDGE.format(lines=lines, shape=shape)
     try:
-        raw = generate_retrying(_OWN_JUDGE.format(lines=lines, shape=shape))
+        try:
+            raw = generate_retrying(prompt)
+        except Exception as e:   # noqa: BLE001 -- rescued as the metadata call is
+            if provider() != "gemini" or config.DRY_RUN:
+                raise
+            raw, _, prior = _rescue_metadata(prompt, _failure_kind(e))
+            if raw is None:
+                raise RuntimeError(prior) from e
         match = re.search(r"\{.*\}", raw or "", re.S)
         verdict = json.loads(match.group(0)) if match else {}
         if not isinstance(verdict, dict):
