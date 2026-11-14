@@ -366,6 +366,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   conflicted with it in `get_metadata`'s failure branch and is pre-resolved
   (`integration/preview`): the second model first, given the main call's
   reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
+  **11-14:** PRD #13's tag condition assumes per-answer reactions. If #77
+  ships without them (its ask), the host's lines are the setup note and the
+  vote, which no Groq trial has read (`tag_trial.py --model groq` reads them
+  on `integration/preview`). Set that bar before #13 is next, not now: a
+  trial ahead of bet 1's read would be stale by the time it is used.
 
 - **Audit 2026-11-12: working at the margin; the owner's selective answers
   decide what ships (last act 11-10 15:24).** 16 shifts since 11-05 (one
