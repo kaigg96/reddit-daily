@@ -313,7 +313,7 @@ def _own_judged(data):
     if not keys:
         return data
     names = {"title": "title", "cta": "closing line"}
-    lines = "\n".join(f'{k}: {json.dumps(data[k])}' for k in keys)
+    lines = "\n".join(f'{k}: {json.dumps(data[k], ensure_ascii=False)}' for k in keys)
     shape = ", ".join(f'"{k}": "yes" or "no"' for k in keys)
     verdict = {}
     try:
