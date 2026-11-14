@@ -3098,7 +3098,7 @@ def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, cap
             for i in range(6):
                 pub = base + datetime.timedelta(weeks=w)
                 out.append({"video_id": f"w{w}v{i}", "published": pub,
-                            "snapshot": pub + datetime.timedelta(days=7), "value": 60.0 + w})
+                            "snapshot": pub + datetime.timedelta(days=7), "value": 60.0})
         return out
     monkeypatch.setattr(report, "_snapshot_metric_rows", rows)
     args = argparse.Namespace(metric=Metric.PCT, at_age=None, within=None)
@@ -3106,4 +3106,4 @@ def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, cap
     out = capsys.readouterr().out
     assert asked == [Metric.PCT]
     assert "share of each video watched" in out and "never a trigger" in out
-    assert "65.0%" in out and "forces PM's priority" not in out
+    assert "60.0%" in out and "FLAT" in out and "forces PM's priority" not in out

@@ -600,7 +600,8 @@ def show_trajectory(args):
                                                min_change=0.02 if share else 1.0 if pct else 0.5)
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
-        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
+        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}"
+              f"{' points' if pct else unit})")
     if verdict == "flat" and not share and not pct:
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
