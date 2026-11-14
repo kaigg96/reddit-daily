@@ -193,9 +193,9 @@ def _cleared(reply):
 
 
 @pytest.mark.parametrize("field, value", [
-    ("title", "3 People Reveal Their Seat Etiquette"), ("title", "Reddit settles the recline debate"),
-    ("title", "Strangers confess their worst flight habit"), ("cta", "Tell r/AskReddit which take wins.")])
-def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field, value):
+    ("title", "Redditors Reveal Their Seat Etiquette"), ("title", "Reddit settles the recline debate"),
+    ("title", "/r/flying's worst flight habit"), ("cta", "Tell r/AskReddit which take wins.")])
+def test_a_field_naming_reddit_falls_back(monkeypatch, field, value):
     reply = {"title": "3 Takes On Reclining Your Seat", "keywords": ["reclining seat", "reddit ama"],
              "cta": "Which take do you pick? Tell us below."}
     reply[field] = value
@@ -203,6 +203,7 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     monkeypatch.setattr(config, "SOURCE", "own")
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert getattr(meta, field) is None and meta.keywords == ["reclining seat"]
+    assert meta.failure == f"own_list_{field}"
     other = "cta" if field == "title" else "title"
     assert getattr(meta, other) == reply[other]
     monkeypatch.setattr(config, "SOURCE", "reddit")   # the show itself names Reddit freely
@@ -210,12 +211,15 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     assert getattr(meta, field) and "reddit ama" in meta.keywords
 
 
+# People telling is the judge's since 11-14 (cleared here), so the list drops
+# only Reddit's names.
 @pytest.mark.parametrize("title, dropped", [
     ("What Your Coffee Order Reveals About You", False), ("The Most Revealing Morning Habit", False),
     ("Gender Reveal Parties: Worth It?", False), ("Are R/C cars a waste of money?", False),
-    ("Do people still recline their seats?", False), ("3 Strangers On Reclining", True),
-    ("Real People Answer: Recline Or Not?", True), ("What people told us about reclining", True)])
-def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
+    ("Do people still recline their seats?", False), ("3 Strangers On Reclining", False),
+    ("Real People Answer: Recline Or Not?", False), ("Seen at example.com/r/flying", False),
+    ("Redditors On Reclining", True), ("What /r/flying says about reclining", True)])
+def test_the_list_catches_reddits_names_not_ordinary_words(monkeypatch, title, dropped):
     reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
     monkeypatch.setattr(llm, "generate_retrying", _cleared(reply))
     monkeypatch.setattr(config, "SOURCE", "own")

@@ -440,44 +440,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
   you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
   when** #14 is read (~11-23).
-- **The own-question title check drops ordinary titles (merged off 2026-11-12,
-  PLAN C16; left by the merge's fresh review).** `llm._OWN_BANNED` matches
-  "people say/tell/explain…" anywhere, so "Why do people say sorry so much?" or
-  "3 People You Meet at Every Wedding" falls back to the question itself, which
-  carries the same words, logging `title_ok=False` and costing #10's and #14's
-  arms that run. It misses "/r/tifu", "Redditors reveal", "3 Answers That…" and
-  "Commenters reveal". Live path untouched (`SOURCE=reddit`). Fixing it changes
-  the commit, so it needed a second render the 12-hour limit refused.
-  **Fixed in part on `strategy/own-title-check` (11-12, 875 pass, unmerged):**
-  three rounds, each reviewed fresh, and each review found new wordings. Its
-  third leaves: "People's Hot Takes", "Hot Takes From Strangers", "People React
-  To…" and singular "A stranger told me" pass (as on `main`); spelled counts
-  newly drop "Should two people split the bill?"; "How often/What do people
-  say…" drop. A word list keeps leaking, so before switch-on weigh a different
-  check, not a fourth round. Not the screen call: it runs inside `select_post`,
-  before `get_metadata` writes the title (`run.py`; checked 11-14). **Chosen
-  (11-14): a second call, not a field in the metadata reply.** On our own
-  channel the writing model ignores its own instructions where a separate
-  check does not: three prompt fixes left bet 1's tags as labels (#77), while
-  the separate R4.6 screen passes its replay. A miss misleads viewers about whose
-  takes they are; a false refusal only ships the question as the title. So: the
-  list keeps Reddit's names alone (`reddit`, `r/…`); one request after
-  `get_metadata` asks the upload model whether the title or closing line
-  presents the takes as real people's, and a yes, a failure or an unreadable
-  reply refuses that field (fail closed). Cost +1 a run: a typical own run then
-  spends 4 (write and screen in `ownquestions.select_post`, the title, this), 8 of 20
-  at two a day and 16 at four, where a worst day passes 20 and #13's Groq
-  route must carry it, as for Reddit's (PRD §4). Test plan: the 17
-  cases below drive the call mocked; before switch-on one batched request
-  judges all 17 on the sample model, and must right every case. **Built 11-14**
-  (`llm._own_judged`, merged off, after the list). Left before switch-on: narrow the
-  list to Reddit's names and move the 17 cases onto the judge; log a judge refusal
-  in `failure`, which today reads as an empty title (mind `validate_release.py`'s
-  reading of it). Rescued as the metadata call is since 11-14. **Graded
-  from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
-  `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
-  when** fixed with tests, before `SOURCE=own` turns on.
-
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
