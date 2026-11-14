@@ -2543,13 +2543,14 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
     import sys
     import pytest
     from scripts import report
-    since, only, count = ("--since restricts", "--min-views applies to --compare only",
+    since, only, count = ("--since restricts", "--min-views applies to --compare and --topic-mix only",
                           "must count every upload")
     refused = (
         (["--since", "2026-10-07", "--trajectory"], since),
         (["--since", "2026-10-07", "--release", "v7"], since),
         (["--since", "2026-10-07"], since),
         (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--topic-mix", "--trajectory"], only),
         (["--min-views", "10", "--replays", "--compare", "title_style=B"], only),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
@@ -2982,6 +2983,24 @@ def test_topic_mix_rules_out_a_fall_within_every_topic():
                         (True, "a", 0.4, 10), (True, "b", 0.2, 10), (True, "c", 0.3, 5)])
     r = insights.topic_mix(vids)
     assert r["mix"] == pytest.approx(0) and r["verdict"] == "not topic mix"
+
+
+def test_topic_mix_min_views_leaves_out_barely_shown_uploads():
+    # R16: no fall among watched uploads; ten late uploads seen 3 times, none
+    # past the opening, make one on their own unless a view floor leaves them out.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 10), (True, "b", 0.3, 10), (True, "c", 0.4, 5)])
+    late = vids[-1].published
+    vids += [Video(video_id=f"low{i}", published=late, views=3, engaged_views=0,
+                   meta={"topic": "a"}) for i in range(10)]
+    assert insights.topic_mix(vids)["fall"] > 0.1
+    r = insights.topic_mix(vids, min_views=10)
+    assert (r["n_late"], r["below_early"], r["below_late"]) == (25, 0, 10)
+    assert r["fall"] == pytest.approx(0) and r["verdict"] == "no fall"
+    # The fall is read even when too few groups remain to reweight the mix.
+    one = _mix_videos([(False, "a", 0.5, 25), (True, "a", 0.4, 25)])
+    r = insights.topic_mix(one)
+    assert r["verdict"] == "insufficient" and r["fall"] == pytest.approx(0.1) and r["mix"] is None
 
 
 def test_topic_mix_pools_thin_topics_and_refuses_thin_reads():

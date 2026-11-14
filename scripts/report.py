@@ -705,18 +705,26 @@ def show_topic_mix(args):
                  "--at-age or --within, and --by only as subreddit (R15)")
     key = args.by or "topic"
     r = insights.topic_mix(insights.load_videos_at_age().videos, key=key,
-                           min_groups=2 if key == "subreddit" else insights.TOPIC_MIX_MIN_GROUPS)
+                           min_groups=2 if key == "subreddit" else insights.TOPIC_MIX_MIN_GROUPS,
+                           min_views=args.min_views)
     split = insights.TOPIC_MIX_SPLIT.date()
     print(f"{'R15' if key == 'subreddit' else 'R12'}: engaged share at ~7 days by {key}, uploads from "
           f"{insights.TOPIC_MIX_START.date()} and before {split} against "
           f"from it ({r['n_early']} and {r['n_late']} with a reading and a {key}; "
-          f"zero-view uploads apart: {r['zero_early']} and {r['zero_late']})\n")
+          f"zero-view uploads apart: {r['zero_early']} and {r['zero_late']})")
+    if args.min_views > 1:   # R16
+        print(f"  uploads under {args.min_views} views left out too: "
+              f"{r['below_early']} and {r['below_late']}")
+    print()
     print(f"  {key:22} {'early':>11} {'late':>11}")
     pct = lambda x: "-" if x is None else f"{x * 100:.1f}"
     for g, ne, nl, me, ml in r["groups"]:
         print(f"  {g:22} {ne:>3} {pct(me):>7} {nl:>3} {pct(ml):>7}")
     if r["verdict"] == "insufficient":
-        print(f"\n  Insufficient data: a period under {insights.TOPIC_MIX_MIN_N}, under "
+        if r["fall"] is not None:   # R16 reads the fall alone
+            print(f"\n  Mean: early {pct(r['mean_early'])}, late {pct(r['mean_late'])} "
+                  f"(fall {pct(r['fall'])} points).")
+        print(f"\n  Insufficient data for the mix: a period under {insights.TOPIC_MIX_MIN_N}, under "
               f"{insights.TOPIC_MIX_MIN_GROUPS} groups, or a late group with no early uploads.")
         return
     print(f"\n  Mean: early {pct(r['mean_early'])}, late {pct(r['mean_late'])} (fall "
@@ -1026,8 +1034,10 @@ def main():
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
-    if args.min_views > 1 and (any(early) or args.replays or not args.compare):
-        sys.exit("--min-views applies to --compare only")
+    mix_only = args.topic_mix and sum(bool(x) for x in early) == 1
+    if args.min_views > 1 and ((any(early) and not mix_only) or args.replays
+                               or not (args.compare or mix_only)):
+        sys.exit("--min-views applies to --compare and --topic-mix only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
                                                   Metric.ENGAGED_SHARE, Metric.WATCH_FINE,
                                                   Metric.WATCH_PER_START, *Metric.RETENTION):
