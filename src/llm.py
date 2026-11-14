@@ -275,7 +275,7 @@ def _own_fields(data):
     reply, so a vote read from the same "cta" drops with it."""
     def ok(field, line):
         if isinstance(line, str) and _OWN_BANNED.search(line):
-            print(f"Own question: the {field} named Reddit or people's answers; dropped: {line!r}")
+            print(f"Own question: the {field} named Reddit; dropped: {line!r}")
             return False
         return True
     data = dict(data)
@@ -298,7 +298,11 @@ person, user, commenter or crowd wrote them, and they come from no website.
 For each line below, answer "yes" if it presents the takes as coming from real
 people, users, strangers, commenters, a crowd, a forum or Reddit (as "People
 reveal...", "Strangers share...", "3 answers that..." would), else "no".
-Mentioning people as the question's subject ("Why do people say sorry?") is "no".
+Calling the takes "answers" ("Top 5 answers to...") is "yes": nobody answered.
+So is a line told as someone's own experience ("My neighbour once told me..."):
+nobody lived the takes. Mentioning people as the question's subject ("Why do
+people say sorry?"), asking the viewer for their own answer, and the host
+speaking as itself ("My vote goes to...") are "no".
 
 {lines}
 
@@ -310,17 +314,20 @@ def _own_judged(data):
     """(reply, label): the reply with any title or closing line the judge does
     not clear set to None, as `_own_fields` does; keywords are left to the list.
 
-    The label is for MetadataResult.failure: `own_judge_title` / `own_judge_cta`
-    for a line the judge refused, or `own_judge_<why>` once for both when no
-    verdict came (a failed request, `no_json`, `bad_json`); "" when none was
-    refused. Without it a refusal logged as a title the model never wrote."""
+    The label is for MetadataResult.failure: each part of the judge's own
+    failure as `own_judge_<why>` (a request's, kept when a later route
+    answered, as the metadata call keeps Gemini's; `no_json`, `bad_json`), then
+    `own_judge_title` / `own_judge_cta` for a line a verdict refused. With no
+    verdict both lines go and the failure is why. "" when the judge answered
+    first time and refused nothing. Without it a refusal logged as a title the
+    model never wrote."""
     keys = [k for k in ("title", "cta") if isinstance(data.get(k), str) and data[k].strip()]
     if not keys:
         return data, ""
     names = {"title": "title", "cta": "closing line"}
     lines = "\n".join(f'{k}: {json.dumps(data[k], ensure_ascii=False)}' for k in keys)
     shape = ", ".join(f'"{k}": "yes" or "no"' for k in keys)
-    verdict, failed = {}, ""
+    verdict, failed, answered = {}, "", False
     prompt = _OWN_JUDGE.format(lines=lines, shape=shape)
     try:
         try:
@@ -329,27 +336,33 @@ def _own_judged(data):
             failed = _failure_kind(e)
             if provider() != "gemini" or config.DRY_RUN:
                 raise
+            # Kept when rescued too, as the metadata call keeps Gemini's: a
+            # judge's day cap is the next upload's lost title.
             raw, _, failed = _rescue_metadata(prompt, failed)
             if raw is None:
                 raise RuntimeError(failed) from e
-            failed = ""
         match = re.search(r"\{.*\}", raw or "", re.S)
         if not match:
-            failed = "no_json"
+            failed = ";".join(filter(None, (failed, "no_json")))
         else:
-            verdict = json.loads(match.group(0))
-            if not isinstance(verdict, dict):
-                verdict, failed = {}, "bad_json"
+            try:
+                verdict = json.loads(match.group(0))
+            except ValueError:
+                verdict = None
+            answered = isinstance(verdict, dict)
+            if not answered:
+                verdict, failed = {}, ";".join(filter(None, (failed, "bad_json")))
     except Exception as e:   # noqa: BLE001 -- fail closed, never fail the run
-        failed = failed or ("bad_json" if isinstance(e, ValueError) else type(e).__name__)
+        failed = failed or type(e).__name__
         print(f"Own question: the title judge failed ({type(e).__name__}); refusing both lines")
-    data, refused = dict(data), []
+    data, labels = dict(data), [f"own_judge_{p}" for p in failed.split(";") if p]
     for k in keys:
         if str(verdict.get(k, "")).strip().lower() != "no":
             print(f"Own question: the judge did not clear the {names[k]}; dropped: {data[k]!r}")
             data[k] = None
-            refused.append(f"own_judge_{k}")
-    return data, (f"own_judge_{failed}" if failed else ";".join(refused))
+            if answered:   # with no verdict, the failure above is why
+                labels.append(f"own_judge_{k}")
+    return data, ";".join(labels)
 
 
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,

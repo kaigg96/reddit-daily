@@ -8,7 +8,7 @@ Reddit's names alone and a separate request judges the rest (`llm._own_judged`).
 These cases grade the list and the judge's plumbing with no AI request: the
 list refuses Reddit's names and nothing else, and every other line reaches the
 judge, whose verdict alone decides. Whether the judge's model rights them is
-graded before switch-on by one batched request on the sample model.
+graded before switch-on by one batched request (`scripts/judge_own_cases.py`).
 """
 import pytest
 
@@ -33,6 +33,10 @@ CASES = [
     ("Why do people say sorry so much?", False),
     ("3 People You Meet at Every Wedding", False),
     ("What do people say when they mean no?", False),
+    # Closing lines (11-14): the viewer's answer and the host's own vote are ordinary.
+    ("What would your answer be? Tell us below.", False),
+    ("I'm raising my hand for skiing, two hundred a day is wild. Which gets yours?", False),
+    ("Which take gets your vote?", False),
 ]
 NAMED = {"Redditors Reveal Their Worst Date", "r/AskReddit Answers This",
          "/r/tifu's Best Stories"}

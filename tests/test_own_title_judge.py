@@ -92,7 +92,7 @@ def test_a_failed_judge_is_rescued_as_the_metadata_call_is(own, monkeypatch):
     m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
     assert m.title == "3 Takes On Tipping" and m.cta == "Which gets your vote?"
     assert len(calls) == 2 and len(rescued) == 1 and rescued[0] == calls[1]
-    assert m.failure == ""   # rescued: nothing was refused
+    assert m.failure == "own_judge_RuntimeError"   # rescued: kept, nothing refused
 
 
 def test_a_judge_no_route_answers_refuses_both(own, monkeypatch):
@@ -124,3 +124,39 @@ def test_a_refusal_follows_a_rescued_metadata_reply(monkeypatch):
     assert m.source == llm.FALLBACK_SOURCE and m.title is None
     assert m.cta == "Which gets your vote?" and len(calls) == 2
     assert m.failure == "RuntimeError;own_judge_title"
+
+
+def test_every_part_of_a_judge_failure_is_named_the_judges(monkeypatch):
+    """A rescued metadata reply, then a judge no route answers: each part of the
+    judge's chain carries its prefix, so none reads as the metadata call's
+    (fresh review, 11-14)."""
+    monkeypatch.setattr(config, "SOURCE", "own")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+
+    def fail(prompt, tries=2, **kw):
+        raise RuntimeError("503")
+    monkeypatch.setattr(llm, "generate_retrying", fail)
+    replies = iter([(REPLY, llm.FALLBACK_SOURCE, "http_503"),
+                    (None, "gemini", "http_429_day;fallback_http_429_day")])
+    monkeypatch.setattr(llm, "_rescue_metadata", lambda prompt, prior: next(replies))
+    m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
+    assert m.title is None and m.cta is None and m.source == llm.FALLBACK_SOURCE
+    assert m.failure == "http_503;own_judge_http_429_day;own_judge_fallback_http_429_day"
+
+
+def test_a_rescued_judge_that_refuses_logs_both(monkeypatch):
+    monkeypatch.setattr(config, "SOURCE", "own")
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    calls = []
+
+    def fake(prompt, tries=2, **kw):
+        calls.append(prompt)
+        if len(calls) == 1:
+            return REPLY
+        raise RuntimeError("503")
+    monkeypatch.setattr(llm, "generate_retrying", fake)
+    monkeypatch.setattr(llm, "_rescue_metadata", lambda prompt, prior: (
+        '{"title": "no", "cta": "yes"}', llm.FALLBACK_SOURCE, prior))
+    m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
+    assert m.title == "3 Takes On Tipping" and m.cta is None
+    assert m.failure == "own_judge_RuntimeError;own_judge_cta"
