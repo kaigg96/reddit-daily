@@ -71,3 +71,25 @@ def test_nothing_left_to_judge_makes_no_request(monkeypatch):
     monkeypatch.setattr(llm, "generate_retrying",
                         lambda *a, **k: (_ for _ in ()).throw(AssertionError("asked")))
     assert llm._own_judged({"title": None, "cta": ""}) == {"title": None, "cta": ""}
+
+
+def test_a_failed_judge_is_rescued_as_the_metadata_call_is(own, monkeypatch):
+    """A 503 or a spent cap on the main model: the fallback answers the judge
+    too, rather than refusing both lines (fresh review, 11-14)."""
+    calls = own(RuntimeError("503"))
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    rescued = []
+    monkeypatch.setattr(llm, "_rescue_metadata",
+                        lambda prompt, prior: rescued.append(prompt) or
+                        ('{"title": "no", "cta": "no"}', llm.FALLBACK_SOURCE, prior))
+    m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
+    assert m.title == "3 Takes On Tipping" and m.cta == "Which gets your vote?"
+    assert len(calls) == 2 and len(rescued) == 1 and rescued[0] == calls[1]
+
+
+def test_a_judge_no_route_answers_refuses_both(own, monkeypatch):
+    own(RuntimeError("503"))
+    monkeypatch.setattr(config, "DRY_RUN", False)
+    monkeypatch.setattr(llm, "_rescue_metadata", lambda prompt, prior: (None, "gemini", prior))
+    m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
+    assert m.title is None and m.cta is None
