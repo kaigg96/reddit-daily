@@ -552,12 +552,17 @@ def show_trajectory(args):
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
     if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START,
-                           Metric.ENGAGED_SHARE):
+                           Metric.ENGAGED_SHARE, Metric.PCT):
         print(f"--trajectory reads watch-seconds (whole, fine or per play start), engaged_share, "
-              f"views or engaged_views, not {args.metric}")
+              f"avg_view_pct, views or engaged_views, not {args.metric}")
         return
     share = args.metric == Metric.ENGAGED_SHARE
-    rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
+    # The share of each video watched (WORKLOG 11-14: is a fall in watch-seconds
+    # shorter videos, or viewers leaving earlier?). It rises as videos shorten,
+    # so it is read beside watch-seconds, never alone, and never a trigger.
+    pct = args.metric == Metric.PCT
+    rows = (_snapshot_metric_rows(Metric.PCT) if pct
+            else _fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
             else _engaged_share_rows(at_age=args.at_age or 7, ids=insights.ids_within(args.within)
                                      if args.within else None) if share
@@ -580,8 +585,10 @@ def show_trajectory(args):
             if args.metric == Metric.WATCH_PER_START
             else "engaged share (engaged views / views; reported since 2026-10-05; D9's"
                  " measure for tests, read per test with --release, never a trigger here)"
-            if share else f"watch-seconds{fine}")
-    unit, digits = ("", 2) if share else ("s", 1)
+            if share else "share of each video watched (a diagnostic: it rises as videos"
+                          " shorten, so read it beside watch-seconds; never a trigger)"
+            if pct else f"watch-seconds{fine}")
+    unit, digits = ("", 2) if share else ("%", 1) if pct else ("s", 1)
     print(f"Median {name}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
@@ -590,11 +597,11 @@ def show_trajectory(args):
     floor = insights.median([abs(b[2] - a[2])
                             for a, b in zip(series, series[1:])]) or None
     verdict, why = insights.trajectory_verdict(series, floor=floor, digits=digits,
-                                               min_change=0.02 if share else 0.5)
+                                               min_change=0.02 if share else 1.0 if pct else 0.5)
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
         print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
-    if verdict == "flat" and not share:
+    if verdict == "flat" and not share and not pct:
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
 
