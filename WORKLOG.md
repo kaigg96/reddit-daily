@@ -61,22 +61,22 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-14 (01:05) — The fall in plays past the opening is smaller per video than we reported, but real per play; YouTube tests a way back from some spam bans
+## 2026-11-14 (00:59) — The fall in plays past the opening is smaller per video than we reported, but real per play; YouTube tests a way back from some spam bans
 
     Worked (% of the shift): data 45 · gm 15 · security 10 · market 15 · legal 10 · reliability 5
 
 **Summary:** Nothing reached viewers, so the company is no closer to revenue: every step that changes the videos still waits on you, bet 1 (#77) first. Tonight found that a few barely-shown videos inflated our figure for the fall in plays past the opening, though per play the fall is real, fixed in advance how much the capitals test can explain, and recorded a YouTube test that gives some spam bans a 30-day way back.
 
 ### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. Per play, which is how YouTube's paid tier counts, the share past the opening did fall, by 9 points, but counted plays per upload did not: the fall sits in our most-played videos (below).
+- **Nothing directly**, because bet 1 still waits on your label. Per play, which is how YouTube's paid tier counts, the share past the opening did fall, by 9 points, and counted plays per upload fell about a sixth after 19 October (below).
 
 ### Done
 - **Data (a rule set before its read):** the capitals test is read about 23 November. It began four days before the fall, so its timing fits. Before its result is seen, I fixed how much of the fall it could explain. Titles with a capitalised word rose from 38 to 50 in 100 uploads, so capitals explain a quarter of the fall only if the capitalised half trails by 22 points or more, a very large gap. A fresh helper confirmed the figures; its two fixes are in. A related rule got its missing due date.
-- **Data (a question answered: partly barely-shown videos):** the 10.6-point fall averaged every video's share, including videos shown a handful of times, where 2 plays of 3 reads as 67%. I set a rule first, then left out videos under 10 plays, 4 in each period. The fall shrank to 4.5 points (38 to 34 in 100), which by the rule makes barely-shown videos most of it: a lead for Monday, thin at 26 videos. Per play, though, the scorecard still shows 43 to 34 in 100; barely-shown videos have too few plays to move it. So the per-play fall is real and sits in our most-played videos: the week of 26 October had our most plays per upload and lowest share, yet counted plays per upload tied our five-week best. A fresh helper reviewed it; its fixes are in.
+- **Data (a question answered: partly barely-shown videos):** the 10.6-point fall averaged every video's share, including videos shown a handful of times, where 2 plays of 3 reads as 67%. I set a rule first, then left out videos under 10 plays, 4 in each period. The fall shrank to 4.5 points (38 to 34 in 100), which by the rule makes barely-shown videos most of it: a lead for Monday, thin at 26 videos. Per play, though, the scorecard still shows 43 to 34 in 100; barely-shown videos have too few plays to move it. So the per-play fall is real, and may sit in our most-played videos: the week of 26 October had our most plays per upload and lowest share. Counted plays per upload averaged 84 after 19 October against 100 before. A fresh helper reviewed it; its fixes are in.
 - **Market intelligence (answered: no change found):** outside sources report no YouTube change to how plays are counted near 19 October. On 22 October YouTube moved Subscriptions out of the phone app's bottom bar; our subscriber traffic is 0–1 views a week, and whether it sent casual viewers to Shorts our data can't tell.
 - **Legal (risk register updated):** since 29 October YouTube has been testing a 30-day lock before some spam-policy bans. Uploads stop; the channel can fix or delete the videos, or appeal; deleting every video unlocks it and keeps the subscribers. It is a limited test, so the risk stays fatal. It doesn't change my advice on #80 (four a day waits for bet 1).
 - **Security (checked, nothing new):** I scanned our public repository's whole history for leaked keys inside files; our automatic check looks only at file names. It found only a test's fake keys and the two dead Google tokens already on the 7 December list.
-- **General management (ranking):** a fresh helper proposed eight ideas; two others ranked them forwards and reversed, and I did the three that placed well both ways. Dropped: a rule to stop hunting the fall's cause if counted plays held (the rankings split, and rising plays can hide a loss); re-checking the fall on videos read at the same age (split, and too long); viewers' countries (needs YouTube access shifts lack). A second round of six used tonight's evidence, and the spam-lock note topped it both ways. Dropped: testing the extra-brief-plays lead or setting one for 7 December (I had seen the data); a plan for a lock notice (those reach you, not shifts); YouTube's 16 October Shorts bonus pilot (invite-only, for Partner Program members). A third look found the bet 1 merge check and the barely-shown test. Nothing else cleared the bar, so I handed over at 01:05, 14 minutes early.
+- **General management (ranking):** a fresh helper proposed eight ideas; two others ranked them forwards and reversed, and I did the three that placed well both ways. Dropped: a rule to stop hunting the fall's cause if counted plays held (the rankings split, and rising plays can hide a loss); re-checking the fall on videos read at the same age (split, and too long); viewers' countries (needs YouTube access shifts lack). A second round of six used tonight's evidence, and the spam-lock note topped it both ways. Dropped: testing the extra-brief-plays lead or setting one for 7 December (I had seen the data); a plan for a lock notice (those reach you, not shifts); YouTube's 16 October Shorts bonus pilot (invite-only, for Partner Program members). A third look found the bet 1 merge check and the barely-shown test. Nothing else cleared the bar, so I handed over at 00:59, 20 minutes early.
 - **Security and reliability (checked):** both of yesterday's uploads landed; two very short runs were the normal skips. Bet 1 and its two follow-on fixes still merge cleanly into tonight's live code, and all 1,147 tests pass on the result. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; workflows unchanged.
 - AI use: none; no sample video; no Polly.
 
@@ -85,11 +85,11 @@ and more useful than a confident guess.
 
 ### Next
 - **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging, before four a day.
-- **16 November, the weekly review:** the buried-upload rule set on 13 November, the weekly swings question, and tonight's lead that the fall sits in our most-played videos. Unless a field we log explains it, I'd stop hunting its cause: bet 1 is the answer either way.
+- **16 November, the weekly review:** the buried-upload rule set on 13 November, the weekly swings question, and tonight's lead that the fall may sit in our most-played videos. Unless a field we log explains it, I'd stop hunting its cause: bet 1 is the answer either way.
 - **About 18 November:** the new model's 20th upload and its title counts. **20 November:** if bet 1 is still unmerged, update #80, mentioning YouTube's spam-lock test. **23 November:** the capitals read, with tonight's rule.
 
 ### Better?
-- **Than last shift:** no, not toward revenue. We know the fall past the opening sits in our most-played videos, and the fatal risk has a recorded way back.
+- **Than last shift:** no, not toward revenue. Our figure for the fall past the opening is now honest per video and per play, and the fatal risk has a recorded way back.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
