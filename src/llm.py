@@ -261,13 +261,13 @@ def _own_wording(prompt, verbatim=()):
                      "confessions, and never mention Reddit or a subreddit, in any field.\n")
 
 
-# PLAN C16: the prompt forbids naming Reddit or passing the takes off as
-# people's, and this is the check (11-11 review: prompt-only before). A title
-# or closing line that does falls back as a failed one does; a keyword is left out.
-_OWN_BANNED = re.compile(
-    r"reddit|(?<![\w/])r/[a-z]\w{2,}|\b\d+\s+(people|strangers|users)\b|"
-    r"\b(people|users|strangers|folks)('s|s')?\s+(share|reveal|admit|say|said|tell|told|"
-    r"confess|explain|answer)\w*", re.I)
+# PLAN C16: the prompt forbids naming Reddit, and this is the check (11-11
+# review: prompt-only before). A title or closing line that does falls back as
+# a failed one does; a keyword is left out. Reddit's names only: passing the
+# takes off as people's is the judge's (below), since three rounds of word
+# lists for it each leaked and each dropped ordinary questions ("Why do people
+# say sorry so much?"). Keywords have no judge, so they keep only this.
+_OWN_BANNED = re.compile(r"reddit|(?<![\w/])/?r/[a-z]\w{2,}", re.I)
 
 
 def _own_fields(data):
@@ -307,37 +307,49 @@ Return ONLY a JSON object, no markdown fence: {{{shape}}}
 
 
 def _own_judged(data):
-    """The reply with any title or closing line the judge does not clear set to
-    None, as `_own_fields` does; keywords are left to the list."""
+    """(reply, label): the reply with any title or closing line the judge does
+    not clear set to None, as `_own_fields` does; keywords are left to the list.
+
+    The label is for MetadataResult.failure: `own_judge_title` / `own_judge_cta`
+    for a line the judge refused, or `own_judge_<why>` once for both when no
+    verdict came (a failed request, `no_json`, `bad_json`); "" when none was
+    refused. Without it a refusal logged as a title the model never wrote."""
     keys = [k for k in ("title", "cta") if isinstance(data.get(k), str) and data[k].strip()]
     if not keys:
-        return data
+        return data, ""
     names = {"title": "title", "cta": "closing line"}
     lines = "\n".join(f'{k}: {json.dumps(data[k], ensure_ascii=False)}' for k in keys)
     shape = ", ".join(f'"{k}": "yes" or "no"' for k in keys)
-    verdict = {}
+    verdict, failed = {}, ""
     prompt = _OWN_JUDGE.format(lines=lines, shape=shape)
     try:
         try:
             raw = generate_retrying(prompt)
         except Exception as e:   # noqa: BLE001 -- rescued as the metadata call is
+            failed = _failure_kind(e)
             if provider() != "gemini" or config.DRY_RUN:
                 raise
-            raw, _, prior = _rescue_metadata(prompt, _failure_kind(e))
+            raw, _, failed = _rescue_metadata(prompt, failed)
             if raw is None:
-                raise RuntimeError(prior) from e
+                raise RuntimeError(failed) from e
+            failed = ""
         match = re.search(r"\{.*\}", raw or "", re.S)
-        verdict = json.loads(match.group(0)) if match else {}
-        if not isinstance(verdict, dict):
-            verdict = {}
+        if not match:
+            failed = "no_json"
+        else:
+            verdict = json.loads(match.group(0))
+            if not isinstance(verdict, dict):
+                verdict, failed = {}, "bad_json"
     except Exception as e:   # noqa: BLE001 -- fail closed, never fail the run
+        failed = failed or ("bad_json" if isinstance(e, ValueError) else type(e).__name__)
         print(f"Own question: the title judge failed ({type(e).__name__}); refusing both lines")
-    data = dict(data)
+    data, refused = dict(data), []
     for k in keys:
         if str(verdict.get(k, "")).strip().lower() != "no":
             print(f"Own question: the judge did not clear the {names[k]}; dropped: {data[k]!r}")
             data[k] = None
-    return data
+            refused.append(f"own_judge_{k}")
+    return data, (f"own_judge_{failed}" if failed else ";".join(refused))
 
 
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
@@ -349,7 +361,10 @@ def _own_judged(data):
 # `failure` says WHY the fields came back empty: `http_429` (a cap; `_day` or
 # `_minute` when the body names which), another `http_<status>`, `timeout`,
 # `no_json`, `bad_json`. Blank when
-# Gemini answered with JSON. The upload log keeps it because the ok-flags alone
+# Gemini answered with JSON, except that an own-question run (PLAN C16) adds
+# why a line was refused after it: `own_list_<field>` for Reddit's name,
+# `own_judge_<field>` or `own_judge_<why>` (`_own_judged`). Never read as
+# "Gemini failed" without `source`. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
 MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure")
@@ -536,7 +551,11 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     if config.SOURCE == "own":
-        data = _own_judged(_own_fields(data))
+        listed = _own_fields(data)
+        named = [f"own_list_{k}" for k in ("title", "cta")
+                 if data.get(k) and listed.get(k) is None]
+        data, judged = _own_judged(listed)
+        prior = ";".join(filter(None, (prior, *named, judged)))
     return MetadataResult(
         title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
