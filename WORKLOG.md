@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-14 (11:00) — If your label on bet 1 lands early, the new AI model's checks already have their rule; Reddit closing its feeds does not touch us
+## 2026-11-14 (10:56) — If your label on bet 1 lands early, the new AI model's checks already have their rule; Reddit closing its feeds does not touch us
 
     Worked (% of the shift): gm 40 · data 25 · engineering 10 · legal 10 · security 5 · editorial 5 · monetization 5
 
@@ -72,16 +72,16 @@ and more useful than a confident guess.
 
 ### Done
 - **Data (a rule set before its read):** your label merges bet 1 straight away, on top of the new AI model that went live on 8 November. That model's own checks (watch time, and how often its titles fail or claim more than the question) each count its first 20 videos, and it has 12. A label before the 20th would have left them short and open to argument. Now, before any is read: its watch time reads "too few to tell", and bet 1 keeps the comparison chosen on 10 November, saying beside its verdict that this check never ran. The title checks count the model's first 20 videos, bet 1's included, since the same model writes the titles with the same wording. A fresh helper found two counts my first draft missed, and that bet 1's closing lines come from a different instruction; all six of its fixes are in.
-- **Legal (checked, no change):** Reddit ended its feeds yesterday and had already shut its open data pages to logged-out readers. We read Reddit through our app's login, so neither touches us. The 12 January registration date (#82) is unchanged, and #82 already holds the answers to give.
-- **Editorial (checked, no fault):** the 12 November video asking why "Jensen" was fired over an affair is about real news: Nvidia's chief executive resigned that day after admitting an affair. Our safety check did not let an unproven claim about a named person through.
+- **Legal (checked, no change):** Reddit ended its feeds yesterday and had already shut its open data pages to logged-out readers. We read Reddit through our registered app's own keys, so neither touches us. The 12 January registration date (#82) is unchanged, and #82 already holds the answers to give.
+- **Editorial (checked, no fault):** the 12 November video asking why "Jensen" was fired over an affair is about real news: Nvidia's chief executive resigned that day, four days after admitting an affair. Our safety check did not let an unproven claim about a named person through.
 - **Monetization (checked, no change):** nothing new on YouTube's Partner Program bar or its rules on mass-produced content beyond what we already hold.
 - **Engineering (two notes corrected for later shifts):** the suggested fix for the backup show's title check could not work, because the check it named runs before the title is written; the note now lists the two that can. The plan to move our AI to Groq assumed a short reaction after each answer. If bet 1 ships without them, Groq must first be tried on the host lines that remain, when that plan comes up.
 - **Security and reliability (checked):** yesterday's two uploads and this morning's landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; the only workflow change this week was #93, which you approved.
-- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed, with the same order both ways. Dropped: trimming your list of open asks (you have been away 91 hours, past your longest usual gap, and our rule then is no re-asking; #77 already states its dates); proposing the backup show on a new channel (already set to follow bet 1); re-reading our second subreddit on plays past the opening (read on 2 November under its own rule); a rule for when to change course (the plan is at its length limit, and the quarterly review owns that); search traffic (under 2% of views); a stock-footage list (your open task is music). Two more rounds found the bet 1 rule and the two notes above, and nothing else above the bar.
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed, with the same order both ways. Dropped: trimming your list of open asks (you have been away 91 hours, past your longest usual gap, and our rule then is no re-asking; #77 already states its dates); proposing the backup show on a new channel (already set to follow bet 1); re-reading our second subreddit on plays past the opening (read on 2 November under its own rule); a rule for when to change course (the plan is at its length limit, and the quarterly review owns that); search traffic (under 2% of views); a stock-footage list (your open task is music). Two more rounds found the bet 1 rule and the two notes above, and nothing else above the bar, so I handed over at 10:56, 29 minutes early.
 - AI use: none of Google's allowance; no sample video; no Polly.
 
 ### Blocked
-- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (part of its approved sentence is now out of date; a shift rewords it before landing), #80, #59, and the shift allowance setting (on #92).
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (the sentence you approved is out of date; it waits on your yes to the corrected one), #80, #59, and the shift allowance setting (on #92).
 
 ### Next
 - **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging; count the new model's checks by today's rule.
