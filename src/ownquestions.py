@@ -13,7 +13,7 @@ screen and a repeat check against every shipped title.
 import json
 import re
 
-from . import config, content, llm
+from . import config, content, insights, llm
 from .content import Answer, PostContent
 
 PROMPT = (
@@ -65,10 +65,27 @@ def parse(reply):
     return data["question"].strip(), [t.strip() for t in data["takes"]]
 
 
+def near_repeat(question, shipped):
+    """The shipped question `question` rewords, else "": #90's sameness check
+    (PLAN C16). A model writing questions repeats itself in new words ("relax
+    after a long day" / "unwind after a long day", 0.71), which an exact match
+    misses, and YouTube's spam page names AI videos made "with minimal
+    changes". R13's words and bar (`insights`): 3 of the 238 Reddit questions
+    shipped to 11-14 reach it against an earlier one."""
+    words = insights.question_words(question)
+    for title in shipped:
+        other = insights.question_words(title)
+        if words and other and \
+                len(words & other) / len(words | other) >= insights.NEAR_REPEAT_JACCARD:
+            return title
+    return ""
+
+
 def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=None):
     """Today's question and three takes. One request on the upload model, then
     one free Groq request if that reply is refused: unusable, a repeat of any
-    shipped title (a model writing questions repeats itself), or skipped by the
+    shipped title (a model writing questions repeats itself), or a rewording of
+    one (`near_repeat`), or skipped by the
     R4.6 screen, whose dropped takes refuse the whole episode, as three takes
     are the show. Raises when neither route gives one, so the run fails loudly
     rather than shipping a reading. Groq only while `GROQ_FALLBACK` is on, as
@@ -87,7 +104,7 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
             print(f"Own question: the {route}'s reply was refused: {(reply or '')[:300]!r}")
             continue
         question, takes = episode
-        if question.lower() in shipped:
+        if question.lower() in shipped or near_repeat(question, shipped):
             print(f"Own question: the {route} repeated a shipped question: {question[:60]}")
             continue
         result = screener(question, takes) if screener else None

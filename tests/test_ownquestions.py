@@ -74,6 +74,29 @@ def test_any_shipped_question_is_refused_not_only_the_last(monkeypatch):
         ownquestions.select_post(OTHER["question"], uploaded={GOOD["question"]})
 
 
+def test_a_reworded_shipped_question_is_refused_too(monkeypatch):
+    """#90's sameness check (PLAN C16): new words, the same question."""
+    _routes(monkeypatch, GOOD, OTHER)
+    post = ownquestions.select_post(uploaded={"Is it rude to recline a plane seat?"})
+    assert post.title == OTHER["question"]
+    # Sharing a topic is not a repeat.
+    post = ownquestions.select_post(uploaded={"Should you tip at a restaurant?"})
+    assert post.title == GOOD["question"]
+
+
+@pytest.mark.parametrize("question, shipped, hit", [
+    ("What is the best way to relax after a long day?",
+     "what is the best way to unwind after a long day?", True),
+    ("What is the best way to spend a rainy Sunday?",
+     "how should people spend a completely free saturday?", False),
+    ("Should two people split the bill on a first date?", "who should pay on a first date?", False),
+    ("Why?", "why?", False),                  # no words to compare: the exact match's
+])
+def test_near_repeat_uses_r13s_words_and_bar(question, shipped, hit):
+    assert ownquestions.near_repeat(question, {shipped, "an unrelated question entirely"}) == \
+        (shipped if hit else "")
+
+
 def test_the_screen_runs_and_a_skip_or_a_dropped_take_refuses_the_episode(monkeypatch):
     _routes(monkeypatch, GOOD, OTHER)
     seen, refused = [], []
