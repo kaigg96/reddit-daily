@@ -455,10 +455,21 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   newly drop "Should two people split the bill?"; "How often/What do people
   say…" drop. A word list keeps leaking, so before switch-on weigh a different
   check, not a fourth round. Not the screen call: it runs inside `select_post`,
-  before `get_metadata` writes the title (`run.py`; checked 11-14). Left: a
-  yes/no field in the metadata reply (no extra request; the model judges its
-  own line), or a second call after it (one request a run, from the 20 a day),
-  with the list kept for Reddit's names alone. **Graded
+  before `get_metadata` writes the title (`run.py`; checked 11-14). **Chosen
+  (11-14): a second call, not a field in the metadata reply.** On our own
+  channel the writing model ignores its own instructions where a separate
+  check does not: three prompt fixes left bet 1's tags as labels (#77), while
+  the separate R4.6 screen passes its replay. A miss misleads viewers about whose
+  takes they are; a false refusal only ships the question as the title. So: the
+  list keeps Reddit's names alone (`reddit`, `r/…`); one request after
+  `get_metadata` asks the upload model whether the title or closing line
+  presents the takes as real people's, and a yes, a failure or an unreadable
+  reply refuses that field (fail closed). Cost +1 a run: a typical own run then
+  spends 4 (write, screen, title, this; `ownquestions.select_post`), 8 of 20
+  at two a day and 16 at four, where a worst day passes 20 and #13's Groq
+  route must carry it, as for Reddit's (PRD §4). Test plan: the 17
+  cases below drive the call mocked; before switch-on one batched request
+  judges all 17 on the sample model, and must right every case. **Graded
   from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
   `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
