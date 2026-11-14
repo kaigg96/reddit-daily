@@ -471,9 +471,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   cases below drive the call mocked; before switch-on one batched request
   judges all 17 on the sample model, and must right every case. **Built 11-14**
   (`llm._own_judged`, merged off, after the list). Left before switch-on: narrow the
-  list to Reddit's names and move the 17 cases onto the judge; rescue the judge as
-  the metadata call is (a 429 or 503 now refuses both lines); log a judge refusal
-  in `failure`, which today reads as an empty title. **Graded
+  list to Reddit's names and move the 17 cases onto the judge; log a judge refusal
+  in `failure`, which today reads as an empty title (mind `validate_release.py`'s
+  reading of it). Rescued as the metadata call is since 11-14. **Graded
   from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
   `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
