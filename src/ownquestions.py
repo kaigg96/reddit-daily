@@ -104,8 +104,10 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
             print(f"Own question: the {route}'s reply was refused: {(reply or '')[:300]!r}")
             continue
         question, takes = episode
-        if question.lower() in shipped or near_repeat(question, shipped):
-            print(f"Own question: the {route} repeated a shipped question: {question[:60]}")
+        near = question.lower() in shipped and question or near_repeat(question, shipped)
+        if near:
+            print(f"Own question: the {route} repeated a shipped question: {question[:60]}"
+                  f" (shipped: {near[:60]})")
             continue
         result = screener(question, takes) if screener else None
         # A post-level risk demoted to the takes, logged as the Reddit path

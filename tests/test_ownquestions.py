@@ -80,8 +80,9 @@ def test_a_reworded_shipped_question_is_refused_too(monkeypatch):
     post = ownquestions.select_post(uploaded={"Is it rude to recline a plane seat?"})
     assert post.title == OTHER["question"]
     # Sharing a topic is not a repeat.
+    _routes(monkeypatch, OTHER, GOOD)
     post = ownquestions.select_post(uploaded={"Should you tip at a restaurant?"})
-    assert post.title == GOOD["question"]
+    assert post.title == OTHER["question"]
 
 
 @pytest.mark.parametrize("question, shipped, hit", [

@@ -440,6 +440,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
   you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
   when** #14 is read (~11-23).
+- **An own-question rewording fails the run, with no second try (2026-11-14,
+  PLAN C16; fresh review).** `ownquestions.near_repeat` refuses a question
+  sharing half its words with any shipped one, but `GROQ_FALLBACK` is off, so
+  the upload model is the only route and a refusal fails the run. A reviewer's
+  30 plausible questions against the 236 shipped: 1 refused ("Should you
+  always return a shopping cart?", 0.5), so ~3% of runs, rising as titles pile
+  up, since the prompt never shows what shipped. Fix before `SOURCE=own` turns
+  on: recent shipped questions in the prompt, or a second upload-model try.
+  **Closes when** one lands with a test.
+
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
