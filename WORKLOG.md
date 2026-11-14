@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-14 (11:00) — If your label on bet 1 lands early, the new AI model's checks already have their rule; Reddit closing its feeds does not touch us
+
+    Worked (% of the shift): gm 40 · data 25 · engineering 10 · legal 10 · security 5 · editorial 5 · monetization 5
+
+**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). This shift settled in advance how the new AI model's checks are counted if that label lands before the model's 20th video, and confirmed that Reddit closing its feeds yesterday leaves our uploads untouched.
+
+### Toward revenue
+- **Nothing directly**, because bet 1 still waits on your label. When it comes, the shift that merges it has nothing left to decide first: the rule below covered the one open case.
+
+### Done
+- **Data (a rule set before its read):** your label merges bet 1 straight away, on top of the new AI model that went live on 8 November. That model's own checks (watch time, and how often its titles fail or claim more than the question) each count its first 20 videos, and it has 12. A label before the 20th would have left them short and open to argument. Now, before any is read: its watch time reads "too few to tell", and bet 1 keeps the comparison chosen on 10 November, saying beside its verdict that this check never ran. The title checks count the model's first 20 videos, bet 1's included, since the same model writes the titles with the same wording. A fresh helper found two counts my first draft missed, and that bet 1's closing lines come from a different instruction; all six of its fixes are in.
+- **Legal (checked, no change):** Reddit ended its feeds yesterday and had already shut its open data pages to logged-out readers. We read Reddit through our app's login, so neither touches us. The 12 January registration date (#82) is unchanged, and #82 already holds the answers to give.
+- **Editorial (checked, no fault):** the 12 November video asking why "Jensen" was fired over an affair is about real news: Nvidia's chief executive resigned that day after admitting an affair. Our safety check did not let an unproven claim about a named person through.
+- **Monetization (checked, no change):** nothing new on YouTube's Partner Program bar or its rules on mass-produced content beyond what we already hold.
+- **Engineering (two notes corrected for later shifts):** the suggested fix for the backup show's title check could not work, because the check it named runs before the title is written; the note now lists the two that can. The plan to move our AI to Groq assumed a short reaction after each answer. If bet 1 ships without them, Groq must first be tried on the host lines that remain, when that plan comes up.
+- **Security and reliability (checked):** yesterday's two uploads and this morning's landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; the only workflow change this week was #93, which you approved.
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed, with the same order both ways. Dropped: trimming your list of open asks (you have been away 91 hours, past your longest usual gap, and our rule then is no re-asking; #77 already states its dates); proposing the backup show on a new channel (already set to follow bet 1); re-reading our second subreddit on plays past the opening (read on 2 November under its own rule); a rule for when to change course (the plan is at its length limit, and the quarterly review owns that); search traffic (under 2% of views); a stock-footage list (your open task is music). Two more rounds found the bet 1 rule and the two notes above, and nothing else above the bar.
+- AI use: none of Google's allowance; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (part of its approved sentence is now out of date; a shift rewords it before landing), #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging; count the new model's checks by today's rule.
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and the lead that the fall may sit in our most-played videos.
+- **About 18 November:** the new model's 20th video and its title counts. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
+
+### Better?
+- **Than last shift:** no, not toward revenue. The day your label arrives now needs no decision, and one threat to our source is ruled out.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-14 (00:59) — The fall in plays past the opening is smaller per video than we reported, but real per play; YouTube tests a way back from some spam bans
 
     Worked (% of the shift): data 45 · gm 15 · security 10 · market 15 · legal 10 · reliability 5
@@ -90,42 +124,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no, not toward revenue. Our figure for the fall past the opening is now honest per video and per play, and the fatal risk has a recorded way back.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-13 (19:08) — The fall in plays that get past the opening is not in anything we choose; five suspects ruled out
-
-    Worked (% of the shift): data 55 · gm 25 · reliability 10 · engineering 5 · security 5
-
-**Summary:** Fewer viewers now get past each video's opening (about 40 in 100 before 19 October, 30 since). Tonight's tests show the fall is the same whatever the topic, subreddit, voice or format. That points at the opening itself, which bet 1 changes, or at YouTube. Nothing reached viewers, so the company is no closer to revenue tonight.
-
-### Toward revenue
-- **Nothing directly.** Every step that changes the videos still waits on you, bet 1 (#77) first. Plays past the opening are the units YouTube's paid tier counts, so their fall matters to every revenue route. Tonight ruled out the explanations that are ours to choose: the fall happens inside every topic and both subreddits. Bet 1 is the one ready change that touches the opening.
-
-### Done
-- **Data (a question answered: no):** does a change in our topic mix explain the fall? I set the rule and saved it before looking. The share fell from 40.6 to 30.0 in 100, and the mix of topics accounts for none of it. It fell inside each topic group. With only two topics common enough to test alone, the read is coarse.
-- **Data (a question answered: no):** the same test by subreddit. Our second subreddit's share of uploads doubled over the same weeks, which made it the likeliest cause. It isn't: the share fell inside both (39 to 30, and 43 to 30). The voice mix shifted a little too. By the figures we already hold, that explains about 1 point of the 10, without touching the voice test that is still sealed. The video format was the same in both periods, so it isn't that either.
-- **Data (a question answered: too rare to matter):** are reworded repeats of earlier questions buried more often? Only 3 of 219 uploads repeat an earlier question, too few to test and too few to explain the buried uploads. Two are word-for-word repeats from July and August, from before we refused every past title.
-- **Reliability (a check, all clear):** the missed-upload alarm waiting for your December bundle would not have raised a false alarm at any of the 129 scheduled shifts since 20 September, even with GitHub starting jobs hours late. It fired only on the one real miss, 6 October. Its closest call was 26.7 hours of its 28-hour window, which I noted so the check is re-run before it lands.
-- **Data (a rule set for Monday's review):** whether video length, rank in the candidate list or title style explains the rise in buried uploads. Set before Monday's figures arrive, with a stricter bar because it runs three tests.
-- **Engineering (bet 1's path kept clear):** tonight's changes touched files bet 1 also changes. I checked that bet 1 and its two follow-on fixes still merge into the live code cleanly, and that all 1,147 tests pass on the result. So your label still needs nothing else.
-- **General management:** the code-findings list was one over its limit for several shifts. It is back at the limit: I moved a finished item's note into the code it describes. All 870 tests pass, and a fresh helper reviewed each change before it merged.
-- **General management (your approvals):** I tried again to apply #88's approved text. The tool that runs shifts still refuses to edit those files, so it stays with you; the patch on the issue still applies cleanly. #65 still waits on your "yes" to its corrected sentence. On #88 a shift promised to look for a safe way to let shifts land approved changes to those files. There isn't one: the lock sits outside the tool's permission settings, and the only way past it turns off every permission check for the whole shift. I don't recommend that, so those changes stay one command for you.
-- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. Both orders agreed, and I did all four survivors in that order. Dropped: late-running jobs as a cause of buried uploads (lateness now moves with the calendar, so there is no fair comparison); pinning our build steps to exact versions (only you can land it); counting deleted Reddit posts (it needs Reddit calls); whether closing lines draw comments (no viewer has commented on the last 20 uploads). A second round at 18:57 found only the findings-list fix. It dropped: a note on an old library (live security debt, not a finished item); the sample-video reset hour (dropped 8 November, and it would not close); pre-testing library updates (done 28 October); a risk row for late jobs (already recorded); and the approval guard (a file only you can change). I found the subreddit test myself after that, and two checks that needed only counts: voice and format, above. I also checked whether shifts could safely be allowed to land your approved rule texts (above). Nothing else cleared the bar, so I handed over at 19:08, 23 minutes early.
-- **Security and reliability (checked):** this morning's upload landed; the evening one had not yet run by 19:05, which is normal now that GitHub starts jobs hours late. The money controls are intact ($0.33 this month, forecast $0.78 of $3). No secret is in the repository, and the workflows are unchanged.
-- AI use: none; no sample video; no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label; its sample, review and today's automatic check all passed), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59 (five minutes for the two checks that matter), and the shift allowance setting (on #92).
-
-### Next
-- **If #77 is labelled:** merge bet 1 straight away. Today's automatic check passed on the sampled version. Then the verdict-counting fix, then the time-slot logging, before four a day.
-- **16 November, the weekly review:** read the buried-upload rule set tonight, with the weekly swings question, on that day's figures.
-- **About 18 November:** the new model's 20th upload and its counts. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals test's read, if its lock opens.
-
-### Better?
-- **Than last shift:** no, not toward revenue. We now know the fall past the opening isn't in what we pick, which points the fix at the opening itself.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
