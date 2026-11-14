@@ -303,3 +303,4 @@ F301,2026-11-14T00:33:44+00:00,43533433352,data,"Ledger rule: how much of the en
 F302,2026-11-14T00:33:44+00:00,43533433352,security,"Full-history scan of the public repo for secret values, not just file names",done,,none,,,0,
 F303,2026-11-14T00:33:44+00:00,43533433352,market,Outside sources for a YouTube change near 19 Oct behind the engaged-share fall,done,,none,,,0,
 F304,2026-11-14T00:38:27+00:00,43533433352,data,Ledger #8-titles: due date and a note that #10's half was read,done,,mistake,A csv rewrite re-quoted three unrelated rows; caught in the diff and redone as a one-line replacement,"Editing the ledger by exact line, never by round-tripping it through csv",2,
+F305,2026-11-14T00:43:47+00:00,43533433352,legal,Record YouTube's 10-29 spam-lock test on the channel-loss risk,done,,docs,"The plan sat at its exact word limit, so the sentence needed matching cuts elsewhere","None; the budget forced a drifting count out, which was right",4,

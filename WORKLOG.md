@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-14 (00:50) — The capitals test can't be stretched to explain the fall in plays past the opening; YouTube now tests a way back from some spam bans
+
+    Worked (% of the shift): data 35 · gm 20 · security 15 · market 15 · legal 10 · reliability 5
+
+**Summary:** Nothing reached viewers, so the company is no closer to revenue: every step that changes the videos still waits on you, bet 1 (#77) first. Tonight fixed in advance how much of the fall in plays past the opening the capitals test can be blamed for, found no leaked keys anywhere in our history, and recorded a YouTube test that gives some spam bans a 30-day way back.
+
+### Toward revenue
+- **Nothing directly**, because bet 1 still waits on your label. One lead touches revenue: the plays YouTube counts toward its Partner Program (those past the opening) have not fallen per upload, even though their share of all plays has. If that holds, the fall costs less than it looked; it is only a lead (below).
+
+### Done
+- **Data (a rule set before its read):** the capitals test is read about 23 November. It began four days before the fall started, so it is the one suspect of ours whose timing fits. Before its result is seen, I fixed how much of the fall it could explain. Titles with a capitalised word rose from 38 to 50 in 100 uploads, so capitals explain a quarter of the fall only if the capitalised half trails by 22 points or more, a very large gap. A fresh helper confirmed the figures; its two fixes, which rule out a convenient reading, are in. I also gave a related rule its missing due date, so a missed read will show up.
+- **Data (a lead for Monday):** the week of 26 October had the most plays per upload we have ever had, the lowest share past the opening, and per-upload counted plays tied with our best of the last five weeks. So the fall may be extra brief plays, not lost viewers. Our report tool can't compare it until about 30 November, and an October finding saw no such link video by video.
+- **Market intelligence (answered: no change found):** outside sources report no YouTube change to how plays are counted near 19 October. On 22 October YouTube moved Subscriptions out of the phone app's bottom bar and launched AI-built custom feeds in the US. Our subscriber traffic is 0–1 views a week, and whether the move sent more casual viewers to Shorts our data can't tell. A "no" from outside sources is weak evidence.
+- **Legal (risk register updated):** since 29 October YouTube has been testing a 30-day lock before some spam-policy bans. Uploads stop; the channel can fix or delete the videos, or appeal; deleting every video unlocks it and keeps the subscribers. It is a limited test, so the risk stays fatal, but it is a first way back. It doesn't change my advice on #80 (four a day waits for bet 1).
+- **Security (checked, nothing new):** I scanned our public repository's whole history for leaked keys inside files; our automatic check looks only at file names. It found only a test's fake keys and the two dead Google tokens already on the 7 December list.
+- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. The capitals rule came in both top twos, and the history scan and outside-sources check sat mid-table both ways, so I did those three. Dropped: a rule to stop hunting the fall's cause if counted plays held (the rankings split, and rising plays can hide a loss); re-checking the fall on videos read at the same age (split, and too long); viewers' countries (needs YouTube access shifts lack); trimming the findings record (already under its limit). A second round of six used tonight's evidence, and the spam-lock note topped it both ways. Dropped: testing the extra-brief-plays lead now or setting a test for 7 December (I had already seen the data, so any rule would fit it); a plan for a lock notice (those reach you, not shifts); YouTube's 16 October Shorts bonus pilot (invite-only, for Partner Program members). A third look found only the bet 1 merge check.
+- **Security and reliability (checked):** both of yesterday's uploads landed; two very short runs were the normal skips. Bet 1 and its two follow-on fixes still merge cleanly into tonight's live code, and all 1,147 tests pass on the result. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; workflows unchanged.
+- AI use: none; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label; its sample, review and automatic check all passed), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59 (five minutes for the two checks that matter), and the shift allowance setting (on #92).
+
+### Next
+- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging, before four a day.
+- **16 November, the weekly review:** the buried-upload rule set on 13 November, the weekly swings question, and tonight's lead on counted plays. If no field we log explains the fall, I'd stop hunting its cause: a fall of a quarter doesn't change being ~690 times short, and bet 1 is the answer either way.
+- **About 18 November:** the new model's 20th upload and its title counts. **20 November:** if bet 1 is still unmerged, update #80, mentioning YouTube's spam-lock test. **23 November:** the capitals read, with tonight's rule.
+
+### Better?
+- **Than last shift:** no, not toward revenue. The capitals read can no longer be stretched to explain the fall, and the fatal risk now has a recorded way back.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-13 (19:08) — The fall in plays that get past the opening is not in anything we choose; five suspects ruled out
 
     Worked (% of the shift): data 55 · gm 25 · reliability 10 · engineering 5 · security 5
@@ -93,40 +127,5 @@ and more useful than a confident guess.
 
 ### Better?
 - **Than last shift:** no, not toward revenue. We now know the fall past the opening isn't in what we pick, which points the fix at the opening itself.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-13 (11:39) — Bet 1 has passed every check a shift can run; your label now ships it within about a day
-
-    Worked (% of the shift): product 40 · gm 20 · reliability 15 · engineering 15 · data 5 · security 5
-
-**Summary:** Bet 1, the step every revenue plan waits on, now has its sample video and a fresh review of the exact version your label (#77) ships, and neither found a problem. Only the daily automatic check is left, so your label is the only thing between bet 1 and viewers. Nothing reached viewers today.
-
-### Toward revenue
-- **Bet 1 is one label from shipping, with nothing else in the way.** Before today, a label would have started a day or more of checks. Now the sample and the review are done, and the automatic check runs this afternoon. Bet 2, doubling weekly views, needs bet 1 by about 20 November.
-
-### Done
-- **Product (sample video, PASS):** I brought bet 1's release up to date with the live code (all 1,137 tests pass) and had its sample made: 24.5 seconds, playable. It closes on the host's pick, "I raise my hand for the suffering SREs. Which answer gets your vote?" It is read aloud by a free stand-in voice, because test versions never hold our paid narrator's keys, so you can follow it by ear, as you asked on #77 in October. I first wrote on #77 that it was silent. I corrected that, and test-video reports now name the voice. Our check left out the host's note under the question, and the run skipped a health thread for the next post, both as planned. I added the link to #77 without emailing you. The video stays downloadable until 27 November.
-- **Product (fresh review, no blockers):** a fresh helper read the whole release against the live code. It found no way to upload twice or lose our posting record, and the money and safety controls are unchanged. It left four small notes, which I wrote into our code-health list. The one worth knowing: on a day when several top threads are health ones, a run could find no usable post and skip an upload. That is about 1 in 400 runs, against about 1 in 1,200 today. Fixing it would cost AI requests, so it waits until a run actually misses.
-- **Reliability (a check, all clear):** the new AI model's first week was to be watched for running out of its daily allowance. Its 10 uploads so far never hit any limit. Two hit Google's brief overload errors, and both still uploaded.
-- **Engineering (ready for after bet 1):** two follow-on changes must go in right after bet 1. One logs which time slot each upload was meant for, which four uploads a day needs. The other fixes how bet 1's verdict counts its videos. I brought both up to date and checked that bet 1 and both of them merge into the live code cleanly, with all 1,141 tests passing.
-- **General management (ranking):** a fresh helper proposed eight ideas from our data and plans, and two others ranked the survivors, forwards and reversed. Both put the allowance check first, then the follow-on changes. Dropped: an early count of the new model's over-claiming titles (its rule forbids a count before the 20th upload, about 18 November); two new data questions (the open ones wait on snapshots not yet taken; morning against evening was answered earlier); a fourth attempt at the backup show's title check (over an hour); deleting YouTube text we keep too long (yours, on 7 December); a closing line asking for subscribers (our findings say no subscriber lever reads within a quarter); posting to TikTok (new platforms are yours). Also checked: our one music track can't explain the rise in buried uploads; every upload since July used it. A narrower round at 11:30 found bet 1's side measures (above) and a line that goes stale when bet 1 merges, which the merging shift already updates. Nothing else cleared the bar, so I handed over at 11:39, 19 minutes early.
-- **Data (a gap in bet 1's rules closed before any data):** two side measures in bet 1's rules, how much of each video people watch and where they leave, didn't say what bet 1 is compared with: the older format alone, or the new AI model's weeks too, as its main verdict is. Picking after the figures arrive would let us pick the answer we like. They now compare with both pooled, matching the verdict. No bet 1 video exists yet, so no result could have swayed it.
-- **Security and reliability (checked):** yesterday's two uploads and this morning's landed. The money controls are intact ($0.33 this month, forecast $0.78 of $3). No secret is in the repository, and the workflows are unchanged.
-- **General management (an ask kept true):** from bet 1 on, each test video spends one request of the model that writes our real titles, which the wording #65 awaits denies. I noted it there without emailing you.
-- AI use: one sample video (a free stand-in voice; a few AI requests, one from the uploads' allowance); no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label; nothing to watch, though the sample is there), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59 (five minutes for the two checks that matter), and the shift allowance setting (on #92).
-
-### Next
-- **If #77 is labelled:** merge bet 1 on this afternoon's automatic check (it runs about 16:00–17:00 UTC on the sampled version). Don't update the release with the live code before then: a new version would need a fresh sample. Then merge the verdict-counting fix right away. The time-slot logging goes in after bet 1, before four a day.
-- **If the automatic check can't reach Google again,** it retries the next day. That is not a failure.
-- **16 November:** the weekly review. **About 18 November:** the new model's 20th upload, and the title counts set for it. **23 November:** the capitals test's read, if its lock opens.
-
-### Better?
-- **Than last shift:** yes, a little. A label on #77 no longer starts a day of checks: the sample and the review are done. Nothing reached viewers.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
