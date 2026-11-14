@@ -46,7 +46,7 @@ R4-narrow-chance,min-views filter narrows chance,observational,chance_gap,2026-1
 R6,v7 buries more uploads,release,buried_rate,2026-10-10,2026-10-12,2026-10-12,recorded,4 of 25 at ≤5 views (p=0.049),25,bar p 0.0125,,PRD §4 2026-10-12; git c0860b2
 #15,bet 1 / v8 host tags,release,watch_seconds,2026-10-10,,,pending,,≥20 uploads (rule),"~12% (release check drift floor within AskReddit, 2026-10-27 data)",,PRD §0 #15; git 6badebb
 #8-v8,"engaged share, v8 vs v7",release,engaged_share,2026-10-12,,,pending,,,,,PRD §0 #8
-#8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,2026-11-23,,pending,,,,,"PRD §0 #8; git c41807d; #10's half read 2026-11-02 (no difference, row #10); #14's half due with #14, cut in row #14-fall"
+#8-titles,engaged share on #10 and #14,coin,engaged_share,2026-10-13,2026-11-23,,pending,,,,,"PRD §0 #8; git c41807d; #10's half read 2026-11-02 (no difference, row #10); #14's half due with #14, its command in row #14-fall"
 R2-lead,voice engaged-share lead (1 of 10 reads),coin,engaged_share,,,2026-10-14,lead,0.44 vs 0.29,12/13,25%,,PRD §4 2026-10-06 (2026-10-14)
 R2,Stephen's voice and engaged share,coin,engaged_share,2026-10-14,2026-11-02,2026-11-02,lead,+47% medians (0.46 vs 0.31); within AskReddit +42% (diagnostic),14 vs 22,27%,,PRD §0 #16; PRD §4 2026-11-02; git ccada12
 #15-avgpct,"v8 avg % viewed, long videos",release,avg_view_pct,2026-10-17,,,pending,,,bar 5 points lower,,PRD §0 #15; git 1d55ba2
