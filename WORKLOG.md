@@ -61,6 +61,37 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-14 (23:45) — The backup show's title check passes every test case on our AI models, and it no longer repeats a question in new words
+
+    Worked (% of the shift): strategy 65 · engineering 15 · gm 15 · security 5
+
+**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). The backup show, which keeps uploads going if Reddit access ends on 12 January, is two steps nearer being ready to switch on: its title check is finished and proven, and it now refuses a question it has already asked in different words.
+
+### Toward revenue
+- **Nothing directly**, because bet 1 still waits on your label. The nearest thing is the backup show: without it, uploads stop on 12 January if the Reddit app is not registered (#82), and they stop in March 2027 either way. It stays switched off; turning it on is still your call (#90).
+
+### Done
+- **Strategy (the backup show's title check, finished; a fix):** a word list was meant to stop its titles passing the AI's takes off as real people's, but it kept letting wordings through and blocking ordinary questions ("Why do people say sorry so much?"). It now only blocks the word Reddit and subreddit names, and a separate AI check judges the rest. When that check refuses a line, the upload record now says so; before, a refusal looked like a title the AI never wrote. I tested the check on our two AI models with the fixed set of example titles: 15 of 17 right at first. It let through "3 Answers That Changed How I Tip" and "A stranger told me something I can't forget". I tightened its instructions, using examples unlike the test cases so it could not just learn the answers. After that it got 20 of 20, then 26 of 26 on both models, once I added six cases unlike its examples and three closing lines. Two fresh reviewers found nothing that had to be fixed; their smaller points are fixed or noted in the code.
+- **Strategy (a sameness check; a bet):** YouTube's spam rules name AI videos made "with minimal changes". The backup show refused only an exact repeat of a past question, while an AI writing questions rewords itself ("relax after a long day" / "unwind after a long day"). It now refuses any question that shares half or more of its words with one we have shipped. Only 3 of our 238 Reddit questions would have tripped that rule, so it catches rewordings, not variety. A reviewer then found that a refused question would have failed the whole run, about 3% of runs, because the backup AI route is off. So a repeat now gets one more try, with the AI told which question to avoid. Both changes were reviewed fresh and merged switched off.
+- **General management (ranking):** with nothing ready, a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. The same four came top both ways. I did the top one, the sameness check. Dropped: re-reading YouTube's template rule against the backup show's format (answered on 26 October, and that answer is where the music and sameness conditions came from); a test that the backup show never contacts Reddit (reading the code answers it: only the Reddit path ever connects). Fourth both ways, measuring how often the question writer repeats itself, needs AI requests after 08:00, so it is for a later shift.
+- **Security and reliability (checked):** both of today's uploads landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; no workflow change. One slip: a merge pushed the live branch with one failing test (a status written in the wrong form in our plan). I fixed it a minute later and nothing ran on it.
+- AI use: 6 of Google's free requests (4 on the sample model, 2 on the uploads' model), all between 23:10 and 23:16, over an hour before the 00:23 run; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (waits on your yes to the corrected sentence), #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
+- **Ready now:** the backup show's last buildable condition, no two uploads in a row on the same background clip, merged off. Then, after 08:00 and an hour clear of an upload, measure how often its question writer repeats itself (about 5 requests, with the rule set first).
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling watch time. **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
+
+### Better?
+- **Than last shift:** no, not toward revenue. The backup show's title check is proven on both our AI models, and it now refuses reworded repeats, which YouTube's spam rules would count against it.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds and bet 1 hasn't shipped. The backup show has gone from a sample to built, checked and switched off, waiting on you.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-14 (17:53) — Watch time is falling inside our main subreddit, which would have tilted bet 1's verdict; the backup show's title check is built
 
     Worked (% of the shift): data 30 · reliability 20 · strategy 30 · gm 20
@@ -94,38 +125,3 @@ and more useful than a confident guess.
 - **Than last shift:** no, not toward revenue. Bet 1's eventual verdict is safer from a false revert, the Reddit cutoff can no longer cost money or a duplicate upload, and the backup show is one step nearer.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, falling inside AskReddit, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-14 (10:56) — If your label on bet 1 lands early, the new AI model's checks already have their rule; Reddit closing its feeds does not touch us
-
-    Worked (% of the shift): gm 40 · data 25 · engineering 10 · legal 10 · security 5 · editorial 5 · monetization 5
-
-**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). This shift settled in advance how the new AI model's checks are counted if that label lands before the model's 20th video, and confirmed that Reddit closing its feeds yesterday leaves our uploads untouched.
-
-### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. When it comes, the shift that merges it has nothing left to decide first: the rule below covered the one open case.
-
-### Done
-- **Data (a rule set before its read):** your label merges bet 1 straight away, on top of the new AI model that went live on 8 November. That model's own checks (watch time, and how often its titles fail or claim more than the question) each count its first 20 videos, and it has 12. A label before the 20th would have left them short and open to argument. Now, before any is read: its watch time reads "too few to tell", and bet 1 keeps the comparison chosen on 10 November, saying beside its verdict that this check never ran. The title checks count the model's first 20 videos, bet 1's included, since the same model writes the titles with the same wording. A fresh helper found two counts my first draft missed, and that bet 1's closing lines come from a different instruction; all six of its fixes are in.
-- **Legal (checked, no change):** Reddit ended its feeds yesterday and had already shut its open data pages to logged-out readers. We read Reddit through our registered app's own keys, so neither touches us. The 12 January registration date (#82) is unchanged, and #82 already holds the answers to give.
-- **Editorial (checked, no fault):** the 12 November video asking why "Jensen" was fired over an affair is about real news: Nvidia's chief executive resigned that day, four days after admitting an affair. Our safety check did not let an unproven claim about a named person through.
-- **Monetization (checked, no change):** nothing new on YouTube's Partner Program bar or its rules on mass-produced content beyond what we already hold.
-- **Engineering (two notes corrected for later shifts):** the suggested fix for the backup show's title check could not work, because the check it named runs before the title is written; the note now lists the two that can. The plan to move our AI to Groq assumed a short reaction after each answer. If bet 1 ships without them, Groq must first be tried on the host lines that remain, when that plan comes up.
-- **Security and reliability (checked):** yesterday's two uploads and this morning's landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; the only workflow change this week was #93, which you approved.
-- **General management (ranking):** a fresh helper proposed eight ideas, and two others ranked them forwards and reversed, with the same order both ways. Dropped: trimming your list of open asks (you have been away 91 hours, past your longest usual gap, and our rule then is no re-asking; #77 already states its dates); proposing the backup show on a new channel (already set to follow bet 1); re-reading our second subreddit on plays past the opening (read on 2 November under its own rule); a rule for when to change course (the plan is at its length limit, and the quarterly review owns that); search traffic (under 2% of views); a stock-footage list (your open task is music). Two more rounds found the bet 1 rule and the two notes above, and nothing else above the bar, so I handed over at 10:56, 29 minutes early.
-- AI use: none of Google's allowance; no sample video; no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (the sentence you approved is out of date; it waits on your yes to the corrected one), #80, #59, and the shift allowance setting (on #92).
-
-### Next
-- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging; count the new model's checks by today's rule.
-- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and the lead that the fall may sit in our most-played videos.
-- **About 18 November:** the new model's 20th video and its title counts. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
-
-### Better?
-- **Than last shift:** no, not toward revenue. The day your label arrives now needs no decision, and one threat to our source is ruled out.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
-
