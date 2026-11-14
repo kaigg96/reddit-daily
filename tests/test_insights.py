@@ -2536,6 +2536,20 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
     assert len(called) == 2
 
 
+def test_topic_mix_refuses_options_it_would_ignore(monkeypatch):
+    """--topic-mix always reads engaged share on R12's sample: a --compare or
+    another --metric must be refused, never dropped silently."""
+    import sys
+    import pytest
+    from scripts import report
+    for extra in (["--compare", "title_style=B"], ["--metric", "views"], ["--at-age", "7"],
+                  ["--by", "topic"]):
+        monkeypatch.setattr(sys, "argv", ["report.py", "--offline", "--topic-mix"] + extra)
+        with pytest.raises(SystemExit) as exc:
+            report.main()
+        assert "--topic-mix reads R12's fixed sample" in str(exc.value), extra
+
+
 def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch):
     """A filter the reader believes applied must never be dropped silently:
     --since outside --compare/--by, --min-views outside --compare, and

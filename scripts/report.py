@@ -700,9 +700,11 @@ def show_themes(args):
 def show_topic_mix(args):
     """`--topic-mix`: R12, does a change in topic mix explain the fall in
     engaged share (PRD §0)?"""
-    if args.at_age is not None or args.within or args.by not in (None, "subreddit"):
-        sys.exit("--topic-mix reads R12's fixed sample at ~7 days; it takes no "
-                 "--at-age or --within, and --by only as subreddit (R15)")
+    if (args.at_age is not None or args.within or args.compare or args.by not in (None, "subreddit")
+            or args.metric not in (Metric.WATCH, Metric.ENGAGED_SHARE)):
+        # It always reads engaged share; another metric or a --compare would be ignored silently.
+        sys.exit("--topic-mix reads R12's fixed sample at ~7 days in engaged share; it takes no "
+                 "--at-age, --within, --compare or other --metric, and --by only as subreddit (R15)")
     key = args.by or "topic"
     r = insights.topic_mix(insights.load_videos_at_age().videos, key=key,
                            min_groups=2 if key == "subreddit" else insights.TOPIC_MIX_MIN_GROUPS,
