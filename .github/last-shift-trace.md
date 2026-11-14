@@ -1,99 +1,103 @@
-## Shift trace — run 43533433352
+## Shift trace — run 43585197762
 
-**Ended:** success, is_error false, 124 turns, 38.8 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 123, 1 failed. Helper agents made 103 more, 1 failed.
+**Ended:** success, is_error false, 110 turns, 31.2 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 108, 1 failed. Helper agents made 53 more, 0 failed.
 
 **Last message:**
 
-> I handed over at 00:58, 21 minutes before the 01:19 deadline. Everything is merged and pushed, the working tree is clean, all 872 tests pass and the tracker check finds nothing stale. Nothing reached viewers: every change to the videos still waits on the owner, bet 1 (#77) first.
+> I've handed over at 10:56, 29 minutes early, with the handover pushed to `main`. Nothing reached viewers this shift, so the company is no closer to revenue: every change to the videos still waits on the owner's label on bet 1 (#77).
 >
-> **Done tonight (all reviewed by a fresh helper before merging):**
-> - **The reported drop is smaller per video, but real per play.** Our 13 November figure said the share of plays getting past each video's opening fell from about 40 to 30 in 100. I wrote down a rule, then left out videos with under 10 plays (4 in each period). The drop shrank to 4.5 points (38 to 34). Per play, which is how YouTube counts toward its Partner Program, the share still fell 9 points (43 to 34). Counted plays per upload averaged 84 after 19 October against 100 before. The idea that the drop sits in our most-played videos rests on one week, so it is only a lead for Monday's review. To run this I added an option to the reporting tool. I then made it refuse options it would otherwise silently ignore.
-> - **Capitals test:** before its 23 November read, I fixed how much of the drop capitalised titles could explain. They account for a quarter only if the capitalised half trails by 22 points or more.
-> - **Legal:** I added to the risk register YouTube's 29 October test of a 30-day lock before some spam bans, which can be fixed or undone by deleting videos. It's a limited test, so losing the channel stays our fatal risk.
-> - **Security:** a scan of the repository's whole history for leaked keys found nothing new.
-> - **Bet 1:** it and its two follow-on fixes still merge cleanly into tonight's code, with all 1,147 tests passing on the result.
->
-> **Mistakes caught:** my first handover draft said the drop was only about 4 points, before I'd checked the per-play figure. It also claimed counted plays per upload hadn't fallen, and placed the drop in our most-played videos. A review caught the last two claims and all three are corrected 
+> **Done:**
+> - **The one real gap: if bet 1 merges early.** A label on #77 merges bet 1 at once, on top of the new AI model (v7s) that went live on 8 November. Three of that model's pending checks each count its first 20 uploads, and it has 12. I set the rule before any of them is read:
+>   - Its watch-time check would read "insufficient data". Bet 1 then keeps the comparison chosen on 10 November and says beside its verdict that this check never ran.
+>   - The title checks count the model's first 20 uploads, bet 1's included. The closing-line checks count only uploads from before the merge, because bet 1 writes its closing lines from a different instruction.
+>   - A fresh reviewer found six problems, including two counts I had missed. All six are fixed and all tests pass. The full rule is in the ledger as `v7s-before-bet1`, because the PRD's status section and findings log are both at their word limits.
+> - **Checked, no change:**
+>   - Reddit ended its RSS feeds yesterday and had already locked its open JSON pages. We read Reddit through the registered app's own keys, so neither affects us. The 12 January registration date is unchanged.
+>   - The 12 November upload about "Jensen" being fired is real news: Nvidia's chief executive resigned that day, four days after admitting an affair. The named-wrongdoing screen didn't miss anything.
+>   - YouTube's Partner Program bar and its mass-produced-content rules show nothing new beyond what we already hold.
+> - **Two code-findings notes corrected:**
+>   - The own-question title check's suggested fix can't work, because the screen it names runs before the title is written. The note now lists the two options that can.
+>   - The plan to move our AI to Groq (#13) assumed per-answer reactions. If bet 1 ships without the
 
-### Tool calls (last 80 of 123)
+### Tool calls (last 80 of 108)
 
-44. Bash: venv/bin/python scripts/friction.py add --function data --task "Ledger rule: how much of the engaged-share fall #14's capitals could explai…
-45. Bash: date -u +%H:%M; for m in engaged_views views engaged_share; do echo "== $m"; venv/bin/python scripts/report.py --offline --trajectory --met…
-46. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -15; echo ===; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -15; echo ==…
-47. Bash: date -u +%H:%M; awk 'NR>=153' TECH_DEBT.md | grep -n "^- \*\*" | cut -c1-200
-48. Bash: awk 'NR>=153' TECH_DEBT.md | sed -n '344,383p'
-49. WebSearch: YouTube spam policy 30-day lock instead of termination test October 2026
-50. WebFetch: https://www.dexerto.com/youtube/youtube-tests-new-policy-letting-creators-delete-videos-to-avoid-permanent-bans-3423181/
-51. Bash: date -u +%H:%M; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i "plan\|prd" | head
-52. Bash: venv/bin/python scripts/escalate.py --help 2>&1 | head -40; gh issue view 80 --json title,body --jq '.title, (.body|length), (.body[0:1500]…
-53. Bash: gh issue view 80 --json body --jq '.body[1500:]'
-54. Bash: grep -n "#8-titles\|engaged.share" PRD.md | grep -in "#10\|11-02\|style B\|title_style" | cut -c1-500 | head -8; grep -n "^#10\|^R2.2\|titl…
-55. Bash: git checkout -q -b data/ledger-8-titles-due && venv/bin/python - <<'EOF'
-56. Bash: git diff analysis/experiments.csv | grep "^[-+]" | cut -c1-160
-57. Bash: git checkout analysis/experiments.csv && venv/bin/python - <<'EOF'
-58. Bash: git add analysis/experiments.csv .github/friction.csv && git commit -q -m "Ledger #8-titles: due with #14 on 11-23; note #10's half was rea…
-59. Agent: Review ledger due-date diff
-60. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-61. Bash: sed -i 's/#14'"'"'s half due with #14, cut in row #14-fall"/#14'"'"'s half due with #14, its command in row #14-fall"/' analysis/experiment…
-62. Bash: venv/bin/python scripts/friction.py add --function data --task "Ledger #8-titles: due date and a note that #10's half was read" --outcome d…
-63. Agent: Second-round candidate generation
-64. Agent: Rank round-2 candidates forward
-65. Agent: Rank round-2 candidates reversed
-66. Bash: date -u +%H:%M; grep -n "PLAN.md" scripts/context_budget.py | head -5; grep -n "def .*words\|split()" scripts/context_budget.py | head -5
-67. Bash: venv/bin/python scripts/report.py --experiments 2>&1 | head -12
-68. Bash: git checkout -q -b gm/spam-lock-risk && venv/bin/python - <<'EOF'
+29. Read: /home/runner/work/reddit-daily/reddit-daily/src/content.py
+30. Bash: venv/bin/python scripts/friction.py --help 2>&1 | head -20; grep -n -i "pivot\|kill criter\|stop rule\|wind down\|give up" PLAN.md DECISION…
+31. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -30; sed -n 80,95p ORG.md
+32. Bash: grep -n "#3's read\|#3 read\|Read 11-02\|read 11-02" PRD.md | head -10
+33. Bash: grep -n "Second subreddit\|second subreddit\|NoStupidQuestions" PRD.md | head -12
+34. Bash: grep -n -i "reopen #3\|#3 reopen\|reopens #3\|#3's reopen\|reopened #3" PRD.md DECISIONS.md TECH_DEBT.md WORKLOG.md analysis/experiments.cs…
+35. Bash: date -u +%H:%M; cd /home/runner/work/reddit-daily/reddit-daily && head -1 analysis/screen_log.csv; grep -i "jensen" analysis/screen_log.csv…
+36. WebSearch: Jensen fired affair with employee November 2026
+37. Bash: venv/bin/python scripts/friction.py add --function legal --task "Reddit registration: re-checked dates and what RSS/JSON shutdowns mean for…
+38. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -15; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -8
+39. Bash: venv/bin/python scripts/friction.py add --function legal --task "Reddit registration: re-checked dates and what the RSS/JSON shutdowns mean…
+40. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | grep -n "^- \*\*\|^### \|^- " | cut -c1-260 | head -40
+41. Bash: awk '/^## Open items/,/^## [^O]/' TECH_DEBT.md | sed -n '286,312p;344,356p;367,420p'
+42. Bash: gh issue view 65 --json body,comments -q '.body' | head -40; echo ======; gh issue view 65 --json comments -q '.comments[-3:][] | .createdA…
+43. Bash: gh run list -L 15 --json workflowName,conclusion,createdAt,event -q '.[] | "\(.createdAt) \(.conclusion) \(.event) \(.workflowName)"'; git …
+44. Bash: git show -s --format='%an %ad %s%n%b' --date=iso 9a4e8f2 | head -12; git show --stat 9a4e8f2 | tail -6; git diff 9a4e8f2~1 9a4e8f2 -- .gith…
+45. Bash: grep -n "_OWN_BANNED\|def _own_title\|own_title\|SOURCE ==\|SOURCE=" src/llm.py src/config.py src/run.py src/ownquestions.py | head -20; gi…
+46. Read: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+47. Bash: sed -n 440,500p src/llm.py
+48. Bash: grep -n -i "altered\|synthetic\|containsSyntheticMedia\|disclos" PRD.md PLAN.md TECH_DEBT.md DECISIONS.md src/youtube.py | cut -c1-220 | he…
+49. Agent: Third-round narrow candidate generation
+50. Bash: sed -n 129p PRD.md | cut -c1-3000; grep -n "v7s" upload_log.csv | wc -l; awk -F, '$10=="v7s"' upload_log.csv | wc -l
+51. Bash: sed -n 129p PRD.md | grep -o "Next, after the 11-08 07:00 reset.\{0,2500\}"; grep -n "merges over it\|waits for the successor" PRD.md TECH_…
+52. Bash: grep -n "20th" PRD.md | cut -c1-120; grep -o "title count (11-11)[^|]\{0,200\}" PRD.md | head -3; grep -n -i "v7s" analysis/experiments.csv…
+53. Bash: sed -n 125p PRD.md; head -1 analysis/experiments.csv; grep -n "^v7s\|successor\|#13" analysis/experiments.csv | cut -c1-400
+54. Bash: cut -d, -f3 analysis/experiments.csv | sort | uniq -c; grep -n "balance\|amend" analysis/experiments.csv | cut -c1-300 | head -5; ls tests …
+55. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+56. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+57. Bash: tail -c1 analysis/experiments.csv | xxd | head -1; printf '%s\n' 'v7s-before-bet1,"v7s'"'"'s reads if bet 1 merges before its 20th upload",…
+58. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i -E "PRD|over|fail|TOTAL|within"; date -u +%H:%M
+59. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+60. Bash: venv/bin/python - <<'EOF'
+61. Bash: git diff analysis/experiments.csv | cut -c1-200
+62. Bash: venv/bin/python - <<'EOF'
+63. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+64. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+65. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD.md#0|TOTAL|within"; date -u +%H:%M
+66. Agent: Fresh review of the new rule
+67. Bash: grep -o "[^.]\{0,200\}5 or more of\( its\)\? \(the \)\?20[^.]\{0,150\}" PRD.md | head -4; grep -o "re-counted at the 20th upload[^.]\{0,120…
+68. Bash: grep -o "[^*]\{0,400\}2 of the last 30, #13): 5 or more of 20 ranks a prompt fix" PRD.md | head -2
 69. Bash: venv/bin/python - <<'EOF'
-70. Bash: git add PLAN.md .github/friction.csv && git commit -q -m "PLAN §4: YouTube's 10-29 spam-lock test on the channel-loss risk
-71. Agent: Review PLAN risk-row diff
-72. Bash: sed -i "s/(11-03, 11-11)\. A 10-29 test gives/(11-03, 11-11). YouTube's 10-29 test gives/" PLAN.md && git diff --stat && venv/bin/python sc…
-73. Bash: venv/bin/python scripts/friction.py add --function legal --task "Record YouTube's 10-29 spam-lock test on the channel-loss risk" --outcome …
-74. Bash: git log -5 --format='%h %ci %s' -- upload_log.csv prev_post.txt; gh run list --workflow "Generate and Upload Reddit Video" -L 4 --json data…
-75. Bash: gh issue list --label needs-owner --state open --json number,title --jq '.[] | "\(.number) \(.title[0:70])"' | head -15; date -u +%H:%M
-76. Bash: grep -n "^## \|^---$" WORKLOG.md; wc -l WORKLOG.md
-77. Bash: git checkout -q -b gm/handover-1114 && cat > /tmp/entry.md <<'EOF'
-78. Bash: venv/bin/python - <<'EOF'
-79. Bash: git fetch -q origin && venv/bin/python scripts/check_docs.py 2>&1 | grep -i "merge"; git diff --stat origin/main...origin/integration/previ…
-80. Bash: rm -rf /tmp/wt && git worktree add -q --detach /tmp/wt origin/main && cd /tmp/wt && git -c user.name=t -c user.email=t@t merge -q --no-edit…
-81. Bash: venv/bin/python - <<'EOF'
-82. Bash: venv/bin/python - <<'EOF'
-83. Bash: venv/bin/python - <<'EOF'
-84. Bash: venv/bin/python - <<'EOF'
-85. Bash: venv/bin/python - <<'EOF'
-86. Bash: git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover: capitals read bounded before it opens; spam-lock test on the channel…
-87. Bash: venv/bin/python scripts/report.py --help 2>&1 | grep -iE "field|derived|length|--by|--compare|topic-mix" | head -20; grep -n "video_length\…
-88. Bash: grep -n "question_length\|question length" PRD.md analysis/experiments.csv | cut -c1-300 | head -8; grep -n "Length and clip\|length and cl…
-89. Bash: sed -n 205p PRD.md | cut -c1-1500
-90. Bash: grep -n "def topic_mix" -A 45 src/insights.py | grep -n "min_views\|views\|engaged\|mean\|median" | head -20; grep -n "topic.mix\|topic_mix…
-91. Bash: sed -n 286,335p src/insights.py; sed -n 700,730p scripts/report.py
-92. Bash: git checkout -q -b data/topic-mix-min-views && grep -n "def test.*topic_mix\|topic_mix(" tests/*.py | head -8; grep -n "TOPIC_MIX_" src/ins…
-93. Bash: venv/bin/python - <<'EOF'
-94. Bash: sed -n 2960,3010p tests/test_insights.py
-95. Bash: grep -n '"--min-views"' -A 3 scripts/report.py; grep -n "args.min_views" scripts/report.py | head
-96. Bash: sed -n 1005,1036p scripts/report.py
-97. Bash: venv/bin/python - <<'EOF'
-98. Bash: venv/bin/python - <<'EOF'
-99. Bash: date -u +%H:%M; venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; venv/bin/python scripts/report.py --topic-mix 2>&1 | tail -6; echo ====…
-100. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | grep -E "FAILED|Error|assert" | head -8
-101. Bash: grep -n "min-views applies to --compare only" tests/*.py; sed -n 2535,2562p tests/test_insights.py
-102. Bash: grep -n '\["fall"\]' tests/*.py | head; venv/bin/python - <<'EOF'
-103. Bash: date -u +%H:%M; venv/bin/python scripts/report.py --topic-mix --min-views 10 2>&1 | head -2; git add -A src/insights.py scripts/report.py t…
-104. Agent: Review R16 tool change
-105. Bash: venv/bin/python - <<'EOF'
-106. Bash: venv/bin/python scripts/friction.py add --function data --task "R16: does the rise in barely-shown uploads make the engaged-share fall? (ru…
-107. Bash: venv/bin/python - <<'EOF'
-108. Bash: venv/bin/python scripts/report.py --offline --scorecard 2>&1 | grep -iE "engaged|share|past the opening" | head -8; grep -n "def scorecard"…
-109. Bash: grep -n "engaged_per_100" src/*.py scripts/*.py | head -6
-110. Bash: sed -n 1625,1660p src/insights.py; sed -n 460,485p scripts/report.py
-111. Bash: venv/bin/python scripts/report.py --offline --scorecard 2>&1 | head -14
-112. Bash: venv/bin/python - <<'EOF'
-113. Bash: venv/bin/python - <<'EOF'
-114. Bash: sed -n 64,80p WORKLOG.md
-115. Bash: venv/bin/python - <<'EOF'
-116. Bash: grep -n '"--metric"' -A 2 scripts/report.py | head -4; grep -n 'release_key != p.get_default' scripts/report.py | head -2; grep -n "^def sh…
-117. Bash: grep -n "fixed sample at ~7 days\|takes no --at-age" tests/*.py | head; git status --short | head
-118. Bash: venv/bin/python - <<'EOF'
-119. Bash: git add scripts/report.py tests/test_insights.py && git commit -q -m "report --topic-mix: refuse --compare and another --metric instead of …
-120. Agent: Review guard fix and handover
-121. Bash: venv/bin/python - <<'EOF'
-122. Bash: sed -i 's/^## 2026-11-14 (01:05) — /## 2026-11-14 (00:59) — /; s/so I handed over at 01:05, 14 minutes early\./so I handed over at 00:59, 2…
-123. Bash: venv/bin/python scripts/friction.py add --function data --task "report --topic-mix: refuse --compare and other --metric instead of ignoring…
+70. Bash: grep -o "first week: no 429[^;]*; two 503s); its 20th upload\|\*\*Bet 1 merged before its 20th upload:\*\* ledger \`v7s-before-bet1\` (11-1…
+71. Bash: venv/bin/python scripts/friction.py add --function data --task "Pre-committed how v7s's reads count if bet 1 merges before v7s's 20th uploa…
+72. Bash: git add PRD.md analysis/experiments.csv .github/friction.csv && git commit -q -m "Ledger v7s-before-bet1: how v7s's reads count if bet 1 me…
+73. Bash: grep -o "[^.]*#14[^.]*v8[^.]*\.\|[^.]*v8[^.]*#14[^.]*\." PRD.md | cut -c1-400 | head -8; echo ---; grep -o "[^.]*R7[^.]*v8[^.]*\." PRD.md |…
+74. Bash: grep -n -o "[^.]\{0,200\}bet 1 merge[^.]\{0,200\}" PRD.md TECH_DEBT.md | cut -c1-420 | head -10; git show origin/integration/preview:src/co…
+75. Bash: for b in main origin/integration/preview; do echo "== $b"; git grep -n -E "title_caps *=|random\.choice\(config\.VOICES|VOICES\b.*choice|de…
+76. Bash: for b in main origin/integration/preview; do echo "== $b"; git grep -n -E "voice *= *|VOICES\[" $b -- src/run.py src/tts.py | cut -c1-170 |…
+77. Bash: git show origin/integration/preview:src/run.py | sed -n 255,270p; git show main:src/run.py | sed -n 150,160p
+78. WebSearch: YouTube Partner Program Shorts eligibility change November 2026
+79. WebSearch: YouTube inauthentic content reused content policy update November 2026 AI channels demonetized
+80. WebFetch: https://lenspov.com/articles/youtube-ai-content-demonetization-2026
+81. Bash: venv/bin/python scripts/friction.py add --function monetization --task "Partner Program and inauthentic-content policy news since 11-03 (no…
+82. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -25; git status --short
+83. Bash: grep -n "screen\.\|llm.generate_metadata\|generate_metadata(\|def main\|own_fields\|ownquestions\." src/run.py | head -20; grep -n "def scr…
+84. Bash: sed -n 100,135p src/run.py
+85. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+86. Bash: timeout 300 venv/bin/python -m pytest -q -x 2>&1 | tail -1 && venv/bin/python scripts/context_budget.py --check 2>&1 | tail -1 && venv/bin/…
+87. Bash: venv/bin/python scripts/backlog_status.py --help 2>&1 | head -15; venv/bin/python scripts/backlog_status.py --all 2>&1 | head -40
+88. Bash: env | grep -c -E "^GROQ|^GEMINI" ; env | grep -o -E "^(GROQ|GEMINI)[A-Z_]*" ; ls .env 2>&1 | head -1
+89. Bash: grep -n -o "[^.]\{0,250\}\(reactions off\|HOST_REACTIONS\)[^.]\{0,250\}" PRD.md TECH_DEBT.md | grep -i -E "groq|#13" | cut -c1-500 | head -5
+90. Bash: sed -n 158,175p TECH_DEBT.md | cut -c1-300; git show origin/integration/preview:scripts/tag_trial.py | sed -n 1,40p | cut -c1-200
+91. Bash: n=$(grep -n "The Groq route is merged switched off" TECH_DEBT.md | cut -d: -f1); sed -n "${n},$((n+40))p" TECH_DEBT.md
+92. Bash: n=$(grep -n "The Groq route is merged switched off" TECH_DEBT.md | cut -d: -f1); awk -v s=$n 'NR>s && /^- \*\*/ {print NR; exit}' TECH_DEBT…
+93. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+94. Bash: timeout 300 venv/bin/python -m pytest -q -x 2>&1 | tail -1 && venv/bin/python scripts/friction.py add --function engineering --task "Groq i…
+95. Bash: grep -n -o "[^.]\{0,200\}title_ok[^.]\{0,200\}" PRD.md | cut -c1-400 | head -8; grep -n -i "fallback title\|raw question\|title fell back" …
+96. Bash: grep -n "^## 20" WORKLOG.md; wc -w WORKLOG.md
+97. Bash: sed -n 92,98p WORKLOG.md; tail -5 WORKLOG.md; wc -l WORKLOG.md
+98. Bash: date -u +%H:%M && sed -i '95,131d' WORKLOG.md && tail -3 WORKLOG.md && wc -w WORKLOG.md
+99. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+100. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|TOTAL|within|OVER"; venv/bin/python scripts/context_budget.py --a…
+101. Bash: git add WORKLOG.md && git commit -q -m "Handover 11-14 (11:00): v7s's reads keyed to bet 1 merging early; Reddit's feed shutdown checked; t…
+102. Bash: awk '/^### .*Distribution/,/^### [^D]/' ORG.md | head -30; awk '/^### .*Finance/,/^### [^F]/' ORG.md | head -30
+103. Bash: grep -n "^#\+ " ORG.md | head -40
+104. Bash: sed -n 166,179p ORG.md; sed -n 278,292p ORG.md
+105. Bash: gh issue view 65 --json comments -q '.comments[] | .createdAt + " " + .author.login + "\n" + .body' | sed -n '/2026-10-27/,$p' | head -60; …
+106. Bash: venv/bin/python - <<'EOF'
+107. Bash: t=$(date -u +%H:%M) && venv/bin/python - "$t" <<'EOF'
+108. Bash: git fetch -q origin main && git log --oneline -1 origin/main && git status -sb | head -1
