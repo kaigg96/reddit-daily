@@ -85,6 +85,39 @@ def test_a_reworded_shipped_question_is_refused_too(monkeypatch):
     assert post.title == OTHER["question"]
 
 
+def _upload_only(monkeypatch, *replies):
+    """GROQ_FALLBACK off, as in production: the upload model answers in turn."""
+    monkeypatch.setattr(config, "GROQ_FALLBACK", False)
+    sent, queue = [], list(replies)
+    monkeypatch.setattr(llm, "generate_retrying",
+                        lambda prompt, **kw: sent.append(prompt) or json.dumps(queue.pop(0)))
+    monkeypatch.setattr(llm, "_generate_groq",
+                        lambda prompt: (_ for _ in ()).throw(AssertionError("groq asked")))
+    return sent
+
+
+def test_a_repeat_earns_the_upload_model_one_more_request_told_its_question(monkeypatch):
+    """Fresh review, 11-14: with GROQ_FALLBACK off a repeat failed the run."""
+    sent = _upload_only(monkeypatch, GOOD, OTHER)
+    post = ownquestions.select_post(uploaded={"Is it rude to recline a plane seat?"})
+    assert post.title == OTHER["question"] and len(sent) == 2
+    assert sent[0] == ownquestions.PROMPT and sent[1].startswith(ownquestions.PROMPT)
+    assert json.dumps(GOOD["question"]) in sent[1]
+    assert "recline a plane seat" not in sent[1]      # never the shipped text
+
+
+def test_the_told_request_is_the_only_extra_one(monkeypatch):
+    sent = _upload_only(monkeypatch, GOOD, GOOD, OTHER)
+    with pytest.raises(RuntimeError):
+        ownquestions.select_post(uploaded={GOOD["question"]})
+    assert len(sent) == 2
+    persona = {**GOOD, "takes": GOOD["takes"][:2] + ["As a parent, never."]}
+    sent = _upload_only(monkeypatch, persona, GOOD)
+    with pytest.raises(RuntimeError):                  # an unusable reply earns none
+        ownquestions.select_post()
+    assert len(sent) == 1
+
+
 @pytest.mark.parametrize("question, shipped, hit", [
     ("What is the best way to relax after a long day?",
      "what is the best way to unwind after a long day?", True),

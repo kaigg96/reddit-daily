@@ -85,17 +85,21 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
     """Today's question and three takes. One request on the upload model, then
     one free Groq request if that reply is refused: unusable, a repeat of any
     shipped title (a model writing questions repeats itself), or a rewording of
-    one (`near_repeat`), or skipped by the
+    one (`near_repeat`, which first earns the upload model one more request,
+    told the repeat), or skipped by the
     R4.6 screen, whose dropped takes refuse the whole episode, as three takes
     are the show. Raises when neither route gives one, so the run fails loudly
     rather than shipping a reading. Groq only while `GROQ_FALLBACK` is on, as
     every other call. No model is named: a dry run writes on the sample model,
     so a render never spends the uploads' allowance."""
     shipped = {t.strip().lower() for t in uploaded} | {prev_title.strip().lower()}
-    for route in ("upload model",) + (("groq",) if config.GROQ_FALLBACK else ()):
+    routes = ["upload model"] + (["groq"] if config.GROQ_FALLBACK else [])
+    prompt = PROMPT
+    while routes:
+        route = routes.pop(0)
         try:
-            reply = (llm.generate_retrying(PROMPT)
-                     if route == "upload model" else llm._generate_groq(PROMPT))
+            reply = (llm._generate_groq(prompt) if route == "groq"
+                     else llm.generate_retrying(prompt))
         except Exception as e:   # noqa: BLE001 -- the other route may still answer
             print(f"Own question: the {route} failed ({type(e).__name__})")
             continue
@@ -108,6 +112,13 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
         if near:
             print(f"Own question: the {route} repeated a shipped question: {question[:60]}"
                   f" (shipped: {near[:60]})")
+            if route == "upload model":
+                # With GROQ_FALLBACK off a repeat failed the run (fresh review,
+                # 11-14: ~3% of trial questions). One more request, told its
+                # own question, never the shipped text.
+                prompt = PROMPT + ("\nAlready asked, so write another: not this "
+                                   f"question or a rewording of it: {json.dumps(question)}")
+                routes.insert(0, "upload model, told the repeat")
             continue
         result = screener(question, takes) if screener else None
         # A post-level risk demoted to the takes, logged as the Reddit path
