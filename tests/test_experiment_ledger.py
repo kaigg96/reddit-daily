@@ -122,3 +122,19 @@ def test_a_read_seven_days_late_is_on_time_and_eight_is_late():
         rule("b", due="2026-10-05", read="2026-10-13", verdict="noise"),
     ], TODAY)
     assert [r["id"] for r in s["on_time"]] == ["a"] and [r["id"] for r in s["late"]] == ["b"]
+
+
+def test_the_ledger_is_in_one_written_form():
+    """Hand edits twice left a CRLF line ending and re-quoted rows nobody had
+    touched (F299, F304), caught only by a diff stat. Every row as
+    `csv.writer` would write it, so a rewrite by script leaves unchanged rows
+    unchanged and a stray carriage return cannot reach a cell."""
+    import io
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        "analysis", "experiments.csv")
+    raw = open(path, newline="", encoding="utf-8").read()
+    assert "\r" not in raw
+    out = io.StringIO()
+    csv.writer(out, lineterminator="\n").writerows(csv.reader(io.StringIO(raw)))
+    rewritten = out.getvalue().splitlines()
+    assert [(i, line) for i, line in enumerate(raw.splitlines()) if line != rewritten[i]] == []
