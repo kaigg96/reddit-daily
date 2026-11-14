@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-11-13 · **Live format:** `v7s` (`v7` on `gemini-3.6-flash`, merged 2026-11-08; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
+**Last updated:** 2026-11-14 · **Live format:** `v7s` (`v7` on `gemini-3.6-flash`, merged 2026-11-08; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
 
 <a name="delivery-plan"></a>
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*

@@ -449,7 +449,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   To…" and singular "A stranger told me" pass (as on `main`); spelled counts
   newly drop "Should two people split the bill?"; "How often/What do people
   say…" drop. A word list keeps leaking, so before switch-on weigh a different
-  check (the screen call judging the title), not a fourth round. **Graded
+  check, not a fourth round. Not the screen call: it runs inside `select_post`,
+  before `get_metadata` writes the title (`run.py`; checked 11-14). Left: a
+  yes/no field in the metadata reply (no extra request; the model judges its
+  own line), or a second call after it (one request a run, from the 20 a day),
+  with the list kept for Reddit's names alone. **Graded
   from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
   `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
   when** fixed with tests, before `SOURCE=own` turns on.
