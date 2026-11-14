@@ -299,3 +299,6 @@ F297,2026-11-13T18:55:17+00:00,43483433524,data,pre-register 11-16 burial-field 
 F298,2026-11-13T18:59:32+00:00,43483433524,gm,TECH_DEBT back to cap (C15 note to code),done,,none,none,none,0,
 F299,2026-11-13T19:01:41+00:00,43483433524,data,R15 subreddit mix vs engaged-share fall,done,,mistake,csv.writer's default CRLF line ending slipped into the ledger on R14's append; caught only by a diff stat,a ledger test that refuses CR characters,4,
 F300,2026-11-13T19:06:43+00:00,43483433524,gm,safe route for shifts to land approved skill edits,done,,access,the .claude/ write lock is outside permission rules; only a mode that drops every check lifts it,knowing this when #88 first hit the lock (11-10),3,
+F301,2026-11-14T00:33:44+00:00,43533433352,data,"Ledger rule: how much of the engaged-share fall #14's capitals could explain, set before its 11-23 read",done,,docs,"Finding a home for the rule: the product plan's status and findings sections are both within 10 words of their limits, so it went in the ledger row, as R14 did",None needed; the ledger row worked,3,
+F302,2026-11-14T00:33:44+00:00,43533433352,security,"Full-history scan of the public repo for secret values, not just file names",done,,none,,,0,
+F303,2026-11-14T00:33:44+00:00,43533433352,market,Outside sources for a YouTube change near 19 Oct behind the engaged-share fall,done,,none,,,0,
