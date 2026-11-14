@@ -3078,3 +3078,32 @@ def test_topic_mix_reads_subreddit_with_two_groups():
     assert insights.topic_mix(vids)["verdict"] == "insufficient"   # no topic logged
     r = insights.topic_mix(vids, key="subreddit", min_groups=2)
     assert r["verdict"] == "lead" and r["mix"] == pytest.approx(r["fall"])
+
+
+def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, capsys):
+    """WORKLOG 11-14: is a fall in watch-seconds shorter videos? The share
+    watched is read week by week, labelled a diagnostic, in percent."""
+    import argparse
+    import pathlib
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    import report
+    asked = []
+
+    def rows(metric_col="avg_view_duration_s", path=None):
+        asked.append(metric_col)
+        base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+        out = []
+        for w in range(6):
+            for i in range(6):
+                pub = base + datetime.timedelta(weeks=w)
+                out.append({"video_id": f"w{w}v{i}", "published": pub,
+                            "snapshot": pub + datetime.timedelta(days=7), "value": 60.0})
+        return out
+    monkeypatch.setattr(report, "_snapshot_metric_rows", rows)
+    args = argparse.Namespace(metric=Metric.PCT, at_age=None, within=None)
+    report.show_trajectory(args)
+    out = capsys.readouterr().out
+    assert asked == [Metric.PCT]
+    assert "share of each video watched" in out and "never a trigger" in out
+    assert "60.0%" in out and "FLAT" in out and "forces PM's priority" not in out
