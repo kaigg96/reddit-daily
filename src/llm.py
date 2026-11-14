@@ -287,6 +287,51 @@ def _own_fields(data):
     return data
 
 
+# PLAN C16, TECH_DEBT's own-title item (design chosen 11-14): a word list kept
+# leaking, so a separate request judges the title and closing line. On our
+# channel a separate check holds where instructions inside the writing request
+# do not (bet 1's tags, #77). A miss misleads viewers about whose takes they
+# are; a false refusal only ships the question as the title, so anything but a
+# plain "no" refuses (fail closed). One request a run, own questions only.
+_OWN_JUDGE = """Our show writes its own question and its own three takes; no real
+person, user, commenter or crowd wrote them, and they come from no website.
+For each line below, answer "yes" if it presents the takes as coming from real
+people, users, strangers, commenters, a crowd, a forum or Reddit (as "People
+reveal...", "Strangers share...", "3 answers that..." would), else "no".
+Mentioning people as the question's subject ("Why do people say sorry?") is "no".
+
+{lines}
+
+Return ONLY a JSON object, no markdown fence: {{{shape}}}
+"""
+
+
+def _own_judged(data):
+    """The reply with any title or closing line the judge does not clear set to
+    None, as `_own_fields` does; keywords are left to the list."""
+    keys = [k for k in ("title", "cta") if isinstance(data.get(k), str) and data[k].strip()]
+    if not keys:
+        return data
+    names = {"title": "title", "cta": "closing line"}
+    lines = "\n".join(f'{k}: {json.dumps(data[k], ensure_ascii=False)}' for k in keys)
+    shape = ", ".join(f'"{k}": "yes" or "no"' for k in keys)
+    verdict = {}
+    try:
+        raw = generate_retrying(_OWN_JUDGE.format(lines=lines, shape=shape))
+        match = re.search(r"\{.*\}", raw or "", re.S)
+        verdict = json.loads(match.group(0)) if match else {}
+        if not isinstance(verdict, dict):
+            verdict = {}
+    except Exception as e:   # noqa: BLE001 -- fail closed, never fail the run
+        print(f"Own question: the title judge failed ({type(e).__name__}); refusing both lines")
+    data = dict(data)
+    for k in keys:
+        if str(verdict.get(k, "")).strip().lower() != "no":
+            print(f"Own question: the judge did not clear the {names[k]}; dropped: {data[k]!r}")
+            data[k] = None
+    return data
+
+
 # `source` mirrors ScreenResult.source: it says whether Gemini answered at all,
 # which all-None fields cannot. Both a spent quota and a prompt that produces
 # junk return None for every field, and the release gate has to tell them apart
@@ -483,7 +528,7 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     if config.SOURCE == "own":
-        data = _own_fields(data)
+        data = _own_judged(_own_fields(data))
     return MetadataResult(
         title=_clean_published(data.get("title")),
         keywords=_clean_keywords(data.get("keywords")),
