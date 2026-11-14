@@ -465,7 +465,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `get_metadata` asks the upload model whether the title or closing line
   presents the takes as real people's, and a yes, a failure or an unreadable
   reply refuses that field (fail closed). Cost +1 a run: a typical own run then
-  spends 4 (write, screen, title, this; `ownquestions.select_post`), 8 of 20
+  spends 4 (write and screen in `ownquestions.select_post`, the title, this), 8 of 20
   at two a day and 16 at four, where a worst day passes 20 and #13's Groq
   route must carry it, as for Reddit's (PRD §4). Test plan: the 17
   cases below drive the call mocked; before switch-on one batched request

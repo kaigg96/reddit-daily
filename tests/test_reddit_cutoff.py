@@ -57,6 +57,7 @@ def live_run(monkeypatch, tmp_path):
 
     monkeypatch.setattr(config, "DRY_RUN", False)
     monkeypatch.setattr(config, "SAMPLE", False)
+    monkeypatch.setattr(config, "SILENT_NARRATION", False)
     monkeypatch.setattr(config, "SOURCE", "reddit")
     monkeypatch.setenv("RUN_SCHEDULE", config.LEGACY_CRON)
     monkeypatch.setattr(run, "check_channel_name", lambda: None)
@@ -81,11 +82,15 @@ def live_run(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("status", [401, 403])
 def test_a_refused_listing_fails_the_run_before_any_spend(monkeypatch, live_run, status):
+    asked = []
+
     def top():
+        asked.append(status)   # so a run that dies before Reddit cannot pass
         raise _refusal(status)
     monkeypatch.setattr(content, "make_reddit", lambda: _reddit(top))
     with pytest.raises(Exception):
         run.main()
+    assert asked == [status]
     assert live_run.screens == []
     assert live_run.prev.read_text() == "yesterday's question"
 
