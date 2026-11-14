@@ -132,9 +132,12 @@ def test_the_ledger_is_in_one_written_form():
     import io
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                         "analysis", "experiments.csv")
-    raw = open(path, newline="", encoding="utf-8").read()
+    with open(path, newline="", encoding="utf-8") as f:
+        raw = f.read()
     assert "\r" not in raw
+    rows = list(csv.reader(io.StringIO(raw)))
+    # An unquoted comma splits a cell in two, and DictReader files the rest under None.
+    assert [r[0] for r in rows if len(r) != len(FIELDS)] == []
     out = io.StringIO()
-    csv.writer(out, lineterminator="\n").writerows(csv.reader(io.StringIO(raw)))
-    rewritten = out.getvalue().splitlines()
-    assert [(i, line) for i, line in enumerate(raw.splitlines()) if line != rewritten[i]] == []
+    csv.writer(out, lineterminator="\n").writerows(rows)
+    assert out.getvalue() == raw
