@@ -438,8 +438,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   second's review:** the source includes the top comments, so one in capitals
   exempts common words ("YOU") and either arm can still leak; "OMG" is not an
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
-  you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
-  when** #14 is read (~11-23).
+  you do?"). Rare, and a leak dilutes, never inflates (PRD §0, row 14). **Closes
+  when** the capitals test is read (~11-23).
+
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to
