@@ -114,8 +114,8 @@ def select_post(prev_title="", uploaded=frozenset(), screener=None, on_verdict=N
                   f" (shipped: {near[:60]})")
             if route == "upload model":
                 # With GROQ_FALLBACK off a repeat failed the run (fresh review,
-                # 11-14: ~3% of trial questions). One more request, told its
-                # own question, never the shipped text.
+                # 11-14: ~3% of trial questions). One more request, told the
+                # model's own question, not the shipped one it resembles.
                 prompt = PROMPT + ("\nAlready asked, so write another: not this "
                                    f"question or a rewording of it: {json.dumps(question)}")
                 routes.insert(0, "upload model, told the repeat")
