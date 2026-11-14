@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-14 (17:45) — Watch time is falling inside our main subreddit, which would have tilted bet 1's verdict; the Reddit cutoff now fails safely, by test
+
+    Worked (% of the shift): data 35 · reliability 25 · strategy 15 · gm 25
+
+**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). This shift found that watch time inside AskReddit has fallen from 12 to 10 seconds while the channel as a whole reads flat, and set bet 1's read to show that beside its verdict, so a falling baseline cannot pass for a failed bet.
+
+### Toward revenue
+- **Nothing directly**, because bet 1 still waits on your label. The nearest thing: bet 1's verdict is the one decision on our way to revenue, and it was at risk of a false "revert" (below). Bet 1 still merges cleanly into today's live code, with all 1,150 tests passing.
+
+### Done
+- **Data (a question answered: yes, falling):** bet 1 is judged on AskReddit uploads against the earlier versions' AskReddit uploads, pooled. I set the rule and saved it before looking. Our reporting tool reads AskReddit's watch time at a week old as falling, 12 to 10 seconds since mid-October, beyond its usual 1-second drift, while the channel overall reads flat (12 to 11), so our second subreddit is holding up better. Recent weeks are thinner, 7–8 AskReddit uploads each, since the two subreddits share the slots. So a baseline pooled from the better weeks would make bet 1 look worse than it is. Its rule is unchanged; if its read says revert, it now prints a comparison with the same recent weeks beside it, never as the trigger.
+- **Data (a question answered: no):** could a topic now justify reopening the parked idea of choosing posts by topic? Its bar is a 50% lead. The best-placed topic, politics and news, leads by 27%, and our tool refused the comparison because those videos are younger. It stays parked.
+- **Reliability (a safeguard for 12 January):** if the Reddit app is not registered by then, Reddit will refuse our requests. A new test proves such a refusal stops the run before it pays for narration, writes a title, uploads, or touches the record of what was last posted, whether the refusal comes on the list of posts or later, after the safety check has spent a request. A fresh reviewer found the first version could pass without ever reaching Reddit; fixed.
+- **Strategy (a decision for the backup show):** the check that stops our own-questions show's titles passing AI-written takes off as real people's has leaked through three rounds of word lists. I chose its replacement: a separate AI check of each title, refusing when in doubt, because on our channel a separate check works where instructions inside the writing request do not (bet 1's reactions). One request per video; it fits the daily allowance at two or four a day. Recorded for whoever builds it.
+- **Data (record-keeping):** our list of experiments and their rules now has a test holding it in one consistent form. Adding it found a row whose last cell had split in two, losing part of its references; repaired, nothing else changed.
+- **General management (ranking):** a fresh helper proposed six ideas; two others ranked them forwards and reversed, and the top two agreed. I did five of the six in that order. Dropped: what our viewers' countries imply for pay per 1,000 views (it changes no decision while we are this far from any paid tier).
+- **Security and reliability (checked):** both of yesterday's uploads and this morning's landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; no workflow change since 11 November.
+- AI use: none of Google's allowance; no sample video; no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (waits on your yes to the corrected sentence), #80, #59, and the shift allowance setting (on #92).
+
+### Next
+- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and today's lead: AskReddit's watch time is falling while our second subreddit holds.
+- **About 18 November:** the new model's 20th video and its title counts. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
+
+### Better?
+- **Than last shift:** no, not toward revenue. Bet 1's eventual verdict is safer from a false revert, and the Reddit cutoff can no longer cost money or a duplicate upload.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, falling inside AskReddit, and bet 1 hasn't shipped.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-14 (10:56) — If your label on bet 1 lands early, the new AI model's checks already have their rule; Reddit closing its feeds does not touch us
 
     Worked (% of the shift): gm 40 · data 25 · engineering 10 · legal 10 · security 5 · editorial 5 · monetization 5
@@ -93,36 +127,3 @@ and more useful than a confident guess.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
 
----
-
-## 2026-11-14 (00:59) — The fall in plays past the opening is smaller per video than we reported, but real per play; YouTube tests a way back from some spam bans
-
-    Worked (% of the shift): data 45 · gm 15 · security 10 · market 15 · legal 10 · reliability 5
-
-**Summary:** Nothing reached viewers, so the company is no closer to revenue: every step that changes the videos still waits on you, bet 1 (#77) first. Tonight found that a few barely-shown videos inflated our figure for the fall in plays past the opening, though per play the fall is real, fixed in advance how much the capitals test can explain, and recorded a YouTube test that gives some spam bans a 30-day way back.
-
-### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. Per play, which is how YouTube's paid tier counts, the share past the opening did fall, by 9 points, and counted plays per upload fell about a sixth after 19 October (below).
-
-### Done
-- **Data (a rule set before its read):** the capitals test is read about 23 November. It began four days before the fall, so its timing fits. Before its result is seen, I fixed how much of the fall it could explain. Titles with a capitalised word rose from 38 to 50 in 100 uploads, so capitals explain a quarter of the fall only if the capitalised half trails by 22 points or more, a very large gap. A fresh helper confirmed the figures; its two fixes are in. A related rule got its missing due date.
-- **Data (a question answered: partly barely-shown videos):** the 10.6-point fall averaged every video's share, including videos shown a handful of times, where 2 plays of 3 reads as 67%. I set a rule first, then left out videos under 10 plays, 4 in each period. The fall shrank to 4.5 points (38 to 34 in 100), which by the rule makes barely-shown videos most of it: a lead for Monday, thin at 26 videos. Per play, though, the scorecard still shows 43 to 34 in 100; barely-shown videos have too few plays to move it. So the per-play fall is real, and may sit in our most-played videos: the week of 26 October had our most plays per upload and lowest share. Counted plays per upload averaged 84 after 19 October against 100 before. A fresh helper reviewed it; its fixes are in.
-- **Market intelligence (answered: no change found):** outside sources report no YouTube change to how plays are counted near 19 October. On 22 October YouTube moved Subscriptions out of the phone app's bottom bar; our subscriber traffic is 0–1 views a week, and whether it sent casual viewers to Shorts our data can't tell.
-- **Legal (risk register updated):** since 29 October YouTube has been testing a 30-day lock before some spam-policy bans. Uploads stop; the channel can fix or delete the videos, or appeal; deleting every video unlocks it and keeps the subscribers. It is a limited test, so the risk stays fatal. It doesn't change my advice on #80 (four a day waits for bet 1).
-- **Security (checked, nothing new):** I scanned our public repository's whole history for leaked keys inside files; our automatic check looks only at file names. It found only a test's fake keys and the two dead Google tokens already on the 7 December list.
-- **General management (ranking):** a fresh helper proposed eight ideas; two others ranked them forwards and reversed, and I did the three that placed well both ways. Dropped: a rule to stop hunting the fall's cause if counted plays held (the rankings split, and rising plays can hide a loss); re-checking the fall on videos read at the same age (split, and too long); viewers' countries (needs YouTube access shifts lack). A second round of six used tonight's evidence, and the spam-lock note topped it both ways. Dropped: testing the extra-brief-plays lead or setting one for 7 December (I had seen the data); a plan for a lock notice (those reach you, not shifts); YouTube's 16 October Shorts bonus pilot (invite-only, for Partner Program members). A third look found the bet 1 merge check and the barely-shown test. Nothing else cleared the bar, so I handed over at 00:59, 20 minutes early.
-- **Security and reliability (checked):** both of yesterday's uploads landed; two very short runs were the normal skips. Bet 1 and its two follow-on fixes still merge cleanly into tonight's live code, and all 1,147 tests pass on the result. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; workflows unchanged.
-- AI use: none; no sample video; no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label; its sample, review and automatic check all passed), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65, #80, #59 (five minutes for the two checks that matter), and the shift allowance setting (on #92).
-
-### Next
-- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging, before four a day.
-- **16 November, the weekly review:** the buried-upload rule set on 13 November, the weekly swings question, and tonight's lead that the fall may sit in our most-played videos. Unless a field we log explains it, I'd stop hunting its cause: bet 1 is the answer either way.
-- **About 18 November:** the new model's 20th upload and its title counts. **20 November:** if bet 1 is still unmerged, update #80, mentioning YouTube's spam-lock test. **23 November:** the capitals read, with tonight's rule.
-
-### Better?
-- **Than last shift:** no, not toward revenue. Our figure for the fall past the opening is now honest per video and per play, and the fatal risk has a recorded way back.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, and bet 1 hasn't shipped.
-- **Than ~100 shifts ago:** too early to say.
