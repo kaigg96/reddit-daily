@@ -33,6 +33,13 @@ CASES = [
     ("Why do people say sorry so much?", False),
     ("3 People You Meet at Every Wedding", False),
     ("What do people say when they mean no?", False),
+    # Added 11-14 after a review: unlike the judge's own examples.
+    ("The Internet Weighs In On Tipping", True),
+    ("Viewers Confess Their Worst Habits", True),
+    ("I Asked 100 Parents Their Biggest Regret", True),
+    ("Is tipping 20% too much?", False),
+    ("Would you rather lose your phone or your wallet?", False),
+    ("The weirdest things people collect", False),
     # Closing lines (11-14): the viewer's answer and the host's own vote are ordinary.
     ("What would your answer be? Tell us below.", False),
     ("I'm raising my hand for skiing, two hundred a day is wild. Which gets yours?", False),

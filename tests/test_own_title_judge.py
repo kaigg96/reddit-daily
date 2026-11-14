@@ -38,11 +38,11 @@ def test_a_cleared_title_and_line_ship_on_one_extra_request(own):
     ('{"cta": "no"}', True, "own_judge_title"),                    # no verdict for it
     ('{"title": "maybe", "cta": "no"}', True, "own_judge_title"),  # anything but a plain no
     ('{"title": "yes", "cta": "yes"}', False, "own_judge_title;own_judge_cta"),
-    ('["no", "no"]', False, "own_judge_no_json"),                   # wrong shape
-    ('{"title": no}', False, "own_judge_bad_json"),
-    ('{"title": "no"', False, "own_judge_no_json"),
-    ('not json', False, "own_judge_no_json"),
-    (RuntimeError("503"), False, "own_judge_RuntimeError"),         # the request failed
+    ('["no", "no"]', False, "own_judge_no_json;own_judge_unanswered"),   # wrong shape
+    ('{"title": no}', False, "own_judge_bad_json;own_judge_unanswered"),
+    ('{"title": "no"', False, "own_judge_no_json;own_judge_unanswered"),
+    ('not json', False, "own_judge_no_json;own_judge_unanswered"),
+    (RuntimeError("503"), False, "own_judge_RuntimeError;own_judge_unanswered"),         # the request failed
 ])
 def test_anything_but_a_plain_no_refuses_the_line(own, monkeypatch, judge, cta_ships, failure):
     """The refusal is logged, so it does not read as a title the model never
@@ -103,7 +103,7 @@ def test_a_judge_no_route_answers_refuses_both(own, monkeypatch):
                         lambda prompt, prior: tried.append(prompt) or (None, "gemini", prior))
     m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
     assert m.title is None and m.cta is None
-    assert len(tried) == 1 and m.failure == "own_judge_RuntimeError"
+    assert len(tried) == 1 and m.failure == "own_judge_RuntimeError;own_judge_unanswered"
 
 
 def test_a_refusal_follows_a_rescued_metadata_reply(monkeypatch):
@@ -141,7 +141,8 @@ def test_every_part_of_a_judge_failure_is_named_the_judges(monkeypatch):
     monkeypatch.setattr(llm, "_rescue_metadata", lambda prompt, prior: next(replies))
     m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
     assert m.title is None and m.cta is None and m.source == llm.FALLBACK_SOURCE
-    assert m.failure == "http_503;own_judge_http_429_day;own_judge_fallback_http_429_day"
+    assert m.failure == ("http_503;own_judge_http_429_day;own_judge_fallback_http_429_day;"
+                         "own_judge_unanswered")
 
 
 def test_a_rescued_judge_that_refuses_logs_both(monkeypatch):

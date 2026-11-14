@@ -20,7 +20,7 @@ def test_the_prompt_is_the_judges_with_every_case():
     p = jc.prompt()
     assert p.startswith(llm._OWN_JUDGE[:60])
     assert all(json.dumps(line, ensure_ascii=False) in p for line, _ in jc.CASES)
-    assert f'"{len(jc.CASES)}": "yes" or "no"' in p and len(jc.CASES) == 20
+    assert f'"{len(jc.CASES)}": "yes" or "no"' in p and len(jc.CASES) == 26
 
 
 @pytest.mark.parametrize("raw, code", [

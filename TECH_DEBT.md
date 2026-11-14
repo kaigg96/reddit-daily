@@ -440,28 +440,6 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
   you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
   when** #14 is read (~11-23).
-- **The own-question title check's last step: the judge's model (merged off
-  2026-11-12, PLAN C16).** A word list (`llm._OWN_BANNED`) leaked through three
-  fresh-reviewed rounds and dropped ordinary questions ("Why do people say sorry
-  so much?"), so since 11-14 it keeps Reddit's names alone (`reddit`, `r/…`,
-  `/r/…`) and a separate request after `get_metadata` judges whether the title or
-  closing line passes the takes off as real people's (`llm._own_judged`; fail
-  closed; rescued as the metadata call is). Chosen over a field in the metadata
-  reply because on our channel the writing model ignores its own instructions
-  where a separate check does not (#77's tags; the R4.6 screen). Cost +1 a run:
-  4 for an own run, 8 of 20 at two a day, 16 at four. A refusal now logs in
-  `meta_failure` (`own_list_<field>`, `own_judge_<field>`, `own_judge_<why>`,
-  after the metadata call's own failure; `validate_release.py` reads `failure`
-  only with a fallback `source`, so it is unaffected). The 17 fixed cases
-  (`tests/test_own_title_cases.py`) now grade the list and the plumbing with the
-  judge mocked. **Left before switch-on:** one request,
-  `scripts/judge_own_cases.py`, judging all 17 on the sample model, which must
-  right every case; it needs a Gemini window (after 07:00 UTC, an hour clear of
-  the :23 runs). Known gaps, accepted: keywords have no judge, so only Reddit's
-  names drop there (they are tags, never shown); the list misses `redd.it` and
-  subreddits opening on a digit. **Closes when** that run rights all 17, or
-  its misses are fixed and it reruns.
-
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
 (delete it, or leave one line in the pass that fixed it), **promoted** to

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One request: does the own-question show's title judge right the 20 fixed
+"""One request: does the own-question show's title judge right the fixed
 cases (PLAN C16; TECH_DEBT's own-title item)? The last check before
 `SOURCE=own` can turn on: the unit tests prove the plumbing with the judge
 mocked, never its model.
@@ -52,6 +52,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--model", default=llm.SAMPLE_MODEL)
     args = ap.parse_args(argv)
+    if llm.provider() != "gemini":   # it would answer on Groq, under Gemini's name
+        print("AI_PROVIDER routes to Groq: unset it to grade a Gemini model")
+        return 2
     try:
         raw = llm._generate(prompt(), model=args.model)
     except Exception as e:   # noqa: BLE001

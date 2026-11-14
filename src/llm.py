@@ -293,7 +293,12 @@ def _own_fields(data):
 # do not (bet 1's tags, #77). A miss misleads viewers about whose takes they
 # are; a false refusal only ships the question as the title, so anything but a
 # plain "no" refuses (fail closed). One request a run, own questions only.
-_OWN_JUDGE = """Our show writes its own question and its own three takes; no real
+# Graded by scripts/judge_own_cases.py: 15 of 17 before its "answers" and
+# told-story sentences, then 26 of 26 on both models (11-14). Not graded: a
+# host's vote claiming experience ("I've been there"), which only arises once
+# the vote rule runs with own questions; and lines labelled title/cta, as
+# here, where the batch numbers them.
+_OWN_JUDGE ="""Our show writes its own question and its own three takes; no real
 person, user, commenter or crowd wrote them, and they come from no website.
 For each line below, answer "yes" if it presents the takes as coming from real
 people, users, strangers, commenters, a crowd, a forum or Reddit (as "People
@@ -318,7 +323,7 @@ def _own_judged(data):
     failure as `own_judge_<why>` (a request's, kept when a later route
     answered, as the metadata call keeps Gemini's; `no_json`, `bad_json`), then
     `own_judge_title` / `own_judge_cta` for a line a verdict refused. With no
-    verdict both lines go and the failure is why. "" when the judge answered
+    verdict both lines go and `own_judge_unanswered` ends it. "" when the judge answered
     first time and refused nothing. Without it a refusal logged as a title the
     model never wrote."""
     keys = [k for k in ("title", "cta") if isinstance(data.get(k), str) and data[k].strip()]
@@ -362,6 +367,8 @@ def _own_judged(data):
             data[k] = None
             if answered:   # with no verdict, the failure above is why
                 labels.append(f"own_judge_{k}")
+    if not answered:   # else a rescued judge and a refusing one log alike
+        labels.append("own_judge_unanswered")
     return data, ";".join(labels)
 
 
