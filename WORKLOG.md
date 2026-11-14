@@ -83,7 +83,7 @@ and more useful than a confident guess.
 ### Next
 - **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
 - **Ready now:** the backup show's last buildable condition, never the same background clip twice in a row, is built and reviewed on a branch; it changes how the video is put together, so it merges only after a sample video passes. Ask for one after 08:00, an hour clear of an upload. Then measure how often its question writer repeats itself (about 5 requests, with the rule set first).
-- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling watch time. **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling watch time. For that last one I set the rule tonight, before any figure was seen: our reporting tool cannot yet show the share of each video watched week by week, so add that first. If AskReddit's share holds or rises while its watch time fell, the fall is shorter videos; if the share falls beyond its usual drift, viewers are leaving earlier. **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
 
 ### Better?
 - **Than last shift:** no, not toward revenue. The backup show's title check is proven on both our AI models, and it now refuses reworded repeats, which YouTube's spam rules would count against it.
