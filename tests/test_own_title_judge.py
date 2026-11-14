@@ -90,6 +90,9 @@ def test_a_failed_judge_is_rescued_as_the_metadata_call_is(own, monkeypatch):
 def test_a_judge_no_route_answers_refuses_both(own, monkeypatch):
     own(RuntimeError("503"))
     monkeypatch.setattr(config, "DRY_RUN", False)
-    monkeypatch.setattr(llm, "_rescue_metadata", lambda prompt, prior: (None, "gemini", prior))
+    tried = []
+    monkeypatch.setattr(llm, "_rescue_metadata",
+                        lambda prompt, prior: tried.append(prompt) or (None, "gemini", prior))
     m = llm.get_metadata("How much should you tip?", ["a", "b", "c"])
     assert m.title is None and m.cta is None
+    assert len(tried) == 1
