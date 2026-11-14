@@ -182,6 +182,16 @@ def test_a_demoted_post_risk_is_logged_as_on_the_reddit_path(monkeypatch):
     assert logged == [(GOOD["question"], "demoted_post_risk")]
 
 
+def _cleared(reply):
+    """The metadata reply, with the title judge (llm._own_judged) clearing
+    every line, so these tests grade the word list alone."""
+    def fake(prompt, **kw):
+        if prompt.startswith(llm._OWN_JUDGE[:30]):
+            return '{"title": "no", "cta": "no"}'
+        return json.dumps(reply)
+    return fake
+
+
 @pytest.mark.parametrize("field, value", [
     ("title", "3 People Reveal Their Seat Etiquette"), ("title", "Reddit settles the recline debate"),
     ("title", "Strangers confess their worst flight habit"), ("cta", "Tell r/AskReddit which take wins.")])
@@ -189,7 +199,7 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     reply = {"title": "3 Takes On Reclining Your Seat", "keywords": ["reclining seat", "reddit ama"],
              "cta": "Which take do you pick? Tell us below."}
     reply[field] = value
-    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
+    monkeypatch.setattr(llm, "generate_retrying", _cleared(reply))
     monkeypatch.setattr(config, "SOURCE", "own")
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert getattr(meta, field) is None and meta.keywords == ["reclining seat"]
@@ -207,7 +217,7 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     ("Real People Answer: Recline Or Not?", True), ("What people told us about reclining", True)])
 def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
     reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
-    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
+    monkeypatch.setattr(llm, "generate_retrying", _cleared(reply))
     monkeypatch.setattr(config, "SOURCE", "own")
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert (meta.title is None) == dropped
