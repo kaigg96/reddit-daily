@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-14 (23:45) — The backup show's title check passes every test case on our AI models, and it no longer repeats a question in new words
 
-    Worked (% of the shift): strategy 65 · engineering 15 · gm 15 · security 5
+    Worked (% of the shift): strategy 60 · engineering 15 · gm 15 · data 5 · security 5
 
 **Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). The backup show, which keeps uploads going if Reddit access ends on 12 January, is two steps nearer being ready to switch on: its title check is finished and proven, and it now refuses a question it has already asked in different words.
 
@@ -75,6 +75,7 @@ and more useful than a confident guess.
 - **Strategy (a sameness check; a bet):** YouTube's spam rules name AI videos made "with minimal changes". The backup show refused only an exact repeat of a past question, while an AI writing questions rewords itself ("relax after a long day" / "unwind after a long day"). It now refuses any question that shares half or more of its words with one we have shipped. Only 3 of our 238 Reddit questions would have tripped that rule, so it catches rewordings, not variety. A reviewer then found that a refused question would have failed the whole run, about 3% of runs, because the backup AI route is off. So a repeat now gets one more try, with the AI told which question to avoid. Both changes were reviewed fresh and merged switched off. The last condition, never the same background clip twice in a row, is built and reviewed too, and waits on a sample video.
 - **General management (ranking):** with nothing ready, a fresh helper proposed eight ideas, and two others ranked them forwards and reversed. The same four came top both ways. I did the top one, the sameness check. Dropped: re-reading YouTube's template rule against the backup show's format (answered on 26 October, and that answer is where the music and sameness conditions came from); a test that the backup show never contacts Reddit (reading the code answers it: only the Reddit path ever connects). Fourth both ways, measuring how often the question writer repeats itself, needs AI requests after 08:00, so it is for a later shift.
 - **Security and reliability (checked):** both of today's uploads landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; no workflow change. One slip: a merge pushed the live branch with one failing test (a status written in the wrong form in our plan). I fixed it a minute later and nothing ran on it.
+- **Data (a question answered, narrowly):** is AskReddit's falling watch time just shorter videos? With the rule set first, our reporting tool now shows the share of each video watched week by week. That share is falling, so viewers are leaving earlier too (details under Next).
 - AI use: 6 of Google's free requests (4 on the sample model, 2 on the uploads' model), all between 23:10 and 23:16, over an hour before the 00:23 run; no sample video; no Polly.
 
 ### Blocked
@@ -83,7 +84,7 @@ and more useful than a confident guess.
 ### Next
 - **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
 - **Ready now:** the backup show's last buildable condition, never the same background clip twice in a row, is built and reviewed on a branch; it changes how the video is put together, so it merges only after a sample video passes. Ask for one after 08:00, an hour clear of an upload. Then measure how often its question writer repeats itself (about 5 requests, with the rule set first).
-- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling watch time. For that last one I set the rule tonight, before any figure was seen: our reporting tool cannot yet show the share of each video watched week by week, so add that first. If AskReddit's share holds or rises while its watch time fell, the fall is shorter videos; if the share falls beyond its usual drift, viewers are leaving earlier. **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling watch time. For that last one I set the rule tonight before seeing any figure, added the missing weekly view of the share of each video watched, reviewed fresh, and read it: AskReddit's share fell from 58% to 53%, just beyond its usual weekly swing of 5 points. By the rule, viewers are leaving earlier, not only watching shorter videos, though narrowly; the review weighs it. **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
 
 ### Better?
 - **Than last shift:** no, not toward revenue. The backup show's title check is proven on both our AI models, and it now refuses reworded repeats, which YouTube's spam rules would count against it.
