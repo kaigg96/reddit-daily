@@ -338,3 +338,4 @@ F336,2026-11-15T11:35:36+00:00,43706183068,reliability,Gate test placement broke
 F337,2026-11-15T17:54:28+00:00,43742586351,product,Keep bet 1's sample (expires 11-27) on sample-frames; repoint #77,done,,none,None,None,0,
 F338,2026-11-15T17:54:57+00:00,43742586351,reliability,Four-a-day risk (2): re-count cancelled runs (0 of 394) and closest starts (3.1h),done,,none,None,None,0,
 F339,2026-11-15T18:01:58+00:00,43742586351,data,"R9: do the own show's kind of questions cost watch time? Rule first, split built, reviewed, read: -9% inside a 10% gap, no evidence",done,,none,The review found 21 of 23 name flags misfiled one way; fixed before the read,A counts-only pass on the arms before any figure,0,
+F340,2026-11-15T18:03:35+00:00,43742586351,strategy,"Music route that makes #90 label-only: incompetech CC BY 4.0 found; switch-on loose end (3) settled, no workflow patch",done,,none,None,None,0,

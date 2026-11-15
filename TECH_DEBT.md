@@ -165,9 +165,16 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   then judge), so the gates spend 7 of their stated 8, 9 only if retries
   fire (the cap is a budget line, not a stop); (2) fixed 11-15: the docs
   check now reads the shipped version, so it flags PRD's live format until
-  it says `v7s-own`; (3) branch renders could no longer show Reddit's show
-  (`dry-run.yml` passes no `SOURCE`), which bet 1's AskReddit read wants.
-  Then a dry run of its tip, which renders the own path.
+  it says `v7s-own`; (3) settled 11-15, no workflow patch: `dry-run.yml`
+  passes no `SOURCE`, so a render takes the branch's default, and a sample
+  branch whose `config.SOURCE` defaults to `reddit` still renders Reddit's
+  show. Then a dry run of its tip, which renders the own path. **Music
+  without the owner's hands (11-15):** Kevin MacLeod's tracks (incompetech)
+  are CC BY 4.0, so plain files may sit in this public repo with a credit,
+  and are pre-registered in Content ID: a claim comes when the description
+  lacks the credit, and is released within 72 h of a dispute (the owner's
+  hands). Needs a credit line in the description, which nothing writes yet,
+  and a track choice. Build it only if the owner picks it on #90.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
