@@ -131,6 +131,34 @@ name. A recurring sting or a host persona waits for the February read.
 render is bought. Two fails on the same check means the shape changes, not
 the episode.
 
+**Worked examples** (T6's three episodes in the shape; values as fetched
+11-15, comparisons computed from the records). The script is what is spoken;
+[screen] is what is shown.
+
+1. *Hook:* "Gas is four forty-five a gallon today. What did it cost in 1990?"
+   [screen: "$4.45 today · 1990: ?"] *Beat:* "Say your number." [screen holds
+   3 s] *Reveal:* "One dollar four." [screen: "$1.04"] "Less than a quarter
+   of today." [screen: "÷4.3"] *Turn:* "Same gallon, same country.
+   Thirty-six years." *Tomorrow:* "Tomorrow: a dozen eggs, 1980."
+   Credit: "Source: U.S. Bureau of Labor Statistics, series APU000074714."
+2. *Hook:* "More people: Wyoming, or Washington, D.C.?" [screen: the two
+   names] *Beat:* "Pick one." [screen holds 3 s] *Reveal:* "D.C."
+   [screen: "D.C. 702,250 · Wyoming 587,618"] "By about a hundred and
+   fifteen thousand." *Turn:* "A whole state, outnumbered by one city that
+   isn't in one." *Tomorrow:* "Tomorrow: Vermont or Alaska?"
+   Credit: "Source: U.S. Census Bureau, Vintage 2024 population estimates."
+3. *Hook:* "How many floors does the Burj Khalifa have?" [screen: the
+   name, "? floors"] *Beat:* "Guess." [screen holds 3 s] *Reveal:* "A
+   hundred and sixty-three." [screen: "163"] "Sixty-one more than the
+   Empire State Building." [screen: "163 vs 102"] *Turn:* "And it's
+   been the tallest since 2010." *Tomorrow:* "Tomorrow: the longest
+   bridge you can drive on." Credit: "Data: Wikidata (CC0), Q12495 P1101;
+   Q9188 P1101."
+
+The comparison in each is a second record or a ratio, never prose a model
+invented; the "turn" is the one line the model may write, and it states no
+number the records do not hold.
+
 **Schema the renderer takes** (one JSON per episode, produced by `select`):
 `{"hook": str, "beat": str, "options": [str, str] | null, "answer": str,
 "comparison": str, "turn": str, "tomorrow": str, "source": {"name": str,
