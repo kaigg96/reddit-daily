@@ -39,8 +39,8 @@ open. **`STOP`** — close the loop and end.
 1. **Incident.** Did both uploads land (`upload_log.csv` tail)? Did the last
    workflow run succeed? Is `prev_post.txt` intact? Did `money_check.py`
    report drift? A missed or duplicated upload, or a money control gone,
-   preempts everything. You cannot read Actions logs, so to see *why* a run
-   failed, request a dry run of `main` (§6): the verdict carries the error.
+   preempts everything. To see *why* a run failed, read its log: `gh run list
+   --limit 5`, then `gh run view <id> --log-failed`.
 2. **Ship what's built.** Read `.github/last-release-validation.md` on `main`;
    CI writes the verdict there. PASS means merge. Unshipped work is inventory.
 3. **A review is due.** `cadence.py` names it; it is this shift's first work
@@ -61,11 +61,11 @@ Supply is **ready** work across `PRD.md` §0 (the product) and `PLAN.md` §3
 - **Rank it, then take from the top until the hand-over time.** Use `/backlog`
   §2 — separate pass, forward and reversed, one-line statements, each
   dimension scored before any overall call. The first dimension is **effect on
-  the company's path to revenue**; watch-seconds is the product's measure,
-  not the company's. A shift that only ever ranks product items is ranking the
-  old way.
-- **Fewer than 3 ready is the first job**: generate and rank more
-  (`/backlog` §1–2). Research questions answerable from existing data come
+  the company's path to revenue**; engaged share is the product's test
+  measure (D9, #91), not the company's. A shift that only ever ranks product
+  items is ranking the old way.
+- **Below the floor `backlog_status.py` prints is the first job**: generate
+  and rank more (`/backlog` §1–2). Research questions answerable from existing data come
   first — their worst case is wasted minutes. Then the risk register
   (`PLAN.md` §4): a risk with no item answering it is a gap. If generating
   finds nothing above the bar, say what it considered and why; never pad.

@@ -1,6 +1,6 @@
 ---
 name: backlog
-description: How the company decides what to work on next — generating candidate work, prioritising the one queue, evaluating an experiment whose decision rule has come due, and challenging a constraint that costs more than it buys. Load when fewer than 3 items are ready (scripts/backlog_status.py), when ranking the queue, when a rule comes due, or when a constraint keeps forcing workarounds.
+description: How the company decides what to work on next — generating candidate work, prioritising the one queue, evaluating an experiment whose decision rule has come due, and challenging a constraint that costs more than it buys. Load when ready items are below the floor scripts/backlog_status.py prints, when ranking the queue, when a rule comes due, or when a constraint keeps forcing workarounds.
 ---
 
 # Decide what to work on next
@@ -93,7 +93,7 @@ judgement. Dimensions, in this project's terms:
 | | |
 |---|---|
 | **Effect on the path to revenue** | The company's goal (`PLAN.md` §1, D12). Scored first, for every candidate, product or not. |
-| **Effect on watch-seconds** | The product's primary metric (`PRD.md` §4), for product candidates. Views are noisy — 27–50% at fixed age. |
+| **Effect on engaged share** | The product's success metric for tests set from 2026-11-10, with watch-seconds as its gate (D9, #91), for product candidates. Views are noisy — 27–50% at fixed age. |
 | **Evidence** | Measured on *our* channel / measured elsewhere / reasoned. |
 | **Cost** | Gemini requests, Polly characters, Actions minutes, shift time. |
 | **Reversibility** | One `FORMAT_VERSION` bump, or something that cannot be undone. |

@@ -119,9 +119,9 @@ Adopted so far: the *"would removing this cause a mistake?"* pruning test;
 `CLAUDE.md` for broadly-applicable rules only, with specifics in skills;
 hooks and tests in preference to advisory prose.
 
-Not yet tried, and worth a look: `/doctor` for automated `CLAUDE.md` cuts;
-subagents to keep exploration out of the main context; `/clear` discipline
-between unrelated tasks within a shift.
+Adopted since: subagents for exploration and fresh-context review. Not yet
+tried, and worth a look: `/doctor` for automated `CLAUDE.md` cuts; `/clear`
+discipline between unrelated tasks within a shift.
 
 ## Prune
 
