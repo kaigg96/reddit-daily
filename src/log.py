@@ -138,6 +138,19 @@ def append_upload_log(row):
               f"{type(e).__name__}: {e}")
 
 
+def last_bg_clip():
+    """The last upload's background clip, "" when there is none or the log
+    cannot be read: the own show's no-repeat pick (`background._pick_broll`)
+    then falls back to any clip rather than failing the run."""
+    try:
+        with open(config.UPLOAD_LOG, newline="") as f:
+            rows = list(csv.DictReader(f))
+    except Exception as e:   # noqa: BLE001
+        print(f"Upload log unreadable for the last clip ({type(e).__name__}); any clip may repeat")
+        return ""
+    return (rows[-1].get("bg_clip") or "") if rows else ""
+
+
 def uploaded_titles():
     """Every post title already uploaded, so a run never ships one twice.
 

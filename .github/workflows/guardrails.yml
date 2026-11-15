@@ -44,6 +44,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the attribution check reads every commit the push brought
+
+      # CLAUDE.md section 5, held here since 2026-11-15 (D16): the same check
+      # in shift.yml can now change by notice, this file cannot.
+      - name: No AI attribution in the push
+        if: github.event_name == 'push'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            range="$BEFORE..HEAD"
+          else
+            range="-1 HEAD"
+          fi
+          bad=$(git log $range --format='%H %s%n%b' \
+                | grep -iE 'co-authored-by:.*(claude|anthropic)|generated with' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::A commit credits AI tooling, which CLAUDE.md section 5 forbids."
+            echo "$bad"
+            exit 1
+          fi
+          echo "no AI attribution in $range"
 
       - name: Cost controls intact
         run: |
@@ -71,9 +94,21 @@ jobs:
             || { echo "::error::money_check accepts an alarm over 10000 chars/hour (${alarm:-missing})"; exit 1; }
           grep -q 'READONLY_USER = "claude-readonly"' $f && grep -q "identity_ok(me\[\"Arn\"\])" $f \
             || { echo "::error::money_check no longer refuses identities other than the read-only user"; exit 1; }
-          grep -q "money_check.py" .claude/skills/shift/SKILL.md \
+          grep -q "money_check.py" process/shift.md \
             || { echo "::error::shifts no longer run the money check"; exit 1; }
           echo "budget <= \$$max, alarm <= $alarm chars/hour, read-only identity enforced"
+
+      # Since D16 (2026-11-14) shifts edit CLAUDE.md themselves. That they
+      # never spend is held at AWS and by the two checks above, not by these
+      # words: this is a tripwire, not enforcement. A rule nobody can read is
+      # a rule nobody follows, and this file is one a shift cannot change.
+      - name: Money rule still written down
+        run: |
+          grep -q "Spending real money is never a shift's decision" CLAUDE.md \
+            || { echo "::error::CLAUDE.md no longer says a shift never spends money"; exit 1; }
+          grep -q "money_check.py" CLAUDE.md \
+            || { echo "::error::CLAUDE.md no longer names the money check"; exit 1; }
+          echo "the money rule is still in CLAUDE.md"
 
       - name: Safety screen intact
         run: |
@@ -136,19 +171,19 @@ jobs:
         run: |
           [ -f scripts/escalations.py ] \
             || { echo "::error::the approved-escalation tool is gone"; exit 1; }
-          grep -q "escalations.py approved" .claude/skills/shift/SKILL.md \
+          grep -q "escalations.py approved" process/shift.md \
             || { echo "::error::shifts no longer check for decisions the owner has made"; exit 1; }
           echo "approved escalations are still picked up"
 
       - name: PM keeps its methods
         run: |
-          [ -f .claude/skills/backlog/SKILL.md ] \
+          [ -f process/backlog.md ] \
             || { echo "::error::the backlog methods are gone"; exit 1; }
           for m in "verbalized\|probabilit" "reversed" "focusing steps"; do
-            grep -qi "$m" .claude/skills/backlog/SKILL.md \
+            grep -qi "$m" process/backlog.md \
               || { echo "::error::backlog lost a documented bias mitigation ($m)"; exit 1; }
           done
-          grep -q "/backlog" .claude/skills/shift/SKILL.md \
+          grep -q "/backlog" process/shift.md \
             || { echo "::error::the shift no longer points at its ranking methods"; exit 1; }
           echo "generation, ranking and constraint methods intact"
 

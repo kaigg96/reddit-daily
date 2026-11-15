@@ -34,17 +34,28 @@ def _git(*args):
     return r.stdout.strip() if r.returncode == 0 else ""
 
 
+def shipped_format():
+    """FORMAT_VERSION as an upload run computes it: config imported with no
+    SOURCE set, since the own show's version follows SOURCE (PLAN C16) and a
+    literal in the file would miss the switch. None if config cannot load."""
+    env = {k: v for k, v in os.environ.items() if k not in ("SOURCE", "SAMPLE")}
+    r = subprocess.run([sys.executable, "-c",
+                        "from src import config; print(config.FORMAT_VERSION)"],
+                       cwd=ROOT, env=env, capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
+
+
 def check_live_format():
     """The version PRD claims is live, against the version the code ships."""
     prd = _read("PRD.md")
-    code = re.search(r'FORMAT_VERSION\s*=\s*"([^"]+)"', _read("src/config.py"))
+    code = shipped_format()
     claim = re.search(r"\*\*Live format:\*\*\s*`([^`]+)`", prd)
     if not code or not claim:
         return None, "could not read one of the two values"
-    if code.group(1) != claim.group(1):
+    if code != claim.group(1):
         return False, (f"PRD says live format is {claim.group(1)}, "
-                       f"but src/config.py ships {code.group(1)}")
-    return True, f"live format {code.group(1)} agrees with the code"
+                       f"but src/config.py ships {code}")
+    return True, f"live format {code} agrees with the code"
 
 
 def check_merged_branches(root=ROOT, prd=None):
@@ -176,11 +187,17 @@ def check_decision_ids():
     another, independently. A duplicate id makes every later reference
     ambiguous, and one decision was lost entirely in the same episode.
     """
-    ids = re.findall(r"^## (D\d+)\b", _read("DECISIONS.md"), re.M)
+    text = _read("DECISIONS.md")
+    ids = re.findall(r"^## (D\d+)\b", text, re.M)
     dupes = sorted({i for i in ids if ids.count(i) > 1})
     if dupes:
         return False, f"duplicate decision id(s): {', '.join(dupes)}"
-    nums = sorted(int(i[1:]) for i in ids)
+    # A superseded stub leaves once its supersessor has been re-reviewed
+    # twice (the file's retention rule, 2026-11-15); its number is listed on
+    # the "Retired stubs:" line, so a gap there is a record kept, not lost.
+    retired = {int(n) for line in re.findall(r"^Retired stubs:.*$", text, re.M)
+               for n in re.findall(r"\bD(\d+)\b", line)}
+    nums = sorted({int(i[1:]) for i in ids} | retired)
     gaps = [n for n in range(1, max(nums, default=0)) if n not in nums]
     if gaps:
         return False, (f"missing decision id(s) {gaps} — a record was lost or "

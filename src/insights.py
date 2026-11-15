@@ -276,6 +276,129 @@ THEME_SINCE = datetime.datetime(2026, 9, 1, tzinfo=datetime.timezone.utc)
 THEME_ANY_P, THEME_ONE_P, THEME_LIFT, THEME_MIN_BURIED = 0.05, 0.007, 2.0, 10
 
 
+# R12 (PRD §0, pre-committed 2026-11-13, before any per-topic figure): does a
+# change in topic mix explain the fall in engaged share? Periods split at
+# W43; a topic under TOPIC_MIX_MIN uploads in either pools into "rest".
+TOPIC_MIX_START = datetime.datetime(2026, 9, 21, tzinfo=datetime.timezone.utc)
+TOPIC_MIX_SPLIT = datetime.datetime(2026, 10, 19, tzinfo=datetime.timezone.utc)
+TOPIC_MIX_MIN, TOPIC_MIX_MIN_N, TOPIC_MIX_MIN_GROUPS, TOPIC_MIX_MIN_FALL = 5, 20, 3, 0.03
+
+
+def topic_mix(videos, split=TOPIC_MIX_SPLIT, metric=Metric.ENGAGED_SHARE, key="topic",
+              min_groups=TOPIC_MIX_MIN_GROUPS, min_views=1):
+    """R12's read: how much of the fall in mean `metric` from uploads before
+    `split` to those from it the topic mix alone explains (R15: `key` subreddit,
+    two groups allowed). The early period's
+    per-topic means, reweighted to the late period's mix, give what the late
+    mean would have been had only the mix changed. Uploads with no logged
+    topic or no reading are left out, and zero-view uploads are counted apart
+    (zero_early, zero_late), never read as a share of 0. R16: `min_views` leaves
+    out uploads under that many plays too, counted apart (below_early,
+    below_late), so a few barely-shown uploads cannot make the fall. Returns a dict:
+    n_early, n_late, mean_early, mean_late, counterfactual, fall, mix, groups
+    (topic, n early, n late, early mean, late mean), zero_early, zero_late and
+    verdict ("insufficient", "no fall", "lead", "not topic mix" or "unclear")."""
+    rows, zeros, below = [], [0, 0], [0, 0]
+    for v in videos:
+        pub = v.true_published or v.published
+        topic, value = str(v.meta.get(key) or "").strip(), getattr(v, metric)
+        if not topic or pub < TOPIC_MIX_START:
+            continue
+        if not v.views:
+            zeros[pub >= split] += 1
+        elif value is None:
+            continue
+        elif v.views < min_views:
+            below[pub >= split] += 1
+        else:
+            rows.append((pub >= split, topic, value))
+    count = lambda late, t: sum(1 for r in rows if r[0] == late and r[1] == t)
+    keep = {t for _, t, _ in rows if count(False, t) >= TOPIC_MIX_MIN and count(True, t) >= TOPIC_MIX_MIN}
+    by = {}
+    for late, t, value in rows:
+        by.setdefault(t if t in keep else "rest", ([], []))[late].append(value)
+    mean = lambda xs: sum(xs) / len(xs) if xs else None
+    early = [x for e, _ in by.values() for x in e]
+    late = [x for _, l in by.values() for x in l]
+    out = {"n_early": len(early), "n_late": len(late), "mean_early": mean(early),
+           "mean_late": mean(late), "counterfactual": None, "fall": None, "mix": None,
+           "groups": sorted((g, len(e), len(l), mean(e), mean(l)) for g, (e, l) in by.items()),
+           "zero_early": zeros[0], "zero_late": zeros[1], "below_early": below[0],
+           "below_late": below[1], "verdict": "insufficient"}
+    if len(early) >= TOPIC_MIX_MIN_N and len(late) >= TOPIC_MIX_MIN_N:
+        # The fall needs no groups; R16 reads it when too few remain to reweight.
+        out["fall"] = out["mean_early"] - out["mean_late"]
+    # Every late group needs an early mean to be reweighted.
+    if (len(early) < TOPIC_MIX_MIN_N or len(late) < TOPIC_MIX_MIN_N
+            or len(by) < min_groups or any(l and not e for e, l in by.values())):
+        return out
+    out["counterfactual"] = sum(len(l) / len(late) * mean(e) for e, l in by.values() if l)
+    out["mix"] = out["mean_early"] - out["counterfactual"]
+    if out["fall"] < TOPIC_MIX_MIN_FALL:
+        out["verdict"] = "no fall"
+    elif out["mix"] >= out["fall"] / 2:
+        out["verdict"] = "lead"
+    elif out["mix"] < out["fall"] / 4:
+        out["verdict"] = "not topic mix"
+    else:
+        out["verdict"] = "unclear"
+    return out
+
+
+# R13 (PRD §0, pre-committed 2026-11-13, before any overlap): are reworded
+# repeats of earlier questions buried more often? `select_post` refuses only
+# exact repeats.
+NEAR_REPEAT_JACCARD, NEAR_REPEAT_MIN, NEAR_REPEAT_P = 0.5, 8, 0.05
+_NEAR_REPEAT_STOP = frozenset(
+    "the and for are you your what who why how was were has have had does did "
+    "that this with from they their them there would could should about into "
+    "been its it's not but any all one what's who's how's that's don't doesn't "
+    "isn't can't you're".split())
+
+
+def question_words(text):
+    """A question's words for R13: lower case, 3+ letters, stopwords out."""
+    text = str(text or "").lower().replace("\u2019", "'")
+    return frozenset(w for w in re.findall(r"[a-z0-9']+", text)
+                     if len(w) >= 3 and w not in _NEAR_REPEAT_STOP)
+
+
+def near_repeat_overlap(rows):
+    """{video_id: (overlap, earlier question)}: each logged upload's question's
+    highest Jaccard word overlap with any earlier logged question (0.0 and ""
+    for the first, or a question with no words)."""
+    out, seen = {}, []
+    for r in sorted(rows, key=lambda r: r.get("timestamp_utc") or ""):
+        words = question_words(r.get("post_title"))
+        best = (0.0, "")
+        for w, title in seen:
+            if words and w:
+                best = max(best, (len(words & w) / len(words | w), title))
+        out[r["video_id"]] = best
+        seen.append((words, r.get("post_title") or ""))
+    return out
+
+
+def near_repeats_buried(videos, overlap):
+    """R13's read on uploads in `overlap`: near-repeats (overlap of
+    NEAR_REPEAT_JACCARD or more) against the rest, buried, stratified by
+    format_version. Returns a dict: near, rest (videos), strata, p, higher
+    (near-repeats buried more than expected, pooled) and verdict
+    ("insufficient", "lead" or "no")."""
+    vs = [v for v in videos if v.video_id in overlap]
+    near = [v for v in vs if overlap[v.video_id][0] >= NEAR_REPEAT_JACCARD]
+    rest = [v for v in vs if overlap[v.video_id][0] < NEAR_REPEAT_JACCARD]
+    strata = buried_strata(near, rest)
+    p = buried_rate_p_pooled(strata)
+    higher = sum(ha - na * (ha + hb) / (na + nb) for ha, na, hb, nb in strata) > 0
+    if len(near) < NEAR_REPEAT_MIN:
+        verdict = "insufficient"
+    else:
+        verdict = "lead" if p < NEAR_REPEAT_P and higher else "no"
+    return {"near": near, "rest": rest, "strata": strata, "p": p, "higher": higher,
+            "verdict": verdict}
+
+
 def theme_buried(videos, labels):
     """R11's read: per tag, and for any tag, the buried rate of tagged uploads
     against the rest. Only labelled uploads count. Returns (n buried, rows),
@@ -984,8 +1107,9 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 # Each release's pre-committed size (PRD §0); one not listed is read at
 # MIN_COHORT. An automatic read without it answers at 8 and pre-empts a rule
 # that committed to more (#1: `v7` commits to 20; #15: bet 1's `v8`, 20;
-# `v7s`, MODEL's successor, 20 by #13's rule).
-RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20}
+# `v7s`, MODEL's successor, 20 by #13's rule; the own-questions show on
+# either, `config.OWN_FORMAT_VERSION`, 20 by C16's).
+RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20, "v7s-own": 20, "v8-own": 20}
 
 # Each release's pre-committed cut (PRD §0), read when no --within is given.
 # Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was
@@ -1792,6 +1916,12 @@ def _with_derived_dimensions(row):
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
     # The logged topic, else the labelling pass's (see _TOPICS_CACHE).
     r["topic_any"] = (r.get("topic") or "").strip() or (_cached_topics().get(q, "") if q else "")
+    # R9: is the own show's kind of question (#90; ownquestions.PROMPT bars
+    # news, politics, religion, health, sex and a named person or brand) the
+    # kind that holds viewers? dark-morbid is out as not "everyday life".
+    topic = r["topic_any"]
+    r["question_kind"] = "" if not (q and topic) else (
+        "everyday" if topic in _EVERYDAY_TOPICS and not _names_something(q) else "excluded")
     # The question is the narrated opening: does addressing the viewer hold
     # them? 90 of 154 logged questions say "you" (2026-10-03).
     r["question_person"] = "" if not q else (
@@ -1828,6 +1958,30 @@ def _with_derived_dimensions(row):
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
     return r
+
+
+_EVERYDAY_TOPICS = ("relationships-dating", "money-work", "nostalgia", "humor-absurd",
+                    "hypotheticals", "life-advice", "other")
+# Capitalised but naming nothing: the asker, AskReddit's "…of Reddit", and
+# the calendar (R9's review, 11-15: 21 of 23 flags on everyday topics were these
+# or emphasis).
+_UNNAMED = re.compile(
+    r"I(?:['’](?:m|ve|d|ll))?|Reddit|Redditors?|TV|AM|PM|Christmas|Halloween|Thanksgiving|Easter|Santa"
+    r"|(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day|January|February|March|April|May|June"
+    r"|July|August|September|October|November|December")
+
+
+def _names_something(question):
+    """A capitalised word past each sentence's first: a name, brand, place or
+    acronym ("GTA 6", "US officials", "Microsoft"). All-caps words of four or
+    more letters are emphasis ("FREE"), so NASA is missed."""
+    question = re.sub(r"^\s*[\[(][^\])]*[\])]\s*", "", question)
+    for sentence in re.split(r"(?<=[.!?:;])\s+|\s+[-–—]\s+|[\"“]", question):
+        words = re.findall(r"[A-Za-z][\w'’]*", sentence)
+        if any(w[0].isupper() and not _UNNAMED.fullmatch(w)
+               and not (w.isupper() and len(w) >= 4) for w in words[1:]):
+            return True
+    return False
 
 
 def load_videos(now=None, min_age_days=MIN_AGE_DAYS):

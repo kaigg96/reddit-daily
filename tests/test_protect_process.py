@@ -1,11 +1,15 @@
-"""The process guard (.github/workflows/protect-process.yml), tested by running
+"""The workflow guard (.github/workflows/protect-process.yml), tested by running
 its exact script text -- pulled out of the workflow file -- against real git
-histories. It is the only thing between a shift and its own rules, and until
+histories. Since D16 (2026-11-14) the rules and the process text are the
+shifts' own; the workflows, where the paid and upload keys are wired, change
+only on the owner's label or after a notice the owner did not object to. Until
 2026-09-24 it inspected just the last commit of each push."""
+import datetime
 import json
 import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 import yaml
@@ -21,16 +25,22 @@ const fs = require('fs');
 const [script, approvals, payload] = process.argv.slice(2).map(p => fs.readFileSync(p, 'utf8'));
 const labels = JSON.parse(approvals), push = JSON.parse(payload), out = { warnings: [] };
 const core = { setOutput: (k, v) => { out[k] = v; }, warning: m => out.warnings.push(m), info: () => {} };
-// approvals: {issue: [labels]} (labelled by the owner, 'o') or {issue: {labels, by}}
-const entry = n => Array.isArray(labels[n]) ? { labels: labels[n], by: 'o' } : labels[n];
+// approvals: {issue: [labels]} (labelled by the owner, 'o') or
+// {issue: {labels, by, created_at, body, events, comments}}
+const entry = n => Object.assign({ labels: [], by: 'o', events: [], comments: [] },
+                                 Array.isArray(labels[n]) ? { labels: labels[n] } : labels[n]);
 const github = {
   rest: { issues: {
     get: async ({ issue_number }) => {
       if (!(issue_number in labels)) throw new Error('Not Found');
-      return { data: { labels: entry(issue_number).labels.map(name => ({ name })) } };
+      const e = entry(issue_number);
+      return { data: { labels: e.labels.map(name => ({ name })), created_at: e.created_at, body: e.body } };
     },
     listEvents: async ({ issue_number }) => ({ data: entry(issue_number).labels.map(name =>
-      ({ event: 'labeled', label: { name }, actor: { login: entry(issue_number).by } })) }),
+      ({ event: 'labeled', label: { name }, actor: { login: entry(issue_number).by } }))
+      .concat(entry(issue_number).events) }),
+    listComments: async ({ issue_number }) => ({ data: entry(issue_number).comments }),
+    listEventsForTimeline: async ({ issue_number }) => ({ data: entry(issue_number).timeline || [] }),
   } },
   paginate: async (fn, params) => (await fn(params)).data,
 };
@@ -52,7 +62,8 @@ def env(tmp_path):
     home.mkdir()
     return dict(os.environ, HOME=str(home), GIT_CONFIG_GLOBAL=str(home / ".gitconfig"),
                 GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t",
-                GIT_COMMITTER_EMAIL="t@t", RUNNER_TEMP=str(tmp_path))
+                GIT_COMMITTER_EMAIL="t@t", RUNNER_TEMP=str(tmp_path),
+                PYTHON=sys.executable)      # notice_check.py needs PyYAML: this interpreter has it
 
 
 @pytest.fixture
@@ -62,9 +73,16 @@ def repo(tmp_path, env):
     run(r, env, "init", "-q", "-b", "main")
     write(r, "README.md", "hi\n")
     write(r, "CLAUDE.md", "rules v1\n")
-    write(r, ".claude/skills/shift/SKILL.md", "skill v1\n")
+    write(r, ".github/workflows/guardrails.yml", "checks v1\n")
+    write(r, ".github/workflows/shift.yml", SHIFT_V1)
+    write(r, ".github/workflows/notice_check.py",
+          open(os.path.join(ROOT, ".github", "workflows", "notice_check.py")).read())
     commit(r, env, "base")
     return r
+
+
+SHIFT_V1 = "name: Shift\non: push\npermissions:\n  contents: write\n"
+SHIFT_V2 = SHIFT_V1.replace("Shift", "Shift v2")
 
 
 def run(repo, env, *args):
@@ -102,19 +120,19 @@ APPROVED = {5: ["needs-owner", "approved"]}
 
 def test_an_approved_change_passes(repo, env, tmp_path):
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2\n")
-    commit(repo, env, "Change the skill\n\nApproved-In: #5")
+    write(repo, ".github/workflows/shift.yml", "shift v2\n")
+    commit(repo, env, "Change the shift job\n\nApproved-In: #5")
     assert guard(repo, env, tmp_path, before, APPROVED)["ok"] == "true"
 
 
 @pytest.mark.parametrize("message, approvals, why", [
-    ("Change the skill", APPROVED, "no `Approved-In: #N` trailer"),
-    ("Change the skill\n\nApproved-In: #5", {5: ["needs-owner"]}, "not labelled `approved`"),
-    ("Change the skill\n\nApproved-In: #9", APPROVED, "#9 could not be read"),
+    ("Change the shift job", APPROVED, "no `Approved-In: #N` or `Notice-In: #N` trailer"),
+    ("Change the shift job\n\nApproved-In: #5", {5: ["needs-owner"]}, "not labelled `approved`"),
+    ("Change the shift job\n\nApproved-In: #9", APPROVED, "#9 could not be read"),
 ])
 def test_an_unapproved_change_is_caught(repo, env, tmp_path, message, approvals, why):
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2\n")
+    write(repo, ".github/workflows/shift.yml", "shift v2\n")
     commit(repo, env, message)
     out = guard(repo, env, tmp_path, before, approvals)
     assert out["ok"] == "false" and why in out["why"]
@@ -122,29 +140,29 @@ def test_an_unapproved_change_is_caught(repo, env, tmp_path, message, approvals,
 
 def test_the_label_check_forgives_case_and_spaces(repo, env, tmp_path):
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, "CLAUDE.md", "rules v2\n")
-    commit(repo, env, "Rules\n\nApproved-In: #5")
+    write(repo, ".github/workflows/guardrails.yml", "checks v2\n")
+    commit(repo, env, "Checks\n\nApproved-In: #5")
     assert guard(repo, env, tmp_path, before, {5: [" Approved "]})["ok"] == "true"
 
 
 def test_a_protected_edit_behind_a_later_commit_is_caught(repo, env, tmp_path):
     """The gap found 2026-09-24: the old guard diffed HEAD~1..HEAD only."""
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2 -- unapproved\n")
-    commit(repo, env, "Quietly change the skill")
+    write(repo, ".github/workflows/shift.yml", "shift v2 -- unapproved\n")
+    commit(repo, env, "Quietly change the shift job")
     write(repo, "README.md", "hi again\n")
     commit(repo, env, "Unrelated tip")
     assert run(repo, env, "diff", "--name-only", "HEAD~1", "HEAD") == "README.md"  # all the old guard saw
     out = guard(repo, env, tmp_path, before, APPROVED)
-    assert out["ok"] == "false" and ".claude/skills/shift/SKILL.md" in out["files"]
+    assert out["ok"] == "false" and ".github/workflows/shift.yml" in out["files"]
 
 
 def test_approved_work_merged_with_a_merge_commit_passes(repo, env, tmp_path):
     """The false revert recorded 2026-09-23: a merge commit's message has no trailer."""
     before = run(repo, env, "rev-parse", "HEAD")
     run(repo, env, "checkout", "-q", "-b", "feature")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2\n")
-    commit(repo, env, "Change the skill\n\nApproved-In: #5")
+    write(repo, ".github/workflows/shift.yml", "shift v2\n")
+    commit(repo, env, "Change the shift job\n\nApproved-In: #5")
     run(repo, env, "checkout", "-q", "main")
     write(repo, "README.md", "main moved on\n")
     commit(repo, env, "Meanwhile on main")
@@ -161,10 +179,10 @@ def test_a_protected_edit_hidden_inside_a_merge_is_caught(repo, env, tmp_path):
     write(repo, "notes.txt", "x\n")
     commit(repo, env, "Meanwhile on main")
     run(repo, env, "merge", "-q", "--no-ff", "--no-commit", "feature")
-    write(repo, "CLAUDE.md", "rules rewritten during the merge\n")
+    write(repo, ".github/workflows/guardrails.yml", "checks rewritten during the merge\n")
     commit(repo, env, "Merge feature")
     out = guard(repo, env, tmp_path, before, APPROVED)
-    assert out["ok"] == "false" and "CLAUDE.md" in out["files"]
+    assert out["ok"] == "false" and ".github/workflows/guardrails.yml" in out["files"]
 
 
 def test_unprotected_changes_pass(repo, env, tmp_path):
@@ -175,8 +193,8 @@ def test_unprotected_changes_pass(repo, env, tmp_path):
 
 
 def test_an_unknown_push_base_still_checks_the_tip(repo, env, tmp_path):
-    write(repo, "CLAUDE.md", "rules v2\n")
-    commit(repo, env, "Unapproved rules")
+    write(repo, ".github/workflows/guardrails.yml", "checks v2\n")
+    commit(repo, env, "Unapproved checks")
     out = guard(repo, env, tmp_path, "1" * 40, APPROVED)
     assert out["ok"] == "false" and out["warnings"]
 
@@ -190,9 +208,9 @@ def test_the_revert_restores_edits_removes_additions_and_keeps_the_rest(repo, en
     run(repo, env, "remote", "add", "origin", str(origin))
     run(repo, env, "push", "-q", "-u", "origin", "main")
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2 -- unapproved\n")
-    evil = ".claude/skills/x$(touch PWNED)/SKILL.md"
-    write(repo, evil, "an added skill\n")
+    write(repo, ".github/workflows/shift.yml", "shift v2 -- unapproved\n")
+    evil = ".github/workflows/x$(touch PWNED)/job.yml"
+    write(repo, evil, "an added job\n")
     write(repo, "README.md", "legitimate docs change\n")
     commit(repo, env, "Mixed push")
     run(repo, env, "push", "-q", "origin", "main")
@@ -203,7 +221,7 @@ def test_the_revert_restores_edits_removes_additions_and_keeps_the_rest(repo, en
     subprocess.run(["bash", "-e", "-c", revert], cwd=repo, check=True, capture_output=True,
                    env=dict(env, BASE=out["base"]))
 
-    assert (repo / ".claude/skills/shift/SKILL.md").read_text() == "skill v1\n"
+    assert (repo / ".github/workflows/shift.yml").read_text() == SHIFT_V1
     assert not (repo / evil).exists()
     assert (repo / "README.md").read_text() == "legitimate docs change\n"
     assert not (repo / "PWNED").exists() and not (tmp_path / "PWNED").exists()
@@ -213,19 +231,108 @@ def test_the_revert_restores_edits_removes_additions_and_keeps_the_rest(repo, en
 def test_only_the_owners_label_is_an_approval(repo, env, tmp_path):
     """A shift's token can add labels; an `approved` it added is not a decision."""
     before = run(repo, env, "rev-parse", "HEAD")
-    write(repo, ".claude/skills/shift/SKILL.md", "skill v2\n")
+    write(repo, ".github/workflows/shift.yml", "shift v2\n")
     commit(repo, env, "Self-approved\n\nApproved-In: #5")
     out = guard(repo, env, tmp_path, before,
                 {5: {"labels": ["needs-owner", "approved"], "by": "claude[bot]"}})
     assert out["ok"] == "false" and "by claude[bot], not o" in out["why"]
 
 
-def test_an_unapproved_edit_to_the_org_map_is_caught(repo, env, tmp_path):
-    """ORG.md sets which decisions a shift may take alone (D12). A shift that
-    could edit it could promote "Propose" to "Act" for itself."""
-    write(repo, "ORG.md", "| Pivot proposals | Trigger | Propose |\n")
-    before = commit(repo, env, "Add the map (approved)\n\nApproved-In: #5")
-    write(repo, "ORG.md", "| Pivot proposals | Trigger | Act |\n")
-    commit(repo, env, "Let shifts pivot")
-    out = guard(repo, env, tmp_path, before, APPROVED)
-    assert out["ok"] == "false" and "ORG.md" in out["files"]
+@pytest.mark.parametrize("path", ["CLAUDE.md", "ORG.md", "process/shift.md",
+                                  ".claude/skills/shift/SKILL.md"])
+def test_the_rules_and_the_process_text_are_the_shifts_own(repo, env, tmp_path, path):
+    """D16 (2026-11-14): every one of these had become a wait on the owner. The
+    money rule they carry is held in code and at AWS, not by locking the words."""
+    before = run(repo, env, "rev-parse", "HEAD")
+    write(repo, path, "changed by a shift\n")
+    commit(repo, env, "A shift improves its own process")
+    assert guard(repo, env, tmp_path, before)["ok"] == "true"
+
+
+def days_ago(n):
+    return (datetime.datetime.now(datetime.timezone.utc)
+            - datetime.timedelta(days=n)).isoformat(timespec="seconds")
+
+
+def noticed(**over):
+    return {7: dict({"labels": ["needs-owner"], "created_at": days_ago(4),
+                     "body": "why\n\n<!-- apply-patch -->\n`````diff\n...\n`````"}, **over)}
+
+
+def notice_push(repo, env, path=".github/workflows/shift.yml", text=SHIFT_V2):
+    before = run(repo, env, "rev-parse", "HEAD")
+    write(repo, path, text)
+    commit(repo, env, "Change the shift job\n\nNotice-In: #7")
+    return before
+
+
+def test_a_change_whose_notice_ran_with_no_objection_passes(repo, env, tmp_path):
+    before = notice_push(repo, env)
+    assert guard(repo, env, tmp_path, before, noticed())["ok"] == "true"
+
+
+@pytest.mark.parametrize("over, why", [
+    ({"created_at": days_ago(2)}, "has not had its 3 days of notice"),
+    ({"body": "an ordinary question"}, "carries no change to apply"),
+    ({"comments": [{"user": {"login": "o"}, "body": "not this"}]}, "the owner replied"),
+    ({"events": [{"event": "closed", "actor": {"login": "o"}}]}, "the owner replied"),
+    ({"events": [{"event": "labeled", "label": {"name": "objection"}, "actor": {"login": "o"}}]},
+     "the owner replied"),
+    ({"labels": ["needs-owner", "Objection"], "by": "claude[bot]"}, "the owner replied"),
+])
+def test_a_notice_that_is_young_empty_or_objected_to_is_caught(repo, env, tmp_path, over, why):
+    before = notice_push(repo, env)
+    out = guard(repo, env, tmp_path, before, noticed(**over))
+    assert out["ok"] == "false" and why in out["why"]
+
+
+def test_a_shifts_own_comment_or_close_is_not_an_objection(repo, env, tmp_path):
+    before = notice_push(repo, env)
+    out = guard(repo, env, tmp_path, before, noticed(
+        comments=[{"user": {"login": "claude[bot]"}, "body": "raised again"}],
+        events=[{"event": "closed", "actor": {"login": "github-actions[bot]"}}]))
+    assert out["ok"] == "true"
+
+
+def test_a_notice_naming_a_missing_issue_is_caught(repo, env, tmp_path):
+    before = notice_push(repo, env)
+    out = guard(repo, env, tmp_path, before, {})
+    assert out["ok"] == "false" and "#7 could not be read" in out["why"]
+
+
+@pytest.mark.parametrize("path", [".github/workflows/guardrails.yml",
+                                  ".github/workflows/protect-process.yml",
+                                  ".github/workflows/apply-approved.yml",
+                                  ".github/workflows/notice_check.py"])
+def test_a_notice_commit_touching_a_locked_file_is_caught(repo, env, tmp_path, path):
+    """apply-approved.yml would never push this; the guard re-checks in case
+    its token is ever misused (review, 11-15)."""
+    before = notice_push(repo, env, path, "changed\n")
+    out = guard(repo, env, tmp_path, before, noticed())
+    assert out["ok"] == "false" and "never changes by notice" in out["why"]
+
+
+@pytest.mark.parametrize("text, why", [
+    (SHIFT_V1 + "env:\n  K: ${{ secrets.AWS_POLLY_ACCESS_KEY }}\n", "secrets.AWS_POLLY_ACCESS_KEY"),
+    (SHIFT_V1.replace("  contents: write\n", "  actions: write\n"), "grants actions: write"),
+    ("name: Shift\non: push\n", "declares no permissions"),
+])
+def test_a_notice_commit_leaving_a_file_beyond_a_shifts_reach_is_caught(repo, env, tmp_path, text, why):
+    before = notice_push(repo, env, text=text)
+    out = guard(repo, env, tmp_path, before, noticed())
+    assert out["ok"] == "false" and why in out["why"]
+
+
+def test_a_notice_commit_deleting_a_keyed_file_is_caught(repo, env, tmp_path):
+    write(repo, ".github/workflows/upload.yml", SHIFT_V1 + "env:\n  K: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}\n")
+    before = commit(repo, env, "Add the upload job\n\nApproved-In: #5")
+    run(repo, env, "rm", "-q", ".github/workflows/upload.yml")
+    commit(repo, env, "Drop it\n\nNotice-In: #7")
+    out = guard(repo, env, tmp_path, before, {**APPROVED, **noticed()})
+    assert out["ok"] == "false" and "YOUTUBE_REFRESH_TOKEN" in out["why"]
+
+
+def test_a_deleted_comment_holds_a_notice_for_the_guard_too(repo, env, tmp_path):
+    before = notice_push(repo, env)
+    out = guard(repo, env, tmp_path, before, noticed(timeline=[{"event": "comment_deleted"}]))
+    assert out["ok"] == "false" and "the owner replied" in out["why"]

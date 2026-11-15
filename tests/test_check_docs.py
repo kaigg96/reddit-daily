@@ -221,3 +221,15 @@ def test_a_file_path_is_not_a_branch(tmp_path):
     (clone / "analysis").mkdir()
     (clone / "analysis" / "log.csv").write_text("x\n")
     assert c.check_merged_branches(str(clone), "`analysis/log.csv` is pending a read.")[0]
+
+
+def test_the_live_format_is_the_version_an_upload_run_ships(monkeypatch):
+    """Read by importing config with no SOURCE, as the upload workflow runs
+    it: the own show's version follows SOURCE (PLAN C16), so a literal in
+    config.py would say v7s with the own show live. A stray SOURCE is ignored."""
+    from src import insights
+    monkeypatch.setenv("SOURCE", "reddit")
+    shipped = c.shipped_format()
+    assert shipped in insights.RELEASE_MIN_UPLOADS
+    monkeypatch.setenv("SOURCE", "own" if not shipped.endswith("-own") else "reddit")
+    assert c.shipped_format() == shipped

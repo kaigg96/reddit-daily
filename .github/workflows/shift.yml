@@ -3,7 +3,7 @@ name: Run a shift
 # Runs /shift on a schedule using the owner's Claude subscription (an OAuth
 # token, not API billing — so no new paid service, per PRD §5).
 #
-# Deliberately NOT given the upload secrets. A shift gets GEMINI_API_KEY and
+# Deliberately NOT given the upload keys. A shift gets GEMINI_API_KEY and
 # GROQ_API_KEY for the release gates and nothing else: it cannot upload to YouTube, post a
 # comment, or spend a cent on Polly from here. If a render is needed, it queues
 # one with scripts/dry_run.py and dry-run.yml renders it (#27). It never held a
@@ -158,7 +158,7 @@ jobs:
           # Without --allowedTools the action runs with NO shell or file
           # access, so the first scheduled shift "succeeded" having done
           # literally nothing. Blast radius is bounded elsewhere: this job has
-          # no upload secrets, and protect-process.yml guards CI and the rules.
+          # no upload keys, and protect-process.yml guards the workflows.
           #
           # Task/Agent are listed because ultracode orchestrates dynamic
           # workflows; without them it would quietly degrade to plain xhigh and
@@ -206,7 +206,7 @@ jobs:
       # find out why: run 39338110057, 2026-10-19, 32 turns and no handover.
       # This prints a redacted trace (how it ended, its last message, every
       # tool call) and writes it where the next shift can read it; a step below
-      # commits it. The secrets are here only so their values are redacted, and
+      # commits it. The keys are here only so their values are redacted, and
       # are only those the agent already held: it runs from a tree the agent
       # could edit, so the subscription token stays out (its shape is redacted).
       - name: Trace what the shift did

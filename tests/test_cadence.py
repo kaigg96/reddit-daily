@@ -149,6 +149,7 @@ def test_upcoming_quotes_the_rule_not_a_guess():
     held = c.last_held(table(weekly="2026-10-26", monthly="2026-10-05", prep="2026-10-05",
                              planning="2026-10-10"))
     assert c.upcoming(held, D("2026-10-31"), D("2026-10-26")) == {
+        "quarterly planning": D("2027-01-04"),   # a later shift's since D16; with prep, same day in the simulation
         "weekly": D("2026-11-02"), "monthly": D("2026-11-02"), "quarterly prep": D("2027-01-04")}
 
 

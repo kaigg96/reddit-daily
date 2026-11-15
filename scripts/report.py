@@ -554,12 +554,17 @@ def show_trajectory(args):
     if args.metric in (Metric.VIEWS, Metric.ENGAGED_VIEWS):
         return show_weekly_views(args)
     if args.metric not in (Metric.WATCH, Metric.WATCH_FINE, Metric.WATCH_PER_START,
-                           Metric.ENGAGED_SHARE):
+                           Metric.ENGAGED_SHARE, Metric.PCT):
         print(f"--trajectory reads watch-seconds (whole, fine or per play start), engaged_share, "
-              f"views or engaged_views, not {args.metric}")
+              f"avg_view_pct, views or engaged_views, not {args.metric}")
         return
     share = args.metric == Metric.ENGAGED_SHARE
-    rows = (_fine_watch_rows() if args.metric == Metric.WATCH_FINE
+    # The share of each video watched (WORKLOG 11-14: is a fall in watch-seconds
+    # shorter videos, or viewers leaving earlier?). It rises as videos shorten,
+    # so it is read beside watch-seconds, never alone, and never a trigger.
+    pct = args.metric == Metric.PCT
+    rows = (_snapshot_metric_rows(Metric.PCT) if pct
+            else _fine_watch_rows() if args.metric == Metric.WATCH_FINE
             else _per_start_rows() if args.metric == Metric.WATCH_PER_START
             else _engaged_share_rows(at_age=args.at_age or 7, ids=insights.ids_within(args.within)
                                      if args.within else None) if share
@@ -582,8 +587,10 @@ def show_trajectory(args):
             if args.metric == Metric.WATCH_PER_START
             else "engaged share (engaged views / views; reported since 2026-10-05; D9's"
                  " measure for tests, read per test with --release, never a trigger here)"
-            if share else f"watch-seconds{fine}")
-    unit, digits = ("", 2) if share else ("s", 1)
+            if share else "share of each video watched (a diagnostic: it rises as videos"
+                          " shorten, so read it beside watch-seconds; never a trigger)"
+            if pct else f"watch-seconds{fine}")
+    unit, digits = ("", 2) if share else ("%", 1) if pct else ("s", 1)
     print(f"Median {name}, every upload read at ~{args.at_age or 7} days old\n")
     print(f"  {'week':10} {'n':>4} {'median':>8}")
     for period, n, med in series:
@@ -592,11 +599,12 @@ def show_trajectory(args):
     floor = insights.median([abs(b[2] - a[2])
                             for a, b in zip(series, series[1:])]) or None
     verdict, why = insights.trajectory_verdict(series, floor=floor, digits=digits,
-                                               min_change=0.02 if share else 0.5)
+                                               min_change=0.02 if share else 1.0 if pct else 0.5)
     print(f"\n  {verdict.upper()} — {why}")
     if floor:
-        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}{unit})")
-    if verdict == "flat" and not share:
+        print(f"  (week-to-week drift on this channel is ~{floor:.{digits}f}"
+              f"{' points' if pct else unit})")
+    if verdict == "flat" and not share and not pct:
         print("\n  Flat is the actionable verdict: the work being done is not"
               "\n  moving the outcome. See `/backlog` — this forces PM's priority.")
 
@@ -697,6 +705,74 @@ def show_themes(args):
           f"{insights.THEME_ONE_P}, at {insights.THEME_LIFT:.0f}x or more (pre-committed 11-12).")
     print("  " + ("A lead is a candidate screen category, needing its own rule and the owner's call."
                   if any(r[-1] for r in rows) else "No lead: no theme explains the buried uploads."))
+
+
+def show_topic_mix(args):
+    """`--topic-mix`: R12, does a change in topic mix explain the fall in
+    engaged share (PRD §0)?"""
+    if (args.at_age is not None or args.within or args.compare or args.by not in (None, "subreddit")
+            or args.metric not in (Metric.WATCH, Metric.ENGAGED_SHARE)):
+        # It always reads engaged share; another metric or a --compare would be ignored silently.
+        sys.exit("--topic-mix reads R12's fixed sample at ~7 days in engaged share; it takes no "
+                 "--at-age, --within, --compare or other --metric, and --by only as subreddit (R15)")
+    key = args.by or "topic"
+    r = insights.topic_mix(insights.load_videos_at_age().videos, key=key,
+                           min_groups=2 if key == "subreddit" else insights.TOPIC_MIX_MIN_GROUPS,
+                           min_views=args.min_views)
+    split = insights.TOPIC_MIX_SPLIT.date()
+    print(f"{'R15' if key == 'subreddit' else 'R12'}: engaged share at ~7 days by {key}, uploads from "
+          f"{insights.TOPIC_MIX_START.date()} and before {split} against "
+          f"from it ({r['n_early']} and {r['n_late']} with a reading and a {key}; "
+          f"zero-view uploads apart: {r['zero_early']} and {r['zero_late']})")
+    if args.min_views > 1:   # R16
+        print(f"  uploads under {args.min_views} views left out too: "
+              f"{r['below_early']} and {r['below_late']}")
+    print()
+    print(f"  {key:22} {'early':>11} {'late':>11}")
+    pct = lambda x: "-" if x is None else f"{x * 100:.1f}"
+    for g, ne, nl, me, ml in r["groups"]:
+        print(f"  {g:22} {ne:>3} {pct(me):>7} {nl:>3} {pct(ml):>7}")
+    if r["verdict"] == "insufficient":
+        if r["fall"] is not None:   # R16 reads the fall alone
+            print(f"\n  Mean: early {pct(r['mean_early'])}, late {pct(r['mean_late'])} "
+                  f"(fall {pct(r['fall'])} points).")
+        print(f"\n  Insufficient data for the mix: a period under {insights.TOPIC_MIX_MIN_N}, under "
+              f"{insights.TOPIC_MIX_MIN_GROUPS} groups, or a late group with no early uploads.")
+        return
+    print(f"\n  Mean: early {pct(r['mean_early'])}, late {pct(r['mean_late'])} (fall "
+          f"{pct(r['fall'])} points); early reweighted to the late mix {pct(r['counterfactual'])}, "
+          f"so the mix accounts for {pct(r['mix'])} points of it.")
+    print("  Rule (pre-committed 11-13): half the fall or more a lead, under a quarter "
+          f"'not {key} mix', a fall under 3 points nothing to explain.")
+    print(f"  Verdict: {r['verdict'].replace('topic', key)}.")
+
+
+def show_near_repeats(args):
+    """`--near-repeats`: R13, are reworded repeats of earlier questions buried
+    more often (PRD §0)?"""
+    if args.at_age is not None or args.within or args.by:
+        sys.exit("--near-repeats reads R13's fixed sample at ~7 days; it takes no "
+                 "--at-age, --within or --by")
+    overlap = insights.near_repeat_overlap(insights._read_upload_log())
+    r = insights.near_repeats_buried(insights.load_videos_at_age().videos, overlap)
+    near, rest = r["near"], r["rest"]
+    rate = lambda vs: f"{sum(map(insights.is_buried, vs))}/{len(vs)}"
+    print(f"R13: buried (<= {insights.BURIED_VIEWS} views at ~7 days), uploads whose question "
+          f"overlaps an earlier one by {insights.NEAR_REPEAT_JACCARD} or more against the rest\n")
+    print(f"  near-repeats {rate(near):>8}    rest {rate(rest):>8}")
+    print(f"  by format_version (buried near, near, buried rest, rest): {r['strata']}\n")
+    for v in sorted(near, key=lambda v: -overlap[v.video_id][0]):
+        o, earlier = overlap[v.video_id]
+        print(f"  {o:.2f} {v.views:>5.0f} views  {v.meta.get('post_title', '')[:60]!r}"
+              f"  <- {earlier[:60]!r}")
+    if r["verdict"] == "insufficient":
+        print(f"\n  Insufficient data: under {insights.NEAR_REPEAT_MIN} near-repeats.")
+        return
+    print(f"\n  Pooled p {r['p']:.3f}; near-repeats buried "
+          f"{'more' if r['higher'] else 'no more'} than expected.")
+    print(f"  Rule (pre-committed 11-13): pooled p under {insights.NEAR_REPEAT_P} with the "
+          "near-repeats higher is a lead; else no.")
+    print(f"  Verdict: {r['verdict']}.")
 
 
 def show_swings(args):
@@ -905,6 +981,12 @@ def main():
     p.add_argument("--themes", action="store_true",
                    help="R11: do buried uploads share a sensitive theme? Blind "
                         "theme tags (analysis/theme_labels.json) against burial")
+    p.add_argument("--topic-mix", action="store_true",
+                   help="R12: does a change in topic mix explain the fall in "
+                        "engaged share? Early per-topic means reweighted to the late mix")
+    p.add_argument("--near-repeats", action="store_true",
+                   help="R13: are reworded repeats of earlier questions buried "
+                        "more often? Word overlap with earlier logged questions")
     p.add_argument("--swings", action="store_true",
                    help="R4: are weekly view swings viewers or data? The channel's "
                         "counter against --catalogue's recent column (reads on 11-16)")
@@ -945,7 +1027,7 @@ def main():
     # Every other mode returns before the filter, so it would print unfiltered
     # numbers under a --since the reader believes applied.
     early = (args.scorecard, args.trajectory, args.engaged_check, args.engaged_share,
-             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.swings, args.spacing, args.slate, args.zeros, args.release,
+             args.routes, args.opening_reach, args.watch_reach, args.first_answer, args.placebo, args.catalogue, args.themes, args.topic_mix, args.near_repeats, args.swings, args.spacing, args.slate, args.zeros, args.release,
              args.experiments)
     if args.balance and (any(early) or args.within or args.compare or args.min_views > 1
                          or args.at_age is not None or args.replays or args.concentration
@@ -964,8 +1046,10 @@ def main():
         sys.exit("--until applies to --balance only")
     if args.since and (any(early) or not (args.compare or args.by)):
         sys.exit("--since restricts --compare and --by only")
-    if args.min_views > 1 and (any(early) or args.replays or not args.compare):
-        sys.exit("--min-views applies to --compare only")
+    mix_only = args.topic_mix and sum(bool(x) for x in early) == 1
+    if args.min_views > 1 and ((any(early) and not mix_only) or args.replays
+                               or not (args.compare or mix_only)):
+        sys.exit("--min-views applies to --compare and --topic-mix only")
     if args.min_views > 1 and args.metric not in (Metric.WATCH, Metric.PCT, Metric.ENGAGED,
                                                   Metric.ENGAGED_SHARE, Metric.WATCH_FINE,
                                                   Metric.WATCH_PER_START, *Metric.RETENTION):
@@ -1153,6 +1237,12 @@ def main():
 
     if args.themes:         # R11: blind theme tags against burial
         show_themes(args)
+        return
+    if args.topic_mix:      # R12: topic mix against the fall in engaged share
+        show_topic_mix(args)
+        return
+    if args.near_repeats:   # R13: reworded repeats against burial
+        show_near_repeats(args)
         return
     if args.swings:         # R4: the snapshot series against the channel counter
         show_swings(args)

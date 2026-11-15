@@ -844,6 +844,28 @@ def test_question_person_marks_questions_that_address_the_viewer():
     assert person("") == ""
 
 
+def test_question_kind_marks_the_own_shows_kind_of_question():
+    """Research row R9: everyday topics with nothing named, as the own show
+    writes (ownquestions.PROMPT); an unlabelled topic is in neither arm."""
+    kind = lambda q, topic: insights._with_derived_dimensions(
+        {"post_title": q, "topic": topic})["question_kind"]
+    assert kind("What's the best way to relax after a long day?", "life-advice") == "everyday"
+    assert kind("I'm broke. What hobby costs nothing?", "money-work") == "everyday"
+    assert kind("What would you do if you’d won? I’d quit.", "hypotheticals") == "everyday"
+    assert kind("Educators of Reddit, what happened to your smartest student?", "other") == "everyday"
+    assert kind("What is a FREE thing everyone should use?", "life-advice") == "everyday"
+    assert kind("[Serious] What did you do this Halloween?", "nostalgia") == "everyday"
+    assert kind('Lawyers of Reddit - What was the last straw, "Yep I\'m out"?', "other") == "everyday"
+    assert kind("What TV show still keeps you up at 3AM?", "nostalgia") == "everyday"
+    assert kind("Could GTA 6 lower real life crime rates?", "hypotheticals") == "excluded"
+    assert kind("What's the best thing at McDonald's?", "other") == "excluded"
+    assert kind("What’s it like inside of Microsoft right now?", "money-work") == "excluded"
+    assert kind("Why are all flights grounded right now?", "politics-news") == "excluded"
+    assert kind("What's the creepiest thing you've seen?", "dark-morbid") == "excluded"
+    assert kind("What is a question nobody has labelled yet, zqx?", "") == ""
+    assert kind("", "life-advice") == ""
+
+
 def test_title_source_marks_uploads_that_shipped_the_raw_question():
     """Research row R2: does a failed title cost watch-seconds?"""
     source = lambda q, t: insights._with_derived_dimensions(
@@ -2536,6 +2558,20 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
     assert len(called) == 2
 
 
+def test_topic_mix_refuses_options_it_would_ignore(monkeypatch):
+    """--topic-mix always reads engaged share on R12's sample: a --compare or
+    another --metric must be refused, never dropped silently."""
+    import sys
+    import pytest
+    from scripts import report
+    for extra in (["--compare", "title_style=B"], ["--metric", "views"], ["--at-age", "7"],
+                  ["--by", "topic"]):
+        monkeypatch.setattr(sys, "argv", ["report.py", "--offline", "--topic-mix"] + extra)
+        with pytest.raises(SystemExit) as exc:
+            report.main()
+        assert "--topic-mix reads R12's fixed sample" in str(exc.value), extra
+
+
 def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch):
     """A filter the reader believes applied must never be dropped silently:
     --since outside --compare/--by, --min-views outside --compare, and
@@ -2543,13 +2579,14 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
     import sys
     import pytest
     from scripts import report
-    since, only, count = ("--since restricts", "--min-views applies to --compare only",
+    since, only, count = ("--since restricts", "--min-views applies to --compare and --topic-mix only",
                           "must count every upload")
     refused = (
         (["--since", "2026-10-07", "--trajectory"], since),
         (["--since", "2026-10-07", "--release", "v7"], since),
         (["--since", "2026-10-07"], since),
         (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--topic-mix", "--trajectory"], only),
         (["--min-views", "10", "--replays", "--compare", "title_style=B"], only),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
@@ -2962,3 +2999,143 @@ def test_theme_buried_flags_a_tag_buried_twice_as_often():
     # Under THEME_MIN_BURIED buried, nothing is a lead.
     few = {k: v for k, v in labels.items() if k.startswith("c")}
     assert not any(r[-1] for r in insights.theme_buried(vids, few)[1])
+
+
+def _mix_videos(spec):
+    """Videos from (late?, topic, engaged share, count) tuples, 100 views each."""
+    early = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    late = datetime.datetime(2026, 11, 1, tzinfo=datetime.timezone.utc)
+    vids = []
+    for is_late, topic, share, n in spec:
+        for _ in range(n):
+            vids.append(Video(video_id=f"v{len(vids)}", published=late if is_late else early,
+                              views=100, engaged_views=share * 100, meta={"topic": topic}))
+    return vids
+
+
+def test_topic_mix_credits_a_fall_made_by_the_mix_alone():
+    # Each topic holds its share; the late period leans to the low one.
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 5), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 15), (True, "c", 0.4, 5)])
+    r = insights.topic_mix(vids)
+    assert (r["n_early"], r["n_late"]) == (25, 25)
+    assert r["mix"] == pytest.approx(r["fall"]) and r["fall"] == pytest.approx(0.08)
+    assert r["verdict"] == "lead"
+
+
+def test_topic_mix_rules_out_a_fall_within_every_topic():
+    # Same mix both periods; every topic falls by 0.1.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.4, 10), (True, "b", 0.2, 10), (True, "c", 0.3, 5)])
+    r = insights.topic_mix(vids)
+    assert r["mix"] == pytest.approx(0) and r["verdict"] == "not topic mix"
+
+
+def test_topic_mix_min_views_leaves_out_barely_shown_uploads():
+    # R16: no fall among watched uploads; ten late uploads seen 3 times, none
+    # past the opening, make one on their own unless a view floor leaves them out.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 10), (True, "b", 0.3, 10), (True, "c", 0.4, 5)])
+    late = vids[-1].published
+    vids += [Video(video_id=f"low{i}", published=late, views=3, engaged_views=0,
+                   meta={"topic": "a"}) for i in range(10)]
+    assert insights.topic_mix(vids)["fall"] > 0.1
+    r = insights.topic_mix(vids, min_views=10)
+    assert (r["n_late"], r["below_early"], r["below_late"]) == (25, 0, 10)
+    assert r["fall"] == pytest.approx(0) and r["verdict"] == "no fall"
+    # The fall is read even when too few groups remain to reweight the mix.
+    one = _mix_videos([(False, "a", 0.5, 25), (True, "a", 0.4, 25)])
+    r = insights.topic_mix(one)
+    assert r["verdict"] == "insufficient" and r["fall"] == pytest.approx(0.1) and r["mix"] is None
+
+
+def test_topic_mix_pools_thin_topics_and_refuses_thin_reads():
+    # "d" has 4 late uploads: it pools into "rest" with "e", below 5 either side.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "d", 0.4, 6),
+                        (False, "e", 0.4, 2), (True, "a", 0.5, 10), (True, "b", 0.3, 10),
+                        (True, "d", 0.4, 4), (True, "e", 0.4, 2)])
+    groups = {g[0]: g[1:3] for g in insights.topic_mix(vids)["groups"]}
+    assert groups == {"a": (10, 10), "b": (10, 10), "rest": (8, 6)}
+    # An unlogged topic or a missing reading is left out, never read as zero.
+    vids += [Video(video_id="x", published=vids[0].published, views=100, engaged_views=0,
+                   meta={"topic": ""}),
+             Video(video_id="y", published=vids[0].published, views=100, meta={"topic": "a"})]
+    assert insights.topic_mix(vids)["n_early"] == 28
+    # A zero-view upload is counted apart, not read as a share of 0.
+    zero = Video(video_id="z", published=vids[0].published, views=0, engaged_views=0,
+                 meta={"topic": "a"})
+    r = insights.topic_mix(vids + [zero])
+    assert (r["n_early"], r["zero_early"], r["zero_late"]) == (28, 1, 0)
+    # Under 20 a period, or under 3 groups: no verdict.
+    assert insights.topic_mix(vids[:28])["verdict"] == "insufficient"
+    two = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 15),
+                       (True, "a", 0.5, 15), (True, "b", 0.3, 15)])
+    assert insights.topic_mix(two)["verdict"] == "insufficient"
+
+
+def test_near_repeat_overlap_scores_against_earlier_questions_only():
+    rows = [{"video_id": "b", "timestamp_utc": "2026-10-02", "post_title": "What is the best pizza topping?"},
+            {"video_id": "a", "timestamp_utc": "2026-10-01", "post_title": "What's the best pizza topping ever?"},
+            {"video_id": "c", "timestamp_utc": "2026-10-03", "post_title": "Why do cats knock things over?"}]
+    o = insights.near_repeat_overlap(rows)
+    assert o["a"] == (0.0, "")                       # the first has nothing earlier
+    assert o["b"][0] == pytest.approx(3 / 4) and o["b"][1].startswith("What's the best")
+    assert o["c"][0] == 0.0
+    assert insights.question_words("What\u2019s the BEST of it?") == {"best"}
+
+
+def test_near_repeats_buried_stratifies_by_release_and_needs_eight():
+    pub = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    def vids(prefix, fv, buried, n):
+        return [Video(video_id=f"{prefix}{i}", published=pub, views=0 if i < buried else 50,
+                      meta={"format_version": fv}) for i in range(n)]
+    near = vids("n", "v7", 6, 10)
+    rest = vids("r", "v7", 2, 40) + vids("o", "v6", 0, 40)
+    overlap = {**{v.video_id: (0.6, "q") for v in near}, **{v.video_id: (0.1, "") for v in rest}}
+    r = insights.near_repeats_buried(near + rest, overlap)
+    assert r["strata"] == [(6, 10, 2, 40)]           # v6 has no near-repeat: not compared
+    assert r["higher"] and r["p"] < 0.05 and r["verdict"] == "lead"
+    few = {k: (0.1, "") if k in {"n0", "n1", "n2"} else v for k, v in overlap.items()}
+    assert insights.near_repeats_buried(near + rest, few)["verdict"] == "insufficient"
+    # Buried less often than expected is never a lead.
+    calm = vids("n", "v7", 0, 10)
+    assert insights.near_repeats_buried(calm + rest, overlap)["verdict"] == "no"
+
+
+def test_topic_mix_reads_subreddit_with_two_groups():
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 10),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 20)])
+    for v in vids:
+        v.meta["subreddit"] = v.meta.pop("topic")
+    assert insights.topic_mix(vids)["verdict"] == "insufficient"   # no topic logged
+    r = insights.topic_mix(vids, key="subreddit", min_groups=2)
+    assert r["verdict"] == "lead" and r["mix"] == pytest.approx(r["fall"])
+
+
+def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, capsys):
+    """WORKLOG 11-14: is a fall in watch-seconds shorter videos? The share
+    watched is read week by week, labelled a diagnostic, in percent."""
+    import argparse
+    import pathlib
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    import report
+    asked = []
+
+    def rows(metric_col="avg_view_duration_s", path=None):
+        asked.append(metric_col)
+        base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+        out = []
+        for w in range(6):
+            for i in range(6):
+                pub = base + datetime.timedelta(weeks=w)
+                out.append({"video_id": f"w{w}v{i}", "published": pub,
+                            "snapshot": pub + datetime.timedelta(days=7), "value": 60.0})
+        return out
+    monkeypatch.setattr(report, "_snapshot_metric_rows", rows)
+    args = argparse.Namespace(metric=Metric.PCT, at_age=None, within=None)
+    report.show_trajectory(args)
+    out = capsys.readouterr().out
+    assert asked == [Metric.PCT]
+    assert "share of each video watched" in out and "never a trigger" in out
+    assert "60.0%" in out and "FLAT" in out and "forces PM's priority" not in out

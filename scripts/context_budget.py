@@ -79,7 +79,7 @@ ORIENT = {
     # mechanisms that remove the owner from the loop, not prose creep.
     # 2050 -> 2100 on 2026-09-25: the ready-work floor (D11) replaced "an empty
     # lane is PM's problem", which never fired while blocked items filled it.
-    ".claude/skills/shift/SKILL.md": 2100,
+    "process/shift.md": 2100,
     # Added 2026-10-05 with the company reframe (D12): the company's goal, its
     # queue outside the channel product, its risks and the review dates. Read
     # at shift start, like PRD §0, so it is budgeted like it.
@@ -87,8 +87,11 @@ ORIENT = {
     # the friction log and the experiment-process review (D15). PLAN sat at
     # 1300/1300 with every row accurate and none closable; shifts trimmed it
     # twice on 10-26 just to stay under (friction G15).
-    "PLAN.md": 1400,
-    ".claude/skills/pickup/SKILL.md": 700,
+    # 1400 -> 1500 on 2026-11-14, in the owner's session (D16): the queue
+    # gained the two pieces of work they asked for (C19, C20) and Reddit's
+    # 12 January end, with PLAN at 1399/1400 and no row closable.
+    "PLAN.md": 1500,
+    "process/pickup.md": 700,
 }
 # Read on demand, so outside the total above, but budgeted so they can only
 # shrink. PRD §4, the findings, grew 15,317 -> 20,714 words in the week to
@@ -452,12 +455,12 @@ def capacity_shortfall(path=None):
 
 
 def health(raise_issues=False):
-    """Detect process dysfunction and escalate it.
+    """Detect process dysfunction and hand it to the shift.
 
-    The escalation path was built for "I need permission", not for "something
-    is systematically wrong" — so the workflow could measure its own failure
-    and have no route to report it. These checks close that: a threshold trip
-    queues a GitHub issue, which emails the owner.
+    Until D16 (2026-11-14) a threshold trip queued a GitHub issue for the
+    owner. The owner is now the last resort, and the process is the shift's
+    own to fix, so every problem prints as this shift's work with what to do.
+    `raise_issues` is kept for callers and does nothing.
     """
     problems = []
 
@@ -530,20 +533,14 @@ def health(raise_issues=False):
         print("\nPROCESS HEALTH: ok")
         return []
 
-    print("\nPROCESS HEALTH: %d problem(s)" % len(problems))
+    print("\nPROCESS HEALTH: %d problem(s), this shift's to fix (D16), never the owner's" % len(problems))
     for key, title, body, rec in problems:
         print(f"  - {title}")
         if key in SHIFT_OWNED:
-            print("    the shift's to fix, not the owner's (#67): "
-                  "scripts/backlog_status.py prints what to do")
-        elif raise_issues:
-            r = subprocess.run(
-                [sys.executable, os.path.join(ROOT, "scripts", "escalate.py"),
-                 "--title", title, "--key", key, "--recommend", rec],
-                input=body, text=True, capture_output=True)
-            print("    " + (r.stdout.strip() or r.stderr.strip()))
+            print("    (#67) scripts/backlog_status.py prints what to do")
         else:
-            print(f"    (run with --health to queue an issue; key={key})")
+            print("    " + body.replace("\n\n", " ").replace("\n", " "))
+            print("    do: " + rec)
     return problems
 
 
@@ -556,7 +553,7 @@ def main():
     ap.add_argument("--allocation", action="store_true",
                     help="where each shift's time went, by function, from WORKLOG.md")
     ap.add_argument("--health", action="store_true",
-                    help="detect process dysfunction and queue escalations for it")
+                    help="detect process dysfunction and print it as this shift's work")
     args = ap.parse_args()
 
     always = measure(ALWAYS)
