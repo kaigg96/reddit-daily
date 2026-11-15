@@ -155,6 +155,19 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The own show's switch-on (2026-11-15, branch `strategy/own-switch-on`,
+  unmerged until #90's label and its music tracks).** One commit: `SOURCE`
+  defaults to `own` (logs `v7s-own`, or `v8-own` once bet 1 is live), tests
+  pin Reddit. Its fresh review found three things to settle before it merges:
+  (1) the release gates (`validate-release.yml` sets no `SOURCE`) would run
+  the own metadata path, whose title judge fails closed, so a 429 on the judge
+  reads as a gate FAIL, not INCONCLUSIVE (`scripts/validate_release.py` ~203),
+  and gate 1 can pass its 8-request cap; (2) `scripts/check_docs.py:40` reads
+  the literal `"v7s"` line, so it would say the live format agrees while
+  uploads log `v7s-own`; (3) branch renders could no longer show Reddit's show
+  (`dry-run.yml` passes no `SOURCE`), which bet 1's AskReddit read wants.
+  Then a dry run of its tip, which renders the own path.
+
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
