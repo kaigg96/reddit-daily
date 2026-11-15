@@ -342,3 +342,4 @@ F340,2026-11-15T18:03:35+00:00,43742586351,strategy,"Music route that makes #90 
 F341,2026-11-15T18:09:40+00:00,43742586351,engineering,"Move run-slot-log off bet 1 onto main (reliability/run-slot-log-main): clean apply, reviewed, slot key before upload",done,,none,"A test pinned the source line verbatim, so a safe reorder failed it",None,1,
 F342,2026-11-15T18:13:32+00:00,43742586351,engineering,"Check run-slot-log-main over bet 1 (clean, 1,242 pass): it supersedes the stacked branch",done,,none,None,None,0,
 F343,2026-11-15T18:15:49+00:00,43742586351,engineering,"Rehearse bet 1 + verdict fix + run-slot-log-main over today's main: clean, 1,244 pass",done,,none,None,None,0,
+F344,2026-11-15T18:17:35+00:00,43742586351,gm,"Second generation round (2 candidates, both dropped: title-code fixes wait for v8's first 20 uploads); handed over 22 min early",done,,none,Supply: every lever waits on the owner,None,0,
