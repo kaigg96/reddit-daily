@@ -34,17 +34,28 @@ def _git(*args):
     return r.stdout.strip() if r.returncode == 0 else ""
 
 
+def shipped_format():
+    """FORMAT_VERSION as an upload run computes it: config imported with no
+    SOURCE set, since the own show's version follows SOURCE (PLAN C16) and a
+    literal in the file would miss the switch. None if config cannot load."""
+    env = {k: v for k, v in os.environ.items() if k not in ("SOURCE", "SAMPLE")}
+    r = subprocess.run([sys.executable, "-c",
+                        "from src import config; print(config.FORMAT_VERSION)"],
+                       cwd=ROOT, env=env, capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
+
+
 def check_live_format():
     """The version PRD claims is live, against the version the code ships."""
     prd = _read("PRD.md")
-    code = re.search(r'FORMAT_VERSION\s*=\s*"([^"]+)"', _read("src/config.py"))
+    code = shipped_format()
     claim = re.search(r"\*\*Live format:\*\*\s*`([^`]+)`", prd)
     if not code or not claim:
         return None, "could not read one of the two values"
-    if code.group(1) != claim.group(1):
+    if code != claim.group(1):
         return False, (f"PRD says live format is {claim.group(1)}, "
-                       f"but src/config.py ships {code.group(1)}")
-    return True, f"live format {code.group(1)} agrees with the code"
+                       f"but src/config.py ships {code}")
+    return True, f"live format {code} agrees with the code"
 
 
 def check_merged_branches(root=ROOT, prd=None):
