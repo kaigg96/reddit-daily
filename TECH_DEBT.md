@@ -158,13 +158,14 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
 - **The own show's switch-on (2026-11-15, branch `strategy/own-switch-on`,
   unmerged until #90's label and its music tracks).** One commit: `SOURCE`
   defaults to `own` (logs `v7s-own`, or `v8-own` once bet 1 is live), tests
-  pin Reddit. Its fresh review found three things to settle before it merges:
-  (1) the release gates (`validate-release.yml` sets no `SOURCE`) would run
-  the own metadata path: an unanswered judge now reads INCONCLUSIVE (merged
-  11-15), but gate 1 grows to 2–4 requests and can pass the cap of 8; (2)
-  fixed 11-15: the docs check now reads the shipped version, so it flags
-  PRD's live format until it says `v7s-own`; (3) branch renders could no
-  longer show Reddit's show
+  pin Reddit. Its fresh review found three things to settle before it
+  merges: (1) the release gates (`validate-release.yml` sets no `SOURCE`)
+  would run the own metadata path: an unanswered judge now reads
+  INCONCLUSIVE (merged 11-15), but gate 1 grows to 2 requests (metadata,
+  then judge), so the gates spend 7 of their stated 8, 9 only if retries
+  fire (the cap is a budget line, not a stop); (2) fixed 11-15: the docs
+  check now reads the shipped version, so it flags PRD's live format until
+  it says `v7s-own`; (3) branch renders could no longer show Reddit's show
   (`dry-run.yml` passes no `SOURCE`), which bet 1's AskReddit read wants.
   Then a dry run of its tip, which renders the own path.
 
