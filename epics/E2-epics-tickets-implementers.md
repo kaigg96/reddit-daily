@@ -156,7 +156,7 @@ Accept:
 Evidence:
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: ready: `process/lessons.md` seeded 11-15 with 13 lessons, each with friction ids; left: `--check`, brief matching, the weekly step
+Status: ready: `process/lessons.md` seeded 11-15 with 13 lessons, each with friction ids, and the weekly step is in `process/review.md`; left: `--check` and brief matching (need T1, T4)
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
@@ -164,7 +164,7 @@ Accept:
 - [ ] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
 - [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
 - [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
-- [ ] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired
+- [x] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired (11-15, `22816b9`)
 - [x] at least five lessons are seeded, each with real evidence
 Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`.
 
