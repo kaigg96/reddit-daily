@@ -267,6 +267,8 @@ def test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for():
     assert sched == {"late": ("2026-10-05", 3)}
     src = inspect.getsource(wd.main)
     assert "upload_day(v, sched)" in src and "median_publish_drift(channel_videos, sched=sched)" in src
+    # The week's metrics read the same days its cadence counts.
+    assert "week_videos = [v for v in channel_videos if upload_day(v, sched) in last_7_days]" in src
     late = {"id": "late", "published": "2026-10-06T01:23:00Z"}
     old = {"id": "old", "published": "2026-10-06T01:23:00Z"}
     assert wd.upload_day(late, sched) == "2026-10-05"
