@@ -45,6 +45,13 @@ Due when there is a snapshot no weekly review has read.
    **The friction log** (D15): `friction.py report`. Group every new row,
    queue the groups worth fixing with their counts, record each resolution.
 
+7. **Lessons** (E2 T7, from 2026-11-15). Read the friction log's groups
+   (`scripts/friction.py`, `.github/friction-groups.csv`): a group with
+   three or more rows since the last weekly becomes a lesson in
+   `process/lessons.md` (rule, evidence ids, the role and paths it applies
+   to, when it retires) or a ticket on the board; a lesson with no new
+   evidence in eight weeks is retired, and the file never holds more than 30.
+
 ## Monthly — the business review
 
 Due once per calendar month. **This entry is the owner's monthly packet**, so
