@@ -287,7 +287,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (2) a run queued behind another
   cancels a pending one in the `reddit-video` group, so an off-slot run could
   cancel a waiting live one (needs a ~6h pile-up; none in 99 scheduled runs
-  08-27 to 10-13, the closest two 3.5h apart); (3) after the patch, a
+  08-27 to 10-13, the closest two 3.5h apart; 11-15: none of 394 scheduled
+  runs since June was cancelled, and the 135 since 10-13, at the late-cron
+  delays, started no closer than 3.1h apart); (3) after the patch, a
   12:23 run landing after midnight takes the previous day's style, and an
   00:23 one landing after noon the morning subreddit (11.6h+ delays; 3.0–7.4h
   seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
