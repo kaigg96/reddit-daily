@@ -544,7 +544,9 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
   replaced the 11-05 review, held it with five asks open): keep IDs and
-  statistics, drop the text columns at HEAD, leave history. **History also
+  statistics, drop the text columns at HEAD, leave history; **ready** on
+  `legal/youtube-text-retention` (11-15: the three text columns gone, the
+  writer no longer writes them, tests pass). **History also
   holds** the plain Audio Library track (`73beb1c`, 2025-01-18; sealed at HEAD
   10-10, whose script defers history to "a separate decision", never taken)
   and two dead Google login tokens (a 2025 notebook's output; 11-06). Put
