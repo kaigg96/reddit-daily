@@ -196,6 +196,20 @@ def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
         None, None, None, "gemini_fallback", "http_503;fallback_no_json")) is None
 
 
+def test_an_unanswered_own_title_judge_is_inconclusive_not_a_fail(monkeypatch):
+    """Once the own show is live (#90) the gate runs its path, whose judge
+    fails closed; a refusal the judge did give is still a verdict."""
+    assert _metadata(monkeypatch, MetadataResult(
+        None, ["a", "b", "c"], None, "gemini",
+        "own_judge_http_429;own_judge_unanswered")) is None
+    assert _metadata(monkeypatch, MetadataResult(
+        None, ["a", "b", "c"], None, "gemini",
+        "own_judge_title;own_judge_cta")) is False
+    assert _metadata(monkeypatch, MetadataResult(          # junk is a broken prompt
+        None, ["a", "b", "c"], None, "gemini",
+        "own_judge_bad_json;own_judge_unanswered")) is False
+
+
 def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):
     from src import llm
     seen = []
