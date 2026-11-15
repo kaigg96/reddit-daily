@@ -36,36 +36,42 @@ tell from the script", which is also a no for shipping.
    watching, 2026-10-19). No number, name or clause needs a second pass.
 4. **The reveal is worth the wait.** The end lands something the viewer could
    not have guessed and now cannot unknow, or confirms a guess they made and
-   were invested in. Test: would a viewer say the reveal to someone else? If
-   the end is a formula ("which one gets your vote?") with nothing before it
-   that made them care, it fails.
+   were invested in. Two halves: the measurable one is the distance between
+   the anchor the hook states and the answer (×2 or more, from the
+   selector); the judged one is whether a viewer would say the reveal to
+   someone else, answered in one line with the reason. A formula ending
+   ("which one gets your vote?") with nothing before it that made them care
+   fails.
 5. **It is ours, and it is true.** Nothing in it is a plain reading of
    someone else's text; the commentary, the question or the structure is the
-   show's own (PLAN §4, YouTube's reused-content rule). Every stated fact
-   traces to its source record, copied by code, never by a model, and the
-   credit the source asks for is in the description.
+   show's own (PLAN §4, YouTube's reused-content rule): the reviewer judges
+   this half. The "true" half is a test, not a judgement: every stated fact
+   traces to its source record, copied by code, and the credit the source
+   asks for is in the description; the reviewer is given that test's result
+   and the episode's `source` block and reports them.
 
 ## What the bar is not
 
-- Not a style guide. Voice, music and colour are judged by their own tests.
-- Not a predictor. A video can pass all five and get 40 views; the feed
-  decides reach. The bar is the floor below which no video goes out.
+- Not a style guide: voice, music and colour have their own tests.
+- Not a predictor: a video can pass all five and get 40 views; the feed
+  decides reach. It is the floor.
 - Not a score. Five yeses ships; any no is fixed or the video is dropped. A
   reviewer tempted to average is reviewing the wrong thing.
 
 ## How to apply it
 
 - The reviewer is a fresh agent that did not write the episode or its
-  prompt, given the script, the frames, this file, and nothing else: not the
-  author's notes, not the show's design (the design says what was intended;
-  the bar asks what a stranger gets).
+  prompt, given the timed script, the frames, the description, the
+  episode's `source` block, the copy test's result, and this file; never
+  the author's notes or the show's design (the design says what was
+  intended; the bar asks what a stranger gets).
 - One verdict per check with its evidence, then the single change that would
   turn the first no into a yes. Findings are fixed or recorded (`CLAUDE.md`
   §7); a video that fails a check twice after fixes is a design problem, not
   a draft problem, and goes back to the epic.
-- For a new show, the first **three** samples are judged this way before any
-  upload, and the verdicts are kept with the epic's ticket as evidence. For a
-  change inside a shipped show, one sample.
+- A new show's first **three** samples are judged this way before any upload,
+  the verdicts kept with the ticket as evidence; a change inside a shipped
+  show, one sample.
 - The numbers afterwards are the bar's own test: a show that passes and still
   loses most viewers in the opening (`engaged_share` low, `watch_ratio_25`
   low) means check 1 or 2 is being read wrong. The weekly review notes it,

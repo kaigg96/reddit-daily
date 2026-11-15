@@ -28,7 +28,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 **Bet 1** (#70): make the format ours, viewers first (D14); no voice (#71,
 PRD #15); shipping it is a shift's call (D16). **Bet 2** (#72), bet 3's pilot
 after bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
-and pilot the best (§1). Bet 2 is read at two a day (PRD #4). **Q1 2027:** `epics/E3`, the subscriber rate; set by 12-20.
+and pilot the best (§1). Bet 2 is read at two a day (PRD #4). **Q1 2027:** `epics/E3` (challenged 11-15): does any owned format reach? Bets by 12-20.
 
 ## 3. Work queue
 
@@ -43,7 +43,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response. Done when the owner reports a date. |
 | C17 | baking: live 10-27 (#84); D15's first read is due 11-24 | GM | **Friction log** (D15) | Done when D15's read says keep, change or stop. |
 | C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments`. Done when quarterly prep reads it and proposes the process's own rule. |
-| C19 | ready: `epics/E2` T7 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to the role and files they apply to. Done at E2 T9. |
+| C19 | ready: `epics/E2` T7 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to role and files. Done at E2 T9. |
 | C20 | ready: `epics/E2` T1 | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (its README). Done at E2 T9. |
 
 ## 4. Risks

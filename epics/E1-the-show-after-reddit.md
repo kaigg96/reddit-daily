@@ -79,23 +79,29 @@ guess, a pick, a count) and then shown whether they were right. Everything
 else serves that one beat. It is a quiz the way a bar bet is a quiz: the fun
 is in being wrong about something you were sure of.
 
-**Shape, about 15–22 seconds.**
+**Shape, 12–15 seconds** (amended 11-15 on the challenge: the first draft's
+parts summed to 10–16 s and put the reveal a third of the way in, failing
+the viewer bar's check 2; the reveal is now the end).
 1. **The hook (≤ 3 s, spoken and on screen):** the question, in the viewer's
-   terms, with the thing to commit to. "Gas is $4.45 today. What did it cost
-   in 1990?" Never a preamble, never the show's name, never "today we".
-2. **The beat (2–4 s):** the invitation and the room to take it. One line:
-   "Say your number." The screen holds the question and, for a pick, the two
-   options. Music carries it; narration stops. This pause is the show. It is
-   also where a viewer who does not care leaves, which is fine.
-3. **The reveal (3–5 s):** the answer, as a number or a name, large, with the
-   one comparison that makes it land: "$1.04. A quarter of today." The
-   comparison is computed from the record (a ratio, a difference, a rank),
-   never written freehand.
-4. **The turn (2–4 s):** one spoken line that gives the answer meaning or
-   points at the next guess: "Same gallon, same country. Thirty-six years."
-   Then the question for tomorrow, in five words, as the closing line and the
-   pinned comment. No "like and subscribe" (PRD §5 no. 9): the reason to come
-   back is the next question.
+   terms, with the thing to commit to and, for a number, its anchor: "Gas is
+   $4.45 this October. What did it cost in 1990?" Never a preamble, never the
+   show's name, never "today we".
+2. **The beat (3 s):** the invitation and the room to take it. One line:
+   "Say your number." The screen holds the question (and the two options for
+   a pick) over a 3-2-1 countdown with a tick, so every second is followable
+   (check 3); narration stops. This pause is the show. It is also where a
+   viewer who does not care leaves, which is fine.
+3. **The reveal, which is the end (4–5 s):** the answer, large, with the one
+   comparison that makes it land and one spoken clause that gives it
+   meaning: "One dollar four. Less than a quarter of today, before inflation."
+   The comparison is computed from the record (a ratio, a difference, a
+   second record), never written freehand; the clause is the one line the
+   model writes, and it states no number the records do not hold.
+4. **Tomorrow (over the last second, on screen, and in the comment):** the
+   next question in five words and the one way to get it ("Tomorrow: a dozen
+   eggs, 1980. Follow for it."). PRD §5 no. 9 bans fake engagement, not
+   asking; the wording is its own variable (E3 T3). The comment posted at
+   upload carries the question; it cannot be pinned by API.
 
 **What makes it ours (check 5).** The question's framing, the pairing, the
 comparison and the turn are the show's; the fact is the source's and is
@@ -103,24 +109,31 @@ credited in the description exactly as the source asks. No model writes a
 number: `select` fetches the record, `render` copies it, and a test fails if
 the shown value differs from the record (T7's first acceptance line).
 
-**Choosing the question (the selector's rules).**
+**Choosing the question (the selector's rules; amended 11-15: the first
+draft's fame rule rejected its own second episode, and "the obvious guess"
+had no definition for a lone number).**
 - **Guessable, not knowable.** A stranger can form a guess from everyday
   sense (prices, sizes, populations, heights, dates) but would not know the
   answer. Skip anything that needs expertise or that most people know.
-- **A surprising distance.** For a number, the answer differs from the
-  obvious guess by at least ×2 or ÷2 (prices over time, sizes across places);
-  for a pick, the losing option is the one most people would choose, judged
-  by a simple proxy the code can compute (the more populous, the more famous
-  by Wikidata sitelinks). The selector rejects the rest; the shift logs the
-  reject rate so the pool's size is known.
+- **A surprising distance, from a stated anchor.** Every number question
+  states its anchor in the hook (today's price; the Empire State's 102
+  floors), and the answer differs from the anchor by ×2 or ÷2 or more.
+  A question with no anchor is out until a proxy exists. For a pick, the
+  surprise is a category contrast the code can name (a city beats a state;
+  the smaller-looking wins), and the episode ships only when the answer is
+  the option the proxy says most people would not choose. The selector
+  rejects the rest; the shift logs the reject rate so the pool's size is
+  known, and T7 runs it on the three T6 episodes first and records which
+  survive.
 - **One fact, one unit, one comparison.** No episode needs two numbers to
   land. Units in the viewer's own terms (a gallon, a floor, a person).
 - **Fresh shape.** Never the same template two days running (price-then,
   bigger-of-two, how-many) and never the same subject as any shipped title
   (the own-questions repeat check applies).
-- **Nothing that invites contempt.** No question whose fun is someone else's
-  poverty, illness or disaster (USGS quakes and weather extremes are out of
-  the main rotation for this reason, not for supply).
+- **Nothing that invites contempt.** A category list in code, not prose: no
+  question whose fun is someone else's poverty, illness or disaster (USGS
+  quakes and weather extremes are out of the main rotation for this reason,
+  not for supply).
 
 **Series identity.** The closing line's "tomorrow" is the only series device
 until the brand is settled (C12, T11). The watermark carries the channel's
@@ -135,29 +148,42 @@ the episode.
 11-15, comparisons computed from the records). The script is what is spoken;
 [screen] is what is shown.
 
-1. *Hook:* "Gas is four forty-five a gallon today. What did it cost in 1990?"
-   [screen: "$4.45 today · 1990: ?"] *Beat:* "Say your number." [screen holds
-   3 s] *Reveal:* "One dollar four." [screen: "$1.04"] "Less than a quarter
-   of today." [screen: "÷4.3"] *Turn:* "Same gallon, same country.
-   Thirty-six years." *Tomorrow:* "Tomorrow: a dozen eggs, 1980."
+1. *Hook:* "Gas is four forty-five a gallon this October. What did it cost
+   in 1990?" [screen: "$4.45 (Oct 2026) · 1990: ?"] *Beat:* "Say your
+   number." [screen: 3-2-1, tick] *Reveal:* "One dollar four." [screen:
+   "$1.04 · ÷4.3"] "Less than a quarter of today, before inflation."
+   *Tomorrow:* [screen: "Tomorrow: a dozen eggs, 1980. Follow for it."]
    Credit: "Source: U.S. Bureau of Labor Statistics, series APU000074714."
 2. *Hook:* "More people: Wyoming, or Washington, D.C.?" [screen: the two
-   names] *Beat:* "Pick one." [screen holds 3 s] *Reveal:* "D.C."
-   [screen: "D.C. 702,250 · Wyoming 587,618"] "By about a hundred and
-   fifteen thousand." *Turn:* "A whole state, outnumbered by one city that
-   isn't in one." *Tomorrow:* "Tomorrow: Vermont or Alaska?"
-   Credit: "Source: U.S. Census Bureau, Vintage 2024 population estimates."
-3. *Hook:* "How many floors does the Burj Khalifa have?" [screen: the
-   name, "? floors"] *Beat:* "Guess." [screen holds 3 s] *Reveal:* "A
-   hundred and sixty-three." [screen: "163"] "Sixty-one more than the
-   Empire State Building." [screen: "163 vs 102"] *Turn:* "And it's
-   been the tallest since 2010." *Tomorrow:* "Tomorrow: the longest
-   bridge you can drive on." Credit: "Data: Wikidata (CC0), Q12495 P1101;
-   Q9188 P1101."
+   names] *Beat:* "Pick one." [screen: 3-2-1, tick] *Reveal:* "D.C., by
+   about a hundred and fifteen thousand." [screen: "D.C. 702,250 · Wyoming
+   587,618"] "A whole state, outnumbered by one city." *Tomorrow:* [screen:
+   "Tomorrow: Vermont or Alaska? Follow for it."] Credit: "Source: U.S.
+   Census Bureau, Vintage 2024 population estimates." (The contrast the
+   selector names: a city beats a state.)
+3. *Hook:* "The Empire State Building has a hundred and two floors. The
+   Burj Khalifa?" [screen: "Empire State: 102 · Burj Khalifa: ?"] *Beat:*
+   "Guess." [screen: 3-2-1, tick] *Reveal:* "A hundred and sixty-three."
+   [screen: "163 vs 102"] "Sixty-one more, and the tallest since 2010."
+   *Tomorrow:* [screen: "Tomorrow: the longest bridge you can drive. Follow
+   for it."] Credit: "Data: Wikidata (CC0), Q12495 P1101; Q9188 P1101."
+   (The anchor is in the hook, so ×2 can be judged: 163 against 102 is
+   ×1.6, which the rule rejects; T7 records it as the first casualty, or
+   the rule is loosened on evidence.)
 
 The comparison in each is a second record or a ratio, never prose a model
-invented; the "turn" is the one line the model may write, and it states no
-number the records do not hold.
+invented; the spoken clause after it is the one line the model may write,
+and it states no number the records do not hold. "Before inflation" is said
+where a price is compared across years, since the thread would say it
+otherwise.
+
+**Challenged 2026-11-15 (a fresh agent, the same night), amended above:** the
+parts summed to 10–16 s with the reveal a third of the way in; the silent
+beat had nothing followable (the paid quiz channels run a countdown); "no
+subscribe CTA" misread PRD §5 no. 9; the fame rule rejected episode 2 and
+nothing anchored episode 3; comments cannot be pinned by API; "today" named
+a month-old figure and "a quarter of today" ignored inflation. Kept: the one
+beat, copy-by-code, the credit, the three samples before any narrated render.
 
 **Schema the renderer takes** (one JSON per episode, produced by `select`):
 `{"hook": str, "beat": str, "options": [str, str] | null, "answer": str,
@@ -235,7 +261,7 @@ Evidence: 11-15, implementer, not yet re-checked: `content.show_for_run` takes t
 Status: todo
 Needs: T1, T2, T4
 Touches: src/config.py, the experiment ledger, PRD.md §0, PLAN.md C16
-Context: the show is built and merged off (11-15); the switch-on is prepared on `strategy/own-switch-on`, its pre-merge items in TECH_DEBT. Write the choice rule before the first upload: the primary measure (engaged share at 7 days, D9), the gate, the minimum uploads a side, the chance gap `report.py` prints, and the tie rule, which is decision 4.
+Context: the show is built and merged off (11-15); the switch-on is prepared on `strategy/own-switch-on`, its pre-merge items in TECH_DEBT. Write the choice rule before the first upload. **Drafted 11-15 (owner's session, after E3's challenge), for the ledger once T1 of E3 gives the tool:** per arm (`show`), at 7 days, engaged views per upload as median and the shares past 1,000 and 10,000 (E3's Measure), watch-seconds as the gate (#18), subscribers per 1,000 at 28 days beside them, never a trigger (PRD §4 10-17; E3 assumption 3). Read at the first snapshot with **40 uploads a side** (two arms at one a day: early February), the arm whose median engaged views leads beyond the printed chance gap is chosen; a lead under the gap, or a watch-seconds fall beyond its limit, is a tie, and decision 4 holds (takes, continuity). A tail (any upload past 10,000) is reported and may be named in the Decide, never as the trigger. The shift finalises the numbers with the tool, dates the rule before the first `takes` upload, and changes nothing after.
 Accept:
 - [ ] the ledger row for the rule is committed before the first `takes` upload's timestamp
 - [ ] a `takes` upload is live, labelled as takes, naming nothing of Reddit's
