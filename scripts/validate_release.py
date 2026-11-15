@@ -195,6 +195,17 @@ def check_metadata():
              f"its fallback ({meta.source}) did, which does not test this "
              "release's model. The next scheduled run re-checks it.\n")
         return None
+    labels = (meta.failure or "").split(";")
+    if "own_judge_unanswered" in labels and not {
+            "own_judge_no_json", "own_judge_bad_json"} & set(labels):
+        # The own show's title judge fails closed (`llm._own_judged`): with no
+        # verdict both lines are dropped, so a 429 on the judge alone would read
+        # as a broken prompt. It is "could not check", as a dead API is; a
+        # judge that answered junk is a broken prompt, so it still fails.
+        note(f"- ⚠️ INCONCLUSIVE — the title judge did not answer ({meta.failure}), "
+             "so the title and closing line were dropped unjudged. The next "
+             "scheduled run re-checks it.\n")
+        return None
 
     ok = True
     for field, value in (("title", meta.title), ("keywords", meta.keywords),
