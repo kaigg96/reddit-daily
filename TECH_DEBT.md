@@ -332,7 +332,9 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (off `main`, 969 pass; merges with `integration/preview` cleanly, either
   order, rows stay aligned; reviewed fresh). Its fix, the slot key worked out
   before the upload, is not on the stacked branch; nor is its second, the
-  digest's `week_videos` grouped by scheduled day like `per_day` (untested). **Closes when** the switch goes to four.
+  digest's `week_videos` grouped by scheduled day like `per_day`. **It
+  supersedes the stacked branch:** over `integration/preview` it merges
+  clean and 1,242 pass (11-15), so merge this one after `v8` as well. **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
