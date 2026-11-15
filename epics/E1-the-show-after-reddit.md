@@ -101,7 +101,7 @@ Accept:
 Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`.
 
 ### T2 · More than one music track, with no login needed
-Status: ready
+Status: review: `product/e1-t2-music` (`4a30396`), unmerged; left: a fresh review, a listen or a sample, and its own `FORMAT_VERSION` timed against v8's read (one variable per release)
 Needs: none
 Touches: assets/music/, src/video.py, tests/, a licence note beside the tracks
 Context: assumption 4. Today's track is from YouTube's Audio Library, which needs the owner's login and may not be shared, so it is sealed. Find at least three more tracks that are public domain or CC0, or make them with our own code as `scripts/make_sfx.py` makes effects. `video._pick_music` already picks at random from the folder. A track changes the video for every arm alike, so it does not disturb the comparison.
@@ -110,7 +110,7 @@ Accept:
 - [ ] no track needs a login, a payment or an attribution we cannot give in the description
 - [ ] a test shows the picker never chooses the track of the last upload in `upload_log.csv`
 - [ ] if no such track can be found, that is recorded and the ticket is dropped, not left open
-Evidence:
+Evidence: 11-15, implementer: four FreePD tracks (Advertime, City Sunshine, Fresh Focus, Funshine), cut to 60 s at the funk track's level; FreePD closed in 2025, so the files and its "CC0 1.0 Universal Public Domain Dedication" statement come from Internet Archive copies, URLs in `assets/music/LICENSES.md`; `log.last_music_track()` bars the last upload's track; 1,065 pass. Not yet re-checked by the orchestrator; no one has listened.
 
 ### T3 · Every upload records which show it was
 Status: review: on `integration/preview` (`b74fc92`), lands with T1
