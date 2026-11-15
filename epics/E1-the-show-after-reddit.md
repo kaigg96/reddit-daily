@@ -300,8 +300,9 @@ Evidence:
 Status: todo
 Needs: T9
 Touches: PLAN.md C12, `.escalations/`
-Context: the channel's name uses Reddit's, and from January the show has nothing of Reddit's in it. A rename is a one-way door and needs the owner's login: a dated notice (`escalate.py --notice-days`), then one ask with the exact name and steps. The fate of the 1,041 old readings (C12) is decided with it, also by notice.
+Context: the channel's name uses Reddit's, and from January the show has nothing of Reddit's in it. A rename is a one-way door and needs the owner's login: a dated notice (`escalate.py --notice-days`), then one ask with the exact name and steps. The fate of the 1,041 old readings (C12) is decided with it, also by notice. The working name, Show of Hands, stays internal: an English folk duo has it, YouTube channel included.
+**Candidates, checked 2026-11-15** (a 404 at `youtube.com/@handle` means free; Instagram shows an account when one exists and an empty page when none does; TikTok cannot be read from here). Free on YouTube: `@guessfirst`, `@callit`, `@callitdaily`, `@sayyournumber`, `@oneguessdaily`, `@barbetdaily`. Taken: `@sureaboutthat`, `@oneguess`, `@wrongagain`. Instagram: `callit` and `callitdaily` taken; `guessfirst`, `sayyournumber`, `oneguessdaily`, `barbetdaily` show no account. Lead: **Guess First** (says what the viewer does, fits a number, a pick or a take; free on both). Second: **Call It** (fits every show, but the handle is taken on Instagram). Dropped: Say Your Number (numbers only), Bar Bet (alcohol-adjacent for an advertiser review), Wrong Again (taken). The final pick is a Decide after T9, since the show that wins should suit the name; a shift re-checks the handles that week (they can be taken any day), checks the trademark registers (USPTO and CIPO, by search or `curl` with a browser agent, L6) and whether the `.com`/`.show` domain is free, and only then raises the notice.
 Accept:
-- [ ] the name's trademark, handle and domain checks are recorded
+- [ ] the name's trademark, handle (YouTube, Instagram, TikTok) and domain checks are recorded, re-done within a week of the notice
 - [ ] the notice is raised, and the ask can be done from a phone in two minutes
 Evidence:
