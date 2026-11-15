@@ -176,7 +176,9 @@ def main():
     per_day = Counter(upload_day(v, sched) for v in channel_videos if v["published"] >= iso(9))
     week_count = sum(per_day.get(d, 0) for d in last_7_days)
     missed_days = [d for d in last_7_days if per_day.get(d, 0) < config.UPLOADS_PER_DAY]
-    week_videos = [v for v in channel_videos if v["published"][:10] in last_7_days]
+    # The same day as the cadence above, so a late upload is measured in the
+    # window it is counted in.
+    week_videos = [v for v in channel_videos if upload_day(v, sched) in last_7_days]
 
     # Unlogged = on the channel but absent from upload_log: catches uploads
     # where the run died between upload and logging. 15-min buffer covers a
