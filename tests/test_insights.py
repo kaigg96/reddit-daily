@@ -844,6 +844,28 @@ def test_question_person_marks_questions_that_address_the_viewer():
     assert person("") == ""
 
 
+def test_question_kind_marks_the_own_shows_kind_of_question():
+    """Research row R9: everyday topics with nothing named, as the own show
+    writes (ownquestions.PROMPT); an unlabelled topic is in neither arm."""
+    kind = lambda q, topic: insights._with_derived_dimensions(
+        {"post_title": q, "topic": topic})["question_kind"]
+    assert kind("What's the best way to relax after a long day?", "life-advice") == "everyday"
+    assert kind("I'm broke. What hobby costs nothing?", "money-work") == "everyday"
+    assert kind("What would you do if you’d won? I’d quit.", "hypotheticals") == "everyday"
+    assert kind("Educators of Reddit, what happened to your smartest student?", "other") == "everyday"
+    assert kind("What is a FREE thing everyone should use?", "life-advice") == "everyday"
+    assert kind("[Serious] What did you do this Halloween?", "nostalgia") == "everyday"
+    assert kind('Lawyers of Reddit - What was the last straw, "Yep I\'m out"?', "other") == "everyday"
+    assert kind("What TV show still keeps you up at 3AM?", "nostalgia") == "everyday"
+    assert kind("Could GTA 6 lower real life crime rates?", "hypotheticals") == "excluded"
+    assert kind("What's the best thing at McDonald's?", "other") == "excluded"
+    assert kind("What’s it like inside of Microsoft right now?", "money-work") == "excluded"
+    assert kind("Why are all flights grounded right now?", "politics-news") == "excluded"
+    assert kind("What's the creepiest thing you've seen?", "dark-morbid") == "excluded"
+    assert kind("What is a question nobody has labelled yet, zqx?", "") == ""
+    assert kind("", "life-advice") == ""
+
+
 def test_title_source_marks_uploads_that_shipped_the_raw_question():
     """Research row R2: does a failed title cost watch-seconds?"""
     source = lambda q, t: insights._with_derived_dimensions(

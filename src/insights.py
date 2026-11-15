@@ -1894,6 +1894,12 @@ def _with_derived_dimensions(row):
     r["question_length"] = "" if not q else "short" if len(q) <= 63 else "long"
     # The logged topic, else the labelling pass's (see _TOPICS_CACHE).
     r["topic_any"] = (r.get("topic") or "").strip() or (_cached_topics().get(q, "") if q else "")
+    # R9: is the own show's kind of question (#90; ownquestions.PROMPT bars
+    # news, politics, religion, health, sex and a named person or brand) the
+    # kind that holds viewers? dark-morbid is out as not "everyday life".
+    topic = r["topic_any"]
+    r["question_kind"] = "" if not (q and topic) else (
+        "everyday" if topic in _EVERYDAY_TOPICS and not _names_something(q) else "excluded")
     # The question is the narrated opening: does addressing the viewer hold
     # them? 90 of 154 logged questions say "you" (2026-10-03).
     r["question_person"] = "" if not q else (
@@ -1930,6 +1936,30 @@ def _with_derived_dimensions(row):
     d = (r.get("duration_s") or "").strip()
     r["video_length"] = "" if not d else "short" if float(d) <= 20.0 else "long"
     return r
+
+
+_EVERYDAY_TOPICS = ("relationships-dating", "money-work", "nostalgia", "humor-absurd",
+                    "hypotheticals", "life-advice", "other")
+# Capitalised but naming nothing: the asker, AskReddit's "…of Reddit", and
+# the calendar (R9's review, 11-15: 21 of 23 flags on everyday topics were these
+# or emphasis).
+_UNNAMED = re.compile(
+    r"I(?:['’](?:m|ve|d|ll))?|Reddit|Redditors?|TV|AM|PM|Christmas|Halloween|Thanksgiving|Easter|Santa"
+    r"|(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day|January|February|March|April|May|June"
+    r"|July|August|September|October|November|December")
+
+
+def _names_something(question):
+    """A capitalised word past each sentence's first: a name, brand, place or
+    acronym ("GTA 6", "US officials", "Microsoft"). All-caps words of four or
+    more letters are emphasis ("FREE"), so NASA is missed."""
+    question = re.sub(r"^\s*[\[(][^\])]*[\])]\s*", "", question)
+    for sentence in re.split(r"(?<=[.!?:;])\s+|\s+[-–—]\s+|[\"“]", question):
+        words = re.findall(r"[A-Za-z][\w'’]*", sentence)
+        if any(w[0].isupper() and not _UNNAMED.fullmatch(w)
+               and not (w.isupper() and len(w) >= 4) for w in words[1:]):
+            return True
+    return False
 
 
 def load_videos(now=None, min_age_days=MIN_AGE_DAYS):
