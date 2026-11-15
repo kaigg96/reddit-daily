@@ -429,7 +429,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Escalations:** none opened (11-05's hold); the owner answered five
   label-only asks on 11-10 and passed over the five needing a watch, a
   direction call or hands (#59, #77, #80, #82, #90). Tight on files (#88,
-  #65 approved, awaiting hands), not decisions. **Decisions** (inline): D13,
+  #65 approved, then waiting for hands; all six closed 11-15), not decisions. **Decisions** (inline): D13,
   D11, D5 false; D4 worse (PRD §4 15,317 → 20,714 words in a week); D2, D8,
   D9 (amended, #91), D12 strained; D6, D14 hold a third audit: graduation
   candidates. **Outward (docs 11-12):** the `attribution` setting turns off

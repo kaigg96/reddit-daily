@@ -46,6 +46,27 @@ mid-December about a format that ends in January, and leaves no time to
 compare anything); switch cold on 12 January (no baseline, no fallback); Stack
 Exchange (about 1.6 usable questions a day and still a reading, PRD §4).
 
+**Challenged 2026-11-15 by a fresh agent, as asked; amended.** *Kept:*
+decision 2, as the ledger's `v7s-before-bet1` (set 11-14) already accepts
+cutting v7s's read, and decision 4. *Struck:* "auto-revert still guards it".
+From T4 on, v8's AskReddit cut gains about one upload every two days, so its
+20 may come after T9 (ledger `#15-thin`). *Decision 1, amended:* the 20
+December read cannot decide. Takes start no sooner than T1–T4 (~11-20); the
+14 December snapshot, the last before T9, sees uploads to ~12-07 at 7 days,
+about 17 a side, under the 20 `RELEASE_MIN_UPLOADS` requires, and at 15 a side
+the chance gap is 23% on watch-seconds and 35% on engaged share. So T9 will
+refuse and decision 4 applies: takes take every slot on 5 January unless T5's
+gate shows it failing. The takes arm before then is a shakedown, not the
+choice. **The choice of show moves past the cutover:** takes against the
+play-along form (if T7 passes its bar) and Stack Exchange (1.6 a day fills
+one arm; real people's answers; a sample branch exists; costs: answers cut to
+length, and share-alike lets anyone re-upload us), one upload a day each in
+the same weeks, its rule written before the first upload, read in February.
+*Rejected:* keeping 20 December as the deciding read (it cannot reach its own
+minimum), and a third daily upload to hurry it (still too late). *Decision 3*
+rests on one market read about who gets paid, not on our data; T7's viewer
+bar is its test, and it takes no upload slot before the cutover.
+
 ## Out of scope
 
 Four uploads a day (PRD §0 #4): it stays off until T9, so bet 2's window
@@ -69,15 +90,15 @@ Voice changes (#16). Anything that spends beyond #72's approved narration line.
 ## Tickets
 
 ### T1 · Bet 1's no-reactions build is live as the Reddit arm's last form
-Status: ready
+Status: blocked: the 11-16 08:17 release check on `b74fc92` (carries `main` and T3; 1,335 pass); merge on a PASS naming it
 Needs: none
 Touches: src/ (by merge of `integration/preview`), PRD.md §0 #15 and #13, the experiment ledger
 Context: decision 2. The build, its sample and its review are described on #77 (closed). The release check must pass on the day; `FORMAT_VERSION` becomes `v8`. Its pre-committed rule stays as written; add one ledger line that its read is thin by design from T4 on.
 Accept:
 - [ ] `scripts/validate_release.py` passes for the merged tree, and tests are green
 - [ ] the first `v8` upload is in `upload_log.csv` with its host pick as the closing line
-- [ ] PRD §0 no longer says #15 waits on a label; the ledger carries the line above
-Evidence:
+- [x] PRD §0 no longer says #15 waits on a label; the ledger carries the line above
+Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`.
 
 ### T2 · More than one music track, with no login needed
 Status: ready
@@ -92,7 +113,7 @@ Accept:
 Evidence:
 
 ### T3 · Every upload records which show it was
-Status: ready
+Status: review: on `integration/preview` (`b74fc92`), lands with T1
 Needs: none
 Touches: src/log.py, src/run.py, scripts/weekly_analytics.py, src/insights.py, tests/
 Context: the log has no column for the source; an own-question upload is known only by an empty `subreddit`. The comparison needs `report.py --compare show=<name>` with ages matched, like every other read (`CLAUDE.md` §6).
@@ -100,7 +121,7 @@ Accept:
 - [ ] `upload_log.csv` gains a `show` column (`reddit`, `takes`, later others); old rows read as `reddit`
 - [ ] `scripts/report.py --at-age 7 --compare show=takes` runs and refuses thin cohorts as it does elsewhere, with a test
 - [ ] the append-only log's existing rows are unchanged byte for byte
-Evidence:
+Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it.
 
 ### T4 · The show alternates by slot, in code
 Status: todo
@@ -125,18 +146,18 @@ Accept:
 Evidence:
 
 ### T6 · We know whether a play-along show has a clean, daily supply
-Status: ready
+Status: done
 Needs: none
 Touches: PRD.md §4
 Context: decision 3. One shift at most. A guess needs a true answer that is ours to use. Check first-hand, quoting the terms: statistics published by governments that place them in the public domain, and datasets released under CC0 or CC BY. For each: what a viewer would be asked to guess, how many usable episodes a day, and whether commercial use is allowed. Reddit, and anything scraped against a site's terms, is out.
 Accept:
 - [ ] PRD §4 records each source read, its licence quoted, and its daily supply
 - [ ] three example episodes are written out: question, the beat to guess, the reveal, the credit line
-- [ ] a verdict: build T7, or drop the play-along form because no source allows commercial reuse with at least two episodes a day
-Evidence:
+- [x] a verdict: build T7, or drop the play-along form because no source allows commercial reuse with at least two episodes a day
+Evidence: 11-15, `07482b2` on `main`: PRD §4 "Play-along supply". BLS, Census, USGS, NWS public domain; Wikidata CC0; OGL and OWID terms quoted; ~740 candidates (BLS ~200, Wikidata ~490, Census ~50); three episodes; verdict build T7.
 
 ### T7 · A play-along episode exists as a sample a viewer could follow
-Status: todo
+Status: ready
 Needs: T6
 Touches: src/ (a new source beside ownquestions.py), tests/
 Context: only if T6 says build. The number or answer in the reveal is copied from the source record by code, never written by a model. Write the viewer's bar before rendering (D14): can someone who has never seen the channel tell what to guess, and is the reveal worth the wait.
@@ -150,7 +171,7 @@ Evidence:
 Status: todo
 Needs: T5, T7
 Touches: src/content.py, src/config.py, the experiment ledger
-Context: three shows cannot each reach a readable count on two uploads a day before 20 December. Decide between a third daily upload (assumption 3) and giving this show half of the takes arm's slots, using the chance gaps `report.py` prints; write the choice and why.
+Context: amended 11-15 (the challenge, above): this arm runs after the cutover, against takes and perhaps Stack Exchange, read in February. Three shows cannot each reach a readable count on two uploads a day before 20 December. Decide between a third daily upload (assumption 3) and giving this show half of the takes arm's slots, using the chance gaps `report.py` prints; write the choice and why.
 Accept:
 - [ ] the arm's rule is in the ledger before its first upload
 - [ ] the slot plan gives every arm both slots equally, with a test
@@ -160,7 +181,7 @@ Evidence:
 Status: todo
 Needs: T5
 Touches: the experiment ledger, DECISIONS.md, PRD.md §0, PLAN.md
-Context: by 2026-12-20, apply the rule from T5 (and T8 if it ran) exactly as written. A Decide: evidence, the alternative rejected, a fresh agent arguing against it.
+Context: amended 11-15: expect T5's rule to refuse at ~17 a side, so decision 4 applies unless its gate fails. By 2026-12-20, apply the rule from T5 (and T8 if it ran) exactly as written. A Decide: evidence, the alternative rejected, a fresh agent arguing against it.
 Accept:
 - [ ] the rule is quoted before any number, and the choice follows from it
 - [ ] if the rule cannot tell the shows apart, decision 4 applies and the record says so
