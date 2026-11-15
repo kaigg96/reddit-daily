@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from moviepy import ColorClip, VideoClip, VideoFileClip, vfx
 
-from . import config
+from . import config, log
 
 
 def _procedural_frame_function(rng):
@@ -59,11 +59,21 @@ def _procedural_frame_function(rng):
     return frame_function
 
 
+def _pick_broll(files, rng):
+    """The clip for this video. On the own-questions show (PLAN C16), never the
+    last upload's: #90's sameness check, as YouTube's spam page names AI videos
+    made "with minimal changes". Reddit's pick is unchanged, draw for draw."""
+    if config.SOURCE == "own" and len(files) > 1:
+        last = log.last_bg_clip()
+        files = [f for f in files if f.name != last] or files
+    return rng.choice(files)
+
+
 def build_background(duration, rng):
     """Returns (list of background layer clips, bg_name for the upload log)."""
     broll_files = sorted(Path(config.BROLL_DIR).glob("*.mp4"))
     if broll_files:
-        path = rng.choice(broll_files)
+        path = _pick_broll(broll_files, rng)
         clip = VideoFileClip(str(path)).without_audio()
         if clip.duration >= duration + 0.5:
             start = rng.uniform(0, clip.duration - duration - 0.5)
