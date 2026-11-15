@@ -14,7 +14,9 @@ Product status: `PRD.md` §0. Code health: `TECH_DEBT.md`. Conventions:
 ## 1. Orient (always, ~5 minutes)
 
 Run the **`/pickup`** steps, then read `WORKLOG.md`'s last few entries. Do not
-re-derive state from `git log`.
+re-derive state from `git log`. Work larger than a shift is on the epic board
+(`epics/`, its README; `process/epics.md` for the roles): a `ready` ticket of
+an `active` epic is ready work, ahead of generating more.
 
 ```sh
 venv/bin/python scripts/statusline.py --budget   # GO / BOUNDED / WRAP / STOP
