@@ -1940,15 +1940,24 @@ def _with_derived_dimensions(row):
 
 _EVERYDAY_TOPICS = ("relationships-dating", "money-work", "nostalgia", "humor-absurd",
                     "hypotheticals", "life-advice", "other")
-_SELF = re.compile(r"I(?:['’](?:m|ve|d|ll))?")
+# Capitalised but naming nothing: the asker, AskReddit's "…of Reddit", and
+# the calendar (R9's review, 11-15: 21 of 23 flags on everyday topics were these
+# or emphasis).
+_UNNAMED = re.compile(
+    r"I(?:['’](?:m|ve|d|ll))?|Reddit|Redditors?|TV|AM|PM|Christmas|Halloween|Thanksgiving|Easter|Santa"
+    r"|(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day|January|February|March|April|May|June"
+    r"|July|August|September|October|November|December")
 
 
 def _names_something(question):
-    """A capitalised word past each sentence's first, bar "I": a name, brand,
-    place or acronym ("GTA 6", "US officials", "Microsoft")."""
-    for sentence in re.split(r"(?<=[.!?:;])\s+", question):
+    """A capitalised word past each sentence's first: a name, brand, place or
+    acronym ("GTA 6", "US officials", "Microsoft"). All-caps words of four or
+    more letters are emphasis ("FREE"), so NASA is missed."""
+    question = re.sub(r"^\s*[\[(][^\])]*[\])]\s*", "", question)
+    for sentence in re.split(r"(?<=[.!?:;])\s+|\s+[-–—]\s+|[\"“]", question):
         words = re.findall(r"[A-Za-z][\w'’]*", sentence)
-        if any(w[0].isupper() and not _SELF.fullmatch(w) for w in words[1:]):
+        if any(w[0].isupper() and not _UNNAMED.fullmatch(w)
+               and not (w.isupper() and len(w) >= 4) for w in words[1:]):
             return True
     return False
 
