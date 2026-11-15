@@ -61,7 +61,7 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-15 (11:45) — The backup show is finished and switching it on is one prepared change; bet 1 merges with every test passing again
+## 2026-11-15 (11:37) — The backup show is finished and switching it on is one prepared change; bet 1 merges with every test passing again
 
     Worked (% of the shift): strategy 45 · gm 20 · reliability 15 · legal 10 · security 5 · engineering 5
 
@@ -82,6 +82,7 @@ and more useful than a confident guess.
   - moving sample videos to Google's winter reset hour: it needs a workflow change and a rule change, both yours, for little exposure;
   - a question on how concentrated views are: a weak reason, and probably too few videos to answer;
   - measuring how often the backup show's question writer repeats itself: about 5 AI requests, more than was safe before the 12:23 upload.
+  After the top two I fixed two of the switch-on's three loose ends (above). The third needs a workflow change of yours, and only matters once #90 is labelled. Nothing else cleared the bar, so I handed over at 11:37, 15 minutes early.
 - **General management (your approved asks):** #88 and #65 are labelled approved, but a shift can do neither. #88 is a change to the shift instructions that only you can apply; its patch, posted there, still applies cleanly today. #65 still waits on your yes to the corrected sentence.
 - **Security and reliability (checked):** both of yesterday's uploads and this morning's landed. Money controls are intact ($0.33 so far this month, forecast $0.78 of $3). No secret committed, and the only workflow-side change was the settings line you approved on #95.
 - AI use: one sample video, whose requests go to the sample model, at 10:56, well over an hour before the 12:23 run. No other AI requests and no Polly.
