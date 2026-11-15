@@ -89,7 +89,7 @@ and more useful than a confident guess.
 - **After 08:17 on 16 November:** read the check; on a pass naming the release's current commit, merge bet 1, then confirm the first upload closes with the host's pick.
 - **The weekly review** (16 November).
 - **The music:** listen to a sample, check the warning fix, and set its release date.
-- **The play-along sample** (T7), then the shows alternating by slot (T4).
+- **The play-along sample** (T7). The shows alternating by slot (T4) is built, switched off, on a test branch: review it after bet 1 merges.
 - **Dated reads carried from the last handover:** about 18 November the new model's 20th video; 23 November the capitals read; 7 December the data-retention decision.
 - The ready count reads under its floor because it does not count the epic's tickets (five ready or in review); the epic board's own build (E2) should count them.
 

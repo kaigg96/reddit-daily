@@ -124,7 +124,7 @@ Accept:
 Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it.
 
 ### T4 · The show alternates by slot, in code
-Status: todo
+Status: review: `product/e1-t4-show-slots` (`4730afa`, on the release), unmerged; left: a fresh review, the dry runs, and the title-style pairing (below)
 Needs: T3
 Touches: src/content.py, src/config.py, src/run.py, tests/
 Context: assumption 2. Mirror `content.subreddit_for_run`: one Reddit and one new-show upload a day, each show getting the morning and the evening slot equally over two days. Merged switched off behind a constant, so T5 is one line.
@@ -132,7 +132,7 @@ Accept:
 - [ ] a test shows that over any 14 days each show gets 14 uploads, 7 in each slot
 - [ ] `DRY_RUN=1` produces a playable video for each show
 - [ ] with the constant off, behaviour is unchanged (existing tests pass untouched)
-Evidence:
+Evidence: 11-15, implementer, not yet re-checked: `content.show_for_run` takes the old subreddit key, so shows swap slots daily; with `SHOW_ALTERNATION` on, subreddits move on `day // 2 + position // 2`, so the Reddit arm still draws every subreddit in both slots (a trap: on one key, Reddit's slot would always draw the same subreddit and starve bet 1's AskReddit read). `config.use_show` sets SOURCE, SHOW, FORMAT_VERSION and ANSWER_LABEL per run. 1,350 pass. Unchecked: how `title_style_for`, keyed on the day, pairs with subreddits once it is on.
 
 ### T5 · The three-takes show uploads once a day, under a rule set first
 Status: todo
