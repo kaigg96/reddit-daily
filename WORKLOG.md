@@ -16,6 +16,37 @@ next shift looks. Follow this template exactly — the report is generated from
 its structure:
 
 ```
+## 2026-11-15 (18:43) — The owner's session: shifts now decide for themselves, money is the one wall, and Reddit ends for us on 12 January
+
+    Worked (% of the shift): gm 55 · engineering 30 · security 10 · strategy 5
+
+**Summary:** Nothing reached viewers. The owner, back after a month, named the real blocker as their own time and removed it: from now on a shift decides product, strategy and its own process, and is stopped only by spending money (D16).
+
+### Toward revenue
+- **Nothing directly, but the wait is over.** Bet 1 sat a month on one label. That label is no longer needed: shipping it is the next shift's own decision.
+
+### Done
+- **General management (the rule):** the owner is the last resort. Do not ask them to approve anything; decide, act and record. The old "Propose" level is now "Decide": evidence, a fresh reviewer arguing against it, a record. The rules file, the organisation map and the shift, backlog, review, audit and pickup instructions are ours to change; their text now lives in a `process` folder, because the shift tool cannot write where it used to live.
+- **Security (the wall):** spending money is never ours to decide or to ask for. A shift still cannot push workflow files. A change to one now applies itself after 3 days unless the owner objects, but never to the money checks or to a file holding paid or upload keys; those still need their label. A fresh review found two holes in the notice path (a widened token; a key spelled with an escape); both closed by a checker that parses the file. Checked by 93 new or changed tests; all 1,046 pass.
+- **General management (one-way doors):** deleting data or old videos, or renaming the channel, takes a dated notice of 7 days or more; any reply from the owner holds it.
+- **Strategy:** the owner will not register the Reddit app, as it buys only January to March. Reddit ends for us on 12 January.
+- **Owner's asks closed:** #77, #80, #90 (ours to decide now), #82 (declined), #88 (landed), #65 (ours to write).
+- This session was the owner's, with an assistant, not a scheduled shift.
+
+### Blocked
+- **For the owner, only their login can:** #59 (account checks); the weekly shift allowance in the repository settings (200, wanted 400).
+
+### Next
+- **E1's ready tickets, in order: T1** (ship bet 1's no-reactions build as the Reddit arm's last form; sampled and reviewed 13 November), **T3, T2, T6**. Then the verdict-counting fix and the time-slot logging.
+- **Bring the records into line with D16:** the product plan still says items wait on #77 and #80; the review calendar still says planning is never a shift's; the health check still queues asks for the owner; the decisions log is one over its cap.
+- **Both of the owner's briefs are planned, in `epics/`** (read its README first): E2 builds the epic workflow, with lessons as its T7; E1 plans the show after Reddit and is the pilot. Each is a decision made in the owner's session without watching a video: have a fresh agent argue against it before building.
+- 16 November weekly review, as listed below.
+
+### Better?
+- **Than last shift:** yes, in what is possible: nothing a shift needs now waits on a person, except money.
+- **Than ~10 shifts ago:** unclear until something ships; D16 sets its own test for 14 December.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-10-06 — one line on what actually mattered
 
     Worked (% of the shift): reliability 10 · product 30 · engineering 30 · strategy 20 · gm 10
@@ -96,42 +127,3 @@ and more useful than a confident guess.
 - **Than ~100 shifts ago:** too early to say.
 
 ---
-
-## 2026-11-15 (11:37) — The backup show is finished and switching it on is one prepared change; bet 1 merges with every test passing again
-
-    Worked (% of the shift): strategy 45 · gm 20 · reliability 15 · legal 10 · security 5 · engineering 5
-
-**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). The backup show, which keeps uploads going if Reddit access ends on 12 January, is now fully built and switched off. Turning it on is prepared as one change, which your label on #90 merges once its music tracks are in.
-
-### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. I found and fixed one problem: bet 1 had stopped merging cleanly into the live code, because two of its tests failed against a change made yesterday. With that fixed, bet 1 merges with all 1,239 tests passing, so your label can still merge it straight away.
-
-### Done
-- **Strategy (the backup show, finished):** its last condition, never the same background clip twice in a row, passed its sample video (playable, 28 seconds) and merged switched off. Every condition a shift can build is now done.
-- **Strategy (its switch-on, prepared; a bet):** turning the backup show on is now one ready change. Its videos are recorded under their own version name, so their verdict never mixes with Reddit's. A fresh reviewer found that my first version would have filed bet 1's videos under the backup show's name if bet 1 landed later. I fixed that by naming the version after the format it runs on. The naming is live and changes nothing today.
-- **Reliability and general management (the switch-on's loose ends, two of three fixed):** once the backup show was on, our release check would have reported a failed release whenever the backup show's title check could not reach the AI. It now reports "could not check", and a garbled answer still fails. Our tracker check now reads the version an upload actually ships, so after the switch it will flag the tracker until the tracker names the new version. The third loose end is written down for the shift that switches it on: after the switch, sample videos could only show the backup show. Both fixes were reviewed fresh and merged.
-- **Legal (ready for 7 December):** the fix for YouTube text we keep past YouTube's 30-day limit is ready as a separate change. The stored copy keeps video IDs and statistics and drops titles, questions and answers. It rewrites stored data, so it waits on your decision at the 7 December review.
-- **General management (ranking):** with nothing ready, a fresh helper proposed eight ideas and two others ranked them forwards and reversed. Both rankings put the same two first, and I did both. Dropped:
-  - steering the backup show's questions toward topics that seem to do better: those figures are not compared at the same video age, which our rules count as no evidence;
-  - a countdown to 12 January for shifts: only you can register the app;
-  - upgrading a login library with a known flaw: already checked, our use cannot reach the flaw, and it goes in with the next library update;
-  - moving sample videos to Google's winter reset hour: it needs a workflow change and a rule change, both yours, for little exposure;
-  - a question on how concentrated views are: a weak reason, and probably too few videos to answer;
-  - measuring how often the backup show's question writer repeats itself: about 5 AI requests, more than was safe before the 12:23 upload.
-  After the top two I fixed two of the switch-on's three loose ends (above). The third needs a workflow change of yours, and only matters once #90 is labelled. Nothing else cleared the bar, so I handed over at 11:37, 15 minutes early.
-- **General management (your approved asks):** #88 and #65 are labelled approved, but a shift can do neither. #88 is a change to the shift instructions that only you can apply; its patch, posted there, still applies cleanly today. #65 still waits on your yes to the corrected sentence.
-- **Security and reliability (checked):** both of yesterday's uploads and this morning's landed. Money controls are intact ($0.33 so far this month, forecast $0.78 of $3). No secret committed, and the only workflow-side change was the settings line you approved on #95.
-- AI use: one sample video, whose requests go to the sample model, at 10:56, well over an hour before the 12:23 run. No other AI requests and no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #90 (now one label plus the music tracks), #65 (waits on your yes to the corrected sentence), #80, #59.
-
-### Next
-- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
-- **If #90 is labelled and the music is in:** settle the switch-on's last loose ends (the release check's AI request count, and sample videos of Reddit's show), take a sample video of the switch-on, then merge it.
-- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling share watched (read last night under its rule). **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read. **7 December:** the data-retention decision, now ready.
-
-### Better?
-- **Than last shift:** no, not toward revenue. The backup show is finished, its switch-on is one label away, and bet 1 merges cleanly again after quietly breaking.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds and bet 1 hasn't shipped. The backup show has gone from a sample to built, with its switch prepared.
-- **Than ~100 shifts ago:** too early to say.

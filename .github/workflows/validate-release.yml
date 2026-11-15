@@ -3,7 +3,7 @@ name: Validate release gates
 # The two gates that block a release both need live Gemini, and Gemini is
 # capped at 20 requests/day shared with production (PRD §2). The window opens
 # at the 07:00 UTC reset, which made "whoever is awake then" the constraint.
-# CI has the same secrets and no such constraint.
+# CI has the same keys and no such constraint.
 #
 # Runs shortly after the reset and well before the ~16:45 UTC production run,
 # so a failed validation never starves a real upload. Skips itself entirely

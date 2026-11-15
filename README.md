@@ -8,7 +8,7 @@ and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
 ## Picking this up (new session / new contributor)
 
-Run **`/pickup`** (`.claude/skills/pickup/`), which walks this section and the
+Run **`/pickup`** (`process/pickup.md`), which walks this section and the
 delivery plan, then reports where things stand before touching anything. Doing
 it by hand instead — read in this order; it's ~5 minutes and avoids re-deriving
 decisions:
@@ -31,12 +31,12 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
   billed service here ($16/1M chars, billed twice per segment because of the
   speech-mark call). Production is ~$0.90/month; a batch job is where a
   surprise bill comes from. Reuse the mp3s in `assets/gen/` when iterating on
-  visuals, and ask the owner before any deliberate bulk synthesis.
+  visuals. Deliberate bulk synthesis is spending, which no shift decides.
   `POLLY_CHAR_BUDGET` in `src/tts.py` enforces a per-process cap.
 - Feature work goes on a branch; `main` runs live twice daily (see below).
 - Work autonomously and merge your own work (owner, 2026-09-19) — under the
-  gates in `CLAUDE.md` §3. Safety and cost controls,
-  production data and spending still need the owner.
+  gates in `CLAUDE.md` §3. Since 2026-11-14 the owner is the last resort
+  (`CLAUDE.md` §4): decide and act; never spend money.
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis
   (see "Answering 'did X work?'").
 - Never credit AI tooling in code, commits, or anything published.

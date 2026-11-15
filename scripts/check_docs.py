@@ -187,11 +187,17 @@ def check_decision_ids():
     another, independently. A duplicate id makes every later reference
     ambiguous, and one decision was lost entirely in the same episode.
     """
-    ids = re.findall(r"^## (D\d+)\b", _read("DECISIONS.md"), re.M)
+    text = _read("DECISIONS.md")
+    ids = re.findall(r"^## (D\d+)\b", text, re.M)
     dupes = sorted({i for i in ids if ids.count(i) > 1})
     if dupes:
         return False, f"duplicate decision id(s): {', '.join(dupes)}"
-    nums = sorted(int(i[1:]) for i in ids)
+    # A superseded stub leaves once its supersessor has been re-reviewed
+    # twice (the file's retention rule, 2026-11-15); its number is listed on
+    # the "Retired stubs:" line, so a gap there is a record kept, not lost.
+    retired = {int(n) for line in re.findall(r"^Retired stubs:.*$", text, re.M)
+               for n in re.findall(r"\bD(\d+)\b", line)}
+    nums = sorted({int(i[1:]) for i in ids} | retired)
     gaps = [n for n in range(1, max(nums, default=0)) if n not in nums]
     if gaps:
         return False, (f"missing decision id(s) {gaps} — a record was lost or "
