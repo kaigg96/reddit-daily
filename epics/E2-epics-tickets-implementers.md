@@ -100,16 +100,16 @@ Accept:
 Evidence:
 
 ### T2 · The four roles have written methods
-Status: todo
+Status: review: `process/epics.md` written 11-15 (owner's session, Fable) from T3's evidence; left: the two wirings below, which need T1's script
 Needs: T1
 Touches: process/epics.md (new), process/shift.md, process/backlog.md, scripts/context_budget.py, scripts/backlog_status.py
 Context: this file's "The decision" is the outline. Read the two Anthropic articles named in assumption 3 first-hand and adopt only what fits; cite what you adopt.
 Accept:
-- [ ] `process/epics.md` gives each role a procedure a cold shift can follow, in 1,200 words or fewer, and has a budget in `context_budget.py`
+- [x] `process/epics.md` gives each role a procedure a cold shift can follow, in 1,200 words or fewer, and has a budget in `context_budget.py`
 - [ ] `process/shift.md` §3 sends a shift to `epics.py --next` before the ranked queue
 - [ ] `backlog_status.py` counts `ready` tickets of `active` epics as ready work, with a test
 - [ ] the fresh-context review required by `CLAUDE.md` §3 found no contradiction with `CLAUDE.md` §4 or `ORG.md` §2
-Evidence:
+Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring.
 
 ### T3 · We know whether implementers can run side by side in CI
 Status: todo
@@ -156,7 +156,7 @@ Accept:
 Evidence:
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: todo
+Status: ready: `process/lessons.md` seeded 11-15 with 13 lessons, each with friction ids; left: `--check`, brief matching, the weekly step
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
@@ -165,8 +165,8 @@ Accept:
 - [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
 - [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
 - [ ] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired
-- [ ] at least five lessons are seeded, each with real evidence
-Evidence:
+- [x] at least five lessons are seeded, each with real evidence
+Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`.
 
 ### T8 · E1's remaining tickets run through this workflow
 Status: todo
