@@ -396,8 +396,11 @@ def main():
                  f"rank 12 topic buckets against.")
 
     # ---- write full CSV ----
-    fields = ["video_id", "published_at", "age_days", "upload_slot", "title", "question",
-              "answers", "topic", "duration", "views", "likes", "comments", "residual"]
+    # No titles, questions or answers: YouTube lets a client keep API data other
+    # than statistics for 30 days (developer policy III.E.4), and this file is
+    # committed. IDs, our own topic label and statistics may stay (TECH_DEBT).
+    fields = ["video_id", "published_at", "age_days", "upload_slot", "topic", "duration",
+              "views", "likes", "comments", "residual"]
     with open(OUT_DIR / "channel_videos.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         w.writeheader()
