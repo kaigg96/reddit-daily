@@ -161,9 +161,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   pin Reddit. Its fresh review found three things to settle before it merges:
   (1) the release gates (`validate-release.yml` sets no `SOURCE`) would run
   the own metadata path: an unanswered judge now reads INCONCLUSIVE (merged
-  11-15), but gate 1 grows to 2–4 requests and can pass the cap of 8; (2) `scripts/check_docs.py:40` reads
-  the literal `"v7s"` line, so it would say the live format agrees while
-  uploads log `v7s-own`; (3) branch renders could no longer show Reddit's show
+  11-15), but gate 1 grows to 2–4 requests and can pass the cap of 8; (2)
+  fixed 11-15: the docs check now reads the shipped version, so it flags
+  PRD's live format until it says `v7s-own`; (3) branch renders could no
+  longer show Reddit's show
   (`dry-run.yml` passes no `SOURCE`), which bet 1's AskReddit read wants.
   Then a dry run of its tip, which renders the own path.
 

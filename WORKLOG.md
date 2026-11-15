@@ -61,6 +61,46 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-15 (11:45) — The backup show is finished and switching it on is one prepared change; bet 1 merges with every test passing again
+
+    Worked (% of the shift): strategy 45 · gm 20 · reliability 15 · legal 10 · security 5 · engineering 5
+
+**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). The backup show, which keeps uploads going if Reddit access ends on 12 January, is now fully built and switched off. Turning it on is prepared as one change, which your label on #90 merges once its music tracks are in.
+
+### Toward revenue
+- **Nothing directly**, because bet 1 still waits on your label. I found and fixed one problem: bet 1 had stopped merging cleanly into the live code, because two of its tests failed against a change made yesterday. With that fixed, bet 1 merges with all 1,237 tests passing, so your label can still merge it straight away.
+
+### Done
+- **Strategy (the backup show, finished):** its last condition, never the same background clip twice in a row, passed its sample video (playable, 28 seconds) and merged switched off. Every condition a shift can build is now done.
+- **Strategy (its switch-on, prepared; a bet):** turning the backup show on is now one ready change. Its videos are recorded under their own version name, so their verdict never mixes with Reddit's. A fresh reviewer found that my first version would have filed bet 1's videos under the backup show's name if bet 1 landed later. I fixed that by naming the version after the format it runs on. The naming is live and changes nothing today.
+- **Reliability and general management (the switch-on's loose ends, two of three fixed):** once the backup show was on, our release check would have reported a failed release whenever the backup show's title check could not reach the AI. It now reports "could not check", and a garbled answer still fails. Our tracker check now reads the version an upload actually ships, so after the switch it will flag the tracker until the tracker names the new version. The third loose end is written down for the shift that switches it on: after the switch, sample videos could only show the backup show. Both fixes were reviewed fresh and merged.
+- **Legal (ready for 7 December):** the fix for YouTube text we keep past YouTube's 30-day limit is ready as a separate change. The stored copy keeps video IDs and statistics and drops titles, questions and answers. It rewrites stored data, so it waits on your decision at the 7 December review.
+- **General management (ranking):** with nothing ready, a fresh helper proposed eight ideas and two others ranked them forwards and reversed. Both rankings put the same two first, and I did both. Dropped:
+  - steering the backup show's questions toward topics that seem to do better: those figures are not compared at the same video age, which our rules count as no evidence;
+  - a countdown to 12 January for shifts: only you can register the app;
+  - upgrading a login library with a known flaw: already checked, our use cannot reach the flaw, and it goes in with the next library update;
+  - moving sample videos to Google's winter reset hour: it needs a workflow change and a rule change, both yours, for little exposure;
+  - a question on how concentrated views are: a weak reason, and probably too few videos to answer;
+  - measuring how often the backup show's question writer repeats itself: about 5 AI requests, more than was safe before the 12:23 upload.
+- **General management (your approved asks):** #88 and #65 are labelled approved, but a shift can do neither. #88 is a change to the shift instructions that only you can apply; its patch, posted there, still applies cleanly today. #65 still waits on your yes to the corrected sentence.
+- **Security and reliability (checked):** both of yesterday's uploads and this morning's landed. Money controls are intact ($0.33 so far this month, forecast $0.78 of $3). No secret committed, and the only workflow-side change was the settings line you approved on #95.
+- AI use: one sample video, whose requests go to the sample model, at 10:56, well over an hour before the 12:23 run. No other AI requests and no Polly.
+
+### Blocked
+- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #90 (now one label plus the music tracks), #65 (waits on your yes to the corrected sentence), #80, #59.
+
+### Next
+- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
+- **If #90 is labelled and the music is in:** settle the switch-on's last loose ends (the release check's AI request count, and sample videos of Reddit's show), take a sample video of the switch-on, then merge it.
+- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and AskReddit's falling share watched (read last night under its rule). **About 18 November:** the new model's 20th video. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read. **7 December:** the data-retention decision, now ready.
+
+### Better?
+- **Than last shift:** no, not toward revenue. The backup show is finished, its switch-on is one label away, and bet 1 merges cleanly again after quietly breaking.
+- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds and bet 1 hasn't shipped. The backup show has gone from a sample to built, with its switch prepared.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-14 (23:45) — The backup show's title check passes every test case on our AI models, and it no longer repeats a question in new words
 
     Worked (% of the shift): strategy 60 · engineering 15 · gm 15 · data 5 · security 5
@@ -89,40 +129,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** no, not toward revenue. The backup show's title check is proven on both our AI models, and it now refuses reworded repeats, which YouTube's spam rules would count against it.
 - **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds and bet 1 hasn't shipped. The backup show has gone from a sample to built, checked and switched off, waiting on you.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-14 (17:53) — Watch time is falling inside our main subreddit, which would have tilted bet 1's verdict; the backup show's title check is built
-
-    Worked (% of the shift): data 30 · reliability 20 · strategy 30 · gm 20
-
-**Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). This shift found that watch time inside AskReddit has fallen from 12 to 10 seconds while the channel as a whole reads flat, and set bet 1's read to show that beside its verdict, so a falling baseline cannot pass for a failed bet.
-
-### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. The nearest thing: bet 1's verdict is the one decision on our way to revenue, and it was at risk of a false "revert" (below). Bet 1 still merges cleanly into today's live code, this shift's changes included, with all 1,162 tests passing.
-
-### Done
-- **Data (a question answered: yes, falling):** bet 1 is judged on AskReddit uploads against the earlier versions' AskReddit uploads, pooled. I set the rule and saved it before looking. Our reporting tool reads AskReddit's watch time at a week old as falling, 12 to 10 seconds since mid-October, beyond its usual 1-second drift, while the channel overall reads flat (12 to 11), so our second subreddit is holding up better. Recent weeks are thinner, 7–8 AskReddit uploads each, since the two subreddits share the slots. So a baseline pooled from the better weeks would make bet 1 look worse than it is. Its rule is unchanged; if its read says revert, a comparison with the same recent weeks is now printed beside it, never as the trigger. The same holds for the new AI model's own read, due about 25 November, which comes first.
-- **Data (a question the tool can't answer yet):** is AskReddit's fall just shorter videos? The tool cannot read the share of each video watched week by week, so no answer; it stays a question for Monday.
-- **Data (a question answered: no):** could a topic now justify reopening the parked idea of choosing posts by topic? Its bar is a 50% lead. The best-placed topic, politics and news, leads by 27%, and our tool refused the comparison because those videos are younger. It stays parked.
-- **Reliability (a safeguard for 12 January):** if the Reddit app is not registered by then, Reddit will refuse our requests. A new test proves such a refusal stops the run before it pays for narration, writes a title, uploads, or touches the record of what was last posted, whether the refusal comes on the list of posts or later, after the safety check has spent a request. A fresh reviewer found the first version could pass without ever reaching Reddit; fixed.
-- **Strategy (the backup show's title check, chosen and built):** the check that stops our own-questions show's titles passing AI-written takes off as real people's has leaked through three rounds of word lists. I chose its replacement, a separate AI check of each title and closing line that refuses when in doubt, because on our channel a separate check works where instructions inside the writing request do not (bet 1's reactions). It costs one request per video and fits the daily allowance at two or four a day. Built, reviewed fresh twice and merged switched off, so today's show is untouched; a failed request now falls to our backup AI models, as the title request does. Two steps are left before the backup can be switched on, now the next shift's ready work.
-- **Data (record-keeping):** our list of experiments and their rules now has a test holding it in one consistent form. Adding it found a row whose last cell had split in two, losing part of its references; repaired, nothing else changed.
-- **General management (ranking):** a fresh helper proposed six ideas; two others ranked them forwards and reversed, and the top two agreed. I did five of the six in that order, then two follow-ups from the day's findings. Dropped: what our viewers' countries imply for pay per 1,000 views (it changes no decision while we are this far from any paid tier); leaning the subreddit mix toward our second one (its 2 November read: more watch time, fewer plays past the opening). The title check's two remaining steps could not be built, reviewed and merged in the 14 minutes left (one needs AI requests this close to an upload), so I handed over at 17:53.
-- **Security and reliability (checked):** both of yesterday's uploads and this morning's landed. Money controls intact ($0.33 this month, forecast $0.78 of $3); no secret committed; no workflow change since 11 November.
-- AI use: none of Google's allowance; no sample video; no Polly.
-
-### Blocked
-- **For you, in order:** #77 (one label), #82 (register the Reddit app by 12 January), #88 (one command), #95 (one label), #90, #65 (waits on your yes to the corrected sentence), #80, #59, and the shift allowance setting (on #92).
-
-### Next
-- **If #77 is labelled:** merge bet 1 straight away, then the verdict-counting fix, then the time-slot logging.
-- **Ready now:** the backup show's title check, its two steps left.
-- **16 November, the weekly review:** the buried-upload rule, the weekly swings question, and today's lead: AskReddit's watch time is falling while our second subreddit holds.
-- **About 18 November:** the new model's 20th video and its title counts. **20 November:** if bet 1 is still unmerged, update #80. **23 November:** the capitals read.
-
-### Better?
-- **Than last shift:** no, not toward revenue. Bet 1's eventual verdict is safer from a false revert, the Reddit cutoff can no longer cost money or a duplicate upload, and the backup show is one step nearer.
-- **Than ~10 shifts ago:** no. Watch time is flat at 11 seconds, falling inside AskReddit, and bet 1 hasn't shipped.
 - **Than ~100 shifts ago:** too early to say.
