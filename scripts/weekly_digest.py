@@ -115,6 +115,17 @@ def refused_columns(rows):
     return dict(sorted(counts.items()))
 
 
+def unused_sealed(log_rows, since, sealed, min_uploads=10):
+    """Sealed tracks no upload since `since` used. With plain tracks in the
+    rotation (E1 T2), a sealed one that fails to unseal drops out instead of
+    logging "none", so this is its trace. At five tracks, one never drawn in
+    ten or more uploads is chance about one week in 50."""
+    recent = [r.get("music_track") for r in log_rows if r["timestamp_utc"] >= since]
+    if len(recent) < min_uploads:
+        return []
+    return sorted(name for name in sealed if name not in recent)
+
+
 def humanize(n):
     return f"{n / 1_000_000:.1f}M" if n >= 1_000_000 else (f"{n / 1000:.1f}K" if n >= 1000 else str(n))
 
@@ -183,6 +194,7 @@ def main():
     # than failing the upload (scripts/seal_assets.sh); this column is the trace.
     no_music = [r for r in log_rows
                 if r["timestamp_utc"] >= iso(7) and r.get("music_track") == "none"]
+    unsealed = unused_sealed(log_rows, iso(7), [config.FALLBACK_MUSIC.name])
     skips = screen_skips()
     drift = median_publish_drift(channel_videos)
 
@@ -202,6 +214,8 @@ def main():
         soft.append(f"{len(non_public)} upload(s) not public")
     if no_music:
         soft.append(f"{len(no_music)} upload(s) rendered without music")
+    if unsealed:
+        soft.append(f"sealed music unused all week (failed to unseal?): {', '.join(unsealed)}")
     refused = refused_columns(latest.values())
     if refused:
         soft.append("snapshot did not collect " + ", ".join(refused))

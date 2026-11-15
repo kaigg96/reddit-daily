@@ -70,3 +70,14 @@ def test_the_committed_rotation_has_four_licensed_tracks():
         assert f"`{n}`" in licences, n
     # with the sealed funk bed, unsealed in CI, that is at least four in rotation
     assert (config.ASSETS / "funk_bg_lower.mp3.enc").exists()
+
+
+def test_a_sealed_track_unused_all_week_is_flagged():
+    from scripts import weekly_digest as wd
+    rows = [{"timestamp_utc": f"2026-11-{d:02d}T07:00:00+00:00",
+             "music_track": "freepd_funshine.mp3"} for d in range(10, 22)]
+    sealed = ["funk_bg_lower.mp3"]
+    assert wd.unused_sealed(rows, "2026-11-10", sealed) == ["funk_bg_lower.mp3"]
+    rows[-1]["music_track"] = "funk_bg_lower.mp3"
+    assert wd.unused_sealed(rows, "2026-11-10", sealed) == []
+    assert wd.unused_sealed(rows[:5], "2026-11-01", ["x.mp3"]) == []   # too few to tell
