@@ -68,7 +68,7 @@ and more useful than a confident guess.
 **Summary:** Nothing reached viewers, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77). The backup show, which keeps uploads going if Reddit access ends on 12 January, is now fully built and switched off. Turning it on is prepared as one change, which your label on #90 merges once its music tracks are in.
 
 ### Toward revenue
-- **Nothing directly**, because bet 1 still waits on your label. I found and fixed one problem: bet 1 had stopped merging cleanly into the live code, because two of its tests failed against a change made yesterday. With that fixed, bet 1 merges with all 1,237 tests passing, so your label can still merge it straight away.
+- **Nothing directly**, because bet 1 still waits on your label. I found and fixed one problem: bet 1 had stopped merging cleanly into the live code, because two of its tests failed against a change made yesterday. With that fixed, bet 1 merges with all 1,239 tests passing, so your label can still merge it straight away.
 
 ### Done
 - **Strategy (the backup show, finished):** its last condition, never the same background clip twice in a row, passed its sample video (playable, 28 seconds) and merged switched off. Every condition a shift can build is now done.

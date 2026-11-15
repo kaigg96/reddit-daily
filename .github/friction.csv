@@ -334,3 +334,4 @@ F332,2026-11-15T11:21:54+00:00,43706183068,strategy,Own show: release named for 
 F333,2026-11-15T11:23:10+00:00,43706183068,legal,YouTube API text past 30 days: the 12-07 decision prepared as a branch,done,,none,None; nothing in code reads the dropped columns,None,0,
 F334,2026-11-15T11:26:52+00:00,43706183068,reliability,Release gate: an unanswered own title judge is inconclusive (merged),done,,none,"The review caught that a junk reply is also 'unanswered', which must still fail",None,2,
 F335,2026-11-15T11:31:43+00:00,43706183068,gm,Docs check reads the shipped format (merged),done,,none,None,None,0,
+F336,2026-11-15T11:35:36+00:00,43706183068,reliability,Gate test placement broke bet 1's clean merge; moved to its own file,done,,mistake,"My new gate test sat where bet 1 also adds tests, so bet 1 stopped merging cleanly; the docs check caught it before handover","Checking bet 1's merge after every merge to main, which the docs check does once pushed",4,
