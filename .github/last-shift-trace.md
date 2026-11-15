@@ -1,101 +1,102 @@
-## Shift trace — run 43650818286
+## Shift trace — run 43706183068
 
-**Ended:** success, is_error false, 140 turns, 45.3 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 138, 2 failed. Helper agents made 87 more, 0 failed.
+**Ended:** success, is_error false, 123 turns, 43.8 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 122, 2 failed. Helper agents made 111 more, 2 failed.
 
 **Last message:**
 
-> I've handed over: everything is committed and pushed to main, and main passes all 959 tests. Nothing reached viewers this shift, so the company is no closer to revenue; every change to the live videos still waits on the owner's label on bet 1 (#77). The work went into the backup show, which keeps uploads going if Reddit access ends on 12 January. It is merged but switched off, and turning it on stays the owner's call (#90).
+> I handed over at 11:37, 15 minutes early. Nothing reached viewers this shift, so the company is no closer to revenue: every change to the videos still waits on your label on bet 1 (#77).
 >
-> **What shipped:**
-> - **Backup show title check (finished):** the word list now blocks only Reddit's own names, and a separate AI check judges whether a title passes the AI's takes off as real people's. When it refuses a line, the upload record now says so.
->   - On the real models it got 15 of 17 test titles right at first, letting through "3 Answers That…" and "A stranger told me…".
->   - After I tightened its instructions (using examples unlike the test titles), it got 26 of 26 on both AI models, including six new titles unlike its own examples and three closing lines.
-> - **No reworded repeats:** the backup show now refuses a question sharing half or more of its words with one already shipped. Only 3 of our 238 Reddit questions would have tripped that, so it catches rewordings, not ordinary variety.
->   - A reviewer found a refusal would have failed the whole run, about 3% of runs on their estimate. A repeat now gets one more try, with the AI told which question to avoid.
-> - **AskReddit question answered (narrowly):** the reporting tool can now show the share of each video watched, week by week. I set the rule before looking. AskReddit's share fell from 58% to 53%, just past its usual 5-point weekly swing. By that rule, viewers are leaving earlier, not just watching shorter videos. Monday's review weighs it.
-> - **Ranking:** a fresh helper proposed eight ideas and two others ranked them forwards and reversed; the same four came top both ways. Two were dropped because they were already answered.
+> **What moved:**
+> - **Bet 1 had stopped merging cleanly into the live code, and that's fixed.** Two of its tests failed against yesterday's changes. Later in the shift one of my own changes broke the merge again for a few minutes; the tracker check caught it before handover. Bet 1 now merges with all 1,239 tests passing, so your label can still merge it straight away.
+> - **The backup show is fully built and switched off.** Its last condition (never the same background clip twice in a row) passed its sample video and is merged. This is the show that keeps uploads going if Reddit access ends on 12 January.
+> - **Turning it on is ready as one change** on a separate branch. It merges after you label #90 and the music tracks it asks for are in. Its videos are recorded under their own version name, so their results never mix with Reddit's. A fresh reviewer caught that my first version would have filed bet 1's videos under the backup show's name if bet 1 landed later; I fixed it by naming the version after the format it runs on.
+> - **Two of the switch-on's three loose ends are fixed on the live code** (reviewed, no effect on today's uploads):
+>   - The release check now says "could not check" when the backup show's title check can't reach the AI, instead of reporting a failed release.
+>   - The tracker check now reads the version an upload actually ships.
+>   - The third needs a workflow change from you, and only once #90 is labelled: after the switch, sample videos could only show the backup show.
+> - **The fix for YouTube text we keep past YouTube's 30-day limit is ready** for your decision at the 7 December review. It rewrites stored data, so it stays unmerged until then.
 >
-> **Not merged:** the last switch-on condition, never the sam
+> **Your approved asks, #88 and #65:** a shift can't do either. #88 is a patch to the shift instructions that only you can apply; 
 
-### Tool calls (last 80 of 138)
+### Tool calls (last 80 of 122)
 
-59. Bash: venv/bin/python -m pytest -q 2>&1 | grep -E "FAILED|Error|assert" | head -15
-60. Bash: sed -i 's/| C16 | done 11-14: merged off; its title judge/| C16 | done: 11-14, merged off; its title judge/' PLAN.md && grep -n "^| C16" PL…
-61. Bash: git add PLAN.md && git commit -q -m "PLAN C16: its status in the form the queue reads (\"done:\")
-62. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -25
-63. Bash: tail -3 .github/friction.csv 2>/dev/null || ls .github | grep -i fric; grep -n "category\|outcome" scripts/friction.py | head -12
-64. Bash: sed -n 40,64p scripts/friction.py
-65. Bash: venv/bin/python scripts/friction.py add --function strategy --task "Own-title judge: list narrowed, refusals logged, graded 26/26 on both m…
-66. Skill: backlog
-67. Bash: venv/bin/python scripts/report.py --trajectory 2>&1 | tail -25; venv/bin/python scripts/report.py --zeros 2>&1 | tail -15
-68. Bash: grep -n -i "differ\b\|sameness\|videos differ\|repetitive" PRD.md PLAN.md TECH_DEBT.md | cut -c1-300 | head -12; gh issue view 90 --json ti…
-69. Agent: Generate 8 candidate work items
-70. Agent: Rank candidates, forward order
-71. Agent: Rank candidates, reversed order
-72. Bash: date -u +%H:%M && venv/bin/python scripts/context_budget.py --check 2>&1 | tail -15; grep -n "^| C1[0-9]\|^| C[0-9] " PLAN.md | cut -c1-12
-73. Bash: grep -n "SOURCE\|reddit\.\|import" src/run.py | head -30; grep -rn "def test.*own.*run\|SOURCE.*own" tests/test_run*.py 2>/dev/null | head
-74. Read: /home/runner/work/reddit-daily/reddit-daily/src/run.py
-75. Bash: grep -n "make_reddit\|praw\.\|import praw" src/*.py | head; grep -n "def subreddit_for_run" -A6 src/content.py | head -10; date -u +%H:%M
-76. Bash: sed -n 30,39p PLAN.md | cut -c1-400
-77. Bash: python3 - <<'EOF'
-78. Bash: git add PLAN.md && git commit -q -m "PLAN C16: reopened on #90's sameness check, ranked first both ways (11-14)
-79. Bash: grep -n "def uploaded_titles" -A12 src/log.py; grep -n "NEAR_REPEAT\|0\.5" src/insights.py | head -8; grep -n "^from\|^import" src/ownquest…
-80. Bash: git checkout -q -b strategy/own-near-repeat && sed -n 60,74p src/ownquestions.py && venv/bin/python -c "
-81. Bash: venv/bin/python -c "
-82. Bash: python3 - <<'EOF'
-83. Bash: grep -n "shipped\|uploaded=\|def _routes\|^GOOD\|^OTHER" tests/test_ownquestions.py | head -20; sed -n 1,40p tests/test_ownquestions.py | g…
-84. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_ownquestions.py
-85. Bash: python3 - <<'EOF'
-86. Bash: git add -A && git commit -q -m "Own questions: a reworded shipped question is refused too (#90's sameness check)
-87. Agent: Fresh review of near-repeat check
-88. Bash: python3 - <<'EOF'
-89. Bash: python3 - <<'EOF'
-90. Bash: sed -i 's/| C16 | ready: merged off; near-repeat questions refused 11-14; left,/| C16 | ready: near-repeats refused 11-14; left,/' PLAN.md …
-91. Read: /home/runner/work/reddit-daily/reddit-daily/src/ownquestions.py
-92. Bash: python3 - <<'EOF'
-93. Bash: python3 - <<'EOF'
-94. Bash: python3 - <<'EOF'
-95. Agent: Fresh review of the told retry
-96. Bash: python3 - <<'EOF'
-97. Bash: grep -v "^ ok" /tmp/cd.txt | head -12
-98. Bash: grep -n "def.*issue" scripts/check_docs.py | head -5; git diff 9d28e2c HEAD -- PLAN.md PRD.md TECH_DEBT.md WORKLOG.md DECISIONS.md | grep "…
-99. Bash: grep -n "issue references\|misdescribed" scripts/check_docs.py | head -5; venv/bin/python scripts/check_docs.py --help 2>&1 | head -5; grep…
-100. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/check_docs.py
-101. Bash: venv/bin/python -c "
-102. Bash: python3 - <<'EOF'
-103. Bash: python3 - <<'EOF'
-104. Bash: sed -n 108,124p scripts/check_docs.py; grep -n "(PRD #14). \*\*Closes" -B2 -A3 TECH_DEBT.md
-105. Bash: sed -i '441s/never inflates (PRD #14)\. \*\*Closes/never inflates (PRD §0, row 14). **Closes/' TECH_DEBT.md && sed -n 441,442p TECH_DEBT.md…
-106. Bash: venv/bin/python scripts/friction.py add --function strategy --task "Own show: one told retry after a repeat, merged off" --outcome done --c…
-107. Bash: python3 - <<'EOF'
-108. Bash: python3 - <<'EOF'
-109. Bash: git status --short && git add WORKLOG.md && git commit -q -m "Handover 11-14 (23:45): the own show's title judge graded 26/26 on both model…
-110. Bash: sed -n 40,90p src/background.py; grep -n "background\.\|bg_clip" src/run.py | head -10
-111. Bash: grep -rn "build_background\|def compose\|def render" src/*.py | head -10; grep -n "def last_upload\|def uploaded_titles\|bg_clip" src/log.p…
-112. Bash: grep -rn "build_background(" src/ | grep -v "def " ; grep -rn "import background\|from .background\|background\b" src/video.py 2>/dev/null …
-113. Bash: git checkout -q -b strategy/own-clip-repeat && sed -n 1,25p src/background.py | grep -n "import"; grep -n "^from\|^import" src/log.py
-114. Bash: python3 - <<'EOF'
-115. Bash: git add -A && git commit -q -m "Own questions: never the last upload's background clip (#90's sameness check)
-116. Agent: Fresh review of clip no-repeat
-117. Bash: git checkout -q main && python3 - <<'EOF'
-118. Bash: venv/bin/python scripts/friction.py add --function strategy --task "Own show: no repeated background clip, built and reviewed on a branch" …
-119. Bash: timeout 60 venv/bin/python scripts/report.py --trajectory --metric avg_view_pct --within subreddit=AskReddit 2>&1 | tail -14
-120. Bash: grep -n "not avg_view_pct\|TRAJECTORY_METRICS\|reads watch-seconds (whole" scripts/report.py src/insights.py | head;
-121. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-122. Bash: grep -n "R19\|R20\|R18" PRD.md | cut -c1-250 | head; date -u +%H:%M
-123. Bash: grep -n -i "research" PRD.md | head -8; grep -n "^| R[0-9]" PRD.md | cut -c1-200 | head
-124. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
-125. Bash: python3 - <<'EOF'
-126. Bash: git checkout PRD.md && python3 - <<'EOF'
-127. Bash: grep -n "def _snapshot_metric_rows" -A22 scripts/report.py | head -30; sed -n 579,600p scripts/report.py
-128. Bash: head -1 analysis/analytics_snapshots.csv; grep -n "AVG_PCT\|avg_view_pct\|class Metric" -A0 scripts/report.py src/insights.py | head -12
-129. Bash: grep -rln "show_trajectory" tests/ | head -3; grep -rn "def test.*trajectory" tests/ | head -6
-130. Bash: sed -n 345,358p scripts/report.py; sed -n 1466,1484p tests/test_insights.py; grep -n "^import\|^from\|sys.path" tests/test_insights.py | he…
-131. Bash: git checkout -q -b data/trajectory-share-watched && python3 - <<'EOF'
-132. Bash: venv/bin/python -m pytest -q >/tmp/t.txt 2>&1; echo "pytest exit=$?"; tail -1 /tmp/t.txt; timeout 60 venv/bin/python scripts/report.py --tr…
-133. Bash: git add -A && git commit -q -m "report: --trajectory reads the share watched (avg_view_pct), a diagnostic
-134. Agent: Fresh review of trajectory metric
-135. Bash: python3 - <<'EOF'
-136. Bash: git add -A && git commit -q -m "report: the share-watched test reaches the flat case; its drift reads in points (review)" && git checkout -…
-137. Bash: venv/bin/python scripts/friction.py add --function data --task "AskReddit's fall: share-watched trajectory added and read (FALLING, narrowl…
-138. Bash: sed -n '/^## 2026-11-14 (23:45)/,/^### Better/p' WORKLOG.md | head -40
+43. Bash: head -1 upload_log.csv; grep -rn "format_version" src/*.py | grep -v "^src/insights.py" | head; grep -rn "re\.\(match\|search\|compile\).*v…
+44. Bash: grep -n "SOURCE" src/*.py scripts/*.py .github/workflows/*.yml | grep -v "^src/config.py:4[0-6]" | head -30; ls assets/music/ 2>/dev/null |…
+45. Bash: sed -n 119,135p src/config.py; grep -n "\"v7s\"\|'v7s'" src/*.py scripts/*.py | head -20
+46. Bash: git diff main...origin/integration/preview -- src/config.py src/insights.py | grep -n "^[-+]" | grep -i -n "FORMAT_VERSION\|HOUSE_VOTE\|REL…
+47. Bash: git diff main...origin/integration/preview -- src/config.py | sed -n 25,70p
+48. Bash: tail -15 src/config.py; git diff main...origin/integration/preview -- src/config.py | grep "^@@"; wc -l src/config.py
+49. Bash: grep -rln "reload(config)\|importlib.reload" tests/ | head -5; grep -rn "importlib.reload" tests/ | head -3; sed -n 1085,1092p src/insights…
+50. Bash: grep -n "reload" tests/test_ownquestions.py | head -5 && sed -n "$(grep -n 'reload' tests/test_ownquestions.py | head -1 | cut -d: -f1),+14…
+51. Bash: sed -n 165,186p tests/test_ownquestions.py
+52. Bash: git branch -m strategy/own-version && python3 - <<'EOF'
+53. Bash: sed -n 33,45p src/insights.py; grep -n "config\." src/insights.py | head -3
+54. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_ownquestions.py
+55. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -2; venv/bin/python scripts/report.py --release own1 2>&1 | head -5; date -u +%H:%M
+56. Bash: git add -A && git commit -q -m "Own questions log as their own release (own1, read at 20): C16's rule, so a switch-on can never pool with R…
+57. Bash: python3 - <<'EOF'
+58. Bash: ls tests/conftest.py 2>/dev/null && sed -n 1,30p tests/conftest.py
+59. ✗ Bash: git stash -q && git checkout -q strategy/own-version && python3 - <<'EOF' — Exit code 1: 35 passed in 3.04s
+60. Bash: git checkout -q -- . 2>/dev/null; git rebase --skip 2>&1 | tail -1; git log --oneline -2; git stash list; git stash pop -q && git status --…
+61. Bash: python3 - <<'EOF'
+62. Bash: git add -A && git commit -q -m "Switch on our own questions (#90): SOURCE defaults to own, logged as own1
+63. Agent: Fresh review of the two branches
+64. Bash: date -u +%H:%M; grep -n "_rescue_metadata" tests/test_own_title_judge.py src/llm.py | head; git grep -n "def _rescue_metadata" origin/integ…
+65. Bash: git checkout -q strategy/own-version && sed -n 86,92p tests/test_own_title_judge.py; sed -n 100,104p tests/test_own_title_judge.py; sed -n …
+66. Bash: sed -i 's/lambda prompt, prior: /lambda prompt, prior, schema=None: /' tests/test_own_title_judge.py && grep -c "lambda prompt, prior, sche…
+67. Bash: python3 - <<'EOF'
+68. Bash: git add -A && git commit -q --amend -m "Own questions log as their own release, named for their format (v7s-own, read at 20): C16's rule
+69. Agent: Re-review final own-version diff
+70. Bash: git worktree remove --force /tmp/wt; grep -n "^## \|^### " TECH_DEBT.md | head -20; venv/bin/python scripts/context_budget.py --check 2>&1 …
+71. Bash: git checkout -q main && git pull -q --rebase origin main && git merge -q --no-ff strategy/own-version -m "Merge strategy/own-version: own q…
+72. Bash: git rebase --skip 2>&1 | tail -2; git status --short | head; git log --oneline -3
+73. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git commit -q --amend -m "Switch on our own questions (#90): SOURCE defaults to own, …
+74. Bash: sed -n 153,175p TECH_DEBT.md | cut -c1-260
+75. Bash: python3 - <<'EOF'
+76. Bash: python3 - <<'EOF'
+77. Bash: venv/bin/python scripts/friction.py add --function strategy --task "Own show: release named for its format merged; switch-on prepared unmer…
+78. Bash: grep -n -i "30-day\|30 days\|channel_videos" TECH_DEBT.md PRD.md DECISIONS.md PLAN.md | cut -c1-400 | head -12
+79. Bash: sed -n 535,552p TECH_DEBT.md; head -1 analysis/channel_videos.csv; wc -l analysis/channel_videos.csv; grep -rn "channel_videos" src scripts…
+80. Bash: grep -rln "channel_videos.csv" --include=*.py --include=*.yml . | grep -v venv; head -1 analysis/analytics_snapshots.csv | cut -c1-300; ls …
+81. Bash: head -30 analysis/topic_performance.md | cut -c1-200; sed -n 395,410p scripts/analyze_channel.py
+82. Bash: grep -n -c "?" analysis/topic_performance.md; grep -n '"' analysis/topic_performance.md | head -3 | cut -c1-160; git checkout -q -b legal/y…
+83. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A && git commit -q -m "Drop YouTube API text kept past its 30-day limit: cha…
+84. Bash: python3 - <<'EOF'
+85. Bash: sed -n 496,510p TECH_DEBT.md; sed -n 60,95p scripts/dry_run.py; grep -n "RESET_HOUR\|-lt 7" .github/workflows/dry-run.yml tests/*.py | head
+86. Bash: date -u +%H:%M; grep -n -i "oauthlib\|CVE-2026-49265" TECH_DEBT.md | cut -c1-300 | head -6; grep -n -i "oauthlib\|google-auth\|requests-oau…
+87. Bash: sed -n 460,495p TECH_DEBT.md
+88. Bash: sed -n 170,215p scripts/validate_release.py; sed -n 355,370p src/llm.py
+89. Bash: sed -n 370,380p src/llm.py; grep -n "def _judge_own\|def judge_own\|own_judge" src/llm.py | head -5; grep -n "def test.*gate_1\|def test.*m…
+90. Bash: grep -n "_own_judged(" src/llm.py; sed -n "$(grep -n '= _own_judged(' src/llm.py | head -1 | cut -d: -f1),+4p" src/llm.py; grep -n "^def \|…
+91. Bash: sed -n 165,200p tests/test_validate_release.py; date -u +%H:%M
+92. Bash: git checkout -q -b reliability/gate-judge-inconclusive && python3 - <<'EOF'
+93. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A && git commit -q -m "Release gate: an unanswered own title judge is inconc…
+94. Agent: Review the release-gate fix
+95. Bash: date -u +%H:%M && python3 - <<'EOF'
+96. Bash: git commit -q -a --amend --no-edit && git push -q -f origin reliability/gate-judge-inconclusive && git checkout -q main && git pull -q --re…
+97. Bash: python3 - <<'EOF'
+98. Bash: sed -n 30,62p scripts/check_docs.py; grep -n "live_format\|FORMAT_VERSION" tests/test_check_docs.py 2>/dev/null | head -5
+99. Bash: git checkout -q -b gm/check-docs-shipped-format && python3 - <<'EOF'
+100. Bash: grep -n "check_live_format\|shipped_format" tests/*.py | head -5; SOURCE=own venv/bin/python scripts/check_docs.py 2>&1 | grep -i "live for…
+101. Bash: ls tests | grep -i doc; grep -n "^import\|^from" tests/test_check_docs.py 2>/dev/null | head
+102. Bash: cat >> tests/test_check_docs.py <<'EOF'
+103. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A && git commit -q -m "check_docs reads the format an upload run ships, not …
+104. Agent: Review the docs-checker fix
+105. Bash: git checkout -q main && git pull -q --rebase origin main && git merge -q --no-ff gm/check-docs-shipped-format -m "Merge gm/check-docs-shipp…
+106. Bash: venv/bin/python scripts/friction.py add --function gm --task "Docs check reads the shipped format (merged)" --outcome done --category none …
+107. Bash: gh issue view 92 --json state,title -q '"\(.state) \(.title)"'; gh issue view 95 --json state -q .state; date -u +%H:%M
+108. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+109. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|TOTAL|Over|over"; date -u +%H:%M
+110. Bash: python3 - <<'EOF'
+111. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -B1 -A3 -i "stale" | head -12
+112. Bash: python3 - <<'EOF'
+113. Bash: grep -n "^vr\|as vr\|^from src.llm import MetadataResult" tests/test_validate_release.py | head -3; cat > tests/test_gate_own_judge.py <<'E…
+114. Bash: git stash pop -q && git status --short && git diff --stat HEAD | tail -1
+115. Bash: git add -A && git commit -q -m "Handover 11-15 (11:45): the backup show finished, its switch-on prepared on a branch; bet 1 merges cleanly …
+116. Bash: git pull -q --rebase origin main && git push -q origin main && git fetch -q && venv/bin/python scripts/check_docs.py 2>&1 | grep -E "next r…
+117. Bash: sed -i 's/bet 1 merges with all 1,237 tests passing, so your label/bet 1 merges with all 1,239 tests passing, so your label/' WORKLOG.md &&…
+118. Bash: git add -A && git commit -q -m "Handover: bet 1 + main at 1,239 passing; friction F336" && git pull -q --rebase origin main && git push -q …
+119. Bash: sed -n 320,345p scripts/validate_release.py; grep -n "MAX_REQUESTS\|requests_used\|count" scripts/validate_release.py | head -12
+120. Bash: python3 - <<'EOF'
+121. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -3 | head -1; venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; git add -A && git commi…
+122. Bash: python3 - <<'EOF'
