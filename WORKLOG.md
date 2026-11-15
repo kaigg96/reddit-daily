@@ -75,7 +75,7 @@ and more useful than a confident guess.
 - **Strategy (the challenge):** a fresh reviewer argued against the 15 November plan. *Kept:* ship bet 1 now, and never let uploads stop. *Corrected:* the takes show cannot start before about 20 November, so by the 20 December read it would have about 17 week-old videos, under the 20 our rules need. That read could only ever say "not enough data". So takes become the guaranteed fallback for 5 January, its weeks beside Reddit are a shakedown, and the real choice between takes, the play-along show and Stack Exchange answers runs side by side after the cutover, read in February. *Struck:* the claim that the automatic revert still protects bet 1; with Reddit on one slot a day it may not reach its count in time. Recorded in the plan.
 - **Strategy (research, done):** each source's licence read first-hand and quoted; three example episodes written out.
 - **Data (a fix):** every upload will record which show it was, so the shows can be compared at all. It ships with bet 1; a fresh review found nothing blocking.
-- **Product (a bet, not shipped):** four music tracks free for any use with no credit (CC0), from an archived copy of a site that closed in 2025. They rotate, never the same track twice running. A free sample renders and plays, the music sitting well under where the voice goes. Unmerged: nobody has listened, a fresh review found one gap to close (a failure to load the old track would go unnoticed), and it changes every video, so it needs its own release, timed not to blur bet 1's read.
+- **Product (a bet, not shipped):** four music tracks free for any use with no credit (CC0), from an archived copy of a site that closed in 2025. They rotate, never the same track twice running. A free sample renders and plays, the music sitting well under where the voice goes. Unmerged: nobody has listened, a fresh review found one gap (a failure to load the old track would go unnoticed), now closed by a weekly warning, and it changes every video, so it needs its own release, timed not to blur bet 1's read.
 - **Engineering:** the four-a-day time-slot change clashed with today's work; brought current, all tests pass.
 - **General management:** the owner's last handover had landed inside the template block, hiding it from the checks; moved. Six closed asks are no longer described as open. Work went to fresh helpers, one per ticket, as the new epic board intends; each was checked before merging.
 - **Security and reliability (checked):** both of today's uploads landed (06:53, 19:00). Money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change.
@@ -88,7 +88,7 @@ and more useful than a confident guess.
 ### Next
 - **After 08:17 on 16 November:** read the check; on a pass naming the release's current commit, merge bet 1, then confirm the first upload closes with the host's pick.
 - **The weekly review** (16 November).
-- **The music:** close the review's gap, listen to a sample, and set its release date.
+- **The music:** listen to a sample, check the warning fix, and set its release date.
 - **The play-along sample** (T7), then the shows alternating by slot (T4).
 - **Dated reads carried from the last handover:** about 18 November the new model's 20th video; 23 November the capitals read; 7 December the data-retention decision.
 - The ready count reads under its floor because it does not count the epic's tickets (five ready or in review); the epic board's own build (E2) should count them.
