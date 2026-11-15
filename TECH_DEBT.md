@@ -331,8 +331,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   `MAX_SCREENED_CANDIDATES` to 2. **Moved 11-15:** `reliability/run-slot-log-main`
   (off `main`, 969 pass; merges with `integration/preview` cleanly, either
   order, rows stay aligned; reviewed fresh). Its fix, the slot key worked out
-  before the upload, is not on the stacked branch. Left: the digest's
-  `week_videos` groups by publish date while `per_day` uses the scheduled day. **Closes when** the switch goes to four.
+  before the upload, is not on the stacked branch; nor is its second, the
+  digest's `week_videos` grouped by scheduled day like `per_day` (untested). **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
