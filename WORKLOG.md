@@ -65,10 +65,11 @@ and more useful than a confident guess.
 
     Worked (% of the shift): strategy 50 · product 35 · gm 15
 
-**Summary:** Nothing reached viewers. Three pieces of design that a shift would otherwise reconstruct cold: what a play-along episode is and how its questions are chosen (E1 T7), how a video is judged by someone who cannot watch it (`process/viewer-bar.md`), and Q1 2027's bet with its end-of-quarter verdict rule written before any number (`epics/E3`).
+**Summary:** Nothing reached viewers. Three pieces of design that a shift would otherwise reconstruct cold: what a play-along episode is and how its questions are chosen (E1 T7), how a video is judged by someone who cannot watch it (`process/viewer-bar.md`), and Q1 2027's bet with its end-of-quarter verdict rule written before any number (`epics/E3`). A fresh agent then argued against all three the same night and found the bet's premise backwards; every finding is applied and recorded in the files.
 
 ### Toward revenue
-- **E3 names the number that decides whether this company earns:** subscribers per 1,000 views (0.31 today; every paying route's binding half is followers). Its verdict rule tells the owner plainly by March if the path cannot pay within a horizon worth the subscription.
+- **E3 says plainly what the record says:** on YouTube views bind, every route is 200× or more away, and no evidenced lever closes that; Q1 is a search for an owned format that reaches, read per arm on reach and the subscriber rate together. Its verdict rule projects both halves of the nearest tier; if nothing reaches by March, the shift decides a pivot and the owner is told the projection in months, since only stopping is theirs.
+- Also tonight: the four roles' methods (`process/epics.md`), 13 seeded lessons (`process/lessons.md`), three worked episodes, channel-name candidates with handle checks (lead: Guess First), the February comparison's rule drafted (E1 T5).
 
 ### Done
 - **Product:** the play-along episode's shape (hook, beat, reveal, turn), its selector's rules and the renderer's schema, in E1; T7's acceptance lines now test them.
