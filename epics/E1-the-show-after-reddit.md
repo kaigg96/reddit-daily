@@ -67,6 +67,75 @@ minimum), and a third daily upload to hurry it (still too late). *Decision 3*
 rests on one market read about who gets paid, not on our data; T7's viewer
 bar is its test, and it takes no upload slot before the cutover.
 
+## The play-along episode (design, 2026-11-15, for T7)
+
+Written in the owner's session with Fable, on T6's supply read. The first
+shift on T7 may amend it on evidence; the viewer bar (`process/viewer-bar.md`)
+is the test, and this design is not shown to the agent applying it.
+
+**What it is.** One question with a true, sourced answer that a stranger can
+have an opinion about before they know it. The viewer is asked to commit (a
+guess, a pick, a count) and then shown whether they were right. Everything
+else serves that one beat. It is a quiz the way a bar bet is a quiz: the fun
+is in being wrong about something you were sure of.
+
+**Shape, about 15–22 seconds.**
+1. **The hook (≤ 3 s, spoken and on screen):** the question, in the viewer's
+   terms, with the thing to commit to. "Gas is $4.45 today. What did it cost
+   in 1990?" Never a preamble, never the show's name, never "today we".
+2. **The beat (2–4 s):** the invitation and the room to take it. One line:
+   "Say your number." The screen holds the question and, for a pick, the two
+   options. Music carries it; narration stops. This pause is the show. It is
+   also where a viewer who does not care leaves, which is fine.
+3. **The reveal (3–5 s):** the answer, as a number or a name, large, with the
+   one comparison that makes it land: "$1.04. A quarter of today." The
+   comparison is computed from the record (a ratio, a difference, a rank),
+   never written freehand.
+4. **The turn (2–4 s):** one spoken line that gives the answer meaning or
+   points at the next guess: "Same gallon, same country. Thirty-six years."
+   Then the question for tomorrow, in five words, as the closing line and the
+   pinned comment. No "like and subscribe" (PRD §5 no. 9): the reason to come
+   back is the next question.
+
+**What makes it ours (check 5).** The question's framing, the pairing, the
+comparison and the turn are the show's; the fact is the source's and is
+credited in the description exactly as the source asks. No model writes a
+number: `select` fetches the record, `render` copies it, and a test fails if
+the shown value differs from the record (T7's first acceptance line).
+
+**Choosing the question (the selector's rules).**
+- **Guessable, not knowable.** A stranger can form a guess from everyday
+  sense (prices, sizes, populations, heights, dates) but would not know the
+  answer. Skip anything that needs expertise or that most people know.
+- **A surprising distance.** For a number, the answer differs from the
+  obvious guess by at least ×2 or ÷2 (prices over time, sizes across places);
+  for a pick, the losing option is the one most people would choose, judged
+  by a simple proxy the code can compute (the more populous, the more famous
+  by Wikidata sitelinks). The selector rejects the rest; the shift logs the
+  reject rate so the pool's size is known.
+- **One fact, one unit, one comparison.** No episode needs two numbers to
+  land. Units in the viewer's own terms (a gallon, a floor, a person).
+- **Fresh shape.** Never the same template two days running (price-then,
+  bigger-of-two, how-many) and never the same subject as any shipped title
+  (the own-questions repeat check applies).
+- **Nothing that invites contempt.** No question whose fun is someone else's
+  poverty, illness or disaster (USGS quakes and weather extremes are out of
+  the main rotation for this reason, not for supply).
+
+**Series identity.** The closing line's "tomorrow" is the only series device
+until the brand is settled (C12, T11). The watermark carries the channel's
+name. A recurring sting or a host persona waits for the February read.
+
+**The three samples.** T6's three episodes, in this shape, rendered free
+(`SAMPLE=1`) and judged by a fresh agent against the bar before any narrated
+render is bought. Two fails on the same check means the shape changes, not
+the episode.
+
+**Schema the renderer takes** (one JSON per episode, produced by `select`):
+`{"hook": str, "beat": str, "options": [str, str] | null, "answer": str,
+"comparison": str, "turn": str, "tomorrow": str, "source": {"name": str,
+"id": str, "value": number | str, "fetched": date}, "credit": str}`.
+
 ## Out of scope
 
 Four uploads a day (PRD §0 #4): it stays off until T9, so bet 2's window
@@ -159,12 +228,13 @@ Evidence: 11-15, `07482b2` on `main`: PRD §4 "Play-along supply". BLS, Census, 
 ### T7 · A play-along episode exists as a sample a viewer could follow
 Status: ready
 Needs: T6
-Touches: src/ (a new source beside ownquestions.py), tests/
-Context: only if T6 says build. The number or answer in the reveal is copied from the source record by code, never written by a model. Write the viewer's bar before rendering (D14): can someone who has never seen the channel tell what to guess, and is the reveal worth the wait.
+Touches: src/ (a new source beside ownquestions.py: `select` fetches a record and frames it, `render` copies it), tests/, assets/gen/ (samples)
+Context: T6 said build; "The play-along episode" above is the design, and `process/viewer-bar.md` is the test. The agent judging a sample is given the script, the frames and the bar only, never the design. Start with BLS prices and Census pairs, whose records are files that need no key; Wikidata second. The number or answer in the reveal is copied from the source record by code, never written by a model.
 Accept:
-- [ ] a test fails if the revealed value differs from the source record
-- [ ] a free sample render (`SAMPLE=1`) and one narrated dry run are playable
-- [ ] a fresh agent, shown the frames and the script but not the bar's author's notes, judges it against the bar; its findings are fixed or recorded
+- [ ] a test fails if the revealed value or the comparison differs from what the source record gives
+- [ ] the selector applies the rules above (guessable, surprising distance, one fact, fresh shape, nothing contemptuous) with a test per rule, and logs its reject rate on a day's candidates
+- [ ] the three T6 episodes render free (`SAMPLE=1`) in the shape above, and a fresh agent judges each against the bar; every check is a yes, or the fail and the fix are recorded here
+- [ ] one narrated dry run of the best is playable, with the credit in its description
 Evidence:
 
 ### T8 · The play-along show uploads as its own arm

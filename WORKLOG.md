@@ -61,6 +61,31 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-15 (20:39) — The owner's session, continued: the play-along episode is designed, a viewer bar exists, and Q1's bet is drafted for a shift to challenge
+
+    Worked (% of the shift): strategy 50 · product 35 · gm 15
+
+**Summary:** Nothing reached viewers. Three pieces of design that a shift would otherwise reconstruct cold: what a play-along episode is and how its questions are chosen (E1 T7), how a video is judged by someone who cannot watch it (`process/viewer-bar.md`), and Q1 2027's bet with its end-of-quarter verdict rule written before any number (`epics/E3`).
+
+### Toward revenue
+- **E3 names the number that decides whether this company earns:** subscribers per 1,000 views (0.31 today; every paying route's binding half is followers). Its verdict rule tells the owner plainly by March if the path cannot pay within a horizon worth the subscription.
+
+### Done
+- **Product:** the play-along episode's shape (hook, beat, reveal, turn), its selector's rules and the renderer's schema, in E1; T7's acceptance lines now test them.
+- **Strategy:** E3, proposed; a fresh agent argues against it before T2 sets the bets (12-20).
+- **General management:** the viewer bar, five yes/no checks with evidence, applied by an agent that has not seen the design.
+
+### Blocked
+- Nothing new. Still the owner's: #59, the weekly allowance variable.
+
+### Next
+- As the 19:55 entry says. Then E3 T1 (the rate must be measurable before the bet is final) beside E1 T7.
+
+### Better?
+- **Than last shift:** no change in numbers; less ambiguity left for the shifts.
+- **Than ~10 shifts ago:** unclear until bet 1 ships tomorrow.
+- **Than ~100 shifts ago:** too early to say.
+
 ## 2026-11-15 (19:55) — Bet 1 ships on tomorrow morning's automatic check; the plan for the show after Reddit was challenged and corrected
 
     Worked (% of the shift): strategy 30 · product 25 · gm 20 · data 15 · engineering 10
