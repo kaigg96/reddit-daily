@@ -6,32 +6,26 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `integration/preview`
-- **Commit:** `b1190de`
-- **When:** 2026-11-13T11:04:51Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 24.5 s, audio, no dead air
+- **Branch:** `strategy/own-clip-repeat`
+- **Commit:** `de8c103`
+- **When:** 2026-11-15T10:58:36Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 28.4 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/43413615851)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/43706374669)
 
 What it picked:
 
 ```
-Commentary: skipping a medical thread (topic) — After giving birth, can women feel that their body suddenly 
-Selected post: What’s it like inside of Microsoft right now?
-Slate topics (rank order): health-body|money-work|politics-news|dark-morbid|money-work
-Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (3 words)
-Commentary setup, as written: "Pure chaos inside"
-Commentary: dropped only the line(s) named above
-Title style A, caps arm 1: What is REALLY happening inside Microsoft?
-Commentary setup: (dropped)
-CTA: I raise my hand for the suffering SREs. Which answer gets your vote?
-Commentary: our own words are 0.201 of the narration, 1 host line(s) shown
-Assembled: 24.5s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/SttSr: What’s it like inside of Microsoft right now?
+Selected post: Could GTA 6 hypothetically lower real life crime rates on launch day?
+Slate topics (rank order): hypotheticals|money-work|life-advice|fame-celebrity|health-body|humor-absurd|other
+Title style B, caps arm 0: Will you commit crimes on gta 6 launch day?
+CTA: Which one are you? Tell me in the comments below.
+Assembled: 28.4s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
+Today's top NoStupidQuestions post, asked by u/Geocacher6907: Could GTA 6 hypothetically lower real life crime rates on launch day?
 ```
 
 ## Last request
 
-- **Branch:** `integration/preview`
-- **When:** 2026-11-13T11:04:51Z
+- **Branch:** `strategy/own-clip-repeat`
+- **When:** 2026-11-15T10:58:36Z
 - **Outcome:** rendered -- see above
