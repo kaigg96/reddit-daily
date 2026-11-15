@@ -328,7 +328,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
   (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
-  `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
+  `MAX_SCREENED_CANDIDATES` to 2. **Moved 11-15:** `reliability/run-slot-log-main`
+  (off `main`, 969 pass; merges with `integration/preview` cleanly, either
+  order, rows stay aligned; reviewed fresh). Its fix, the slot key worked out
+  before the upload, is not on the stacked branch. Left: the digest's
+  `week_videos` groups by publish date while `per_day` uses the scheduled day. **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
