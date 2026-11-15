@@ -266,8 +266,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`. **Rehearsed again 11-13** over `main` `ae729f3`: `v8`, this
-  branch and `reliability/run-slot-log` merge cleanly, 1,141 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  after `v8`. **Rehearsed again 11-15** over `main` `14d0dbc`: `v8`, this
+  branch and `reliability/run-slot-log-main` merge cleanly, 1,244 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
   fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
   (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
   the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
