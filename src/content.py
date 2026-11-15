@@ -201,6 +201,13 @@ def run_slot(now, schedule=""):
     return day, slot
 
 
+def slot_key(day, slot, schedule):
+    """How the upload log records a run's slot: "2026-10-05/3". Blank for a
+    run no cron line started: its slot is the clock's guess, and a guess that
+    looks like a scheduled slot would count a manual upload as filling one."""
+    return f"{day.isoformat()}/{slot}" if schedule in config.SLOT_CRONS else ""
+
+
 def live_slots():
     """The slots that upload. At two a day, the two the schedule has always
     had, so turning four on changes nothing about them."""

@@ -53,6 +53,12 @@ FIELDS = [
     # It was only in the run log, so #14's arm leaking into it went unseen for
     # four weeks and took 151 run logs to count (PRD §4); those logs expire.
     "cta",
+    # Added 2026-10-13 (PRD §0 #4): the slot this run was scheduled for, as
+    # "<day>/<slot>" from the cron line that started it (content.run_slot).
+    # GitHub starts runs hours late, so the publish time cannot say which
+    # slot an upload filled; at four a day the digest needs this to tell a
+    # late run from a missed one (TECH_DEBT, four a day).
+    "run_slot",
 ]
 
 

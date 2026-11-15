@@ -246,6 +246,7 @@ def main():
         "screen_failure": post.screen_failure,
         "title_caps": title_caps_logged,
         "cta": outro_text,
+        "run_slot": content.slot_key(day, slot, schedule),
     })
 
 
