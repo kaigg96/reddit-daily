@@ -233,10 +233,36 @@ def subreddit_for_run(now, subreddits=None, schedule=""):
     confounded with slot. At four a day each run takes the next entry, so
     no subreddit runs more than twice in a row."""
     subs = subreddits or config.SUBREDDITS
+    day, position = _day_position(now, schedule)
+    if config.SHOW_ALTERNATION:
+        # The Reddit arm runs at (day + position) even (show_for_run), so the
+        # key above would pin it to one subreddit. Moving the subreddit every
+        # two days instead, while the slot swaps daily, gives the arm every
+        # subreddit in every slot over 2 * len(subs) days.
+        return subs[(day.toordinal() // 2 + position // 2) % len(subs)]
+    return subs[(day.toordinal() + position) % len(subs)]
+
+
+def show_for_run(now, schedule=""):
+    """E1 T4: the show this run uploads ("reddit" or "takes"), deterministic
+    per run, when config.SHOW_ALTERNATION is on (off, SOURCE decides).
+
+    Keyed like subreddit_for_run, on (day + slot position) % 2: one show each
+    slot, the two swapping slots every day, so over any two days each show
+    has the morning and the evening once. At four a day each show takes
+    alternate slots. Because this uses the subreddits' old key, the Reddit
+    arm's subreddit moves on day // 2 instead (see subreddit_for_run), or
+    it would draw one subreddit forever."""
+    day, position = _day_position(now, schedule)
+    return config.SHOWS[(day.toordinal() + position) % len(config.SHOWS)]
+
+
+def _day_position(now, schedule=""):
+    """(day, index of this run's slot among the live ones)."""
     day, slot = run_slot(now, schedule)
     live = live_slots()
     position = live.index(slot) if slot in live else slot // 2
-    return subs[(day.toordinal() + position) % len(subs)]
+    return day, position
 
 
 def run_slot(now, schedule=""):
