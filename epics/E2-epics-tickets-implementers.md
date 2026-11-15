@@ -120,7 +120,7 @@ Accept:
 - [ ] this file records the run id, whether both ran at once, whether each stayed in its own tree, and the shift's quota units against a normal shift's
 - [ ] assumption 1 and 2 above are each marked true or false with that evidence
 - [ ] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
-Evidence:
+Evidence: early, ahead of T1 (11-15, run 43749661055, E1's T3 and T6 plus a read-only challenger, three foreground agents in one message): **assumption 1 true:** they returned together after ~11 minutes (19:01 to 19:12), the longest one's own 651 s, against 1,160 s summed; each implementer worked in its own worktree (`isolation: worktree`) and pushed its own branch, and neither diff touched the other's files. **Assumption 2 unmeasured:** this run's row in `.github/shift-usage.csv` lands after the shift; compare it with the three before it (8.2–11.1 units). Dispatch method, for T4: side by side, all agents in one message, since a background agent is refused and a lone foreground one blocks the orchestrator.
 
 ### T4 · An implementer's brief is built from its ticket alone
 Status: todo
