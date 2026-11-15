@@ -15,7 +15,7 @@ from moviepy import (
     afx,
 )
 
-from . import config
+from . import config, log
 from .background import build_background
 
 
@@ -112,16 +112,32 @@ def overlay_text(text, start, duration, font_size, y, color="white", width=confi
 # ---------------------------------------------------------------- audio
 
 
+def _music_tracks():
+    """(path, volume) for every track in rotation: the public-domain tracks in
+    assets/music/ (normalized, so scaled down) and the sealed funk bed when CI
+    has unsealed it (already ~13dB lower than source). Without the seal key,
+    as on a shift's machine, the funk file is absent and the rest still play."""
+    tracks = [(p, config.MUSIC_VOLUME_LIBRARY)
+              for p in sorted(Path(config.MUSIC_DIR).glob("*.mp3"))]
+    if config.FALLBACK_MUSIC.exists():
+        tracks.append((config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK))
+    return tracks
+
+
+def _pick_track(tracks, rng):
+    """Never the last upload's track while another is in rotation (E1 T2)."""
+    if len(tracks) > 1:
+        last = log.last_music_track()
+        tracks = [t for t in tracks if t[0].name != last] or tracks
+    return rng.choice(tracks)
+
+
 def _pick_music(duration, rng):
-    """Returns (music AudioClip or None, track name). Library tracks get scaled
-    down; the legacy fallback file is already ~13dB lower than source."""
-    library = sorted(Path(config.MUSIC_DIR).glob("*.mp3"))
-    if library:
-        path, volume = rng.choice(library), config.MUSIC_VOLUME_LIBRARY
-    elif config.FALLBACK_MUSIC.exists():
-        path, volume = config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK
-    else:
+    """Returns (music AudioClip or None, track name)."""
+    tracks = _music_tracks()
+    if not tracks:
         return None, "none"
+    path, volume = _pick_track(tracks, rng)
 
     music = AudioFileClip(str(path))
     if music.duration < duration:

@@ -14,6 +14,8 @@ __pycache__/
 .github/last-release-detail.md
 /assets/funk_bg_lower.mp3
 /assets/music/*.mp3
+# public-domain tracks (E1 T2, assets/music/LICENSES.md) are committed plain
+!/assets/music/freepd_*.mp3
 # viewer comments (PLAN C5, #75): kept 30 days as a workflow download, never
 # committed. YouTube allows comment text 30 days (III.E.4), and git keeps it
 # for good in a public repository.

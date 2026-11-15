@@ -122,17 +122,27 @@ def append_upload_log(row):
               f"{type(e).__name__}: {e}")
 
 
-def last_bg_clip():
-    """The last upload's background clip, "" when there is none or the log
-    cannot be read: the own show's no-repeat pick (`background._pick_broll`)
-    then falls back to any clip rather than failing the run."""
+def _last_upload(column, what):
     try:
         with open(config.UPLOAD_LOG, newline="") as f:
             rows = list(csv.DictReader(f))
     except Exception as e:   # noqa: BLE001
-        print(f"Upload log unreadable for the last clip ({type(e).__name__}); any clip may repeat")
+        print(f"Upload log unreadable for the last {what} ({type(e).__name__}); any {what} may repeat")
         return ""
-    return (rows[-1].get("bg_clip") or "") if rows else ""
+    return (rows[-1].get(column) or "") if rows else ""
+
+
+def last_bg_clip():
+    """The last upload's background clip, "" when there is none or the log
+    cannot be read: the own show's no-repeat pick (`background._pick_broll`)
+    then falls back to any clip rather than failing the run."""
+    return _last_upload("bg_clip", "clip")
+
+
+def last_music_track():
+    """The last upload's music track, "" when there is none or the log cannot
+    be read: `video._pick_music` then picks from every track."""
+    return _last_upload("music_track", "track")
 
 
 def uploaded_titles():
