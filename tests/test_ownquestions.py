@@ -185,6 +185,24 @@ def test_the_source_is_reddit_unless_switched_and_an_unknown_one_fails(monkeypat
     assert config.SOURCE == "reddit" and config.ANSWER_LABEL == "ANSWER"
 
 
+def test_our_own_questions_log_as_their_own_release(monkeypatch):
+    """C16's rule: the switch ships as its own FORMAT_VERSION, read at 20, so
+    an own upload can never pool with Reddit's in either release's read; named
+    for its Reddit format, so a later bump (bet 1) is a release of its own."""
+    import importlib
+    from src import insights
+    reddits = config.FORMAT_VERSION
+    monkeypatch.delenv("SAMPLE", raising=False)
+    try:
+        monkeypatch.setenv("SOURCE", "own")
+        assert importlib.reload(config).FORMAT_VERSION == f"{reddits}-own"
+    finally:
+        monkeypatch.setenv("SOURCE", "reddit")
+        importlib.reload(config)
+    assert config.FORMAT_VERSION == reddits
+    assert insights.RELEASE_MIN_UPLOADS[config.OWN_FORMAT_VERSION] == 20
+
+
 def test_our_own_question_credits_no_one_and_names_no_subreddit():
     from src.run import upload_text
     desc, tags = upload_text("", GOOD["question"], GOOD["takes"], "", ["planes"])

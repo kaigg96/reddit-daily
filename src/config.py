@@ -173,4 +173,14 @@ TRAFFIC_LOG = ROOT / "analysis" / "traffic_sources.csv"  # R4.7 traffic-source s
 CHANNEL_LOG = ROOT / "analysis" / "channel_stats.csv"  # PLAN C11: subscribers, weekly
 COMMENTS_LOG = ROOT / "analysis" / "viewer_comments.csv"  # PLAN C5: last week's comments
 
+# The own-questions show ships as its own release (PRD §4, C16's rule; ledger
+# C16-own), so its read can never pool with Reddit's. It follows SOURCE, never
+# a hand bump: a run under SOURCE=reddit still logs Reddit's format. Named for
+# the format it runs on, so bet 1 landing on a live own show reads as its own
+# release too (`v8-own` after `v7s-own`), never hidden inside the first. Here,
+# not beside FORMAT_VERSION, so bet 1's bump of that line merges cleanly.
+OWN_FORMAT_VERSION = f"{FORMAT_VERSION}-own"
+if SOURCE == "own":
+    FORMAT_VERSION = OWN_FORMAT_VERSION
+
 GEN.mkdir(parents=True, exist_ok=True)
