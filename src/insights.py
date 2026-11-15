@@ -565,7 +565,7 @@ def _spec_values(value):
 # A derived field's possible values, so a filter can name one no upload has
 # yet: `title_writer!=groq` is meant to be in the title tests' reads before
 # Groq writes any title (#10, #14), and must not be refused as a typo.
-_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}}
+_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}, "show": {"reddit", "takes"}}
 
 
 def _require_value(metas, spec):
@@ -1900,6 +1900,10 @@ def _with_derived_dimensions(row):
     loaders deriving it separately is a rule that drifts.
     """
     r = dict(row)
+    # Which show (E1 T3). Every upload before the column was Reddit's (no own
+    # question went live), so a blank is reddit, not unset: `split_cohorts`
+    # would otherwise drop the whole history from `--compare show=takes`.
+    r["show"] = (r.get("show") or "").strip() or "reddit"
     bg = (r.get("bg_clip") or "").strip()
     r["background_type"] = ("(unknown)" if not bg else
                             "procedural" if bg.startswith("procedural") else "broll")

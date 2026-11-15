@@ -69,6 +69,11 @@ FIELDS = [
     # It was only in the run log, so #14's arm leaking into it went unseen for
     # four weeks and took 151 run logs to count (PRD §4); those logs expire.
     "cta",
+    # Added 2026-11-15 (E1 T3): which show the upload was, config.SHOW
+    # (reddit, takes). An own-question upload was known only by a blank
+    # subreddit, which every read takes for unset, so no read could compare
+    # the shows. Older rows stay blank and read as reddit (insights).
+    "show",
 ]
 
 

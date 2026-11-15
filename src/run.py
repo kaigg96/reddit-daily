@@ -367,6 +367,7 @@ def main():
         "meta_source": meta.source,
         "host_lines": host_lines,
         "cta": outro_text,
+        "show": config.SHOW,
     })
 
 

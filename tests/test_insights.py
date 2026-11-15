@@ -805,6 +805,35 @@ def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path,
     assert c.age_matched
 
 
+def test_the_takes_show_compares_at_a_common_age_and_old_rows_are_reddit(
+        tmp_path, monkeypatch, capsys):
+    """E1 T3: `report.py --at-age 7 --compare show=takes`. Rows from before
+    the column carry no show and are Reddit's, so they fill the other arm
+    rather than leave both; three takes uploads are thin and get no verdict."""
+    import re
+    import sys
+    from scripts import report
+    from src import config
+    r_u, r_s = _era("r", 0, 10, "v7s", 200, 12.0)
+    t_u, t_s = _era("t", 20, 3, "v7s-own", 200, 14.0)
+    _write_series(tmp_path, monkeypatch, r_u + t_u, r_s + t_s)
+    lines = config.UPLOAD_LOG.read_text().splitlines()
+    config.UPLOAD_LOG.write_text("\n".join(
+        [lines[0] + ",show"] + [l + "," for l in lines[1:11]] + [l + ",takes" for l in lines[11:]]
+    ) + "\n")
+    monkeypatch.setattr(sys, "argv", ["report.py", "--at-age", "7", "--compare", "show=takes"])
+    report.main()
+    out = capsys.readouterr().out
+    assert "show=takes vs show!=takes -> insufficient data" in out
+    assert re.search(r"show=takes\s+n=3 .*below MIN_COHORT", out)
+    assert re.search(r"show!=takes\s+n=10 ", out)
+    assert "no show recorded" not in out
+    # A filter may name the takes show before its first upload (T5).
+    config.UPLOAD_LOG.write_text("\n".join(lines[:11]) + "\n")
+    assert insights.ids_within("show=takes") == set()
+    assert len(insights.ids_within("show=reddit")) == 10
+
+
 def test_upload_slot_is_derived_from_the_log_timestamp():
     """Research row R3. The runs drift within a slot, so noon is the split."""
     slot = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["slot"]

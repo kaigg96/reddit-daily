@@ -66,6 +66,9 @@ if SOURCE not in ("reddit", "own"):
 # Each answer's on-screen label. Our own takes say so: nobody else wrote them,
 # so they must never pass for a real person's answer (PRD §4).
 ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
+# The show an upload logs (upload_log `show`, E1 T3), as report.py compares
+# them: `--compare show=takes`. Our own questions are the takes show.
+SHOW = "takes" if SOURCE == "own" else "reddit"
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
