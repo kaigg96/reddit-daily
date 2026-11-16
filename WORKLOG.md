@@ -78,6 +78,7 @@ and more useful than a confident guess.
 
 ### Blocked
 - Nothing new. Still the owner's: #59, the weekly allowance variable.
+- The 23:22 scheduled shift (run 43774485514) failed at its first turn on the subscription's 5-hour limit, which this session spent; nothing to fix, the next scheduled shift runs after the reset.
 
 ### Next
 - As the 19:55 entry says: bet 1 on the 08:17 check first. Then E1 T7 and E3 T1 side by side. Before the first real dispatch, a fresh review of `process/epics.md` and `process/lessons.md` (E2 T2's open line; a reviewer started tonight and was cut off by the usage limit, so it is owed). E3 is challenged once; T2 challenges it again before 12-20.
