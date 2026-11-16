@@ -45,8 +45,30 @@ def test_the_plan_runs_for_the_narrations_length_and_reveals_in_the_last_third(e
     assert all(end <= answer[0] for _, end, _, style in items
                if style in ("hook", "option_a", "option_b", "beat", "count"))
     assert answer[0] >= total * 2 / 3 - 1e-9
-    said = len(f"{episode['answer']} {episode['comparison']}".split()) / sample.WORDS_PER_SECOND
+    said = pr.spoken(f"{episode['answer']} {episode['comparison']}")
     assert total - answer[0] == pytest.approx(max(3.0, said))
+
+
+def _plain(episode):
+    """A copy whose answer and comparison are plain words, so a test's
+    timings follow its word counts alone."""
+    episode = copy.deepcopy(episode)
+    episode["answer"], episode["comparison"] = "A", _words(3)
+    return episode
+
+
+def test_a_number_counts_as_the_words_it_is_read_as():
+    # Third judging (11-16): "nineteen ninety", "six seventy-five" ran past
+    # the hook's estimate when each counted as one word.
+    assert [pr._said(t) for t in ["1990?", "$6.75.", "$1.56", "4.3×", "Jan", "702,250"]] == \
+        [2, 2, 2, 4, 1, 3]
+    assert pr.spoken("in Jan 1990") == pytest.approx(4 / sample.WORDS_PER_SECOND)
+
+
+def test_the_closing_line_is_in_the_description_not_spoken_over_the_reveal():
+    episode = EPISODES[0]
+    assert episode["turn"] in pr.description(episode)
+    assert all(text != episode["turn"] for _, _, text, _ in pr.plan(episode))
 
 
 def test_every_fixture_episode_reveals_at_or_after_two_thirds():
@@ -58,7 +80,7 @@ def test_every_fixture_episode_reveals_at_or_after_two_thirds():
 
 
 def test_a_long_hook_pushes_the_beat_and_reveal_later_by_its_estimate():
-    short, long = copy.deepcopy(EPISODES[0]), copy.deepcopy(EPISODES[0])
+    short, long = _plain(EPISODES[0]), _plain(EPISODES[0])
     short["hook"], long["hook"] = _words(4), _words(27)
     estimate = 27 / sample.WORDS_PER_SECOND          # 10 s at narration pace
     long_plan, short_plan = pr.plan(long), pr.plan(short)
@@ -71,7 +93,7 @@ def test_a_long_hook_pushes_the_beat_and_reveal_later_by_its_estimate():
 
 
 def test_a_short_hook_keeps_3_seconds():
-    episode = copy.deepcopy(EPISODES[0])
+    episode = _plain(EPISODES[0])
     episode["hook"] = _words(4)                      # 1.5 s to say
     items = pr.plan(episode)
     assert _start(items, "beat") == 3.0 and _start(items, "answer") == 6.0
@@ -82,7 +104,7 @@ def test_a_long_reveal_holds_the_question_so_the_reveal_starts_at_two_thirds():
     """A reveal longer than half the lead-up would start before two-thirds.
     Holding the reveal longer only makes that worse, so the question holds
     longer instead and the reveal starts at exactly two-thirds."""
-    episode = copy.deepcopy(EPISODES[0])
+    episode = _plain(EPISODES[0])
     episode["hook"], episode["comparison"] = _words(4), _words(26)   # 27 words revealed
     t = pr.timings(episode)
     assert t["total"] - t["reveal_start"] == pytest.approx(27 / sample.WORDS_PER_SECOND)
