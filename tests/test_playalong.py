@@ -252,3 +252,19 @@ def test_check_turn_lets_ordinary_words_through(turn):
 def test_check_turn_refuses_a_trillion_the_records_do_not_hold():
     (gas,), _ = playalong.select_day(playalong.candidates(), "", [])
     assert playalong.check_turn("A trillion dollars.", gas) == "trillion"
+
+
+def test_ground_beef_is_a_price_question_copied_from_its_record():
+    """T7's less familiar price (11-16): the same shape, its own record."""
+    raw = json.loads((playalong.ASSETS / "bls_APU0000703112.json").read_text())
+    month = {(d["year"], d["period"]): float(d["value"])
+             for d in raw["Results"]["series"][0]["data"]}
+    then, now = month[("1990", "M01")], month[("2026", "M10")]
+    (beef,), rejects = playalong.select_day(playalong.candidates(playalong.BEEF_SERIES), "", [])
+    assert beef["hook"] == (f"What did a pound of ground beef cost in January 1990? "
+                            f"This October it's ${now:.2f}.")
+    assert beef["answer"] == f"${then:.2f}" == "$1.56"
+    assert beef["comparison"] == f"in Jan 1990\n{now / then:.1f}× more now"
+    assert beef["source"]["id"] == "APU0000703112"
+    assert "APU0000703112" in beef["credit"]
+    assert rejects == {"rule2": 2}
