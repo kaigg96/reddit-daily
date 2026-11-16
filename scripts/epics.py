@@ -39,8 +39,15 @@ _TITLE = re.compile(r"^# E(\d+) · (.+?)\s*$")
 _TICKET = re.compile(r"^### T(\d+) · (.+?)\s*$")
 _FIELD = re.compile(r"^([A-Z][a-z]+):\s?(.*)$")
 _REF = re.compile(r"\b(?:E(\d+)\s+)?T(\d+)\b")
+
 _STAMP = re.compile(r"(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})\b")
 _CLOCK = re.compile(r"(?<![\d:-])(\d{1,2}):(\d{2})\b")
+
+
+def needs_refs(value):
+    """The tickets a `Needs:` line names. `none (…)` names none: the note after
+    it is prose (E3 T3), not a dependency."""
+    return [] if value.strip().lower().startswith("none") else _REF.findall(value)
 
 
 def keyword(value):
@@ -204,7 +211,7 @@ def check(epics, now=None, date_of=file_date):
             if "Status" in t.fields and t.status not in TICKET_STATUSES:
                 err(epic, t.at("Status"), f"T{t.num} has unknown status "
                     f"`{t.value('Status')[:40]}` (one of {', '.join(TICKET_STATUSES)})")
-            for e_num, t_num in _REF.findall(t.value("Needs")):
+            for e_num, t_num in needs_refs(t.value("Needs")):
                 target = by_num.get(int(e_num)) if e_num else epic
                 ref = f"E{e_num} T{t_num}" if e_num else f"T{t_num}"
                 if target is None or target.ticket(int(t_num)) is None:
@@ -243,7 +250,7 @@ def next_action(epics):
                 f"{len(review)} in review")
 
     def needs_done(epic, t):
-        for e_num, t_num in _REF.findall(t.value("Needs")):
+        for e_num, t_num in needs_refs(t.value("Needs")):
             target = next((x for x in epics if x.num == int(e_num)), None) if e_num else epic
             dep = target.ticket(int(t_num)) if target else None
             if dep is None or dep.status != "done":
