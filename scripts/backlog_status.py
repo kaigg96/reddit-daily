@@ -120,7 +120,7 @@ def epic_ready(directory=None):
     by_num = {e.num: e for e in board if e.num is not None}
 
     def needs_done(epic, t):
-        for e_num, t_num in ep._REF.findall(t.value("Needs")):
+        for e_num, t_num in ep.needs_refs(t.value("Needs")):
             target = by_num.get(int(e_num)) if e_num else epic
             dep = target.ticket(int(t_num)) if target else None
             if dep is None or dep.status != "done":
