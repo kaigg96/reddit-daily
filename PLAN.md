@@ -26,7 +26,7 @@ A function still at "none" after its first monthly review is a finding (D12).
 ## 2. This quarter's bets
 
 **Bet 1** (#70): make the format ours, viewers first (D14); no voice (#71,
-PRD #15); shipping it is a shift's call (D16). **Bet 2** (#72), bet 3's pilot
+PRD #15); live as `v8` since 2026-11-16. **Bet 2** (#72), bet 3's pilot
 after bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
 and pilot the best (§1). Bet 2 is read at two a day (PRD #4). **Q1 2027:** `epics/E3` (challenged 11-15): does any owned format reach? Bets by 12-20.
 

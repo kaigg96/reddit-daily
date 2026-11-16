@@ -805,6 +805,35 @@ def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path,
     assert c.age_matched
 
 
+def test_the_takes_show_compares_at_a_common_age_and_old_rows_are_reddit(
+        tmp_path, monkeypatch, capsys):
+    """E1 T3: `report.py --at-age 7 --compare show=takes`. Rows from before
+    the column carry no show and are Reddit's, so they fill the other arm
+    rather than leave both; three takes uploads are thin and get no verdict."""
+    import re
+    import sys
+    from scripts import report
+    from src import config
+    r_u, r_s = _era("r", 0, 10, "v7s", 200, 12.0)
+    t_u, t_s = _era("t", 20, 3, "v7s-own", 200, 14.0)
+    _write_series(tmp_path, monkeypatch, r_u + t_u, r_s + t_s)
+    lines = config.UPLOAD_LOG.read_text().splitlines()
+    config.UPLOAD_LOG.write_text("\n".join(
+        [lines[0] + ",show"] + [l + "," for l in lines[1:11]] + [l + ",takes" for l in lines[11:]]
+    ) + "\n")
+    monkeypatch.setattr(sys, "argv", ["report.py", "--at-age", "7", "--compare", "show=takes"])
+    report.main()
+    out = capsys.readouterr().out
+    assert "show=takes vs show!=takes -> insufficient data" in out
+    assert re.search(r"show=takes\s+n=3 .*below MIN_COHORT", out)
+    assert re.search(r"show!=takes\s+n=10 ", out)
+    assert "no show recorded" not in out
+    # A filter may name the takes show before its first upload (T5).
+    config.UPLOAD_LOG.write_text("\n".join(lines[:11]) + "\n")
+    assert insights.ids_within("show=takes") == set()
+    assert len(insights.ids_within("show=reddit")) == 10
+
+
 def test_upload_slot_is_derived_from_the_log_timestamp():
     """Research row R3. The runs drift within a slot, so noon is the split."""
     slot = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["slot"]
@@ -2604,7 +2633,7 @@ def test_own_words_counts_every_upload_of_the_release_and_fallbacks_miss():
     rows = [{"format_version": "v8", "own_words_share": s} for s in ("0.63", "0.51", "0.00", "0.44")]
     rows += [{"format_version": "v7", "own_words_share": ""}, {"format_version": "v8"}]
     line = insights.render_own_words(rows, "v8")
-    assert "2 of 4 uploads" in line and "1 fell back" in line and line.endswith("NOT YET")
+    assert "2 of 4 uploads" in line and "1 showed none of our words" in line and line.endswith("NOT YET")
 
 
 def test_own_words_is_done_only_when_every_upload_meets_it():
@@ -2619,6 +2648,16 @@ def test_own_words_is_silent_for_a_release_without_commentary():
 def test_own_words_skips_a_malformed_value_rather_than_crash_the_read():
     rows = [{"format_version": "v8", "own_words_share": s} for s in ("abc", "nan", "0.60")]
     assert "1 of 1 uploads" in insights.render_own_words(rows, "v8")
+
+
+def test_host_lines_report_the_dose_of_the_release(monkeypatch):
+    monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 2)   # whole: two notes, setup, vote
+    monkeypatch.setattr(insights.config, "HOST_REACTIONS", True)
+    rows = [{"format_version": "v8", "host_lines": n} for n in ("4", "4", "3", "0", "1")]
+    rows += [{"format_version": "v8", "host_lines": ""}, {"format_version": "v7", "host_lines": "4"}]
+    line = insights.render_host_lines(rows, "v8")
+    assert line.endswith("all 4 on 2 of 5 uploads, some on 2, none on 1")
+    assert insights.render_host_lines([{"format_version": "v7", "host_lines": ""}], "v7") == ""
 
 
 def test_fine_watch_seconds_is_percentage_viewed_times_length():

@@ -165,12 +165,56 @@ import scripts.validate_release as vr
 from src.llm import MetadataResult
 
 
-def _metadata(monkeypatch, meta):
+def _metadata(monkeypatch, meta, commentary=False):
+    # Explicit, so these hold on a release branch where commentary is on.
+    monkeypatch.setattr("src.config.COMMENTARY", commentary)
     monkeypatch.setattr("src.llm.get_metadata", lambda *a, **k: meta)
     # check_metadata switches the second model off; restored after the test.
     from src import llm
     monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
     return vr.check_metadata()
+
+
+def test_with_commentary_on_missing_host_lines_fail_the_gate(monkeypatch):
+    """Bet 1 falls back to a plain reading, which would otherwise pass (#70)."""
+    from src.llm import Commentary
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    assert _metadata(monkeypatch, fine, commentary=True) is False
+    host = Commentary("An angle.", ["One.", "Two."], "My hand goes up.")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+
+
+def test_a_dropped_host_line_warns_but_passes(monkeypatch):
+    """A line past its cap drops alone (#15): the upload keeps a host, so the
+    gate passes, but the verdict file must show the prompt overran."""
+    from src.llm import Commentary
+    from src import config
+    monkeypatch.setattr(config, "HOST_REACTIONS", True)   # bet 1 as sampled 10-25
+    lines = []
+    monkeypatch.setattr(vr, "note", lines.append)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    host = Commentary("An angle.", ["", "Two."], "")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+    assert ("- ⚠️ host reaction 1: dropped, past its cap, grading its answer or a swear word"
+            " (the rest still ship)") in lines
+    assert ("- ⚠️ host vote: dropped, past its cap or a swear word"
+            " (the usual closing line ships)") in lines
+    assert "- ✅ host reaction 2: Two." in lines
+
+
+def test_a_dropped_setup_may_have_been_a_title(monkeypatch):
+    from src.llm import Commentary
+    lines = []
+    monkeypatch.setattr(vr, "note", lines.append)
+    fine = MetadataResult("A title", ["a", "b", "c"], "My hand goes up.", "gemini")
+    host = Commentary("", ["One.", "Two."], "My hand goes up.")
+    assert _metadata(monkeypatch, fine._replace(commentary=host), commentary=True) is True
+    assert "- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)" in lines
+
+
+def test_with_commentary_off_host_lines_are_not_asked_for(monkeypatch):
+    fine = MetadataResult("A title", ["a", "b", "c"], "Comment yours!", "gemini")
+    assert _metadata(monkeypatch, fine) is True
 
 
 def test_a_dead_api_is_inconclusive_not_a_failed_release(monkeypatch):
@@ -194,6 +238,27 @@ def test_gemini_s_second_model_answering_is_inconclusive_too(monkeypatch):
         "gemini_fallback", "http_503")) is None
     assert _metadata(monkeypatch, MetadataResult(
         None, None, None, "gemini_fallback", "http_503;fallback_no_json")) is None
+
+
+def test_the_verdict_names_a_dropped_host_line_and_its_length(monkeypatch):
+    """The call's log says which line ran long; the verdict file is what a
+    shift reads, so it carries that line too (2026-10-20)."""
+    from src.llm import Commentary
+    meta = MetadataResult("A title", ["a", "b", "c"], "", "gemini",
+                          commentary=Commentary("Oof", ["Ha", "Wait", "Nope"], ""))
+
+    def get_metadata(*a, **k):
+        print("Commentary: past its length cap, or a placeholder or emoji: vote (23 words)")
+        print('Commentary setup, as written: "Wallet pain"')
+        return meta
+    monkeypatch.setattr("src.config.COMMENTARY", True)
+    monkeypatch.setattr("src.llm.get_metadata", get_metadata)
+    from src import llm
+    monkeypatch.setattr(llm, "FALLBACK_MODEL", llm.FALLBACK_MODEL)
+    monkeypatch.setattr(vr, "SUMMARY", [])
+    vr.check_metadata()
+    assert any("vote (23 words)" in line for line in vr.SUMMARY)
+    assert any('setup, as written: "Wallet pain"' in line for line in vr.SUMMARY)
 
 
 def test_the_release_check_never_spends_a_request_on_the_second_model(monkeypatch):

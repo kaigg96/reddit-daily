@@ -6,6 +6,7 @@ import os
 import re
 import time
 
+import emoji
 import requests
 
 from . import config  # also ensures .env is loaded for direct imports
@@ -80,20 +81,28 @@ def provider():
     return "gemini"
 
 
-def _generate(prompt, thinking_budget=0, model=None):
+def _generate(prompt, thinking_budget=0, model=None, schema=None):
     """One Gemini call. `thinking_budget=0` disables reasoning tokens (the
     default, and what every caller here wants); pass a token budget only for a
     task where reasoning demonstrably helps. `model` exists because the free
     tier is counted per model: a caller on another model draws on its own
-    daily allowance, not the one titles and the screen share (PRD §5 no. 3)."""
+    daily allowance, not the one titles and the screen share (PRD §5 no. 3).
+
+    `schema` makes Gemini answer in that JSON shape, enforced while it writes.
+    Asked in the prompt alone, the 2026-10-17 release check's three-answer
+    reply did not parse, and a live retry gave four reactions for three
+    answers; either costs an upload every host line. Groq's route is
+    unchanged: it is a fallback, and a mode its model may refuse would turn a
+    rescue into a 400."""
     if provider() == "groq":
         return _generate_groq(prompt, reasoning=thinking_budget > 0)
     model = model or (SAMPLE_MODEL if config.DRY_RUN else MODEL)
     body = {"contents": [{"parts": [{"text": prompt}]}]}
+    gen = {}
     # Gemini 3.x answers thinkingBudget with HTTP 400 (measured 2026-09-26),
     # so the budget goes only to the 2.5 models that take it.
     if model.startswith("gemini-2.5"):
-        body["generationConfig"] = {"thinkingConfig": {"thinkingBudget": thinking_budget}}
+        gen["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     # 3.x thinks at length unless told otherwise (2026-11-07, 3.8-flash): one
     # metadata call took 34s of the 60s timeout, and five screen calls ran past
     # 7 minutes. So MODEL asks for its lowest level, except where a caller asks
@@ -102,7 +111,12 @@ def _generate(prompt, thinking_budget=0, model=None):
     # 3.5-flash-lite calls (samples, slate, fallback) are unchanged.
     elif model == MODEL:
         level = "low" if thinking_budget else _LOWEST_THINKING.get(model, "low")
-        body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": level}}
+        gen["thinkingConfig"] = {"thinkingLevel": level}
+    if schema:
+        gen["responseMimeType"] = "application/json"
+        gen["responseSchema"] = schema
+    if gen:
+        body["generationConfig"] = gen
     # The key goes in a header, not the URL: HTTP errors quote the URL, which
     # put the key in any log or file that recorded a failed request.
     resp = requests.post(
@@ -154,13 +168,24 @@ def groq_rescue(prompt, reasoning=False):
     screen and the metadata call, so the switch (config.GROQ_FALLBACK) means
     the same thing for both. The reply is None when off, keyless or missing;
     the failure is blank unless a try was made and missed, so the log tells
-    "Groq failed" from "Groq off"."""
+    "Groq failed" from "Groq off".
+
+    A 429 whose retry-after is Groq's per-minute cap waits once and tries
+    again: on a day Gemini's allowance is spent, up to four screens reach
+    Groq back to back and the metadata call, which carries bet 1's host
+    lines, lands in the same minute (review, 2026-10-12)."""
     if not (config.GROQ_FALLBACK and os.environ.get("GROQ_API_KEY")):
         return None, ""
-    try:
-        return _generate_groq(prompt, reasoning=reasoning), ""
-    except Exception as e:
-        return None, _failure_kind(e)
+    for last in (False, True):
+        try:
+            return _generate_groq(prompt, reasoning=reasoning), ""
+        except Exception as e:
+            wait = None if last else _groq_minute_wait(e)
+            if wait is None:
+                return None, _failure_kind(e)
+            # A wait that then succeeds leaves no failure label, so say so.
+            print(f"Groq rescue: waiting {wait:.0f}s on its per-minute cap, then one retry")
+            time.sleep(wait)
 
 
 def generate_retrying(prompt, tries=2, **kw):
@@ -204,10 +229,19 @@ def generate_retrying(prompt, tries=2, **kw):
 def _groq_rate_wait(exc):
     """Seconds a Groq 429 asks us to wait, if short enough to be its
     per-minute cap; None for Gemini, a missing header, or a longer wait."""
-    if provider() != "groq" or exc.response is None:
+    if provider() != "groq":
+        return None
+    return _groq_minute_wait(exc)
+
+
+def _groq_minute_wait(exc):
+    """Seconds a Groq 429 asks for, if short enough to be its per-minute cap;
+    None for anything else, a missing header, or a longer wait."""
+    response = getattr(exc, "response", None)
+    if response is None or response.status_code != 429:
         return None
     try:
-        wait = float(exc.response.headers.get("retry-after", ""))
+        wait = float(response.headers.get("retry-after", ""))
     except ValueError:
         return None
     return wait if 0 <= wait <= _GROQ_RATE_WAIT_MAX else None
@@ -387,8 +421,14 @@ def _own_judged(data):
 # "Gemini failed" without `source`. The upload log keeps it because the ok-flags alone
 # made a 429 and a timeout look identical -- the 2026-09-24 morning title loss
 # could only be blamed on the quota by its timing.
-MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure")
-MetadataResult.__new__.__defaults__ = ("gemini", "")
+MetadataResult = collections.namedtuple("MetadataResult", "title keywords cta source failure commentary")
+MetadataResult.__new__.__defaults__ = ("gemini", "", None)
+
+# Bet 1's host lines (config.COMMENTARY): a setup, one reaction per answer read,
+# and the verdict, which is also the CTA. Voiced, all or nothing: a partial set
+# would leave answers unreacted to, so it falls back to today's video instead.
+# Shown as text, a line too long is "" and the rest still ship (_clean_commentary).
+Commentary = collections.namedtuple("Commentary", "setup reactions verdict")
 
 
 def _failure_kind(exc):
@@ -474,6 +514,276 @@ def _cta_instruction(vote_rule):
    or groups of people. Plain spoken words. No hashtags, no emoji, no profanity."""
 
 
+# Bet 1 (#70, PRD R3.2's commentary-led variant). The rules are the ones the
+# 2026-10-09 drafts needed (PRD §4): each failure they showed has a line here.
+# The first real sample (2026-10-10, a politics thread) added two: its setup
+# restated the question as "Reddit weighs in on ...", a frame that would repeat
+# across uploads, and a reaction took a side ("skips right over the diplomatic
+# fallout"). Politics is 5 of 86 topic-tagged uploads: too many to skip.
+# Re-tried on the sample model: both fixed, but its vote said "the second one",
+# so the vote's own instruction repeats the never-by-number rule.
+# Word caps keep narration near today's ~455 characters (drafts: 410-546) with
+# our own words at half or more, which is the done-when.
+_COMMENTARY_ASK = """3. COMMENTARY — this show's host reacts to the answers. Its stance is a show
+   of hands: it hears the answers, then raises its hand for one. Spoken lines:
+   - "setup": AT MOST 15 words, after the question and before the first answer:
+     the host's own hunch or angle on this question. Never restate the
+     question, and never open on "Reddit" or a stock frame like "weighs in".
+   - "reactions": exactly {n} lines of AT MOST 12 words each, in order; each is
+     heard straight after its answer and reacts to that answer only.
+   - "cta": the host's vote, AT MOST 15 words: which answer it raises its hand
+     for, named by what it says (never "the first" or "the second one"), and
+     in a few words why, then ask which one gets the viewer's vote.
+   Rules for every line:
+   - Name something specific from this thread, never a stock phrase.
+   - React with opinion, humour or a question. Never state a fact, statistic or
+     diagnosis in your own voice. Judge, never advise: no advice on health,
+     law, money or politics.
+   - Refer to an answer by what it says, never by its number.
+   - Vote on the answer, never on the person: no claims about health
+     conditions, identities or groups of people.
+   - On threads about illness, injury, death or crime, be warm or wry about the
+     people, never about the harm.
+   - On politics or news threads, take no side on the issue itself: react to
+     how an answer is put (its wit, its nerve), and vote on that.
+   - Every line must make sense heard once. Plain spoken words. No hashtags, no
+     emoji, no profanity."""
+
+
+# The prompt's word caps, enforced with slack: a line well past its cap would
+# push the video toward the 60s limit and Polly's per-run budget, either of
+# which would cost the upload, so it falls back instead.
+_HOST_CAPS = {"setup": 15, "reaction": 12, "cta": 15}
+# Shown as text (config.HOST_TEXT, #71), a line must read in about two
+# seconds and fit two lines on screen; the vote is still spoken.
+_TEXT_CAPS = {"setup": 10, "reaction": 10, "cta": 15}
+_CAP_SLACK = 1.5
+
+# What changes in the ask when the host is read, not heard (#71). Each pair
+# must match the voiced ask exactly; a test holds them to it.
+_TEXT_EDITS = [
+    ("Spoken lines:",
+     "Lines shown on screen as text, never spoken (the narrator speaks only the vote):"),
+    ('"setup": AT MOST 15 words, after the question and before the first answer:',
+     '"setup": AT MOST 10 words, shown under the question:'),
+    ("lines of AT MOST 12 words each, in order; each is\n     heard straight after its answer and reacts to that answer only.",
+     "lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only. Never\n     repeat the answer's own words: they are already on screen."),
+    ("Every line must make sense heard once.", "Every line must make sense read once, in two seconds."),
+    ("Plain spoken words.", "Plain words."),
+]
+# A note past about 12 words runs to four lines and meets the watermark
+# (measured at 64px, 900px wide, 2026-10-11), so text lines get less slack.
+_TEXT_SLACK = 1.2
+
+# As tags (config.HOST_TAGS, #77): read at a glance as the narration ends, in
+# the pause before the next segment. Each pair must match the text ask
+# exactly; a test holds them to it.
+# The first tags (2026-10-19) were labels, not reactions: 13 of 15 on six real
+# posts were adjective + noun ("Retail monopoly", "Savage logic"), and the
+# owner found them weak. "Name something specific, never a stock phrase" with
+# a 3-word cap and no quoting is most cheaply met by naming the answer's topic,
+# so tags are told to react, and that rule is kept for the vote.
+_TAG_EDITS = [
+    ('"setup": AT MOST 10 words, shown under the question:',
+     '"setup": a tag of 1 to 3 words, shown as the question finishes: never a\n'
+     '     title for the question, but your gut reaction to it, as a tease of what\n'
+     '     is coming:'),
+    ("lines of AT MOST 10 words each, in order; each is\n     shown while its answer is read and reacts to that answer only.",
+     "lines of 1 to 3 words each, in order. Each is a tag shown as its\n"
+     "     answer finishes: your gut reaction to that answer only, the way a friend\n"
+     "     blurts one out on hearing it (a laugh, a wince, surprise, agreement,\n"
+     "     doubt). React to how it lands; never name, label or sum up what it says:\n"
+     '     "Retail monopoly" and "Savage logic" are labels, not reactions. Best is a\n'
+     '     reaction only that answer could get (to "My cat has judged me for 14\n'
+     '     years": "Fourteen years, ouch."); a plain one is fine when nothing fits.'),
+    ("Every line must make sense read once, in two seconds.",
+     "Every tag must make sense at a glance, and the vote heard once."),
+    ("   - Name something specific from this thread, never a stock phrase.",
+     "   - The vote names something specific from this thread. A tag may be an\n"
+     "     everyday reaction, but no two tags in one video alike."),
+    # Told to react, tags on a politics thread agreed with answers ("Math
+    # checks out" to "Inequality"): a reaction is a verdict unless it is told
+    # what to react to.
+    ("how an answer is put (its wit, its nerve), and vote on that.",
+     "how an answer is put (its wit, its nerve), and vote on that. A tag\n"
+     '     like "Math checks out" or "Finally said it" takes a side.'),
+]
+# Tried 2026-10-19 (owner's idea): each answer's top reply shown to the AI as
+# how Reddit reacted. Tags then reacted to the reply, which the viewer never
+# sees ("Dark turn" from a reply's "sweet release of death"): 4 of 15 made no
+# sense from the answer alone. Removed; the build is in git (e5e24cc).
+# The ask is 1-3 words; one over still reads at a glance. The vote is spoken,
+# so it keeps its text cap.
+_TAG_MAX_WORDS = {"setup": 4, "reaction": 4}
+# A run of letters this long is words the AI ran together: the 2026-10-19
+# local sample showed "Thatescalatedquickly." (20). Real words that long are
+# rare ("characteristically" is 18), and a line dropped for one loses only
+# its own note.
+_RUN_TOGETHER = re.compile(r"[^\W\d_]{19,}")
+# The setup tag is the host line nearly every viewer sees (PRD §4), and on
+# every model and wording tried it came back a title as often as not ("Brutal
+# truth", "The mystery", "Future job apocalypse?"): the weak line the owner
+# turned down (#77). No wording fixed it, so a setup ships only when it reads
+# as a reaction: it exclaims, or opens on a sound. A question mark is not
+# enough, as titles come as questions too. It reads the form, not the sense:
+# "Oh, brutal truth" ships. A dropped setup loses its tag; with every reaction
+# dropped too, the upload is today's reading, as for any line.
+_SOUNDS = frozenset("""ah aha aw dang damn ew eek gosh geez ha hah haha hm hmm
+    huh jeez meh nope oh oof ooh oops ouch phew uh ugh um wait welp whew whoa
+    woah wow yay yep yeah yikes""".split())
+
+
+def _reads_as_reaction(line):
+    first = re.search(r"[^\W\d_]+", line)
+    # Stretched sounds ("Ohhh", "Hmmm") fold to two letters, then to one.
+    word = first and re.sub(r"(.)\1{2,}", r"\1\1", first.group().lower())
+    return "!" in line or bool(word and (word in _SOUNDS or re.sub(r"(.)\1", r"\1", word) in _SOUNDS
+                                         or re.fullmatch(r"(ha|he)+h?", word)))
+
+
+# A reaction tag that grades the answer tells the viewer it is right: a side
+# on a politics thread, a verdict on any other (the owner's bar, PRD §4). The
+# upload model graded every answer of the first spoken sample ("Spot on",
+# "Direct hit", "Deep insight", 10-23), and told never to grade, still did on
+# 3 of 9 (10-24: "Ah, makes sense", "Sad but true", "Good point"). No wording
+# fixed it, so a grading tag is dropped, as a title setup is. It reads stock
+# verdicts only: "Yeah, right" and "Bold move" ship. A one-word verdict counts
+# only at the tag's end ("True crime" ships), and a question is doubt, which
+# is a reaction ("Is that true?!", "Spot on?"). Plain agreement grades too
+# ("Well put", "You're right", "Amen"): on politics it takes a side (10-24),
+# as does naming the answer right ("Plastic crack is right", a release check).
+_VERDICT = re.compile(r"\b((spot[\s-]on|direct hit|deep insight|(good|fair|great|valid) points?|"
+                      r"makes sense|checks out|nail(s|ed)? it|well said|said it|fair enough|"
+                      r"not wrong|agreed?|that tracks|valid|preach|bingo|(that'?s|ain'?t that) the truth|"
+                      r"(good|great|solid|sound|wise) (advice|call|words)|"
+                      r"(well|perfectly|nicely) put|on point|bang on|(you'?re|you are) right|"
+                      r"true that|exactly this|can confirm|correct answer|mic drop|hell ye(s|ah)|amen|"
+                      r"truth bomb)\b|"
+                      r"(true|exactly|facts|correct|accurate|absolutely|dead on|right on|so right|based|"
+                      r"(?<!not )(?<!n't )(is|are|'s|'re|thats|damn|darn|dang|dead|quite|exactly|"
+                      r"absolutely|totally|always|too|about|100\s*(%|percent)) right|100\s*(%|percent))\W*$|"
+                      r"^(totally\s+)?nailed\W*$|^truth\W*$)", re.I)   # "Got nailed" is a wince
+
+
+def _grades(line):
+    # Stretched words fold first, to two letters and to one, as in
+    # _reads_as_reaction: "Truuue" is "true", "Goood point" is "good point".
+    # Groq writes "spot\u2011on" with a non-breaking hyphen (10-24).
+    line = re.sub("[\u2010\u2011\u2013]", "-", line.replace("\u2019", "'"))
+    return "?" not in line and any(_VERDICT.search(re.sub(r"(.)\1{2,}", fold, line))
+                                   for fold in (r"\1\1", r"\1"))
+
+
+def _commentary_ask(n):
+    """The host's instructions, for a voiced host or a text-only one."""
+    ask = _COMMENTARY_ASK
+    if config.HOST_TEXT:
+        for old, new in _TEXT_EDITS:
+            ask = ask.replace(old, new)
+        if config.HOST_TAGS:
+            for old, new in _TAG_EDITS:
+                ask = ask.replace(old, new)
+    return ask.format(n=n)
+
+
+def _within_cap(line, kind):
+    if config.HOST_TEXT and config.HOST_TAGS and kind in _TAG_MAX_WORDS:
+        return len(line.split()) <= _TAG_MAX_WORDS[kind]
+    # The vote is spoken, never a note, so it keeps a spoken line's slack:
+    # the notes' tighter one (screen wrapping) dropped it on 4 of 12 trial
+    # posts (2026-10-20), and #15's dose rule needs every line on 15 of 20.
+    if config.HOST_TEXT and kind != "cta":
+        return len(line.split()) <= _TEXT_CAPS[kind] * _TEXT_SLACK
+    return len(line.split()) <= _HOST_CAPS[kind] * _CAP_SLACK
+
+
+def _usable(line, kind):
+    """Within its cap, with a letter in it (a weak reply can echo the shape's
+    "...") and no emoji, which the note's font draws as an empty box, nor
+    words run together; a setup tag must read as a reaction, and a reaction
+    tag must not grade its answer."""
+    return (_within_cap(line, kind) and re.search(r"[^\W\d_]", line) is not None
+            and not _RUN_TOGETHER.search(line)
+            # Listed whole, not per character: a flag or keycap is two code
+            # points, neither an emoji alone ("Wow 🇺🇸" passed; review, 10-24).
+            and not any(e["emoji"] not in _TEXT_SYMBOLS for e in emoji.emoji_list(line))
+            and not (kind == "setup" and config.HOST_TEXT and config.HOST_TAGS
+                     and not _reads_as_reaction(line))
+            and not (kind == "reaction" and config.HOST_TEXT and config.HOST_TAGS
+                     and _grades(line)))
+
+
+# The emoji package counts these as emoji, but they are text marks the font draws.
+_TEXT_SYMBOLS = "©®™"
+
+
+def _clean_commentary(data, n):
+    """The host's lines, or None when they cannot ship (see Commentary).
+
+    Shown as text, an over-long line is dropped alone: a note costs no time,
+    and one long line cost a whole upload its host in one of four samples
+    (2026-10-13). Its note is left blank, and a long vote leaves the generic
+    closing line. With no note left, the upload is today's reading."""
+    setup, verdict = _clean_str(data.get("setup")), _clean_str(data.get("cta"))
+    raw_reactions = data.get("reactions")
+    # Off, nothing the model sent as reactions is shown, so none of it (a
+    # wrong count, a grade, a swear word) may cost the setup or the vote
+    # (#77, 2026-11-11 review): they are blank, and pass.
+    shown = config.HOST_REACTIONS or not config.HOST_TEXT
+    if not shown:
+        raw_reactions = [""] * n
+    if not isinstance(raw_reactions, list) or len(raw_reactions) != n:
+        return None
+    reactions = [_clean_str(r) for r in raw_reactions]
+    if not (setup and verdict and all(reactions)) and not config.HOST_TEXT:
+        return None
+    # Shown as text, an empty line drops alone, as a long one does: one blank
+    # tag cost every host line (whole-branch review, 10-24).
+    setup, verdict, reactions = setup or "", verdict or "", [r or "" for r in reactions]
+    # Every line is published, so none may swear. The vote (the pinned comment,
+    # and narrated) gets the title's guard; the tags a list that spares "Oh god".
+    # Raw and cleaned both: the emphasis strip turns "f**k" into "fk".
+    def tag_swore(raw, line):
+        return any(content._profane(t, content.TAG_CENSOR) for t in (raw, line)
+                   if isinstance(t, str) and t.strip())
+    vote_swore = bool(verdict) and _clean_published(data.get("cta")) is None
+    vote_ok = _usable(verdict, "cta") and not vote_swore
+    setup_swore = tag_swore(data.get("setup"), setup)
+    setup_ok = _usable(setup, "setup") and not setup_swore
+    swore = [tag_swore(raw, r) for raw, r in zip(raw_reactions, reactions)]
+    ok = [(_usable(r, "reaction") or not shown) and not s for r, s in zip(reactions, swore)]
+    if setup_ok and vote_ok and all(ok):
+        return Commentary(setup, reactions, verdict)
+    # Which line, and how long: the vote ran past the notes' cap on 4 of 12
+    # trial posts (2026-10-20) and nothing said by how much.
+    named = ([("setup", setup, setup_ok, setup_swore), ("vote", verdict, vote_ok, vote_swore)]
+             + [(f"reaction {i}", r, k, s)
+                for i, (r, k, s) in enumerate(zip(reactions, ok, swore), 1)])
+    bad = [f"{name} (a swear word or emoji)" if sw else f"{name} ({len(line.split())} words)"
+           for name, line, fine, sw in named if not fine]
+    print("Commentary: past its length cap, a placeholder or emoji, a setup that"
+          " is not a reaction, or a tag that grades: " + ", ".join(bad))
+    # What a dropped tag said, so a release check shows whether a filter was
+    # right: four checks running said only "setup (2 words)" (10-24). Whole, as
+    # checked (a cut word can read as a slur), on a line the dry run's report
+    # reads as the AI's words, not a failure ("Failed attempt"). A swear word or
+    # emoji stays out of the public log, as the title's do, and the vote,
+    # dropped for its length.
+    for name, line, fine, sw in named:
+        if line and not (fine or sw or name == "vote" or emoji.emoji_list(line)):
+            print(f'Commentary {name}, as written: "{line}"')
+    if not config.HOST_TEXT:
+        return None
+    setup = setup if setup_ok else ""
+    reactions = [r if k else "" for r, k in zip(reactions, ok)]
+    verdict = verdict if vote_ok else ""
+    # Without reactions the vote is the host's one other line, so it ships alone.
+    if not (setup or any(reactions) or (verdict and not shown)):
+        return None
+    print("Commentary: dropped only the line(s) named above")
+    return Commentary(setup, reactions, verdict)
+
+
 # PRD §0 #14: titles with a capitalised word earned ~2x the views at 7 days,
 # observationally (PRD §4, 2026-10-09). Each run's coin assigns an arm, so the
 # read is causal. Both arms ban shock phrases: YouTube's monetization review
@@ -494,6 +804,34 @@ def title_caps_arm(rng):
     return rng.random() < 0.5
 
 
+_PLAIN_SHAPE = '{"title": "...", "keywords": ["...", "..."], "cta": "..."}'
+
+
+def _reply_schema(reactions=None):
+    """The shapes above as Gemini's responseSchema. With `reactions`, the
+    host's lines, with exactly one reaction per answer read: notes are shown
+    in answer order, so a reply with one too many cannot be trimmed safely."""
+    text = {"type": "STRING"}
+    props = {"title": text, "keywords": {"type": "ARRAY", "items": text}}
+    if reactions is not None:
+        props["setup"] = text
+        props["reactions"] = {"type": "ARRAY", "items": text,
+                              "minItems": reactions, "maxItems": reactions}
+    props["cta"] = text
+    order = list(props)
+    return {"type": "OBJECT", "properties": props, "required": order,
+            "propertyOrdering": order}
+
+
+def _commentary_shape(n):
+    """The reply's shape, with one reaction slot per answer read. Kept to
+    Python 3.10's f-strings: the owner's machine, the only one that narrates
+    a sample, runs 3.10 (TECH_DEBT, 2026-10-19)."""
+    slots = ", ".join(['"..."'] * n)
+    return ('{"title": "...", "keywords": ["...", "..."], "setup": "...", '
+            f'"reactions": [{slots}], "cta": "..."}}')
+
+
 def get_metadata(reddit_title, comments, style="A", caps=None):
     """Title + SEO keywords + CTA in ONE Gemini request.
 
@@ -509,9 +847,17 @@ def get_metadata(reddit_title, comments, style="A", caps=None):
     single all-or-nothing result would have made one bad field as expensive as
     a dead API.
     """
-    guidance = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"]).format(reddit_title=reddit_title)
+    template = _STYLE_GUIDANCE.get(style, _STYLE_GUIDANCE["A"])
+    if config.COMMENTARY:
+        # Style C's examples promise a count: the answers actually read.
+        # Replaced before the question goes in, so the question is never edited.
+        template = template.replace('"3 ', f'"{config.COMMENTARY_ANSWERS} ')
+    guidance = template.format(reddit_title=reddit_title)
     if caps is not None:
         guidance += _CAPS_GUIDANCE[bool(caps)] + _NO_SHOCK
+    commentary = config.COMMENTARY
+    if commentary:
+        comments = comments[:config.COMMENTARY_ANSWERS]
     numbered = "\n".join(f'{i}. "{c}"' for i, c in enumerate(comments[:3], 1))
     prompt = f"""
 I'm creating a YouTube Short based on the Reddit question: "{reddit_title}".
@@ -529,22 +875,25 @@ Produce three things.
 2. KEYWORDS — the 10 best search keywords for this video, mixing short-tail and
    long-tail terms someone looking for this discussion would actually type.
 
-{_cta_instruction(config.HOUSE_VOTE_RULE)}
+{_commentary_ask(len(comments)) if commentary
+ else _cta_instruction(config.HOUSE_VOTE_RULE)}
 
 Return ONLY a JSON object, no markdown fence, in exactly this shape:
-{{"title": "...", "keywords": ["...", "..."], "cta": "..."}}
+{_commentary_shape(len(comments)) if commentary else _PLAIN_SHAPE}
 """
     if config.SOURCE == "own":
         prompt = _own_wording(prompt, verbatim=(reddit_title, *comments[:3]))
     route, prior = provider(), ""
+    schema = _reply_schema(len(comments) if commentary else None)
+    model = MODEL if config.METADATA_ON_UPLOAD_MODEL else None
     try:
-        raw = generate_retrying(prompt)
+        raw = generate_retrying(prompt, schema=schema, model=model)
     except Exception as e:
         prior = _failure_kind(e)
-        # Gemini only, never in a dry run (already on FALLBACK_MODEL), as for
-        # the screen.
+        # Gemini only, never in a dry run (on FALLBACK_MODEL already, or on
+        # MODEL by choice for a render), as for the screen.
         if route == "gemini" and not config.DRY_RUN:
-            raw, route, prior = _rescue_metadata(prompt, prior)
+            raw, route, prior = _rescue_metadata(prompt, prior, schema=schema)
         else:
             raw = None
         if raw is None:
@@ -562,12 +911,18 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
     tag = "fallback" if route == FALLBACK_SOURCE else "groq"
     match = re.search(r"\{.*\}", raw, re.S)
     if not match:
-        print(f"{route} metadata returned no JSON object (all fields fall back)")
+        print(f"{route} metadata returned no JSON object (all fields fall back): "
+              f"{_excerpt(raw)}")
         return MetadataResult(None, None, None, route, _then(prior, "no_json", tag))
     try:
-        data = json.loads(match.group(0))
-    except ValueError:
-        print(f"{route} metadata returned unparseable JSON (all fields fall back)")
+        data = _loads_tolerant(match.group(0), route)
+    except ValueError as e:
+        # The reply, not just the verdict: the 2026-10-17 failure printed only
+        # this line, so whether it was quoting, truncation or a stray comma
+        # could not be told from the log.
+        at = match.start() + getattr(e, "pos", 0)
+        print(f"{route} metadata returned unparseable JSON (all fields fall back): "
+              f"{e}; near it: {_excerpt(raw, at)}")
         return MetadataResult(None, None, None, route, _then(prior, "bad_json", tag))
 
     if config.SOURCE == "own":
@@ -586,19 +941,50 @@ Return ONLY a JSON object, no markdown fence, in exactly this shape:
         cta=sentence_case(_clean_published(data.get("cta"))),
         source=route,
         failure=prior,
+        commentary=_clean_commentary(data, len(comments)) if commentary else None,
     )
 
 
-def _rescue_metadata(prompt, prior):
+_TRAILING_COMMA = re.compile(r",(\s*[}\]])")
+
+
+def _loads_tolerant(text, route):
+    """json.loads, forgiving a comma before a closing bracket. Measured
+    2026-10-17: the sample model, in JSON mode, ended a pretty-printed reply
+    `"cta": "...",\\n}`, and that one comma would have cost the upload every
+    field and every host line. Only a reply that fails strict parsing is
+    repaired, and the repair is logged so it never passes as a clean answer.
+    Raises the strict parse's error, whose position is in the reply as sent."""
+    try:
+        return json.loads(text)
+    except ValueError as strict:
+        try:
+            data = json.loads(_TRAILING_COMMA.sub(r"\1", text))
+        except ValueError:
+            raise strict from None
+        print(f"{route} metadata had a trailing comma; parsed without it")
+        return data
+
+
+def _excerpt(text, at=0, width=160):
+    """One log line of a reply around `at`. Model output about a public post,
+    so it is safe in a public log; bounded so a runaway reply stays one line."""
+    start = max(0, at - width // 2)
+    return repr(text[start:start + width])
+
+
+def _rescue_metadata(prompt, prior, schema=None):
     """Once MODEL has failed: one try on FALLBACK_MODEL, then Groq's (PRD §0
     #13): (reply, route, failure). Two 503s 30s apart cost the 2026-10-18 16:02
     upload its title, keywords and CTA, which the screen's second model would
-    have answered. Each route that misses adds its reason after Gemini's.
-    `validate_release.py` sets FALLBACK_MODEL to None: an answer from it tests
-    the wrong model, so there it would only spend a request."""
+    have answered. That model gets the main call's reply `schema`, as every
+    sample render already does; Groq takes none. Each route that misses adds
+    its reason after Gemini's. `validate_release.py` sets FALLBACK_MODEL to
+    None: an answer from it tests the wrong model, so there it would only
+    spend a request."""
     if FALLBACK_MODEL:
         try:
-            reply = generate_retrying(prompt, tries=1, model=FALLBACK_MODEL)
+            reply = generate_retrying(prompt, tries=1, model=FALLBACK_MODEL, schema=schema)
         except Exception as e:
             prior = _then(prior, _failure_kind(e), "fallback")
         else:

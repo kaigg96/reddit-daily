@@ -565,7 +565,7 @@ def _spec_values(value):
 # A derived field's possible values, so a filter can name one no upload has
 # yet: `title_writer!=groq` is meant to be in the title tests' reads before
 # Groq writes any title (#10, #14), and must not be refused as a typo.
-_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}}
+_DERIVED_VALUES = {"title_writer": {"reddit", "gemini", "groq"}, "show": {"reddit", "takes"}}
 
 
 def _require_value(metas, spec):
@@ -968,10 +968,32 @@ def render_own_words(log_rows, version, key="format_version"):
     met = sum(1 for v in vals if v >= OWN_WORDS_DONE)
     line = (f"own words (bet 1's done-when, >= {OWN_WORDS_DONE:.2f} on every upload): "
             f"{met} of {len(vals)} uploads, median {statistics.median(vals):.2f}")
-    fell_back = sum(1 for v in vals if v == 0)
+    fell_back = sum(1 for v in vals if v == 0)   # a plain reading, or every note cut
     if fell_back:
-        line += f", {fell_back} fell back to a plain reading"
+        line += f", {fell_back} showed none of our words"
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
+
+
+def render_host_lines(log_rows, version, key="format_version"):
+    """Bet 1's dose beside its verdict: of the release's uploads logging
+    `host_lines`, how many showed every host line, some (a line too long
+    or a setup that is not a reaction dropped alone, or the duration guard cut
+    one) or none. Never a trigger: it
+    says how much of the change the verdict measured. Whole is a note per
+    answer read (while `HOST_REACTIONS`), the setup and the vote. Empty when nothing logs a count."""
+    reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
+    whole = (config.COMMENTARY_ANSWERS if reacts else 0) + 2
+    counts = []
+    for r in log_rows:
+        n = (r.get("host_lines") or "").strip()
+        if r.get(key) == version and n.isdecimal():
+            counts.append(int(n))
+    if not counts:
+        return ""
+    full = sum(1 for n in counts if n >= whole)
+    none = sum(1 for n in counts if n == 0)
+    return (f"host lines shown (the dose, never a trigger): all {whole} on {full} of "
+            f"{len(counts)} uploads, some on {len(counts) - full - none}, none on {none}")
 
 
 def render_within_length(read, threshold=1.0):
@@ -1878,6 +1900,10 @@ def _with_derived_dimensions(row):
     loaders deriving it separately is a rule that drifts.
     """
     r = dict(row)
+    # Which show (E1 T3). Every upload before the column was Reddit's (no own
+    # question went live), so a blank is reddit, not unset: `split_cohorts`
+    # would otherwise drop the whole history from `--compare show=takes`.
+    r["show"] = (r.get("show") or "").strip() or "reddit"
     bg = (r.get("bg_clip") or "").strip()
     r["background_type"] = ("(unknown)" if not bg else
                             "procedural" if bg.startswith("procedural") else "broll")
