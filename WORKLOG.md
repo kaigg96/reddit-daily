@@ -80,7 +80,7 @@ and more useful than a confident guess.
 - Nothing new. Still the owner's: #59, the weekly allowance variable.
 
 ### Next
-- As the 19:55 entry says. Then E3 T1 (the rate must be measurable before the bet is final) beside E1 T7.
+- As the 19:55 entry says: bet 1 on the 08:17 check first. Then E1 T7 and E3 T1 side by side. Before the first real dispatch, a fresh review of `process/epics.md` and `process/lessons.md` (E2 T2's open line; a reviewer started tonight and was cut off by the usage limit, so it is owed). E3 is challenged once; T2 challenges it again before 12-20.
 
 ### Better?
 - **Than last shift:** no change in numbers; less ambiguity left for the shifts.
