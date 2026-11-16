@@ -31,8 +31,8 @@ STYLES = {
     "count": (340, 1300, "white", config.CAPTION_WIDTH),
     "answer": (210, 520, config.BRAND_ORANGE, config.CAPTION_WIDTH),
     "comparison": (78, 880, "white", config.CAPTION_WIDTH),
-    "turn": (58, 1100, "white", 900),
-    "tomorrow": (60, 1420, config.BRAND_ORANGE, 900),
+    "turn": (58, 1200, "white", 900),
+    "tomorrow": (60, 1460, config.BRAND_ORANGE, 900),
     "credit": (30, 1720, "white", 900),
 }
 OPTION_Y = {"option_a": 640, "option_b": 900}
