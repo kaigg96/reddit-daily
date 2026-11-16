@@ -85,7 +85,7 @@ and more useful than a confident guess.
 
 ### Next
 - **Bet 1:** read the release check; on a pass naming its commit, merge.
-- **The play-along show:** decide whether the "twice as far" rule governs picks or the pick shape goes; choose a less familiar price; time each screen from the narration's length (estimated from word count, so it can be tested without audio); a fresh review of the renderer branch; then the next round of samples.
+- **The play-along show:** decide whether the "twice as far" rule governs picks or the pick shape goes; choose a less familiar price; time each screen from the narration's length (estimated from word count, so it can be tested without audio); a fresh review of the fix waiting on its own branch (the closing line could state a vague number like "quadrupled"); then the next round of samples.
 - The weekly review comes due when Monday's data arrives.
 
 ### Better?
