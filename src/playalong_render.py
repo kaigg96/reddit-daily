@@ -33,7 +33,7 @@ STYLES = {
     "hook": (76, 260, "white", 920, 4),
     "option": (104, None, "white", 880, 1),
     "beat": (92, 1150, config.BRAND_ORANGE, config.CAPTION_WIDTH, 1),
-    "count": (280, 1270, "white", config.CAPTION_WIDTH, 1),
+    "count": (280, 1240, "white", config.CAPTION_WIDTH, 1),
     "answer": (210, 520, config.BRAND_ORANGE, config.CAPTION_WIDTH, 1),
     "comparison": (84, 880, "white", config.CAPTION_WIDTH, 2),
 }
