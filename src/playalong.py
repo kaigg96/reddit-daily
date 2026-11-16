@@ -33,10 +33,13 @@ TOMORROW = "Back tomorrow with another to guess."
 # feel for, per shape. Anything else is trivia nobody can guess at.
 ALLOWED = {PRICE_THEN: {"price"}, BIGGER: {"population"},
            HOW_MANY: {"floors", "height", "date"}}
-# Rule 2: a number question's answer is at least this far from its anchor.
+# Rule 2: a number question's answer is at least this far from its anchor,
+# and a pick's two values this far apart (the viewer bar's "twice as far").
 MIN_DISTANCE = 2.0
-# Rule 2 for a pick, the coded contrast "a city beats a state": the answer
-# ships only when it is the place most would not pick.
+# A ratio shown as "1.0×" says nothing changed ("11.0×" is fine).
+NO_CHANGE = re.compile(r"(?<![\d.])1\.0×")
+# Rule 2 for a pick, on top of the distance, the coded contrast "a city beats
+# a state": the answer ships only when it is the place most would not pick.
 CITY_KINDS = {"city", "district"}
 # Rule 5, nothing that invites contempt (or grief): checked against every
 # record's subject and category, the candidate's category and the hook.
@@ -47,9 +50,10 @@ DENY = re.compile(
     r"mortality|fatal\w*|crime\w*|criminal\w*|murder\w*|homicide\w*|kill\w*|"
     r"prison\w*|overdose\w*|suicide\w*|war|wars|famine\w*)\b", re.I)
 
-# The spoken names the source files lack.
-SERIES = {"APU000074714": {"subject": "Gas", "quantity": "price", "unit": "gallon",
-                           "category": "fuel"}}
+# The spoken names the source files lack. `hook` is how a question names one
+# unit of the series, written out so its case survives (never lowercased).
+SERIES = {"APU000074714": {"subject": "Gas", "hook": "a gallon of regular gas",
+                           "quantity": "price", "unit": "gallon", "category": "fuel"}}
 PLACES = {"District of Columbia": {"subject": "Washington, D.C.", "short": "D.C.",
                                    "kind": "district"}}
 BUILDINGS = {"Q12495": "the Burj Khalifa", "Q9188": "the Empire State Building"}
@@ -70,7 +74,7 @@ def bls_records(path=ASSETS / "bls_APU000074714.json"):
         sid, meta = series["seriesID"], SERIES[series["seriesID"]]
         for d in series["data"]:
             out.append({"source": BLS, "id": sid, "subject": meta["subject"],
-                        "short": meta["subject"], "kind": "series",
+                        "short": meta["subject"], "hook": meta["hook"], "kind": "series",
                         "quantity": meta["quantity"], "unit": meta["unit"],
                         "value": float(d["value"]), "period": f"{d['year']}-{d['period'][1:]}",
                         "month": d["periodName"], "category": meta["category"],
@@ -168,8 +172,8 @@ def _frame(template, records):
         anchor, then = records
         r = anchor["value"] / then["value"]
         when = f"{then['month']} {then['period'][:4]}"
-        hook = (f"What did a {anchor['unit']} of {anchor['subject'].lower()} cost in {when}? "
-                f"This {anchor['month']} it's {_fmt(anchor)}.")
+        named = anchor.get("hook") or f"a {anchor['unit']} of {anchor['subject']}"
+        hook = f"What did {named} cost in {when}? This {anchor['month']} it's {_fmt(anchor)}."
         answer, ans_rec, options = _fmt(then), then, None
         more = f"{r:.1f}× more now" if r >= 1 else f"{1 / r:.1f}× less now"
         # Under the answer it reads "$1.04 / in Jan 1990 / 4.3× more now".
@@ -216,19 +220,21 @@ def select(candidate, prev_template="", shipped=()):
     off = [r.get("quantity") for r in records if r.get("quantity") not in ALLOWED[template]]
     if off:
         return None, f"rule1: {off[0]!r} is not an everyday quantity for {template}"
-    # 2. A surprising distance, from a stated anchor.
+    # 2. A surprising distance, from a stated anchor. The viewer bar's "twice
+    # as far" governs every shape: a pick's two values too.
     if template in (PRICE_THEN, HOW_MANY):
         if len(records) < 2 or records[0].get("value") in (None, ""):
             return None, "rule2: a number question with no anchor"
-        if not all(isinstance(r.get("value"), (int, float)) and r["value"] > 0
-                   for r in records[:2]):
-            return None, "rule2: a value that is not a positive number has no distance"
-        d = _distance(records[0]["value"], records[1]["value"])
-        if d < MIN_DISTANCE:
-            return None, f"rule2: ×{d:.1f} from its anchor, under ×{MIN_DISTANCE:g}"
-    else:
-        if len(records) < 2:
-            return None, "rule2: a pick needs two options"
+    elif len(records) < 2:
+        return None, "rule2: a pick needs two options"
+    if not all(isinstance(r.get("value"), (int, float)) and r["value"] > 0
+               for r in records[:2]):
+        return None, "rule2: a value that is not a positive number has no distance"
+    d = _distance(records[0]["value"], records[1]["value"])
+    if d < MIN_DISTANCE:
+        between = "from its anchor" if template != BIGGER else "between its two options"
+        return None, f"rule2: ×{d:.1f} {between}, under ×{MIN_DISTANCE:g}"
+    if template == BIGGER:
         win, lose = sorted(records[:2], key=lambda r: r["value"], reverse=True)
         if not (win.get("kind") in CITY_KINDS and lose.get("kind") == "state"):
             return None, (f"rule2: no contrast says most would not pick {win['short']}"
@@ -244,6 +250,8 @@ def select(candidate, prev_template="", shipped=()):
     episode = _frame(template, records)
     if template != BIGGER and _fmt(records[0]) not in episode["hook"]:
         return None, "rule2: the hook does not state its anchor"
+    if NO_CHANGE.search(episode["comparison"]):
+        return None, "rule2: the comparison would read 1.0×, no change at all"
     # 4. Fresh shape.
     if template == prev_template:
         return None, f"rule4: the same shape as the previous episode ({template})"
