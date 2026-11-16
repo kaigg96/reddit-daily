@@ -18,3 +18,6 @@ __pycache__/
 # committed. YouTube allows comment text 30 days (III.E.4), and git keeps it
 # for good in a public repository.
 /analysis/viewer_comments.csv
+
+# Agent worktrees, one per dispatched implementer (process/epics.md); never committed.
+.claude/worktrees/

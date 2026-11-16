@@ -101,10 +101,42 @@ def sources():
     return [("product", _read(PRD), section0), ("company", _read(PLAN), queue_section)]
 
 
-def ready_all():
-    """Ready work across both trackers -- the one queue a shift ranks."""
-    return [f"[{label}] {name}" for label, text, section in sources()
-            for name in ready(text, section)]
+def _epics_module():
+    if __package__:
+        from . import epics
+    else:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import epics
+    return epics
+
+
+def epic_ready(directory=None):
+    """`E1 T7 · name` for each `ready` ticket of an `active` epic whose Needs
+    are all `done` (epics/, read by scripts/epics.py's parser). Work larger
+    than a shift lives there, and a count of the two trackers alone read a
+    board full of dispatchable tickets as no supply."""
+    ep = _epics_module()
+    board = ep.board(directory or ep.EPICS)
+    by_num = {e.num: e for e in board if e.num is not None}
+
+    def needs_done(epic, t):
+        for e_num, t_num in ep.needs_refs(t.value("Needs")):
+            target = by_num.get(int(e_num)) if e_num else epic
+            dep = target.ticket(int(t_num)) if target else None
+            if dep is None or dep.status != "done":
+                return False
+        return True
+
+    return [f"{e.label} T{t.num} · {t.name}" for e in board if e.status == "active"
+            for t in e.tickets if t.status == "ready" and needs_done(e, t)]
+
+
+def ready_all(epics_dir=None):
+    """Ready work across both trackers and the epic board -- the one queue a
+    shift ranks."""
+    return ([f"[{label}] {name}" for label, text, section in sources()
+             for name in ready(text, section)]
+            + [f"[epic] {name}" for name in epic_ready(epics_dir)])
 
 
 def main(argv=None):
