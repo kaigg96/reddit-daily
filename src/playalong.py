@@ -296,8 +296,19 @@ _ONES = {w: i for i, w in enumerate(
     "fourteen fifteen sixteen seventeen eighteen nineteen".split())}
 _TENS = {w: 10 * i for i, w in enumerate(
     "twenty thirty forty fifty sixty seventy eighty ninety".split(), start=2)}
-_SCALES = {"hundred": 100, "thousand": 1_000, "million": 1_000_000, "billion": 1_000_000_000}
+_SCALES = {"hundred": 100, "thousand": 1_000, "million": 1_000_000, "billion": 1_000_000_000,
+           "trillion": 1_000_000_000_000}
 _WORDS = {"dozen": 12, "twice": 2, "double": 2, "triple": 3, "half": 0.5}
+# Quantities stated without a value the records could hold ("prices
+# quadrupled", "thousands more", "a quarter of", "½"): a turn using one is
+# refused outright, since no record can confirm it. "Quarter" and "fifth" in
+# a name ("the French Quarter") are refused too: the safe side.
+_VAGUE = re.compile(r"\b(?:hundreds|thousands|millions|billions|trillions?|dozens|thrice|"
+                    r"doubl(?:ed|es|ing)|tripl(?:ed|es|ing)|"
+                    r"(?:quadr|quint|sext|sept|oct)upl(?:e|ed|es|ing)|halv(?:e|ed|es|ing)|"
+                    r"(?:two|three|four|five|six|seven|eight|nine|ten|hundred|thousand|many)fold|"
+                    r"quarters?|thirds?|fifths?|sixths?|sevenths?|eighths?|ninths?|tenths?)\b"
+                    r"|[¼-¾⅐-⅞]")
 _DIGITS = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 
@@ -351,6 +362,9 @@ def check_turn(turn, episode):
     value = episode["source"]["value"]
     if isinstance(value, (int, float)):
         allowed.add(float(value))
+    vague = _VAGUE.search((turn or "").lower())
+    if vague:
+        return vague.group(0)
     for written, v in _numbers(turn or ""):
         if not _held(v, written, allowed):
             return written
