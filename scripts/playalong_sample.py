@@ -3,7 +3,7 @@ committed records, to assets/gen/playalong_<template>.mp4 (gitignored), with
 three PNG frames each (hook, mid-countdown, reveal). Local only: no model,
 no TTS, no network, no upload.
 
-    venv/bin/python scripts/playalong_sample.py
+    venv/bin/python scripts/playalong_sample.py [--price APU0000703112]
 """
 import json
 import shutil
@@ -49,7 +49,9 @@ def probe(path):
 
 def main():
     config.GEN.mkdir(parents=True, exist_ok=True)
-    cands = playalong.candidates()
+    # `--price APU0000703112` renders another BLS series on file (ground beef).
+    price = sys.argv[sys.argv.index("--price") + 1] if "--price" in sys.argv else playalong.GAS_SERIES
+    cands = playalong.candidates(price)
     episodes, _ = playalong.select_day(cands)
     by_hook = {playalong._frame(c["template"], c["records"])["hook"]: c["template"]
                for c in cands}

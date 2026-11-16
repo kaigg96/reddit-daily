@@ -53,7 +53,11 @@ DENY = re.compile(
 # The spoken names the source files lack. `hook` is how a question names one
 # unit of the series, written out so its case survives (never lowercased).
 SERIES = {"APU000074714": {"subject": "Gas", "hook": "a gallon of regular gas",
-                           "quantity": "price", "unit": "gallon", "category": "fuel"}}
+                           "quantity": "price", "unit": "gallon", "category": "fuel"},
+          # T7's less familiar price (11-16): sold by the pound, its 1990 price unknown.
+          "APU0000703112": {"subject": "Ground beef", "hook": "a pound of ground beef",
+                            "quantity": "price", "unit": "pound", "category": "food"}}
+GAS_SERIES, BEEF_SERIES = "APU000074714", "APU0000703112"
 PLACES = {"District of Columbia": {"subject": "Washington, D.C.", "short": "D.C.",
                                    "kind": "district"}}
 BUILDINGS = {"Q12495": "the Burj Khalifa", "Q9188": "the Empire State Building"}
@@ -129,10 +133,11 @@ def wikidata_records(path=ASSETS / "wikidata_P1101.json"):
     return out
 
 
-def candidates():
-    """The three worked examples, from the committed records: gas then and
-    now, D.C. against Wyoming, the Burj Khalifa against the Empire State."""
-    gas = {r["period"]: r for r in bls_records()}
+def candidates(price=GAS_SERIES):
+    """The three worked examples, from the committed records: a price then and
+    now (gas unless `price` names another BLS series on file), D.C. against
+    Wyoming, the Burj Khalifa against the Empire State."""
+    gas = {r["period"]: r for r in bls_records(ASSETS / f"bls_{price}.json")}
     people = {r["short"]: r for r in census_records()}
     floors = {r["id"].split()[0]: r for r in wikidata_records()}
     return [{"template": PRICE_THEN, "records": [gas["2026-10"], gas["1990-01"]]},
