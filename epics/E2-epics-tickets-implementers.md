@@ -72,9 +72,9 @@ turn out to measure the wrong thing.
 
 ## Assumptions to check
 
-1. A CI shift can run implementers side by side (T3). If not, they run one
+1. **True (T3, 11-15).** A CI shift can run implementers side by side (T3). If not, they run one
    after another and the model still holds; only the speed changes.
-2. The usage allowance covers it: implementers multiply a shift's cost, and
+2. **True per shift, false at three shifts a day (T3, 11-16).** The usage allowance covers it: implementers multiply a shift's cost, and
    three shifts a day already exceed the 200-unit weekly cap the owner has
    been asked to raise. T3 measures the cost of two at once before more are tried.
 3. Anthropic's published accounts of this pattern still read as recalled here
@@ -112,16 +112,16 @@ Accept:
 Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring. 11-16, merged `783d015`: a fresh review found one contradiction with `CLAUDE.md` §4 (a ticket needing a paid key "ends in one ask") and five more blocking gaps (accept-first against "dispatch first", dispatch ignoring `active` and `Needs`, briefs silent on the Gemini and render allowances, L11 naming a tool that spends Gemini, gates weaker than §3); all applied, with L1, L2, L9, L12 and L13's evidence corrected. A second fresh review of the result found no contradiction.
 
 ### T3 · We know whether implementers can run side by side in CI
-Status: ready: one line left, assumption 2 (Evidence, 11-16)
+Status: done
 Needs: T1
 Touches: this file; process/epics.md if it exists
 Context: a spike, one shift at most. Shifts run with `Agent` allowed and background agents refused (`.github/workflows/foreground_in_ci.py`); foreground agents sent in one message run together. Try two implementers on two trivial tickets, each isolated on its own branch or worktree.
 Accept:
-- [ ] this file records the run id, whether both ran at once, whether each stayed in its own tree, and the shift's quota units against a normal shift's
-- [ ] assumption 1 and 2 above are each marked true or false with that evidence
-- [ ] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
+- [x] this file records the run id, whether both ran at once, whether each stayed in its own tree, and the shift's quota units against a normal shift's
+- [x] assumption 1 and 2 above are each marked true or false with that evidence
+- [x] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
 Evidence: early, ahead of T1 (11-15, run 43749661055, E1's T3 and T6 plus a read-only challenger, three foreground agents in one message): **assumption 1 true:** they returned together after ~11 minutes (19:01 to 19:12), the longest one's own 651 s, against 1,160 s summed; each implementer worked in its own worktree (`isolation: worktree`) and pushed its own branch, and neither diff touched the other's files. **Assumption 2 unmeasured:** this run's row in `.github/shift-usage.csv` lands after the shift; compare it with the three before it (8.2–11.1 units). Dispatch method, for T4: side by side, all agents in one message, since a background agent is refused and a lone foreground one blocks the orchestrator.
-11-16: run 43749661055's row reads 10.48 units over 47.7 minutes, inside the 8.2–11.5 of the shifts before it, so either a round costs little or `shift-usage.csv` does not count subagents' tokens; which one is the line left (compare this shift's row, run 43856314698, seven rounds, when it lands). Dispatch method written in `process/epics.md` (merged 11-16).
+11-16: run 43749661055's row reads 10.48 units over 47.7 minutes, inside the 8.2–11.5 of the shifts before it, so either a round costs little or `shift-usage.csv` does not count subagents' tokens; which one is the line left (compare this shift's row, run 43856314698, seven rounds, when it lands). Dispatch method written in `process/epics.md` (merged 11-16). 11-16 (21:00 shift): run 43856314698, seven rounds, reads **14.19 units** over 44.4 min and 100 turns, above the 8.2–11.5 of the ten shifts before it (11-13 to 11-15, no rounds), at 0.14 a turn against their 0.07–0.10. Cost rose with rounds while turns did not, so `quota_units` (the action's `total_cost_usd`) counts subagents. **Assumption 2:** a heavy round shift costs about 1.4× the band's median, which fits inside one shift's share; but three shifts a day at ~10 units already run past the 200-unit weekly cap, so routine rounds every shift do not fit until the owner's raise lands (PLAN, the allowance variable). Rounds stay at what a ticket needs, as `process/epics.md` says.
 
 ### T4 · An implementer's brief is built from its ticket alone
 Status: todo
@@ -157,17 +157,17 @@ Accept:
 Evidence:
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: ready: `process/lessons.md` seeded 11-15 with 13 lessons, each with friction ids, and the weekly step is in `process/review.md`; left: `--check` and brief matching (need T1, T4)
+Status: blocked: T5 (its Needs; the board check warned while it read ready); left: `--check` on lessons and brief matching (T4). Seeded 11-15, 16 lessons by 11-16
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
 Accept:
-- [ ] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
+- [x] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
 - [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
 - [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
 - [x] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired (11-15, `22816b9`)
 - [x] at least five lessons are seeded, each with real evidence
-Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`.
+Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`. 11-16 weekly review: L14–L16 from G30, G32, G33 (three or more rows each), same four fields; evidence counts refreshed on L1–L6.
 
 ### T8 · E1's remaining tickets run through this workflow
 Status: todo
