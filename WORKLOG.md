@@ -73,7 +73,7 @@ and more useful than a confident guess.
 - Bet 1 did not ship: its automatic check runs about seven hours late (about 15:00–16:30 here, not 08:17), and a shift cannot start it by hand.
 
 ### Done
-- **Product (a bet):** the question picker merged, with a test per rule; 2 of 3 example questions survive (the skyscraper one is rejected as too close to its anchor). The sample renderer is on two branches, unmerged.
+- **Product (a bet):** the question picker merged, with a test per rule; 2 of 3 example questions survive (the skyscraper one is rejected as too close to its anchor). The sample renderer merged too, after its own fresh review; neither is part of the live uploads yet.
 - **Engineering:** one command now reads and checks the board of larger projects and names the next action; shifts' count of ready work now includes those projects' tickets, so it no longer reads short. Two tests that would have broken later on the live branch were caught by fresh review and fixed before merging.
 - **General management (a fix):** a fresh review of the new working methods found one rule that contradicted the money rule (it let a task end by asking the owner for a paid key) and five other gaps; all fixed. The starting numbers for judging this way of working are recorded: 1 format release a month, 16 of 72 shifts ended early for lack of work.
 - **Security and reliability (checked):** both uploads since the last handover landed (19:00 and 06:52). Money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change. Two lines that named the AI model in the project board were removed.
