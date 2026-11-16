@@ -9,13 +9,16 @@ that sent it (F346). Change this on evidence, as any process text (D16).
 ## Which role, now
 
 Read the board (`scripts/epics.py --next` once E2 T1 lands; until then the
-files). The order never changes: **accept** what is in `review`, **dispatch**
-what is `ready`, **plan** what is `approved` and unticketed, **generate and
-filter** only when nothing else is open. Finishing beats starting; a shift
+files). After `process/shift.md` §2 items 1–5 (incident, ship what's built, a
+due review, owner decisions, a closing window), the order never changes:
+**accept** what is in `review`, **dispatch** `ready` tickets of an `active`
+epic whose `Needs` are all `done`, **plan** what is `approved` and
+unticketed, **generate and filter** only when nothing else is open. Finishing beats starting; a shift
 that leaves work in `review` for the next one has chosen the slowest path.
 
-The clock: a shift has 70 minutes and an agent round takes 10–15. Dispatch in
-the first quarter of the shift, accept in the last. Never leave a ticket
+The clock: a shift has 70 minutes and an agent round takes 10–15. Accept tickets
+carried over in `review` first, then dispatch; accept this round's reports
+last. Never leave a ticket
 `doing` at hand-over: return it to `ready` with what was learned.
 
 ## The orchestrator
@@ -35,27 +38,34 @@ agent blocks the shift, so batching is the only way the orchestrator's time
 is not spent waiting. Each brief is generated from the ticket (`epics.py
 brief`, E2 T4; until then, written by hand to the same shape): the ticket's
 text, its `Touches`, the gates in `CLAUDE.md` §3 that apply, the lessons
-whose `Applies` matches (`process/lessons.md`), and the report format below.
-Nothing else: not the board, not the epic, not another ticket. Three at once
+whose `Applies` matches (`process/lessons.md`), the report format below, and
+its allotment: by default no Gemini calls and no render requests, only free
+`SAMPLE=1` renders and `scripts/replay_text.py`. The orchestrator spends the
+shift's Gemini requests and its one render. Nothing else: not the board, not the epic, not another ticket. Three at once
 is proven; more is measured before it is relied on (`shift-usage.csv`).
 
-**While they run** the orchestrator does only read-only work: reading the
-board, planning the next round, reading reports as they land. It never edits
+**While they run** the orchestrator does only read-only work, such as
+reading the board; it plans the next round before dispatching. It never edits
 a file an implementer's `Touches` names.
 
 **Accepts.** A report is a claim. For each `Accept` line the orchestrator
 re-runs the command or reads the thing itself, on the implementer's branch,
 and records what it saw in `Evidence` (commit, command, result). Then the
-gates (`CLAUDE.md` §3) once per mergeable slice: tests on the merged tree, a
-fresh-context review of the diff, a dry run for anything touching the video,
-`FORMAT_VERSION` if the video changed, one variable per release. A ticket
+gates once per mergeable slice, as `CLAUDE.md` §3 puts them: "Merge once the
+gates pass: tests green, a fresh-context agent's review of the diff with its
+findings fixed or recorded, a dry run producing a playable MP4 for anything
+touching the video, `FORMAT_VERSION` bumped if the video changed, one
+variable per release." A dry run's PASS must name the branch's current
+commit. A ticket
 that fails goes back to `ready` with the reason as a line under `Evidence`
 and a row in the friction log; one that fails **twice** was written wrong,
 and the orchestrator rewrites it before anyone tries again. Bounces are the
 lessons file's main source (`process/lessons.md`).
 
 **Records.** Status changes are made the moment they are true, in the epic
-file, in the commit that makes them true. The handover names each ticket
+file, in the commit that makes them true. At dispatch the orchestrator sets
+`doing: <run id>, <UTC time from date -u>`, and `review` when the report
+lands; a note may follow any status after a colon. The handover names each ticket
 moved and its state.
 
 ## The implementer
@@ -69,7 +79,7 @@ Branch: e1-t7-play-along (commit abc1234)
 Changed: src/playalong.py (new), tests/test_playalong.py (new)
 Accept:
 - [x] "a test fails if the revealed value differs": venv/bin/python -m pytest tests/test_playalong.py -q -> 6 passed; the test test_reveal_matches_record fails when the value is altered (tried)
-- [ ] "one narrated dry run is playable": not done, needs the Polly keys this branch does not hold
+- [ ] "one narrated dry run is playable": not done, needs a dry run, which only the orchestrator requests
 Could not do: ...
 Learned: anything the next person on this file should know (one line each)
 ```
@@ -108,8 +118,12 @@ sees them.
 ## Limits
 
 At most **two** epics `active`. No ticket spends money or asks the owner for
-a decision (`CLAUDE.md` §4); a ticket that needs a key a shift lacks ends in
-one ask with the exact steps, after everything else is built. The usage
+a decision (`CLAUDE.md` §4). A render goes through `scripts/dry_run.py
+request <branch>` (silent narration on a branch); a narration change is the
+owner's run by hand; a workflow change goes through `scripts/escalate.py
+--patch`; a paid key is never asked for, it is recorded in `PLAN.md`. A
+one-way door (a channel rename) has `scripts/escalate.py --notice-days 7` in
+its `Accept` and is not merged before the notice date. The usage
 allowance is the owner's: a round of three agents costs about what a shift
 does, so a shift dispatches at most two rounds, and the cost per accepted
 ticket is read against E2's rule at its review.

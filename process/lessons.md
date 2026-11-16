@@ -15,12 +15,12 @@ Each lesson: the rule in one sentence; `Evidence:` ids; `Applies:` a role
 `Retire when:`.
 
 ## L1 · A fresh-context review before every merge, with its findings fixed or recorded
-Evidence: G19 (13 rows); D2's re-reviews 10-28 to 11-12 ("fresh reviews caught ~19 defects since 10-28; gates caught none")
+Evidence: G19 (13 rows); D2's re-review of 11-05 ("Fresh reviews caught ~19 defects since 10-28; four dry runs and eight release checks caught none.")
 Applies: orchestrator (acceptance)
 Retire when: a month of reviews finds nothing that would have shipped
 
 ## L2 · Rehearse the merge onto today's `main` and run the full suite on the merged tree before pushing
-Evidence: G22 (13 rows); F240, F255 (`main`'s tests broke for minutes after pushes without a run on the merged tree)
+Evidence: G22 (13 rows); F240, F255 support its second half, run the suite before pushing (`main`'s tests broke for minutes after pushes made without a run)
 Applies: orchestrator; implementer, `src/**`
 Retire when: a month without a post-merge break
 
@@ -55,7 +55,7 @@ Applies: orchestrator (dispatch)
 Retire when: CI allows background agents and the shift tool can wait on them
 
 ## L9 · A tracker over its budget is closed or trimmed before the push, never after
-Evidence: G15 (7 rows); 11-15: PLAN pushed 28 words over by the owner's session because a grep masked the check's exit code
+Evidence: G15 (7 rows); F324 (a `pytest | tail -1` inside an `&&` chain hid a failing test, so a merge pushed `main` with a malformed PLAN status)
 Applies: orchestrator (records); any, `PLAN.md`, `PRD.md`, `WORKLOG.md`
 Retire when: the check fails the push itself
 
@@ -65,16 +65,17 @@ Applies: any, `WORKLOG.md`
 Retire when: a check refuses an entry inside the fence
 
 ## L11 · A text-rule change replays over every shipped line before it merges
-Evidence: G26 (4 rows; `scripts/replay_screen.py`, the own-title cases)
+Implementers use `scripts/replay_text.py <base> HEAD` (no model, no network); `scripts/replay_screen.py` spends Gemini per case, so it is an orchestrator-only step run an hour clear of an upload.
+Evidence: G26 (4 rows; the own-title cases)
 Applies: implementer, `src/screen.py`, `src/llm.py`, `src/ownquestions.py`
 Retire when: the replay runs in CI on those paths
 
 ## L12 · A review is run from its checklist file, each step ticked, not from memory
-Evidence: G27 (a review step skipped when worked from memory)
+Evidence: G27 (a review step skipped when worked from memory; seeded below the three-row bar)
 Applies: orchestrator (reviews, acceptance)
 Retire when: G27 gains no row in eight weeks
 
 ## L13 · Copy a result from the tool's output, never retype or truncate it
-Evidence: G28 (hand-copied or truncated output misstated a result)
+Evidence: G28 (hand-copied or truncated output misstated a result; seeded below the three-row bar)
 Applies: any (reports, evidence lines)
 Retire when: G28 gains no row in eight weeks
