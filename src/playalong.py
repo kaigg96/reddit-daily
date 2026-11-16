@@ -141,6 +141,8 @@ def _fmt(record):
     v = record["value"]
     if record["quantity"] == "price":
         return f"${v:,.2f}"
+    if record["quantity"] == "date":
+        return str(int(v))   # a year, never "1,931"
     return f"{v:,}" if float(v).is_integer() else f"{v:,.1f}"
 
 
@@ -216,6 +218,9 @@ def select(candidate, prev_template="", shipped=()):
     if template in (PRICE_THEN, HOW_MANY):
         if len(records) < 2 or records[0].get("value") in (None, ""):
             return None, "rule2: a number question with no anchor"
+        if not all(isinstance(r.get("value"), (int, float)) and r["value"] > 0
+                   for r in records[:2]):
+            return None, "rule2: a value that is not a positive number has no distance"
         d = _distance(records[0]["value"], records[1]["value"])
         if d < MIN_DISTANCE:
             return None, f"rule2: ×{d:.1f} from its anchor, under ×{MIN_DISTANCE:g}"

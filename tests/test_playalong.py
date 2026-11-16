@@ -78,6 +78,12 @@ def test_every_number_is_copied_from_the_record_by_code():
     assert episode["comparison"] == "D.C. 600,000 · Wyoming 587,618 (12,382 more)"
 
 
+def test_values_are_shown_as_their_quantity_reads():
+    assert playalong._fmt({"quantity": "price", "value": 4.454}) == "$4.45"
+    assert playalong._fmt({"quantity": "population", "value": 702250}) == "702,250"
+    assert playalong._fmt({"quantity": "date", "value": 1931}) == "1931"
+
+
 def test_rule1_only_everyday_quantities_per_shape():
     assert _reason(_with(GAS, quantity="gdp")).startswith("rule1:")
     # Floors are everyday for how-many, not for a price question.
@@ -92,6 +98,8 @@ def test_rule2_a_number_question_states_a_far_enough_anchor():
     # 163 floors against 102 is x1.6: a stranger guesses it.
     assert _reason(FLOORS) == "rule2: ×1.6 from its anchor, under ×2"
     assert _reason(_with(GAS, 1, value=3.0)).startswith("rule2: ×1.5")
+    assert _reason(_with(GAS, 1, value=0)).startswith("rule2: a value that is not")
+    assert _reason(_with(GAS, 1, value="1.04")).startswith("rule2: a value that is not")
     # x2 or more ships, either way round (the answer above the anchor too).
     assert playalong.select(_with(FLOORS, 0, value=81, provenance="fetched"))[0]["answer"] == "163"
 
