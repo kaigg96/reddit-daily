@@ -112,7 +112,7 @@ Accept:
 Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring. 11-16, merged `783d015`: a fresh review found one contradiction with `CLAUDE.md` §4 (a ticket needing a paid key "ends in one ask") and five more blocking gaps (accept-first against "dispatch first", dispatch ignoring `active` and `Needs`, briefs silent on the Gemini and render allowances, L11 naming a tool that spends Gemini, gates weaker than §3); all applied, with L1, L2, L9, L12 and L13's evidence corrected. A second fresh review of the result found no contradiction.
 
 ### T3 · We know whether implementers can run side by side in CI
-Status: todo
+Status: ready: one line left, assumption 2 (Evidence, 11-16)
 Needs: T1
 Touches: this file; process/epics.md if it exists
 Context: a spike, one shift at most. Shifts run with `Agent` allowed and background agents refused (`.github/workflows/foreground_in_ci.py`); foreground agents sent in one message run together. Try two implementers on two trivial tickets, each isolated on its own branch or worktree.
@@ -121,6 +121,7 @@ Accept:
 - [ ] assumption 1 and 2 above are each marked true or false with that evidence
 - [ ] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
 Evidence: early, ahead of T1 (11-15, run 43749661055, E1's T3 and T6 plus a read-only challenger, three foreground agents in one message): **assumption 1 true:** they returned together after ~11 minutes (19:01 to 19:12), the longest one's own 651 s, against 1,160 s summed; each implementer worked in its own worktree (`isolation: worktree`) and pushed its own branch, and neither diff touched the other's files. **Assumption 2 unmeasured:** this run's row in `.github/shift-usage.csv` lands after the shift; compare it with the three before it (8.2–11.1 units). Dispatch method, for T4: side by side, all agents in one message, since a background agent is refused and a lone foreground one blocks the orchestrator.
+11-16: run 43749661055's row reads 10.48 units over 47.7 minutes, inside the 8.2–11.5 of the shifts before it, so either a round costs little or `shift-usage.csv` does not count subagents' tokens; which one is the line left (compare this shift's row, run 43856314698, seven rounds, when it lands). Dispatch method written in `process/epics.md` (merged 11-16).
 
 ### T4 · An implementer's brief is built from its ticket alone
 Status: todo
@@ -145,7 +146,7 @@ Accept:
 Evidence:
 
 ### T6 · Epics are proposed and cut before they are planned
-Status: todo
+Status: ready
 Needs: T2
 Touches: process/backlog.md, process/epics.md, epics/ (new proposed files)
 Context: "The decision", Generator and Filter. The filter must be a fresh agent. Expect it to cut most of what is proposed.
