@@ -200,12 +200,15 @@ def test_file_date_reads_an_untracked_file_by_its_mtime(tmp_path):
 
 
 def test_committed_board_passes(capsys):
-    """The board as committed. Read at its own commit time: a `doing` ticket is
-    meant to go stale 12 hours later, and that is --check working, not the
-    board being malformed when it was written."""
-    stamp = subprocess.run(["git", "log", "-1", "--format=%cI", "--", "epics/"], cwd=ep.ROOT,
-                           capture_output=True, text=True).stdout.strip()
-    when = (dt.datetime.fromisoformat(stamp).astimezone(dt.timezone.utc) if stamp
-            else dt.datetime.now(dt.timezone.utc))
-    assert ep.main(["--check", "--now", f"{when:%Y-%m-%d %H:%M}"]) == 0, capsys.readouterr().out
+    """The board as committed, checked for form. A `doing` ticket's age depends
+    on the clock and on clone depth (CI checks out one commit, so every file
+    dates from HEAD); staleness has its own tests above, so here every
+    `doing` time is read as not yet begun."""
+    future = lambda path: dt.date(2100, 1, 1)
+    assert ep.main(["--check"], date_of=future) == 0, capsys.readouterr().out
     assert ep.main([]) == 0 and ep.main(["--next"]) == 0
+
+
+def test_needs_none_with_a_note_names_no_ticket():
+    assert ep.needs_refs("none (E1 T7 for the play-along form)") == []
+    assert ep.needs_refs("T1, E1 T3") == [("", "1"), ("1", "3")]
