@@ -1,5 +1,5 @@
 # E2 · Work in epics: a generator, a filter, an orchestrator, many implementers
-Status: approved
+Status: active
 Function: General management, Engineering
 Deadline: none; its pilot is E1, which has one (2027-01-12)
 Measure: format releases reaching viewers (one in the 31 days to 2026-11-14, a model swap Google forced)
@@ -87,7 +87,7 @@ turn out to measure the wrong thing.
 ## Tickets
 
 ### T1 · The board can be read and checked by one command
-Status: ready
+Status: doing: 43856314698, 11:36
 Needs: none
 Touches: scripts/epics.py (new), tests/test_epics.py (new), .github/shift-usage.csv (read only)
 Context: `epics/README.md` defines the format. Model the script on `scripts/backlog_status.py`, which reads the status tables in PLAN.md and PRD.md.

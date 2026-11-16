@@ -280,7 +280,7 @@ Accept:
 Evidence: 11-15, `07482b2` on `main`: PRD §4 "Play-along supply". BLS, Census, USGS, NWS public domain; Wikidata CC0; OGL and OWID terms quoted; ~740 candidates (BLS ~200, Wikidata ~490, Census ~50); three episodes; verdict build T7.
 
 ### T7 · A play-along episode exists as a sample a viewer could follow
-Status: ready
+Status: doing: 43856314698, 11:36 (the first two Accept lines; renders next round)
 Needs: T6
 Touches: src/ (a new source beside ownquestions.py: `select` fetches a record and frames it, `render` copies it), tests/, assets/gen/ (samples)
 Context: T6 said build; "The play-along episode" above is the design, and `process/viewer-bar.md` is the test. The agent judging a sample is given the script, the frames and the bar only, never the design. Start with BLS prices and Census pairs, whose records are files that need no key; Wikidata second. The number or answer in the reveal is copied from the source record by code, never written by a model.
