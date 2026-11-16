@@ -17,8 +17,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src import config, playalong, playalong_render as pr  # noqa: E402
 
-FRAMES = {"hook": pr.HOOK_END / 2, "countdown": pr.HOOK_END + 1.5,
-          "reveal": pr.REVEAL_START + 1.5}
+
+def frames(episode):
+    """When to grab each still: mid-hook, mid-countdown, mid-reveal."""
+    t = pr.timings(episode)
+    return {"hook": t["hook_end"] / 2, "countdown": t["hook_end"] + pr.COUNT_FROM / 2,
+            "reveal": (t["reveal_start"] + t["total"]) / 2}
 
 
 FFMPEG = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
@@ -57,7 +61,7 @@ def main():
         for start, end, text, style in pr.plan(episode):
             print(f"  {start:4.1f} - {end:4.1f} | {style}: {text!r}")
         print("  description: " + pr.description(episode).replace("\n", " / "))
-        for name, t in FRAMES.items():
+        for name, t in frames(episode).items():
             png = config.GEN / f"playalong_{template}_{name}.png"
             subprocess.run([FFMPEG, "-y", "-v", "error", "-ss", f"{t:.2f}", "-i", str(out),
                             "-frames:v", "1", str(png)], check=True)

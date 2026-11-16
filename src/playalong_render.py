@@ -3,9 +3,13 @@ silent 1080x1920 30 fps MP4. Narration comes later.
 
 The shape: the hook (for a pick, the two options as labelled blocks), then the
 beat line with the question held over a 3-2-1 countdown, then the reveal
-(answer and one comparison) for the last 3 s of 9 s, so it starts at
-two-thirds. `turn` is left for narration; `tomorrow` and `credit` go in the
-description (`description(episode)`), not on screen.
+(answer and one comparison). The screen follows the narration's length: the
+hook holds for as long as it takes to say, the reveal for as long as the
+answer and comparison take, and the reveal never starts before two-thirds of
+the whole (`timings`). Narration is not rendered yet, so each length is an
+estimate from the line's word count at `sample.WORDS_PER_SECOND`. `turn` is
+left for narration; `tomorrow` and `credit` go in the description
+(`description(episode)`), not on screen.
 
 Everything drawn goes through `plan(episode)`, a pure function, so a test can
 check every string on screen is the episode's own without rendering video.
@@ -13,22 +17,24 @@ The live Reddit pipeline is untouched: this only reuses its text and
 background helpers.
 """
 import random
+from pathlib import Path
 
 import numpy as np
 
 from . import config
+from .sample import WORDS_PER_SECOND
 
-HOOK_END = 3.0                    # hook alone, 0-3 s
+HOOK_MIN = 3.0                    # the hook alone holds at least 3 s
 COUNT_FROM = 3                    # the beat: 3, 2, 1, one per second
-REVEAL_START = HOOK_END + COUNT_FROM
-TOTAL = REVEAL_START + 3.0        # the video ends 3 s after the reveal
+REVEAL_MIN = 3.0                  # the reveal holds at least 3 s
 LABELS = ("A", "B")
 # YouTube's caption and channel name cover the bottom 15% of a Short.
 SAFE_BOTTOM = 0.85 * config.H
 
 # style -> (font size, y, colour, width, max lines). On screen: answer and
 # ONE comparison. `turn` is left for narration and `tomorrow`/`credit` for the
-# description: the reveal is 3 s, too short to read a third line.
+# description: the reveal holds only as long as its two lines take to say,
+# too short to read a third.
 STYLES = {
     "hook": (76, 260, "white", 920, 4),
     "option": (104, None, "white", 880, 1),
@@ -50,19 +56,42 @@ def bottom(style):
     return y + size * LINE_H * lines
 
 
+def spoken(text):
+    """Estimated seconds to say `text`: its word count at narration pace."""
+    return len(text.split()) / WORDS_PER_SECOND
+
+
+def timings(episode):
+    """{"hook_end", "reveal_start", "total"} in seconds, from the narration's
+    estimated length. The hook holds for its spoken length (at least
+    HOOK_MIN), the countdown follows it, and the reveal holds for the spoken
+    answer and comparison (at least REVEAL_MIN). The answer must appear only
+    in the last third, which holds when the lead-up is at least twice the
+    reveal; so a long reveal holds the question longer, and the reveal then
+    starts at exactly two-thirds. (Holding the reveal itself longer would
+    pull its start further before two-thirds, not after.)"""
+    reveal = max(REVEAL_MIN, spoken(f"{episode['answer']} {episode['comparison']}"))
+    reveal_start = max(max(HOOK_MIN, spoken(episode["hook"])) + COUNT_FROM, 2 * reveal)
+    return {"hook_end": reveal_start - COUNT_FROM, "reveal_start": reveal_start,
+            "total": reveal_start + reveal}
+
+
 def plan(episode):
     """[(start, end, text, style)] for every piece of text on screen, in
     start order. Text is copied from `episode` unchanged; the only text this
     adds is the countdown digits and the option labels' letters."""
-    items = [(0.0, REVEAL_START, episode["hook"], "hook")]
+    t = timings(episode)
+    hook_end, reveal_start, total = t["hook_end"], t["reveal_start"], t["total"]
+    items = [(0.0, reveal_start, episode["hook"], "hook")]
     for label, option, style in zip(LABELS, episode.get("options") or [], OPTION_Y):
-        items.append((0.0, REVEAL_START, f"{label}  {option}", style))
-    items.append((HOOK_END, REVEAL_START, episode["beat"], "beat"))
+        items.append((0.0, reveal_start, f"{label}  {option}", style))
+    items.append((hook_end, reveal_start, episode["beat"], "beat"))
+    # Each digit ends where the next starts, the last where the reveal does.
+    ticks = [hook_end + i for i in range(COUNT_FROM)] + [reveal_start]
     for i in range(COUNT_FROM):
-        start = HOOK_END + i
-        items.append((start, start + 1.0, str(COUNT_FROM - i), "count"))
-    items += [(REVEAL_START, TOTAL, episode["answer"], "answer"),
-              (REVEAL_START, TOTAL, episode["comparison"], "comparison")]
+        items.append((ticks[i], ticks[i + 1], str(COUNT_FROM - i), "count"))
+    items += [(reveal_start, total, episode["answer"], "answer"),
+              (reveal_start, total, episode["comparison"], "comparison")]
     return sorted(items, key=lambda it: it[0])
 
 
@@ -102,15 +131,20 @@ def build(episode, seed=0):
     from .background import build_background
 
     items = plan(episode)
-    total = max(end for _, end, _, _ in items)
+    total = timings(episode)["total"]
     bg, _ = build_background(total, random.Random(seed))
     video = CompositeVideoClip(bg + _clips(items), size=(config.W, config.H))
     return video.with_duration(total).with_audio(silent_audio(total))
 
 
 def render(episode, out_path, seed=0):
-    from .video import render as write
+    """Write the episode to `out_path`. moviepy's temporary audio goes in
+    assets/gen/ (gitignored), not the working directory, which is the repo
+    root when a script runs this."""
     video = build(episode, seed)
-    write(video, out_path)
+    config.GEN.mkdir(parents=True, exist_ok=True)
+    temp_audio = config.GEN / f"{Path(out_path).stem}_TEMP_audio.m4a"
+    video.write_videofile(str(out_path), fps=config.FPS, codec="libx264", audio_codec="aac",
+                          threads=4, temp_audiofile=str(temp_audio))
     video.close()
     return out_path
