@@ -180,8 +180,26 @@ def test_check_turn_refuses_a_number_the_records_do_not_hold():
     ("Thousands of people.", "thousands"), ("Millions more.", "millions"),
     ("A quarter of the price.", "quarter"), ("A fifth of the price.", "fifth"),
     ("Hundreds of dollars.", "hundreds"), ("A fourfold rise.", "fourfold"),
+    # The second review's (11-16): each still passed.
+    ("A third of the price.", "third"), ("Prices halve.", "halve"),
+    ("Prices quintupled.", "quintupled"), ("Thrice the price.", "thrice"),
+    ("Trillions.", "trillions"), ("A sixth of it.", "sixth"),
+    ("An eighth of it.", "eighth"), ("Ninths.", "ninths"),
+    ("½ the price.", "½"), ("¼ of the price.", "¼"),
 ])
 def test_check_turn_refuses_a_quantity_no_record_can_hold(turn, word):
     # Found by the 11-16 review: each passed as stating no number.
     (gas, _), _ = playalong.select_day(playalong.candidates(), "", [])
     assert playalong.check_turn(turn, gas) == word
+
+
+@pytest.mark.parametrize("turn", ["The scaffold went up.", "Unfold the map.",
+                                  "Manifold reasons.", "The quarterback paid."])
+def test_check_turn_lets_ordinary_words_through(turn):
+    (gas, _), _ = playalong.select_day(playalong.candidates(), "", [])
+    assert playalong.check_turn(turn, gas) == ""
+
+
+def test_check_turn_refuses_a_trillion_the_records_do_not_hold():
+    (gas, _), _ = playalong.select_day(playalong.candidates(), "", [])
+    assert playalong.check_turn("A trillion dollars.", gas) == "trillion"
