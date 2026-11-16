@@ -1,0 +1,25 @@
+{
+ "Q12495": {
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+163",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q12495$5a33216a-42d2-1b18-df70-ab4a0dc64d83"
+    }
+   ]
+  }
+ },
+ "Q9188": {
+  "claims": {}
+ }
+}

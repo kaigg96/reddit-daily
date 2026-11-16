@@ -1,0 +1,18 @@
+{
+ "bls_APU000074714.json": {
+  "fetched": "2026-11-16",
+  "url": "POST https://api.bls.gov/publicAPI/v1/timeseries/data/ {\"seriesid\": [\"APU000074714\"], \"startyear\": \"1990\", \"endyear\": \"1990\"}; GET the same URL + APU000074714 for 2026",
+  "note": "Trimmed to the two months used: 2026-10 and 1990-01."
+ },
+ "census_NST-EST2024-ALLDATA.csv": {
+  "fetched": "2026-11-16",
+  "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-ALLDATA.csv",
+  "note": "Trimmed to six columns and the two rows used."
+ },
+ "wikidata_P1101.json": {
+  "fetched": "2026-11-16",
+  "url": "https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=<Q>&property=P1101&format=json",
+  "note": "Trimmed to each claim's value. Q9188 returned no P1101 claim on 2026-11-16, so its 102 is entered by hand below and marked so.",
+  "entered": {"Q9188": {"P1101": 102, "by": "hand, 2026-11-15 brief; not on Wikidata as fetched"}}
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "status": "REQUEST_SUCCEEDED",
+ "Results": {
+  "series": [
+   {
+    "seriesID": "APU000074714",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "4.454",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "1.042",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
