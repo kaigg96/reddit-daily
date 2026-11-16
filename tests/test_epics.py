@@ -205,7 +205,8 @@ def test_committed_board_passes(capsys):
     dates from HEAD); staleness has its own tests above, so here every
     `doing` time is read as not yet begun."""
     future = lambda path: dt.date(2100, 1, 1)
-    assert ep.main(["--check"], date_of=future) == 0, capsys.readouterr().out
+    assert ep.main(["--check", "--now", "2000-01-01 00:00"], date_of=future) == 0, \
+        capsys.readouterr().out
     assert ep.main([]) == 0 and ep.main(["--next"]) == 0
 
 
