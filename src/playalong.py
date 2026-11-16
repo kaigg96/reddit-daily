@@ -168,7 +168,7 @@ def _frame(template, records):
         anchor, then = records
         r = anchor["value"] / then["value"]
         hook = (f"{anchor['subject']} is {_fmt(anchor)} a {anchor['unit']} this "
-                f"{anchor['month']}. What did it cost in {then['period'][:4]}?")
+                f"{anchor['month']}. What did it cost in {then['month']} {then['period'][:4]}?")
         answer, ans_rec, options = _fmt(then), then, None
         comparison = f"÷{r:.1f}" if r >= 1 else f"×{1 / r:.1f}"
     elif template == HOW_MANY:

@@ -41,7 +41,7 @@ def test_the_revealed_values_are_the_source_records():
     """Pinned to the records as fetched 2026-11-16 (the brief's 2026-11-15
     values): a value or comparison drifting from the record fails here."""
     (gas, people), _ = playalong.select_day(playalong.candidates(), "", [])
-    assert gas["hook"] == "Gas is $4.45 a gallon this October. What did it cost in 1990?"
+    assert gas["hook"] == "Gas is $4.45 a gallon this October. What did it cost in January 1990?"
     assert (gas["answer"], gas["comparison"], gas["options"]) == ("$1.04", "÷4.3", None)
     assert gas["source"] == {"name": "U.S. Bureau of Labor Statistics", "id": "APU000074714",
                              "value": 1.042, "fetched": "2026-11-16"}
@@ -130,9 +130,14 @@ def test_rule4_never_the_same_shape_or_a_shipped_subject():
     assert len(episodes) == 1 and rejects == {"rule4": 1}
 
 
-def test_rule4_reads_the_real_upload_log_when_given_none(capsys):
-    episodes, _ = playalong.select_day(playalong.candidates(), "")
-    assert len(episodes) == 2   # no shipped title names gas, Wyoming or D.C.
+def test_rule4_reads_the_upload_log_when_given_none(capsys, monkeypatch):
+    # The log itself grows twice a day, so a title naming gas would break an
+    # assertion on its contents; this checks only that it is read.
+    from src import log
+    monkeypatch.setattr(log, "uploaded_titles",
+                        lambda: ["What is the best thing about living in Wyoming?"])
+    episodes, rejects = playalong.select_day(playalong.candidates(), "")
+    assert rejects["rule4"] == 1 and len(episodes) == 1
 
 
 @pytest.mark.parametrize("change", [

@@ -21,7 +21,8 @@ an `active` epic is ready work, ahead of generating more.
 ```sh
 venv/bin/python scripts/statusline.py --budget   # GO / BOUNDED / WRAP / STOP
 venv/bin/python scripts/cadence.py               # is a review due?
-venv/bin/python scripts/backlog_status.py        # the ready queue, product and company
+venv/bin/python scripts/epics.py --next         # the epic board's next action
+venv/bin/python scripts/backlog_status.py        # the ready queue, product, company, epics
 venv/bin/python scripts/money_check.py --escalate   # the money controls at AWS
 ```
 
@@ -55,6 +56,9 @@ open. **`STOP`** — close the loop and end.
 
 Supply is **ready** work across `PRD.md` §0 (the product) and `PLAN.md` §3
 (every other function). `backlog_status.py` lists it.
+
+Before ranking, run `venv/bin/python scripts/epics.py --next` and do the
+action it names (`process/epics.md`); the ranked queue comes after it.
 
 - **Rank it, then take from the top until the hand-over time.** Use `/backlog`
   §2 — separate pass, forward and reversed, one-line statements, each

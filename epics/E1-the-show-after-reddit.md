@@ -69,7 +69,7 @@ bar is its test, and it takes no upload slot before the cutover.
 
 ## The play-along episode (design, 2026-11-15, for T7)
 
-Written in the owner's session with Fable, on T6's supply read. The first
+Written in the owner's session, on T6's supply read. The first
 shift on T7 may amend it on evidence; the viewer bar (`process/viewer-bar.md`)
 is the test, and this design is not shown to the agent applying it.
 
@@ -79,9 +79,12 @@ guess, a pick, a count) and then shown whether they were right. Everything
 else serves that one beat. It is a quiz the way a bar bet is a quiz: the fun
 is in being wrong about something you were sure of.
 
-**Shape, 12–15 seconds** (amended 11-15 on the challenge: the first draft's
+**Shape, about 9 seconds** (amended 11-15 on the challenge: the first draft's
 parts summed to 10–16 s and put the reveal a third of the way in, failing
-the viewer bar's check 2; the reveal is now the end).
+the viewer bar's check 2; the reveal is now the end. Amended 11-16 on the
+bar: rendered at 12.5 s, both samples still failed check 2, the answer at
+6.0 s; the video now ends within 3 s of the reveal, and part 4 moves to
+the description and comment. T7's Evidence has the rest).
 1. **The hook (≤ 3 s, spoken and on screen):** the question, in the viewer's
    terms, with the thing to commit to and, for a number, its anchor: "Gas is
    $4.45 this October. What did it cost in 1990?" Never a preamble, never the
@@ -280,16 +283,16 @@ Accept:
 Evidence: 11-15, `07482b2` on `main`: PRD §4 "Play-along supply". BLS, Census, USGS, NWS public domain; Wikidata CC0; OGL and OWID terms quoted; ~740 candidates (BLS ~200, Wikidata ~490, Census ~50); three episodes; verdict build T7.
 
 ### T7 · A play-along episode exists as a sample a viewer could follow
-Status: doing: 43856314698, 11:36 (the first two Accept lines; renders next round)
+Status: ready: the shape changes on the bar's verdict (Evidence), then re-render and re-judge; the renderer is on `e1-t7-render` (`35043af`, reviewed clean, unmerged)
 Needs: T6
 Touches: src/ (a new source beside ownquestions.py: `select` fetches a record and frames it, `render` copies it), tests/, assets/gen/ (samples)
 Context: T6 said build; "The play-along episode" above is the design, and `process/viewer-bar.md` is the test. The agent judging a sample is given the script, the frames and the bar only, never the design. Start with BLS prices and Census pairs, whose records are files that need no key; Wikidata second. The number or answer in the reveal is copied from the source record by code, never written by a model.
 Accept:
-- [ ] a test fails if the revealed value or the comparison differs from what the source record gives
-- [ ] the selector applies the rules above (guessable, surprising distance, one fact, fresh shape, nothing contemptuous) with a test per rule, and logs its reject rate on a day's candidates
+- [x] a test fails if the revealed value or the comparison differs from what the source record gives
+- [x] the selector applies the rules above (guessable, surprising distance, one fact, fresh shape, nothing contemptuous) with a test per rule, and logs its reject rate on a day's candidates
 - [ ] the three T6 episodes render free (`SAMPLE=1`) in the shape above, and a fresh agent judges each against the bar; every check is a yes, or the fail and the fix are recorded here
 - [ ] one narrated dry run of the best is playable, with the credit in its description
-Evidence:
+Evidence: 11-16, selector merged `a88fc42` (`src/playalong.py`, fixtures in `assets/playalong/`). Re-run: `pytest tests/test_playalong.py` -> 21 passed; one census value altered -> 2 failed. The day's run: "2 of 3 candidates made episodes; rejected 1 (33%): rule2 1" (the Burj, ×1.6; the first casualty). Wikidata has no floor count for the Empire State (Q9188 P1101 empty), so its 102 is entered by hand and marked so; the selector refuses an unsourced record. A fresh review: the price hook said "1990" for a January record (fixed: it names the month); `check_turn` lets "quadrupled", "thousands", "a quarter" through, to fix before a model writes the turn. **The bar, two free renders (12.5 s, silent), a fresh judge: both fail check 2**, the answer at 6.0 s, before the last third; both fail check 3 (the "tomorrow" card, 6 words in 1.2 s; the reveal shows four lines at once); the gas hook's first sentence asks nothing (check 1). Two fails on one check: **the shape changes** (the design's own rule): question first, then the anchor; the reveal ends the video within 3 s (about 9 s in all); one comparison line in words ("4.3× more now"); the tomorrow line and the credit go to the description and comment; nothing below 85% of the height.
 
 ### T8 · The play-along show uploads as its own arm
 Status: todo

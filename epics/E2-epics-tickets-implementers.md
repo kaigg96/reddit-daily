@@ -87,29 +87,29 @@ turn out to measure the wrong thing.
 ## Tickets
 
 ### T1 · The board can be read and checked by one command
-Status: doing: 43856314698, 11:36
+Status: done
 Needs: none
 Touches: scripts/epics.py (new), tests/test_epics.py (new), .github/shift-usage.csv (read only)
 Context: `epics/README.md` defines the format. Model the script on `scripts/backlog_status.py`, which reads the status tables in PLAN.md and PRD.md.
 Accept:
-- [ ] `venv/bin/python scripts/epics.py` prints every epic with its tickets grouped by status
-- [ ] `scripts/epics.py --next` prints the single next action by the order in README ("Four roles")
-- [ ] `scripts/epics.py --check` exits 1, naming the file and line, for: a missing header line, an unknown status, a `Needs` naming a ticket that does not exist, a `done` ticket with an empty `Evidence`, a `doing` ticket older than 12 hours, more than two `active` epics
-- [ ] a test runs `--check` on the committed `epics/` and passes; each failure above has its own test
-- [ ] the three baseline numbers under "How we will know" are written into this file with the commands that produced them
-Evidence:
+- [x] `venv/bin/python scripts/epics.py` prints every epic with its tickets grouped by status
+- [x] `scripts/epics.py --next` prints the single next action by the order in README ("Four roles")
+- [x] `scripts/epics.py --check` exits 1, naming the file and line, for: a missing header line, an unknown status, a `Needs` naming a ticket that does not exist, a `done` ticket with an empty `Evidence`, a `doing` ticket older than 12 hours, more than two `active` epics
+- [x] a test runs `--check` on the committed `epics/` and passes; each failure above has its own test
+- [x] the three baseline numbers under "How we will know" are written into this file with the commands that produced them
+Evidence: 11-16, merged `783d015`. Re-run by the orchestrator on the branch: the listing, `--next` -> "ACCEPT E1 T2 …", `--check` -> "3 epics, 25 tickets: clean", exit 0; `pytest tests/test_epics.py` -> 21 passed; full suite on the merged tree 1,104 passed. Two fresh reviews: the committed-board test hung on the clock and CI's depth-1 clone, and `Needs: none (note)` read as a dependency; both fixed before merge. Baselines (31 days to 11-14): **format releases reaching viewers 1** (`v7s`, first upload 11-08; first timestamp per `format_version` in `upload_log.csv`); **7.7 quota units per merge** (902.6 units over 72 runs in `.github/shift-usage.csv`, 2026-10-14 to 11-13, / 117 first-parent merges on `main` by `git log --merges --first-parent`, less one sync; a proxy, since most changes land as direct commits); **16 of 72 shifts ended early for lack of ready work** (under 36 of 60 minutes and a handover saying nothing was ready, matched ±75 min across `WORKLOG.md`'s history; a heuristic, the weakest of the three).
 
 ### T2 · The four roles have written methods
-Status: review: `process/epics.md` written 11-15 (owner's session, Fable) from T3's evidence; left: the two wirings below, which need T1's script
+Status: done
 Needs: T1
 Touches: process/epics.md (new), process/shift.md, process/backlog.md, scripts/context_budget.py, scripts/backlog_status.py
 Context: this file's "The decision" is the outline. Read the two Anthropic articles named in assumption 3 first-hand and adopt only what fits; cite what you adopt.
 Accept:
 - [x] `process/epics.md` gives each role a procedure a cold shift can follow, in 1,200 words or fewer, and has a budget in `context_budget.py`
-- [ ] `process/shift.md` §3 sends a shift to `epics.py --next` before the ranked queue
-- [ ] `backlog_status.py` counts `ready` tickets of `active` epics as ready work, with a test
-- [ ] the fresh-context review required by `CLAUDE.md` §3 found no contradiction with `CLAUDE.md` §4 or `ORG.md` §2
-Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring.
+- [x] `process/shift.md` §3 sends a shift to `epics.py --next` before the ranked queue
+- [x] `backlog_status.py` counts `ready` tickets of `active` epics as ready work, with a test
+- [x] the fresh-context review required by `CLAUDE.md` §3 found no contradiction with `CLAUDE.md` §4 or `ORG.md` §2
+Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring. 11-16, merged `783d015`: a fresh review found one contradiction with `CLAUDE.md` §4 (a ticket needing a paid key "ends in one ask") and five more blocking gaps (accept-first against "dispatch first", dispatch ignoring `active` and `Needs`, briefs silent on the Gemini and render allowances, L11 naming a tool that spends Gemini, gates weaker than §3); all applied, with L1, L2, L9, L12 and L13's evidence corrected. A second fresh review of the result found no contradiction.
 
 ### T3 · We know whether implementers can run side by side in CI
 Status: todo
