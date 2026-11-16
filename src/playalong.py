@@ -298,6 +298,12 @@ _TENS = {w: 10 * i for i, w in enumerate(
     "twenty thirty forty fifty sixty seventy eighty ninety".split(), start=2)}
 _SCALES = {"hundred": 100, "thousand": 1_000, "million": 1_000_000, "billion": 1_000_000_000}
 _WORDS = {"dozen": 12, "twice": 2, "double": 2, "triple": 3, "half": 0.5}
+# Quantities stated without a value the records could hold ("prices
+# quadrupled", "thousands more", "a quarter of"): a turn using one is refused
+# outright, since no record can confirm it.
+_VAGUE = re.compile(r"\b(?:hundreds|thousands|millions|billions|dozens|"
+                    r"doubl(?:ed|es|ing)|tripl(?:ed|es|ing)|quadrupl(?:e|ed|es|ing)|"
+                    r"halv(?:ed|es|ing)|[a-z]+fold|quarters?|thirds|fifths?|tenths?)\b")
 _DIGITS = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 
@@ -351,6 +357,9 @@ def check_turn(turn, episode):
     value = episode["source"]["value"]
     if isinstance(value, (int, float)):
         allowed.add(float(value))
+    vague = _VAGUE.search((turn or "").lower())
+    if vague:
+        return vague.group(0)
     for written, v in _numbers(turn or ""):
         if not _held(v, written, allowed):
             return written

@@ -168,8 +168,20 @@ def test_check_turn_refuses_a_number_the_records_do_not_hold():
     assert playalong.check_turn("That is 4.3 times less.", gas) == ""
     assert playalong.check_turn("Gas was $2 a gallon.", gas) == "2"
     assert playalong.check_turn("It costs four times as much.", gas) == "four"
-    assert playalong.check_turn("Prices doubled, then twice again.", gas) == "twice"
+    assert playalong.check_turn("Prices doubled, then twice again.", gas) == "doubled"
     assert playalong.check_turn("Over a million people.", people) == "million"
     assert playalong.check_turn(
         "Seven hundred two thousand two hundred fifty people.", people) == ""
     assert playalong.check_turn("Seven hundred thousand people.", people) == "seven hundred thousand"
+
+
+@pytest.mark.parametrize("turn, word", [
+    ("Gas quadrupled since 1990.", "quadrupled"), ("Prices tripled.", "tripled"),
+    ("Thousands of people.", "thousands"), ("Millions more.", "millions"),
+    ("A quarter of the price.", "quarter"), ("A fifth of the price.", "fifth"),
+    ("Hundreds of dollars.", "hundreds"), ("A fourfold rise.", "fourfold"),
+])
+def test_check_turn_refuses_a_quantity_no_record_can_hold(turn, word):
+    # Found by the 11-16 review: each passed as stating no number.
+    (gas, _), _ = playalong.select_day(playalong.candidates(), "", [])
+    assert playalong.check_turn(turn, gas) == word
