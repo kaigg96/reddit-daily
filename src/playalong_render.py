@@ -7,9 +7,10 @@ beat line with the question held over a 3-2-1 countdown, then the reveal
 hook holds for as long as it takes to say, the reveal for as long as the
 answer and comparison take, and the reveal never starts before two-thirds of
 the whole (`timings`). Narration is not rendered yet, so each length is an
-estimate from the line's word count at `sample.WORDS_PER_SECOND`. `turn` is
-left for narration; `tomorrow` and `credit` go in the description
-(`description(episode)`), not on screen.
+estimate from the line's word count at `sample.WORDS_PER_SECOND`, a number
+counted as the words it is read as. `turn`, `tomorrow` and `credit` go in the
+description (`description(episode)`), neither on screen nor spoken: the third
+judging (11-16) found a spoken closing line cannot fit the reveal.
 
 Everything drawn goes through `plan(episode)`, a pure function, so a test can
 check every string on screen is the episode's own without rendering video.
@@ -56,9 +57,22 @@ def bottom(style):
     return y + size * LINE_H * lines
 
 
+def _said(token):
+    """How many words a token is read as: "1990" two ("nineteen ninety"),
+    "$6.75" two ("six seventy-five"), "4.3×" four ("four point three times")."""
+    if not any(c.isdigit() for c in token):
+        return 1
+    extra = token.count("×") + token.count("%")
+    digits = sum(c.isdigit() for c in token)
+    if "." in token.strip(".,?!:;") and not token.startswith("$"):
+        return digits + 1 + extra
+    return max(1, -(-digits // 2)) + extra
+
+
 def spoken(text):
-    """Estimated seconds to say `text`: its word count at narration pace."""
-    return len(text.split()) / WORDS_PER_SECOND
+    """Estimated seconds to say `text`: the words it is read as, at
+    narration pace."""
+    return sum(_said(t) for t in text.split()) / WORDS_PER_SECOND
 
 
 def timings(episode):
@@ -97,7 +111,7 @@ def plan(episode):
 
 def description(episode):
     """The text that goes under the video instead of on it."""
-    return f"{episode['tomorrow']}\n\n{episode['credit']}"
+    return f"{episode['turn']}\n\n{episode['tomorrow']}\n\n{episode['credit']}"
 
 
 def _clips(items):
