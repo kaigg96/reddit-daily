@@ -167,10 +167,13 @@ def _frame(template, records):
     if template == PRICE_THEN:
         anchor, then = records
         r = anchor["value"] / then["value"]
-        hook = (f"{anchor['subject']} is {_fmt(anchor)} a {anchor['unit']} this "
-                f"{anchor['month']}. What did it cost in {then['month']} {then['period'][:4]}?")
+        when = f"{then['month']} {then['period'][:4]}"
+        hook = (f"What did a {anchor['unit']} of {anchor['subject'].lower()} cost in {when}? "
+                f"This {anchor['month']} it's {_fmt(anchor)}.")
         answer, ans_rec, options = _fmt(then), then, None
-        comparison = f"÷{r:.1f}" if r >= 1 else f"×{1 / r:.1f}"
+        more = f"{r:.1f}× more now" if r >= 1 else f"{1 / r:.1f}× less now"
+        # Under the answer it reads "$1.04 / in Jan 1990 / 4.3× more now".
+        comparison = f"in {then['month'][:3]} {then['period'][:4]}\n{more}"
     elif template == HOW_MANY:
         anchor, ans_rec = records
         hook = (f"{_cap(anchor['subject'])} has {_fmt(anchor)} {anchor['unit']}. "
@@ -182,9 +185,8 @@ def _frame(template, records):
         ans_rec, other = (a, b) if a["value"] > b["value"] else (b, a)
         hook = f"More people: {a['subject']}, or {b['subject']}?"
         options, answer = [a["subject"], b["subject"]], ans_rec["short"]
-        diff = ans_rec["value"] - other["value"]
-        comparison = (f"{ans_rec['short']} {_fmt(ans_rec)} · {other['short']} {_fmt(other)}"
-                      f" ({diff:,} more)")
+        # One line per name, so no line splits a name from its number.
+        comparison = f"{ans_rec['short']} {_fmt(ans_rec)}\n{other['short']} {_fmt(other)}"
     return {"hook": hook, "beat": BEAT[template], "options": options, "answer": answer,
             "comparison": comparison, "turn": TURN[template], "tomorrow": TOMORROW,
             "source": {"name": ans_rec["source"], "id": ans_rec["id"],

@@ -41,15 +41,15 @@ def test_the_revealed_values_are_the_source_records():
     """Pinned to the records as fetched 2026-11-16 (the brief's 2026-11-15
     values): a value or comparison drifting from the record fails here."""
     (gas, people), _ = playalong.select_day(playalong.candidates(), "", [])
-    assert gas["hook"] == "Gas is $4.45 a gallon this October. What did it cost in January 1990?"
-    assert (gas["answer"], gas["comparison"], gas["options"]) == ("$1.04", "÷4.3", None)
+    assert gas["hook"] == "What did a gallon of gas cost in January 1990? This October it's $4.45."
+    assert (gas["answer"], gas["comparison"], gas["options"]) == ("$1.04", "in Jan 1990\n4.3× more now", None)
     assert gas["source"] == {"name": "U.S. Bureau of Labor Statistics", "id": "APU000074714",
                              "value": 1.042, "fetched": "2026-11-16"}
     assert gas["credit"] == "Source: U.S. Bureau of Labor Statistics, series APU000074714."
     assert people["hook"] == "More people: Wyoming, or Washington, D.C.?"
     assert people["options"] == ["Wyoming", "Washington, D.C."]
     assert people["answer"] == "D.C."
-    assert people["comparison"] == "D.C. 702,250 · Wyoming 587,618 (114,632 more)"
+    assert people["comparison"] == "D.C. 702,250\nWyoming 587,618"
     assert people["source"]["value"] == 702250
     assert people["credit"] == "Source: U.S. Census Bureau, Vintage 2024 population estimates."
     assert [e["beat"] for e in (gas, people)] == ["Say your number.", "Pick one."]
@@ -64,18 +64,18 @@ def test_the_episode_matches_the_raw_files_it_was_read_from():
     (gas, people), _ = playalong.select_day(playalong.candidates(), "", [])
     then, now = month[("1990", "M01")], month[("2026", "M10")]
     assert gas["answer"] == f"${then:.2f}" and f"${now:.2f}" in gas["hook"]
-    assert gas["comparison"] == f"÷{now / then:.1f}"
+    assert gas["comparison"] == f"in Jan 1990\n{now / then:.1f}× more now"
     dc, wy = pop["District of Columbia"], pop["Wyoming"]
-    assert people["comparison"] == f"D.C. {dc:,} · Wyoming {wy:,} ({dc - wy:,} more)"
+    assert people["comparison"] == f"D.C. {dc:,}\nWyoming {wy:,}"
 
 
 def test_every_number_is_copied_from_the_record_by_code():
     """Change a record and the episode follows it: nothing is typed in."""
     episode, _ = playalong.select(_with(GAS, 1, value=0.991))
-    assert (episode["answer"], episode["comparison"]) == ("$0.99", "÷4.5")
+    assert (episode["answer"], episode["comparison"]) == ("$0.99", "in Jan 1990\n4.5× more now")
     assert episode["source"]["value"] == 0.991
     episode, _ = playalong.select(_with(PEOPLE, 1, value=600_000))
-    assert episode["comparison"] == "D.C. 600,000 · Wyoming 587,618 (12,382 more)"
+    assert episode["comparison"] == "D.C. 600,000\nWyoming 587,618"
 
 
 def test_values_are_shown_as_their_quantity_reads():
