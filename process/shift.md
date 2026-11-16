@@ -164,8 +164,9 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
   `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
   The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
   a PASS naming the branch's current commit. A branch renders the real post
-  over **silent narration**: unmerged code never holds the Polly keys, because
-  the repo's logs are public. Only `main` renders with real narration. A change
+  in a **free offline stand-in voice** (since `v8`; silent if it fails, and
+  `SAMPLE=1` is always silent): unmerged code never holds the Polly keys,
+  because the repo's logs are public. Only `main` renders with real narration. A change
   to narration itself needs the owner to run that by hand. A render spends 2–5
   Gemini requests, so the Gemini rule above applies to it.
 - **AWS read-only key:** `money_check.py` only. Its policy denies every

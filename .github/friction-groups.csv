@@ -1,6 +1,6 @@
 group,title,status,item,opened,resolved,note
 G1,The render and sample allowance holds finished work,open,,2026-09-25,,Eased by free samples; recurred 10-06. seeded 2026-10-27 from the work log's notes; check it is still true. 11-02: `dry_run.py next` computes the slot (F112's share); the 12-hour cap and #65 remain
-G2,"Recorded answers are hard to find, so work gets redone",fixed,backlog_status.py --dropped,2026-09-26,2026-11-09,"11-09: --dropped, which generation reads, now lists every PRD §4 finding's headline (F157, F168, F201: generators re-proposed answered findings). Other causes in the group (a number never written down, F187; one answer spread over three places, F210) are untouched, so a recurrence there counts against this fix"
+G2,"Recorded answers are hard to find, so work gets redone",open,backlog_status.py --dropped,2026-09-26,,"11-16 weekly: reopened, 7 rows since the fix (F241, F242, F265, F269, F275, F309, F311): rankers and generators still miss answers held in TECH_DEBT, an issue body or PRD §4; L3 stands, the fix did not reach those homes. 11-09: --dropped, which generation reads, now lists every PRD §4 finding's headline (F157, F168, F201: generators re-proposed answered findings). Other causes in the group (a number never written down, F187; one answer spread over three places, F210) are untouched, so a recurrence there counts against this fix"
 G3,The views-never-revert rule hid side-by-side findings,open,,2026-09-28,,seeded 2026-10-27 from the work log's notes; check it is still true
 G4,The work log's word budget fights the retention it asks for,open,,2026-09-29,,seeded 2026-10-27 from the work log's notes; check it is still true
 G5,report.py could not produce a needed count,fixed,report.py,2026-09-29,2026-09-29,
@@ -28,3 +28,11 @@ G26,"Text-rule changes need a replay over every shipped line, which is slow and 
 G27,"A review's steps are worked from memory, so one gets skipped",open,,2026-11-09,,
 G28,Hand-copied or truncated output misstates a result,open,,2026-11-09,,
 G29,Nothing stops a read of a blind test's field before its due date,open,,2026-11-09,,
+G30,"A process doc or recorded claim goes stale, and a shift acts on it",open,,2026-11-16,,"F250, F283, F291, F351; 11-16 weekly: F291's line (branch renders are silent) fixed in process/shift.md once v8 merged; lesson L14"
+G31,"An old branch lacks today's tooling, so checking it out breaks the session",open,,2026-11-16,,F254
+G32,A hand edit of a structured file changes bytes beside it,open,,2026-11-16,,"F299, F304, F327; lesson L15"
+G33,A rule is pre-committed before checking the tool can print its read,open,,2026-11-16,,"F247, F306, F320, F321; lesson L16"
+G34,"Background agents are refused in CI, so each dispatch blocks the orchestrator",open,,2026-11-16,,F346
+G35,The epic methods' round limit counts reviews and judgings as rounds,open,,2026-11-16,,F353
+G36,A handover entry inside the template fence hides from its readers,open,,2026-11-16,,F347; lesson L10 already
+G37,"Dependency advisories are unreadable from a shift (no pip-audit, Dependabot refused)",open,,2026-11-16,,F231
