@@ -18,6 +18,7 @@ The live Reddit pipeline is untouched: this only reuses its text and
 background helpers.
 """
 import random
+import re
 from pathlib import Path
 
 import numpy as np
@@ -28,6 +29,7 @@ from .sample import WORDS_PER_SECOND
 HOOK_MIN = 3.0                    # the hook alone holds at least 3 s
 COUNT_FROM = 3                    # the beat: 3, 2, 1, one per second
 REVEAL_MIN = 3.0                  # the reveal holds at least 3 s
+TAIL_S = 0.5                      # held after the narration's last word
 LABELS = ("A", "B")
 # YouTube's caption and channel name cover the bottom 15% of a Short.
 SAFE_BOTTOM = 0.85 * config.H
@@ -88,7 +90,10 @@ def timings(episode, said=None):
     after.)"""
     said = said or {}
     hook = said.get("hook", spoken(episode["hook"]))
-    reveal = max(REVEAL_MIN, said.get("reveal", spoken(f"{episode['answer']} {episode['comparison']}")))
+    # A measured reveal ends on its last word, so it holds TAIL_S more: the
+    # 11-17 render ended 0.1 s after it. (The estimate's slack covers it.)
+    heard = said["reveal"] + TAIL_S if "reveal" in said else None
+    reveal = max(REVEAL_MIN, heard or spoken(f"{episode['answer']} {episode['comparison']}"))
     hook_end = max(HOOK_MIN, hook)
     reveal_start = max(hook_end + COUNT_FROM, 2 * reveal)
     # The beat line follows the hook's last word; the 3-2-1 leads into the
@@ -153,19 +158,50 @@ _MONTHS = {"Jan": "January", "Feb": "February", "Mar": "March", "Apr": "April",
            "Oct": "October", "Nov": "November", "Dec": "December"}
 
 
+_ONES = ("zero one two three four five six seven eight nine ten eleven twelve thirteen "
+         "fourteen fifteen sixteen seventeen eighteen nineteen").split()
+_TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+
+
+def _under_100(n):
+    if n < 20:
+        return _ONES[n]
+    return _TENS[n // 10] + ("" if n % 10 == 0 else "-" + _ONES[n % 10])
+
+
+def _decimal_words(m):
+    """"$6.75" as "six seventy-five", "4.3" as "four point three": the
+    stand-in voice paused at a figure's point as at a full stop, so "4.3×"
+    was heard as "four. three" (fourth judging, 11-17). Under 100 only;
+    larger figures are left as written."""
+    whole, frac = int(m.group(2)), m.group(3)
+    if whole >= 100:
+        return m.group(0)
+    if m.group(1):   # a price: dollars, then cents as a number ("oh five")
+        cents = int(frac[:2].ljust(2, "0"))
+        tail = ("oh " + _ONES[cents]) if 0 < cents < 10 else _under_100(cents)
+        return f"{_under_100(whole)} {tail}"
+    return f"{_under_100(whole)} point {' '.join(_ONES[int(d)] for d in frac)}"
+
+
 def _speakable(text):
-    """Shown text as it is read: "4.3×" as "4.3 times", "Jan" as "January",
-    a line break as a sentence's end. Figures stay figures, so the voice
-    says the number shown."""
+    """Shown text as it is read: "4.3×" as "four point three times", "Jan" as
+    "January", a line break as a sentence's end. A figure with a point is
+    written out so the voice cannot break it; the words are still the
+    figure shown."""
+    text = re.sub(r"(\$)?(\d+)\.(\d+)", _decimal_words, text)
     text = text.replace("×", " times").replace("\n", ". ")
     return " ".join(_MONTHS.get(w, w) for w in text.split())
 
 
 def script(episode):
     """What is said, by part: the hook in full, the beat's one line, then
-    the answer and its comparison. The countdown itself is unspoken."""
-    return {"hook": episode["hook"], "beat": episode["beat"],
-            "reveal": _speakable(f"{episode['answer']} {episode['comparison']}") + "."}
+    the answer and its comparison, the answer once (a pick's comparison
+    opens with it). The countdown itself is unspoken."""
+    answer, comparison = episode["answer"], episode["comparison"]
+    reveal = comparison if comparison.startswith(answer) else f"{answer} {comparison}"
+    return {"hook": _speakable(episode["hook"]), "beat": episode["beat"],
+            "reveal": _speakable(reveal) + "."}
 
 
 TICK_S = 0.12
@@ -173,15 +209,18 @@ TICK_S = 0.12
 
 def ticks(t, fps=44100):
     """The countdown's tick (the design's "3-2-1 with a tick"): a short
-    decaying 1.5 kHz burst on each digit and on the reveal, where it reaches
-    zero. That last one also bridges the voice's lead-in: without it the
-    stand-in render read 1.0 s of dead air before the answer (11-17)."""
+    decaying 1.5 kHz burst each second from the beat line to the reveal,
+    landing on each digit and on the reveal, where it reaches zero. Ticking
+    from the beat keeps the guess from going silent: held to two-thirds, the
+    countdown can start well after the beat's line is said (1.4 s unsaid in
+    the second 11-17 render), and the last tick bridges the voice's lead-in
+    before the answer (1.0 s without it)."""
     from moviepy.audio.AudioClip import AudioArrayClip
     n = int(TICK_S * fps)
     burst = 0.25 * np.sin(2 * np.pi * 1500 * np.arange(n) / fps) * np.exp(-np.arange(n) / (n / 4))
-    start = t["count_start"]
-    return [AudioArrayClip(np.column_stack([burst, burst]), fps=fps).with_start(start + i)
-            for i in range(COUNT_FROM + 1)]
+    lead = int(t["count_start"] - t["hook_end"] + 1e-9)    # whole seconds before the digits
+    return [AudioArrayClip(np.column_stack([burst, burst]), fps=fps).with_start(t["count_start"] + i)
+            for i in range(-lead, COUNT_FROM + 1)]
 
 
 def build(episode, seed=0, narration=None):

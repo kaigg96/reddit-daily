@@ -199,3 +199,34 @@ def test_render_writes_moviepys_temp_audio_under_assets_gen(monkeypatch, tmp_pat
     pr.render(EPISODES[0], tmp_path / "sample.mp4")
     assert written["path"] == str(tmp_path / "sample.mp4")
     assert Path(written["temp_audiofile"]).parent == config.GEN
+
+
+def test_measured_lengths_set_the_timings_and_the_reveal_holds_past_its_last_word():
+    episode = _plain(EPISODES[0])
+    t = pr.timings(episode, {"hook": 7.0, "reveal": 5.7})
+    assert t["hook_end"] == 7.0
+    assert t["total"] - t["reveal_start"] == pytest.approx(5.7 + pr.TAIL_S)
+    assert t["reveal_start"] >= t["total"] * 2 / 3 - 1e-9
+    assert t["count_start"] == t["reveal_start"] - pr.COUNT_FROM >= t["hook_end"]
+
+
+def test_figures_with_a_point_are_said_in_words_and_nothing_else_changes():
+    assert pr._speakable("$6.75 now, $1.05 then") == "six seventy-five now, one oh five then"
+    assert pr._speakable("in Jan 1990\n4.3× more now") == "in January 1990. four point three times more now"
+    assert pr._speakable("$150.25 and 702,250") == "$150.25 and 702,250"   # left as written
+
+
+def test_the_script_says_a_picks_answer_once():
+    pick = {"hook": "More people?", "beat": "Pick one.", "answer": "D.C.",
+            "comparison": "D.C. 702,250\nWyoming 587,618"}
+    assert pr.script(pick)["reveal"].count("D.C.") == 1
+    price = {"hook": "h", "beat": "b", "answer": "$1.56", "comparison": "in Jan 1990\n4.3× more now"}
+    assert pr.script(price)["reveal"] == "one fifty-six in January 1990. four point three times more now."
+
+
+def test_a_tick_each_second_from_the_beat_on_each_digit_and_on_the_reveal():
+    t = {"hook_end": 2.0, "count_start": 4.5, "reveal_start": 7.5, "total": 10.0}
+    starts = [c.start for c in pr.ticks(t)]
+    assert starts == [2.5, 3.5, 4.5, 5.5, 6.5, 7.5]   # no gap reaches 1 s
+    assert starts[0] - t["hook_end"] < 1
+    assert all(c.start + c.duration <= t["total"] for c in pr.ticks(t))
