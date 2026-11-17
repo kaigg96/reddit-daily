@@ -179,7 +179,11 @@ def _decimal_words(m):
         return m.group(0)
     if m.group(1):   # a price: dollars, then cents as a number ("oh five")
         cents = int(frac[:2].ljust(2, "0"))
-        tail = ("oh " + _ONES[cents]) if 0 < cents < 10 else _under_100(cents)
+        if not cents:
+            return f"{_under_100(whole)} dollar" + ("" if whole == 1 else "s")
+        if not whole:
+            return f"{_under_100(cents)} cents"
+        tail = ("oh " + _ONES[cents]) if cents < 10 else _under_100(cents)
         return f"{_under_100(whole)} {tail}"
     return f"{_under_100(whole)} point {' '.join(_ONES[int(d)] for d in frac)}"
 
@@ -189,7 +193,7 @@ def _speakable(text):
     "January", a line break as a sentence's end. A figure with a point is
     written out so the voice cannot break it; the words are still the
     figure shown."""
-    text = re.sub(r"(\$)?(\d+)\.(\d+)", _decimal_words, text)
+    text = re.sub(r"(?<![\d,.])(\$)?(\d+)\.(\d+)(?!,?\d|\.\d)", _decimal_words, text)
     text = text.replace("×", " times").replace("\n", ". ")
     return " ".join(_MONTHS.get(w, w) for w in text.split())
 

@@ -214,6 +214,8 @@ def test_figures_with_a_point_are_said_in_words_and_nothing_else_changes():
     assert pr._speakable("$6.75 now, $1.05 then") == "six seventy-five now, one oh five then"
     assert pr._speakable("in Jan 1990\n4.3× more now") == "in January 1990. four point three times more now"
     assert pr._speakable("$150.25 and 702,250") == "$150.25 and 702,250"   # left as written
+    assert pr._speakable("$10.00, $1.00, $0.99") == "ten dollars, one dollar, ninety-nine cents"
+    assert pr._speakable("1,050.5 and 1.1.2020") == "1,050.5 and 1.1.2020"     # never inside a figure
 
 
 def test_the_script_says_a_picks_answer_once():
