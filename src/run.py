@@ -153,7 +153,31 @@ def check_channel_name():
                          "branded with a placeholder. Add the CHANNEL_NAME secret.")
 
 
+def _playalong_narrated():
+    """BRANCH ONLY (e1-t7-narrated-render), never merged: dry-run.yml runs
+    `python -m src.run`, so here it renders E1 T7's ground beef episode with
+    the free stand-in voice instead of a Reddit post. No Reddit, Gemini,
+    Polly or YouTube call."""
+    from . import playalong, playalong_render as pr
+    from moviepy import AudioFileClip
+    episodes, _ = playalong.select_day(playalong.candidates(playalong.BEEF_SERIES))
+    episode = episodes[0]
+    narration = pr.narrate(episode, "Danielle")
+    said = {k: AudioFileClip(str(p)).duration for k, p in narration.items()}
+    print("Narration: " + ("stand-in voice" if config.STAND_IN_VOICE else "silent"))
+    print(f"Script: {pr.script(episode)}")
+    print(f"Said (s): {said}")
+    print(f"Estimated: {pr.timings(episode)}")
+    print(f"Timed: {pr.timings(episode, said)}")
+    for start, end, text, style in pr.plan(episode, said):
+        print(f"  {start:5.2f} - {end:5.2f} | {style}: {text!r}")
+    print("description:\n" + pr.description(episode))
+    pr.render(episode, config.OUT_VIDEO, narration=narration)
+
+
 def main():
+    if os.environ.get("DRY_RUN") and not config.SAMPLE:
+        return _playalong_narrated()
     rng = random.Random()
     print(f"DRY_RUN={config.DRY_RUN} SAMPLE={config.SAMPLE} "
           f"SILENT_NARRATION={config.SILENT_NARRATION} format={config.FORMAT_VERSION}")
