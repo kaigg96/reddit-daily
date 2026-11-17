@@ -2,6 +2,7 @@
 record's, and the five rules each refuse what they should."""
 import copy
 import csv
+from decimal import ROUND_HALF_UP, Decimal
 import json
 
 import pytest
@@ -261,10 +262,19 @@ def test_ground_beef_is_a_price_question_copied_from_its_record():
              for d in raw["Results"]["series"][0]["data"]}
     then, now = month[("1990", "M01")], month[("2026", "M10")]
     (beef,), rejects = playalong.select_day(playalong.candidates(playalong.BEEF_SERIES), "", [])
+    # Rounded as a reader rounds, from the record's own digits ("6.755").
+    shown = Decimal(str(now)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     assert beef["hook"] == (f"What did a pound of ground beef cost in January 1990? "
-                            f"This October it's ${now:.2f}.")
+                            f"This October it's ${shown}.") and str(shown) == "6.76"
     assert beef["answer"] == f"${then:.2f}" == "$1.56"
     assert beef["comparison"] == f"in Jan 1990\n{now / then:.1f}× more now"
     assert beef["source"]["id"] == "APU0000703112"
     assert "APU0000703112" in beef["credit"]
     assert rejects == {"rule2": 2}
+
+
+def test_a_price_rounds_half_up_as_a_reader_does():
+    # 6.755 as a float sits a hair under, so an f-string showed $6.75 (11-17).
+    assert playalong._fmt({"value": 6.755, "quantity": "price"}) == "$6.76"
+    assert playalong._fmt({"value": 1.557, "quantity": "price"}) == "$1.56"
+    assert playalong._fmt({"value": 4.45, "quantity": "number"}) == "4.5"
