@@ -42,7 +42,8 @@ _REFUSED_CHARS = str.maketrans({"<": "‹", ">": "›"})
 
 
 def _accepted(text):
-    return str(text).translate(_REFUSED_CHARS)
+    # Only text: a missing title stays missing, refused as before, never "None".
+    return text.translate(_REFUSED_CHARS) if isinstance(text, str) else text
 
 
 def _next_chunk_retrying(request, sleep=time.sleep):
