@@ -172,14 +172,16 @@ TICK_S = 0.12
 
 
 def ticks(t, fps=44100):
-    """The countdown's tick, one per digit (the design's "3-2-1 with a
-    tick"): a short decaying 1.5 kHz burst at each of `t`'s starts."""
+    """The countdown's tick (the design's "3-2-1 with a tick"): a short
+    decaying 1.5 kHz burst on each digit and on the reveal, where it reaches
+    zero. That last one also bridges the voice's lead-in: without it the
+    stand-in render read 1.0 s of dead air before the answer (11-17)."""
     from moviepy.audio.AudioClip import AudioArrayClip
     n = int(TICK_S * fps)
     burst = 0.25 * np.sin(2 * np.pi * 1500 * np.arange(n) / fps) * np.exp(-np.arange(n) / (n / 4))
     start = t["count_start"]
     return [AudioArrayClip(np.column_stack([burst, burst]), fps=fps).with_start(start + i)
-            for i in range(COUNT_FROM)]
+            for i in range(COUNT_FROM + 1)]
 
 
 def build(episode, seed=0, narration=None):
