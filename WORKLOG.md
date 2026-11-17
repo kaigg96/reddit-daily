@@ -74,7 +74,7 @@ and more useful than a confident guess.
 ### Done
 - **Reliability (a fix):** the upload now swaps "<" and ">" for look-alike marks YouTube accepts, in the title, description and tags. Full tests passed and a fresh review found no blockers. The risk had been on our list since October as "never seen yet".
 - **Product (a bet):** the play-along episode is now narrated, timed from its narration, and ticks while the viewer guesses. Two fresh judges each found one problem. The voice paused at decimal points ("four. three"), so figures are now said in words. A price was rounded down ($6.755 shown as $6.75), so figures now round as people expect. The automatic test render passed with sound and no dead air, at no cost and with no Google requests. Three fresh reviews, findings fixed or noted on the ticket. That ticket is finished.
-- **Product (checked):** bet 1's and the show-label tickets are accepted on this morning's upload: the host's vote is the closing line, and the upload is labelled as the Reddit show.
+- **Product (checked):** bet 1's and the show-label tickets are accepted on this morning's upload: the host's vote is the closing line, and the upload is labelled as the Reddit show. The four new music tracks passed a fresh review and a measurement (no silence, no clipping); they wait to ship as their own version after bet 1's read. The two-shows-a-day schedule was simulated over 60 days: fair to both shows and both slots, with one harmless quirk recorded.
 - **Security and money (checked):** money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change. AI use: no Google requests, no paid voice.
 - Balance: one fix (the upload), one bet (the new show).
 
@@ -84,7 +84,7 @@ and more useful than a confident guess.
 
 ### Next
 - **First:** confirm tonight's upload landed (its run starts late, around 18:00–22:00).
-- The three-takes show's switch-on (E1 T5) waits on the music tracks (T2) and the slot plan (T4), both in review. T2's merge is timed against bet 1's read, one change at a time.
+- The three-takes show's switch-on (E1 T5) waits on the music tracks (T2, ready, held for bet 1's read) and the slot plan (T4, which needs one dry run per show: one per shift).
 - The play-along arm (T8) waits on T5. Its notes are on the ticket: whether ticks should start before the "3" appears, and the ratio's rounding.
 
 ### Better?
