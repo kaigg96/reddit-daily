@@ -217,15 +217,15 @@ Voice changes (#16). Anything that spends beyond #72's approved narration line.
 ## Tickets
 
 ### T1 · Bet 1's no-reactions build is live as the Reddit arm's last form
-Status: review: merged to `main` 11-16 on the release check's PASS of `b74fc92`; left: the first `v8` upload's closing line
+Status: done
 Needs: none
 Touches: src/ (by merge of `integration/preview`), PRD.md §0 #15 and #13, the experiment ledger
 Context: decision 2. The build, its sample and its review are described on #77 (closed). The release check must pass on the day; `FORMAT_VERSION` becomes `v8`. Its pre-committed rule stays as written; add one ledger line that its read is thin by design from T4 on.
 Accept:
 - [x] `scripts/validate_release.py` passes for the merged tree, and tests are green
-- [ ] the first `v8` upload is in `upload_log.csv` with its host pick as the closing line
+- [x] the first `v8` upload is in `upload_log.csv` with its host pick as the closing line
 - [x] PRD §0 no longer says #15 waits on a label; the ledger carries the line above
-Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`. 11-16: the check passed `b74fc92` at 18:33 (metadata and screen; its sample's 3-word setup dropped, the vote shipped). Merged into `main`, which since added only `src/playalong*.py`, outside the live path: 1,393 pass, free silent sample plays. The merge is `v7s`'s 17th upload on, so ledger `v7s-before-bet1` applies.
+Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`. 11-16: the check passed `b74fc92` at 18:33 (metadata and screen; its sample's 3-word setup dropped, the vote shipped). Merged into `main`, which since added only `src/playalong*.py`, outside the live path: 1,393 pass, free silent sample plays. The merge is `v7s`'s 17th upload on, so ledger `v7s-before-bet1` applies. **Accepted 11-17:** the first `v8` upload (`fSKBzgvb2qg`, 11-17 08:13, NoStupidQuestions) is logged with `host_lines` 1 and its vote as the closing line ("I am voting for poorly tested AI coding…"). The one before it, 11-16's evening run, was refused by YouTube for a ">" in an answer (fixed 11-17, TECH_DEBT); its metadata had come from the fallback model on a 503.
 
 ### T2 · More than one music track, with no login needed
 Status: review: `product/e1-t2-music` (`e1f8b5d`), unmerged; left: a listen, a fresh look at `e1f8b5d`, and its own `FORMAT_VERSION` timed against v8's read (one variable per release)
@@ -240,15 +240,15 @@ Accept:
 Evidence: 11-15, implementer: four FreePD tracks (Advertime, City Sunshine, Fresh Focus, Funshine), cut to 60 s at the funk track's level; FreePD closed in 2025, so the files and its "CC0 1.0 Universal Public Domain Dedication" statement come from Internet Archive copies, URLs in `assets/music/LICENSES.md`; `log.last_music_track()` bars the last upload's track; 1,065 pass. Orchestrator 11-15: fresh review, nothing blocking, names match the log so the no-repeat rule works, the archived licence quotes verified verbatim, four 0.96 MB files. Its finding to fix before merge: a funk bed that fails to unseal in CI now drops out of rotation silently, where it used to log `none` and the digest flagged it (`weekly_digest.py`; the comment in `run-reddit-video.yml` goes stale too). Free sample (`SAMPLE=1`, silent) on the branch: 24.3 s, `freepd_funshine.mp3`, decodes clean, bed alone at −37 dB mean. No one has listened. Fixed in `e1f8b5d` (1,066 pass): the weekly digest flags a sealed track that no upload used all week. The workflow's unseal comment still says "none"; raise its one-line patch (`escalate.py --patch`) at the merge.
 
 ### T3 · Every upload records which show it was
-Status: review: merged to `main` with T1 11-16; left: the first live row's `show` reads `reddit`
+Status: done
 Needs: none
 Touches: src/log.py, src/run.py, scripts/weekly_analytics.py, src/insights.py, tests/
 Context: the log has no column for the source; an own-question upload is known only by an empty `subreddit`. The comparison needs `report.py --compare show=<name>` with ages matched, like every other read (`CLAUDE.md` §6).
 Accept:
-- [ ] `upload_log.csv` gains a `show` column (`reddit`, `takes`, later others); old rows read as `reddit`
-- [ ] `scripts/report.py --at-age 7 --compare show=takes` runs and refuses thin cohorts as it does elsewhere, with a test
-- [ ] the append-only log's existing rows are unchanged byte for byte
-Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it.
+- [x] `upload_log.csv` gains a `show` column (`reddit`, `takes`, later others); old rows read as `reddit`
+- [x] `scripts/report.py --at-age 7 --compare show=takes` runs and refuses thin cohorts as it does elsewhere, with a test
+- [x] the append-only log's existing rows are unchanged byte for byte (values, as accepted below)
+Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it. **Accepted 11-17:** the first live row (`fSKBzgvb2qg`) reads `show` = `reddit`; `insights` reads a blank as `reddit`; `--at-age 7 --compare show=takes` refuses (n=0, below MIN_COHORT=8, against 218). Against `7a5719d`'s log, all 241 earlier rows keep every value, but none is byte-identical: the header migration padded each with five blank cells, as foreseen above. Accepted on values: the line's purpose is that no history changes, and refusing the padding would leave rows of mixed width for one column's sake.
 
 ### T4 · The show alternates by slot, in code
 Status: review: `product/e1-t4-show-slots` (`4730afa`, on the release), unmerged; left: the dry runs and the title-style pairing (below)
