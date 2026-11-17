@@ -109,7 +109,8 @@ def test_a_long_reveal_holds_the_question_so_the_reveal_starts_at_two_thirds():
     t = pr.timings(episode)
     assert t["total"] - t["reveal_start"] == pytest.approx(27 / sample.WORDS_PER_SECOND)
     assert t["reveal_start"] == pytest.approx(t["total"] * 2 / 3)
-    assert t["hook_end"] > 3.0   # held past the short hook's 3 s
+    # The beat follows the hook's 3 s; the 3-2-1 leads into the reveal.
+    assert t["hook_end"] == 3.0 and t["count_start"] == t["reveal_start"] - pr.COUNT_FROM
 
 
 @pytest.mark.parametrize("episode", ALL, ids=lambda e: e["beat"])
@@ -148,7 +149,10 @@ def test_the_countdown_shows_3_2_1_one_per_second(episode):
         assert e1 == s2 and e1 - s1 == pytest.approx(1.0)
     (beat,) = _by_style(pr.plan(episode), "beat")
     assert beat[2] == episode["beat"]
-    assert (beat[0], beat[1]) == (counts[0][0], counts[-1][1])
+    # The beat line shows from the hook's end, the digits lead into the reveal.
+    t = pr.timings(episode)
+    assert (beat[0], beat[1]) == (t["hook_end"], counts[-1][1])
+    assert beat[0] <= counts[0][0] == t["count_start"]
     (hook,) = _by_style(pr.plan(episode), "hook")
     assert hook[2] == episode["hook"] and hook[1] >= counts[-1][1]   # question held
 
@@ -191,7 +195,40 @@ def test_render_writes_moviepys_temp_audio_under_assets_gen(monkeypatch, tmp_pat
         def close(self):
             pass
 
-    monkeypatch.setattr(pr, "build", lambda episode, seed=0: Clip())
+    monkeypatch.setattr(pr, "build", lambda episode, seed=0, narration=None: Clip())
     pr.render(EPISODES[0], tmp_path / "sample.mp4")
     assert written["path"] == str(tmp_path / "sample.mp4")
     assert Path(written["temp_audiofile"]).parent == config.GEN
+
+
+def test_measured_lengths_set_the_timings_and_the_reveal_holds_past_its_last_word():
+    episode = _plain(EPISODES[0])
+    t = pr.timings(episode, {"hook": 7.0, "reveal": 5.7})
+    assert t["hook_end"] == 7.0
+    assert t["total"] - t["reveal_start"] == pytest.approx(5.7 + pr.TAIL_S)
+    assert t["reveal_start"] >= t["total"] * 2 / 3 - 1e-9
+    assert t["count_start"] == t["reveal_start"] - pr.COUNT_FROM >= t["hook_end"]
+
+
+def test_figures_with_a_point_are_said_in_words_and_nothing_else_changes():
+    assert pr._speakable("$6.75 now, $1.05 then") == "six seventy-five now, one oh five then"
+    assert pr._speakable("in Jan 1990\n4.3× more now") == "in January 1990. four point three times more now"
+    assert pr._speakable("$150.25 and 702,250") == "$150.25 and 702,250"   # left as written
+    assert pr._speakable("$10.00, $1.00, $0.99") == "ten dollars, one dollar, ninety-nine cents"
+    assert pr._speakable("1,050.5 and 1.1.2020") == "1,050.5 and 1.1.2020"     # never inside a figure
+
+
+def test_the_script_says_a_picks_answer_once():
+    pick = {"hook": "More people?", "beat": "Pick one.", "answer": "D.C.",
+            "comparison": "D.C. 702,250\nWyoming 587,618"}
+    assert pr.script(pick)["reveal"].count("D.C.") == 1
+    price = {"hook": "h", "beat": "b", "answer": "$1.56", "comparison": "in Jan 1990\n4.3× more now"}
+    assert pr.script(price)["reveal"] == "one fifty-six in January 1990. four point three times more now."
+
+
+def test_a_tick_each_second_from_the_beat_on_each_digit_and_on_the_reveal():
+    t = {"hook_end": 2.0, "count_start": 4.5, "reveal_start": 7.5, "total": 10.0}
+    starts = [c.start for c in pr.ticks(t)]
+    assert starts == [2.5, 3.5, 4.5, 5.5, 6.5, 7.5]   # no gap reaches 1 s
+    assert starts[0] - t["hook_end"] < 1
+    assert all(c.start + c.duration <= t["total"] for c in pr.ticks(t))

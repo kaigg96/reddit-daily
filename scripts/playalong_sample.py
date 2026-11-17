@@ -3,7 +3,11 @@ committed records, to assets/gen/playalong_<template>.mp4 (gitignored), with
 three PNG frames each (hook, mid-countdown, reveal). Local only: no model,
 no TTS, no network, no upload.
 
-    venv/bin/python scripts/playalong_sample.py [--price APU0000703112]
+    venv/bin/python scripts/playalong_sample.py [--price APU0000703112] [--narrate]
+
+`--narrate` reads it with the sample voice (STAND_IN_VOICE=1 for the free
+stand-in; else silence of the estimated length; never Polly) and times the
+screens and stills from what was said.
 """
 import json
 import shutil
@@ -18,10 +22,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import config, playalong, playalong_render as pr  # noqa: E402
 
 
-def frames(episode):
+def frames(episode, said=None):
     """When to grab each still: mid-hook, mid-countdown, mid-reveal."""
-    t = pr.timings(episode)
-    return {"hook": t["hook_end"] / 2, "countdown": t["hook_end"] + pr.COUNT_FROM / 2,
+    t = pr.timings(episode, said)
+    return {"hook": t["hook_end"] / 2, "countdown": t["count_start"] + pr.COUNT_FROM / 2,
             "reveal": (t["reveal_start"] + t["total"]) / 2}
 
 
@@ -58,12 +62,18 @@ def main():
     for episode in episodes:
         template = by_hook[episode["hook"]]
         out = config.GEN / f"playalong_{template}.mp4"
-        pr.render(episode, out)
+        narration = pr.narrate(episode, "Danielle") if "--narrate" in sys.argv else None
+        said = None
+        if narration:
+            from moviepy import AudioFileClip
+            said = {k: AudioFileClip(str(p)).duration for k, p in narration.items()}
+            print(f"  said: {pr.script(episode)} {said}")
+        pr.render(episode, out, narration=narration)
         print(f"{out}: {probe(out)}")
-        for start, end, text, style in pr.plan(episode):
+        for start, end, text, style in pr.plan(episode, said):
             print(f"  {start:4.1f} - {end:4.1f} | {style}: {text!r}")
         print("  description: " + pr.description(episode).replace("\n", " / "))
-        for name, t in frames(episode).items():
+        for name, t in frames(episode, said).items():
             png = config.GEN / f"playalong_{template}_{name}.png"
             subprocess.run([FFMPEG, "-y", "-v", "error", "-ss", f"{t:.2f}", "-i", str(out),
                             "-frames:v", "1", str(png)], check=True)

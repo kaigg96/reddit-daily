@@ -14,6 +14,7 @@ import csv
 import json
 import re
 from collections import Counter
+from decimal import ROUND_HALF_UP, Decimal
 
 from . import config, insights, ownquestions
 
@@ -145,14 +146,21 @@ def candidates(price=GAS_SERIES):
             {"template": HOW_MANY, "records": [floors["Q9188"], floors["Q12495"]]}]
 
 
+def _half_up(v, decimals):
+    """`v` rounded half up, as a reader rounds: the float 6.755 is stored a
+    hair under, so round() and an f-string gave $6.75 where the record's
+    $6.755 is $6.76 (fifth judging, 11-17: check 5's "true")."""
+    return Decimal(str(v)).quantize(Decimal(1).scaleb(-decimals), rounding=ROUND_HALF_UP)
+
+
 def _fmt(record):
     """A record's value as shown and spoken, copied by code."""
     v = record["value"]
     if record["quantity"] == "price":
-        return f"${v:,.2f}"
+        return f"${_half_up(v, 2):,.2f}"
     if record["quantity"] == "date":
         return str(int(v))   # a year, never "1,931"
-    return f"{v:,}" if float(v).is_integer() else f"{v:,.1f}"
+    return f"{v:,}" if float(v).is_integer() else f"{_half_up(v, 1):,.1f}"
 
 
 def _cap(text):
@@ -362,7 +370,7 @@ def _numbers(text):
 
 def _held(value, written, allowed):
     decimals = len(written.split(".")[1]) if "." in written and written[0].isdigit() else 0
-    return any(round(a, decimals) == value if decimals else a == value for a in allowed)
+    return any(float(_half_up(a, decimals)) == value if decimals else a == value for a in allowed)
 
 
 def check_turn(turn, episode):
