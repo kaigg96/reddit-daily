@@ -34,6 +34,15 @@ _RETRIABLE_STATUS = (429, 500, 502, 503, 504)
 # cut-off one matters most: the video may already be live, and an uncaught
 # raise skips prev_post.txt, so the next run would upload the post again.
 _DROPPED = (OSError, http.client.HTTPException, httplib2.ServerNotFoundError)
+# YouTube refuses a title, description or tag holding "<" or ">" with a 400
+# (invalidDescription), and a 400 is not retried: on 2026-11-16 an answer
+# quoting another ("\> Huge IT nation ...") cost the evening slot its upload.
+# Each is swapped for its look-alike angle quote, which YouTube accepts.
+_REFUSED_CHARS = str.maketrans({"<": "‹", ">": "›"})
+
+
+def _accepted(text):
+    return str(text).translate(_REFUSED_CHARS)
 
 
 def _next_chunk_retrying(request, sleep=time.sleep):
@@ -69,9 +78,9 @@ def upload_video(file_path, title, description, keywords, category_id="24"):
     youtube = build("youtube", "v3", credentials=_authenticate())
     body = {
         "snippet": {
-            "title": title,
-            "description": description,
-            "tags": keywords or [],
+            "title": _accepted(title),
+            "description": _accepted(description),
+            "tags": [_accepted(k) for k in keywords or []],
             "categoryId": category_id,
         },
         "status": {
