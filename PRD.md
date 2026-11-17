@@ -12,7 +12,7 @@
 
 ## 0. Status & delivery plan *(living section — update when anything ships)*
 
-**Last updated:** 2026-11-16 · **Live format:** `v8` (bet 1, #15: the host's setup note on screen and its vote spoken, over `v7s`; merged 2026-11-16; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
+**Last updated:** 2026-11-17 · **Live format:** `v8` (bet 1, #15: the host's setup note on screen and its vote spoken, over `v7s`; merged 2026-11-16, first upload 11-17 08:13, the 11-16 evening one refused by YouTube for a ">" in an answer, fixed; earlier releases under **Shipped**). `integration/preview` holds the next release, which the release check reads. **Never delete it:** the check stops at a missing target rather than falling back to `main`.
 
 <a name="delivery-plan"></a>
 ### Delivery plan *(the single tracker — per-requirement detail lives in §6)*

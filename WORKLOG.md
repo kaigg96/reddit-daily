@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-17 (11:52) — A missed upload found and fixed before tonight's run, and the play-along show now exists as a narrated sample that passes the viewer test
+
+    Worked (% of the shift): reliability 30 · product 55 · gm 15
+
+**Summary:** Last night's evening upload, the first meant for bet 1, never went out: YouTube refused its description because one Reddit answer contained a ">" sign. That is fixed and live. The play-along show, the main candidate to replace Reddit in January, now has a narrated sample (a free stand-in voice), and a fresh judge passes it on four of the viewer test's five checks; the fifth failure was a rounding error, now fixed in code.
+
+### Toward revenue
+- **One upload was lost** (11-16 evening), and the cause would have struck again on any answer quoting another. The fix went live at 12:00, hours before tonight's run. Bet 1's first upload landed this morning instead, so its count starts one upload later.
+- **The show after Reddit moved from a silent mock-up to a narrated episode.** Ground beef: "What did a pound cost in January 1990? This October it's $6.76", a ticking 3-2-1, then "$1.56, 4.3× more now". The screens now follow how long the voice actually takes; real speech ran 10–30% longer than our estimate.
+
+### Done
+- **Reliability (a fix):** the upload now swaps "<" and ">" for look-alike marks YouTube accepts, in the title, description and tags. Full tests passed and a fresh review found no blockers. The risk had been on our list since October as "never seen yet".
+- **Product (a bet):** the play-along episode is now narrated, timed from its narration, and ticks while the viewer guesses. Two fresh judges each found one problem. The voice paused at decimal points ("four. three"), so figures are now said in words. A price was rounded down ($6.755 shown as $6.75), so figures now round as people expect. The automatic test render passed with sound and no dead air, at no cost and with no Google requests. Three fresh reviews, findings fixed or noted on the ticket. That ticket is finished.
+- **Product (checked):** bet 1's and the show-label tickets are accepted on this morning's upload: the host's vote is the closing line, and the upload is labelled as the Reddit show.
+- **Security and money (checked):** money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change. AI use: no Google requests, no paid voice.
+- Balance: one fix (the upload), one bet (the new show).
+
+### Blocked
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+- A failed upload still alerts no one; this shift found it by reading the run's log. The alarm is built and waits for the monthly review's bundle of workflow changes.
+
+### Next
+- **First:** confirm tonight's upload landed (its run starts late, around 18:00–22:00).
+- The three-takes show's switch-on (E1 T5) waits on the music tracks (T2) and the slot plan (T4), both in review. T2's merge is timed against bet 1's read, one change at a time.
+- The play-along arm (T8) waits on T5. Its notes are on the ticket: whether ticks should start before the "3" appears, and the ratio's rounding.
+
+### Better?
+- **Than last shift:** yes: a lost-upload cause is closed before it recurred, and the replacement show passed its last open check, which it had failed three times.
+- **Than ~10 shifts ago:** unclear: bet 1 and the new show are both further along, but watch time is still falling and nothing new has been read yet.
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-16 (21:06) — Weekly review: bet 1 is live, watch time is now falling channel-wide, and the play-along show passes four of the viewer test's five checks
 
     Worked (% of the shift): product 50 · gm 30 · data 15 · reliability 5
@@ -125,33 +158,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** yes, a little: the replacement show is now something that can be watched and judged, not only a design, and the test caught a real flaw before anything was bought.
 - **Than ~10 shifts ago:** no, not in numbers: watch time is flat and nothing new has reached viewers.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-15 (20:39) — The owner's session, continued: the play-along episode is designed, a viewer bar exists, and Q1's bet is drafted for a shift to challenge
-
-    Worked (% of the shift): strategy 50 · product 35 · gm 15
-
-**Summary:** Nothing reached viewers. Three pieces of design that a shift would otherwise reconstruct cold: what a play-along episode is and how its questions are chosen (E1 T7), how a video is judged by someone who cannot watch it (`process/viewer-bar.md`), and Q1 2027's bet with its end-of-quarter verdict rule written before any number (`epics/E3`). A fresh agent then argued against all three the same night and found the bet's premise backwards; every finding is applied and recorded in the files.
-
-### Toward revenue
-- **E3 says plainly what the record says:** on YouTube views bind, every route is 200× or more away, and no evidenced lever closes that; Q1 is a search for an owned format that reaches, read per arm on reach and the subscriber rate together. Its verdict rule projects both halves of the nearest tier; if nothing reaches by March, the shift decides a pivot and the owner is told the projection in months, since only stopping is theirs.
-- Also tonight: the four roles' methods (`process/epics.md`), 13 seeded lessons (`process/lessons.md`), three worked episodes, channel-name candidates with handle checks (lead: Guess First), the February comparison's rule drafted (E1 T5).
-
-### Done
-- **Product:** the play-along episode's shape (hook, beat, reveal, turn), its selector's rules and the renderer's schema, in E1; T7's acceptance lines now test them.
-- **Strategy:** E3, proposed; a fresh agent argues against it before T2 sets the bets (12-20).
-- **General management:** the viewer bar, five yes/no checks with evidence, applied by an agent that has not seen the design.
-
-### Blocked
-- Nothing new. Still the owner's: #59, the weekly allowance variable.
-- The 23:22 scheduled shift (run 43774485514) failed at its first turn on the subscription's 5-hour limit, which this session spent; nothing to fix, the next scheduled shift runs after the reset.
-
-### Next
-- As the 19:55 entry says: bet 1 on the 08:17 check first. Then E1 T7 and E3 T1 side by side. Before the first real dispatch, a fresh review of `process/epics.md` and `process/lessons.md` (E2 T2's open line; a reviewer started tonight and was cut off by the usage limit, so it is owed). E3 is challenged once; T2 challenges it again before 12-20.
-
-### Better?
-- **Than last shift:** no change in numbers; less ambiguity left for the shifts.
-- **Than ~10 shifts ago:** unclear until bet 1 ships tomorrow.
 - **Than ~100 shifts ago:** too early to say.
