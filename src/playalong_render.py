@@ -75,33 +75,42 @@ def spoken(text):
     return sum(_said(t) for t in text.split()) / WORDS_PER_SECOND
 
 
-def timings(episode):
+def timings(episode, said=None):
     """{"hook_end", "reveal_start", "total"} in seconds, from the narration's
-    estimated length. The hook holds for its spoken length (at least
-    HOOK_MIN), the countdown follows it, and the reveal holds for the spoken
-    answer and comparison (at least REVEAL_MIN). The answer must appear only
-    in the last third, which holds when the lead-up is at least twice the
-    reveal; so a long reveal holds the question longer, and the reveal then
-    starts at exactly two-thirds. (Holding the reveal itself longer would
-    pull its start further before two-thirds, not after.)"""
-    reveal = max(REVEAL_MIN, spoken(f"{episode['answer']} {episode['comparison']}"))
-    reveal_start = max(max(HOOK_MIN, spoken(episode["hook"])) + COUNT_FROM, 2 * reveal)
-    return {"hook_end": reveal_start - COUNT_FROM, "reveal_start": reveal_start,
-            "total": reveal_start + reveal}
+    length: measured when `said` gives it ({"hook": s, "reveal": s}, the
+    narrated audio's own lengths), else estimated. The hook holds for its
+    spoken length (at least HOOK_MIN), the countdown follows it, and the
+    reveal holds for the spoken answer and comparison (at least REVEAL_MIN).
+    The answer must appear only in the last third, which holds when the
+    lead-up is at least twice the reveal; so a long reveal holds the question
+    longer, and the reveal then starts at exactly two-thirds. (Holding the
+    reveal itself longer would pull its start further before two-thirds, not
+    after.)"""
+    said = said or {}
+    hook = said.get("hook", spoken(episode["hook"]))
+    reveal = max(REVEAL_MIN, said.get("reveal", spoken(f"{episode['answer']} {episode['comparison']}")))
+    hook_end = max(HOOK_MIN, hook)
+    reveal_start = max(hook_end + COUNT_FROM, 2 * reveal)
+    # The beat line follows the hook's last word; the 3-2-1 leads into the
+    # reveal. Apart only when the reveal is held to two-thirds: the narrated
+    # 11-17 render left 1.6 s unsaid between them when the beat waited too.
+    return {"hook_end": hook_end, "count_start": reveal_start - COUNT_FROM,
+            "reveal_start": reveal_start, "total": reveal_start + reveal}
 
 
-def plan(episode):
+def plan(episode, said=None):
     """[(start, end, text, style)] for every piece of text on screen, in
     start order. Text is copied from `episode` unchanged; the only text this
     adds is the countdown digits and the option labels' letters."""
-    t = timings(episode)
-    hook_end, reveal_start, total = t["hook_end"], t["reveal_start"], t["total"]
+    t = timings(episode, said)
+    hook_end, count_start = t["hook_end"], t["count_start"]
+    reveal_start, total = t["reveal_start"], t["total"]
     items = [(0.0, reveal_start, episode["hook"], "hook")]
     for label, option, style in zip(LABELS, episode.get("options") or [], OPTION_Y):
         items.append((0.0, reveal_start, f"{label}  {option}", style))
     items.append((hook_end, reveal_start, episode["beat"], "beat"))
     # Each digit ends where the next starts, the last where the reveal does.
-    ticks = [hook_end + i for i in range(COUNT_FROM)] + [reveal_start]
+    ticks = [count_start + i for i in range(COUNT_FROM)] + [reveal_start]
     for i in range(COUNT_FROM):
         items.append((ticks[i], ticks[i + 1], str(COUNT_FROM - i), "count"))
     items += [(reveal_start, total, episode["answer"], "answer"),
@@ -139,23 +148,78 @@ def silent_audio(duration, fps=44100):
     return AudioArrayClip(np.zeros((int(duration * fps), 2)), fps=fps)
 
 
-def build(episode, seed=0):
-    """The episode as a moviepy clip: background, the plan's text, silence."""
-    from moviepy import CompositeVideoClip
+_MONTHS = {"Jan": "January", "Feb": "February", "Mar": "March", "Apr": "April",
+           "Jun": "June", "Jul": "July", "Aug": "August", "Sep": "September",
+           "Oct": "October", "Nov": "November", "Dec": "December"}
+
+
+def _speakable(text):
+    """Shown text as it is read: "4.3×" as "4.3 times", "Jan" as "January",
+    a line break as a sentence's end. Figures stay figures, so the voice
+    says the number shown."""
+    text = text.replace("×", " times").replace("\n", ". ")
+    return " ".join(_MONTHS.get(w, w) for w in text.split())
+
+
+def script(episode):
+    """What is said, by part: the hook in full, the beat's one line, then
+    the answer and its comparison. The countdown itself is unspoken."""
+    return {"hook": episode["hook"], "beat": episode["beat"],
+            "reveal": _speakable(f"{episode['answer']} {episode['comparison']}") + "."}
+
+
+TICK_S = 0.12
+
+
+def ticks(t, fps=44100):
+    """The countdown's tick, one per digit (the design's "3-2-1 with a
+    tick"): a short decaying 1.5 kHz burst at each of `t`'s starts."""
+    from moviepy.audio.AudioClip import AudioArrayClip
+    n = int(TICK_S * fps)
+    burst = 0.25 * np.sin(2 * np.pi * 1500 * np.arange(n) / fps) * np.exp(-np.arange(n) / (n / 4))
+    start = t["count_start"]
+    return [AudioArrayClip(np.column_stack([burst, burst]), fps=fps).with_start(start + i)
+            for i in range(COUNT_FROM)]
+
+
+def build(episode, seed=0, narration=None):
+    """The episode as a moviepy clip: background, the plan's text, and the
+    countdown's ticks over silence, or over `narration` ({"hook", "beat",
+    "reveal"}: audio files from `narrate`), whose lengths then set the
+    timings."""
+    from moviepy import AudioFileClip, CompositeAudioClip, CompositeVideoClip
     from .background import build_background
 
-    items = plan(episode)
-    total = timings(episode)["total"]
+    voice = {k: AudioFileClip(str(p)) for k, p in (narration or {}).items()}
+    said = {k: voice[k].duration for k in ("hook", "reveal") if k in voice}
+    t = timings(episode, said)
+    items = plan(episode, said)
+    total = t["total"]
     bg, _ = build_background(total, random.Random(seed))
     video = CompositeVideoClip(bg + _clips(items), size=(config.W, config.H))
-    return video.with_duration(total).with_audio(silent_audio(total))
+    at = {"hook": 0.0, "beat": t["hook_end"], "reveal": t["reveal_start"]}
+    sounds = [silent_audio(total)] + ticks(t) + [c.with_start(at[k]) for k, c in voice.items()]
+    return video.with_duration(total).with_audio(CompositeAudioClip(sounds).with_duration(total))
 
 
-def render(episode, out_path, seed=0):
+def narrate(episode, voice=None):
+    """Synthesize each part of `script(episode)` to assets/gen/ with the
+    sample voice (`sample.synthesize`: the free stand-in when
+    config.STAND_IN_VOICE is on, else silence of the estimated length; never
+    Polly). Returns {part: path}."""
+    from . import sample
+    paths = {}
+    for part, text in script(episode).items():
+        paths[part] = config.GEN / f"playalong_said_{part}.mp3"
+        sample.synthesize(text, paths[part], voice)
+    return paths
+
+
+def render(episode, out_path, seed=0, narration=None):
     """Write the episode to `out_path`. moviepy's temporary audio goes in
     assets/gen/ (gitignored), not the working directory, which is the repo
     root when a script runs this."""
-    video = build(episode, seed)
+    video = build(episode, seed, narration)
     config.GEN.mkdir(parents=True, exist_ok=True)
     temp_audio = config.GEN / f"{Path(out_path).stem}_TEMP_audio.m4a"
     video.write_videofile(str(out_path), fps=config.FPS, codec="libx264", audio_codec="aac",

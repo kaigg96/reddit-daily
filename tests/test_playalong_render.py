@@ -109,7 +109,8 @@ def test_a_long_reveal_holds_the_question_so_the_reveal_starts_at_two_thirds():
     t = pr.timings(episode)
     assert t["total"] - t["reveal_start"] == pytest.approx(27 / sample.WORDS_PER_SECOND)
     assert t["reveal_start"] == pytest.approx(t["total"] * 2 / 3)
-    assert t["hook_end"] > 3.0   # held past the short hook's 3 s
+    # The beat follows the hook's 3 s; the 3-2-1 leads into the reveal.
+    assert t["hook_end"] == 3.0 and t["count_start"] == t["reveal_start"] - pr.COUNT_FROM
 
 
 @pytest.mark.parametrize("episode", ALL, ids=lambda e: e["beat"])
@@ -148,7 +149,10 @@ def test_the_countdown_shows_3_2_1_one_per_second(episode):
         assert e1 == s2 and e1 - s1 == pytest.approx(1.0)
     (beat,) = _by_style(pr.plan(episode), "beat")
     assert beat[2] == episode["beat"]
-    assert (beat[0], beat[1]) == (counts[0][0], counts[-1][1])
+    # The beat line shows from the hook's end, the digits lead into the reveal.
+    t = pr.timings(episode)
+    assert (beat[0], beat[1]) == (t["hook_end"], counts[-1][1])
+    assert beat[0] <= counts[0][0] == t["count_start"]
     (hook,) = _by_style(pr.plan(episode), "hook")
     assert hook[2] == episode["hook"] and hook[1] >= counts[-1][1]   # question held
 
@@ -191,7 +195,7 @@ def test_render_writes_moviepys_temp_audio_under_assets_gen(monkeypatch, tmp_pat
         def close(self):
             pass
 
-    monkeypatch.setattr(pr, "build", lambda episode, seed=0: Clip())
+    monkeypatch.setattr(pr, "build", lambda episode, seed=0, narration=None: Clip())
     pr.render(EPISODES[0], tmp_path / "sample.mp4")
     assert written["path"] == str(tmp_path / "sample.mp4")
     assert Path(written["temp_audiofile"]).parent == config.GEN

@@ -21,7 +21,7 @@ from src import config, playalong, playalong_render as pr  # noqa: E402
 def frames(episode):
     """When to grab each still: mid-hook, mid-countdown, mid-reveal."""
     t = pr.timings(episode)
-    return {"hook": t["hook_end"] / 2, "countdown": t["hook_end"] + pr.COUNT_FROM / 2,
+    return {"hook": t["hook_end"] / 2, "countdown": t["count_start"] + pr.COUNT_FROM / 2,
             "reveal": (t["reveal_start"] + t["total"]) / 2}
 
 
