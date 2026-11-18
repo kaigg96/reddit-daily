@@ -377,7 +377,10 @@ def check_lessons(path=LESSONS):
 def _touches(path, touches):
     """Whether lesson path `path` (from backticks) matches a `Touches` item."""
     for item in touches:
-        if (fnmatch.fnmatch(item, path) or item == path or item.startswith(path)
+        # The item's first word is its path: "src/ (by merge of …)", "PLAN.md §3",
+        # "analysis/experiments.csv (one row)" (review).
+        item = (item.strip().strip("`").split() or [""])[0].strip("`")
+        if (fnmatch.fnmatch(item, path) or item == path
                 or (item.endswith("/") and path.startswith(item))):
             return True
     return False

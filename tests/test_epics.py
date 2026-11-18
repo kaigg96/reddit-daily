@@ -513,3 +513,13 @@ def test_bounce_onto_an_empty_evidence_line_and_its_refusals(tmp_path, capsys):
                     "--why", "x", "--category", "wobbly"]) == 1       # friction refuses it
     assert path.read_text(encoding="utf-8") == before                # nothing written
     assert len(log.read_text(encoding="utf-8").splitlines()) == 2    # header and the one row
+
+
+def test_a_touches_item_with_a_note_matches_on_its_path():
+    """Review, 11-18: a note after the path ("src/ (by merge of …)") kept
+    lessons on that directory out of the brief."""
+    assert ep._touches("src/video.py", ["src/ (by merge of `integration/preview`)"])
+    assert ep._touches("analysis/*.csv", ["analysis/experiments.csv (one row)"])
+    assert ep._touches("PLAN.md", ["PLAN.md §3"])
+    assert not ep._touches("PLAN.md", ["PLAN.md.bak"])
+    assert not ep._touches("src/run.py", ["the experiment ledger"])
