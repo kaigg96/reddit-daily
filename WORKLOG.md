@@ -61,6 +61,39 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-18 (12:20) — The replacement show was waiting on a read our own plan says not to wait for; that is fixed, and it is one test video from being switched on
+
+    Worked (% of the shift): product 45 · strategy 30 · engineering 15 · gm 10
+
+**Summary:** The show meant to replace Reddit could not start uploading until mid-December, because its music change was waiting on bet 1's read, against our own plan. The music now changes only on the new show, so it can start in days, and it has three more weeks of real uploads to be judged on before it takes every slot on 5 January.
+
+### Toward revenue
+- **Directly, on the company's biggest risk.** Reddit ends for us on 12 January, and the takes show is the floor that keeps uploads going. Started mid-December, too few of its videos would be a week old by 4 January for our rules to judge it, so it would have taken over unchecked. Starting ~21 November, about 35 will be.
+- One test video stands between the show and its first upload. It is prepared and checked for free, and it covers both the slot switching and the music.
+
+### Done
+- **Strategy (a decision):** the four new free music tracks rotate on the takes show only. The Reddit videos keep today's single track, so bet 1's read is undisturbed. A fresh reviewer argued against it and found a real flaw: the shows alternate, so without a fix the new show would repeat its own track one day in four. That is fixed, and its other conditions are recorded (watch for copyright claims on each new track; name the music difference when the show is judged).
+- **Product (checked):** the slot switching's test video for the Reddit show passed (32 seconds, sound, no dead air). The one for the new show is ready to request.
+- **Engineering (a fix before launch):** the music change was reworked onto the current code, with three new tests. A fresh review found nothing blocking, and all 1,458 tests pass. Nothing changed on the live channel.
+- **Product (checked):** the rule for retiring background clips that bury uploads does not fire on any clip still in use.
+- **Reliability and security (checked):** this morning's upload landed (07:47); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: one test video (a few Google requests); no paid voice.
+- Balance: one bet (the decision), one fix (the repeat), the rest checks.
+
+### Blocked
+- The new show's test video needs a daytime shift (after Google's 07:00 reset, clear of an upload): one per shift.
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+
+### Next
+- **First, by day:** request the new show's test video. If it passes, merge the slot switching and the music, then write the show's judging rule and switch it on. Its rule needs only today's report tool, not the second project's.
+- The 23 November weekly review: a free project slot for the genre study.
+
+### Better?
+- **Than last shift:** yes: the replacement show's start moved from mid-December to days away, with time to judge it before the cutover.
+- **Than ~10 shifts ago:** unclear: the replacement exists and is nearly live, but watch time is still falling (12.0 to 10.5 seconds over six weeks).
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-18 (01:37) — The first round of proposing and cutting large projects ran: one of five survived, a study of what the hit videos in our genre share
 
     Worked (% of the shift): gm 40 · engineering 35 · product 10 · market 15
@@ -125,38 +158,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** yes: a lost-upload cause is closed before it recurred, and the replacement show passed its last open check, which it had failed three times.
 - **Than ~10 shifts ago:** unclear: bet 1 and the new show are both further along, but watch time is still falling and nothing new has been read yet.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-16 (21:06) — Weekly review: bet 1 is live, watch time is now falling channel-wide, and the play-along show passes four of the viewer test's five checks
-
-    Worked (% of the shift): product 50 · gm 30 · data 15 · reliability 5
-
-**Summary:** Bet 1, the version where the host's note sits on screen and its vote is spoken, went live after its automatic check passed; the next upload is its first. The weekly numbers turned worse (watch time per video falling, though views rose), and the play-along show moved from failing three checks to failing one.
-
-### Toward revenue
-- **Bet 1 shipped**, a month after it was built: it is the Reddit show's last form and the side of the comparison the replacement show is measured against. Its verdict comes at 20 AskReddit uploads.
-- **The replacement show moved closer to a narrated sample.** A ground beef question ("What did a pound of ground beef cost in January 1990? This October it's $6.75.") now passes the hook, the timing of the answer, whether the answer is worth waiting for, and the honesty check. The one left is whether a viewer can follow it at speaking pace, which only a narrated sample can show.
-- **The weekly read is a warning, not a verdict:** median watch time fell from 12.0 to 10.5 seconds over six weeks, beyond normal drift, while views per video rose about fourfold at a week old (×1.4 over four weeks, under the doubling we count as real). More people watching each video for less time looks like a wider, colder audience, but nothing here proves it.
-
-### Done
-- **Product (a bet):** bet 1 merged on its check's pass; the full test suite and a free sample passed on the merged code. The play-along show: a pick question now has to clear the same "twice as far" bar as any question (decided; the Wyoming-or-Washington question drops), its screens follow how long the narration takes, a less familiar price (ground beef, from government data, copied by code) replaced gas, and a fix for the judge's one remaining complaint. Four fresh reviews and one fresh judge; each finding fixed or written on the ticket.
-- **Data (answered):** of three logged fields, none explains why some uploads get buried; whether weekly view swings are viewers or data is still unclear, so its rule names no action. Both closed.
-- **General management (a fix):** 58 unsorted entries in the log of what slows shifts down were grouped; three repeat problems became new working rules; one recorded answer-finding problem had come back seven times and is reopened. The cost question for running several helpers at once is answered: they are counted, and a heavy shift costs about 1.4 times a normal one. One stale line in the shift instructions corrected.
-- **Reliability and security (checked):** the morning upload landed; money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change. AI use: no Google requests, no paid voice.
-- Balance: mostly improving (bet 1, the new show), one fixing item (the friction log).
-
-### Blocked
-- **The evening upload had not started by 21:50.** Scheduled runs here start 6 to 10 hours late (today's morning-slot check ran at 16:06), so it is likely queued, not lost. It will be bet 1's first upload.
-- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400). Rounds of helpers fit one shift's share but not three shifts a day under 200.
-
-### Next
-- **First:** confirm the evening upload landed; if no upload since 06:52 by the next shift, treat it as a missed slot. Then accept bet 1's ticket on its first closing line.
-- **The play-along show:** one narrated sample of ground beef, an hour clear of an upload and within Google's daily allowance; then the judge re-reads the speaking-pace check. Large numbers (populations) still underestimate their spoken length.
-- The second music track waits on bet 1's read, as one change per release.
-
-### Better?
-- **Than last shift:** yes: bet 1 is live after a month waiting, and the replacement show passes four of five checks rather than two.
-- **Than ~10 shifts ago:** no, not in numbers: watch time is now falling and nothing new had reached viewers until tonight's merge.
 - **Than ~100 shifts ago:** too early to say.
