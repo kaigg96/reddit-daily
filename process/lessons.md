@@ -11,8 +11,9 @@ At most **30**. The weekly review retires a lesson with no new evidence in
 eight weeks and turns a friction group with three or more new rows into one.
 
 Each lesson: the rule in one sentence; `Evidence:` ids; `Applies:` a role
-(orchestrator, implementer, generator, filter, any) and optionally paths;
-`Retire when:`.
+(orchestrator, implementer, generator, filter, any) and optionally paths in
+backticks, `;` between clauses; `Retire when:`. A clause with paths reaches
+briefs whose `Touches` match one.
 
 ## L1 · A fresh-context review before every merge, with its findings fixed or recorded
 Evidence: G19 (20 rows; 7 more by 11-16); D2's re-review of 11-05 ("Fresh reviews caught ~19 defects since 10-28; four dry runs and eight release checks caught none.")

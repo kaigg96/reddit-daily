@@ -61,6 +61,41 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-18 (01:37) — The first round of proposing and cutting large projects ran: one of five survived, a study of what the hit videos in our genre share
+
+    Worked (% of the shift): gm 40 · engineering 35 · product 10 · market 15
+
+**Summary:** Five large projects were proposed and a separate reviewer cut four, keeping a study of what other quiz channels' most-watched Shorts have in common. Its riskiest step, reading other channels' figures without a login, was tried and works. Nothing reached viewers: a night shift cannot spend the Google allowance the morning upload needs, so the switching of shows by time slot waits for its test videos.
+
+### Toward revenue
+- **Indirectly.** The surviving study feeds the choice of next quarter's bet, due 20 December. It is the only proposal aimed at our biggest gap: a few videos that reach hundreds of thousands. It waits for a free slot, since two projects are already running; the 23 November weekly review gives it one if none has freed.
+- Two other proposals aimed at what we ship were cut on evidence. A longer play-along round would come to about 50 seconds, not past a minute, and would need more paid narration. A study of where viewers leave was not needed: the existing figures already show the steepest loss between a quarter and halfway through.
+
+### Done
+- **General management (a bet on the method):** the project board's first full round of proposing and filtering. The reviewer caught five claims in the proposals that the records contradict. Cut projects now show in the list of already-dropped work, so they are not proposed again.
+- **Market (a test):** seven logged-out requests show another channel's Shorts, sorted by popularity, with exact views, length and date for each. One trap: two of the paid quiz channels we had listed post long videos, not Shorts.
+- **Engineering (an improvement):** the brief each helper agent receives is now generated from its task alone, with the rules and the lessons that apply, and its first use built the next piece: one command records a task as accepted, or sends it back with the reason and a note in the log of what slows us down. A third task made each helper receive only the lessons for the files it will touch. Fresh reviews found six problems across the three, all fixed before merging.
+- **Product (checked):** the switching of shows by time slot passes its timing test and, switched off, changes nothing (all 1,449 tests). Its two test videos are left.
+- **Reliability and security (checked):** last night's upload landed (21:09); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: no Google requests, no paid voice.
+- Balance: mostly improving (the board's method, the study); no fixes were needed.
+
+### Blocked
+- The slot switching's test videos each need a daytime shift: after Google's 07:00 reset and an hour clear of an upload, one per shift.
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+- Ready work is below the floor (2 of 5) partly by rule: the surviving study cannot count while two projects hold both slots, and both are waiting.
+
+### Next
+- **First, by day:** request the slot switching's test video for the Reddit show; the next daytime shift does the other show.
+- The board method's own tasks are done but its trial: run the remaining show-switching tasks through it, and dispatch the study's first task from a generated brief once the study has a slot.
+- The 23 November weekly review: give the study a slot, and decide whether a waiting project may lend its slot to one with a deadline.
+
+### Better?
+- **Than last shift:** unclear: the queue's method improved and one market question is answered, but nothing new reached viewers.
+- **Than ~10 shifts ago:** unclear: bet 1 is live and the new show exists as a sample, but watch time is still falling (12.0 to 10.5 seconds over six weeks).
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-17 (11:52) — A missed upload found and fixed before tonight's run, and the play-along show now exists as a narrated sample that passes the viewer test
 
     Worked (% of the shift): reliability 30 · product 55 · gm 15
@@ -124,38 +159,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** yes: bet 1 is live after a month waiting, and the replacement show passes four of five checks rather than two.
 - **Than ~10 shifts ago:** no, not in numbers: watch time is now falling and nothing new had reached viewers until tonight's merge.
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-16 (11:17) — The play-along show exists as code and as two sample videos, and the viewer test sent its shape back once already
-
-    Worked (% of the shift): product 45 · gm 30 · engineering 20 · reliability 5
-
-**Summary:** For the first time, the quiz-style show we plan to run after Reddit exists: it picks a question from public government data and copies every number from the source, and two free sample videos were judged by an agent who had not seen the design. The first judging found the answer arriving halfway through. The shape was changed and that check now passes, but two others still fail, so it is not ready for a narrated sample.
-
-### Toward revenue
-- **The show after Reddit moved from paper to video.** It builds episodes like "What did a gallon of gas cost in January 1990? This October it's $4.45" and "More people: Wyoming, or Washington, D.C.?" from public data, with a test that fails if any shown number differs from its source.
-- **Still failing:** the screen timings must follow the narration, which only a narrated sample can test; the gas question is too familiar to surprise; and the judge argues the pick format cannot both surprise and meet our "twice as far" rule. The next shift decides that rule for picks, or drops the format.
-- Bet 1 did not ship: its automatic check runs about seven hours late (about 15:00–16:30 here, not 08:17), and a shift cannot start it by hand.
-
-### Done
-- **Product (a bet):** the question picker merged, with a test per rule; 2 of 3 example questions survive (the skyscraper one is rejected as too close to its anchor). The sample renderer merged too, after its own fresh review; neither is part of the live uploads yet.
-- **Engineering:** one command now reads and checks the board of larger projects and names the next action; shifts' count of ready work now includes those projects' tickets, so it no longer reads short. Two tests that would have broken later on the live branch were caught by fresh review and fixed before merging.
-- **General management (a fix):** a fresh review of the new working methods found one rule that contradicted the money rule (it let a task end by asking the owner for a paid key) and five other gaps; all fixed. The starting numbers for judging this way of working are recorded: 1 format release a month, 16 of 72 shifts ended early for lack of work.
-- **Security and reliability (checked):** both uploads since the last handover landed (19:00 and 06:52). Money controls intact ($0.33 this month, forecast $0.78 of $3). No secret committed, no workflow change. Two lines that named the AI model in the project board were removed.
-- AI use: none of Google's allowance, no sample video bought, no Polly. Balance: mostly improving (the show), one fixing item (the methods).
-
-### Blocked
-- **Bet 1:** today's delayed check; if it passes, the next shift merges.
-- **For the owner, only their login can:** #59 (account checks); the weekly shift allowance in the repository settings (200, wanted 400).
-
-### Next
-- **Bet 1:** read the release check; on a pass naming its commit, merge.
-- **The play-along show:** decide whether the "twice as far" rule governs picks or the pick shape goes; choose a less familiar price; time each screen from the narration's length (estimated from word count, so it can be tested without audio); a fresh review of the fix waiting on its own branch (the closing line could state a vague number like "quadrupled"); then the next round of samples.
-- The weekly review comes due when Monday's data arrives.
-
-### Better?
-- **Than last shift:** yes, a little: the replacement show is now something that can be watched and judged, not only a design, and the test caught a real flaw before anything was bought.
-- **Than ~10 shifts ago:** no, not in numbers: watch time is flat and nothing new has reached viewers.
 - **Than ~100 shifts ago:** too early to say.

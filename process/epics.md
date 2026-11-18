@@ -35,8 +35,8 @@ cannot be checked in minutes is two tickets.
 with `isolation: worktree`, one ticket each, on its own branch named
 `e<n>-t<n>-<slug>`. Background agents are refused in CI and a lone foreground
 agent blocks the shift, so batching is the only way the orchestrator's time
-is not spent waiting. Each brief is generated from the ticket (`epics.py
-brief`, E2 T4; until then, written by hand to the same shape): the ticket's
+is not spent waiting. Each brief is generated from the ticket by
+`scripts/epics.py brief E<n> T<n>` (E2 T4), never written by hand: the ticket's
 text, its `Touches`, the gates in `CLAUDE.md` §3 that apply, the lessons
 whose `Applies` matches (`process/lessons.md`), the report format below, and
 its allotment: by default no Gemini calls and no render requests, only free
@@ -59,7 +59,8 @@ variable per release." A dry run's PASS must name the branch's current
 commit. A ticket
 that fails goes back to `ready` with the reason as a line under `Evidence`
 and a row in the friction log; one that fails **twice** was written wrong,
-and the orchestrator rewrites it before anyone tries again. Bounces are the
+and the orchestrator rewrites it before anyone tries again. `scripts/epics.py
+accept` and `bounce` write both outcomes, friction row included. Bounces are the
 lessons file's main source (`process/lessons.md`).
 
 **Records.** Status changes are made the moment they are true, in the epic

@@ -124,50 +124,52 @@ Evidence: early, ahead of T1 (11-15, run 43749661055, E1's T3 and T6 plus a read
 11-16: run 43749661055's row reads 10.48 units over 47.7 minutes, inside the 8.2–11.5 of the shifts before it, so either a round costs little or `shift-usage.csv` does not count subagents' tokens; which one is the line left (compare this shift's row, run 43856314698, seven rounds, when it lands). Dispatch method written in `process/epics.md` (merged 11-16). 11-16 (21:00 shift): run 43856314698, seven rounds, reads **14.19 units** over 44.4 min and 100 turns, above the 8.2–11.5 of the ten shifts before it (11-13 to 11-15, no rounds), at 0.14 a turn against their 0.07–0.10. Cost rose with rounds while turns did not, so `quota_units` (the action's `total_cost_usd`) counts subagents. **Assumption 2:** a heavy round shift costs about 1.4× the band's median, which fits inside one shift's share; but three shifts a day at ~10 units already run past the 200-unit weekly cap, so routine rounds every shift do not fit until the owner's raise lands (PLAN, the allowance variable). Rounds stay at what a ticket needs, as `process/epics.md` says.
 
 ### T4 · An implementer's brief is built from its ticket alone
-Status: todo
+Status: done
 Needs: T2, T3
 Touches: scripts/epics.py, tests/test_epics.py, process/epics.md
 Context: the brief is the implementer's whole world, so it is generated, not written by hand: ticket text, `Touches`, the gates that apply, the matching lessons (T7 adds them), and the report format.
 Accept:
-- [ ] `scripts/epics.py brief E2 T4` prints a complete brief and nothing from any other ticket or epic, with a test
-- [ ] the brief ends with the report format: branch, what changed, each `Accept` line with the command run and its output, what could not be done
-- [ ] one real ticket was implemented from a generated brief and its report followed the format
-Evidence:
+- [x] `scripts/epics.py brief E2 T4` prints a complete brief and nothing from any other ticket or epic, with a test
+- [x] the brief ends with the report format: branch, what changed, each `Accept` line with the command run and its output, what could not be done
+- [x] one real ticket was implemented from a generated brief and its report followed the format
+Evidence: 11-18 (01:37 shift), implementer from a hand-written brief on `e2-t4-brief` (`74547e6`). Re-run by the orchestrator: `epics.py brief E2 T4` exit 0, 54 lines, T4's own heading, Needs, Touches, Context and Accept, no Status or Evidence, nothing of the epic's prose or a sibling (grep for T3, T5, "Why now", "The decision": 0); it ends with the report block, one line per Accept; `brief E2 T99` exit 2. Fresh review: nothing blocking, 27 tickets checked for leaks; its two should-fixes fixed (`lessons_for` matched "any" only as the first clause, so L9 reached no brief; a fixture-board test read the live lessons file) in `851ec19`. Merged, 1,440 pass. Left as nits: the quote regex would cut a gates sentence at an "e.g. "; `brief` must be the first argument; E1 T7's and E6 T2's Context say "above", which a brief no longer shows; the brief prints Accept lines already ticked.
+Accepted 2026-11-18: Line 3: E2 T5 was dispatched from `epics.py brief E2 T5` (the generated text verbatim, plus four dispatch notes) and its report followed the format, every Accept line with its command and output; T4 done.
 
 ### T5 · Acceptance re-runs the criteria and leaves evidence
-Status: todo
+Status: done
 Needs: T4
 Touches: process/epics.md, scripts/epics.py, tests/test_epics.py
 Context: README "Four roles" step 1. An implementer's report is a claim; the orchestrator's re-run is the evidence.
 Accept:
-- [ ] `process/epics.md` states the procedure, the bounce rule (twice, then rewrite the ticket) and that the `CLAUDE.md` §3 gates run once per mergeable slice
-- [ ] `scripts/epics.py accept E<n> T<n> --evidence "…"` sets `done` and writes `Evidence`; `bounce … --why "…"` returns it to `ready` and appends the reason; both tested
-- [ ] each bounce also adds a line to the friction log (`scripts/friction.py add`)
-Evidence:
+- [x] `process/epics.md` states the procedure, the bounce rule (twice, then rewrite the ticket) and that the `CLAUDE.md` §3 gates run once per mergeable slice
+- [x] `scripts/epics.py accept E<n> T<n> --evidence "…"` sets `done` and writes `Evidence`; `bounce … --why "…"` returns it to `ready` and appends the reason; both tested
+- [x] each bounce also adds a line to the friction log (`scripts/friction.py add`)
+Evidence: Accepted 2026-11-18: 11-18 (01:37 shift), implementer from a generated brief on `e2-t5-accept` (`907ff71`). Re-run: `pytest tests/test_epics.py` 30 passed; `bounce E2 T5` on a copy of the board changed only its Status and Evidence lines and wrote one friction row to the given log. Line 1: the Accepts paragraph already held it, one sentence added (1,194 of 1,200 words). Fresh review: not blocking; its two should-fixes fixed: a second bounce set `ready`, which `--next` would dispatch, now `todo`; a bounce dropped the old status (branch, commit), now kept as (was: …). Nits left: the friction row is written before the epic file, so a failed write leaves a row; the count includes bounces from before a rewrite. Merged `8661f9f`, 1,444 pass. This acceptance is the command's first use.
 
 ### T6 · Epics are proposed and cut before they are planned
-Status: ready
+Status: done
 Needs: T2
 Touches: process/backlog.md, process/epics.md, epics/ (new proposed files)
 Context: "The decision", Generator and Filter. The filter must be a fresh agent. Expect it to cut most of what is proposed.
 Accept:
-- [ ] one full round is recorded: at least four proposed epics, the filter's verdict and reason on each, at least one cut
-- [ ] cut epics appear in `backlog_status.py --dropped`, so the next round does not propose them again
-- [ ] no more than two epics are `active` afterwards (`epics.py --check`)
-Evidence:
+- [x] one full round is recorded: at least four proposed epics, the filter's verdict and reason on each, at least one cut
+- [x] cut epics appear in `backlog_status.py --dropped`, so the next round does not propose them again
+- [x] no more than two epics are `active` afterwards (`epics.py --check`)
+Evidence: 11-18 (01:37 shift). A generator agent (worktree, about 5 minutes) wrote five proposals on `e2-t6-proposals` (`188f67e`): E4 a play-along round past a minute, E5 where viewers leave, E6 what the hits in our genre share, E7 one command for "do we already know", E8 a merge that cannot land broken. A second fresh agent filtered them, ranking forward and reversed (both E6 > E8 > E7 > E5 > E4): **E6 approved, four cut**, each status line carrying its reason (`c02dcf7`). The filter checked the generator's claims and five did not hold (E4's "about as long as a reading": a narrated play-along episode is 16.9 s, so three are ~50 s, not past a minute; E6's "the only scan": three ran). Line 2 needed code: `--dropped` read only the work log, so `backlog_status.dropped_epics` now lists cut epics first, with a test (merged `9b44509` after a fresh review, nits only, the one that could drop a reason fixed; 1,435 pass). `venv/bin/python scripts/backlog_status.py --dropped` prints E4, E5, E7, E8 with their reasons. `epics.py --check`: 8 epics, clean, two active (E1, E2). E8's residue is already lesson L2. The round took about 15 minutes of a shift; the generator's 5 minutes is the cheap part and the filter's checking is where the value was.
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: blocked: T5 (its Needs; the board check warned while it read ready); left: `--check` on lessons and brief matching (T4). Seeded 11-15, 16 lessons by 11-16
+Status: done
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
 Accept:
 - [x] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
-- [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
-- [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
+- [x] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
+- [x] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
 - [x] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired (11-15, `22816b9`)
 - [x] at least five lessons are seeded, each with real evidence
 Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`. 11-16 weekly review: L14–L16 from G30, G32, G33 (three or more rows each), same four fields; evidence counts refreshed on L1–L6.
+Accepted 2026-11-18: 11-18 (01:37 shift), implementer from a brief on `e2-t7-lessons` (`dbbc9a3`). Re-run: `epics.py --check` clean on 16 lessons; `pytest tests/test_epics.py` 34 passed (fixture tests for no Evidence, a 31st lesson, five Touches sets); `brief E6 T1` (Touches PRD.md §4) lists L6, L7, L9, L13, L14, L16 and no `src/` lesson. The branch put process/lessons.md 29 words over its budget; trimmed. Fresh review: a Touches item with a note ("src/ (by merge of …)") missed its directory's lessons, and a prefix match let `PLAN.md.bak` match; fixed in `652103f` (an item matches on its first word), with a test. Left: L16's backticked `PRD.md` is a topic, now read as a path filter. Merged `4f18702`, 1,449 pass.
 
 ### T8 · E1's remaining tickets run through this workflow
 Status: todo

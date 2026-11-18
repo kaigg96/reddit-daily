@@ -210,6 +210,316 @@ def test_committed_board_passes(capsys):
     assert ep.main([]) == 0 and ep.main(["--next"]) == 0
 
 
+BRIEF_BOARD = {
+    "E1-a.md": HEAD.format(n=1, status="active").replace(
+        "## Tickets", "Prose only the epic has: zebra crossing.\n\n## Tickets") + """
+### T1 · Make the widget wobble
+Status: ready: orchestrator's note, marmalade
+Needs: none
+Touches: src/widget.py, tests/test_widget.py
+Context: the widget is still
+Accept:
+- [ ] `pytest tests/test_widget.py` passes
+- [ ] the wobble is visible in a frame,
+  wrapped onto a second line
+Evidence: grapefruit, from an earlier bounce
+and a second evidence line, kumquat
+
+### T2 · Paint the sibling shed
+Status: todo
+Needs: T1
+Touches: src/shed.py
+Context: the shed is grey
+Accept:
+- [ ] the shed is teal
+Evidence:
+""",
+    "E2-b.md": epic(2, tickets=[{"n": 1}]).replace("Ticket 1", "Polish the other epic's lantern"),
+}
+
+
+def test_brief_is_its_ticket_alone(tmp_path, capsys):
+    d = write(tmp_path, BRIEF_BOARD)
+    assert ep.main(["brief", "E1", "T1", "--dir", d]) == 0
+    out = capsys.readouterr().out
+    assert "### T1 · Make the widget wobble" in out
+    assert "Touches: src/widget.py, tests/test_widget.py" in out
+    assert "- [ ] `pytest tests/test_widget.py` passes" in out
+    assert "  wrapped onto a second line" in out
+    assert "branch named `e1-t1-<slug>`" in out
+    for foreign in ("zebra", "Epic 1", "shed", "teal", "lantern", "Epic 2",     # sibling, epic
+                    "marmalade", "grapefruit", "kumquat"):                    # Status, Evidence
+        assert foreign not in out, foreign
+    assert '"Merge once the gates pass: tests green,' in out and "SAMPLE=1" in out
+    assert "## Lessons that apply to you" in out     # which ones: the fixture test below
+
+
+def test_lessons_match_a_clause_opening_with_the_role_or_any(tmp_path):
+    """Read from a fixture, not the live file, which every round edits."""
+    path = tmp_path / "lessons.md"
+    path.write_text("## L1 · Orchestrator only\nApplies: orchestrator (acceptance)\n\n"
+                    "## L2 · Implementer second\nApplies: orchestrator; implementer, `src/**`\n\n"
+                    "## L3 · Any on files\nApplies: orchestrator (records); any, `PLAN.md`\n\n"
+                    "## L4 · Any first\nApplies: any (research)\n\n"
+                    "## L5 · Mentions the word only\nApplies: generator (not the implementer)\n",
+                    encoding="utf-8")
+    assert ep.lessons_for("implementer", str(path)) == [
+        "L2 · Implementer second", "L3 · Any on files", "L4 · Any first"]
+
+
+LESSONS_FIXTURE = """# Lessons
+
+## L1 · Orchestrator only
+Evidence: G1
+Applies: orchestrator (acceptance)
+
+## L2 · Implementer on src
+Evidence: G2
+Applies: orchestrator; implementer, `src/**`
+
+## L3 · Any on PLAN
+Evidence: G3
+Applies: orchestrator (records); any, `PLAN.md`, `PRD.md`
+
+## L4 · Any, no paths
+Evidence: G4
+Applies: any (research)
+
+## L5 · Implementer on the video
+Evidence: G5
+Applies: orchestrator (scheduling); implementer, `src/video.py`, `src/llm.py`
+
+## L6 · Implementer, no paths
+Evidence: G6
+Applies: implementer
+
+## L7 · Generator on src
+Evidence: G7
+Applies: generator, `src/widget.py`
+
+## L8 · Any on the worklog
+Evidence: G8
+Applies: any, `WORKLOG.md`
+"""
+
+
+def test_lessons_match_role_and_touches(tmp_path):
+    path = str(tmp_path / "lessons.md")
+    (tmp_path / "lessons.md").write_text(LESSONS_FIXTURE, encoding="utf-8")
+    def heads(touches):
+        return [h.split(" · ")[0] for h in ep.lessons_for("implementer", path, touches)]
+    assert heads(["src/widget.py", "tests/test_widget.py"]) == ["L2", "L4", "L6"]
+    assert heads(["src/video.py"]) == ["L2", "L4", "L5", "L6"]
+    assert heads(["PLAN.md §3", "scripts/epics.py"]) == ["L3", "L4", "L6"]
+    assert heads(["WORKLOG.md"]) == ["L4", "L6", "L8"]
+    assert heads([]) == ["L4", "L6"]
+
+
+def test_brief_lists_exactly_the_lessons_for_its_touches(tmp_path, capsys, monkeypatch):
+    (tmp_path / "lessons.md").write_text(LESSONS_FIXTURE, encoding="utf-8")
+    monkeypatch.setattr(ep, "LESSONS", str(tmp_path / "lessons.md"))
+    board = tmp_path / "board"
+    board.mkdir()
+    assert ep.main(["brief", "E1", "T1", "--dir", write(board, BRIEF_BOARD)]) == 0
+    out = capsys.readouterr().out
+    section = out.split("## Lessons that apply to you", 1)[1].split("## Report", 1)[0]
+    listed = [l[2:] for l in section.splitlines() if l.startswith("- ")]
+    assert listed == ["L2 · Implementer on src", "L4 · Any, no paths",
+                      "L6 · Implementer, no paths"]
+    assert "a path in your `Touches`" in section and "until E2 T7" not in section
+
+
+def test_check_fails_a_lesson_with_no_evidence_and_more_than_thirty(tmp_path, capsys):
+    path = tmp_path / "lessons.md"
+    path.write_text(LESSONS_FIXTURE, encoding="utf-8")
+    assert ep.check_lessons(str(path)) == []
+    path.write_text(LESSONS_FIXTURE.replace("Evidence: G4\n", "Evidence:  \n")
+                    .replace("Evidence: G6\n", ""), encoding="utf-8")
+    errors = ep.check_lessons(str(path))
+    assert len(errors) == 2 and "L4 has no `Evidence:`" in errors[0] \
+        and "L6 has no `Evidence:`" in errors[1], errors
+    assert errors[0].split(":")[1] == "15"          # the lesson's heading line
+    many = "".join(f"## L{n} · Rule {n}\nEvidence: G{n}\nApplies: any\n\n" for n in range(1, 32))
+    path.write_text(many, encoding="utf-8")
+    assert ep.check_lessons(str(path)) == [f"{path}:121: 31 lessons, at most 30"]
+    path.write_text(many.split("## L31")[0], encoding="utf-8")
+    assert ep.check_lessons(str(path)) == []
+    # and --check fails on them
+    board = tmp_path / "board"
+    board.mkdir()
+    d = write(board, CLEAN)
+    path.write_text(LESSONS_FIXTURE.replace("Evidence: G4\n", ""), encoding="utf-8")
+    assert ep.main(["--check", "--dir", d, "--now", "2026-11-16 12:00", "--lessons", str(path)],
+                   date_of=lambda _p: DAY) == 1
+    assert "L4 has no `Evidence:`" in capsys.readouterr().out
+
+
+def test_committed_lessons_pass():
+    assert ep.check_lessons() == []
+
+
+def test_brief_ends_with_the_report_format(tmp_path, capsys):
+    assert ep.main(["brief", "E1", "T1", "--dir", write(tmp_path, BRIEF_BOARD)]) == 0
+    out = capsys.readouterr().out.rstrip()
+    block = out[out.rindex("```", 0, len(out) - 3):].splitlines()
+    assert out.endswith("Learned: anything the next person on this file should know "
+                        "(one line each)\n```")
+    assert block[1] == "Branch: e1-t1-<slug> (commit abc1234)"
+    assert ('- [ ] "the wobble is visible in a frame, wrapped onto a second line": '
+            "<command run> -> <its output, copied>") in block
+    # the same fields, in the same order, as process/epics.md's "The implementer"
+    doc = open(os.path.join(ep.ROOT, "process", "epics.md"), encoding="utf-8").read()
+    doc = doc.split("## The implementer", 1)[1].split("```")[1]
+    def labels(lines):
+        return [l.split(":")[0] for l in lines if l.strip() and not l.startswith(("-", "`"))]
+    assert labels(block) == labels(doc.splitlines()) == \
+        ["Branch", "Changed", "Accept", "Could not do", "Learned"]
+
+
+def test_brief_of_an_unknown_ticket_exits_non_zero(tmp_path, capsys):
+    d = write(tmp_path, BRIEF_BOARD)
+    for args in (["E1", "T9"], ["E9", "T1"], ["E1"]):
+        assert ep.main(["brief", *args, "--dir", d]) != 0
+        err = capsys.readouterr()
+        assert err.out == "" and len(err.err.strip().splitlines()) == 1, args
+
+
+def test_brief_of_a_committed_ticket(capsys):
+    """The sentences the brief quotes from CLAUDE.md and process/epics.md are
+    still there to quote."""
+    assert ep.main(["brief", "E2", "T4"]) == 0
+    assert capsys.readouterr().out.startswith("# Brief: E2 T4 · ")
+
+
 def test_needs_none_with_a_note_names_no_ticket():
     assert ep.needs_refs("none (E1 T7 for the play-along form)") == []
     assert ep.needs_refs("T1, E1 T3") == [("", "1"), ("1", "3")]
+
+
+ACCEPT_BOARD = HEAD.format(n=1, status="active") + """
+### T1 · Wobble the widget
+Status: review: `e1-t1-wobble` (`abc1234`)
+Needs: none
+Touches: src/widget.py
+Context: the widget is still
+Accept:
+- [x] `pytest tests/test_widget.py` passes
+- [x] the wobble is visible in a frame,
+  wrapped onto a second line
+Evidence:
+
+### T2 · Paint the shed
+Status: review: `e1-t2-shed`
+Needs: T1
+Touches: src/shed.py
+Context: the shed is grey
+Accept:
+- [x] the shed is teal
+- [ ] the door is teal
+Evidence: 11-17, an earlier note
+and its second line
+"""
+
+
+def _board_file(tmp_path, text=ACCEPT_BOARD):
+    path = tmp_path / "E1-a.md"
+    path.write_text(text, encoding="utf-8")
+    return str(tmp_path), path
+
+
+def _diff(before, after):
+    """Lines removed and added, in order: what an edit changed and nothing else."""
+    import difflib
+    return [l for l in difflib.ndiff(before.splitlines(), after.splitlines())
+            if l[:1] in "+-"]
+
+
+def test_accept_sets_done_and_writes_evidence_changing_nothing_else(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    assert ep.main(["accept", "E1", "T1", "--dir", d, "--evidence",
+                    "abc1234: pytest -> 6 passed"], today="2026-11-18") == 0
+    assert "E1 T1 done" in capsys.readouterr().out
+    after = path.read_text(encoding="utf-8")
+    assert _diff(ACCEPT_BOARD, after) == [
+        "- Status: review: `e1-t1-wobble` (`abc1234`)", "+ Status: done",
+        "- Evidence:", "+ Evidence: Accepted 2026-11-18: abc1234: pytest -> 6 passed"]
+    t = ep.parse(str(path)).ticket(1)
+    assert t.status == "done" and t.evidence.startswith("Accepted 2026-11-18: abc1234")
+    assert not log.exists()                         # accepting logs no friction
+    assert run_check(tmp_path, {}) == []            # the board still passes --check
+
+
+def test_accept_refuses_an_unticked_line_or_a_ticket_not_in_review(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    assert ep.main(["accept", "E1", "T2", "--dir", d, "--evidence", "x"]) == 1
+    err = capsys.readouterr().err
+    assert "1 of 2 Accept lines not ticked" in err and "- [ ] the door is teal" in err
+    text = ACCEPT_BOARD.replace("Status: review: `e1-t1-wobble` (`abc1234`)", "Status: doing: 1, 11:00")
+    d, path = _board_file(tmp_path, text)
+    assert ep.main(["accept", "E1", "T1", "--dir", d, "--evidence", "x"]) == 1
+    assert "not review" in capsys.readouterr().err
+    assert ep.main(["accept", "E1", "T1", "--dir", d]) == 1               # no --evidence
+    assert ep.main(["accept", "E1", "--dir", d, "--evidence", "x"]) == 2   # no ticket
+    assert path.read_text(encoding="utf-8") == text                        # untouched
+
+
+def test_bounce_returns_to_ready_appends_the_reason_and_logs_friction(tmp_path, capsys):
+    import csv
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    args = ["bounce", "E1", "T2", "--dir", d, "--friction", str(log)]
+    assert ep.main(args + ["--why", "the door is grey"], today="2026-11-18") == 0
+    out = capsys.readouterr().out
+    assert "E1 T2 back to ready (bounce 1)" in out and "friction row F1 (mistake)" in out
+    after = path.read_text(encoding="utf-8")
+    assert _diff(ACCEPT_BOARD, after) == [
+        "- Status: review: `e1-t2-shed`", "+ Status: ready",
+        "+ Bounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`)"]
+    assert after.endswith("and its second line\nBounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`)\n")
+    rows = list(csv.DictReader(open(log, encoding="utf-8")))
+    assert len(rows) == 1
+    assert (rows[0]["function"], rows[0]["outcome"], rows[0]["category"],
+            rows[0]["hardest"], rows[0]["minutes_lost"]) == \
+        ("gm", "partial", "mistake", "the door is grey", "15")
+    assert rows[0]["task"] == "bounce E1 T2 · Paint the shed"
+
+    # dispatched again and failed again: the ticket was written wrong, and says so
+    path.write_text(after.replace("### T2 · Paint the shed\nStatus: ready",
+                                  "### T2 · Paint the shed\nStatus: review: again"),
+                    encoding="utf-8")
+    assert ep.main(args + ["--why", "still grey"], today="2026-11-19") == 0
+    out = capsys.readouterr().out
+    assert "(bounce 2)" in out and "friction row F2 (docs)" in out and "Rewrite it" in out
+    t = ep.parse(str(path)).ticket(2)
+    assert t.status == "todo" and "rewrite it before it is dispatched again" in t.value("Status")
+    assert t.evidence.endswith("Bounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`) "
+                               "Bounced 2026-11-19: still grey (was: review: again)")
+    assert [r["category"] for r in csv.DictReader(open(log, encoding="utf-8"))] == ["mistake", "docs"]
+
+
+def test_bounce_onto_an_empty_evidence_line_and_its_refusals(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    args = ["bounce", "E1", "T1", "--dir", d, "--friction", str(log)]
+    assert ep.main(args + ["--why", "no frame shows the wobble"], today="2026-11-18") == 0
+    assert "Evidence: Bounced 2026-11-18: no frame shows the wobble (was: " in path.read_text(encoding="utf-8")
+    capsys.readouterr()
+    before = path.read_text(encoding="utf-8")
+    assert ep.main(args + ["--why", "again"]) == 1                  # T1 is ready now
+    assert "only a ticket in review or doing" in capsys.readouterr().err
+    assert ep.main(["bounce", "E1", "T2", "--dir", d, "--friction", str(log)]) == 1   # no --why
+    assert ep.main(["bounce", "E1", "T2", "--dir", d, "--friction", str(log),
+                    "--why", "x", "--category", "wobbly"]) == 1       # friction refuses it
+    assert path.read_text(encoding="utf-8") == before                # nothing written
+    assert len(log.read_text(encoding="utf-8").splitlines()) == 2    # header and the one row
+
+
+def test_a_touches_item_with_a_note_matches_on_its_path():
+    """Review, 11-18: a note after the path ("src/ (by merge of …)") kept
+    lessons on that directory out of the brief."""
+    assert ep._touches("src/video.py", ["src/ (by merge of `integration/preview`)"])
+    assert ep._touches("analysis/*.csv", ["analysis/experiments.csv (one row)"])
+    assert ep._touches("PLAN.md", ["PLAN.md §3"])
+    assert not ep._touches("PLAN.md", ["PLAN.md.bak"])
+    assert not ep._touches("src/run.py", ["the experiment ledger"])
