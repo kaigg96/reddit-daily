@@ -146,7 +146,7 @@ Accept:
 Evidence:
 
 ### T6 · Epics are proposed and cut before they are planned
-Status: ready
+Status: doing: shift 11-18 01:37, 01:40 UTC (generator on `e2-t6-proposals`, then a fresh filter)
 Needs: T2
 Touches: process/backlog.md, process/epics.md, epics/ (new proposed files)
 Context: "The decision", Generator and Filter. The filter must be a fresh agent. Expect it to cut most of what is proposed.
