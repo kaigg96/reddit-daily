@@ -1,105 +1,102 @@
-## Shift trace — run 44217123177
+## Shift trace — run 44296922252
 
-**Ended:** success, is_error false, 105 turns, 49.1 min, stop end_turn; 1 permission denial(s): Bash. **Tool calls:** 104, 1 failed. Helper agents made 163 more, 7 failed.
+**Ended:** success, is_error false, 151 turns, 49.4 min, stop end_turn; 3 permission denial(s): Bash, Task. **Tool calls:** 150, 3 failed. Helper agents made 41 more, 0 failed.
 
 **Last message:**
 
-> The shift is done and the handover is pushed (02:26). Nothing reached viewers this shift. The next step for the show-switching work needs a test video, and that spends Google's daily allowance, which the morning upload needs before the 07:00 reset. So this night shift worked on the project board instead.
+> The shift is over and the handover was pushed to `main` at 12:30. Guardrail checks passed on every push I've seen; the run for the last commit hadn't shown up yet when I checked.
 >
-> **What moved:**
-> - **First round of large-project proposals.** A helper agent proposed five projects. A second, fresh agent cut four of them, each with its reason, and caught five claims in the proposals that our records contradict. One survived: a study of what other quiz channels' most-watched Shorts have in common. It feeds the choice of next quarter's bet, due 20 December. Its riskiest step, reading other channels' figures without a login, was tried (7 requests) and works: views, length and date for each video, sorted by popularity. It is planned with its first task ready. It waits for a slot because two projects already hold both; the 23 November weekly review gives it one if none has freed.
-> - **Cut projects can't be proposed again.** The list of already-dropped work now includes them.
-> - **Three tools for the project board, all merged:**
->   - each helper agent's instructions are now generated from its task alone;
->   - one command records a task as accepted, or sends it back with the reason;
->   - each helper now gets only the lessons for the files it will touch.
+> **What moved the company toward revenue:** the takes show, which replaces Reddit after 12 January, was stuck behind a three-ticket chain that our own plan says not to wait for. Its music change (E1 T2) was waiting on bet 1's read. That would have delayed its first upload to about 14 December. By 4 January only about 15 of its videos would have been old enough to judge, under the minimum of 20, so it would have taken every slot unchecked. The music now rotates on the takes show only, and the Reddit videos are unchanged. The show can start in days, and about 35 videos will be judgeable by then. A fresh challenger found a real flaw: the shows alternate, so without a fix the takes show would repeat its own track about one day in four. That is fixed, and the challenger's other conditions are recorded on the epic.
 >
->   Each was built by a helper, re-checked by me, and reviewed by a fresh agent. The reviews found six problems, all fixed before merging. All 1,449 tests pass.
-> - **Show switching by time slot.** Two of its three checks pass on the branch with current `main` merged in: the 14-day slot test, and switched off it changes nothing. The two test videos are left.
-> - **Checks:** last night's upload landed at 21:09. Money controls are intact ($0.45 spent this month, forecast $0.75 of $3). No secrets committed, no workflow changes, no Google requests, no paid voice.
+> **Done:**
+> - **Slot switching (E1 T4):** the Reddit-show test video passed on the branch's current commit (32 s, sound, no dead air).
+> - **Takes-show test video:** prepared on `e1-t4-takes-render`, which carries both T4 and the music change. A free local render played the takes show with a new track.
+> - **Merges:** T4 and T2 merge cleanly together, and all 1,476 tests pass on the combined code.
+> - **Judging rule:** written into the experiment ledger as `takes-gate`, before any takes upload. It is read once on 4 January and can only fail with at least 20 takes videos clearly behind Reddit on watch time. Two fresh challenges reviewed it. The takes arm now has row #17 in the product tracker.
+> - **Board check:** `epics.py --check` now warns when a task waits on a blocked one and says why. Run on yesterday's board, it flags exactly this stall. Reviewed and merged.
+> - **Checks:** no background clip in use meets the retirement rule. This morning's upload landed. Money controls are intact.
 >
-> **Still open:**
-> - Ready work is 2 against a floor of
+> **One m
 
-### Tool calls (last 80 of 104)
+### Tool calls (last 80 of 150)
 
-25. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "^### T\|^Status" epics/E2-epics-tickets-implementers.md epics/E3-q1-2027-the-busin…
-26. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "epic\|dropped" scripts/backlog_status.py | head -30; cat epics/README.md | head -60
-27. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-28. Agent: Generate epic proposals E2 T6
-29. Bash: cd /home/runner/work/reddit-daily/reddit-daily; date -u +%H:%M; git fetch -q origin e2-t6-proposals && git log --oneline -1 origin/e2-t6-pr…
-30. Agent: Filter epic proposals E2 T6
-31. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git merge -q --ff-only origin/e2-t6-proposals 2>&1 || git merge -q --no-edit origin/e2-t6-p…
-32. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-33. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -n 100,160p scripts/backlog_status.py; grep -n "def recently_dropped" -A 30 scripts/bac…
-34. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -n 76,100p scripts/epics.py; grep -n "dropped\|recently_dropped\|def test.*epic" tests/…
-35. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -n 95,137p tests/test_backlog_status.py
-36. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git checkout -q -b e2-t6-dropped-epics; python3 - <<'EOF'
-37. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git checkout -q main && git add epics/ && git commit -q -m "E2 T6: the filter's verdicts, E…
-38. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git branch --show-current; git status --short; git log --oneline -2 main; git log --oneline…
-39. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git add scripts/backlog_status.py tests/test_backlog_status.py && git commit -q -m "backlog…
-40. Agent: Review dropped-epics diff
-41. Agent: Probe E6 public figures feasibility
-42. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-43. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -i 's| venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped…
-44. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git add scripts/backlog_status.py tests/test_backlog_status.py && git commit -q -m "backlog…
-45. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "T6 · Epics are proposed" -A 9 epics/E2-epics-tickets-implementers.md | head -12; g…
-46. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-47. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -n 126,147p epics/E2-epics-tickets-implementers.md | grep -n "###\|Status\|Needs"; grep…
-48. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-49. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/friction.py add --help 2>&1 | sed -n 1,30p
-50. Bash: cd /home/runner/work/reddit-daily/reddit-daily; tail -3 .github/friction.csv 2>/dev/null || ls analysis/ | grep -i fric; grep -rn "OUTCOMES…
-51. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -n 108,110p scripts/friction.py; venv/bin/python scripts/friction.py add --function pro…
-52. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "^## \|^### " PLAN.md | head -20; awk '/^## 3/,/^## 4/' PLAN.md | grep -n "Status\|…
-53. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -ln "pytest" .github/workflows/*.yml; grep -n "check_docs" .github/workflows/*.yml | h…
-54. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "Applies" process/lessons.md | head -20; grep -n "^## L\|^### L" process/lessons.md…
-55. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-56. Agent: Implement E2 T4 brief command
-57. Bash: cd /home/runner/work/reddit-daily/reddit-daily; date -u +%H:%M; git fetch -q origin e2-t4-brief main; git worktree add -q /tmp/t4b origin/e…
-58. Bash: cat /tmp/brief.txt; cd /tmp/t4b && git diff origin/main -- process/epics.md
-59. Agent: Review E2 T4 brief diff
-60. Bash: cd /tmp/t4b; sed -n 335,352p scripts/epics.py; sed -n 240,262p tests/test_epics.py; grep -n "def brief" -A 6 scripts/epics.py | head -10
-61. Bash: cd /tmp/t4b && git checkout -q -b e2-t4-brief-fix && python3 - <<'EOF'
-62. Bash: cd /tmp/t4b && git add -A scripts/epics.py tests/test_epics.py && git commit -q -m "epics brief: match a lesson clause by clause; test the …
-63. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git push -q origin main 2>&1|tail -1; python3 - <<'EOF'
-64. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -i 's/ in `50d3a50`\. Merged, 1,440 pass/ in `851ec19`. Merged, 1,440 pass/' epics/E2-e…
-65. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-66. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/friction.py add --function gm --task "Ready supply below the floor …
-67. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-68. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/context_budget.py --check 2>&1 | grep -v " ok " | head -15; tail -c…
-69. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-70. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -i 's/| C19 | blocked: `epics\/E2` T7 waits for T5 |/| C19 | blocked: `epics\/E2` T7 |/…
-71. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python -m pytest tests/test_check_docs.py tests/test_context_budget.py tests/test_…
-72. Bash: cd /home/runner/work/reddit-daily/reddit-daily; git add WORKLOG.md PLAN.md .github/friction.csv && git status --short | head; git commit -q…
-73. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/epics.py brief E2 T5 | sed -n '/## The ticket/,/## Gates/p'
-74. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-75. Bash: cat /tmp/brief_t5.txt | head -3
-76. Read: /tmp/brief_t5.txt
-77. Agent: Implement E2 T5 accept/bounce
-78. Bash: cd /home/runner/work/reddit-daily/reddit-daily; date -u +%H:%M; git fetch -q origin e2-t5-accept main; git worktree add -q /tmp/t5 origin/e…
-79. Agent: Review E2 T5 accept/bounce diff
-80. Bash: cd /tmp/t5; sed -n 490,516p scripts/epics.py; grep -n "bounced 2 times\|rewrite it before" tests/test_epics.py | head
-81. Bash: cd /tmp/t5 && git checkout -q -b e2-t5-fix && python3 - <<'EOF'
-82. Bash: cd /tmp/t5; grep -n "Bounced 2026-11-18" tests/test_epics.py; grep -n "no frame shows the wobble" -B 12 tests/test_epics.py | grep -n "Stat…
-83. Bash: cd /tmp/t5; sed -n 395,414p tests/test_epics.py
-84. Bash: cd /tmp/t5 && python3 - <<'EOF'
-85. Bash: cd /tmp/t5 && git add scripts/epics.py tests/test_epics.py && git commit -q -m "epics bounce: a twice-bounced ticket goes to todo, not read…
-86. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-87. Bash: cd /home/runner/work/reddit-daily/reddit-daily; grep -n "### T7 · Lessons" -A 9 epics/E2-epics-tickets-implementers.md | cut -c1-220
-88. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-89. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/friction.py add --function engineering --task "E2 T5: epics.py acce…
-90. Bash: cd /home/runner/work/reddit-daily/reddit-daily; sed -i 's/^Status: ready: T5 done 11-18; left: `--check` on lessons/Status: doing: shift 11…
-91. Agent: Implement E2 T7 lesson matching
-92. Bash: cd /home/runner/work/reddit-daily/reddit-daily; date -u +%H:%M; git fetch -q origin e2-t7-lessons main; git worktree add -q /tmp/t7 origin/…
-93. Bash: cd /tmp/t7; git diff origin/main -- process/lessons.md process/review.md
-94. Bash: cd /tmp/t7 && git checkout -q -b e2-t7-trim && python3 - <<'EOF'
-95. Bash: cd /tmp/t7 && sed -i 's/^backticks, clauses split by `;`; `Retire when:`. A clause with paths reaches$/backticks, `;` between clauses; `Ret…
-96. Agent: Review E2 T7 diff quickly
-97. Bash: cd /tmp/t7; grep -n "def _touches" -A 14 scripts/epics.py
-98. Bash: cd /tmp/t7 && python3 - <<'EOF'
-99. Bash: cd /tmp/t7 && git add process/lessons.md process/review.md scripts/epics.py tests/test_epics.py && git commit -q -m "Lessons: a Touches ite…
-100. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-101. Bash: cd /home/runner/work/reddit-daily/reddit-daily; python3 - <<'EOF'
-102. Bash: cd /home/runner/work/reddit-daily/reddit-daily; awk '/^## 2026-11-18/,/^## 2026-11-17/' WORKLOG.md | head -45; git worktree list | wc -l
-103. Bash: cd /home/runner/work/reddit-daily/reddit-daily; venv/bin/python scripts/backlog_status.py --count
-104. Bash: cd /home/runner/work/reddit-daily/reddit-daily; for w in /tmp/t4 /tmp/t4b /tmp/t5 /tmp/t7; do git worktree remove --force $w 2>/dev/null; d…
+71. Bash: git push -q origin e1-t4-takes-render 2>&1 | tail -1; git checkout -q main && git pull -q --ff-only; git status --short | head -3; grep -n …
+72. Read: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+73. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+74. Read: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+75. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+76. Read: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+77. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+78. Read: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+79. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+80. Grep: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+81. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+82. Read: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+83. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+84. Bash: date -u +%H:%M; venv/bin/python scripts/epics.py --check 2>&1 | tail -5; venv/bin/python scripts/check_docs.py 2>&1 | tail -5
+85. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -25
+86. Bash: tail -3 .github/friction.csv 2>/dev/null || ls analysis | grep -i fric; venv/bin/python scripts/friction.py --help 2>&1 | sed -n 1,15p
+87. Bash: venv/bin/python scripts/friction.py add --function product --task "E1 T4 line 2, Reddit half: main merged into the branch, full suite, dry …
+88. Bash: git status --short; grep -n "^F372" -r --include=*.csv . | cut -c1-120
+89. Bash: python3 - <<'EOF'
+90. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
+91. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | tail -8; date -u +%H:%M
+92. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -v "^ [1-4]\.\|^ \|Options" | head -20
+93. Edit: /home/runner/work/reddit-daily/reddit-daily/PLAN.md
+94. Bash: venv/bin/python scripts/report.py --help 2>&1 | grep -n -i "compare\|reach\|metric\|release\|routes" | head -15
+95. Bash: timeout 60 venv/bin/python scripts/report.py --compare show=takes --metric engaged_views --at-age 7 2>&1 | tail -6; git status --short
+96. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+97. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+98. Bash: venv/bin/python scripts/epics.py --check 2>&1 | tail -2; date -u +%H:%M; sed -n '/^## 2026-11-1[0-9]/=' WORKLOG.md | head -20; grep -n "^##…
+99. Bash: sed -n 132,175p WORKLOG.md | grep -i -n "clip" | head -3; timeout 90 venv/bin/python scripts/report.py --at-age 7 --by bg_clip --metric vie…
+100. Bash: wc -l WORKLOG.md && sed -n 60,64p WORKLOG.md && tail -3 WORKLOG.md | cut -c1-100
+101. Bash: python3 - <<'EOF'
+102. Bash: date -u +%H:%M; timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | tail -2; venv/bin/python scripts/check_docs.py 2>&1 | tail -3; git s…
+103. Bash: git add .github/friction.csv WORKLOG.md epics/E1-the-show-after-reddit.md && git commit -q -m "E1: T2's rotation scoped to the takes show (…
+104. Bash: grep -n "^### T8" -A 9 epics/E2-epics-tickets-implementers.md | cut -c1-900
+105. Bash: wc -l scripts/epics.py && grep -n "^def \|needs\b\|Needs" scripts/epics.py | head -40
+106. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/epics.py
+107. Bash: git checkout -q -b gm/epics-blocked-chain && grep -n "warnings\|def main" scripts/epics.py | sed -n 1,40p | grep -v "^2[0-4][0-9]:" ; grep …
+108. Bash: sed -n 628,647p scripts/epics.py; ls tests | grep -i epic; grep -n "ready but needs\|def _board\|def _epic\|tmp_path" tests/test_epics.py |…
+109. Bash: sed -n 1,62p tests/test_epics.py; grep -n "warnings" tests/test_epics.py | head -5
+110. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/epics.py
+111. Bash: sed -n 76,106p scripts/epics.py; grep -n "def test_ready_ticket\|ready but needs" tests/test_epics.py
+112. Bash: grep -n "_, warnings\|warnings =" tests/test_epics.py | head -5
+113. Bash: cat >> tests/test_epics.py <<'EOF'
+114. Bash: sed -i 's/ assert w.startswith("E1-a.md:") and "T5 waits on T2, blocked: bet 1'"'"'s read" in w/ assert "E1-a.md:" in w and "T5 waits on T2…
+115. Bash: rm -rf /tmp/oldboard && mkdir /tmp/oldboard && for f in $(git ls-tree --name-only 4f187029 epics/ | grep "/E"); do git show 4f187029:$f > /…
+116. Bash: timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git commit -qam "epics.py --check warns when an active epic's ticket wait…
+117. Agent: Fresh review of epics check diff
+118. Bash: cat >> tests/test_epics.py <<'EOF'
+119. Bash: git commit -qam "epics.py chain warning: test a cross-epic ref and that a ready waiter is warned once (review nits)" && git checkout -q mai…
+120. Bash: git status | head -5; git log --oneline -3 gm/epics-blocked-chain; git log --oneline -3 origin/main
+121. Bash: git reflog -8; git log --oneline -2 origin/gm/epics-blocked-chain
+122. Bash: git branch -f gm/epics-blocked-chain ffd235e5 && git log --oneline -3 gm/epics-blocked-chain && git diff --stat main gm/epics-blocked-chain…
+123. Bash: venv/bin/python scripts/friction.py add --function gm --task "epics.py --check warns when an active epic's ticket waits on a blocked one; f…
+124. Bash: python3 - <<'EOF'
+125. Bash: python3 - <<'EOF'
+126. Bash: head -1 analysis/experiments.csv; grep -c . analysis/experiments.csv; grep -n "^bet-2-engaged\|^#15-thin" analysis/experiments.csv | cut -c…
+127. Bash: sed -n 2953,2990p src/insights.py | grep -n "kind\|verdict\|KINDS\|VERDICTS" | head; cut -d, -f3 analysis/experiments.csv | sort | uniq -c
+128. Bash: git checkout -q -b data/takes-gate-rule && python3 - <<'EOF'
+129. Bash: python3 - <<'EOF'
+130. Agent: Challenge takes gate ledger rule
+131. Bash: date -u +%H:%M && python3 - <<'EOF'
+132. Bash: python3 - <<'EOF'
+133. Bash: git add analysis/experiments.csv epics/E1-the-show-after-reddit.md && git commit -q -m "Ledger takes-gate: the takes arm's gate before deci…
+134. Bash: venv/bin/python scripts/friction.py add --function data --task "E1 T5 line 1: the takes arm's gate written into the ledger before any takes…
+135. Bash: sed -n '/^## 2026-11-18 (12:18)/,/^---$/p' WORKLOG.md
+136. Bash: git add WORKLOG.md .github/friction.csv && git commit -q -m "Handover: the takes gate rule set; friction row" && git push -q origin main 2>…
+137. Bash: grep -n "^| 1[6-9] |\|^| 2[0-9] |\|#17\b\|#18\b" PRD.md | head -5; grep -n "^| 16 |" PRD.md | cut -c1-80
+138. Bash: python3 - <<'EOF'
+139. Bash: timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add PRD.md && git commit -q -m "PRD §0 #17: the takes arm, with its p…
+140. Bash: git checkout -q -b tmp/t4-t2-premerge main && git merge -q --no-edit product/e1-t4-show-slots 2>&1 | tail -2 && git merge -q --no-edit prod…
+141. Bash: sed -i 's/^SHOW_ALTERNATION = False/SHOW_ALTERNATION = True/' src/config.py && timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | grep …
+142. Bash: sed -i 's/^SHOW_ALTERNATION = False/SHOW_ALTERNATION = True/' src/config.py && timeout 600 venv/bin/python -m pytest tests/ -q 2>&1 | grep …
+143. Bash: date -u +%H:%M; grep -n "llm\|gemini\|monkeypatch.setattr\|GEMINI\|genai" tests/test_reddit_cutoff.py | head -15; grep -n "GEMINI_API_KEY\|…
+144. Bash: sed -n 1,25p tests/conftest.py
+145. Bash: git checkout -q main && grep -n "Open items" TECH_DEBT.md | head -2
+146. Bash: sed -n 153,157p TECH_DEBT.md | cut -c1-120 && python3 - <<'EOF'
+147. Bash: python3 - <<'EOF'
+148. Bash: python3 - <<'EOF'
+149. Bash: timeout 300 venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add WORKLOG.md TECH_DEBT.md && git commit -q -m "Handover: the trial …
+150. Bash: git branch -D tmp/t4-t2-premerge -q; gh run list --limit 4 --json displayTitle,conclusion,status -q '.[] | .status+" "+(.conclusion//"")+" …
