@@ -210,6 +210,96 @@ def test_committed_board_passes(capsys):
     assert ep.main([]) == 0 and ep.main(["--next"]) == 0
 
 
+BRIEF_BOARD = {
+    "E1-a.md": HEAD.format(n=1, status="active").replace(
+        "## Tickets", "Prose only the epic has: zebra crossing.\n\n## Tickets") + """
+### T1 · Make the widget wobble
+Status: ready: orchestrator's note, marmalade
+Needs: none
+Touches: src/widget.py, tests/test_widget.py
+Context: the widget is still
+Accept:
+- [ ] `pytest tests/test_widget.py` passes
+- [ ] the wobble is visible in a frame,
+  wrapped onto a second line
+Evidence: grapefruit, from an earlier bounce
+and a second evidence line, kumquat
+
+### T2 · Paint the sibling shed
+Status: todo
+Needs: T1
+Touches: src/shed.py
+Context: the shed is grey
+Accept:
+- [ ] the shed is teal
+Evidence:
+""",
+    "E2-b.md": epic(2, tickets=[{"n": 1}]).replace("Ticket 1", "Polish the other epic's lantern"),
+}
+
+
+def test_brief_is_its_ticket_alone(tmp_path, capsys):
+    d = write(tmp_path, BRIEF_BOARD)
+    assert ep.main(["brief", "E1", "T1", "--dir", d]) == 0
+    out = capsys.readouterr().out
+    assert "### T1 · Make the widget wobble" in out
+    assert "Touches: src/widget.py, tests/test_widget.py" in out
+    assert "- [ ] `pytest tests/test_widget.py` passes" in out
+    assert "  wrapped onto a second line" in out
+    assert "branch named `e1-t1-<slug>`" in out
+    for foreign in ("zebra", "Epic 1", "shed", "teal", "lantern", "Epic 2",     # sibling, epic
+                    "marmalade", "grapefruit", "kumquat"):                    # Status, Evidence
+        assert foreign not in out, foreign
+    assert '"Merge once the gates pass: tests green,' in out and "SAMPLE=1" in out
+    assert "## Lessons that apply to you" in out     # which ones: the fixture test below
+
+
+def test_lessons_match_a_clause_opening_with_the_role_or_any(tmp_path):
+    """Read from a fixture, not the live file, which every round edits."""
+    path = tmp_path / "lessons.md"
+    path.write_text("## L1 · Orchestrator only\nApplies: orchestrator (acceptance)\n\n"
+                    "## L2 · Implementer second\nApplies: orchestrator; implementer, `src/**`\n\n"
+                    "## L3 · Any on files\nApplies: orchestrator (records); any, `PLAN.md`\n\n"
+                    "## L4 · Any first\nApplies: any (research)\n\n"
+                    "## L5 · Mentions the word only\nApplies: generator (not the implementer)\n",
+                    encoding="utf-8")
+    assert ep.lessons_for("implementer", str(path)) == [
+        "L2 · Implementer second", "L3 · Any on files", "L4 · Any first"]
+
+
+def test_brief_ends_with_the_report_format(tmp_path, capsys):
+    assert ep.main(["brief", "E1", "T1", "--dir", write(tmp_path, BRIEF_BOARD)]) == 0
+    out = capsys.readouterr().out.rstrip()
+    block = out[out.rindex("```", 0, len(out) - 3):].splitlines()
+    assert out.endswith("Learned: anything the next person on this file should know "
+                        "(one line each)\n```")
+    assert block[1] == "Branch: e1-t1-<slug> (commit abc1234)"
+    assert ('- [ ] "the wobble is visible in a frame, wrapped onto a second line": '
+            "<command run> -> <its output, copied>") in block
+    # the same fields, in the same order, as process/epics.md's "The implementer"
+    doc = open(os.path.join(ep.ROOT, "process", "epics.md"), encoding="utf-8").read()
+    doc = doc.split("## The implementer", 1)[1].split("```")[1]
+    def labels(lines):
+        return [l.split(":")[0] for l in lines if l.strip() and not l.startswith(("-", "`"))]
+    assert labels(block) == labels(doc.splitlines()) == \
+        ["Branch", "Changed", "Accept", "Could not do", "Learned"]
+
+
+def test_brief_of_an_unknown_ticket_exits_non_zero(tmp_path, capsys):
+    d = write(tmp_path, BRIEF_BOARD)
+    for args in (["E1", "T9"], ["E9", "T1"], ["E1"]):
+        assert ep.main(["brief", *args, "--dir", d]) != 0
+        err = capsys.readouterr()
+        assert err.out == "" and len(err.err.strip().splitlines()) == 1, args
+
+
+def test_brief_of_a_committed_ticket(capsys):
+    """The sentences the brief quotes from CLAUDE.md and process/epics.md are
+    still there to quote."""
+    assert ep.main(["brief", "E2", "T4"]) == 0
+    assert capsys.readouterr().out.startswith("# Brief: E2 T4 · ")
+
+
 def test_needs_none_with_a_note_names_no_ticket():
     assert ep.needs_refs("none (E1 T7 for the play-along form)") == []
     assert ep.needs_refs("T1, E1 T3") == [("", "1"), ("1", "3")]
