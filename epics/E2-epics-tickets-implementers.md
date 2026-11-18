@@ -135,7 +135,7 @@ Accept:
 Evidence: 11-18 (01:37 shift), implementer from a hand-written brief on `e2-t4-brief` (`74547e6`). Re-run by the orchestrator: `epics.py brief E2 T4` exit 0, 54 lines, T4's own heading, Needs, Touches, Context and Accept, no Status or Evidence, nothing of the epic's prose or a sibling (grep for T3, T5, "Why now", "The decision": 0); it ends with the report block, one line per Accept; `brief E2 T99` exit 2. Fresh review: nothing blocking, 27 tickets checked for leaks; its two should-fixes fixed (`lessons_for` matched "any" only as the first clause, so L9 reached no brief; a fixture-board test read the live lessons file) in `851ec19`. Merged, 1,440 pass. Left as nits: the quote regex would cut a gates sentence at an "e.g. "; `brief` must be the first argument; E1 T7's and E6 T2's Context say "above", which a brief no longer shows; the brief prints Accept lines already ticked.
 
 ### T5 · Acceptance re-runs the criteria and leaves evidence
-Status: todo
+Status: doing: shift 11-18 01:37, 02:08 UTC (`e2-t5-accept`, from `epics.py brief E2 T5`; T4 is merged, and this dispatch is its last line)
 Needs: T4
 Touches: process/epics.md, scripts/epics.py, tests/test_epics.py
 Context: README "Four roles" step 1. An implementer's report is a claim; the orchestrator's re-run is the evidence.
