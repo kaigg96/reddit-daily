@@ -133,6 +133,21 @@ def test_the_count_and_the_listing_include_the_epic_board(tmp_path, monkeypatch,
     assert "READY 1 (floor 5)" in out and "  - [epic] E1 T7 · Ticket 7" in out
 
 
+def test_cut_epics_are_listed_as_dropped(tmp_path, monkeypatch, capsys):
+    """E2 T6: a filter's cut stays on the board a month, and `--dropped` is
+    what the next generator reads, so the cut must show there."""
+    (tmp_path / "E4-a.md").write_text(_epic(4, "dropped: filter 11-18, too thin", []),
+                                      encoding="utf-8")
+    (tmp_path / "E5-b.md").write_text(_epic(5, "approved (filter 11-18)", []),
+                                      encoding="utf-8")
+    assert b.dropped_epics(str(tmp_path)) == ["E4 · Epic 4: filter 11-18, too thin"]
+    monkeypatch.setattr(b, "dropped_epics", lambda d=None, real=b.dropped_epics: real(str(tmp_path)))
+    monkeypatch.setattr(b, "recently_dropped", lambda **k: [])
+    monkeypatch.setattr(b, "answered_in", lambda text: [])
+    b.main(["--dropped"])
+    assert "  - E4 · Epic 4: filter 11-18, too thin" in capsys.readouterr().out
+
+
 _OLD = """## 2026-10-16 (22:36) — older shift
 
 ### Done

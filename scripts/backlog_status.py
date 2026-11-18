@@ -131,6 +131,15 @@ def epic_ready(directory=None):
             for t in e.tickets if t.status == "ready" and needs_done(e, t)]
 
 
+def dropped_epics(directory=None):
+    """`E4 · name: why` for each epic a filter cut. They stay on the board a
+    month so the generator sees them (process/epics.md), and the work log's
+    drop lists, which `--dropped` read alone, never held them (E2 T6)."""
+    ep = _epics_module()
+    return [f"{e.label} · {e.name}: {e.header['Status'][0].partition(':')[2].strip()}"
+            for e in ep.board(directory or ep.EPICS) if e.status == "dropped"]
+
+
 def ready_all(epics_dir=None):
     """Ready work across both trackers and the epic board -- the one queue a
     shift ranks."""
@@ -146,6 +155,10 @@ def main(argv=None):
         print(len(found))
         return 0
     if "--dropped" in argv:
+        epics_cut = dropped_epics()
+        if epics_cut:
+            print("EPICS cut by a filter, so they are not proposed again:\n")
+            print("".join(f"  - {line}\n" for line in epics_cut))
         for heading, bullet in recently_dropped():
             print(f"{heading[:70]}\n  {bullet}\n")   # cut, a drop is re-proposed
         print("DONE in the last ten shifts (each bullet's opening), so "
