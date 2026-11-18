@@ -75,10 +75,10 @@ and more useful than a confident guess.
 - **Strategy (a decision):** the four new free music tracks rotate on the takes show only. The Reddit videos keep today's single track, so bet 1's read is undisturbed. A fresh reviewer argued against it and found a real flaw: the shows alternate, so without a fix the new show would repeat its own track one day in four. That is fixed, and its other conditions are recorded (watch for copyright claims on each new track; name the music difference when the show is judged).
 - **Product (checked):** the slot switching's test video for the Reddit show passed (32 seconds, sound, no dead air). The one for the new show is ready to request.
 - **Engineering (a fix before launch):** the music change was reworked onto the current code, with three new tests. A fresh review found nothing blocking, and all 1,458 tests pass. Nothing changed on the live channel.
-- **Data (a rule set in advance):** the test that decides whether the new show takes every slot on 5 January is now written down, before its first upload: it compares how long viewers watch each show over the same weeks, read once on 4 January. It can only fail on at least 20 new-show videos and a clear shortfall; otherwise it takes over as planned. Two fresh reviewers checked it, and the second's fix (which minimum count governs) is in.
-- **General management (a fix to the method):** the project board's daily check now warns when a task waits on another that is blocked, and says why. Run on yesterday's board, it names exactly the stall above, which three shifts missed. A fresh review found nothing blocking; merged.
-- **Product (checked):** the rule for retiring background clips that bury uploads does not fire on any clip still in use.
-- **Reliability and security (checked):** this morning's upload landed (07:47); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: one test video (a few Google requests); no paid voice.
+- **Data (a rule set in advance):** the test that decides whether the new show takes every slot on 5 January is now written down, before its first upload: it compares how long viewers watch each show over the same weeks, read once on 4 January. It can only fail on at least 20 new-show videos and a clear shortfall; otherwise it takes over as planned. Two fresh reviewers checked it.
+- **General management (a fix to the method):** the project board's daily check now warns when a task waits on another that is blocked, and says why. On yesterday's board it names exactly the stall above. Reviewed and merged.
+- **Product (checked):** no clip in use meets the rule for retiring clips that bury uploads.
+- **Reliability and security (checked):** this morning's upload landed (07:47); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: one test video (a few Google requests); no paid voice. **A mistake:** a trial run of the tests with the new show switched on was not shielded from Google, and some requests may have gone out from the shared daily allowance; recorded, with the fix, for the switch-on.
 - Balance: one bet (the decision) and its rule, two fixes (the repeat, the board's check), the rest checks.
 
 ### Blocked
@@ -87,6 +87,7 @@ and more useful than a confident guess.
 
 ### Next
 - **First, by day:** request the new show's test video. If it passes, merge the slot switching and the music, then switch the show on: its judging rule is already set.
+- Before switching the new show on: shield the tests from Google and pin ten tests to the switch's off position (the trial found them; recorded with the code-health notes). The slot switching and the music merge cleanly together (1,476 tests pass).
 - The 23 November weekly review: a free project slot for the genre study.
 
 ### Better?
