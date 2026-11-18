@@ -164,8 +164,8 @@ def last_bg_clip():
 
 def last_music_track(show=None):
     """The last upload's music track, or the last of `show`'s when given, ""
-    when there is none or the log cannot be read: `video._pick_music` then
-    picks from every track."""
+    when there is none or the log cannot be read: `video._pick_track` then
+    bars nothing on its account."""
     return _last_upload("music_track", "track", show)
 
 

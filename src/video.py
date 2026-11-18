@@ -180,7 +180,8 @@ def _pick_track(tracks, rng):
     """Never the channel's last track, nor this show's last, while another is
     in rotation (E1 T2). With the shows alternating by slot (T4) the channel's
     last upload is usually the other show's, so that alone would let a show
-    repeat its own track."""
+    repeat its own track; and since Reddit's is always the funk bed, takes
+    then rotates the plain tracks only."""
     if len(tracks) > 1:
         channel = log.last_music_track()
         recent = {channel, log.last_music_track(config.SHOW)}
