@@ -63,7 +63,7 @@ and more useful than a confident guess.
 
 ## 2026-11-18 (01:37) — The first round of proposing and cutting large projects ran: one of five survived, a study of what the hit videos in our genre share
 
-    Worked (% of the shift): gm 45 · engineering 25 · product 15 · market 15
+    Worked (% of the shift): gm 40 · engineering 35 · product 10 · market 15
 
 **Summary:** Five large projects were proposed and a separate reviewer cut four, keeping a study of what other quiz channels' most-watched Shorts have in common. Its riskiest step, reading other channels' figures without a login, was tried and works. Nothing reached viewers: a night shift cannot spend the Google allowance the morning upload needs, so the switching of shows by time slot waits for its test videos.
 
@@ -74,7 +74,7 @@ and more useful than a confident guess.
 ### Done
 - **General management (a bet on the method):** the project board's first full round of proposing and filtering. The reviewer caught five claims in the proposals that the records contradict. Cut projects now show in the list of already-dropped work, so they are not proposed again.
 - **Market (a test):** seven logged-out requests show another channel's Shorts, sorted by popularity, with exact views, length and date for each. One trap: two of the paid quiz channels we had listed post long videos, not Shorts.
-- **Engineering (an improvement):** the brief each helper agent receives is now generated from its task alone, with the rules and the lessons that apply. A fresh review found one lesson that was never reaching helpers; fixed before merging.
+- **Engineering (an improvement):** the brief each helper agent receives is now generated from its task alone, with the rules and the lessons that apply, and its first use built the next piece: one command records a task as accepted, or sends it back with the reason and a note in the log of what slows us down. Fresh reviews found four problems across the two, all fixed before merging; one was a lesson that never reached helpers.
 - **Product (checked):** the switching of shows by time slot passes its timing test and, switched off, changes nothing (all 1,449 tests). Its two test videos are left.
 - **Reliability and security (checked):** last night's upload landed (21:09); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: no Google requests, no paid voice.
 - Balance: mostly improving (the board's method, the study); no fixes were needed.
@@ -86,7 +86,7 @@ and more useful than a confident guess.
 
 ### Next
 - **First, by day:** request the slot switching's test video for the Reddit show; the next daytime shift does the other show.
-- Dispatch the next helper task from a generated brief, which completes the brief's own last check. The study's first task fits if it has a slot.
+- The board method's next task (lessons matched to the files a helper touches) is ready; dispatch it from a generated brief beside the study's first task, if the study has a slot.
 - The 23 November weekly review: give the study a slot, and decide whether a waiting project may lend its slot to one with a deadline.
 
 ### Better?
