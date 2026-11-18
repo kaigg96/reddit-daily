@@ -158,17 +158,18 @@ Accept:
 Evidence: 11-18 (01:37 shift). A generator agent (worktree, about 5 minutes) wrote five proposals on `e2-t6-proposals` (`188f67e`): E4 a play-along round past a minute, E5 where viewers leave, E6 what the hits in our genre share, E7 one command for "do we already know", E8 a merge that cannot land broken. A second fresh agent filtered them, ranking forward and reversed (both E6 > E8 > E7 > E5 > E4): **E6 approved, four cut**, each status line carrying its reason (`c02dcf7`). The filter checked the generator's claims and five did not hold (E4's "about as long as a reading": a narrated play-along episode is 16.9 s, so three are ~50 s, not past a minute; E6's "the only scan": three ran). Line 2 needed code: `--dropped` read only the work log, so `backlog_status.dropped_epics` now lists cut epics first, with a test (merged `9b44509` after a fresh review, nits only, the one that could drop a reason fixed; 1,435 pass). `venv/bin/python scripts/backlog_status.py --dropped` prints E4, E5, E7, E8 with their reasons. `epics.py --check`: 8 epics, clean, two active (E1, E2). E8's residue is already lesson L2. The round took about 15 minutes of a shift; the generator's 5 minutes is the cheap part and the filter's checking is where the value was.
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: doing: shift 11-18 01:37, 02:19 UTC (`e2-t7-lessons`); T5 done 11-18; left: `--check` on lessons, and `brief` matching by `Touches` (today it matches by role, clause by clause, in `epics.lessons_for`). Seeded 11-15, 16 lessons by 11-16
+Status: done
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
 Accept:
 - [x] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
-- [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
-- [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
+- [x] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
+- [x] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
 - [x] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired (11-15, `22816b9`)
 - [x] at least five lessons are seeded, each with real evidence
 Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`. 11-16 weekly review: L14–L16 from G30, G32, G33 (three or more rows each), same four fields; evidence counts refreshed on L1–L6.
+Accepted 2026-11-18: 11-18 (01:37 shift), implementer from a brief on `e2-t7-lessons` (`dbbc9a3`). Re-run: `epics.py --check` clean on 16 lessons; `pytest tests/test_epics.py` 34 passed (fixture tests for no Evidence, a 31st lesson, five Touches sets); `brief E6 T1` (Touches PRD.md §4) lists L6, L7, L9, L13, L14, L16 and no `src/` lesson. The branch put process/lessons.md 29 words over its budget; trimmed. Fresh review: a Touches item with a note ("src/ (by merge of …)") missed its directory's lessons, and a prefix match let `PLAN.md.bak` match; fixed in `652103f` (an item matches on its first word), with a test. Left: L16's backticked `PRD.md` is a topic, now read as a path filter. Merged `4f18702`, 1,449 pass.
 
 ### T8 · E1's remaining tickets run through this workflow
 Status: todo
