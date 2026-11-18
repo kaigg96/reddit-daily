@@ -384,8 +384,8 @@ def test_bounce_returns_to_ready_appends_the_reason_and_logs_friction(tmp_path, 
     after = path.read_text(encoding="utf-8")
     assert _diff(ACCEPT_BOARD, after) == [
         "- Status: review: `e1-t2-shed`", "+ Status: ready",
-        "+ Bounced 2026-11-18: the door is grey"]
-    assert after.endswith("and its second line\nBounced 2026-11-18: the door is grey\n")
+        "+ Bounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`)"]
+    assert after.endswith("and its second line\nBounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`)\n")
     rows = list(csv.DictReader(open(log, encoding="utf-8")))
     assert len(rows) == 1
     assert (rows[0]["function"], rows[0]["outcome"], rows[0]["category"],
@@ -401,8 +401,9 @@ def test_bounce_returns_to_ready_appends_the_reason_and_logs_friction(tmp_path, 
     out = capsys.readouterr().out
     assert "(bounce 2)" in out and "friction row F2 (docs)" in out and "Rewrite it" in out
     t = ep.parse(str(path)).ticket(2)
-    assert t.status == "ready" and "rewrite it before it is dispatched again" in t.value("Status")
-    assert t.evidence.endswith("Bounced 2026-11-18: the door is grey Bounced 2026-11-19: still grey")
+    assert t.status == "todo" and "rewrite it before it is dispatched again" in t.value("Status")
+    assert t.evidence.endswith("Bounced 2026-11-18: the door is grey (was: review: `e1-t2-shed`) "
+                               "Bounced 2026-11-19: still grey (was: review: again)")
     assert [r["category"] for r in csv.DictReader(open(log, encoding="utf-8"))] == ["mistake", "docs"]
 
 
@@ -411,7 +412,7 @@ def test_bounce_onto_an_empty_evidence_line_and_its_refusals(tmp_path, capsys):
     log = tmp_path / "friction.csv"
     args = ["bounce", "E1", "T1", "--dir", d, "--friction", str(log)]
     assert ep.main(args + ["--why", "no frame shows the wobble"], today="2026-11-18") == 0
-    assert "Evidence: Bounced 2026-11-18: no frame shows the wobble\n" in path.read_text(encoding="utf-8")
+    assert "Evidence: Bounced 2026-11-18: no frame shows the wobble (was: " in path.read_text(encoding="utf-8")
     capsys.readouterr()
     before = path.read_text(encoding="utf-8")
     assert ep.main(args + ["--why", "again"]) == 1                  # T1 is ready now

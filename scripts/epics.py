@@ -492,7 +492,7 @@ def _friction():
 
 def bounce(epic, t, why, today=None, friction_path=None, category=None,
            minutes=ROUND_MINUTES):
-    """Return t to `ready`, add `Bounced <date>: <why>` to its Evidence, and
+    """Return t to `ready`, add `Bounced <date>: <why> (was: <status>)` to its Evidence, and
     log the bounce in the friction log. The second bounce marks the ticket for
     rewriting and its row is `docs` (the ticket was written wrong); a first is
     `mistake`. Returns (bounces so far, the friction row)."""
@@ -502,10 +502,13 @@ def bounce(epic, t, why, today=None, friction_path=None, category=None,
         raise ValueError(f"{where} is `{t.value('Status')[:40]}`: only a ticket in review "
                          "or doing is bounced")
     count = 1 + len(re.findall(r"\bBounced \d{4}-\d{2}-\d{2}:", t.evidence))
+    # `todo`, not `ready`, at the limit: --next dispatches any `ready` (review).
     status = "ready" if count < BOUNCE_LIMIT else (
-        f"ready: bounced {count} times; rewrite it before it is dispatched again "
+        f"todo: bounced {count} times; rewrite it before it is dispatched again "
         "(process/epics.md)")
-    text = edited(epic, t, status, f"Bounced {_today(today)}: {why}")   # refuses first
+    # The old status names the branch and what was left; keep it (review).
+    was = t.value("Status")
+    text = edited(epic, t, status, f"Bounced {_today(today)}: {why} (was: {was})")   # refuses first
     row = _friction().add(
         "gm", f"bounce {where} · {t.name}", "partial",
         category or ("docs" if count >= BOUNCE_LIMIT else "mistake"),
