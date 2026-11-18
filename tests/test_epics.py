@@ -267,6 +267,97 @@ def test_lessons_match_a_clause_opening_with_the_role_or_any(tmp_path):
         "L2 · Implementer second", "L3 · Any on files", "L4 · Any first"]
 
 
+LESSONS_FIXTURE = """# Lessons
+
+## L1 · Orchestrator only
+Evidence: G1
+Applies: orchestrator (acceptance)
+
+## L2 · Implementer on src
+Evidence: G2
+Applies: orchestrator; implementer, `src/**`
+
+## L3 · Any on PLAN
+Evidence: G3
+Applies: orchestrator (records); any, `PLAN.md`, `PRD.md`
+
+## L4 · Any, no paths
+Evidence: G4
+Applies: any (research)
+
+## L5 · Implementer on the video
+Evidence: G5
+Applies: orchestrator (scheduling); implementer, `src/video.py`, `src/llm.py`
+
+## L6 · Implementer, no paths
+Evidence: G6
+Applies: implementer
+
+## L7 · Generator on src
+Evidence: G7
+Applies: generator, `src/widget.py`
+
+## L8 · Any on the worklog
+Evidence: G8
+Applies: any, `WORKLOG.md`
+"""
+
+
+def test_lessons_match_role_and_touches(tmp_path):
+    path = str(tmp_path / "lessons.md")
+    (tmp_path / "lessons.md").write_text(LESSONS_FIXTURE, encoding="utf-8")
+    def heads(touches):
+        return [h.split(" · ")[0] for h in ep.lessons_for("implementer", path, touches)]
+    assert heads(["src/widget.py", "tests/test_widget.py"]) == ["L2", "L4", "L6"]
+    assert heads(["src/video.py"]) == ["L2", "L4", "L5", "L6"]
+    assert heads(["PLAN.md §3", "scripts/epics.py"]) == ["L3", "L4", "L6"]
+    assert heads(["WORKLOG.md"]) == ["L4", "L6", "L8"]
+    assert heads([]) == ["L4", "L6"]
+
+
+def test_brief_lists_exactly_the_lessons_for_its_touches(tmp_path, capsys, monkeypatch):
+    (tmp_path / "lessons.md").write_text(LESSONS_FIXTURE, encoding="utf-8")
+    monkeypatch.setattr(ep, "LESSONS", str(tmp_path / "lessons.md"))
+    board = tmp_path / "board"
+    board.mkdir()
+    assert ep.main(["brief", "E1", "T1", "--dir", write(board, BRIEF_BOARD)]) == 0
+    out = capsys.readouterr().out
+    section = out.split("## Lessons that apply to you", 1)[1].split("## Report", 1)[0]
+    listed = [l[2:] for l in section.splitlines() if l.startswith("- ")]
+    assert listed == ["L2 · Implementer on src", "L4 · Any, no paths",
+                      "L6 · Implementer, no paths"]
+    assert "a path in your `Touches`" in section and "until E2 T7" not in section
+
+
+def test_check_fails_a_lesson_with_no_evidence_and_more_than_thirty(tmp_path, capsys):
+    path = tmp_path / "lessons.md"
+    path.write_text(LESSONS_FIXTURE, encoding="utf-8")
+    assert ep.check_lessons(str(path)) == []
+    path.write_text(LESSONS_FIXTURE.replace("Evidence: G4\n", "Evidence:  \n")
+                    .replace("Evidence: G6\n", ""), encoding="utf-8")
+    errors = ep.check_lessons(str(path))
+    assert len(errors) == 2 and "L4 has no `Evidence:`" in errors[0] \
+        and "L6 has no `Evidence:`" in errors[1], errors
+    assert errors[0].split(":")[1] == "15"          # the lesson's heading line
+    many = "".join(f"## L{n} · Rule {n}\nEvidence: G{n}\nApplies: any\n\n" for n in range(1, 32))
+    path.write_text(many, encoding="utf-8")
+    assert ep.check_lessons(str(path)) == [f"{path}:121: 31 lessons, at most 30"]
+    path.write_text(many.split("## L31")[0], encoding="utf-8")
+    assert ep.check_lessons(str(path)) == []
+    # and --check fails on them
+    board = tmp_path / "board"
+    board.mkdir()
+    d = write(board, CLEAN)
+    path.write_text(LESSONS_FIXTURE.replace("Evidence: G4\n", ""), encoding="utf-8")
+    assert ep.main(["--check", "--dir", d, "--now", "2026-11-16 12:00", "--lessons", str(path)],
+                   date_of=lambda _p: DAY) == 1
+    assert "L4 has no `Evidence:`" in capsys.readouterr().out
+
+
+def test_committed_lessons_pass():
+    assert ep.check_lessons() == []
+
+
 def test_brief_ends_with_the_report_format(tmp_path, capsys):
     assert ep.main(["brief", "E1", "T1", "--dir", write(tmp_path, BRIEF_BOARD)]) == 0
     out = capsys.readouterr().out.rstrip()

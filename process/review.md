@@ -50,7 +50,11 @@ Due when there is a snapshot no weekly review has read.
    three or more rows since the last weekly becomes a lesson in
    `process/lessons.md` (rule, evidence ids, the role and paths it applies
    to, when it retires) or a ticket on the board; a lesson with no new
-   evidence in eight weeks is retired, and the file never holds more than 30.
+   evidence in eight weeks is retired, and the file never holds more than 30
+   (`scripts/epics.py --check` fails a lesson with no `Evidence:`, and a 31st).
+   A lesson's paths decide which briefs carry it: `epics.py brief` lists a
+   lesson when an `Applies` clause opens with `implementer` or `any` and names
+   no paths or one matching the ticket's `Touches`.
 
 ## Monthly — the business review
 
