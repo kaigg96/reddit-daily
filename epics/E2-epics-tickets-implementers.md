@@ -146,15 +146,15 @@ Accept:
 Evidence:
 
 ### T6 · Epics are proposed and cut before they are planned
-Status: doing: shift 11-18 01:37, 01:40 UTC (generator on `e2-t6-proposals`, then a fresh filter)
+Status: done
 Needs: T2
 Touches: process/backlog.md, process/epics.md, epics/ (new proposed files)
 Context: "The decision", Generator and Filter. The filter must be a fresh agent. Expect it to cut most of what is proposed.
 Accept:
-- [ ] one full round is recorded: at least four proposed epics, the filter's verdict and reason on each, at least one cut
-- [ ] cut epics appear in `backlog_status.py --dropped`, so the next round does not propose them again
-- [ ] no more than two epics are `active` afterwards (`epics.py --check`)
-Evidence:
+- [x] one full round is recorded: at least four proposed epics, the filter's verdict and reason on each, at least one cut
+- [x] cut epics appear in `backlog_status.py --dropped`, so the next round does not propose them again
+- [x] no more than two epics are `active` afterwards (`epics.py --check`)
+Evidence: 11-18 (01:37 shift). A generator agent (worktree, about 5 minutes) wrote five proposals on `e2-t6-proposals` (`188f67e`): E4 a play-along round past a minute, E5 where viewers leave, E6 what the hits in our genre share, E7 one command for "do we already know", E8 a merge that cannot land broken. A second fresh agent filtered them, ranking forward and reversed (both E6 > E8 > E7 > E5 > E4): **E6 approved, four cut**, each status line carrying its reason (`c02dcf7`). The filter checked the generator's claims and five did not hold (E4's "about as long as a reading": a narrated play-along episode is 16.9 s, so three are ~50 s, not past a minute; E6's "the only scan": three ran). Line 2 needed code: `--dropped` read only the work log, so `backlog_status.dropped_epics` now lists cut epics first, with a test (merged `9b44509` after a fresh review, nits only, the one that could drop a reason fixed; 1,435 pass). `venv/bin/python scripts/backlog_status.py --dropped` prints E4, E5, E7, E8 with their reasons. `epics.py --check`: 8 epics, clean, two active (E1, E2). E8's residue is a queue item, not an epic (PLAN §3). The round took about 15 minutes of a shift; the generator's 5 minutes is the cheap part and the filter's checking is where the value was.
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
 Status: blocked: T5 (its Needs; the board check warned while it read ready); left: `--check` on lessons and brief matching (T4). Seeded 11-15, 16 lessons by 11-16
