@@ -523,3 +523,29 @@ def test_a_touches_item_with_a_note_matches_on_its_path():
     assert ep._touches("PLAN.md", ["PLAN.md §3"])
     assert not ep._touches("PLAN.md", ["PLAN.md.bak"])
     assert not ep._touches("src/run.py", ["the experiment ledger"])
+
+
+def _warnings(tmp_path, files):
+    _, warnings = ep.check(ep.board(write(tmp_path, files)), now=NOON, date_of=lambda _p: DAY)
+    return warnings
+
+
+def test_a_ticket_waiting_on_a_blocked_one_is_warned_with_the_reason(tmp_path):
+    # E1 T5 waited on T2, blocked on a read the epic's decisions said not to wait for
+    board = {"E1-a.md": epic(1, tickets=[
+        {"n": 2, "status": "blocked: bet 1's read (one variable per release)"},
+        {"n": 5, "status": "todo", "needs": "T1, T2"},
+        {"n": 1, "status": "done", "evidence": "abc123"}])}
+    (w,) = _warnings(tmp_path, board)
+    assert "E1-a.md:" in w and "T5 waits on T2, blocked: bet 1's read" in w
+    assert run_check(tmp_path, board) == []          # a warning, never a failure
+
+
+def test_no_chain_warning_off_the_active_epics_or_once_unblocked(tmp_path):
+    blocked = [{"n": 2, "status": "blocked: a reason"}, {"n": 5, "status": "todo", "needs": "T2"}]
+    assert _warnings(tmp_path, {"E1-a.md": epic(1, "proposed", tickets=blocked)}) == []
+    unblocked = [{"n": 2, "status": "review: a branch"}, {"n": 5, "status": "todo", "needs": "T2"}]
+    assert _warnings(tmp_path, {"E1-a.md": epic(1, tickets=unblocked)}) == []
+    done = [{"n": 2, "status": "blocked: a reason"},
+            {"n": 5, "status": "done", "needs": "T2", "evidence": "x"}]
+    assert _warnings(tmp_path, {"E1-a.md": epic(1, tickets=done)}) == []
