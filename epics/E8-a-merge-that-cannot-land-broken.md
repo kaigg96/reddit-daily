@@ -1,5 +1,5 @@
 # E8 · A merge to the live branch that cannot land broken
-Status: dropped: filter 11-18, no row of G22/G11 records a lost upload and only ~10 of 21 would be caught on the merged tree; a script nobody must run is the advice it criticises. Kept as one queue item: tests and check_docs on the merged tree before every push to main
+Status: dropped: filter 11-18, no row of G22/G11 records a lost upload and only ~10 of 21 would be caught on the merged tree; a script nobody must run is the advice it criticises. its residue, the full suite on the merged tree before every push to main, is already lesson L2 (`process/lessons.md`)
 Function: Engineering (with Reliability)
 Deadline: none; most useful before E1's switch-on merges (by 2027-01-05)
 Measure: new rows in friction groups G22 ("Merge mechanics show their breakage only after landing", 17) and G11 ("Tests not rerun after the last edit before a merge", 4), and fix commits landing within an hour of a merge to `main`
