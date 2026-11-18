@@ -429,7 +429,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Escalations:** none opened (11-05's hold); the owner answered five
   label-only asks on 11-10 and passed over the five needing a watch, a
   direction call or hands (#59, #77, #80, #82, #90). Tight on files (#88,
-  #65 approved, awaiting hands), not decisions. **Decisions** (inline): D13,
+  #65 approved, then waiting for hands; all six closed 11-15), not decisions. **Decisions** (inline): D13,
   D11, D5 false; D4 worse (PRD §4 15,317 → 20,714 words in a week); D2, D8,
   D9 (amended, #91), D12 strained; D6, D14 hold a third audit: graduation
   candidates. **Outward (docs 11-12):** the `attribution` setting turns off
@@ -542,9 +542,13 @@ a list nobody can read is the same as no list.
   ("Fuuuck", "sh!t") pass every list, as the library does not fold repeats
   (folding would newly flag 0 of 1,417 logged titles and lines); a swearing
   vote in voiced mode (dormant) is untested; the library reads a curly "he’ll"
-  as "hell" (fails safe, rare); YouTube's API refuses "<" and ">" in a title
-  or description and nothing strips them, which would fail the upload and
-  retry the same post (0 of ~2,300 past titles and answers). Live video left
+  as "hell" (fails safe, rare). YouTube's API refuses "<" and ">" in a title,
+  description or tag: it happened 11-16 (an answer quoting another, "\> Huge
+  IT nation"; the evening slot lost) and `youtube._accepted` swaps both for
+  angle quotes since 11-17 (reviewed). Left: `content.clean_text` keeps
+  Reddit's markdown escapes and quote marks, so that "\>" was also on screen,
+  in the captions and in Polly's text; stripping them changes the video, so
+  after bet 1's read, not inside it. Live video left
   as is (retitling would alter a row of #10 and #14). **Closes when** `v8`
   ships and none of these has occurred in its first 20 uploads.
 

@@ -101,7 +101,11 @@ ORIENT = {
 # 20714 -> 20310 on 11-12: five closed findings compressed; it follows down.
 # 20310 -> 19130 the same evening: four more (the 09-25 topic read, R4's 10-10,
 # R8, the zero-view pipeline check, which now carries R11's result).
-REFERENCE = {"PRD.md#4. Objectives": 19130}
+# The epic workflow's method, its lessons and the viewer bar (11-15): read by
+# the role that needs them, never at start-up; capped where they were written
+# so they can only shrink, like PRD section 4.
+REFERENCE = {"PRD.md#4. Objectives": 19130, "process/epics.md": 1200,
+             "process/lessons.md": 900, "process/viewer-bar.md": 800}
 
 
 def words(text):

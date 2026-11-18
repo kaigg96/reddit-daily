@@ -1,5 +1,5 @@
 # E2 · Work in epics: a generator, a filter, an orchestrator, many implementers
-Status: approved
+Status: active
 Function: General management, Engineering
 Deadline: none; its pilot is E1, which has one (2027-01-12)
 Measure: format releases reaching viewers (one in the 31 days to 2026-11-14, a model swap Google forced)
@@ -72,9 +72,9 @@ turn out to measure the wrong thing.
 
 ## Assumptions to check
 
-1. A CI shift can run implementers side by side (T3). If not, they run one
+1. **True (T3, 11-15).** A CI shift can run implementers side by side (T3). If not, they run one
    after another and the model still holds; only the speed changes.
-2. The usage allowance covers it: implementers multiply a shift's cost, and
+2. **True per shift, false at three shifts a day (T3, 11-16).** The usage allowance covers it: implementers multiply a shift's cost, and
    three shifts a day already exceed the 200-unit weekly cap the owner has
    been asked to raise. T3 measures the cost of two at once before more are tried.
 3. Anthropic's published accounts of this pattern still read as recalled here
@@ -87,40 +87,41 @@ turn out to measure the wrong thing.
 ## Tickets
 
 ### T1 · The board can be read and checked by one command
-Status: ready
+Status: done
 Needs: none
 Touches: scripts/epics.py (new), tests/test_epics.py (new), .github/shift-usage.csv (read only)
 Context: `epics/README.md` defines the format. Model the script on `scripts/backlog_status.py`, which reads the status tables in PLAN.md and PRD.md.
 Accept:
-- [ ] `venv/bin/python scripts/epics.py` prints every epic with its tickets grouped by status
-- [ ] `scripts/epics.py --next` prints the single next action by the order in README ("Four roles")
-- [ ] `scripts/epics.py --check` exits 1, naming the file and line, for: a missing header line, an unknown status, a `Needs` naming a ticket that does not exist, a `done` ticket with an empty `Evidence`, a `doing` ticket older than 12 hours, more than two `active` epics
-- [ ] a test runs `--check` on the committed `epics/` and passes; each failure above has its own test
-- [ ] the three baseline numbers under "How we will know" are written into this file with the commands that produced them
-Evidence:
+- [x] `venv/bin/python scripts/epics.py` prints every epic with its tickets grouped by status
+- [x] `scripts/epics.py --next` prints the single next action by the order in README ("Four roles")
+- [x] `scripts/epics.py --check` exits 1, naming the file and line, for: a missing header line, an unknown status, a `Needs` naming a ticket that does not exist, a `done` ticket with an empty `Evidence`, a `doing` ticket older than 12 hours, more than two `active` epics
+- [x] a test runs `--check` on the committed `epics/` and passes; each failure above has its own test
+- [x] the three baseline numbers under "How we will know" are written into this file with the commands that produced them
+Evidence: 11-16, merged `783d015`. Re-run by the orchestrator on the branch: the listing, `--next` -> "ACCEPT E1 T2 …", `--check` -> "3 epics, 25 tickets: clean", exit 0; `pytest tests/test_epics.py` -> 21 passed; full suite on the merged tree 1,104 passed. Two fresh reviews: the committed-board test hung on the clock and CI's depth-1 clone, and `Needs: none (note)` read as a dependency; both fixed before merge. Baselines (31 days to 11-14): **format releases reaching viewers 1** (`v7s`, first upload 11-08; first timestamp per `format_version` in `upload_log.csv`); **7.7 quota units per merge** (902.6 units over 72 runs in `.github/shift-usage.csv`, 2026-10-14 to 11-13, / 117 first-parent merges on `main` by `git log --merges --first-parent`, less one sync; a proxy, since most changes land as direct commits); **16 of 72 shifts ended early for lack of ready work** (under 36 of 60 minutes and a handover saying nothing was ready, matched ±75 min across `WORKLOG.md`'s history; a heuristic, the weakest of the three).
 
 ### T2 · The four roles have written methods
-Status: todo
+Status: done
 Needs: T1
 Touches: process/epics.md (new), process/shift.md, process/backlog.md, scripts/context_budget.py, scripts/backlog_status.py
 Context: this file's "The decision" is the outline. Read the two Anthropic articles named in assumption 3 first-hand and adopt only what fits; cite what you adopt.
 Accept:
-- [ ] `process/epics.md` gives each role a procedure a cold shift can follow, in 1,200 words or fewer, and has a budget in `context_budget.py`
-- [ ] `process/shift.md` §3 sends a shift to `epics.py --next` before the ranked queue
-- [ ] `backlog_status.py` counts `ready` tickets of `active` epics as ready work, with a test
-- [ ] the fresh-context review required by `CLAUDE.md` §3 found no contradiction with `CLAUDE.md` §4 or `ORG.md` §2
-Evidence:
+- [x] `process/epics.md` gives each role a procedure a cold shift can follow, in 1,200 words or fewer, and has a budget in `context_budget.py`
+- [x] `process/shift.md` §3 sends a shift to `epics.py --next` before the ranked queue
+- [x] `backlog_status.py` counts `ready` tickets of `active` epics as ready work, with a test
+- [x] the fresh-context review required by `CLAUDE.md` §3 found no contradiction with `CLAUDE.md` §4 or `ORG.md` §2
+Evidence: 11-15: `process/epics.md` (1,037 words, budget 1,200 in `context_budget.py`); the dispatch method is T3's (one message, foreground, worktrees). Not yet reviewed fresh; the first orchestrating shift reviews it with T1's wiring. 11-16, merged `783d015`: a fresh review found one contradiction with `CLAUDE.md` §4 (a ticket needing a paid key "ends in one ask") and five more blocking gaps (accept-first against "dispatch first", dispatch ignoring `active` and `Needs`, briefs silent on the Gemini and render allowances, L11 naming a tool that spends Gemini, gates weaker than §3); all applied, with L1, L2, L9, L12 and L13's evidence corrected. A second fresh review of the result found no contradiction.
 
 ### T3 · We know whether implementers can run side by side in CI
-Status: todo
+Status: done
 Needs: T1
 Touches: this file; process/epics.md if it exists
 Context: a spike, one shift at most. Shifts run with `Agent` allowed and background agents refused (`.github/workflows/foreground_in_ci.py`); foreground agents sent in one message run together. Try two implementers on two trivial tickets, each isolated on its own branch or worktree.
 Accept:
-- [ ] this file records the run id, whether both ran at once, whether each stayed in its own tree, and the shift's quota units against a normal shift's
-- [ ] assumption 1 and 2 above are each marked true or false with that evidence
-- [ ] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
-Evidence:
+- [x] this file records the run id, whether both ran at once, whether each stayed in its own tree, and the shift's quota units against a normal shift's
+- [x] assumption 1 and 2 above are each marked true or false with that evidence
+- [x] the dispatch method chosen (side by side, or one after another) is written where T4 will read it
+Evidence: early, ahead of T1 (11-15, run 43749661055, E1's T3 and T6 plus a read-only challenger, three foreground agents in one message): **assumption 1 true:** they returned together after ~11 minutes (19:01 to 19:12), the longest one's own 651 s, against 1,160 s summed; each implementer worked in its own worktree (`isolation: worktree`) and pushed its own branch, and neither diff touched the other's files. **Assumption 2 unmeasured:** this run's row in `.github/shift-usage.csv` lands after the shift; compare it with the three before it (8.2–11.1 units). Dispatch method, for T4: side by side, all agents in one message, since a background agent is refused and a lone foreground one blocks the orchestrator.
+11-16: run 43749661055's row reads 10.48 units over 47.7 minutes, inside the 8.2–11.5 of the shifts before it, so either a round costs little or `shift-usage.csv` does not count subagents' tokens; which one is the line left (compare this shift's row, run 43856314698, seven rounds, when it lands). Dispatch method written in `process/epics.md` (merged 11-16). 11-16 (21:00 shift): run 43856314698, seven rounds, reads **14.19 units** over 44.4 min and 100 turns, above the 8.2–11.5 of the ten shifts before it (11-13 to 11-15, no rounds), at 0.14 a turn against their 0.07–0.10. Cost rose with rounds while turns did not, so `quota_units` (the action's `total_cost_usd`) counts subagents. **Assumption 2:** a heavy round shift costs about 1.4× the band's median, which fits inside one shift's share; but three shifts a day at ~10 units already run past the 200-unit weekly cap, so routine rounds every shift do not fit until the owner's raise lands (PLAN, the allowance variable). Rounds stay at what a ticket needs, as `process/epics.md` says.
 
 ### T4 · An implementer's brief is built from its ticket alone
 Status: todo
@@ -145,7 +146,7 @@ Accept:
 Evidence:
 
 ### T6 · Epics are proposed and cut before they are planned
-Status: todo
+Status: ready
 Needs: T2
 Touches: process/backlog.md, process/epics.md, epics/ (new proposed files)
 Context: "The decision", Generator and Filter. The filter must be a fresh agent. Expect it to cut most of what is proposed.
@@ -156,17 +157,17 @@ Accept:
 Evidence:
 
 ### T7 · Lessons come from evidence and reach the agent that needs them
-Status: todo
+Status: blocked: T5 (its Needs; the board check warned while it read ready); left: `--check` on lessons and brief matching (T4). Seeded 11-15, 16 lessons by 11-16
 Needs: T5
 Touches: process/lessons.md (new), scripts/epics.py, tests/test_epics.py, process/review.md
 Context: PLAN C19 and D16's brief. A lesson is never an agent's opinion of its own work. Seed the file from evidence that already exists: the friction log's groups (`.github/friction-groups.csv`) and review findings recorded in TECH_DEBT.md.
 Accept:
-- [ ] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
+- [x] each lesson has: the rule in one sentence, `Evidence:` (a commit, run id, issue or friction id), `Applies:` (a role, and optionally paths), `Retire when:`
 - [ ] `epics.py --check` fails a lesson with no evidence, and the file holds at most 30
 - [ ] `epics.py brief` includes exactly the lessons whose `Applies` matches the ticket's role and `Touches`, with a test
-- [ ] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired
-- [ ] at least five lessons are seeded, each with real evidence
-Evidence:
+- [x] the weekly review (`process/review.md`) gains one step: a friction group with three or more entries becomes a lesson or a ticket, and a lesson with no new evidence in eight weeks is retired (11-15, `22816b9`)
+- [x] at least five lessons are seeded, each with real evidence
+Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the most rows (G2, G16, G22, G19, G1, G15, G17, G18, G26, G27, G28) and the day's own rows (F346, F347), each with `Evidence:`, `Applies:`, `Retire when:`. 11-16 weekly review: L14–L16 from G30, G32, G33 (three or more rows each), same four fields; evidence counts refreshed on L1–L6.
 
 ### T8 · E1's remaining tickets run through this workflow
 Status: todo

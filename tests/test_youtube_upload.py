@@ -71,6 +71,29 @@ def test_upload_video_still_returns_none_on_a_lasting_error(monkeypatch, tmp_pat
     assert youtube.upload_video(tmp_path / "v.mp4", "t", "d", ["k"]) is None
 
 
+def test_angle_brackets_never_reach_youtube(monkeypatch, tmp_path):
+    # 2026-11-16: an answer quoting another, "\> Huge IT nation", made the
+    # description invalid and the evening upload was refused.
+    sent = {}
+
+    class Videos:
+        def insert(self, **kw):
+            sent.update(kw["body"]["snippet"])
+            return _request((None, {"id": "abc"}))
+
+    class Client:
+        def videos(self): return Videos()
+
+    monkeypatch.setattr(youtube, "_authenticate", lambda: None)
+    monkeypatch.setattr(youtube, "build", lambda *a, **k: Client())
+    monkeypatch.setattr(youtube, "MediaFileUpload", lambda *a, **k: None)
+    assert youtube.upload_video(tmp_path / "v.mp4", "Is 3 > 2?",
+                                "3. \\> Huge IT nation <3", ["a<b", "c"]) == "abc"
+    assert sent["title"] == "Is 3 › 2?"
+    assert sent["description"] == "3. \\› Huge IT nation ‹3"
+    assert sent["tags"] == ["a‹b", "c"]
+
+
 def test_the_chunk_is_a_multiple_of_256_kib():
     assert youtube.UPLOAD_CHUNK % (256 * 1024) == 0
 
