@@ -61,31 +61,32 @@ and more useful than a confident guess.
 
 ---
 
-## 2026-11-18 (12:12) — The replacement show was waiting on a read our own plan says not to wait for; that is fixed, and it is one test video from being switched on
+## 2026-11-18 (12:18) — The replacement show was waiting on a read our own plan says not to wait for; that is fixed, and it is one test video from being switched on
 
-    Worked (% of the shift): product 40 · strategy 30 · engineering 15 · gm 15
+    Worked (% of the shift): product 35 · strategy 25 · engineering 15 · data 10 · gm 15
 
 **Summary:** The show meant to replace Reddit could not start uploading until mid-December, because its music change was waiting on bet 1's read, against our own plan. The music now changes only on the new show, so it can start in days, and it has three more weeks of real uploads to be judged on before it takes every slot on 5 January.
 
 ### Toward revenue
 - **Directly, on the company's biggest risk.** Reddit ends for us on 12 January, and the takes show is the floor that keeps uploads going. Started mid-December, too few of its videos would be a week old by 4 January for our rules to judge it, so it would have taken over unchecked. Starting ~21 November, about 35 will be.
-- Left before its first upload: one test video (prepared and checked for free; it covers both the slot switching and the music), then merging the two and writing the show's judging rule.
+- Left before its first upload: one test video (prepared and checked for free; it covers both the slot switching and the music), then merging the two and switching it on (its judging rule is set).
 
 ### Done
 - **Strategy (a decision):** the four new free music tracks rotate on the takes show only. The Reddit videos keep today's single track, so bet 1's read is undisturbed. A fresh reviewer argued against it and found a real flaw: the shows alternate, so without a fix the new show would repeat its own track one day in four. That is fixed, and its other conditions are recorded (watch for copyright claims on each new track; name the music difference when the show is judged).
 - **Product (checked):** the slot switching's test video for the Reddit show passed (32 seconds, sound, no dead air). The one for the new show is ready to request.
 - **Engineering (a fix before launch):** the music change was reworked onto the current code, with three new tests. A fresh review found nothing blocking, and all 1,458 tests pass. Nothing changed on the live channel.
+- **Data (a rule set in advance):** the test that decides whether the new show takes every slot on 5 January is now written down, before its first upload: it compares how long viewers watch each show over the same weeks, read once on 4 January. It can only fail on at least 20 new-show videos and a clear shortfall; otherwise it takes over as planned. Two fresh reviewers checked it, and the second's fix (which minimum count governs) is in.
 - **General management (a fix to the method):** the project board's daily check now warns when a task waits on another that is blocked, and says why. Run on yesterday's board, it names exactly the stall above, which three shifts missed. A fresh review found nothing blocking; merged.
 - **Product (checked):** the rule for retiring background clips that bury uploads does not fire on any clip still in use.
 - **Reliability and security (checked):** this morning's upload landed (07:47); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: one test video (a few Google requests); no paid voice.
-- Balance: one bet (the decision), two fixes (the repeat, the board's check), the rest checks.
+- Balance: one bet (the decision) and its rule, two fixes (the repeat, the board's check), the rest checks.
 
 ### Blocked
 - The new show's test video needs a daytime shift (after Google's 07:00 reset, clear of an upload): one per shift.
 - For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
 
 ### Next
-- **First, by day:** request the new show's test video. If it passes, merge the slot switching and the music, then write the show's judging rule and switch it on. Its rule needs only today's report tool, not the second project's.
+- **First, by day:** request the new show's test video. If it passes, merge the slot switching and the music, then switch the show on: its judging rule is already set.
 - The 23 November weekly review: a free project slot for the genre study.
 
 ### Better?
