@@ -332,7 +332,7 @@ def _quote(rel, pattern):
 
 
 def lessons_for(role, path=LESSONS):
-    """Each lesson's heading whose `Applies:` names `role` or starts with `any`.
+    """Each lesson's heading whose `Applies:` has a clause opening with `role` or `any`.
     By role only: E2 T7 adds matching by the ticket's `Touches`."""
     out, head = [], None
     for line in open(path, encoding="utf-8").read().splitlines():
@@ -340,8 +340,10 @@ def lessons_for(role, path=LESSONS):
         if m:
             head = m.group(1)
         elif head and line.startswith("Applies:"):
-            applies = line.split(":", 1)[1].strip().lower()
-            if applies.startswith("any") or role in re.findall(r"[a-z]+", applies):
+            # Clause by clause: "orchestrator (records); any, `PLAN.md`" is
+            # for any role on those files, as "any, `WORKLOG.md`" is (review).
+            clauses = line.split(":", 1)[1].lower().split(";")
+            if any(re.match(r"\s*(any|" + re.escape(role) + r")\b", c) for c in clauses):
                 out.append(head)
             head = None
     return out

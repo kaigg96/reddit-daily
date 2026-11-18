@@ -251,8 +251,20 @@ def test_brief_is_its_ticket_alone(tmp_path, capsys):
                     "marmalade", "grapefruit", "kumquat"):                    # Status, Evidence
         assert foreign not in out, foreign
     assert '"Merge once the gates pass: tests green,' in out and "SAMPLE=1" in out
-    assert "L7 · Run a library on a sample" in out                         # Applies: implementer
-    assert "L1 · " not in out                                              # orchestrator only
+    assert "## Lessons that apply to you" in out     # which ones: the fixture test below
+
+
+def test_lessons_match_a_clause_opening_with_the_role_or_any(tmp_path):
+    """Read from a fixture, not the live file, which every round edits."""
+    path = tmp_path / "lessons.md"
+    path.write_text("## L1 · Orchestrator only\nApplies: orchestrator (acceptance)\n\n"
+                    "## L2 · Implementer second\nApplies: orchestrator; implementer, `src/**`\n\n"
+                    "## L3 · Any on files\nApplies: orchestrator (records); any, `PLAN.md`\n\n"
+                    "## L4 · Any first\nApplies: any (research)\n\n"
+                    "## L5 · Mentions the word only\nApplies: generator (not the implementer)\n",
+                    encoding="utf-8")
+    assert ep.lessons_for("implementer", str(path)) == [
+        "L2 · Implementer second", "L3 · Any on files", "L4 · Any first"]
 
 
 def test_brief_ends_with_the_report_format(tmp_path, capsys):
