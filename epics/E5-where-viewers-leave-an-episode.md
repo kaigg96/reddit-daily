@@ -1,5 +1,5 @@
 # E5 · Where viewers leave an episode
-Status: proposed
+Status: dropped: filter 11-18, the five retention points already show where viewers leave (steepest between 25% and 50%, 11-16 medians), #15 has its Where read set in advance, and the segments it would log belong to the Reddit show that ends 01-12
 Function: Data (with Product management)
 Deadline: none; most useful before E1 T9 reads the shows (2026-12-20)
 Measure: average % viewed (the scorecard guardrail now BREACHED, 55.3 to 46.4). Done when every upload's segments are on record, joined to its retention points, and one command names the segment where viewers leave

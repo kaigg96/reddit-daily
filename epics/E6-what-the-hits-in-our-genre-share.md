@@ -1,18 +1,19 @@
 # E6 · What the hits in our genre have in common
-Status: proposed
+Status: approved (filter 11-18, the one of five; waits for an active slot, at most two)
 Function: Market intelligence (with Product management)
 Deadline: before E3 T2 sets Q1's bets (2026-12-20)
 Measure: what exists when done: a dated table of comparable quiz and play-along Shorts channels' top videos against each channel's own median, and the hypotheses it hands Product (ORG.md: "hypotheses supplied that changed a decision")
-Rule: it worked if at least one of its hypotheses becomes a pre-committed test in the owned show by 2027-02-28, or it records that none survived a fresh challenge. Written before any channel is read.
+Rule: it worked if at least one of its hypotheses enters an arm's design at E3 T2 by 2026-12-20, or the record says none survived a fresh challenge. E3 forbids a per-lever read in Q1, so no hypothesis is tested on its own. Written before any channel is read (amended by the filter, 11-18).
 
 ## Why now
 
 E3 names the gap: "The paid channels in our genre have what we lack: a few
 videos that reach hundreds of thousands. Q1 cannot be a march toward a bar.
 It is a search for a format that reaches." Our own data cannot show what
-makes a hit: "Nothing we log makes hits" (PRD §4, 2026-10-07). The only
-market scan of comparable channels (2026-10-05) used "search-snippet figures,
-approximate", and it compared channels, not their best videos. PLAN §1
+makes a hit: "Nothing we log makes hits" (PRD §4, 2026-10-07). Three scans
+of comparable channels ran (10-05 on search-snippet figures, 10-18 on about
+185 Reddit channels, 10-31 on 15 quiz channels, 6 of them paid), and none
+compared a channel's top videos with its own median. PLAN §1
 rates Market intelligence "Thin". `--routes`: the 500 tier is about 209x
 short on engaged views, so the tail is the only way there.
 
@@ -64,3 +65,15 @@ video content, which a shift cannot do: only what pages state is used.
    findings name candidates.
 3. View counts on public pages are rounded. Comparing each channel's top
    videos with its own median stays valid at that precision.
+
+## The filter (2026-11-18)
+
+Approved, the only one of five (E4, E5, E7 and E8 cut). First both ways in
+the opposite-order ranking: the only proposal aimed at the reach gap E3
+names (`--routes`: the 500 tier is ~209x short), it feeds a decision made
+either way (E3 T2, 12-20), it costs about two shifts with no Gemini, Polly or
+owner, and it is reversible. Start from the 10-31 list of paid quiz channels.
+Its riskiest assumption is half-tested: the 10-18 and 10-31 scans read
+channel pages without a login. What remains is whether video IDs and view
+counts are on the page: one curl of one paid channel's `/shorts` page with a
+browser user agent (G17), then one video page for length and date.

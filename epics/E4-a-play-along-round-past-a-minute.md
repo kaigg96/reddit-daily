@@ -1,5 +1,5 @@
 # E4 · A play-along round that runs past a minute
-Status: proposed
+Status: dropped: filter 11-18, cannot start before E1's arms are read in February, a release would read length rather than the round (PRD §4 10-07: v7's lead was mostly length), and its arithmetic fails: three 16.9 s episodes are ~50 s, not past a minute, at 1.5-2x the Polly characters
 Function: Product management (with Monetization)
 Deadline: none; it starts once E1 T9 has chosen the show (by 2026-12-20), and only if the play-along show is chosen or kept as an arm
 Measure: median watch-seconds per upload at 7 days (the scorecard's success line), with engaged share beside it

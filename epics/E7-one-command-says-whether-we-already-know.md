@@ -1,5 +1,5 @@
 # E7 · One command says whether we already know the answer
-Status: proposed
+Status: dropped: filter 11-18, about 9 of G2's 26 rows are judgement errors a keyword search would not fix, the rest are covered by `--dropped` and E2's filter, and its gain to revenue is indirect (~2 h lost in 7 weeks); if G2 keeps growing, replaying its rows is a half-hour queue item
 Function: General management (with Data)
 Deadline: none
 Measure: new rows in friction group G2 ("Recorded answers are hard to find, so work gets redone"), today 26, the most of any open group
