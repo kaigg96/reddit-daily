@@ -59,7 +59,8 @@ variable per release." A dry run's PASS must name the branch's current
 commit. A ticket
 that fails goes back to `ready` with the reason as a line under `Evidence`
 and a row in the friction log; one that fails **twice** was written wrong,
-and the orchestrator rewrites it before anyone tries again. Bounces are the
+and the orchestrator rewrites it before anyone tries again. `scripts/epics.py
+accept` and `bounce` write both outcomes, friction row included. Bounces are the
 lessons file's main source (`process/lessons.md`).
 
 **Records.** Status changes are made the moment they are true, in the epic

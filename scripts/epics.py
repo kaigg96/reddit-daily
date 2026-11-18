@@ -13,9 +13,17 @@ malformed or a dispatched ticket had been forgotten.
                                                # naming file:line for each fault
     venv/bin/python scripts/epics.py brief E2 T4   # an implementer's whole brief,
                                                # from that ticket alone (E2 T4)
+    venv/bin/python scripts/epics.py accept E2 T5 --evidence "commit, command, result"
+                                               # review -> done, every Accept line
+                                               # ticked [x] first (E2 T5)
+    venv/bin/python scripts/epics.py bounce E2 T5 --why "line 2 fails: ..."
+                                               # review/doing -> ready, the reason
+                                               # under Evidence and a friction row
 
 Options for --check and tests: --dir PATH reads another board, --now
 "YYYY-MM-DD HH:MM" (UTC) sets the clock a `doing` ticket's age is read against.
+For bounce: --friction PATH (another log), --category (default `mistake`, and
+`docs` from the second bounce), --minutes (default an agent round, 15).
 
 A status is its first word: `ready: <note>`, `review: <branch> ...`,
 `proposed (challenged ...)` and `doing: 43856314698, 11:36 (note)` are
@@ -306,20 +314,25 @@ def ticket_text(epic, t):
     return out
 
 
-def accept_items(lines):
-    """The text of each `- [ ]` line under `Accept:`, a wrapped line joined."""
+def accept_ticks(lines):
+    """(ticked, text) for each `- [ ]` line under `Accept:`, a wrapped line joined."""
     items, inside = [], False
     for line in lines:
         f = _FIELD.match(line)
         if f and f.group(1) in TICKET_FIELDS:
             inside = f.group(1) == "Accept"
             continue
-        m = re.match(r"\s*- \[[ xX]\]\s*(.*)$", line)
+        m = re.match(r"\s*- \[([ xX])\]\s*(.*)$", line)
         if inside and m:
-            items.append(m.group(1).strip())
+            items.append([m.group(1) != " ", m.group(2).strip()])
         elif inside and items and line.strip():
-            items[-1] += " " + line.strip()
-    return items
+            items[-1][1] += " " + line.strip()
+    return [tuple(i) for i in items]
+
+
+def accept_items(lines):
+    """The text of each `- [ ]` line under `Accept:`, a wrapped line joined."""
+    return [text for _ticked, text in accept_ticks(lines)]
 
 
 def _quote(rel, pattern):
@@ -393,12 +406,123 @@ def brief(epic, t):
     return out
 
 
-def find(epics, e_arg, t_arg):
+def _one_line(name, text):
+    text = (text or "").strip()
+    if not text:
+        raise ValueError(f"{name} \"…\" is required")
+    if "\n" in text or "\r" in text:
+        raise ValueError(f"{name} must be one line")
+    return text
+
+
+def _ending(line):
+    return line[len(line.rstrip("\r\n")):]
+
+
+def edited(epic, t, status, entry):
+    """The epic file's text with t's `Status:` line set to `status` and `entry`
+    added to its `Evidence:`: on the `Evidence:` line itself when that is
+    empty, else on its own line after the last line of the block. Every other
+    byte is kept."""
+    for key in ("Status", "Evidence"):
+        if key not in t.fields:
+            raise ValueError(f"{epic.label} T{t.num} has no `{key}:` line (epics.py --check)")
+    with open(epic.path, encoding="utf-8", newline="") as f:
+        lines = f.read().splitlines(keepends=True)
+    s = t.at("Status") - 1
+    lines[s] = f"Status: {status}" + _ending(lines[s])
+    e = last = t.at("Evidence") - 1
+    for i in range(e + 1, len(lines)):              # the block, as parse() reads it
+        f = _FIELD.match(lines[i].rstrip("\r\n"))
+        if lines[i].startswith("#") or (f and f.group(1) in TICKET_FIELDS):
+            break
+        if lines[i].strip():
+            last = i
+    if last == e and not lines[e].split(":", 1)[1].strip():
+        lines[e] = f"Evidence: {entry}" + _ending(lines[e])
+    else:
+        eol = _ending(lines[last])
+        lines[last] = lines[last].rstrip("\r\n") + (eol or "\n")
+        lines.insert(last + 1, entry + eol)
+    return "".join(lines)
+
+
+def _write(path, text):
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def _today(today):
+    return today or dt.datetime.now(dt.timezone.utc).date().isoformat()
+
+
+def accept(epic, t, evidence, today=None):
+    """Set t `done` and add `Accepted <date>: <evidence>` to its Evidence.
+    Refused unless t is in `review` with every Accept line ticked `[x]` in the
+    epic file: the orchestrator ticks each line as it re-runs it, so a line
+    nobody re-ran cannot be accepted by default."""
+    evidence = _one_line("--evidence", evidence)
+    where = f"{epic.label} T{t.num}"
+    if t.status != "review":
+        raise ValueError(f"{where} is `{t.value('Status')[:40]}`, not review: only a "
+                         "reported ticket is accepted")
+    ticks = accept_ticks(ticket_text(epic, t))
+    if not ticks:
+        raise ValueError(f"{where} has no Accept lines to re-run")
+    unmet = [text for ticked, text in ticks if not ticked]
+    if unmet:
+        raise ValueError(f"{where} has {len(unmet)} of {len(ticks)} Accept lines not ticked "
+                         f"in {_rel(epic.path)}; re-run each, tick it `[x]`, then accept:\n"
+                         + "\n".join(f"  - [ ] {u}" for u in unmet))
+    _write(epic.path, edited(epic, t, "done", f"Accepted {_today(today)}: {evidence}"))
+
+
+BOUNCE_LIMIT = 2        # a ticket that fails this often was written wrong (process/epics.md)
+ROUND_MINUTES = 15      # an agent round, the default minutes a bounce loses ("The clock")
+BOUNCE_HELPED = "the orchestrator's re-run of the Accept lines, on the branch, before merge"
+
+
+def _friction():
+    here = os.path.join(ROOT, "scripts")
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    import friction
+    return friction
+
+
+def bounce(epic, t, why, today=None, friction_path=None, category=None,
+           minutes=ROUND_MINUTES):
+    """Return t to `ready`, add `Bounced <date>: <why> (was: <status>)` to its Evidence, and
+    log the bounce in the friction log. The second bounce marks the ticket for
+    rewriting and its row is `docs` (the ticket was written wrong); a first is
+    `mistake`. Returns (bounces so far, the friction row)."""
+    why = _one_line("--why", why)
+    where = f"{epic.label} T{t.num}"
+    if t.status not in ("review", "doing"):
+        raise ValueError(f"{where} is `{t.value('Status')[:40]}`: only a ticket in review "
+                         "or doing is bounced")
+    count = 1 + len(re.findall(r"\bBounced \d{4}-\d{2}-\d{2}:", t.evidence))
+    # `todo`, not `ready`, at the limit: --next dispatches any `ready` (review).
+    status = "ready" if count < BOUNCE_LIMIT else (
+        f"todo: bounced {count} times; rewrite it before it is dispatched again "
+        "(process/epics.md)")
+    # The old status names the branch and what was left; keep it (review).
+    was = t.value("Status")
+    text = edited(epic, t, status, f"Bounced {_today(today)}: {why} (was: {was})")   # refuses first
+    row = _friction().add(
+        "gm", f"bounce {where} · {t.name}", "partial",
+        category or ("docs" if count >= BOUNCE_LIMIT else "mistake"),
+        hardest=why, helped=BOUNCE_HELPED, minutes=minutes, path=friction_path)
+    _write(epic.path, text)
+    return count, row
+
+
+def find(epics, e_arg, t_arg, command="brief"):
     """(epic, ticket) for `E2 T4`, or a one-line reason there is none."""
     em = re.fullmatch(r"[Ee]?(\d+)", e_arg or "")
     tm = re.fullmatch(r"[Tt]?(\d+)", t_arg or "")
     if not (em and tm):
-        return None, None, "usage: epics.py brief E<n> T<n>"
+        return None, None, f"usage: epics.py {command} E<n> T<n>"
     epic = next((e for e in epics if e.num == int(em.group(1))), None)
     if epic is None:
         return None, None, f"no epic E{em.group(1)} on the board"
@@ -416,9 +540,34 @@ def _arg(argv, flag):
     return None
 
 
-def main(argv=None, date_of=file_date):
+def main(argv=None, date_of=file_date, today=None):
     argv = sys.argv[1:] if argv is None else argv
     epics = board(_arg(argv, "--dir") or EPICS)
+    if argv[:1] in (["accept"], ["bounce"]):
+        command = argv[0]
+        epic, t, why = find(epics, *(argv[1:3] + [None, None])[:2], command=command)
+        if why:
+            print(why, file=sys.stderr)
+            return 2
+        where = f"{epic.label} T{t.num}"
+        try:
+            if command == "accept":
+                accept(epic, t, _arg(argv, "--evidence"), today)
+                print(f"{where} done; evidence written to {_rel(epic.path)}")
+                return 0
+            count, row = bounce(epic, t, _arg(argv, "--why"), today,
+                                friction_path=_arg(argv, "--friction"),
+                                category=_arg(argv, "--category"),
+                                minutes=_arg(argv, "--minutes") or ROUND_MINUTES)
+        except ValueError as e:
+            print(e, file=sys.stderr)
+            return 1
+        print(f"{where} back to ready (bounce {count}), the reason under Evidence in "
+              f"{_rel(epic.path)}; friction row {row['id']} ({row['category']})")
+        if count >= BOUNCE_LIMIT:
+            print(f"{where} has failed {count} times: it was written wrong. Rewrite it "
+                  "before anyone tries again (process/epics.md).")
+        return 0
     if argv[:1] == ["brief"]:
         epic, t, why = find(epics, *(argv[1:3] + [None, None])[:2])
         if why:
