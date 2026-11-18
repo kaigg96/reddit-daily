@@ -549,3 +549,13 @@ def test_no_chain_warning_off_the_active_epics_or_once_unblocked(tmp_path):
     done = [{"n": 2, "status": "blocked: a reason"},
             {"n": 5, "status": "done", "needs": "T2", "evidence": "x"}]
     assert _warnings(tmp_path, {"E1-a.md": epic(1, tickets=done)}) == []
+
+
+def test_chain_warning_crosses_epics_and_a_ready_waiter_is_warned_once(tmp_path):
+    board = {"E1-a.md": epic(1, tickets=[{"n": 1, "status": "review: a branch", "needs": "E3 T7"},
+                                         {"n": 2, "status": "ready", "needs": "E3 T7"}]),
+             "E3-c.md": epic(3, "proposed", tickets=[{"n": 7, "status": "blocked: the owner's login"}])}
+    warnings = _warnings(tmp_path, board)
+    assert len(warnings) == 2
+    assert "T1 waits on E3 T7, blocked: the owner's login" in warnings[0]
+    assert "T2 is ready but needs E3 T7, which is not done" in warnings[1]
