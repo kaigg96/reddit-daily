@@ -159,22 +159,33 @@ def note_clips(text, start, duration):
 
 
 def _music_tracks():
-    """(path, volume) for every track in rotation: the public-domain tracks in
-    assets/music/ (normalized, so scaled down) and the sealed funk bed when CI
-    has unsealed it (already ~13dB lower than source). Without the seal key,
-    as on a shift's machine, the funk file is absent and the rest still play."""
-    tracks = [(p, config.MUSIC_VOLUME_LIBRARY)
-              for p in sorted(Path(config.MUSIC_DIR).glob("*.mp3"))]
-    if config.FALLBACK_MUSIC.exists():
-        tracks.append((config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK))
-    return tracks
+    """(path, volume) for every track in this show's rotation: the
+    public-domain tracks in assets/music/ (normalized, so scaled down) and the
+    sealed funk bed when CI has unsealed it (already ~13dB lower than source).
+    Without the seal key, as on a shift's machine, the funk file is absent and
+    the rest still play.
+
+    The Reddit show keeps the funk bed alone (E1 T2, 11-18): a new track would
+    change every Reddit video and cut `v8`'s read, so it joins the rotation as
+    its own release after that read. The takes show has no read to disturb."""
+    funk = ([(config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK)]
+            if config.FALLBACK_MUSIC.exists() else [])
+    if config.SHOW == "reddit":
+        return funk
+    return [(p, config.MUSIC_VOLUME_LIBRARY)
+            for p in sorted(Path(config.MUSIC_DIR).glob("*.mp3"))] + funk
 
 
 def _pick_track(tracks, rng):
-    """Never the last upload's track while another is in rotation (E1 T2)."""
+    """Never the channel's last track, nor this show's last, while another is
+    in rotation (E1 T2). With the shows alternating by slot (T4) the channel's
+    last upload is usually the other show's, so that alone would let a show
+    repeat its own track."""
     if len(tracks) > 1:
-        last = log.last_music_track()
-        tracks = [t for t in tracks if t[0].name != last] or tracks
+        channel = log.last_music_track()
+        recent = {channel, log.last_music_track(config.SHOW)}
+        tracks = ([t for t in tracks if t[0].name not in recent]
+                  or [t for t in tracks if t[0].name != channel] or tracks)
     return rng.choice(tracks)
 
 
