@@ -303,3 +303,121 @@ def test_brief_of_a_committed_ticket(capsys):
 def test_needs_none_with_a_note_names_no_ticket():
     assert ep.needs_refs("none (E1 T7 for the play-along form)") == []
     assert ep.needs_refs("T1, E1 T3") == [("", "1"), ("1", "3")]
+
+
+ACCEPT_BOARD = HEAD.format(n=1, status="active") + """
+### T1 · Wobble the widget
+Status: review: `e1-t1-wobble` (`abc1234`)
+Needs: none
+Touches: src/widget.py
+Context: the widget is still
+Accept:
+- [x] `pytest tests/test_widget.py` passes
+- [x] the wobble is visible in a frame,
+  wrapped onto a second line
+Evidence:
+
+### T2 · Paint the shed
+Status: review: `e1-t2-shed`
+Needs: T1
+Touches: src/shed.py
+Context: the shed is grey
+Accept:
+- [x] the shed is teal
+- [ ] the door is teal
+Evidence: 11-17, an earlier note
+and its second line
+"""
+
+
+def _board_file(tmp_path, text=ACCEPT_BOARD):
+    path = tmp_path / "E1-a.md"
+    path.write_text(text, encoding="utf-8")
+    return str(tmp_path), path
+
+
+def _diff(before, after):
+    """Lines removed and added, in order: what an edit changed and nothing else."""
+    import difflib
+    return [l for l in difflib.ndiff(before.splitlines(), after.splitlines())
+            if l[:1] in "+-"]
+
+
+def test_accept_sets_done_and_writes_evidence_changing_nothing_else(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    assert ep.main(["accept", "E1", "T1", "--dir", d, "--evidence",
+                    "abc1234: pytest -> 6 passed"], today="2026-11-18") == 0
+    assert "E1 T1 done" in capsys.readouterr().out
+    after = path.read_text(encoding="utf-8")
+    assert _diff(ACCEPT_BOARD, after) == [
+        "- Status: review: `e1-t1-wobble` (`abc1234`)", "+ Status: done",
+        "- Evidence:", "+ Evidence: Accepted 2026-11-18: abc1234: pytest -> 6 passed"]
+    t = ep.parse(str(path)).ticket(1)
+    assert t.status == "done" and t.evidence.startswith("Accepted 2026-11-18: abc1234")
+    assert not log.exists()                         # accepting logs no friction
+    assert run_check(tmp_path, {}) == []            # the board still passes --check
+
+
+def test_accept_refuses_an_unticked_line_or_a_ticket_not_in_review(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    assert ep.main(["accept", "E1", "T2", "--dir", d, "--evidence", "x"]) == 1
+    err = capsys.readouterr().err
+    assert "1 of 2 Accept lines not ticked" in err and "- [ ] the door is teal" in err
+    text = ACCEPT_BOARD.replace("Status: review: `e1-t1-wobble` (`abc1234`)", "Status: doing: 1, 11:00")
+    d, path = _board_file(tmp_path, text)
+    assert ep.main(["accept", "E1", "T1", "--dir", d, "--evidence", "x"]) == 1
+    assert "not review" in capsys.readouterr().err
+    assert ep.main(["accept", "E1", "T1", "--dir", d]) == 1               # no --evidence
+    assert ep.main(["accept", "E1", "--dir", d, "--evidence", "x"]) == 2   # no ticket
+    assert path.read_text(encoding="utf-8") == text                        # untouched
+
+
+def test_bounce_returns_to_ready_appends_the_reason_and_logs_friction(tmp_path, capsys):
+    import csv
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    args = ["bounce", "E1", "T2", "--dir", d, "--friction", str(log)]
+    assert ep.main(args + ["--why", "the door is grey"], today="2026-11-18") == 0
+    out = capsys.readouterr().out
+    assert "E1 T2 back to ready (bounce 1)" in out and "friction row F1 (mistake)" in out
+    after = path.read_text(encoding="utf-8")
+    assert _diff(ACCEPT_BOARD, after) == [
+        "- Status: review: `e1-t2-shed`", "+ Status: ready",
+        "+ Bounced 2026-11-18: the door is grey"]
+    assert after.endswith("and its second line\nBounced 2026-11-18: the door is grey\n")
+    rows = list(csv.DictReader(open(log, encoding="utf-8")))
+    assert len(rows) == 1
+    assert (rows[0]["function"], rows[0]["outcome"], rows[0]["category"],
+            rows[0]["hardest"], rows[0]["minutes_lost"]) == \
+        ("gm", "partial", "mistake", "the door is grey", "15")
+    assert rows[0]["task"] == "bounce E1 T2 · Paint the shed"
+
+    # dispatched again and failed again: the ticket was written wrong, and says so
+    path.write_text(after.replace("### T2 · Paint the shed\nStatus: ready",
+                                  "### T2 · Paint the shed\nStatus: review: again"),
+                    encoding="utf-8")
+    assert ep.main(args + ["--why", "still grey"], today="2026-11-19") == 0
+    out = capsys.readouterr().out
+    assert "(bounce 2)" in out and "friction row F2 (docs)" in out and "Rewrite it" in out
+    t = ep.parse(str(path)).ticket(2)
+    assert t.status == "ready" and "rewrite it before it is dispatched again" in t.value("Status")
+    assert t.evidence.endswith("Bounced 2026-11-18: the door is grey Bounced 2026-11-19: still grey")
+    assert [r["category"] for r in csv.DictReader(open(log, encoding="utf-8"))] == ["mistake", "docs"]
+
+
+def test_bounce_onto_an_empty_evidence_line_and_its_refusals(tmp_path, capsys):
+    d, path = _board_file(tmp_path)
+    log = tmp_path / "friction.csv"
+    args = ["bounce", "E1", "T1", "--dir", d, "--friction", str(log)]
+    assert ep.main(args + ["--why", "no frame shows the wobble"], today="2026-11-18") == 0
+    assert "Evidence: Bounced 2026-11-18: no frame shows the wobble\n" in path.read_text(encoding="utf-8")
+    capsys.readouterr()
+    before = path.read_text(encoding="utf-8")
+    assert ep.main(args + ["--why", "again"]) == 1                  # T1 is ready now
+    assert "only a ticket in review or doing" in capsys.readouterr().err
+    assert ep.main(["bounce", "E1", "T2", "--dir", d, "--friction", str(log)]) == 1   # no --why
+    assert ep.main(["bounce", "E1", "T2", "--dir", d, "--friction", str(log),
+                    "--why", "x", "--category", "wobbly"]) == 1       # friction refuses it
+    assert path.read_text(encoding="utf-8") == before                # nothing written
+    assert len(log.read_text(encoding="utf-8").splitlines()) == 2    # header and the one row
