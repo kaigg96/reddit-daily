@@ -8,7 +8,7 @@ video. Supply is work whose next step can be taken now; this counts it.
 
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
-    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped,
+    venv/bin/python scripts/backlog_status.py --dropped # the epics cut, what recent shifts dropped,
                                                         # did, and PRD §4 answers
 
 Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
@@ -131,6 +131,19 @@ def epic_ready(directory=None):
             for t in e.tickets if t.status == "ready" and needs_done(e, t)]
 
 
+def dropped_epics(directory=None):
+    """`E4 · name: why` for each epic a filter cut. They stay on the board a
+    month so the generator sees them (process/epics.md), and the work log's
+    drop lists, which `--dropped` read alone, never held them (E2 T6)."""
+    ep = _epics_module()
+    # Whatever follows the keyword is the reason ("dropped: why", "dropped (why)"),
+    # which epics.py --check does not constrain.
+    return [f"{e.label} · {e.name}: "
+            + (re.sub(r"^dropped\W*", "", e.header["Status"][0], flags=re.I).rstrip(")")
+               or "no reason given")
+            for e in ep.board(directory or ep.EPICS) if e.status == "dropped"]
+
+
 def ready_all(epics_dir=None):
     """Ready work across both trackers and the epic board -- the one queue a
     shift ranks."""
@@ -146,6 +159,10 @@ def main(argv=None):
         print(len(found))
         return 0
     if "--dropped" in argv:
+        epics_cut = dropped_epics()
+        if epics_cut:
+            print("EPICS cut by a filter, so they are not proposed again:\n")
+            print("".join(f"  - {line}\n" for line in epics_cut))
         for heading, bullet in recently_dropped():
             print(f"{heading[:70]}\n  {bullet}\n")   # cut, a drop is re-proposed
         print("DONE in the last ten shifts (each bullet's opening), so "
