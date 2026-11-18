@@ -8,7 +8,7 @@ video. Supply is work whose next step can be taken now; this counts it.
 
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
-    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped,
+    venv/bin/python scripts/backlog_status.py --dropped # the epics cut, what recent shifts dropped,
                                                         # did, and PRD §4 answers
 
 Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
@@ -136,7 +136,11 @@ def dropped_epics(directory=None):
     month so the generator sees them (process/epics.md), and the work log's
     drop lists, which `--dropped` read alone, never held them (E2 T6)."""
     ep = _epics_module()
-    return [f"{e.label} · {e.name}: {e.header['Status'][0].partition(':')[2].strip()}"
+    # Whatever follows the keyword is the reason ("dropped: why", "dropped (why)"),
+    # which epics.py --check does not constrain.
+    return [f"{e.label} · {e.name}: "
+            + (re.sub(r"^dropped\W*", "", e.header["Status"][0], flags=re.I).rstrip(")")
+               or "no reason given")
             for e in ep.board(directory or ep.EPICS) if e.status == "dropped"]
 
 

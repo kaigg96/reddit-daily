@@ -140,7 +140,10 @@ def test_cut_epics_are_listed_as_dropped(tmp_path, monkeypatch, capsys):
                                       encoding="utf-8")
     (tmp_path / "E5-b.md").write_text(_epic(5, "approved (filter 11-18)", []),
                                       encoding="utf-8")
-    assert b.dropped_epics(str(tmp_path)) == ["E4 · Epic 4: filter 11-18, too thin"]
+    (tmp_path / "E6-c.md").write_text(_epic(6, "dropped (superseded by E5)", []),
+                                      encoding="utf-8")
+    assert b.dropped_epics(str(tmp_path)) == ["E4 · Epic 4: filter 11-18, too thin",
+                                              "E6 · Epic 6: superseded by E5"]
     monkeypatch.setattr(b, "dropped_epics", lambda d=None, real=b.dropped_epics: real(str(tmp_path)))
     monkeypatch.setattr(b, "recently_dropped", lambda **k: [])
     monkeypatch.setattr(b, "answered_in", lambda text: [])
