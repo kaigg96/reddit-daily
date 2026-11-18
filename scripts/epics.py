@@ -232,6 +232,15 @@ def check(epics, now=None, date_of=file_date):
                 elif t.status == "ready" and target.ticket(int(t_num)).status != "done":
                     warnings.append(f"{_rel(epic.path)}:{t.at('Status')}: T{t.num} is "
                                     f"ready but needs {ref}, which is not done")
+                elif (epic.status == "active" and t.status in ("todo", "doing", "review")
+                      and target.ticket(int(t_num)).status == "blocked"):
+                    # E1 T5 waited three days on T2, blocked on a read E1's own
+                    # decision 2 said not to wait for, and only a reading of the
+                    # ticket text found it (11-18): a chain is surfaced, so its
+                    # reason is re-judged on every shift's --check.
+                    why = target.ticket(int(t_num)).value("Status").partition(":")[2].strip()
+                    warnings.append(f"{_rel(epic.path)}:{t.at('Status')}: T{t.num} waits on "
+                                    f"{ref}, blocked: {why[:80] or '(no reason given)'}")
             if t.status == "done" and not t.evidence.strip():
                 err(epic, t.at("Evidence"), f"T{t.num} is done with an empty `Evidence:`")
             if t.status == "doing":
