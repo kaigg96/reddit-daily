@@ -18,6 +18,9 @@ Read, in this order:
 3. **`PLAN.md`** — the company's: its goal, the queue for every function
    outside the product, its risks, and when each review last ran. Who owns
    what is in `ORG.md`, read when a task needs it.
+4. **`epics/`** — work larger than a shift, as tickets (its README). A
+   `ready` ticket of an `active` epic is ready work; `process/epics.md`
+   says how each role does its job.
 
 Then read further **only as the task requires** — `PRD.md` §4 (Findings) for
 anything touching metrics or experiments, §6 for a specific requirement's spec,

@@ -25,10 +25,10 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 ## 2. This quarter's bets
 
-**Bet 1 approved** (#70): make the format ours, viewers first (D14); no
-voice (#71, PRD #15); shipping it is a shift's call (D16). Bet 2
-approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
-and pilot the best (§1; Reddit's terms, §4). Bet 2 needs bet 1 by ~11-13–11-20 (PRD §4).
+**Bet 1** (#70): make the format ours, viewers first (D14); no voice (#71,
+PRD #15); live as `v8` since 2026-11-16. **Bet 2** (#72), bet 3's pilot
+after bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
+and pilot the best (§1). Bet 2 is read at two a day (PRD #4). **Q1 2027:** `epics/E3` (challenged 11-15): does any owned format reach? Bets by 12-20.
 
 ## 3. Work queue
 
@@ -39,12 +39,12 @@ Everything outside the channel product (PRD §0), with the same statuses;
 |---|---|---|---|---|
 | C10 | parked: the owner said no on #89 (11-10) | Audience | **Publishing pipeline** | Drafts read as a bot's, too formulaic; first person only (PRD §4). Reopen with drafts that meet that bar. |
 | C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and decide whether and how to rename (a notice, then the owner's login). **Decide the old videos' fate with it** (a notice, D16): all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos; private ones go unmentioned. Exact copies: already private (PRD §4). Done when decided. |
-| C16 | ready: built and merged off 11-15, switch-on prepared (`strategy/own-switch-on`, TECH_DEBT); `epics/E1` T1, T2, T3, T6 | Strategy | **A source after Reddit, live before 2027-01-12** | Reddit ends for us on 01-12 (#82 declined). `epics/E1` plans the choice: the built show as a daily arm beside Reddit's, a play-along form tested against it, a rule set first, continuity as the floor. Done at E1 T10. |
+| C16 | ready: built and merged off 11-15, switch-on prepared (`strategy/own-switch-on`, TECH_DEBT); `epics/E1` T1, T3, T6, T7 done | Strategy | **A source after Reddit, live before 2027-01-12** | Reddit ends for us on 01-12 (#82 declined). `epics/E1` plans the choice: the built show as a daily arm beside Reddit's, a play-along form tested against it, a rule set first, continuity as the floor. Done at E1 T10. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response. Done when the owner reports a date. |
 | C17 | baking: live 10-27 (#84); D15's first read is due 11-24 | GM | **Friction log** (D15) | Done when D15's read says keep, change or stop. |
 | C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments`. Done when quarterly prep reads it and proposes the process's own rule. |
-| C19 | ready: `epics/E2` T7 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to the role and files they apply to. Done at E2 T9. |
-| C20 | ready: `epics/E2` T1 | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (its README). Done at E2 T9. |
+| C19 | blocked: `epics/E2` T9 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to role and files. Done at E2 T9. |
+| C20 | ready: `epics/E2` T8 | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (README). Done at E2 T9. |
 
 ## 4. Risks
 
@@ -65,7 +65,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | 2026-11-09 |
+| Weekly | 2026-11-16 |
 | Monthly | 2026-11-03 |
 | Quarterly prep | 2026-10-05 |
 | Quarterly planning | 2026-10-10 |

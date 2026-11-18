@@ -14,12 +14,15 @@ Product status: `PRD.md` §0. Code health: `TECH_DEBT.md`. Conventions:
 ## 1. Orient (always, ~5 minutes)
 
 Run the **`/pickup`** steps, then read `WORKLOG.md`'s last few entries. Do not
-re-derive state from `git log`.
+re-derive state from `git log`. Work larger than a shift is on the epic board
+(`epics/`, its README; `process/epics.md` for the roles): a `ready` ticket of
+an `active` epic is ready work, ahead of generating more.
 
 ```sh
 venv/bin/python scripts/statusline.py --budget   # GO / BOUNDED / WRAP / STOP
 venv/bin/python scripts/cadence.py               # is a review due?
-venv/bin/python scripts/backlog_status.py        # the ready queue, product and company
+venv/bin/python scripts/epics.py --next         # the epic board's next action
+venv/bin/python scripts/backlog_status.py        # the ready queue, product, company, epics
 venv/bin/python scripts/money_check.py --escalate   # the money controls at AWS
 ```
 
@@ -53,6 +56,9 @@ open. **`STOP`** — close the loop and end.
 
 Supply is **ready** work across `PRD.md` §0 (the product) and `PLAN.md` §3
 (every other function). `backlog_status.py` lists it.
+
+Before ranking, run `venv/bin/python scripts/epics.py --next` and do the
+action it names (`process/epics.md`); the ranked queue comes after it.
 
 - **Rank it, then take from the top until the hand-over time.** Use `/backlog`
   §2 — separate pass, forward and reversed, one-line statements, each
@@ -154,12 +160,17 @@ Limits are in `CLAUDE.md` §1. Shift-specific:
 
 - **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
   an hour of a scheduled run — exhausting it cost a real upload its title.
-- **Dry runs:** at most one per shift, and you cannot render one — ask:
+- **Dry runs:** at most one per shift, and you cannot render the Reddit
+  pipeline locally (no Reddit keys) — ask:
   `venv/bin/python scripts/dry_run.py request <branch>`, then commit and push.
+  Free paths do render locally, narrated too: `STAND_IN_VOICE=1` gives
+  `SAMPLE=1` or `scripts/playalong_sample.py --narrate` the stand-in voice
+  (~2 minutes; 11-17), so measure there before spending the one request.
   The verdict lands in `.github/last-dry-run.md` in 5–10 minutes. Merge only on
   a PASS naming the branch's current commit. A branch renders the real post
-  over **silent narration**: unmerged code never holds the Polly keys, because
-  the repo's logs are public. Only `main` renders with real narration. A change
+  in a **free offline stand-in voice** (since `v8`; silent if it fails, and
+  `SAMPLE=1` is always silent): unmerged code never holds the Polly keys,
+  because the repo's logs are public. Only `main` renders with real narration. A change
   to narration itself needs the owner to run that by hand. A render spends 2–5
   Gemini requests, so the Gemini rule above applies to it.
 - **AWS read-only key:** `money_check.py` only. Its policy denies every

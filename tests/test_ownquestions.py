@@ -221,6 +221,7 @@ def test_the_metadata_call_never_passes_takes_off_as_peoples_answers(monkeypatch
     own, reddit = sent[0::2], sent[1::2]
     for p in own:
         body, ban = p.rsplit("Never present", 1)
+        body = body.replace('never open on "Reddit"', "")   # v8's host-line ban, not a mention
         assert "Reddit" not in body and "People" not in body and "discussion" not in body
         assert not re.search(r"\banswers?\b", body.replace("not real people's answers", ""), re.I)
         assert "never mention Reddit" in ban

@@ -13,7 +13,9 @@ Exits 0 if every gate passes, 1 otherwise, and writes a Markdown verdict to
 $GITHUB_STEP_SUMMARY when present. Costs at most MAX_REQUESTS Gemini calls.
 """
 import argparse
+import contextlib
 import datetime
+import io
 import os
 import re
 import subprocess
@@ -178,7 +180,16 @@ def check_metadata():
     # As replay_screen.py does for the screen: the second model's answer would
     # be inconclusive below, so trying it would only spend a request.
     llm.FALLBACK_MODEL = None
-    meta = llm.get_metadata(q, comments, style="A", caps=True)
+    # Its log too: which host line ran long, and by how much, is printed
+    # there and not otherwise in this file, which is what a shift reads.
+    log = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(log):
+            meta = llm.get_metadata(q, comments, style="A", caps=True)
+    finally:
+        print(log.getvalue(), end="")
+    dropped = [ln for ln in log.getvalue().splitlines()
+               if ln.startswith("Commentary: past") or ", as written: " in ln]
 
     if meta.source == "error":
         # Deliberately not retried, for the same reason check_screen doesn't:
@@ -228,6 +239,35 @@ def check_metadata():
             ok = False
     if meta.keywords is not None and len(meta.keywords) < 3:
         note(f"- ⚠️ only {len(meta.keywords)} keywords (expected ~10)")
+    # Bet 1 (#70): the host's lines fail soft to a plain reading, so a prompt
+    # that never produces them would otherwise pass. Shown in full, since the
+    # verdict file is where a shift reads them.
+    from src import config
+    if config.COMMENTARY:
+        host = meta.commentary
+        if host is None:
+            note("- ❌ host lines missing or past their caps (the upload would be a plain reading)")
+            ok = False
+        else:
+            # A line past its cap now drops alone (#15), so the upload keeps a
+            # host; warn, so the verdict file still shows the prompt overran.
+            def shown(label, line, ships="the rest still ship", why="past its cap"):
+                note(f"- ✅ host {label}: {line}" if line
+                     else f"- ⚠️ host {label}: dropped, {why} ({ships})")
+            if host.setup:
+                shown("setup", host.setup)
+            else:
+                note("- ⚠️ host setup: dropped, past its cap or not a reaction (the rest still ship)")
+            reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
+            if not reacts:   # #77, 11-11: never shown, so never read
+                note("- host reactions: off (the setup and the vote are the host)")
+            for i, line in enumerate(host.reactions if reacts else (), 1):
+                shown(f"reaction {i}", line, why="past its cap, grading its answer or a swear word")
+            if not host.verdict:   # a swear word now drops it too (the run log says which)
+                note("- ⚠️ host vote: dropped, past its cap or a swear word"
+                     " (the usual closing line ships)")
+        for line in dropped:
+            note(f"- ⚠️ {line}")
     note("")
     return ok
 

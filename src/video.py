@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 from moviepy import (
     AudioFileClip,
+    ColorClip,
     CompositeAudioClip,
     CompositeVideoClip,
     TextClip,
@@ -21,10 +22,13 @@ from .background import build_background
 
 @dataclass
 class Segment:
-    kind: str  # 'title' | 'comment' | 'outro'
+    kind: str  # 'title' | 'comment' | 'host' | 'outro'
     text: str
     audio_path: str
     marks: list  # from tts.synthesize_with_marks
+    # Bet 1's text-only host (PRD R3.2, after #71): our line about this
+    # segment, shown on screen and never spoken.
+    note: str = ""
 
 
 @dataclass
@@ -87,17 +91,39 @@ def _text_clip(text, font_size, color="white", stroke_frac=0.075, width=config.C
     )
 
 
-def caption_clips(groups, seg_start, font_size, y):
+def caption_clips(groups, seg_start, font_size, y, color="white"):
     clips = []
     for g in groups:
         clip = (
-            _text_clip(g.text.upper(), font_size)
+            _text_clip(g.text.upper(), font_size, color=color)
             .with_start(seg_start + g.start)
             .with_duration(max(0.15, g.end - g.start))
             .with_position(("center", y))
         )
         clips.append(clip)
     return clips
+
+
+def note_window(start, display_dur):
+    """(start, duration) of a segment's on-screen note. It comes in partway
+    through, once the viewer has the segment's point, and stays to the next
+    segment, so the narrator's words and ours are never on screen at once
+    in the same place."""
+    return start + display_dur * config.NOTE_LEAD, display_dur * (1 - config.NOTE_LEAD) + config.INTER_SEGMENT_GAP
+
+
+def tag_window(start, audio_dur, display_dur):
+    """(start, duration) of a segment's tag (config.HOST_TAGS): it comes in on
+    the narration's last words and stays through the pause to the next
+    segment, so it is read while nothing else is being said (#77)."""
+    appear = start + max(0.0, audio_dur - config.TAG_LEAD_IN)
+    return appear, start + display_dur + config.TAG_PAUSE - appear
+
+
+def gap_after(seg):
+    """The silence after a segment: a longer pause when it carries a tag, so
+    the tag can be read. Shared with the duration guard (run.py)."""
+    return config.TAG_PAUSE if seg.note and config.HOST_TAGS else config.INTER_SEGMENT_GAP
 
 
 def overlay_text(text, start, duration, font_size, y, color="white", width=config.CAPTION_WIDTH):
@@ -107,6 +133,26 @@ def overlay_text(text, start, duration, font_size, y, color="white", width=confi
         .with_duration(duration)
         .with_position(("center", y))
     )
+
+
+def note_clips(text, start, duration):
+    """A host note over a dark band, so it stays crisp on a busy clip: the
+    2026-10-11 local sample's yellow notes read on orange smoke, but not
+    crisply. The band sits behind the note (first in the list). The AI
+    writes some notes all lower case (the 2026-10-11 sample's did), so the
+    first letter is capitalised when its first word is plain lower case, so
+    "r/AskReddit" and "iPhone" stay as written."""
+    first = text.split(" ", 1)[0]
+    if first.isalpha() and first.islower():
+        text = text[:1].upper() + text[1:]
+    note = overlay_text(text, start, duration, config.NOTE_FONT_SIZE, config.NOTE_Y,
+                        color=config.HOST_CAPTION_COLOR, width=config.NOTE_WIDTH)
+    band = (ColorClip(note.size, color=(0, 0, 0))
+            .with_opacity(config.NOTE_BAND_OPACITY)
+            .with_start(start)
+            .with_duration(duration)
+            .with_position(("center", config.NOTE_Y)))
+    return [band, note]
 
 
 # ---------------------------------------------------------------- audio
@@ -208,12 +254,20 @@ def assemble(question, segments, rng):
                 overlay_text(f"{config.ANSWER_LABEL} {answer_i}/{n_answers}", t, display_dur, 56, 330, color=config.BRAND_ORANGE)
             )
             overlays += caption_clips(groups, t, font_size=112, y=700)
+        elif seg.kind == "host":  # bet 1 (#70): the host's own words
+            overlays += caption_clips(groups, t, font_size=100, y=700,
+                                      color=config.HOST_CAPTION_COLOR)
         else:  # outro
             overlays += caption_clips(groups, t, font_size=100, y=700)
+        if seg.note:
+            start, span = (tag_window(t, dur, display_dur) if config.HOST_TAGS
+                           else note_window(t, display_dur))
+            overlays += note_clips(seg.note, start, span)
 
-        t += display_dur + config.INTER_SEGMENT_GAP
+        gap = gap_after(seg)
+        t += display_dur + gap
 
-    total = t - config.INTER_SEGMENT_GAP + 0.35  # small tail so the last word breathes
+    total = t - gap + 0.35  # small tail so the last word breathes
 
     # v7: the question is pinned from the first frame to the last. The opening
     # second is where the Shorts feed (~97% of views) decides, so it shows the

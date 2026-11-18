@@ -67,6 +67,133 @@ minimum), and a third daily upload to hurry it (still too late). *Decision 3*
 rests on one market read about who gets paid, not on our data; T7's viewer
 bar is its test, and it takes no upload slot before the cutover.
 
+## The play-along episode (design, 2026-11-15, for T7)
+
+Written in the owner's session, on T6's supply read. The first
+shift on T7 may amend it on evidence; the viewer bar (`process/viewer-bar.md`)
+is the test, and this design is not shown to the agent applying it.
+
+**What it is.** One question with a true, sourced answer that a stranger can
+have an opinion about before they know it. The viewer is asked to commit (a
+guess, a pick, a count) and then shown whether they were right. Everything
+else serves that one beat. It is a quiz the way a bar bet is a quiz: the fun
+is in being wrong about something you were sure of.
+
+**Shape, about 9 seconds** (amended 11-15 on the challenge: the first draft's
+parts summed to 10–16 s and put the reveal a third of the way in, failing
+the viewer bar's check 2; the reveal is now the end. Amended 11-16 on the
+bar: rendered at 12.5 s, both samples still failed check 2, the answer at
+6.0 s; the video now ends within 3 s of the reveal, and part 4 moves to
+the description and comment. T7's Evidence has the rest).
+1. **The hook (≤ 3 s, spoken and on screen):** the question, in the viewer's
+   terms, with the thing to commit to and, for a number, its anchor: "Gas is
+   $4.45 this October. What did it cost in 1990?" Never a preamble, never the
+   show's name, never "today we".
+2. **The beat (3 s):** the invitation and the room to take it. One line:
+   "Say your number." The screen holds the question (and the two options for
+   a pick) over a 3-2-1 countdown with a tick, so every second is followable
+   (check 3); narration stops. This pause is the show. It is also where a
+   viewer who does not care leaves, which is fine.
+3. **The reveal, which is the end (4–5 s):** the answer, large, with the one
+   comparison that makes it land and one spoken clause that gives it
+   meaning: "One dollar four. Less than a quarter of today, before inflation."
+   The comparison is computed from the record (a ratio, a difference, a
+   second record), never written freehand; the clause is the one line the
+   model writes, and it states no number the records do not hold.
+4. **Tomorrow (over the last second, on screen, and in the comment):** the
+   next question in five words and the one way to get it ("Tomorrow: a dozen
+   eggs, 1980. Follow for it."). PRD §5 no. 9 bans fake engagement, not
+   asking; the wording is its own variable (E3 T3). The comment posted at
+   upload carries the question; it cannot be pinned by API.
+
+**What makes it ours (check 5).** The question's framing, the pairing, the
+comparison and the turn are the show's; the fact is the source's and is
+credited in the description exactly as the source asks. No model writes a
+number: `select` fetches the record, `render` copies it, and a test fails if
+the shown value differs from the record (T7's first acceptance line).
+
+**Choosing the question (the selector's rules; amended 11-15: the first
+draft's fame rule rejected its own second episode, and "the obvious guess"
+had no definition for a lone number).**
+- **Guessable, not knowable.** A stranger can form a guess from everyday
+  sense (prices, sizes, populations, heights, dates) but would not know the
+  answer. Skip anything that needs expertise or that most people know.
+- **A surprising distance, from a stated anchor.** Every number question
+  states its anchor in the hook (today's price; the Empire State's 102
+  floors), and the answer differs from the anchor by ×2 or ÷2 or more.
+  A question with no anchor is out until a proxy exists. For a pick, the
+  surprise is a category contrast the code can name (a city beats a state;
+  the smaller-looking wins), and the episode ships only when the answer is
+  the option the proxy says most people would not choose, **and** (11-16,
+  T7) its two values are ×2 apart, as every question's must be. The selector
+  rejects the rest; the shift logs the reject rate so the pool's size is
+  known, and T7 runs it on the three T6 episodes first and records which
+  survive.
+- **One fact, one unit, one comparison.** No episode needs two numbers to
+  land. Units in the viewer's own terms (a gallon, a floor, a person).
+- **Fresh shape.** Never the same template two days running (price-then,
+  bigger-of-two, how-many) and never the same subject as any shipped title
+  (the own-questions repeat check applies).
+- **Nothing that invites contempt.** A category list in code, not prose: no
+  question whose fun is someone else's poverty, illness or disaster (USGS
+  quakes and weather extremes are out of the main rotation for this reason,
+  not for supply).
+
+**Series identity.** The closing line's "tomorrow" is the only series device
+until the brand is settled (C12, T11). The watermark carries the channel's
+name. A recurring sting or a host persona waits for the February read.
+
+**The three samples.** T6's three episodes, in this shape, rendered free
+(`SAMPLE=1`) and judged by a fresh agent against the bar before any narrated
+render is bought. Two fails on the same check means the shape changes, not
+the episode.
+
+**Worked examples** (T6's three episodes in the shape; values as fetched
+11-15, comparisons computed from the records). The script is what is spoken;
+[screen] is what is shown.
+
+1. *Hook:* "Gas is four forty-five a gallon this October. What did it cost
+   in 1990?" [screen: "$4.45 (Oct 2026) · 1990: ?"] *Beat:* "Say your
+   number." [screen: 3-2-1, tick] *Reveal:* "One dollar four." [screen:
+   "$1.04 · ÷4.3"] "Less than a quarter of today, before inflation."
+   *Tomorrow:* [screen: "Tomorrow: a dozen eggs, 1980. Follow for it."]
+   Credit: "Source: U.S. Bureau of Labor Statistics, series APU000074714."
+2. *Hook:* "More people: Wyoming, or Washington, D.C.?" [screen: the two
+   names] *Beat:* "Pick one." [screen: 3-2-1, tick] *Reveal:* "D.C., by
+   about a hundred and fifteen thousand." [screen: "D.C. 702,250 · Wyoming
+   587,618"] "A whole state, outnumbered by one city." *Tomorrow:* [screen:
+   "Tomorrow: Vermont or Alaska? Follow for it."] Credit: "Source: U.S.
+   Census Bureau, Vintage 2024 population estimates." (The contrast the
+   selector names: a city beats a state.)
+3. *Hook:* "The Empire State Building has a hundred and two floors. The
+   Burj Khalifa?" [screen: "Empire State: 102 · Burj Khalifa: ?"] *Beat:*
+   "Guess." [screen: 3-2-1, tick] *Reveal:* "A hundred and sixty-three."
+   [screen: "163 vs 102"] "Sixty-one more, and the tallest since 2010."
+   *Tomorrow:* [screen: "Tomorrow: the longest bridge you can drive. Follow
+   for it."] Credit: "Data: Wikidata (CC0), Q12495 P1101; Q9188 P1101."
+   (The anchor is in the hook, so ×2 can be judged: 163 against 102 is
+   ×1.6, which the rule rejects; T7 records it as the first casualty, or
+   the rule is loosened on evidence.)
+
+The comparison in each is a second record or a ratio, never prose a model
+invented; the spoken clause after it is the one line the model may write,
+and it states no number the records do not hold. "Before inflation" is said
+where a price is compared across years, since the thread would say it
+otherwise.
+
+**Challenged 2026-11-15 (a fresh agent, the same night), amended above:** the
+parts summed to 10–16 s with the reveal a third of the way in; the silent
+beat had nothing followable (the paid quiz channels run a countdown); "no
+subscribe CTA" misread PRD §5 no. 9; the fame rule rejected episode 2 and
+nothing anchored episode 3; comments cannot be pinned by API; "today" named
+a month-old figure and "a quarter of today" ignored inflation. Kept: the one
+beat, copy-by-code, the credit, the three samples before any narrated render.
+
+**Schema the renderer takes** (one JSON per episode, produced by `select`):
+`{"hook": str, "beat": str, "options": [str, str] | null, "answer": str,
+"comparison": str, "turn": str, "tomorrow": str, "source": {"name": str,
+"id": str, "value": number | str, "fetched": date}, "credit": str}`.
+
 ## Out of scope
 
 Four uploads a day (PRD §0 #4): it stays off until T9, so bet 2's window
@@ -90,55 +217,55 @@ Voice changes (#16). Anything that spends beyond #72's approved narration line.
 ## Tickets
 
 ### T1 · Bet 1's no-reactions build is live as the Reddit arm's last form
-Status: blocked: the 11-16 08:17 release check on `b74fc92` (carries `main` and T3; 1,335 pass); merge on a PASS naming it
+Status: done
 Needs: none
 Touches: src/ (by merge of `integration/preview`), PRD.md §0 #15 and #13, the experiment ledger
 Context: decision 2. The build, its sample and its review are described on #77 (closed). The release check must pass on the day; `FORMAT_VERSION` becomes `v8`. Its pre-committed rule stays as written; add one ledger line that its read is thin by design from T4 on.
 Accept:
-- [ ] `scripts/validate_release.py` passes for the merged tree, and tests are green
-- [ ] the first `v8` upload is in `upload_log.csv` with its host pick as the closing line
+- [x] `scripts/validate_release.py` passes for the merged tree, and tests are green
+- [x] the first `v8` upload is in `upload_log.csv` with its host pick as the closing line
 - [x] PRD §0 no longer says #15 waits on a label; the ledger carries the line above
-Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`.
+Evidence: 11-15: `main` merged into `integration/preview` cleanly (`403fc90`), then T3 (`b74fc92`); 1,335 pass. The release check could not run the same evening (the 19:00 upload's hour). Ledger `#15-thin`. 11-16: the check passed `b74fc92` at 18:33 (metadata and screen; its sample's 3-word setup dropped, the vote shipped). Merged into `main`, which since added only `src/playalong*.py`, outside the live path: 1,393 pass, free silent sample plays. The merge is `v7s`'s 17th upload on, so ledger `v7s-before-bet1` applies. **Accepted 11-17:** the first `v8` upload (`fSKBzgvb2qg`, 11-17 08:13, NoStupidQuestions) is logged with `host_lines` 1 and its vote as the closing line ("I am voting for poorly tested AI coding…"). The one before it, 11-16's evening run, was refused by YouTube for a ">" in an answer (fixed 11-17, TECH_DEBT); its metadata had come from the fallback model on a 503.
 
 ### T2 · More than one music track, with no login needed
-Status: ready
+Status: blocked: bet 1's read (one variable per release); accept lines verified 11-17 on `e1f8b5d`, which merges as its own `FORMAT_VERSION` after `v8`'s read, with the workflow comment's patch
 Needs: none
 Touches: assets/music/, src/video.py, tests/, a licence note beside the tracks
 Context: assumption 4. Today's track is from YouTube's Audio Library, which needs the owner's login and may not be shared, so it is sealed. Find at least three more tracks that are public domain or CC0, or make them with our own code as `scripts/make_sfx.py` makes effects. `video._pick_music` already picks at random from the folder. A track changes the video for every arm alike, so it does not disturb the comparison.
 Accept:
-- [ ] at least four tracks in rotation, each with its source and licence text recorded in the repo
-- [ ] no track needs a login, a payment or an attribution we cannot give in the description
-- [ ] a test shows the picker never chooses the track of the last upload in `upload_log.csv`
+- [x] at least four tracks in rotation, each with its source and licence text recorded in the repo
+- [x] no track needs a login, a payment or an attribution we cannot give in the description
+- [x] a test shows the picker never chooses the track of the last upload in `upload_log.csv`
 - [ ] if no such track can be found, that is recorded and the ticket is dropped, not left open
-Evidence:
+Evidence: 11-15, implementer: four FreePD tracks (Advertime, City Sunshine, Fresh Focus, Funshine), cut to 60 s at the funk track's level; FreePD closed in 2025, so the files and its "CC0 1.0 Universal Public Domain Dedication" statement come from Internet Archive copies, URLs in `assets/music/LICENSES.md`; `log.last_music_track()` bars the last upload's track; 1,065 pass. Orchestrator 11-15: fresh review, nothing blocking, names match the log so the no-repeat rule works, the archived licence quotes verified verbatim, four 0.96 MB files. Its finding to fix before merge: a funk bed that fails to unseal in CI now drops out of rotation silently, where it used to log `none` and the digest flagged it (`weekly_digest.py`; the comment in `run-reddit-video.yml` goes stale too). Free sample (`SAMPLE=1`, silent) on the branch: 24.3 s, `freepd_funshine.mp3`, decodes clean, bed alone at −37 dB mean. No one has listened. Fixed in `e1f8b5d` (1,066 pass): the weekly digest flags a sealed track that no upload used all week. The workflow's unseal comment still says "none"; raise its one-line patch (`escalate.py --patch`) at the merge. **11-17, accepted on the branch (not merged):** a fresh look at `e1f8b5d` found no blockers: the picker never returns nothing or repeats while another track exists, handles a missing, empty, blank or unknown last row, and logs `path.name`, which is what the rule compares; the funk bed's level is unchanged; LICENSES.md gives CC0 text, archived URLs and a sha256 per track; no attribution needed. Measured in place of a listen: each track 60.0 s, no silence of 1 s at −50 dB, peaks −3.5 to −9.1 dBFS (no clipping), −20 to −22 dB mean before the bed's 0.18 gain. Its should-fix is this ticket's own timing: every video changes, so a `FORMAT_VERSION` bump after `v8`'s read. Nits, for the merge: the digest checks only `FALLBACK_MUSIC`, and `seal_assets.sh`'s glob would now seal the CC0 tracks too; the test named "four" checks at least 3; README's music line and `run-reddit-video.yml`'s unseal comment go stale; anyone can register a CC0 track in Content ID, so watch the first uploads with each for claims.
 
 ### T3 · Every upload records which show it was
-Status: review: on `integration/preview` (`b74fc92`), lands with T1
+Status: done
 Needs: none
 Touches: src/log.py, src/run.py, scripts/weekly_analytics.py, src/insights.py, tests/
 Context: the log has no column for the source; an own-question upload is known only by an empty `subreddit`. The comparison needs `report.py --compare show=<name>` with ages matched, like every other read (`CLAUDE.md` §6).
 Accept:
-- [ ] `upload_log.csv` gains a `show` column (`reddit`, `takes`, later others); old rows read as `reddit`
-- [ ] `scripts/report.py --at-age 7 --compare show=takes` runs and refuses thin cohorts as it does elsewhere, with a test
-- [ ] the append-only log's existing rows are unchanged byte for byte
-Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it.
+- [x] `upload_log.csv` gains a `show` column (`reddit`, `takes`, later others); old rows read as `reddit`
+- [x] `scripts/report.py --at-age 7 --compare show=takes` runs and refuses thin cohorts as it does elsewhere, with a test
+- [x] the append-only log's existing rows are unchanged byte for byte (values, as accepted below)
+Evidence: 11-15, `b849e94` (`data/e1-t3-show-column`): `config.SHOW` from `SOURCE`; blank reads as `reddit` in `insights._with_derived_dimensions`; 2 new tests. `--at-age 7 --compare show=takes` refuses (n=0 against 206). The committed log is untouched, but the first live run after the merge re-writes it through `_migrate_header`, padding old rows with blank cells, as every column added since 10-09 did (bet 1 adds four anyway): values kept, bytes not. Fresh review: nothing blocking; minor, the ledger-floor counter reads raw `show`, harmless while no ledger row coins on it. **Accepted 11-17:** the first live row (`fSKBzgvb2qg`) reads `show` = `reddit`; `insights` reads a blank as `reddit`; `--at-age 7 --compare show=takes` refuses (n=0, below MIN_COHORT=8, against 218). Against `7a5719d`'s log, all 241 earlier rows keep every value, but none is byte-identical: the header migration padded each with five blank cells, as foreseen above. Accepted on values: the line's purpose is that no history changes, and refusing the padding would leave rows of mixed width for one column's sake.
 
 ### T4 · The show alternates by slot, in code
-Status: todo
+Status: review: `product/e1-t4-show-slots` (`c903b02`, `main` merged in), unmerged; lines 1 and 3 accepted 11-18; left: the two dry runs (one per show, one render a shift, each after the 07:00 UTC Gemini reset and an hour clear of a run)
 Needs: T3
 Touches: src/content.py, src/config.py, src/run.py, tests/
 Context: assumption 2. Mirror `content.subreddit_for_run`: one Reddit and one new-show upload a day, each show getting the morning and the evening slot equally over two days. Merged switched off behind a constant, so T5 is one line.
 Accept:
-- [ ] a test shows that over any 14 days each show gets 14 uploads, 7 in each slot
+- [x] a test shows that over any 14 days each show gets 14 uploads, 7 in each slot
 - [ ] `DRY_RUN=1` produces a playable video for each show
-- [ ] with the constant off, behaviour is unchanged (existing tests pass untouched)
-Evidence:
+- [x] with the constant off, behaviour is unchanged (existing tests pass untouched)
+Evidence: 11-15, implementer, not yet re-checked: `content.show_for_run` takes the old subreddit key, so shows swap slots daily; with `SHOW_ALTERNATION` on, subreddits move on `day // 2 + position // 2`, so the Reddit arm still draws every subreddit in both slots (a trap: on one key, Reddit's slot would always draw the same subreddit and starve bet 1's AskReddit read). `config.use_show` sets SOURCE, SHOW, FORMAT_VERSION and ANSWER_LABEL per run. 1,350 pass. Unchecked: how `title_style_for`, keyed on the day, pairs with subreddits once it is on. Fresh review 11-15: nothing blocking; switched off, production is unchanged (a pure extraction, `run.py`'s new step skipped); switched on, no module keeps a stale copy. Minor: the first startup line prints the import-time format before `use_show` runs. **11-17, the pairing checked** (60 simulated days on `4730afa`, `SHOW_ALTERNATION` on, two a day): each arm gets 30 mornings and 30 evenings and the same style mix (A 10, B 40, C 10, the 4:1:1 weighting), and the Reddit arm draws AskReddit and NoStupidQuestions alike (5 A, 20 B, 5 C each), so the show read and the subreddit read stay balanced. The one confound: inside an arm, style A always runs in one slot and C in the other (Reddit: A evenings, C mornings; takes: the reverse), since both keys follow the day's parity. No A-against-C read is planned (#10 is done), so recorded, not fixed; a future style read within an arm needs the cycle offset by a day there. `tests/test_show_slots.py` and `test_slate.py` pass on the branch (49). **11-18 (01:37 shift), lines 1 and 3 accepted.** `main` merged into the branch cleanly (`c903b02`, pushed). Line 1: `test_over_any_14_days_each_show_gets_14_uploads_7_per_slot`, parametrised over seven start days, asserts every (show, slot) pair appears exactly 7 times in 14 days; `pytest tests/test_show_slots.py` 15 passed. Line 3: the branch adds one test file and changes no existing one (`git diff origin/main --stat -- tests/`), `test_built_switched_off` holds the constant off, and the full suite passes on the merged tree, 1,449. Line 2 not attempted: every render spends Gemini (takes are written by the model, the Reddit arm's metadata too), and before 07:00 UTC that is the morning upload's allowance, its fallback included (`FALLBACK_MODEL` is the sample model). Next: request the branch as it is for the Reddit arm; then a branch-only render commit with `SHOW_ALTERNATION` on (or `SOURCE` set to takes), as T7's render branch did, for the takes arm on the following shift.
 
 ### T5 · The three-takes show uploads once a day, under a rule set first
 Status: todo
 Needs: T1, T2, T4
 Touches: src/config.py, the experiment ledger, PRD.md §0, PLAN.md C16
-Context: the show is built and merged off (11-15); the switch-on is prepared on `strategy/own-switch-on`, its pre-merge items in TECH_DEBT. Write the choice rule before the first upload: the primary measure (engaged share at 7 days, D9), the gate, the minimum uploads a side, the chance gap `report.py` prints, and the tie rule, which is decision 4.
+Context: the show is built and merged off (11-15); the switch-on is prepared on `strategy/own-switch-on`, its pre-merge items in TECH_DEBT. Write the choice rule before the first upload. **Drafted 11-15 (owner's session, after E3's challenge), for the ledger once T1 of E3 gives the tool:** per arm (`show`), at 7 days, engaged views per upload as median and the shares past 1,000 and 10,000 (E3's Measure), watch-seconds as the gate (#18), subscribers per 1,000 at 28 days beside them, never a trigger (PRD §4 10-17; E3 assumption 3). Read at the first snapshot with **40 uploads a side** (two arms at one a day: early February), the arm whose median engaged views leads beyond the printed chance gap is chosen; a lead under the gap, or a watch-seconds fall beyond its limit, is a tie, and decision 4 holds (takes, continuity). A tail (any upload past 10,000) is reported and may be named in the Decide, never as the trigger. The shift finalises the numbers with the tool, dates the rule before the first `takes` upload, and changes nothing after.
 Accept:
 - [ ] the ledger row for the rule is committed before the first `takes` upload's timestamp
 - [ ] a `takes` upload is live, labelled as takes, naming nothing of Reddit's
@@ -157,15 +284,20 @@ Accept:
 Evidence: 11-15, `07482b2` on `main`: PRD §4 "Play-along supply". BLS, Census, USGS, NWS public domain; Wikidata CC0; OGL and OWID terms quoted; ~740 candidates (BLS ~200, Wikidata ~490, Census ~50); three episodes; verdict build T7.
 
 ### T7 · A play-along episode exists as a sample a viewer could follow
-Status: ready
+Status: done
 Needs: T6
-Touches: src/ (a new source beside ownquestions.py), tests/
-Context: only if T6 says build. The number or answer in the reveal is copied from the source record by code, never written by a model. Write the viewer's bar before rendering (D14): can someone who has never seen the channel tell what to guess, and is the reveal worth the wait.
+Touches: src/ (a new source beside ownquestions.py: `select` fetches a record and frames it, `render` copies it), tests/, assets/gen/ (samples)
+Context: T6 said build; "The play-along episode" above is the design, and `process/viewer-bar.md` is the test. The agent judging a sample is given the script, the frames and the bar only, never the design. Start with BLS prices and Census pairs, whose records are files that need no key; Wikidata second. The number or answer in the reveal is copied from the source record by code, never written by a model.
 Accept:
-- [ ] a test fails if the revealed value differs from the source record
-- [ ] a free sample render (`SAMPLE=1`) and one narrated dry run are playable
-- [ ] a fresh agent, shown the frames and the script but not the bar's author's notes, judges it against the bar; its findings are fixed or recorded
-Evidence:
+- [x] a test fails if the revealed value or the comparison differs from what the source record gives
+- [x] the selector applies the rules above (guessable, surprising distance, one fact, fresh shape, nothing contemptuous) with a test per rule, and logs its reject rate on a day's candidates
+- [x] the three T6 episodes render free (`SAMPLE=1`) in the shape above, and a fresh agent judges each against the bar; every check is a yes, or the fail and the fix are recorded here
+- [x] one narrated dry run of the best is playable, with the credit in its description
+Evidence: 11-16, selector merged `a88fc42` (`src/playalong.py`, fixtures in `assets/playalong/`). Re-run: `pytest tests/test_playalong.py` -> 21 passed; one census value altered -> 2 failed. The day's run: "2 of 3 candidates made episodes; rejected 1 (33%): rule2 1" (the Burj, ×1.6; the first casualty). Wikidata has no floor count for the Empire State (Q9188 P1101 empty), so its 102 is entered by hand and marked so; the selector refuses an unsourced record. A fresh review: the price hook said "1990" for a January record (fixed: it names the month); `check_turn` lets "quadrupled", "thousands", "a quarter" through, to fix before a model writes the turn. **The bar, two free renders (12.5 s, silent), a fresh judge: both fail check 2**, the answer at 6.0 s, before the last third; both fail check 3 (the "tomorrow" card, 6 words in 1.2 s; the reveal shows four lines at once); the gas hook's first sentence asks nothing (check 1). Two fails on one check: **the shape changes** (the design's own rule): question first, then the anchor; the reveal ends the video within 3 s (about 9 s in all); one comparison line in words ("4.3× more now"); the tomorrow line and the credit go to the description and comment; nothing below 85% of the height.
+Reshaped (`e1-t7-reshape`, 9.0 s, reveal at 6.0 s, tomorrow and credit in the description; 35 tests) and judged again by a different fresh agent: **check 2 now passes both; checks 1 and 5 pass both.** Still failing: **check 3**, both: fixed 3 s slots cannot hold a 17-word spoken hook or a clause spoken over the shown figures, so the timings must come from the narration's length (the beat starts when the hook's audio ends; at the reveal the voice says the shown figure), which only a narrated render can test. **Check 4**: the gas price fails its judged half (a dollar in 1990 is roughly known: pick a less familiar price); the pick fails its measured half (×1.19), and the judge argues it is structural: two places are only a surprise when close, and close cannot reach ×2. The design's pick rule (a coded contrast) and the bar's ×2 disagree; the next shift decides which governs picks, or drops the pick shape. The yellow shape at the left edge is in the stock clip `pexels_7565898.mp4`; play-along needs its own clip choice.
+Renderer merged `3d09f04` after a fresh review (nothing blocking; full suite 1,118). Its notes, open (the turn check's gap is fixed on `e1-t7-turn-check`, 1,126 pass, unreviewed): a ratio near 1 would print "1.0× more now" (reject it); `.lower()` on a series name would lowercase a proper noun (give each series its hook form); the sample script's moviepy temp audio lands in the repo root (pass a temp path under `assets/gen/`). Fixed before merge: the countdown digit ran 7 px into the caption area.
+11-16 (21:00 shift). **Design call 1, picks:** the bar's ×2 governs every shape; the coded contrast alone no longer qualifies a pick. Why: the bar is the only objective test and one rule for all shapes keeps it so; picks return when a pair clears ×2 with its contrast. Rejected: a pick-only surprise rule, which no data can check before upload. So Wyoming vs D.C. (×1.2) is out and the fixtures make one episode. **Call 2, the price: ground beef per lb** (APU0000703112: $1.557 in January 1990, $6.755 in October 2026, ×4.3; sold by the pound, so guessable, and its 1990 price is not known the way gas's is). Coffee per lb is the second (APU0000717311: $2.917, $9.249, ×3.2). Both fetched 11-16 from the keyless BLS API v1 by curl, as `sources.json` records gas; Wired the same evening (merged, 1,426 pass): `candidates(price=playalong.BEEF_SERIES)`, gas by default; `scripts/playalong_sample.py --price APU0000703112` renders it, 11.6 s, reveal at 8.6 s. Fresh review: not blocking; nit: 6.755 is a float tie and shows "$6.75" where half-up gives $6.76. **Third judging** (ground beef, a fresh agent given the bar, timed script, planned narration and frames only): checks 1, 2, 4, 5 **yes** (the hook asks from the first frame; $1.56 at 8.6 of 11.6 s; ×4.3 and "a viewer would repeat it"; credit and copy test). Check 3 **no**: the planned closing line ("Prices creep up so slowly…") plus answer and comparison is ~20 spoken words in a 3 s reveal; and the hook read aloud ("nineteen ninety", "six seventy-five") is ~18 words, ~6.7 s, against 5.6 s. Its one change: cut the spoken closing line and hold the reveal for the answer and comparison's spoken length. So `spoken()` should count a number as the words it is read as, and `turn` leaves the reveal (it can go in the description, as `tomorrow` did). Check 2 holds only while the total stays near today's. **Its fix merged** (`e1-t7-check3`, 1,428 pass): `playalong_render._said` counts a number as read ("1990" 2, "$6.75" 2, "4.3×" 4) and `turn` moves to the description; ground beef now holds its question to 9.3 s and reveals there, of 13.7 s. Fresh review: not blocking; low: Census-sized numbers still undercount ("702,250" counts 3, is read as ~7). **Turn check** merged (`2f8ae01`) after a second fresh review found 9 more words slipping through (a third, halve, quintupled, thrice, trillion, …), fixed with tests. **Timing** merged (`e1-t7-timing`, 1,425 pass): `playalong_render.timings` sets each screen from the narration's word count at `sample.WORDS_PER_SECOND`, the reveal at two-thirds or later; the renderer review's three notes fixed with tests. Free sample: 11.6 s, hook 0–5.6 s, reveal 8.6–11.6 s. Fresh review: not blocking; low: a reason prints "×2.0 … under ×2" at ×1.99 (`:.1f`); the estimate counts "$1.04" and "1990" as one word each, so spoken reveals run long (the narrated render tells); the "×" glyph renders small in the font.
+**11-17 (11:52 shift), accepted.** Narration merged (`375287d`, 1,434 pass): `playalong_render.narrate` reads `script()` with the sample voice (the free stand-in, never Polly), `timings(said=…)` sets the screens from the measured lengths, the beat line follows the hook's last word and the 3-2-1 leads into the reveal, a tick each second from the beat to the reveal, 0.5 s held after the last word; `scripts/playalong_sample.py --narrate` reproduces it (`STAND_IN_VOICE=1`). **Narrated dry run:** `dry_run.py request e1-t7-narrated-render` (a branch-only hook in `run.py`, never to merge) PASS at `cf45fcc`, 16.9 s, stand-in voice, no Gemini spent; the description is the credit. **Fourth judging** (fresh agent, local stand-in render): 1, 2, 4, 5 yes; 3 no on sound, the voice pausing at each decimal point ("four. three") and the last word 0.1 s from the end. Fixed: decimal figures said in words, the 0.5 s hold. Measured: speech ran 0.7 s past the hook's estimate and 1.3 s past the reveal's, so the estimate undercounts; the narrated timings replace it. **Fifth judging** (another fresh agent, the fixed render, 17.6 s): 1-4 yes, check 3 included (no pause inside a figure over 0.09 s); 5 no, narrowly: $6.755 showed as $6.75, a float tie. Fixed in code with a test (`playalong._half_up`; the turn check's `_held` too): the hook now reads $6.76, "six seventy-six". Not re-judged after that one-figure fix. Three fresh reviews, findings fixed. Left, for T8: the judge's taste note that a tick before "3" appears, and one on "Say", is untidy (ticks start at the beat so the guess never falls silent; the cleaner fix counts from more digits); the ratio still formats as a float ("4.25" → "4.2"); `_held` raises rather than refuses on a 28-digit figure; the sample script never closes its audio clips; a pick says "D.C." with the stand-in voice unheard; Census-sized figures stay as digits in narration, unmeasured.
 
 ### T8 · The play-along show uploads as its own arm
 Status: todo
@@ -202,8 +334,9 @@ Evidence:
 Status: todo
 Needs: T9
 Touches: PLAN.md C12, `.escalations/`
-Context: the channel's name uses Reddit's, and from January the show has nothing of Reddit's in it. A rename is a one-way door and needs the owner's login: a dated notice (`escalate.py --notice-days`), then one ask with the exact name and steps. The fate of the 1,041 old readings (C12) is decided with it, also by notice.
+Context: the channel's name uses Reddit's, and from January the show has nothing of Reddit's in it. A rename is a one-way door and needs the owner's login: a dated notice (`escalate.py --notice-days`), then one ask with the exact name and steps. The fate of the 1,041 old readings (C12) is decided with it, also by notice. The working name, Show of Hands, stays internal: an English folk duo has it, YouTube channel included.
+**Candidates, checked 2026-11-15** (a 404 at `youtube.com/@handle` means free; Instagram shows an account when one exists and an empty page when none does; TikTok cannot be read from here). Free on YouTube: `@guessfirst`, `@callit`, `@callitdaily`, `@sayyournumber`, `@oneguessdaily`, `@barbetdaily`. Taken: `@sureaboutthat`, `@oneguess`, `@wrongagain`. Instagram: `callit` and `callitdaily` taken; `guessfirst`, `sayyournumber`, `oneguessdaily`, `barbetdaily` show no account. Lead: **Guess First** (says what the viewer does, fits a number, a pick or a take; free on both). Second: **Call It** (fits every show, but the handle is taken on Instagram). Dropped: Say Your Number (numbers only), Bar Bet (alcohol-adjacent for an advertiser review), Wrong Again (taken). The final pick is a Decide after T9, since the show that wins should suit the name; a shift re-checks the handles that week (they can be taken any day), checks the trademark registers (USPTO and CIPO, by search or `curl` with a browser agent, L6) and whether the `.com`/`.show` domain is free, and only then raises the notice.
 Accept:
-- [ ] the name's trademark, handle and domain checks are recorded
+- [ ] the name's trademark, handle (YouTube, Instagram, TikTok) and domain checks are recorded, re-done within a week of the notice
 - [ ] the notice is raised, and the ask can be done from a phone in two minutes
 Evidence:

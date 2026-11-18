@@ -6,26 +6,32 @@ a PASS that names the branch's current commit.
 
 ## Last render
 
-- **Branch:** `strategy/own-clip-repeat`
-- **Commit:** `de8c103`
-- **When:** 2026-11-15T10:58:36Z
-- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 28.4 s, audio, no dead air
+- **Branch:** `product/e1-t4-show-slots`
+- **Commit:** `c1bab69`
+- **When:** 2026-11-18T11:49:43Z
+- **Verdict:** ✅ PASS -- playable: 1080x1920, 30 fps, 32.1 s, audio, no dead air
 
-[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/43706374669)
+[Sample video and full output](https://github.com/kaigg96/reddit-daily/actions/runs/44297376984)
 
 What it picked:
 
 ```
-Selected post: Could GTA 6 hypothetically lower real life crime rates on launch day?
-Slate topics (rank order): hypotheticals|money-work|life-advice|fame-celebrity|health-body|humor-absurd|other
-Title style B, caps arm 0: Will you commit crimes on gta 6 launch day?
-CTA: Which one are you? Tell me in the comments below.
-Assembled: 28.4s, bg=pexels_15022349.mp4, music=funk_bg_lower.mp3
-Today's top NoStupidQuestions post, asked by u/Geocacher6907: Could GTA 6 hypothetically lower real life crime rates on launch day?
+Selected post: When have you seen the statement “every accusation is a confession” actually happen?
+Slate topics (rank order): politics-news|relationships-dating|dark-morbid|humor-absurd|health-body|fame-celebrity|nostalgia
+Commentary: past its length cap, a placeholder or emoji, a setup that is not a reaction, or a tag that grades: setup (3 words)
+Commentary setup, as written: "Seen this daily."
+Commentary: dropped only the line(s) named above
+Title style B, caps arm 0: Have you caught someone accusing you of their own secret?
+Commentary setup: (dropped)
+CTA: My hand goes to the food stealing dog for pure audacity. Which one got your vote?
+Narration: stand-in voice (Kokoro), not Polly
+Commentary: our own words are 0.172 of the narration, 1 host line(s) shown
+Assembled: 32.1s, bg=pexels_9668945.mp4, music=funk_bg_lower.mp3
+Today's top AskReddit post, asked by u/InstancePale9207: When have you seen the statement “every accusation is a confession” actually happen?
 ```
 
 ## Last request
 
-- **Branch:** `strategy/own-clip-repeat`
-- **When:** 2026-11-15T10:58:36Z
+- **Branch:** `product/e1-t4-show-slots`
+- **When:** 2026-11-18T11:49:43Z
 - **Outcome:** rendered -- see above

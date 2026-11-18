@@ -48,11 +48,32 @@ FIELDS = [
     # Added 2026-10-09 (PRD §0 #14): the title's capitals arm, 1 or 0, blank
     # when the title fell back to the Reddit question and no arm applied.
     "title_caps",
+    # Added 2026-10-10 (bet 1, #70): whether the host's lines shipped, 1 or 0,
+    # blank while commentary is off; and our own words' share of the
+    # narration's characters, its done-when (at least 0.50 on every upload).
+    "commentary_ok", "own_words_share",
+    # Added 2026-10-11 (PRD §0 #13): who answered the metadata call, as
+    # screen_source does for the screen: gemini, groq, groq_fallback when Groq
+    # answered for a failed Gemini, error when nobody did. A model that
+    # answered with junk keeps its own name: read meta_failure beside it.
+    # Without it a Groq title would count unmarked in the title-style and caps
+    # reads (#10, #14).
+    "meta_source",
+    # Added 2026-10-13 (bet 1, #15): how many host lines the viewer got (notes
+    # shown plus the vote; 5 when whole with three answers), blank while
+    # commentary is off. commentary_ok is 1 for a partial host too, since a
+    # text line too long now drops alone: read this beside it.
+    "host_lines",
     # Added 2026-11-04: the closing line as shipped (spoken, captioned and
     # posted as our comment; cta_ok says whether it was written for the post).
     # It was only in the run log, so #14's arm leaking into it went unseen for
     # four weeks and took 151 run logs to count (PRD §4); those logs expire.
     "cta",
+    # Added 2026-11-15 (E1 T3): which show the upload was, config.SHOW
+    # (reddit, takes). An own-question upload was known only by a blank
+    # subreddit, which every read takes for unset, so no read could compare
+    # the shows. Older rows stay blank and read as reddit (insights).
+    "show",
 ]
 
 

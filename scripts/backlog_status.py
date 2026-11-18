@@ -8,7 +8,7 @@ video. Supply is work whose next step can be taken now; this counts it.
 
     venv/bin/python scripts/backlog_status.py           # ready work vs the floor
     venv/bin/python scripts/backlog_status.py --count   # just the number
-    venv/bin/python scripts/backlog_status.py --dropped # what recent shifts dropped,
+    venv/bin/python scripts/backlog_status.py --dropped # the epics cut, what recent shifts dropped,
                                                         # did, and PRD §4 answers
 
 Two trackers feed one queue: PRD §0 (the channel product) and PLAN.md §3 (every
@@ -101,10 +101,55 @@ def sources():
     return [("product", _read(PRD), section0), ("company", _read(PLAN), queue_section)]
 
 
-def ready_all():
-    """Ready work across both trackers -- the one queue a shift ranks."""
-    return [f"[{label}] {name}" for label, text, section in sources()
-            for name in ready(text, section)]
+def _epics_module():
+    if __package__:
+        from . import epics
+    else:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import epics
+    return epics
+
+
+def epic_ready(directory=None):
+    """`E1 T7 · name` for each `ready` ticket of an `active` epic whose Needs
+    are all `done` (epics/, read by scripts/epics.py's parser). Work larger
+    than a shift lives there, and a count of the two trackers alone read a
+    board full of dispatchable tickets as no supply."""
+    ep = _epics_module()
+    board = ep.board(directory or ep.EPICS)
+    by_num = {e.num: e for e in board if e.num is not None}
+
+    def needs_done(epic, t):
+        for e_num, t_num in ep.needs_refs(t.value("Needs")):
+            target = by_num.get(int(e_num)) if e_num else epic
+            dep = target.ticket(int(t_num)) if target else None
+            if dep is None or dep.status != "done":
+                return False
+        return True
+
+    return [f"{e.label} T{t.num} · {t.name}" for e in board if e.status == "active"
+            for t in e.tickets if t.status == "ready" and needs_done(e, t)]
+
+
+def dropped_epics(directory=None):
+    """`E4 · name: why` for each epic a filter cut. They stay on the board a
+    month so the generator sees them (process/epics.md), and the work log's
+    drop lists, which `--dropped` read alone, never held them (E2 T6)."""
+    ep = _epics_module()
+    # Whatever follows the keyword is the reason ("dropped: why", "dropped (why)"),
+    # which epics.py --check does not constrain.
+    return [f"{e.label} · {e.name}: "
+            + (re.sub(r"^dropped\W*", "", e.header["Status"][0], flags=re.I).rstrip(")")
+               or "no reason given")
+            for e in ep.board(directory or ep.EPICS) if e.status == "dropped"]
+
+
+def ready_all(epics_dir=None):
+    """Ready work across both trackers and the epic board -- the one queue a
+    shift ranks."""
+    return ([f"[{label}] {name}" for label, text, section in sources()
+             for name in ready(text, section)]
+            + [f"[epic] {name}" for name in epic_ready(epics_dir)])
 
 
 def main(argv=None):
@@ -114,6 +159,10 @@ def main(argv=None):
         print(len(found))
         return 0
     if "--dropped" in argv:
+        epics_cut = dropped_epics()
+        if epics_cut:
+            print("EPICS cut by a filter, so they are not proposed again:\n")
+            print("".join(f"  - {line}\n" for line in epics_cut))
         for heading, bullet in recently_dropped():
             print(f"{heading[:70]}\n  {bullet}\n")   # cut, a drop is re-proposed
         print("DONE in the last ten shifts (each bullet's opening), so "
