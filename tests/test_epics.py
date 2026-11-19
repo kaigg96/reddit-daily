@@ -199,7 +199,7 @@ def test_an_approved_planned_epic_is_started_or_waited_for_before_a_new_round(tm
              "E3-c.md": epic(3, "approved", tickets=planned)}
     # both slots full: no new proposals while E3 waits
     assert _next(tmp_path, files).startswith(
-        "NOTHING ON THE BOARD: 2 epics active, the limit, and E3 is approved and planned")
+        "NOTHING ON THE BOARD: 2 epics active (at most 2), and E3 is approved and planned")
     files["E2-b.md"] = epic(2, "done")
     assert _next(tmp_path, files).startswith("ACTIVATE E3 · Epic 3")
     files["E3-c.md"] = epic(3, "active", tickets=planned)

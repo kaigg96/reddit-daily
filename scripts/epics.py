@@ -297,7 +297,7 @@ def next_action(epics):
         active = sum(1 for x in epics if x.status == "active")
         if active < MAX_ACTIVE:
             return f"ACTIVATE {e.label} · {e.name} ({_rel(e.path)}): approved and planned, a slot is free"
-        return (f"NOTHING ON THE BOARD: {active} epics active, the limit, and {e.label} is "
+        return (f"NOTHING ON THE BOARD: {active} epics active (at most {MAX_ACTIVE}), and {e.label} is "
                 "approved and planned, waiting for a slot; work the ranked queue")
     return "GENERATE AND FILTER: propose epics, and have a fresh agent cut them"
 
