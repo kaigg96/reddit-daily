@@ -192,6 +192,20 @@ def test_next_follows_the_four_roles_in_order(tmp_path):
     assert _next(tmp_path, files).startswith("GENERATE AND FILTER")
 
 
+def test_an_approved_planned_epic_is_started_or_waited_for_before_a_new_round(tmp_path):
+    planned = [{"n": 1, "status": "todo"}]
+    files = {"E1-a.md": epic(1, tickets=[{"n": 1, "status": "todo"}]),
+             "E2-b.md": epic(2, tickets=[{"n": 1, "status": "blocked: x"}]),
+             "E3-c.md": epic(3, "approved", tickets=planned)}
+    # both slots full: no new proposals while E3 waits
+    assert _next(tmp_path, files).startswith(
+        "NOTHING ON THE BOARD: 2 epics active, the limit, and E3 is approved and planned")
+    files["E2-b.md"] = epic(2, "done")
+    assert _next(tmp_path, files).startswith("ACTIVATE E3 · Epic 3")
+    files["E3-c.md"] = epic(3, "active", tickets=planned)
+    assert _next(tmp_path, files).startswith("GENERATE AND FILTER")
+
+
 def test_file_date_reads_an_untracked_file_by_its_mtime(tmp_path):
     path = tmp_path / "E1-a.md"
     path.write_text("x", encoding="utf-8")

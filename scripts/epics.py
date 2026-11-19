@@ -288,6 +288,17 @@ def next_action(epics):
     plan = [e for e in epics if e.status == "approved" and not e.tickets]
     if plan:
         return f"PLAN {plan[0].label} · {plan[0].name} ({_rel(plan[0].path)}): approved, no tickets"
+    # An approved, planned epic is the next one to start. With the active
+    # slots full, a new round of proposals only queues behind it: on 11-19 the
+    # board asked for one with E6 planned and waiting since 11-18.
+    waiting = [e for e in epics if e.status == "approved"]
+    if waiting:
+        e = waiting[0]
+        active = sum(1 for x in epics if x.status == "active")
+        if active < MAX_ACTIVE:
+            return f"ACTIVATE {e.label} · {e.name} ({_rel(e.path)}): approved and planned, a slot is free"
+        return (f"NOTHING ON THE BOARD: {active} epics active, the limit, and {e.label} is "
+                "approved and planned, waiting for a slot; work the ranked queue")
     return "GENERATE AND FILTER: propose epics, and have a fresh agent cut them"
 
 
