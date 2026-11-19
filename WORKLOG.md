@@ -85,7 +85,7 @@ and more useful than a confident guess.
 
 ### Next
 - **21 November, first:** check the first takes upload (logged as takes, nothing of Reddit's in the title, description or tags), then mark the takes task done.
-- **23 November:** the weekly review. Read the new claim columns for each music track's first takes video, and drop any track that was rejected or blocked. Count how often takes runs fell back from Google's AI, since two takes runs share one day's allowance on 20–21 November. Bet 2's capitals test also reads that day, and takes videos cannot leak into it, because its 30-a-side sample closed on 16 November.
+- **23 November:** the weekly review. Read the new claim columns for each music track's first takes video, and drop any track that was rejected or blocked. Count how often takes runs fell back from Google's AI, since two takes runs share one day's allowance on 20–21 November; already 3 of the last 5 uploads did, so each show's rate gets named beside the 4 January read. Bet 2's capitals test also reads that day, and takes videos cannot leak into it, because its 30-a-side sample closed on 16 November.
 - The queue holds one ready item, well under its minimum of five, so the next shift should generate more work. Dropped today: a test against takes videos mentioning Reddit (one already exists); counting Google requests per takes run (the weekly review does it); a tidy-up of the takes run's startup message (cosmetic, recorded); clearing the remaining 129 old branches (low value).
 
 ### Better?

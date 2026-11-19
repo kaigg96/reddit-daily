@@ -166,7 +166,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   before 08:00 UTC (11-15, 11-16): 8, plus 6-8 for the release check, 14-16
   of 20, ~24 worst case. Every call falls back (second model, Groq), so a run
   is lost only if Groq also fails the question. Shifts keep Gemini off those
-  days; count `meta_source` fallbacks on takes rows at the first weekly.
+  days; count `meta_source` fallbacks on takes rows at the first weekly,
+  and name each show's fallback share beside the 01-04 read, as music is:
+  3 of the first 5 logged (11-17 to 11-19) fell back, and `--compare
+  meta_source=gemini_fallback` refuses until 8 a side reach 7 days.
   (2) **The release check exercises Reddit's metadata path only**
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
