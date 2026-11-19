@@ -974,25 +974,38 @@ def render_own_words(log_rows, version, key="format_version"):
     return line + (" -- DONE" if met == len(vals) else " -- NOT YET")
 
 
-def render_host_lines(log_rows, version, key="format_version"):
+def dose_ids(release_videos, n):
+    """The uploads bet 1's dose rule counts: the first `n` by upload date of
+    those its verdict read (PRD §4, pre-committed 2026-10-26). Weekly
+    snapshots add a week of uploads at a time, so the read jumps past `n`."""
+    first = sorted(release_videos, key=lambda v: v.true_published or v.published)[:n]
+    return {v.video_id for v in first}
+
+
+def render_host_lines(log_rows, version, key="format_version", ids=None):
     """Bet 1's dose beside its verdict: of the release's uploads logging
     `host_lines`, how many showed every host line, some (a line too long
     or a setup that is not a reaction dropped alone, or the duration guard cut
     one) or none. Never a trigger: it
-    says how much of the change the verdict measured. Whole is a note per
-    answer read (while `HOST_REACTIONS`), the setup and the vote. Empty when nothing logs a count."""
+    says how much of the change the verdict measured, so `ids` limits it to
+    the verdict's uploads (its cut and age; PRD §4, pre-committed 2026-10-26).
+    Whole is a note per answer read (while `HOST_REACTIONS`), the setup and
+    the vote. Empty when nothing logs a count."""
     reacts = config.HOST_REACTIONS or not config.HOST_TEXT   # as llm._clean_commentary
     whole = (config.COMMENTARY_ANSWERS if reacts else 0) + 2
     counts = []
     for r in log_rows:
         n = (r.get("host_lines") or "").strip()
+        if ids is not None and r.get("video_id") not in ids:
+            continue
         if r.get(key) == version and n.isdecimal():
             counts.append(int(n))
     if not counts:
         return ""
     full = sum(1 for n in counts if n >= whole)
     none = sum(1 for n in counts if n == 0)
-    return (f"host lines shown (the dose, never a trigger): all {whole} on {full} of "
+    which = "" if ids is None else ", the verdict's first uploads"
+    return (f"host lines shown (the dose, never a trigger{which}): all {whole} on {full} of "
             f"{len(counts)} uploads, some on {len(counts) - full - none}, none on {none}")
 
 
