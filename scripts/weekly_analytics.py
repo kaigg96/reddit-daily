@@ -252,12 +252,15 @@ def claim_state(yt, video_ids):
     """video_id -> CLAIM_FIELDS, from videos.list (one request per 50 ids).
     Every recent upload is asked about, not only those the analytics query
     returned: a rejected upload has no analytics."""
-    out = {}
+    # One the API does not return (deleted, or never processed) says so,
+    # rather than reading blank like an upload too old to be asked about.
+    out = {v: {"upload_status": "not returned"} for v in video_ids}
     for d in analytics.fetch_video_details(yt, video_ids, part="status,contentDetails"):
         status = d.get("status", {})
         upload = status.get("uploadStatus", "")
-        if status.get("rejectionReason"):
-            upload += f":{status['rejectionReason']}"
+        reason = status.get("rejectionReason") or status.get("failureReason")
+        if reason:
+            upload += f":{reason}"
         rr = d.get("contentDetails", {}).get("regionRestriction") or {}
         region = (f"blocked {len(rr['blocked'])}" if rr.get("blocked")
                   else f"allowed {len(rr['allowed'])}" if "allowed" in rr else "")
@@ -269,8 +272,9 @@ def add_claim_state(yt, videos, today):
     """claim_state for the recent uploads; never raises. A failure writes its
     reason into each recent upload's upload_status, so a shift reading the
     snapshot can tell an unread week from a clean one."""
-    recent = recent_uploads(videos, today)
+    recent = []
     try:
+        recent = recent_uploads(videos, today)
         return claim_state(yt, recent)
     except Exception as e:
         reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]

@@ -536,6 +536,10 @@ def test_a_claim_on_a_recent_upload_is_recorded_and_old_ones_are_not_asked():
     assert claims["claimed"]["upload_status"] == "rejected:claim"
     assert claims["blocked"]["region_restriction"] == "blocked 2"
     assert claims["few"]["region_restriction"] == "allowed 1"
+    gone = wa.add_claim_state(_FakeVideos([]), [("gone", "2026-11-22", "public")], "2026-11-23")
+    assert gone == {"gone": {"upload_status": "not returned"}}
+    failed = [{"id": "f", "status": {"uploadStatus": "failed", "failureReason": "codec"}}]
+    assert wa.claim_state(_FakeVideos(failed), ["f"])["f"]["upload_status"] == "failed:codec"
 
 
 def test_a_failed_claim_read_costs_its_columns_only_and_says_why(capsys):
