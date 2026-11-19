@@ -3,15 +3,21 @@
 import datetime
 import os
 import re
+import types
 from dataclasses import dataclass
 
 import emoji
 import praw
-from better_profanity import profanity
+from better_profanity import Profanity, profanity
 
 from . import config
 
 profanity.load_censor_words()
+# The host's tags are reactions, where "Oh god" and "Hell no" are fine: the
+# same list without the mild words that double as exclamations ("OMG" too,
+# since "Oh my god" passes).
+TAG_CENSOR = Profanity()
+TAG_CENSOR.load_censor_words(whitelist_words=["god", "hell", "damn", "omg"])
 
 
 @dataclass
@@ -83,8 +89,31 @@ def clean_text(text):
     return text
 
 
+def sentence_case(text):
+    """The host's vote, as posted in the channel's comment: the AI writes it
+    all lower case ("raising my hand for yes. which gets your vote?", the
+    2026-10-11 sample), so each sentence's first letter is capitalised when
+    its first word is plain lower case, keeping "r/AskReddit" and "iPhone".
+    The video's own lines are untouched: its captions are shown in capitals,
+    and the host's notes are capitalised in video.note_clips."""
+    def cap(m):
+        word = m.group(2).rstrip(",;:.!?").replace("'", "").replace("’", "")  # "i'd", "don’t"
+        plain = word.isalpha() and word.islower()
+        return m.group(1) + (m.group(2)[:1].upper() + m.group(2)[1:] if plain else m.group(2))
+    # The stop is looked behind, not matched, so "nope. which?" caps both. A
+    # full stop ends a sentence except after another ("leave... now"), after
+    # "vs" or in an initialism ("u.s.", "i.e."), as in llm.sentence_case
+    # (003c9bb; the two disagreed on 19 of 420 logged texts).
+    text = re.sub(r"(^|(?:(?<=[!?])|(?<=\.)(?<!\.\.)(?<!\bvs\.)(?<!\.[^\W\d_]\.))\s+)(\S+)",
+                  cap, text)
+    return re.sub(r"(?<![./])\bi\b(?!\.\w|/)", "I", text)   # not "i.e.", "i/o"
+
+
 def _has_emoji(text):
-    return any(emoji.is_emoji(ch) for ch in text)
+    # Listed whole, not per character: a flag or keycap is two code points,
+    # neither an emoji alone (an answer shown on screen carried 🇺🇸; 10-24).
+    # The old per-character check stays too, for a malformed sequence.
+    return bool(emoji.emoji_list(text)) or any(emoji.is_emoji(ch) for ch in text)
 
 
 # The library counts a straight quote or * as part of a word, so a quote or
@@ -136,10 +165,10 @@ def _eligible(posts, prev_title, uploaded):
     return candidates
 
 
-def _profane(text):
-    return (profanity.contains_profanity(text)
-            or profanity.contains_profanity(_EDGE_MARKS.sub(" ", text))
-            or any(profanity.contains_profanity(m.group(1))
+def _profane(text, censor=profanity):
+    return (censor.contains_profanity(text)
+            or censor.contains_profanity(_EDGE_MARKS.sub(" ", text))
+            or any(censor.contains_profanity(m.group(1))
                    for m in _CONTRACTED.finditer(_EDGE_MARKS.sub(" ", text))))
 
 
@@ -160,6 +189,34 @@ def _comment_pool(post, limit):
     ][:limit]
 
 
+# Bet 1 (#70, PRD R3.2): with commentary on, medical threads are skipped at
+# selection. Drafts slipped facts and advice there even under prompt rules, and
+# YouTube refuses AI personas advising on health. The screen's health-body
+# label catches 1 of 83 uploads, so the title is checked too (2 of 165 by
+# keyword). Broad on purpose: a wrong skip costs one candidate, not an upload.
+_MEDICAL = re.compile(
+    r"\b(doctors?|nurses?|hospitals?|medical|medicine|medications?|illness(es)?|"
+    r"diseases?|cancer|symptoms?|diagnos\w*|surger(y|ies)|surgeons?|paramedics?|"
+    r"ambulances?|911|chiropract\w*|therap(y|ies|ists?)|pharmac\w*|health)\b", re.I)
+_MEDICAL_CAPS = re.compile(r"\b(ER|EMTs?)\b")  # case-folded, "er" is in "were"
+
+
+def is_medical(title, topic=""):
+    """True for a thread the host must not comment on (bet 1, #70)."""
+    return (topic == "health-body" or bool(_MEDICAL.search(title))
+            or bool(_MEDICAL_CAPS.search(title)))
+
+
+def _medical_skip(title, on_verdict, why):
+    print(f"Commentary: skipping a medical thread ({why}) — {title[:60]}")
+    if on_verdict:
+        on_verdict(title, types.SimpleNamespace(
+            category="medical", reason=why, source="commentary", unsafe=(), demoted=""),
+            # Not "skip_*": the weekly digest reads those as the screen's
+            # verdicts to audit for false positives, and this is not one.
+            "medical_excluded")
+
+
 def subreddit_for_run(now, subreddits=None, schedule=""):
     """R4.1: the subreddit this run draws from, deterministic per run.
 
@@ -176,10 +233,36 @@ def subreddit_for_run(now, subreddits=None, schedule=""):
     confounded with slot. At four a day each run takes the next entry, so
     no subreddit runs more than twice in a row."""
     subs = subreddits or config.SUBREDDITS
+    day, position = _day_position(now, schedule)
+    if config.SHOW_ALTERNATION:
+        # The Reddit arm runs at (day + position) even (show_for_run), so the
+        # key above would pin it to one subreddit. Moving the subreddit every
+        # two days instead, while the slot swaps daily, gives the arm every
+        # subreddit in every slot over 2 * len(subs) days.
+        return subs[(day.toordinal() // 2 + position // 2) % len(subs)]
+    return subs[(day.toordinal() + position) % len(subs)]
+
+
+def show_for_run(now, schedule=""):
+    """E1 T4: the show this run uploads ("reddit" or "takes"), deterministic
+    per run, when config.SHOW_ALTERNATION is on (off, SOURCE decides).
+
+    Keyed like subreddit_for_run, on (day + slot position) % 2: one show each
+    slot, the two swapping slots every day, so over any two days each show
+    has the morning and the evening once. At four a day each show takes
+    alternate slots. Because this uses the subreddits' old key, the Reddit
+    arm's subreddit moves on day // 2 instead (see subreddit_for_run), or
+    it would draw one subreddit forever."""
+    day, position = _day_position(now, schedule)
+    return config.SHOWS[(day.toordinal() + position) % len(config.SHOWS)]
+
+
+def _day_position(now, schedule=""):
+    """(day, index of this run's slot among the live ones)."""
     day, slot = run_slot(now, schedule)
     live = live_slots()
     position = live.index(slot) if slot in live else slot // 2
-    return subs[(day.toordinal() + position) % len(subs)]
+    return day, position
 
 
 def run_slot(now, schedule=""):
@@ -249,6 +332,11 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
     def first_passing(posts, first_rank):
         nonlocal screened
         for rank, post in enumerate(posts, first_rank):
+            # Before the screen, and outside its cap: a thread skipped on its title
+            # spends no request, so it must not cost the run a screened candidate.
+            if config.COMMENTARY and is_medical(post.title):
+                _medical_skip(post.title, on_verdict, "title")
+                continue
             if screened >= config.MAX_SCREENED_CANDIDATES:
                 return None
             screened += 1
@@ -265,6 +353,9 @@ def select_post(reddit, prev_title, subreddit_name="AskReddit", screener=None, o
                     print(f"Screen: skipping post ({result.category}) — {post.title[:60]}")
                     if on_verdict:
                         on_verdict(post.title, result, "skip_post")
+                    continue
+                if config.COMMENTARY and is_medical("", topic):
+                    _medical_skip(post.title, on_verdict, "topic")
                     continue
 
                 # Answer-level category raised against the post: not a skip, but

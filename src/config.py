@@ -34,6 +34,28 @@ SAMPLE = os.environ.get("SAMPLE", "").lower() in ("1", "true", "yes")
 SILENT_NARRATION = os.environ.get("SILENT_NARRATION", "").lower() in ("1", "true", "yes")
 DRY_RUN = SAMPLE or SILENT_NARRATION or \
     os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+# STAND_IN_VOICE: a narration that never calls Polly uses a free offline voice
+# (src/standin.py) rather than silence, so a branch render can be judged by ear
+# (#77). On by default for SILENT_NARRATION, the branch renders; off for SAMPLE,
+# whose fixed post only proves a render plays. Uploads never reach it.
+STAND_IN_VOICE = os.environ.get(
+    "STAND_IN_VOICE", "1" if SILENT_NARRATION and not SAMPLE else "").lower() in ("1", "true", "yes")
+# METADATA_ON_UPLOAD_MODEL=1 writes a dry run's title, host tags and vote on
+# the upload model (llm.MODEL): one request from the allowance uploads share,
+# so only for a render the owner judges (#77). The screen stays on the sample
+# model. On three posts (2026-10-20) the sample model's tags were labels where
+# the upload model's reacted (1 of 9 reactions against 7), so a render that
+# judges the tags must show what an upload would. Uploads use MODEL already.
+# On by default with the stand-in voice: a branch render that speaks exists to
+# be judged by ear, and dry-run.yml allows one such render per 12 hours.
+METADATA_ON_UPLOAD_MODEL = os.environ.get(
+    "METADATA_ON_UPLOAD_MODEL", "1" if STAND_IN_VOICE else "").lower() in ("1", "true", "yes")
+# REUSE_NARRATION=1, on a dry run only: narration already bought for the same
+# text and voice is reused from GEN/narration/ rather than billed again, and
+# the narrator is always VOICES[0] so a re-render finds it. For the owner's
+# narrated renders (#77): each timing tweak cost a Polly run (TECH_DEBT).
+REUSE_NARRATION = DRY_RUN and os.environ.get(
+    "REUSE_NARRATION", "").lower() in ("1", "true", "yes")
 # SOURCE: where the question comes from. "reddit" is the show; "own" is our
 # own question with three takes (src/ownquestions.py), the source after
 # Reddit's free API ends (PLAN C16), built switched off: only a label turns it
@@ -44,6 +66,9 @@ if SOURCE not in ("reddit", "own"):
 # Each answer's on-screen label. Our own takes say so: nobody else wrote them,
 # so they must never pass for a real person's answer (PRD §4).
 ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
+# The show an upload logs (upload_log `show`, E1 T3), as report.py compares
+# them: `--compare show=takes`. Our own questions are the takes show.
+SHOW = "takes" if SOURCE == "own" else "reddit"
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
@@ -115,13 +140,13 @@ AI_PROVIDER = (os.environ.get("AI_PROVIDER") or "gemini").strip().lower()
 GROQ_MODEL = "openai/gpt-oss-120b"
 # Groq's one try once Gemini has failed (llm.groq_rescue): the screen's last
 # before its keyword backstop, and the metadata call's before the title, CTA
-# and keywords fall back. Off until merged with a sample; switch it here,
-# never by a variable.
-GROQ_FALLBACK = False
+# and keywords fall back. Switched on with a sample (PRD §0 #13); switch it
+# here, never by a variable.
+GROQ_FALLBACK = True
 
 # --- pipeline metadata (R0.2) ---
-FORMAT_VERSION = "v7s"  # v7s = v7 on MODEL's successor (PRD §4, 11-07): titles, closing lines, the screen
-# v7 = opens on the question, not the channel name + format label
+FORMAT_VERSION = "v8"  # v8 = bet 1, text-only (#71): the host's setup note on screen (reactions off: HOST_REACTIONS), the narrator speaks its vote
+# v7s = v7 on MODEL's successor (PRD §4, 11-07): titles, closing lines, the screen
 # Bumped for anything but bet 1's vote? Move the version tests/test_llm.py
 # forbids the vote to share, or the vote could ship unlabelled.
 
@@ -130,6 +155,44 @@ FORMAT_VERSION = "v7s"  # v7s = v7 on MODEL's successor (PRD §4, 11-07): titles
 # instead of "comment your answer". None keeps the prompt unchanged. Turning it
 # on changes the video: bump FORMAT_VERSION and take a real sample.
 HOUSE_VOTE_RULE = None
+
+# Bet 1's first step as the owner approved it (#70, 2026-10-10; PRD R3.2's
+# commentary-led variant): the host speaks a setup, a reaction after each
+# answer read, and its vote in place of the CTA, all from the same
+# metadata call. It supersedes HOUSE_VOTE_RULE. On, it also skips medical
+# threads at selection (content.is_medical). Turning it on changes the video:
+# bump FORMAT_VERSION, take a sample, and the owner listens to one first.
+COMMENTARY = True
+# In vote order (owner, 2026-08-23). Two made room for the spoken host (#70);
+# text notes take no time, and two answers cut the median video from 23.3s to
+# ~17.2s, where uploads hold 25% less watch time (PRD §4, 2026-10-14).
+COMMENTARY_ANSWERS = 3
+HOST_CAPTION_COLOR = "#ffd84d"  # the host's lines read apart from the answers
+# The text-only host's notes (PRD R3.2, after #71): below the word captions
+# (y=700) and above the watermark (y=1500), inside the Shorts safe zone.
+NOTE_Y = 1150
+NOTE_FONT_SIZE = 64
+NOTE_WIDTH = 900
+NOTE_LEAD = 0.35  # share of the segment before its note appears
+NOTE_BAND_OPACITY = 0.55  # the dark band behind a note; the clip still shows through
+# The host's setup and reactions as on-screen notes, never spoken; the
+# narrator speaks the vote, as today's CTA (#71).
+HOST_TEXT = True
+# The notes as tags of 1-3 words, each shown on its segment's last spoken
+# words and held through a longer pause, so it is read while nothing else is
+# said (owner, #77, 2026-10-19): a sentence shown mid-answer could not be read
+# while the answer was heard. False restores those notes (NOTE_LEAD).
+HOST_TAGS = True
+# Bet 1 without its per-answer reactions (#77, 2026-11-11): the setup note and
+# the vote stay, and no answer carries a tag. gemini-3.6-flash labels where
+# 2.5-flash reacted, and four fixes left it at 0-1 of 9 (PRD §4), so this is
+# the build #77 offers. True restores the reactions as the 10-25 sample.
+HOST_REACTIONS = False
+TAG_LEAD_IN = 0.3  # seconds before its segment's narration ends that a tag appears
+# The gap after a segment that carries a tag, in place of INTER_SEGMENT_GAP. A
+# tag shows for TAG_LEAD_IN + TAG_PAUSE: 0.8s read too quick for the eyes to
+# move down, read and take it in (owner, 2026-10-19), so about 1.2s.
+TAG_PAUSE = 0.9
 
 # --- AWS Polly cost guard (the only billed service; see CLAUDE.md §1) ---
 # Neural is $16/1M chars and every segment is synthesized twice (mp3 + speech
@@ -180,7 +243,30 @@ COMMENTS_LOG = ROOT / "analysis" / "viewer_comments.csv"  # PLAN C5: last week's
 # release too (`v8-own` after `v7s-own`), never hidden inside the first. Here,
 # not beside FORMAT_VERSION, so bet 1's bump of that line merges cleanly.
 OWN_FORMAT_VERSION = f"{FORMAT_VERSION}-own"
+REDDIT_FORMAT_VERSION = FORMAT_VERSION
 if SOURCE == "own":
     FORMAT_VERSION = OWN_FORMAT_VERSION
+
+# E1 T4: one Reddit and one takes upload a day, the two shows trading the
+# morning and evening slots daily (content.show_for_run). Off, SOURCE alone
+# picks the show, as before; on, each run's show overrides SOURCE (use_show).
+# On since E1 T5: takes runs as a daily arm under ledger `takes-gate`, set
+# before its first upload and read once on 2027-01-04.
+SHOW_ALTERNATION = True
+SHOWS = ("reddit", "takes")
+
+
+def use_show(show):
+    """Set everything that follows the show for this run: SOURCE, SHOW,
+    FORMAT_VERSION and ANSWER_LABEL, as SOURCE sets them at import. Other
+    modules read these as config.X at call time, so a run that calls this
+    before its content step runs as that show throughout."""
+    global SOURCE, SHOW, FORMAT_VERSION, ANSWER_LABEL
+    if show not in SHOWS:
+        raise ValueError(f"show {show!r} is not a show {SHOWS}")
+    SOURCE = "own" if show == "takes" else "reddit"
+    SHOW = show
+    FORMAT_VERSION = OWN_FORMAT_VERSION if show == "takes" else REDDIT_FORMAT_VERSION
+    ANSWER_LABEL = "TAKE" if show == "takes" and not SAMPLE else "ANSWER"
 
 GEN.mkdir(parents=True, exist_ok=True)

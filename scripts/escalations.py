@@ -8,7 +8,8 @@ approved escalation is a **work item**, not a question.
 
     escalations.py open              # anything still awaiting a decision
     escalations.py approved          # decided — do these, then close them;
-                                     # also lists recent refusals
+                                     # also lists recent refusals and notices
+    escalations.py notices           # dated notices: due, running, or held
     escalations.py close <n> "what was done"
 
 Both listings first flag any sample render an open ask links whose download
@@ -316,6 +317,8 @@ def show(want_approved):
             print("LABELLED APPROVED, BUT NOT BY THE OWNER — not a decision; do not act:")
             for i, _ in forged:
                 print(f"  #{i['number']}  {i['title']}")
+    if want_approved:
+        notices(quiet=True)
     if not rows:
         print("approved and waiting to be done: none" if want_approved
               else "awaiting the owner: none")
@@ -336,6 +339,65 @@ def show(want_approved):
     return 0
 
 
+NOTICE_DATE = re.compile(r"<!-- notice-date: (\d{4}-\d{2}-\d{2}) -->")    # escalate.py --notice-days
+
+
+def _owner_objected(issue):
+    """Any sign of the owner stops a notice: a reply, their close (even if the
+    issue was reopened since), or an `objection` label. A shift's token can
+    add and remove labels, so theirs is read from who put it there; one that
+    is on the issue now holds it whoever added it. A deleted comment holds it
+    too, whoever deleted it: the reply it removed may have been the owner's."""
+    owner = REPO.split("/")[0]
+    is_objection = lambda name: (name or "").strip().lower() == "objection"
+    if any(is_objection(l["name"]) for l in issue["labels"]):
+        return True
+    for e in _api(f"/repos/{REPO}/issues/{issue['number']}/events?per_page=100") or []:
+        if e.get("event") == "comment_deleted":     # whoever's: a reply may have been the owner's
+            return True
+        if (e.get("actor") or {}).get("login") == owner and (
+                e.get("event") == "closed"
+                or (e.get("event") == "labeled" and is_objection((e.get("label") or {}).get("name")))):
+            return True
+    return bool(_owner_replies(issue))
+
+
+def notices(now=None, quiet=False):
+    """Dated notices (D16): a one-way door that costs no money goes ahead on
+    its date unless the owner objected. This is where a shift learns which."""
+    today = (now or datetime.now(timezone.utc)).date().isoformat()
+    rows = [i for i in _api(f"/repos/{REPO}/issues?state=open&labels=notice&per_page=100") or []
+            if "pull_request" not in i
+            and any(l["name"].strip().lower() == "notice" for l in i["labels"])]
+    if not rows:
+        if not quiet:
+            print("notices: none open")
+        return 0
+    print("NOTICES. Each said what would happen and when. DUE: go ahead, then close "
+          "it saying what was done. HELD: the owner objected, so do not go ahead; their "
+          "reply is the decision:")
+    for i in rows:
+        body = i.get("body") or ""
+        date = NOTICE_DATE.search(body)
+        if _owner_objected(i):
+            state = "HELD by the owner"
+        elif APPLY_MARKER in body:
+            state = ("a workflow change: " + (_not_applied(i) or "applied")
+                     if any(c.get("body", "").startswith(RESULT_MARKER)
+                            for c in (_comments(i) if i.get("comments") else []))
+                     else "a workflow change: applies itself once its notice has run")
+        elif not date:
+            state = "no date found: raise it again with --notice-days"
+        elif date.group(1) <= today:
+            state = f"DUE since {date.group(1)}"
+        else:
+            state = f"running until {date.group(1)}"
+        print(f"  #{i['number']}  {i['title']}  [{state}]")
+        for reply in _owner_replies(i):
+            print("      owner: " + reply.replace("\n", "\n             "))
+    return 0
+
+
 def close(number, message):
     """Close only with a note saying what was done — a bare close loses why."""
     _api(f"/repos/{REPO}/issues/{number}/comments", {"body": message})
@@ -351,6 +413,8 @@ if __name__ == "__main__":
             sys.exit(show(True))
         if cmd == "open":
             sys.exit(show(False))
+        if cmd == "notices":
+            sys.exit(notices())
         if cmd == "close" and len(sys.argv) >= 4:
             sys.exit(close(int(sys.argv[2]), " ".join(sys.argv[3:])))
     except urllib.error.HTTPError as e:

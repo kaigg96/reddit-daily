@@ -155,26 +155,31 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The own show's switch-on (2026-11-15, branch `strategy/own-switch-on`,
-  unmerged until #90's label and its music tracks).** One commit: `SOURCE`
-  defaults to `own` (logs `v7s-own`, or `v8-own` once bet 1 is live), tests
-  pin Reddit. Its fresh review found three things to settle before it
-  merges: (1) the release gates (`validate-release.yml` sets no `SOURCE`)
-  would run the own metadata path: an unanswered judge now reads
-  INCONCLUSIVE (merged 11-15), but gate 1 grows to 2 requests (metadata,
-  then judge), so the gates spend 7 of their stated 8, 9 only if retries
-  fire (the cap is a budget line, not a stop); (2) fixed 11-15: the docs
-  check now reads the shipped version, so it flags PRD's live format until
-  it says `v7s-own`; (3) settled 11-15, no workflow patch: `dry-run.yml`
-  passes no `SOURCE`, so a render takes the branch's default, and a sample
-  branch whose `config.SOURCE` defaults to `reddit` still renders Reddit's
-  show. Then a dry run of its tip, which renders the own path. **Music
-  without the owner's hands (11-15):** Kevin MacLeod's tracks (incompetech)
-  are CC BY 4.0, so plain files may sit in this public repo with a credit,
-  and are pre-registered in Content ID: a claim comes when the description
-  lacks the credit, and is released within 72 h of a dispute (the owner's
-  hands). Needs a credit line in the description, which nothing writes yet,
-  and a track choice. Build it only if the owner picks it on #90.
+- **The takes show's switch-on (E1 T5; merged 11-19, `5f732aa`, after its
+  render twin's PASS at `3311579`; the E1 branches deleted).** Its fresh
+  review as a live change: nothing blocking; two fixes made
+  on the branch (takes never draws the funk bed; the digest never auto-reverts
+  `-own`). Open, not fixed: (1) **Gemini on takes days.** A takes run spends
+  ~4 upload-model requests (question, screen, metadata, title judge; worst
+  ~12), Reddit's ~2 (worst 10). The slots give takes two runs in a row every
+  other day, which share one Pacific quota day when the morning run lands
+  before 08:00 UTC (11-15, 11-16): 8, plus 6-8 for the release check, 14-16
+  of 20, ~24 worst case. Every call falls back (second model, Groq), so a run
+  is lost only if Groq also fails the question. Shifts keep Gemini off those
+  days; count `meta_source` fallbacks on takes rows at the first weekly.
+  (2) **The release check exercises Reddit's metadata path only**
+  (`validate_release.py` never calls `use_show`): takes' question and title
+  judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
+  line prints the import-time `v8` on a takes run (the log row is right), and
+  the output file is still `final_askreddit_video.mp4`; the upload
+  workflow's unseal comment ("none") now holds for the Reddit show only,
+  too small for an owner's label alone: fold it into that file's next
+  patch. (4) The digest's
+  `-own` exclusion has no end date and names 2027-01-04: once takes holds
+  every slot (01-05), its next release must be auto-reverted like any other;
+  T10's shift ends the exclusion. A second fresh review of the branch's later
+  commits: nothing blocking.
+  **Before T5's switch-on too (11-18): tests could reach the real Gemini API.** With `SHOW_ALTERNATION` flipped on, 10 tests failed and the suite took 220 s: the cutoff runs took the takes path, whose `ownquestions` calls are unmocked, with the shell's real key. **Fixed 11-19:** conftest strips `GEMINI_API_KEY` (on `main`, `2115fb5`, with a test). The pins are on `engineering/e1-t5-test-pins` (based on T4's branch; merge it after T4): nine tests pin the switch off, and one more cutoff test runs with it on. Switched on there, with T2 merged, only `test_built_switched_off` fails, 38 s: the switch-on commit replaces that guard. Fresh review: nothing blocking. Caveat: a subprocess test that imports `config` reloads a local `.env`, so the strip covers the parent process only.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
@@ -266,8 +271,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`. **Rehearsed again 11-13** over `main` `ae729f3`: `v8`, this
-  branch and `reliability/run-slot-log` merge cleanly, 1,141 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  after `v8`. **Rehearsed again 11-15** over `main` `14d0dbc`: `v8`, this
+  branch and `reliability/run-slot-log-main` merge cleanly, 1,244 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
   fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
   (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
   the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
@@ -328,7 +333,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
   (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
-  `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
+  `MAX_SCREENED_CANDIDATES` to 2. **Moved 11-15:** `reliability/run-slot-log-main`
+  (off `main`, 969 pass; merges with `integration/preview` cleanly, either
+  order, rows stay aligned; reviewed fresh). Its fix, the slot key worked out
+  before the upload, is not on the stacked branch; nor is its second, the
+  digest's `week_videos` grouped by scheduled day like `per_day`. **It
+  supersedes the stacked branch:** over `integration/preview` it merges
+  clean and 1,242 pass (11-15), so merge this one after `v8` as well. **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
@@ -423,7 +434,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Escalations:** none opened (11-05's hold); the owner answered five
   label-only asks on 11-10 and passed over the five needing a watch, a
   direction call or hands (#59, #77, #80, #82, #90). Tight on files (#88,
-  #65 approved, awaiting hands), not decisions. **Decisions** (inline): D13,
+  #65 approved, then waiting for hands; all six closed 11-15), not decisions. **Decisions** (inline): D13,
   D11, D5 false; D4 worse (PRD §4 15,317 → 20,714 words in a week); D2, D8,
   D9 (amended, #91), D12 strained; D6, D14 hold a third audit: graduation
   candidates. **Outward (docs 11-12):** the `attribution` setting turns off
@@ -512,8 +523,8 @@ a list nobody can read is the same as no list.
   between 07:00 and 08:00 UTC in winter spends the day the uploads already
   used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
   from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
-  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
-  after 08:00 UTC in winter; PRD §0's host-line row says so.
+  owner). The skill's sentence was fixed 11-19 (shifts own it since D16). Until
+  then, plan Gemini work after 08:00 UTC in winter.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
@@ -536,9 +547,13 @@ a list nobody can read is the same as no list.
   ("Fuuuck", "sh!t") pass every list, as the library does not fold repeats
   (folding would newly flag 0 of 1,417 logged titles and lines); a swearing
   vote in voiced mode (dormant) is untested; the library reads a curly "he’ll"
-  as "hell" (fails safe, rare); YouTube's API refuses "<" and ">" in a title
-  or description and nothing strips them, which would fail the upload and
-  retry the same post (0 of ~2,300 past titles and answers). Live video left
+  as "hell" (fails safe, rare). YouTube's API refuses "<" and ">" in a title,
+  description or tag: it happened 11-16 (an answer quoting another, "\> Huge
+  IT nation"; the evening slot lost) and `youtube._accepted` swaps both for
+  angle quotes since 11-17 (reviewed). Left: `content.clean_text` keeps
+  Reddit's markdown escapes and quote marks, so that "\>" was also on screen,
+  in the captions and in Polly's text; stripping them changes the video, so
+  after bet 1's read, not inside it. Live video left
   as is (retitling would alter a row of #10 and #14). **Closes when** `v8`
   ships and none of these has occurred in its first 20 uploads.
 

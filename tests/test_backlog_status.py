@@ -91,7 +91,64 @@ def test_the_company_queue_is_well_formed_and_counted():
     bad = [(status, name) for status, _, name in rows if status not in b.STATUSES]
     assert not bad, f"unknown statuses: {bad}"
     assert not b.malformed(text, b.queue_section)
-    assert all(name.startswith(("[product] ", "[company] ")) for name in b.ready_all())
+    assert all(name.startswith(("[product] ", "[company] ", "[epic] "))
+               for name in b.ready_all())
+
+
+def _ticket(n, status, needs="—"):
+    return (f"### T{n} · Ticket {n}\nStatus: {status}\nNeeds: {needs}\nTouches: x\n"
+            f"Context: y\nAccept:\n- [ ] z\nEvidence: {'shipped' if status == 'done' else ''}\n")
+
+
+def _epic(n, status, tickets):
+    return (f"# E{n} · Epic {n}\nStatus: {status}\nFunction: Product\nDeadline: —\n"
+            f"Measure: m\nRule: r\n\n## Tickets\n\n" + "\n".join(tickets))
+
+
+def test_ready_tickets_of_active_epics_count_once_their_needs_are_done(tmp_path):
+    """Work larger than a shift lives in epics/; a dispatchable ticket there is
+    supply. Only an active epic's, and only once everything it needs is done."""
+    (tmp_path / "E1-a.md").write_text(_epic(1, "active", [
+        _ticket(1, "done"), _ticket(2, "ready", "T1"), _ticket(3, "ready", "T4"),
+        _ticket(4, "doing: 123, 10:00"), _ticket(5, "ready: after the review"),
+        _ticket(6, "ready", "E2 T1"), _ticket(7, "todo")]), encoding="utf-8")
+    (tmp_path / "E2-b.md").write_text(_epic(2, "approved", [
+        _ticket(1, "ready")]), encoding="utf-8")
+    assert b.epic_ready(str(tmp_path)) == ["E1 T2 · Ticket 2", "E1 T5 · Ticket 5"]
+    found = b.ready_all(str(tmp_path))
+    assert found[-2:] == ["[epic] E1 T2 · Ticket 2", "[epic] E1 T5 · Ticket 5"]
+    assert [n for n in found if n.startswith("[epic] ")] == found[-2:]
+
+
+def test_the_count_and_the_listing_include_the_epic_board(tmp_path, monkeypatch, capsys):
+    (tmp_path / "E1-a.md").write_text(_epic(1, "active", [_ticket(7, "ready")]),
+                                      encoding="utf-8")
+    monkeypatch.setattr(b, "sources", lambda: [])
+    monkeypatch.setattr(b, "short_shifts", lambda: [])
+    monkeypatch.setattr(b, "epic_ready", lambda d=None, real=b.epic_ready: real(str(tmp_path)))
+    b.main(["--count"])
+    assert capsys.readouterr().out == "1\n"
+    b.main([])
+    out = capsys.readouterr().out
+    assert "READY 1 (floor 5)" in out and "  - [epic] E1 T7 · Ticket 7" in out
+
+
+def test_cut_epics_are_listed_as_dropped(tmp_path, monkeypatch, capsys):
+    """E2 T6: a filter's cut stays on the board a month, and `--dropped` is
+    what the next generator reads, so the cut must show there."""
+    (tmp_path / "E4-a.md").write_text(_epic(4, "dropped: filter 11-18, too thin", []),
+                                      encoding="utf-8")
+    (tmp_path / "E5-b.md").write_text(_epic(5, "approved (filter 11-18)", []),
+                                      encoding="utf-8")
+    (tmp_path / "E6-c.md").write_text(_epic(6, "dropped (superseded by E5)", []),
+                                      encoding="utf-8")
+    assert b.dropped_epics(str(tmp_path)) == ["E4 · Epic 4: filter 11-18, too thin",
+                                              "E6 · Epic 6: superseded by E5"]
+    monkeypatch.setattr(b, "dropped_epics", lambda d=None, real=b.dropped_epics: real(str(tmp_path)))
+    monkeypatch.setattr(b, "recently_dropped", lambda **k: [])
+    monkeypatch.setattr(b, "answered_in", lambda text: [])
+    b.main(["--dropped"])
+    assert "  - E4 · Epic 4: filter 11-18, too thin" in capsys.readouterr().out
 
 
 _OLD = """## 2026-10-16 (22:36) — older shift

@@ -1,21 +1,24 @@
-name: Protect the process rules
+name: Protect the workflows
 
-# Shifts run autonomously and are told, in prose, that changes to their own
-# rules are proposals rather than self-applied edits. Prose is advisory — the
-# same reason the R4.6 tier guarantee moved into screen.py and the Polly budget
-# into tts.py. This is that rule in code.
+# Since 2026-11-14 (D16) shifts own their process: CLAUDE.md, ORG.md and the
+# process text (process/*.md) change on a shift's own judgement, because every
+# one of them had become a wait on an owner with no time to answer. What stays
+# locked is this directory. The workflows are where the paid and upload keys
+# are wired and where the money checks run (guardrails.yml), so they are the
+# part of "never spend money" a shift must not be able to reach.
 #
-# If a protected file changes on main without an approving issue, the change is
-# reverted and the owner is told. Branches are untouched: propose freely, get
-# approval, then merge.
+# A workflow file may change on main in two ways only:
+#   Approved-In: #N  the owner labelled issue #N `approved`
+#   Notice-In: #N    issue #N carried the exact change for NOTICE_DAYS and the
+#                    owner neither replied, closed it nor labelled it
+#                    `objection`; apply-approved.yml lands these, within what
+#                    notice_check.py allows, and this re-checks the files
+# Anything else is reverted and the owner is told.
 
 on:
   push:
     branches: [main]
     paths:
-      - 'CLAUDE.md'
-      - 'ORG.md'
-      - '.claude/skills/**'
       - '.github/workflows/**'
 
 permissions:
@@ -36,22 +39,61 @@ jobs:
         with:
           fetch-depth: 0   # every commit the push brought in, not just the tip
 
+      - name: Python can read YAML
+        run: |
+          python3 -c "import yaml" 2>/dev/null \
+            || python3 -m pip install -q --user pyyaml \
+            || python3 -m pip install -q --user --break-system-packages pyyaml
+
       - name: Was this approved?
         id: verify
         uses: actions/github-script@v7
         with:
           script: |
-            const { execSync } = require('child_process');
+            const { execSync, execFileSync } = require('child_process');
             const git = (args) => execSync(`git ${args}`, { encoding: 'utf8' });
+            // Through an argument list, never a shell: a file name is chosen
+            // by whoever made the commit.
+            const show = (spec) => {
+              try { return execFileSync('git', ['show', spec], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); }
+              catch (e) { return ''; }
+            };
             // Workflows are protected because CI *is* the gate that replaced
-            // owner review -- a shift able to edit it could disable its own
-            // supervision, which matters more now shifts can run inside CI.
-            // ORG.md since 2026-10-05: it sets which decisions a shift may take
-            // alone (Act) and which go to the owner (Propose / Owner), so a
-            // shift able to edit it could promote its own authority.
-            const isProtected = f => f === 'CLAUDE.md' || f === 'ORG.md'
-                                  || f.startsWith('.claude/skills/')
-                                  || f.startsWith('.github/workflows/');
+            // owner review, and because the keys that can spend money or
+            // change the channel are wired here. The rules and the process
+            // text are the shifts' own since D16 (2026-11-14).
+            const isProtected = f => f.startsWith('.github/workflows/');
+            // Must match notice_check.py, which also decides what a notice may
+            // do to a file's content; tests/test_protect_process.py checks both.
+            const NOTICE_DAYS = 3;
+            const neverByNotice = ['.github/workflows/protect-process.yml',
+                                   '.github/workflows/apply-approved.yml',
+                                   '.github/workflows/notice_check.py',
+                                   '.github/workflows/guardrails.yml'];
+            const python = process.env.PYTHON || 'python3';
+            const checker = '.github/workflows/notice_check.py';
+            const refusals = (name, text) => {
+              try {
+                return JSON.parse(execFileSync(python, [checker, '--name', name],
+                  { input: text, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }));
+              } catch (e) {
+                if (e.status === 1 && e.stdout) { try { return JSON.parse(e.stdout); } catch (_) { /* fall through */ } }
+                return [`${name} could not be checked`];
+              }
+            };
+            // A notice may not touch the locked files, nor leave a file reaching
+            // what notice_check.py refuses (read at the commit, or before it for
+            // a deletion). apply-approved.yml would not push such a commit; this
+            // holds if its token is ever misused.
+            const noticeMayTouch = (sha, files) => {
+              const why = [];
+              for (const f of files) {
+                if (neverByNotice.includes(f)) { why.push(`\`${f}\` never changes by notice`); continue; }
+                const text = show(`${sha}:${f}`) || show(`${sha}~1:${f}`);
+                if (text) why.push(...refusals(f, text));
+              }
+              return why.length ? [...new Set(why)].join('; ') : null;
+            };
 
             // Judge every commit the push brought in. Until 2026-09-24 this read
             // only HEAD~1..HEAD, which let a protected edit through behind any
@@ -95,6 +137,41 @@ jobs:
               return verdicts[n];
             };
 
+            // The other way in: the change sat on an issue for NOTICE_DAYS and
+            // the owner did not object. apply-approved.yml checks far more
+            // (the exact text, which files, which keys) before it pushes; this
+            // re-checks what can be read back from the issue, so a trailer
+            // alone still proves nothing.
+            const isObjection = l => String((l && l.name) || l).trim().toLowerCase() === 'objection';
+            const notices = {};
+            const noticedIn = async (n) => {
+              if (!(n in notices)) {
+                try {
+                  const { owner, repo } = context.repo;
+                  const issue = (await github.rest.issues.get({ owner, repo, issue_number: n })).data;
+                  const age = (Date.now() - Date.parse(issue.created_at)) / 86400000;
+                  const events = await github.paginate(github.rest.issues.listEvents,
+                    { owner, repo, issue_number: n, per_page: 100 });
+                  const comments = await github.paginate(github.rest.issues.listComments,
+                    { owner, repo, issue_number: n, per_page: 100 });
+                  const timeline = await github.paginate(github.rest.issues.listEventsForTimeline,
+                    { owner, repo, issue_number: n, per_page: 100 });
+                  const objected = (issue.labels || []).some(isObjection)
+                    || events.some(e => e.actor && e.actor.login === owner
+                        && (e.event === 'closed' || (e.event === 'labeled' && isObjection(e.label))))
+                    || comments.some(c => c.user && c.user.login === owner)
+                    || [...events, ...timeline].some(e => e.event === 'comment_deleted');
+                  notices[n] = !(issue.body || '').includes('<!-- apply-patch -->')
+                      ? `issue #${n} carries no change to apply`
+                    : !(age >= NOTICE_DAYS)
+                      ? `issue #${n} has not had its ${NOTICE_DAYS} days of notice`
+                    : objected ? `the owner replied, closed or objected on issue #${n}`
+                    : null;
+                } catch (e) { notices[n] = `issue #${n} could not be read`; }
+              }
+              return notices[n];
+            };
+
             const bad = [];
             for (const sha of git(`rev-list --reverse ${base}..${after}`).split('\n').filter(Boolean)) {
               // A merge is judged only on what it introduces itself (--cc).
@@ -104,8 +181,12 @@ jobs:
               const files = git(`diff-tree -r --no-commit-id --name-only ${merge ? '--cc ' : ''}${sha}`)
                 .split('\n').filter(Boolean).filter(isProtected);
               if (!files.length) continue;
-              const m = git(`log -1 --pretty=%B ${sha}`).match(/Approved-In:\s*#(\d+)/i);
-              const why = m ? await approvedIn(Number(m[1])) : 'no `Approved-In: #N` trailer';
+              const message = git(`log -1 --pretty=%B ${sha}`);
+              const m = message.match(/Approved-In:\s*#(\d+)/i);
+              const nm = message.match(/Notice-In:\s*#(\d+)/i);
+              const why = m ? await approvedIn(Number(m[1]))
+                        : nm ? (await noticedIn(Number(nm[1]))) || noticeMayTouch(sha, files)
+                        : 'no `Approved-In: #N` or `Notice-In: #N` trailer';
               if (why) bad.push({ sha: sha.slice(0, 7), files, why });
             }
 
@@ -135,11 +216,11 @@ jobs:
             if git cat-file -e "$BASE:$f" 2>/dev/null; then git checkout "$BASE" -- "$f"
             else git rm -q -f -- "$f"; fi
           done < "$RUNNER_TEMP/unapproved-files.txt"
-          git commit -m "Revert unapproved process change
+          git commit -m "Revert unapproved workflow change
 
-          Protected files changed on main without owner approval. The change is
-          not lost -- it is in the history and can be re-proposed on a branch
-          with an approving issue." || echo "nothing to revert"
+          Workflow files changed on main without the owner's approval or a
+          notice that ran its course. The change is not lost -- it is in the
+          history and can be raised again with scripts/escalate.py --patch." || echo "nothing to revert"
           for attempt in 1 2 3; do
             git pull --rebase origin main && git push && exit 0
             sleep 5
@@ -151,19 +232,20 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const key = 'process-change-without-approval';
+            const key = 'workflow-change-without-approval';
             const marker = `<!-- escalation-key: ${key} -->`;
             const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const body = `${marker}\n\n` +
-              `A protected file changed on \`main\` without approval and **has been reverted**.\n\n` +
+              `A workflow file changed on \`main\` without approval or notice and **has been reverted**.\n\n` +
               `- **Files:** ${{ toJSON(steps.verify.outputs.files) }}\n` +
               `- **Reason:** ${{ toJSON(steps.verify.outputs.why) }}\n` +
               `- **Commit:** ${context.sha.slice(0, 7)} · [run](${run})\n\n` +
-              `These files define how shifts behave, so changing them is a proposal, ` +
-              `not a shift's call. The work is not lost — it is in that commit.\n\n` +
-              `## Recommendation\n\nIf you want it: label an issue \`approved\` and ` +
-              `re-land with \`Approved-In: #N\` in the commit message. If you don't, ` +
-              `nothing further is needed — it is already reverted.`;
+              `The workflows hold the keys that can spend money or change the channel, ` +
+              `so they change only on your label or after a notice you did not object to. ` +
+              `The work is not lost — it is in that commit.\n\n` +
+              `## Recommendation\n\nNothing is needed from you: it is already reverted, and a ` +
+              `shift can raise the change again as a notice. Look only if you did not expect ` +
+              `anyone to be pushing workflow files.`;
             const open = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100,
             });
@@ -176,7 +258,7 @@ jobs:
             } else {
               await github.rest.issues.create({
                 owner: context.repo.owner, repo: context.repo.repo,
-                title: 'Process rules changed without approval (reverted)',
+                title: 'A workflow changed without approval or notice (reverted)',
                 labels: ['needs-owner'], body,
               });
             }

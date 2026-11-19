@@ -13,7 +13,7 @@ shift's sense of whether it has been a while:
                        at once if last month's was skipped too
     quarterly prep     no packet prepared yet this quarter, once a monthly is held
                        in it (the packet draws on it), or at once when overdue
-    quarterly planning prepared, but not yet held with the owner -- never a shift's to do
+    quarterly planning prepared this quarter and not yet held: a later shift's (D16)
 
 PLAN.md §5 records when each was last held. A review updates its own row.
 
@@ -33,7 +33,7 @@ LEDGER = os.path.join(ROOT, "analysis", "experiments.csv")
 
 # The order a shift takes them in when several are due. Monthly first: it is
 # the one that reaches the owner, and its findings feed the quarter's packet.
-ORDER = ["monthly", "weekly", "quarterly prep"]
+ORDER = ["monthly", "weekly", "quarterly prep", "quarterly planning"]
 # A month's first Monday snapshot lands by the 7th; this leaves its weekly
 # review a few days before the monthly comes due without it.
 MONTHLY_LATEST_DAY = 10
@@ -122,9 +122,9 @@ def due(held, today, snapshot):
         out.append(("quarterly prep", f"no packet yet this quarter (last {prep or 'never'})"))
     plan = held.get("quarterly planning")
     if prep and _quarter(prep) == _quarter(today) and (plan is None or plan < prep):
-        # A bet is decided by its own label, not a session (D13, 2026-10-11).
-        out.append(("quarterly planning", "packet prepared; waiting on the owner's "
-                                          "labels on its bets"))
+        # Since D16 (2026-11-14) a later shift than prep sets the bets, each a
+        # Decide with a fresh agent arguing against it (process/review.md).
+        out.append(("quarterly planning", "packet prepared; a later shift sets the bets"))
     return out
 
 

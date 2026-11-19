@@ -25,10 +25,10 @@ A function still at "none" after its first monthly review is a finding (D12).
 
 ## 2. This quarter's bets
 
-**Bet 1 approved** (#70): make the format ours, viewers first (D14); no
-voice (#71, PRD #15). Bet 2
-approved (#72); bet 3's pilot waits on bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline fixed 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
-and pilot the best (§1; Reddit's terms, §4). Bet 2 needs bet 1 by ~11-13–11-20 (PRD §4).
+**Bet 1** (#70): make the format ours, viewers first (D14); no voice (#71,
+PRD #15); live as `v8` since 2026-11-16. **Bet 2** (#72), bet 3's pilot
+after bet 1. Bet 2: double weekly views (PRD #14, #10, #3, #4; baseline 2026-10-05: **8,300** views at 7 days over publish weeks W36–W39, `report.py --trajectory --metric views`, so the bar is 16,600 over the quarter's last four full weeks, in play starts. Beside it, in engaged views (pre-committed 2026-10-14): W40–W43's 7-day total at two a day, doubled: **9,412** (ledger `bet-2-engaged`)); price other routes
+and pilot the best (§1). Bet 2 is read at two a day (PRD #4). **Q1 2027:** `epics/E3` (challenged 11-15): does any owned format reach? Bets by 12-20.
 
 ## 3. Work queue
 
@@ -37,12 +37,14 @@ Everything outside the channel product (PRD §0), with the same statuses;
 
 | # | Status | Function | Item | Next step, and done when |
 |---|---|---|---|---|
-| C10 | parked: the owner said no on #89 (11-10) | Audience | **Publishing pipeline** | Owner: drafts read as a bot's, too formulaic; first person only (PRD §4). Reopen with drafts the owner reads first. |
-| C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and propose whether and how to rename. **Propose the old videos' fate with it**: all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos; private ones go unmentioned. Exact copies: already private (PRD §4). Done when the owner has decided. |
-| C16 | done: 11-15, built and merged off; #90's label and music turn it on via `strategy/own-switch-on` (pre-merge items: TECH_DEBT) | Strategy | **A source after Reddit** | Own questions (#90; PRD §4). Done when merged off. |
+| C10 | parked: the owner said no on #89 (11-10) | Audience | **Publishing pipeline** | Drafts read as a bot's, too formulaic; first person only (PRD §4). Reopen with drafts that meet that bar. |
+| C12 | blocked: bet 1's next step keeping (PRD #15) | Editorial | **A public brand** | The working name, Show of Hands, is an English folk duo's since 1986, YouTube channel included; the channel's current name uses Reddit's. Once the kept originality step settles the show, check the name's trademark, domain and handles (free), and decide whether and how to rename (a notice, then the owner's login). **Decide the old videos' fate with it** (a notice, D16): all 1,041 are readings, 883 pre-pipeline earning under 1%. Reviewers check the "main theme": at two a day the new show stays a minority for a year. Delete or start fresh: YouTube's rejection FAQ says "edit or delete" violating videos; private ones go unmentioned. Exact copies: already private (PRD §4). Done when decided. |
+| C16 | baking: takes live beside Reddit from 11-20 (`epics/E1` T5); T9 by 12-20 | Strategy | **A source after Reddit, live before 2027-01-12** | Reddit ends for us on 01-12 (#82 declined). `epics/E1` plans the choice: the built show as a daily arm beside Reddit's, a play-along form tested against it, a rule set first, continuity as the floor. Done at E1 T10. |
 | C14 | blocked: the owner's six checks (#59) | Security | **Quarterly account-security check** | The fatal risk's only response. Done when the owner reports a date. |
 | C17 | baking: live 10-27 (#84); D15's first read is due 11-24 | GM | **Friction log** (D15) | Done when D15's read says keep, change or stop. |
 | C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments`. Done when quarterly prep reads it and proposes the process's own rule. |
+| C19 | blocked: `epics/E2` T9 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to role and files. Done at E2 T9. |
+| C20 | ready: `epics/E2` T8 | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (README). Done at E2 T9. |
 
 ## 4. Risks
 
@@ -50,7 +52,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 |---|---|---|---|
 | The format cannot be monetized under YouTube's reused-content policy | Legal, Editorial | **Confirmed** from YouTube's page (2026-10-05; unchanged 11-03, 11-11): "Content exclusively features readings of other materials you did not originally create, like text from websites" is not monetizable, and "applies to your channel as a whole". Today's format is that. A second rule refuses content "that looks like it's made with a template" / ends the Partner Program route. It names content "designed to shock or surprise viewers" (refused in titles, PRD §0). Whether a text-only host passes is unsettled (PRD §4) | Not the deciding test now (D14). Bet 1 (PRD #15); old videos (C12); music variety (owner task, PRD §0) |
 | Reddit's terms forbid monetized use of API data | Legal | **Confirmed** from Reddit's Developer and Data API Terms (read 2026-10-06; unchanged 11-03). Without written approval, no use "by or on behalf of a business" and no revenue derived from the Data APIs. Even unpaid, our videos sit outside a plain reading of its display licence (#60). Its ban on training AI on posts binds Gemini's free tier, which trains on what it is sent. Deleted posts and comments must go "as soon as possible" (§3.3), which a published video cannot short of deletion (C12) | Owner (#60, 2026-10-10): not yet, since we earn nothing; ask before applying to any programme. Gemini's paid tier declined (#62); Groq (bans training) is only `v8`'s fallback (PRD #13). No drop-in source replaces Reddit (PRD §4; C16) |
-| Reddit's free API, our only source, ends March 2027; unregistered apps lose it 2027-01-12 | Legal, Strategy | **Confirmed** by Reddit's page registering "existing apps" (archived 10-13): 10-31 binds new requests only / fatal: uploads stop. Then "commercial deals" (~$12k/month reported); Devvit lacks Python | The owner registers our app (#82); C16's build |
+| Reddit's API, our only source, ends for us 2027-01-12 | Legal, Strategy | **Certain**: the owner declined to register our app (11-14, #82); free access ends March 2027 regardless / fatal: uploads stop. "Commercial deals" (~$12k/month reported); Devvit lacks Python | C16, live before 01-12 |
 | Shorts revenue is too small at any reachable scale | Strategy | High / high — ~691× short (§1); at four a day each upload needs ~70× our best (PRD §4) | Bets 2 and 3 |
 | Dependence on one platform (96.7% of views come from the Shorts feed) | Distribution, Strategy | Medium / high | Bet 3 (#55); every route needs bet 1 (§1). Its 10-01 originality change: PRD §4 |
 | Loss of the YouTube channel or the Google account | Security, Legal | Low / fatal. Also the spam policy (strikes, termination; read 2026-10-19), whose example of mass-production ("the exact same background music", AI imagery, an AI script) shares our one music track; and it bars "re-posting material from other websites… without adding anything of your own" (11-03, 11-11). YouTube's 10-29 test gives some spam terminations a 30-day lock to fix or delete videos first | C14; bet 1; music variety; four a day after bet 1 (#80) |
@@ -63,7 +65,7 @@ own row when it finishes.
 
 | Review | Last held |
 |---|---|
-| Weekly | 2026-11-09 |
+| Weekly | 2026-11-16 |
 | Monthly | 2026-11-03 |
 | Quarterly prep | 2026-10-05 |
 | Quarterly planning | 2026-10-10 |

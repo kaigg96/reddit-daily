@@ -1,22 +1,35 @@
-name: Apply an approved workflow change
+name: Apply an approved or noticed workflow change
 
-# A shift cannot push workflow files: GitHub refuses them from its token. So an
-# approved change to one used to wait for the owner at a computer (#21 waited
-# two days). Now a shift attaches the exact change to its escalation
-# (`escalate.py --patch`), and when the OWNER labels that issue `approved`,
-# this applies precisely that change, commits it with `Approved-In:`, and
-# pushes it with a token kept for this job alone (the APPLY_TOKEN secret).
+# A shift cannot push workflow files: GitHub refuses them from its token. So a
+# shift attaches the exact change to an issue (`escalate.py --patch`) and this
+# job lands it, with a token kept for this job alone (the APPLY_TOKEN secret).
+# There are two ways in.
 #
-# It refuses unless: the owner applied the label; the issue was never edited
-# after it was raised, so the change is the one they read; the change matches
-# its recorded fingerprint; and it touches workflow files only -- never this
-# file or protect-process.yml. The machinery that checks approvals is never
-# changed by the machinery it checks. protect-process.yml then re-checks
-# everything this pushes, because a push with this token triggers it.
+# 1. The owner's label. When the OWNER labels the issue `approved`, this
+#    applies precisely that change and commits it with `Approved-In:`.
+#
+# 2. Notice (D16, 2026-11-14). The owner has no time to label, and waits on
+#    them stopped the company for weeks. So once a day this also applies any
+#    change that has sat on its issue for NOTICE_DAYS while the owner neither
+#    replied, closed the issue nor labelled it `objection`, committing it with
+#    `Notice-In:`. Notice reaches less than a label does: what it may not do
+#    is written once, in notice_check.py (a key a shift does not hold, a
+#    widened GITHUB_TOKEN, the money checks). Those changes wait for the
+#    owner's label.
+#
+# Either way it refuses unless: the issue was never edited after it was
+# raised, so the change is the one that was shown; the change matches its
+# recorded fingerprint; and it touches workflow files only -- never this file
+# or protect-process.yml. The machinery that checks approvals is never changed
+# by the machinery it checks. protect-process.yml then re-checks everything
+# this pushes, because a push with this token triggers it.
 
 on:
   issues:
     types: [labeled]
+  schedule:
+    - cron: '41 9 * * *'   # the notice path, once a day
+  workflow_dispatch:       # the notice path, on demand
 
 permissions:
   contents: read    # the push goes out with APPLY_TOKEN, not this token
@@ -29,9 +42,10 @@ concurrency:
 jobs:
   apply:
     if: >-
-      github.event.label.name == 'approved' &&
+      github.event_name != 'issues' ||
+      (github.event.label.name == 'approved' &&
       github.event.sender.login == github.repository_owner &&
-      contains(github.event.issue.body, '<!-- apply-patch -->')
+      contains(github.event.issue.body, '<!-- apply-patch -->'))
     runs-on: ubuntu-latest
     steps:
       - name: Is auto-apply set up?
@@ -47,98 +61,211 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.APPLY_TOKEN }}
 
+      - name: Python can read YAML
+        if: steps.token.outputs.ok == 'true'
+        run: |
+          python3 -c "import yaml" 2>/dev/null \
+            || python3 -m pip install -q --user pyyaml \
+            || python3 -m pip install -q --user --break-system-packages pyyaml
+
       - name: Apply exactly the approved change
         uses: actions/github-script@v7
         env:
           HAS_TOKEN: ${{ steps.token.outputs.ok }}
         with:
           script: |
-            const { execSync } = require('child_process');
+            const { execSync, execFileSync } = require('child_process');
             const fs = require('fs');
             const crypto = require('crypto');
             const git = (args) => execSync(`git ${args}`, { encoding: 'utf8' });
             const { owner, repo } = context.repo;
-            const issue = context.payload.issue;
-            const n = issue.number;
             const tmp = process.env.RUNNER_TEMP;
-            const say = (text) => github.rest.issues.createComment(
-              { owner, repo, issue_number: n, body: `<!-- apply-result -->\n${text}` });
+            const MARKER = '<!-- apply-patch -->';
+            const RESULT = '<!-- apply-result -->';
+            const say = (n, text) => github.rest.issues.createComment(
+              { owner, repo, issue_number: n, body: `${RESULT}\n${text}` });
 
-            if (process.env.HAS_TOKEN !== 'true') {
-              await say('**Not applied: auto-apply is not set up** (no `APPLY_TOKEN` ' +
-                        'secret), so this approved workflow change needs landing by hand.');
-              return;
-            }
-
-            // The change is the one the owner read only if the issue was never
-            // edited after it was raised. The escalation workflow never edits a
-            // body -- a re-raised key becomes a comment -- so an edit is someone else's.
-            const q = await github.graphql(
-              'query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){lastEditedAt}}}',
-              { o: owner, r: repo, n });
-            const edited = q.repository.issue.lastEditedAt;
-            if (edited) {
-              await say(`**Not applied:** this issue was edited after it was raised (${edited}), ` +
-                        'so the change may not be the one you approved. A shift will raise it again.');
-              return;
-            }
-
-            const body = issue.body || '';
-            const fenced = body.match(/<!-- apply-patch -->\s*`````diff\n([\s\S]*?)\n`````/);
-            const recorded = body.match(/patch-sha256: ([0-9a-f]{64})/);
-            if (!fenced || !recorded) {
-              await say('**Not applied:** the change in this issue could not be read.');
-              return;
-            }
-            const patch = fenced[1] + '\n';
-            if (crypto.createHash('sha256').update(patch).digest('hex') !== recorded[1]) {
-              await say('**Not applied:** the change does not match its recorded fingerprint.');
-              return;
-            }
-
-            // Workflow files only, never the two that enforce approvals. Checked
-            // on what git actually stages, not on how the patch describes itself.
+            // Must match notice_check.py (NOTICE_DAYS, LOCKED, MONEY_CHECKS);
+            // tests/test_apply_approved.py checks that they do.
+            const NOTICE_DAYS = 3;
             const enforcers = ['.github/workflows/protect-process.yml',
-                               '.github/workflows/apply-approved.yml'];
-            const allowed = p => p.startsWith('.github/workflows/') && !enforcers.includes(p);
-            fs.writeFileSync(`${tmp}/approved.patch`, patch);
-            try { git(`apply --check ${tmp}/approved.patch`); }
-            catch (e) {
-              await say('**Not applied:** the workflow files have changed since this was ' +
-                        'raised, so the change no longer fits. A shift will raise it again ' +
-                        "against today's version.");
-              return;
-            }
-            git(`apply --index ${tmp}/approved.patch`);
-            const staged = git('diff --cached --name-only').split('\n').filter(Boolean);
-            const outside = staged.filter(p => !allowed(p));
-            if (!staged.length || outside.length) {
-              git('reset -q --hard');
-              await say('**Not applied:** auto-apply only changes workflow files, and never ' +
-                        'the two that enforce approvals. This touches ' +
-                        (outside.map(p => `\`${p}\``).join(', ') || 'nothing') +
-                        ', so it needs landing by hand.');
+                               '.github/workflows/apply-approved.yml',
+                               '.github/workflows/notice_check.py'];
+            // Out of a notice's reach as well: the checks on the money controls.
+            const moneyChecks = ['.github/workflows/guardrails.yml'];
+            // What else a notice may not do (a key a shift does not hold, a
+            // widened GITHUB_TOKEN) is decided by notice_check.py, on the
+            // file's content before and after. Any failure to check is a refusal.
+            const python = process.env.PYTHON || 'python3';
+            const checker = '.github/workflows/notice_check.py';
+            const refusals = (name, text) => {
+              try {
+                return JSON.parse(execFileSync(python, [checker, '--name', name],
+                  { input: text, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }));
+              } catch (e) {
+                if (e.status === 1 && e.stdout) { try { return JSON.parse(e.stdout); } catch (_) { /* fall through */ } }
+                return [`${name} could not be checked (${String(e.message || e).split('\n')[0]})`];
+              }
+            };
+            // File contents by `HEAD:path` or `:path` (the index); '' if absent.
+            // Through an argument list, never a shell: the patch chose the name.
+            const show = (spec) => {
+              try { return execFileSync('git', ['show', spec], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); }
+              catch (e) { return ''; }
+            };
+
+            // One issue, by the owner's label (noticed = false) or by notice.
+            // Returns false only when nothing further should be tried.
+            const consider = async (issue, noticed) => {
+              const n = issue.number;
+
+              // The change is the one that was shown only if the issue was
+              // never edited after it was raised. The escalation workflow never
+              // edits a body that carries a change -- a re-raised key becomes a
+              // comment -- so an edit is someone else's.
+              const q = await github.graphql(
+                'query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){lastEditedAt}}}',
+                { o: owner, r: repo, n });
+              const edited = q.repository.issue.lastEditedAt;
+              if (edited) {
+                await say(n, `**Not applied:** this issue was edited after it was raised (${edited}), ` +
+                             'so the change may not be the one that was shown. A shift will raise it again.');
+                return true;
+              }
+
+              const body = issue.body || '';
+              const fenced = body.match(/<!-- apply-patch -->\s*`````diff\n([\s\S]*?)\n`````/);
+              const recorded = body.match(/patch-sha256: ([0-9a-f]{64})/);
+              if (!fenced || !recorded) {
+                await say(n, '**Not applied:** the change in this issue could not be read.');
+                return true;
+              }
+              const patch = fenced[1] + '\n';
+              if (crypto.createHash('sha256').update(patch).digest('hex') !== recorded[1]) {
+                await say(n, '**Not applied:** the change does not match its recorded fingerprint.');
+                return true;
+              }
+
+              // Workflow files only, never the two that enforce approvals. Checked
+              // on what git actually stages, not on how the patch describes itself,
+              // and with renames listed as the removal and the addition they are.
+              const refused = noticed ? [...enforcers, ...moneyChecks] : enforcers;
+              const allowed = p => p.startsWith('.github/workflows/') && !refused.includes(p);
+              fs.writeFileSync(`${tmp}/approved.patch`, patch);
+              try { git(`apply --check ${tmp}/approved.patch`); }
+              catch (e) {
+                await say(n, '**Not applied:** the workflow files have changed since this was ' +
+                             'raised, so the change no longer fits. A shift will raise it again ' +
+                             "against today's version.");
+                return true;
+              }
+              git(`apply --index ${tmp}/approved.patch`);
+              const staged = git('diff --cached --no-renames --name-only').split('\n').filter(Boolean);
+              const outside = staged.filter(p => !allowed(p));
+              if (!staged.length || outside.length) {
+                git('reset -q --hard');
+                await say(n, noticed
+                  ? '**Not applied by notice:** a notice changes workflow files only, and never ' +
+                    'the money checks or the two files that enforce approvals. This touches ' +
+                    (outside.map(p => `\`${p}\``).join(', ') || 'nothing') +
+                    ', so it waits for your `approved` label.'
+                  : '**Not applied:** auto-apply only changes workflow files, and never ' +
+                    'the two that enforce approvals. This touches ' +
+                    (outside.map(p => `\`${p}\``).join(', ') || 'nothing') +
+                    ', so it needs landing by hand.');
+                return true;
+              }
+              if (noticed) {
+                // Before and after: a deleted keyed file is refused on its old
+                // content, a new one on its new content.
+                const why = [];
+                for (const p of staged) {
+                  for (const spec of [`HEAD:${p}`, `:${p}`]) {
+                    const text = show(spec);
+                    if (text) why.push(...refusals(p, text));
+                  }
+                }
+                if (why.length) {
+                  git('reset -q --hard');
+                  await say(n, '**Not applied by notice:** ' + [...new Set(why)].join('; ') +
+                    '. A notice may not do that (notice_check.py), so only your `approved` label applies this change.');
+                  return true;
+                }
+              }
+
+              // The title comes from the issue, so it reaches git through a file,
+              // never through a shell.
+              git('config user.name "github-actions[bot]"');
+              git('config user.email "github-actions[bot]@users.noreply.github.com"');
+              fs.writeFileSync(`${tmp}/message.txt`,
+                `${issue.title.replace(/^Approve:\s*/i, '')}\n\n` + (noticed
+                  ? `Applied automatically: #${n} gave ${NOTICE_DAYS} days of notice and the owner did not object.\n\nNotice-In: #${n}\n`
+                  : `Applied automatically once the owner approved #${n}.\n\nApproved-In: #${n}\n`));
+              git(`commit -q -F ${tmp}/message.txt`);
+              let pushed = false;
+              for (let attempt = 0; attempt < 3 && !pushed; attempt++) {
+                try { git('pull -q --rebase origin main'); git('push -q origin HEAD:main'); pushed = true; }
+                catch (e) { await new Promise(r => setTimeout(r, 5000)); }
+              }
+              if (!pushed) {
+                await say(n, '**Not applied:** the change could not be pushed. It needs landing by hand.');
+                core.setFailed('push failed');
+                return false;
+              }
+              await say(n, `**Applied** in ${git('rev-parse --short HEAD').trim()}` +
+                           (noticed ? `, after ${NOTICE_DAYS} days of notice with no objection. ` : '. ') +
+                           'The process guard re-checks it on arrival.');
+              await github.rest.issues.update({ owner, repo, issue_number: n, state: 'closed' });
+              return true;
+            };
+
+            // The owner's label: exactly the issue they labelled.
+            if (!context.eventName || context.eventName === 'issues') {
+              const issue = context.payload.issue;
+              if (process.env.HAS_TOKEN !== 'true') {
+                await say(issue.number, '**Not applied: auto-apply is not set up** (no `APPLY_TOKEN` ' +
+                          'secret), so this approved workflow change needs landing by hand.');
+                return;
+              }
+              await consider(issue, false);
               return;
             }
 
-            // The title comes from the issue, so it reaches git through a file,
-            // never through a shell.
-            git('config user.name "github-actions[bot]"');
-            git('config user.email "github-actions[bot]@users.noreply.github.com"');
-            fs.writeFileSync(`${tmp}/message.txt`,
-              `${issue.title.replace(/^Approve:\s*/i, '')}\n\n` +
-              `Applied automatically once the owner approved #${n}.\n\nApproved-In: #${n}\n`);
-            git(`commit -q -F ${tmp}/message.txt`);
-            let pushed = false;
-            for (let attempt = 0; attempt < 3 && !pushed; attempt++) {
-              try { git('pull -q --rebase origin main'); git('push -q origin HEAD:main'); pushed = true; }
-              catch (e) { await new Promise(r => setTimeout(r, 5000)); }
+            // Notice: every open change whose days have run with no objection.
+            // Only an issue escalate.py labelled `notice`: a change it wrote
+            // as an ask (`needs-owner`) waits for the label without a comment.
+            if (process.env.HAS_TOKEN !== 'true') { core.info('auto-apply is not set up'); return; }
+            const isObjection = l => String((l && l.name) || l).trim().toLowerCase() === 'objection';
+            const isNotice = l => String((l && l.name) || l).trim().toLowerCase() === 'notice';
+            const open = await github.paginate(github.rest.issues.listForRepo,
+              { owner, repo, state: 'open', per_page: 100 });
+            for (const issue of open) {
+              if (issue.pull_request || !(issue.body || '').includes(MARKER)) continue;
+              if (!(issue.labels || []).some(isNotice)) continue;
+              const n = issue.number;
+              const age = (Date.now() - Date.parse(issue.created_at)) / 86400000;
+              if (!(age >= NOTICE_DAYS)) continue;
+              const comments = await github.paginate(github.rest.issues.listComments,
+                { owner, repo, issue_number: n, per_page: 100 });
+              // This job has already spoken here: applied, refused or held.
+              if (comments.some(c => (c.body || '').startsWith(RESULT))) continue;
+              const events = await github.paginate(github.rest.issues.listEvents,
+                { owner, repo, issue_number: n, per_page: 100 });
+              const timeline = await github.paginate(github.rest.issues.listEventsForTimeline,
+                { owner, repo, issue_number: n, per_page: 100 });
+              // Any sign of the owner stops a notice. A shift's token can add
+              // and remove labels, so the label is read from who put it there;
+              // it can also delete a comment, so a deleted comment, whoever's,
+              // holds the notice: the owner's close and label cannot be undone.
+              const objected = (issue.labels || []).some(isObjection)
+                || events.some(e => e.actor && e.actor.login === owner
+                    && (e.event === 'closed' || (e.event === 'labeled' && isObjection(e.label))))
+                || comments.some(c => c.user && c.user.login === owner)
+                || [...events, ...timeline].some(e => e.event === 'comment_deleted');
+              if (objected) {
+                await say(n, '**Held:** you replied to, closed or objected to this notice, so it ' +
+                             'will not apply itself. Your `approved` label still applies it.');
+                continue;
+              }
+              if (!(await consider(issue, true))) return;
             }
-            if (!pushed) {
-              await say('**Not applied:** the change could not be pushed. It needs landing by hand.');
-              core.setFailed('push failed');
-              return;
-            }
-            await say(`**Applied** in ${git('rev-parse --short HEAD').trim()}. ` +
-                      'The process guard re-checks it on arrival.');
-            await github.rest.issues.update({ owner, repo, issue_number: n, state: 'closed' });

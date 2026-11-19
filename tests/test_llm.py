@@ -32,6 +32,14 @@ class FakeResponse:
         return {"candidates": [{"content": {"parts": [{"text": self._text}]}}]}
 
 
+def test_no_test_inherits_the_shells_gemini_key():
+    # conftest strips it: an unmocked path would otherwise spend production's
+    # shared 20 a day from a shift's environment (11-18, the takes path).
+    import os
+    assert "GEMINI_API_KEY" not in os.environ
+    assert "GROQ_API_KEY" not in os.environ
+
+
 GOOD_JSON = ('{"title": "A Great Title", '
              '"keywords": ["one", "two"], "cta": "Comment your answer below!"}')
 
@@ -69,6 +77,81 @@ def test_metadata_is_one_request_not_three(captured):
 
     assert len(captured) == 1
     assert "thinkingConfig" in captured[0]["json"]["generationConfig"]
+
+
+def test_metadata_asks_gemini_for_its_exact_shape(captured):
+    """The 2026-10-17 release check: asked for JSON in the prompt alone, the
+    three-answer reply did not parse, and a live retry gave four reactions for
+    three answers. Either cost the upload every host line."""
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    cfg = captured[0]["json"]["generationConfig"]
+    assert cfg["responseMimeType"] == "application/json"
+    assert "thinkingConfig" in cfg
+    reactions = cfg["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == llm.config.COMMENTARY_ANSWERS
+    assert cfg["responseSchema"]["required"] == ["title", "keywords", "setup", "reactions", "cta"]
+
+
+def test_the_schema_counts_the_answers_actually_read(captured):
+    """A thread with fewer answers than the setting reads fewer, one note each."""
+    llm.get_metadata("q", ["a", "b"], style="B")
+    reactions = captured[0]["json"]["generationConfig"]["responseSchema"]["properties"]["reactions"]
+    assert reactions["minItems"] == reactions["maxItems"] == 2
+
+
+def test_the_plain_reading_asks_only_for_its_three_fields(captured, monkeypatch):
+    monkeypatch.setattr(llm.config, "COMMENTARY", False)
+    llm.get_metadata("q", ["a", "b", "c"], style="B")
+    schema = captured[0]["json"]["generationConfig"]["responseSchema"]
+    assert schema["required"] == ["title", "keywords", "cta"]
+
+
+def test_a_sample_model_gets_the_schema_without_a_thinking_budget(captured):
+    """Gemini 3.x 400s on thinkingBudget, so the schema must not bring it back."""
+    llm._generate("x", model="gemini-3.5-flash-lite", schema={"type": "OBJECT"})
+    assert captured[0]["json"]["generationConfig"] == {
+        "responseMimeType": "application/json", "responseSchema": {"type": "OBJECT"}}
+
+
+def test_other_calls_are_not_switched_to_json_mode(captured):
+    """Only the metadata call changed; the screen's request stays as validated."""
+    llm._generate("hello")
+    assert set(captured[0]["json"]["generationConfig"]) == {"thinkingConfig"}
+
+
+def test_an_unparseable_reply_is_quoted_near_the_fault(monkeypatch, capsys):
+    """The 2026-10-17 failure logged only "unparseable JSON", so its cause could
+    not be read; the log now shows the reply around the error, on one line."""
+    # The fault sits past the excerpt's width, so the excerpt must follow it.
+    reply = ('{"title": "Ok", "keywords": [' + '"pad", ' * 60 + '"x"], '
+             '"cta": "Vote for "plastic crack" now"}')
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    llm.get_metadata("q", ["a", "b", "c"])
+    out = capsys.readouterr().out
+    assert "plastic crack" in out and "fall back" in out
+    assert len(out.strip().splitlines()) == 1 and len(out) < 400
+
+
+def test_a_trailing_comma_no_longer_costs_every_field(monkeypatch, capsys):
+    """Measured 2026-10-17 on the sample model, in JSON mode: a pretty-printed
+    reply ending `"cta": "...",\\n}`. Strict parsing dropped title, keywords,
+    vote and host lines over one comma. The repair is logged, not silent."""
+    reply = ('{\n  "title": "T",\n  "keywords": ["a", "b",],\n  "setup": "S",\n'
+             '  "reactions": ["r1", "r2", "r3"],\n  "cta": "Which one, YOU?",\n}')
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.keywords, meta.cta) == ("T", ["a", "b"], "Which one, YOU?")
+    assert meta.failure == ""
+    assert "trailing comma" in capsys.readouterr().out
+
+
+def test_a_comma_inside_a_line_is_never_touched(monkeypatch):
+    """The repair only runs on a reply that failed, and only drops a comma
+    that sits before a closing bracket."""
+    reply = '{"title": "Wait, really?", "keywords": ["x"], "cta": "One, two, three",}'
+    monkeypatch.setattr(llm, "_generate", lambda *a, **k: reply)
+    meta = llm.get_metadata("q", ["a", "b", "c"])
+    assert (meta.title, meta.cta) == ("Wait, really?", "One, two, three")
 
 
 def test_uses_v1beta_because_v1_rejects_thinking_config(captured):
@@ -538,6 +621,15 @@ def test_the_upload_log_keeps_the_failure_kind():
     assert "meta_failure" in log.FIELDS
 
 
+def test_the_upload_log_names_who_answered_the_metadata_call():
+    """A Groq title for a failed Gemini must not count unmarked in the title
+    reads (#10, #14): the run logs the source the call returned."""
+    import inspect
+    from src import log, run
+    assert "meta_source" in log.FIELDS
+    assert '"meta_source": meta.source' in inspect.getsource(run.main)
+
+
 def _called_url(monkeypatch, dry_run):
     seen = {}
 
@@ -568,6 +660,24 @@ def test_production_calls_keep_the_production_model(monkeypatch):
 def test_a_dry_run_spends_a_different_models_allowance(monkeypatch):
     """The free tier is counted per model: a sample must not starve an upload."""
     assert "/gemini-3.5-flash-lite:generateContent" in _called_url(monkeypatch, True)
+
+
+@pytest.mark.parametrize("switch, model", [(False, None), (True, "gemini-3.6-flash")])
+def test_a_dry_run_can_write_its_tags_on_the_upload_model(monkeypatch, switch, model):
+    """#77: the owner judges tags in a narrated local render, a dry run. The
+    sample model's tags were labels where the upload model's reacted
+    (2026-10-20), so the switch puts the metadata call alone on MODEL."""
+    seen = []
+
+    def gen(prompt, **kw):
+        seen.append(kw.get("model"))
+        return '{"title": "t", "keywords": ["a"], "cta": "c"}'
+
+    monkeypatch.setattr(llm.config, "DRY_RUN", True)
+    monkeypatch.setattr(llm.config, "METADATA_ON_UPLOAD_MODEL", switch)
+    monkeypatch.setattr(llm, "_generate", gen)
+    llm.get_metadata("Q?", ["a", "b", "c"])
+    assert seen == [model]
 
 
 def test_title_styles_run_four_b_to_one_a_to_one_c():
@@ -620,6 +730,25 @@ def test_two_503s_go_to_geminis_second_model_before_the_fields_fall_back(monkeyp
     assert meta.title == "A Great Title" and meta.keywords and meta.cta
     # Gemini's failure stays, so the log shows why the second model ran.
     assert (meta.source, meta.failure) == (llm.FALLBACK_SOURCE, "http_503")
+
+
+def test_the_second_model_gets_the_main_calls_reply_schema(monkeypatch):
+    """Bet 1's host lines need the schema (2026-10-17); every sample render
+    already sends it to this model."""
+    sent = []
+
+    def overloaded(*a, **k):
+        sent.append((k.get("model"), k.get("schema")))
+        if k.get("model") != llm.FALLBACK_MODEL:
+            raise llm.requests.HTTPError("503", response=FakeResponse(status=503))
+        return GOOD_JSON
+
+    monkeypatch.setattr(llm, "_generate", overloaded)
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    monkeypatch.setattr(llm.config, "DRY_RUN", False)
+    llm.get_metadata("q", ["a", "b", "c"])
+    (_, main), _, (model, fallback) = sent
+    assert model == llm.FALLBACK_MODEL and main and fallback == main
 
 
 def test_a_503_on_both_models_waits_once_and_never_retries_the_second(monkeypatch):
@@ -705,6 +834,7 @@ def test_metadata_never_retries_a_429(monkeypatch):
 def _metadata_prompt(monkeypatch, vote_rule):
     seen = []
     monkeypatch.setattr(llm.config, "HOUSE_VOTE_RULE", vote_rule)
+    monkeypatch.setattr(llm.config, "COMMENTARY", False)  # bet 1's fuller step supersedes it
     monkeypatch.setattr(llm, "generate_retrying",
                         lambda prompt, *a, **k: seen.append(prompt) or '{"cta": "c"}')
     llm.get_metadata("What is the scariest story?", ["one", "two", "three"])
@@ -1012,3 +1142,49 @@ def test_a_groq_miss_is_named_after_geminis(monkeypatch):
 
     _gemini_429(monkeypatch, groq_reply="{not: json}")
     assert llm.get_metadata("q", ["a"]).failure == "http_429;fallback_http_429;groq_bad_json"
+
+
+def test_the_rescue_waits_out_groqs_minute_cap_once(monkeypatch, capsys):
+    """Review, 2026-10-12: with Gemini spent, the screens and the metadata
+    call reach Groq in one minute, over its 8K-token cap."""
+    _gemini_429(monkeypatch)
+    replies = [_groq_429("7"), GOOD_JSON]
+    slept = []
+
+    def groq(prompt, reasoning=False):
+        r = replies.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+    monkeypatch.setattr(llm, "_generate_groq", groq)
+    monkeypatch.setattr(llm.time, "sleep", slept.append)
+    meta = llm.get_metadata("q", ["a"])
+    assert slept == [7.0]
+    assert (meta.source, meta.failure) == ("groq_fallback", "http_429;fallback_http_429")
+    # The success leaves no failure label, so the wait is printed instead.
+    assert "per-minute cap" in capsys.readouterr().out
+
+
+def _groq_503(retry_after):
+    resp = FakeGroqResponse(status=503)
+    resp.headers = {"retry-after": retry_after}
+    return llm.requests.HTTPError("503", response=resp)
+
+
+def test_the_rescue_never_waits_twice_on_a_daily_cap_or_off_a_429(monkeypatch):
+    cases = ((["7", "7"], [7.0], 2, "groq_http_429"), (["3600"], [], 1, "groq_http_429"),
+             ([None], [], 1, "groq_http_429"), (["503:7"], [], 1, "groq_http_503"))
+    for headers, sleeps, calls, groq_failure in cases:
+        _gemini_429(monkeypatch)
+        errors = [_groq_503(h[4:]) if h and h.startswith("503:") else _groq_429(h)
+                  for h in headers]
+        slept, sent = [], []
+
+        def groq(prompt, reasoning=False):
+            sent.append(prompt)
+            raise errors.pop(0)
+        monkeypatch.setattr(llm, "_generate_groq", groq)
+        monkeypatch.setattr(llm.time, "sleep", slept.append)
+        meta = llm.get_metadata("q", ["a"])
+        assert (slept, len(sent)) == (sleeps, calls), headers
+        assert meta.failure == f"http_429;fallback_http_429;{groq_failure}", headers

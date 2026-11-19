@@ -1,0 +1,149 @@
+# Audit the workflow
+
+**The workflow is a product, and this is its review.** The code has tests and
+the channel has metrics; the process has neither unless a shift deliberately
+looks. That gap is where agentic systems rot — they optimise what they build
+and never ask whether the way they build it still makes sense.
+
+This is the biggest task in the project-management lane, not a separate
+rotation. It comes due once roughly ten shifts of evidence exist, because every
+question below reads a *series* — one shift cannot tell you whether the process
+is working. Findings go in `TECH_DEBT.md`.
+
+**Changes to `CLAUDE.md`, `ORG.md` and the process text (`process/*.md`) are
+the audit's to make** (D16, 2026-11-14): on a branch, on the evidence the
+audit read, with a fresh-context review, then merged. The skill files under
+`.claude/` are stubs that point at `process/`, because the shift tool refuses
+writes there. Workflow files alone stay locked (`CLAUDE.md` §4):
+
+1. Make the edit, `git diff -- .github/workflows/ > change.patch`, drop it.
+2. `scripts/escalate.py --patch change.patch`, with the reasoning.
+3. It applies itself after 3 days unless the owner objects, or waits for
+   their label if it touches the money checks or a file holding paid keys.
+
+A process rewritten on a new opinion is the failure to guard against now that
+no owner approves the change. The record and the fresh review are the guard.
+
+Hold it to the same standard as the channel: **evidence over hunches, record
+what you rejected, and don't change direction because a shift has a new
+opinion.** Process churn is as costly as code churn.
+
+## The evidence to read first
+
+- **`DECISIONS.md`** — every process decision and the assumptions under it.
+- **`WORKLOG.md`, last ten entries** — what shifts actually did.
+- **Closed and open escalation issues** — which decisions really needed a human.
+- **`git log`** — what got reverted, re-done, or abandoned on a branch.
+- `scripts/context_budget.py --session --allocation` — what a session spent,
+  and where each shift's time went, by function.
+- `PLAN.md` — whether the reviews ran (§5) and what the coverage says (§1).
+- `scripts/friction.py report` — what shifts found hard, and which fixes held.
+
+## Re-test the decisions
+
+Walk `DECISIONS.md` and, for each assumption, ask **is this still true?** A
+false assumption means the decision is due for re-litigation — not necessarily
+reversal. Record the re-review inline with a date, *including* "still holds":
+an unreviewed decision and a reviewed-and-confirmed one look identical
+otherwise.
+
+This is the file's reason to exist. D1 is there as the worked example — a
+decision whose primary assumption became false within two hours and stood
+unexamined until the owner happened to ask.
+
+## What to ask
+
+**Is the time going where the value is?** `--allocation` shows time by
+function. A function with ready work that never gets time is a ranking failure.
+A function with no work that never gets time is fine, as long as its reviews
+run. Shifts spent only on product and reliability mean the queue is still being
+ranked the old way, on watch-seconds instead of the path to revenue (D12).
+
+**Is the company closer to revenue than it was?** Read `scripts/report.py --scorecard`
+for the numbers and the last ten `WORKLOG` "Better?" sections for the
+subjective series. The two disagreeing is information, not a problem: numbers
+lag, and a run of "unclear" answers alongside a flat scorecard is the strongest
+signal available that the work is not landing. **Then ask whether the measures
+themselves are right** — the success metric, the guardrails and their margins
+are a decision (`DECISIONS.md`), not a law, and a guardrail that has never
+fired or fires every time is miscalibrated.
+
+**Is it producing value?** Which of the last ten shifts shipped something that
+mattered, and which produced churn? If a shift's output was a refactor nobody
+needed or a doc nobody reads, that is a process failure, not a one-off — the
+value bar (`/shift` §7) is not working.
+
+**Are we working on the right things?** Is the triage order still right, or is
+something important always losing? Is a function never worked — and is that
+correct (nothing to do there) or a bug (its review never runs, or its items
+never rank)?
+
+**Are the gates real or theatre?** Have the merge gates ever *caught* anything?
+A gate that has never failed is either protecting well or not testing anything;
+the git history tells you which. Equally: has anything reached `main` that the
+gates should have stopped?
+
+**Is the authorization boundary right?** Escalations are the data. Too many on
+trivia means the boundary is drawn too tight. None at all, over many shifts,
+probably means shifts are deciding things they shouldn't.
+
+**Can each process tell whether it works?** Every standing process — the
+queue, the reviews, the experiments, the friction log — needs an outcome
+recorded each time it runs, a scheduled read of that record, and a
+keep/change/stop rule set before the data (D15). One missing any of the three
+is a finding.
+
+**Does the handover work?** Could a cold session resume from `WORKLOG.md` and
+`PRD.md` §0 alone, or did recent shifts re-derive state that should have been
+written down? Re-derivation is the symptom; a thin handover is the cause.
+
+**Are the budgets calibrated?** Context ceilings, the usage reserve, the Gemini
+allowance — has any of them blocked useful work, or failed to stop waste?
+
+**Are the rules being followed?** A rule quietly ignored across several shifts
+is worse than no rule: it is noise that makes the others easier to ignore.
+Either enforce it in code or delete it.
+
+## Then look outward
+
+Re-read [Claude Code best practices](https://code.claude.com/docs/en/best-practices)
+and the [skills](https://code.claude.com/docs/en/skills) docs — they change.
+Look for community practice worth stealing. For each candidate, decide and
+**record the decision either way**, so the next audit doesn't re-litigate it.
+
+Adopted so far: the *"would removing this cause a mistake?"* pruning test;
+`CLAUDE.md` for broadly-applicable rules only, with specifics in skills;
+hooks and tests in preference to advisory prose.
+
+Adopted since: subagents for exploration and fresh-context review. Not yet
+tried, and worth a look: `/doctor` for automated `CLAUDE.md` cuts; `/clear`
+discipline between unrelated tasks within a shift.
+
+## Prune
+
+Run `venv/bin/python scripts/context_budget.py`. It reports three things:
+words in the always-loaded and startup docs, and **open-item counts in the
+append-only ones** — `WORKLOG.md`, `DECISIONS.md`, `TECH_DEBT.md`. The second
+is the one that creeps, because those files cost nothing per session and so
+nobody notices them growing.
+
+Enforce closure. An open item resolves — fixed, promoted to `PRD.md` §0's
+backlog, or deleted with reasoning. A superseded decision compresses to a line;
+one confirmed stable across three audits graduates into the rules and leaves a
+stub. **"Still open" is not a resolution**, and a list nobody can read is the
+same as no list.
+
+**`PRD.md` is the largest document and only §0 is budgeted**, so check it by
+hand: cancelled and superseded requirements in §6, and retracted findings in
+§4, should compress to a line plus a pointer to git history. Full text of a
+decision we no longer act on is cost without benefit.
+
+Look for **layering**: the same rule stated in two places will drift — that has
+already happened here between memory and `PRD.md`. One rule, one home.
+
+## Finish
+
+Write up what you found, what you changed, what you proposed, and what you
+deliberately left alone, in `TECH_DEBT.md`. **"The process is working" is a
+valid finding** if the evidence says so — say it and stop, rather than
+manufacturing a change to justify the audit.

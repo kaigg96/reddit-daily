@@ -59,6 +59,9 @@ def live_run(monkeypatch, tmp_path):
     monkeypatch.setattr(config, "SAMPLE", False)
     monkeypatch.setattr(config, "SILENT_NARRATION", False)
     monkeypatch.setattr(config, "SOURCE", "reddit")
+    # The Reddit show's run, whatever the slot: with E1 T4's alternation on,
+    # half the slots are takes, which never asks Reddit.
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
     monkeypatch.setenv("RUN_SCHEDULE", config.LEGACY_CRON)
     monkeypatch.setattr(run, "check_channel_name", lambda: None)
     prev = tmp_path / "prev_post.txt"
@@ -90,6 +93,29 @@ def test_a_refused_listing_fails_the_run_before_any_spend(monkeypatch, live_run,
     monkeypatch.setattr(content, "make_reddit", lambda: _reddit(top))
     with pytest.raises(Exception):
         run.main()
+    assert asked == [status]
+    assert live_run.screens == []
+    assert live_run.prev.read_text() == "yesterday's question"
+
+
+@pytest.mark.parametrize("status", [401, 403])
+def test_with_the_shows_alternating_the_reddit_slot_still_fails_before_spend(
+        monkeypatch, live_run, status):
+    """The path production runs once E1 T5 switches the shows on: the slot's
+    show is chosen by use_show, then the same refusal must stop the run."""
+    for name in ("SOURCE", "SHOW", "FORMAT_VERSION", "ANSWER_LABEL"):
+        monkeypatch.setattr(config, name, getattr(config, name))
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", True)
+    monkeypatch.setattr(content, "show_for_run", lambda now, schedule="": "reddit")
+    asked = []
+
+    def top():
+        asked.append(status)
+        raise _refusal(status)
+    monkeypatch.setattr(content, "make_reddit", lambda: _reddit(top))
+    with pytest.raises(Exception):
+        run.main()
+    assert config.SHOW == "reddit"
     assert asked == [status]
     assert live_run.screens == []
     assert live_run.prev.read_text() == "yesterday's question"

@@ -178,7 +178,8 @@ def test_gaps_match_rows_to_shifts_by_time_or_run(tmp_path, started):
     assert [s["logged"] for s in fr.gaps(rows, led2)] == [True]
 
 
-def test_three_silent_shifts_reach_the_owner(tmp_path, monkeypatch, started):
+def test_three_silent_shifts_are_the_shifts_to_fix(tmp_path, monkeypatch, started):
+    """Until D16 (2026-11-14) this reached the owner; now nothing does."""
     led = ledger(tmp_path, [(t(d, 10), 50, str(d), 0) for d in (2, 3, 4, 5)])
     monkeypatch.setattr(cb, "LEDGER", led)
     monkeypatch.setattr(fr, "load", lambda path=None: [row(1, t(2, 9, 30), run_id="x")])
@@ -191,8 +192,7 @@ def test_three_silent_shifts_reach_the_owner(tmp_path, monkeypatch, started):
     monkeypatch.setattr(cb.subprocess, "run", run)
     problems = cb.health(raise_issues=True)
     assert any(p[0] == "process-friction-silent" for p in problems)
-    assert "process-friction-silent" not in cb.SHIFT_OWNED
-    assert any("process-friction-silent" in a for a in calls)
+    assert calls == []
 
 
 def test_two_silent_shifts_do_not(tmp_path, monkeypatch, started):
