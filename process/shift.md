@@ -152,7 +152,8 @@ or upload keys, waits for the label; `protect-process.yml` and
 **Auto-revert** (issue #18). Check a release with `scripts/report.py --release
 <version>`, which reads every upload at the same age. **Revert on
 watch-seconds only.** Views swing 27–50% at fixed age with nothing changed, so
-a views trigger fires on noise.
+a views trigger fires on noise. The takes show's `-own` releases are never
+auto-reverted: ledger `takes-gate` alone judges them, once, on 2027-01-04.
 
 ## 6. External budgets (these are not Claude usage)
 
