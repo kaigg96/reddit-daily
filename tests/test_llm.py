@@ -32,6 +32,14 @@ class FakeResponse:
         return {"candidates": [{"content": {"parts": [{"text": self._text}]}}]}
 
 
+def test_no_test_inherits_the_shells_gemini_key():
+    # conftest strips it: an unmocked path would otherwise spend production's
+    # shared 20 a day from a shift's environment (11-18, the takes path).
+    import os
+    assert "GEMINI_API_KEY" not in os.environ
+    assert "GROQ_API_KEY" not in os.environ
+
+
 GOOD_JSON = ('{"title": "A Great Title", '
              '"keywords": ["one", "two"], "cta": "Comment your answer below!"}')
 
