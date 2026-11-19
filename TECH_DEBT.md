@@ -155,26 +155,29 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The own show's switch-on (2026-11-15, branch `strategy/own-switch-on`,
-  unmerged until #90's label and its music tracks).** One commit: `SOURCE`
-  defaults to `own` (logs `v7s-own`, or `v8-own` once bet 1 is live), tests
-  pin Reddit. Its fresh review found three things to settle before it
-  merges: (1) the release gates (`validate-release.yml` sets no `SOURCE`)
-  would run the own metadata path: an unanswered judge now reads
-  INCONCLUSIVE (merged 11-15), but gate 1 grows to 2 requests (metadata,
-  then judge), so the gates spend 7 of their stated 8, 9 only if retries
-  fire (the cap is a budget line, not a stop); (2) fixed 11-15: the docs
-  check now reads the shipped version, so it flags PRD's live format until
-  it says `v7s-own`; (3) settled 11-15, no workflow patch: `dry-run.yml`
-  passes no `SOURCE`, so a render takes the branch's default, and a sample
-  branch whose `config.SOURCE` defaults to `reddit` still renders Reddit's
-  show. Then a dry run of its tip, which renders the own path. **Music
-  without the owner's hands (11-15):** Kevin MacLeod's tracks (incompetech)
-  are CC BY 4.0, so plain files may sit in this public repo with a credit,
-  and are pre-registered in Content ID: a claim comes when the description
-  lacks the credit, and is released within 72 h of a dispute (the owner's
-  hands). Needs a credit line in the description, which nothing writes yet,
-  and a track choice. Build it only if the owner picks it on #90.
+- **The takes show's switch-on (E1 T5; 11-19, `strategy/e1-t5-switch-on`,
+  render twin `e1-t5-switch-on-render`).** Supersedes `strategy/own-switch-on`
+  (11-15: `SOURCE` defaulting to `own`; the slots replaced it), which can be
+  deleted. Its fresh review as a live change: nothing blocking; two fixes made
+  on the branch (takes never draws the funk bed; the digest never auto-reverts
+  `-own`). Open, not fixed: (1) **Gemini on takes days.** A takes run spends
+  ~4 upload-model requests (question, screen, metadata, title judge; worst
+  ~12), Reddit's ~2 (worst 10). The slots give takes two runs in a row every
+  other day, which share one Pacific quota day when the morning run lands
+  before 08:00 UTC (11-15, 11-16): 8, plus 6-8 for the release check, 14-16
+  of 20, ~24 worst case. Every call falls back (second model, Groq), so a run
+  is lost only if Groq also fails the question. Shifts keep Gemini off those
+  days; count `meta_source` fallbacks on takes rows at the first weekly.
+  (2) **The release check exercises Reddit's metadata path only**
+  (`validate_release.py` never calls `use_show`): takes' question and title
+  judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
+  line prints the import-time `v8` on a takes run (the log row is right), and
+  the output file is still `final_askreddit_video.mp4`. (4) The digest's
+  `-own` exclusion has no end date and names 2027-01-04: once takes holds
+  every slot (01-05), its next release must be auto-reverted like any other;
+  T10's shift ends the exclusion. A second fresh review of the branch's later
+  commits: nothing blocking.
+  **Before T5's switch-on too (11-18): tests could reach the real Gemini API.** With `SHOW_ALTERNATION` flipped on, 10 tests failed and the suite took 220 s: the cutoff runs took the takes path, whose `ownquestions` calls are unmocked, with the shell's real key. **Fixed 11-19:** conftest strips `GEMINI_API_KEY` (on `main`, `2115fb5`, with a test). The pins are on `engineering/e1-t5-test-pins` (based on T4's branch; merge it after T4): nine tests pin the switch off, and one more cutoff test runs with it on. Switched on there, with T2 merged, only `test_built_switched_off` fails, 38 s: the switch-on commit replaces that guard. Fresh review: nothing blocking. Caveat: a subprocess test that imports `config` reloads a local `.env`, so the strip covers the parent process only.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
@@ -518,8 +521,8 @@ a list nobody can read is the same as no list.
   between 07:00 and 08:00 UTC in winter spends the day the uploads already
   used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
   from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
-  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
-  after 08:00 UTC in winter; PRD §0's host-line row says so.
+  owner). The skill's sentence was fixed 11-19 (shifts own it since D16). Until
+  then, plan Gemini work after 08:00 UTC in winter.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
