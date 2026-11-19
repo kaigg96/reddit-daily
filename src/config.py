@@ -250,7 +250,9 @@ if SOURCE == "own":
 # E1 T4: one Reddit and one takes upload a day, the two shows trading the
 # morning and evening slots daily (content.show_for_run). Off, SOURCE alone
 # picks the show, as before; on, each run's show overrides SOURCE (use_show).
-SHOW_ALTERNATION = False
+# On since E1 T5: takes runs as a daily arm under ledger `takes-gate`, set
+# before its first upload and read once on 2027-01-04.
+SHOW_ALTERNATION = True
 SHOWS = ("reddit", "takes")
 
 

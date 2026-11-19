@@ -23,8 +23,10 @@ def alternating(monkeypatch):
         monkeypatch.setattr(config, name, getattr(config, name))
 
 
-def test_built_switched_off():
-    assert config.SHOW_ALTERNATION is False
+def test_switched_on_by_e1_t5():
+    # Off again only with the takes-gate's read (01-04) or a Decide: the
+    # ledger row was dated before the first takes upload.
+    assert config.SHOW_ALTERNATION is True
 
 
 @pytest.mark.parametrize("offset", range(0, 7))
