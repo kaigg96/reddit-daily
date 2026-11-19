@@ -2361,6 +2361,19 @@ def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch
     assert "`v7`: NO VERDICT" in line
 
 
+def test_the_digest_never_auto_reverts_the_takes_show(monkeypatch):
+    """With the shows alternating, `v8-own` and `v8` are the two latest
+    releases; read as a release, takes would face all of Reddit's history and
+    could be reverted before ledger `takes-gate`'s 01-04 read."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": v} for v in ("v7s", "v8", "v8-own", "v8", "v8-own")]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v8", "v7s"]
+    assert "`v8-own`: not auto-reverted, ledger `takes-gate`" in line
+
+
 def test_each_committed_release_cut_names_a_logged_field_and_value():
     """A misspelt cut would filter every upload out, and the digest would print
     NO VERDICT rather than fail (review, 2026-10-25)."""
@@ -3168,3 +3181,30 @@ def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, cap
     assert asked == [Metric.PCT]
     assert "share of each video watched" in out and "never a trigger" in out
     assert "60.0%" in out and "FLAT" in out and "forces PM's priority" not in out
+
+
+def test_the_takes_gate_read_compares_on_a_full_arm(tmp_path, monkeypatch, capsys):
+    """Ledger `takes-gate`'s exact command, on 22 uploads a side over the same
+    weeks after older Reddit ones: it must print a comparison with a chance
+    gap, or the 01-04 read would pass by refusal for a bug, not for evidence."""
+    import sys
+    from scripts import report
+    from src import config
+    uploads, snaps = _era("old", 0, 20, "v8", 200, 12.0)
+    for arm, fv, base in (("r", "v8", 12.0), ("t", "v8-own", 10.0)):
+        u, s = _era(arm, 40, 22, fv, 200, base)
+        uploads += u
+        snaps += [(d, v, views, base + (i % 5) * 0.8) for i, (d, v, views, _) in enumerate(s)]
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    lines = config.UPLOAD_LOG.read_text().splitlines()
+    config.UPLOAD_LOG.write_text("\n".join(
+        [lines[0] + ",show"] + [l + ("," + ("takes" if l.split(",")[1].startswith("t") else "reddit")) for l in lines[1:]]
+    ) + "\n")
+    monkeypatch.setattr(sys, "argv", ["report.py", "--compare", "show=takes", "--metric",
+                                      "watch_seconds", "--at-age", "7", "--since", "2026-08-10"])
+    report.main()
+    out = capsys.readouterr().out
+    import re
+    assert "show=takes vs show!=takes -> worse by" in out
+    assert re.search(r"show=takes\s+n=22 ", out) and re.search(r"show!=takes\s+n=22 ", out)
+    assert re.search(r"chance: random arms of 22 and 22 .* differ by [\d.]+%", out)

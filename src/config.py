@@ -243,7 +243,30 @@ COMMENTS_LOG = ROOT / "analysis" / "viewer_comments.csv"  # PLAN C5: last week's
 # release too (`v8-own` after `v7s-own`), never hidden inside the first. Here,
 # not beside FORMAT_VERSION, so bet 1's bump of that line merges cleanly.
 OWN_FORMAT_VERSION = f"{FORMAT_VERSION}-own"
+REDDIT_FORMAT_VERSION = FORMAT_VERSION
 if SOURCE == "own":
     FORMAT_VERSION = OWN_FORMAT_VERSION
+
+# E1 T4: one Reddit and one takes upload a day, the two shows trading the
+# morning and evening slots daily (content.show_for_run). Off, SOURCE alone
+# picks the show, as before; on, each run's show overrides SOURCE (use_show).
+# On since E1 T5: takes runs as a daily arm under ledger `takes-gate`, set
+# before its first upload and read once on 2027-01-04.
+SHOW_ALTERNATION = True
+SHOWS = ("reddit", "takes")
+
+
+def use_show(show):
+    """Set everything that follows the show for this run: SOURCE, SHOW,
+    FORMAT_VERSION and ANSWER_LABEL, as SOURCE sets them at import. Other
+    modules read these as config.X at call time, so a run that calls this
+    before its content step runs as that show throughout."""
+    global SOURCE, SHOW, FORMAT_VERSION, ANSWER_LABEL
+    if show not in SHOWS:
+        raise ValueError(f"show {show!r} is not a show {SHOWS}")
+    SOURCE = "own" if show == "takes" else "reddit"
+    SHOW = show
+    FORMAT_VERSION = OWN_FORMAT_VERSION if show == "takes" else REDDIT_FORMAT_VERSION
+    ANSWER_LABEL = "TAKE" if show == "takes" and not SAMPLE else "ANSWER"
 
 GEN.mkdir(parents=True, exist_ok=True)

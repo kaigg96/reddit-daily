@@ -168,6 +168,9 @@ def main():
         print(f"Slot {slot} is off at {config.UPLOADS_PER_DAY} uploads a day; nothing to do")
         return
     check_channel_name()
+    if config.SHOW_ALTERNATION:   # E1 T4: this run's show overrides SOURCE
+        config.use_show(content.show_for_run(now, schedule))
+        print(f"Show this run: {config.SHOW} format={config.FORMAT_VERSION}")
 
     # --- content ---
     prev_title = ""

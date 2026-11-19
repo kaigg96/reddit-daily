@@ -1199,8 +1199,13 @@ def release_digest_line(log_rows, target_age=None):
     """One line for the Monday digest, so a due verdict reaches the owner
     whether or not a shift remembers to run the check (TECH_DEBT)."""
     target_age = AGE_MATCH_TARGET_DAYS if target_age is None else target_age
+    # The takes show's releases (`-own`) are judged by ledger `takes-gate`
+    # alone, once on 01-04 against Reddit over the same weeks. Read here they
+    # would face the whole Reddit history before them, and the auto-revert
+    # rule could switch the arm off before its own read (switch-on review).
+    takes = [r for r in log_rows if (r.get("format_version") or "").endswith("-own")]
     parts = []
-    for version in latest_releases(log_rows):
+    for version in latest_releases([r for r in log_rows if r not in takes]):
         cut = RELEASE_WITHIN.get(version)
         read = release_read(version, target_age=target_age, within_spec=cut)
         if read is None:
@@ -1209,6 +1214,8 @@ def release_digest_line(log_rows, target_age=None):
             verdict = release_verdict(read.comparisons, read.floors, read.triggers,
                                       RELEASE_MIN_UPLOADS.get(version, MIN_COHORT))
         parts.append(f"`{version}`" + (f" (within {cut})" if cut else "") + f": {verdict}")
+    for version in latest_releases(takes, n=1):
+        parts.append(f"`{version}`: not auto-reverted, ledger `takes-gate` reads it on 2027-01-04")
     return (f"**Release checks** (auto-revert, every upload read at ~{target_age:g} days) — "
             + (" · ".join(parts) if parts else "no release logged"))
 

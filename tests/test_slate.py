@@ -236,6 +236,13 @@ def test_thinking_budget_goes_only_to_models_that_accept_it(monkeypatch):
 
 # --- R4.1 subreddit rotation ---------------------------------------------------
 
+@pytest.fixture
+def one_show(monkeypatch):
+    """These pin the single-show key on purpose: with E1 T4's alternation on,
+    subreddits move on the day's pair of slots instead (test_show_slots)."""
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
+
+
 def _runs(days):
     import datetime
     start = datetime.datetime(2026, 10, 5, 5, tzinfo=datetime.timezone.utc)
@@ -244,7 +251,7 @@ def _runs(days):
             yield (hour, start.replace(hour=hour) + datetime.timedelta(days=d))
 
 
-def test_rotation_gives_every_subreddit_both_slots():
+def test_rotation_gives_every_subreddit_both_slots(one_show):
     subs = ["AskReddit", "NoStupidQuestions"]
     seen = {(s, h): 0 for s in subs for h in (5, 17)}
     for hour, now in _runs(6):
@@ -252,7 +259,7 @@ def test_rotation_gives_every_subreddit_both_slots():
     assert set(seen.values()) == {3}
 
 
-def test_rotation_never_repeats_a_subreddit_within_a_day():
+def test_rotation_never_repeats_a_subreddit_within_a_day(one_show):
     subs = ["AskReddit", "NoStupidQuestions", "AskUK"]
     picks = [content.subreddit_for_run(now, subs) for _, now in _runs(3)]
     assert all(picks[i] != picks[i + 1] for i in range(0, len(picks), 2))
@@ -322,7 +329,7 @@ def _old_rule(now, subs):
     return subs[(now.toordinal() + (now.hour >= 12)) % len(subs)]
 
 
-def test_at_two_a_day_both_cron_shapes_pick_as_before():
+def test_at_two_a_day_both_cron_shapes_pick_as_before(one_show):
     subs = ["AskReddit", "NoStupidQuestions"]
     for d in range(5, 12):
         for hour, line in ((5, "23 0 * * *"), (17, "23 12 * * *")):
@@ -344,7 +351,7 @@ def test_a_late_evening_run_belongs_to_the_day_it_was_scheduled_for():
     assert content.run_slot(_at(5, 23, 10), "23 18 * * *") == (datetime.date(2026, 10, 5), 3)
 
 
-def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch):
+def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch, one_show):
     monkeypatch.setattr(config, "UPLOADS_PER_DAY", 4)
     subs = ["AskReddit", "NoStupidQuestions"]
     lines = [("23 0 * * *", 5), ("23 6 * * *", 11), ("23 12 * * *", 17), ("23 18 * * *", 23)]
