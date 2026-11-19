@@ -155,10 +155,9 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
-- **The takes show's switch-on (E1 T5; 11-19, `strategy/e1-t5-switch-on`,
-  render twin `e1-t5-switch-on-render`).** Supersedes `strategy/own-switch-on`
-  (11-15: `SOURCE` defaulting to `own`; the slots replaced it), which can be
-  deleted. Its fresh review as a live change: nothing blocking; two fixes made
+- **The takes show's switch-on (E1 T5; merged 11-19, `5f732aa`, after its
+  render twin's PASS at `3311579`; the E1 branches deleted).** Its fresh
+  review as a live change: nothing blocking; two fixes made
   on the branch (takes never draws the funk bed; the digest never auto-reverts
   `-own`). Open, not fixed: (1) **Gemini on takes days.** A takes run spends
   ~4 upload-model requests (question, screen, metadata, title judge; worst
@@ -172,7 +171,10 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
   line prints the import-time `v8` on a takes run (the log row is right), and
-  the output file is still `final_askreddit_video.mp4`. (4) The digest's
+  the output file is still `final_askreddit_video.mp4`; the upload
+  workflow's unseal comment ("none") now holds for the Reddit show only,
+  too small for an owner's label alone: fold it into that file's next
+  patch. (4) The digest's
   `-own` exclusion has no end date and names 2027-01-04: once takes holds
   every slot (01-05), its next release must be auto-reverted like any other;
   T10's shift ends the exclusion. A second fresh review of the branch's later
