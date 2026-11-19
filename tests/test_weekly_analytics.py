@@ -476,7 +476,8 @@ def test_a_client_error_still_stops_at_once():
 
 
 def test_retention_columns_extend_the_live_header_as_a_pure_append():
-    assert wa.FIELDS[-len(wa.RETENTION_FIELDS):] == wa.RETENTION_FIELDS
+    tail = wa.RETENTION_FIELDS + wa.CLAIM_FIELDS
+    assert wa.FIELDS[-len(tail):] == tail
     live = open(os.path.join(os.path.dirname(__file__), "..", "analysis",
                              "analytics_snapshots.csv")).readline().strip().split(",")
     assert wa.FIELDS[:len(live)] == live
@@ -493,3 +494,56 @@ def test_a_channel_header_it_cannot_extend_never_ends_the_job(tmp_path, monkeypa
     wa.channel_step(_FakeAudience(_AUDIENCE), "2026-11-09")  # raises nothing
     assert p.read_bytes() == b"snapshot_date,views,subscribers\n2026-10-26,1,22\n"
     assert "channel snapshot failed (SystemExit" in capsys.readouterr().out
+
+
+class _FakeVideos:
+    """videos().list(part=..., id=...).execute() -> the items for those ids."""
+
+    def __init__(self, items, fail=None):
+        self.items, self.fail, self.asked = items, fail, []
+
+    def videos(self):
+        return self
+
+    def list(self, part, id, maxResults):
+        assert part == "status,contentDetails"
+        self.asked += id.split(",")
+        return self
+
+    def execute(self, num_retries=0):
+        if self.fail:
+            raise self.fail
+        return {"items": [i for i in self.items if i["id"] in self.asked]}
+
+
+def test_a_claim_on_a_recent_upload_is_recorded_and_old_ones_are_not_asked():
+    """E1 T5: a shift has no YouTube access, so the snapshot is where a
+    rejected or region-blocked takes upload shows."""
+    items = [{"id": "ok", "status": {"uploadStatus": "processed"}, "contentDetails": {}},
+             {"id": "claimed", "status": {"uploadStatus": "rejected", "rejectionReason": "claim"},
+              "contentDetails": {}},
+             {"id": "blocked", "status": {"uploadStatus": "processed"},
+              "contentDetails": {"regionRestriction": {"blocked": ["DE", "FR"]}}},
+             {"id": "few", "status": {"uploadStatus": "processed"},
+              "contentDetails": {"regionRestriction": {"allowed": ["US"]}}}]
+    videos = [("ok", "2026-11-20T20:46:00Z", "public"), ("claimed", "2026-11-21", "public"),
+              ("blocked", "2026-11-22", "public"), ("few", "2026-11-22", "public"),
+              ("old", "2026-09-01T00:00:00Z", "public")]
+    yt = _FakeVideos(items)
+    claims = wa.add_claim_state(yt, videos, "2026-11-23")
+    assert "old" not in yt.asked and "old" not in claims
+    assert claims["ok"] == {"upload_status": "processed", "region_restriction": ""}
+    assert claims["claimed"]["upload_status"] == "rejected:claim"
+    assert claims["blocked"]["region_restriction"] == "blocked 2"
+    assert claims["few"]["region_restriction"] == "allowed 1"
+    gone = wa.add_claim_state(_FakeVideos([]), [("gone", "2026-11-22", "public")], "2026-11-23")
+    assert gone == {"gone": {"upload_status": "not returned"}}
+    failed = [{"id": "f", "status": {"uploadStatus": "failed", "failureReason": "codec"}}]
+    assert wa.claim_state(_FakeVideos(failed), ["f"])["f"]["upload_status"] == "failed:codec"
+
+
+def test_a_failed_claim_read_costs_its_columns_only_and_says_why(capsys):
+    videos = [("a", "2026-11-22", "public"), ("old", "2026-09-01", "public")]
+    claims = wa.add_claim_state(_FakeVideos([], fail=RuntimeError("quota")), videos, "2026-11-23")
+    assert claims == {"a": {"upload_status": "refused: RuntimeError: quota"}}
+    assert "::warning::claim state refused" in capsys.readouterr().out
