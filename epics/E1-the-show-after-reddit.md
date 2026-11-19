@@ -364,3 +364,14 @@ Accept:
 - [ ] the name's trademark, handle (YouTube, Instagram, TikTok) and domain checks are recorded, re-done within a week of the notice
 - [ ] the notice is raised, and the ask can be done from a phone in two minutes
 Evidence:
+
+### T12 · From 5 January every slot is takes, by date, with no shift needed
+Status: todo: ready once T5 is done (its first takes upload, ~11-21); written 11-19 for dispatch (E2 T8)
+Needs: T5
+Touches: src/config.py, src/content.py, tests/test_show_slots.py
+Context: decision 4 (continuity is the floor): takes take every slot on 2027-01-05 unless ledger `takes-gate` fails on 01-04. Today nothing in code does it: `content.show_for_run` alternates `config.SHOWS` forever, so if no shift changes it, every Reddit slot from 01-12 ends in an error (`tests/test_reddit_cutoff.py`) and half the uploads stop. Add a dated constant (`TAKES_ONLY_FROM = datetime.date(2027, 1, 5)` in `src/config.py`, beside `SHOW_ALTERNATION`) and make `show_for_run` return `"takes"` for a run whose scheduled day (`content.run_slot`'s day, not the clock) is on or after it. A FAIL at the 01-04 read changes the date, never the code. Nothing else changes: before the date the slots alternate exactly as now (the existing tests pass untouched). No `FORMAT_VERSION` bump: no video changes before the date.
+Accept:
+- [ ] a test: a run scheduled on 2027-01-04 still alternates, and every slot from 2027-01-05 (both slots, at two and at four a day, a late run landing after midnight included) is takes
+- [ ] with the date moved past the test's days, `show_for_run` matches today's alternation for 28 days (a test)
+- [ ] the full suite passes and PRD §0 #17 names the date
+Evidence:
