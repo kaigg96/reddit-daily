@@ -120,11 +120,12 @@ def test_one_track_or_no_record_still_picks(monkeypatch, tmp_path):
 
 def test_the_committed_rotation_has_four_licensed_tracks():
     names = [p.name for p in sorted(config.MUSIC_DIR.glob("*.mp3"))]
-    assert len([n for n in names if n.startswith("freepd_")]) >= 3
+    # T2's line: at least four in takes' rotation, which no longer includes
+    # the funk bed (it stays the Reddit show's, sealed)
+    assert len([n for n in names if n.startswith("freepd_")]) >= 4
     licences = (config.MUSIC_DIR / "LICENSES.md").read_text()
     for n in names:
         assert f"`{n}`" in licences, n
-    # with the sealed funk bed, unsealed in CI, that is at least four in rotation
     assert (config.ASSETS / "funk_bg_lower.mp3.enc").exists()
 
 

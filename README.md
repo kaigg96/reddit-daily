@@ -151,11 +151,11 @@ Secrets go in `.env` (gitignored): `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`,
    `venv/bin/python scripts/prep_broll.py <downloaded file> <short_name>`,
    then record the source URL. Prefer dark/mid-tone footage — bright clips
    wash out the white captions even under the scrim.
-2. **Music variety (PRD R1.6, optional — still open).** The current track
-   (`funk_bg_lower.mp3`) is from the YouTube Audio Library and license-clean.
-   For per-video variety, drop 2–3 more Audio Library tracks into
-   `assets/music/` (rotation is automatic) and list them in
-   `assets/CREDITS.md`.
+2. **Music variety (PRD R1.6).** The Reddit show keeps `funk_bg_lower.mp3`
+   (YouTube Audio Library, sealed) until `v8`'s read; the takes show rotates
+   four CC0 tracks in `assets/music/`, sources and licences in
+   `assets/music/LICENSES.md` (E1 T2). More Audio Library tracks stay
+   welcome: they go in `assets/music/` and are sealed, as PRD §0 says.
 
 ### OAuth re-auth (reference — already done)
 
