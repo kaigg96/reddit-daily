@@ -15,7 +15,7 @@ Every media asset committed to this repo must be listed here with its source and
 | `broll/pexels_15022349.mp4` | https://www.pexels.com/video/15022349/ | Pexels License |
 | `broll_retired/pexels_15168364.mp4` | https://www.pexels.com/video/15168364/ | Pexels License — retired 2026-10-26: 6 of 21 uploads using it sat at ≤5 views (p=0.003 under the 0.0071 bar, PRD §0 #11) |
 | `broll_retired/pexels_16482908.mp4` | https://www.pexels.com/video/16482908/ | Pexels License — retired 2026-09-28: 8 of 16 uploads using it sat at ≤5 views |
-| `music/` | *(empty — optional: add more Audio Library tracks for variety)* | Record each track here |
+| `music/freepd_*.mp3` (4 tracks) | FreePD.com, via the Internet Archive (site closed 2025); each URL in `music/LICENSES.md` | CC0 1.0 (public domain); no attribution required. Trimmed to 60 s, normalized |
 
 ## Services whose output is in the video — paid use (read 2026-10-18)
 
