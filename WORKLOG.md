@@ -82,7 +82,7 @@ and more useful than a confident guess.
 - Balance: two fixes (the tests' Google access, the review's two faults), the rest preparation for a bet that is already decided.
 
 ### Blocked
-- The test video needs a daytime shift: after Google's 07:00 reset, an hour clear of an upload, one per shift.
+- The test video needs a daytime shift: after Google's reset (08:00 UTC in winter), an hour clear of an upload, one per shift.
 - For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
 
 ### Next

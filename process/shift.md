@@ -159,7 +159,8 @@ auto-reverted: ledger `takes-gate` alone judges them, once, on 2027-01-04.
 
 Limits are in `CLAUDE.md` §1. Shift-specific:
 
-- **Gemini:** at most 8 requests, only after the 07:00 UTC reset, never within
+- **Gemini:** at most 8 requests, only after the reset (midnight Pacific: 08:00
+  UTC from November to March, 07:00 otherwise), never within
   an hour of a scheduled run — exhausting it cost a real upload its title.
 - **Dry runs:** at most one per shift, and you cannot render the Reddit
   pipeline locally (no Reddit keys) — ask:

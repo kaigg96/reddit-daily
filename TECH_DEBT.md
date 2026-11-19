@@ -517,8 +517,8 @@ a list nobody can read is the same as no list.
   between 07:00 and 08:00 UTC in winter spends the day the uploads already
   used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
   from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
-  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
-  after 08:00 UTC in winter; PRD §0's host-line row says so.
+  owner). The skill's sentence was fixed 11-19 (shifts own it since D16). Until
+  then, plan Gemini work after 08:00 UTC in winter.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
