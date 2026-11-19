@@ -265,6 +265,8 @@ def test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for():
             for v in ("garbage", "garbage/3", " 2026-10-05/3", "2026-10-05/9", "2026-10-05/\u00b2")]
     sched = wd.scheduled_slots(log)
     assert sched == {"late": ("2026-10-05", 3)}
+    # a compact date Python accepts is keyed as the digest's days are
+    assert wd.scheduled_slots([{"video_id": "c", "run_slot": "20261005/3"}]) == {"c": ("2026-10-05", 3)}
     src = inspect.getsource(wd.main)
     assert "upload_day(v, sched)" in src and "median_publish_drift(channel_videos, sched=sched)" in src
     # The week's metrics read the same days its cadence counts.

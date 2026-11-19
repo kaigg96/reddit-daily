@@ -62,7 +62,7 @@ def scheduled_slots(log_rows):
     for r in log_rows:
         day, _, slot = (r.get("run_slot") or "").partition("/")
         try:   # a hand-edited value falls back to the estimate, never stops the report
-            datetime.date.fromisoformat(day)
+            day = datetime.date.fromisoformat(day).isoformat()   # "20261005" too
         except ValueError:
             continue
         if slot in ("0", "1", "2", "3"):
