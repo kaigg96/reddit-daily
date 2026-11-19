@@ -155,6 +155,32 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **The takes show's switch-on (E1 T5; merged 11-19, `5f732aa`, after its
+  render twin's PASS at `3311579`; the E1 branches deleted).** Its fresh
+  review as a live change: nothing blocking; two fixes made
+  on the branch (takes never draws the funk bed; the digest never auto-reverts
+  `-own`). Open, not fixed: (1) **Gemini on takes days.** A takes run spends
+  ~4 upload-model requests (question, screen, metadata, title judge; worst
+  ~12), Reddit's ~2 (worst 10). The slots give takes two runs in a row every
+  other day, which share one Pacific quota day when the morning run lands
+  before 08:00 UTC (11-15, 11-16): 8, plus 6-8 for the release check, 14-16
+  of 20, ~24 worst case. Every call falls back (second model, Groq), so a run
+  is lost only if Groq also fails the question. Shifts keep Gemini off those
+  days; count `meta_source` fallbacks on takes rows at the first weekly,
+  and name each show's fallback share beside the 01-04 read, as music is:
+  3 of the first 5 logged (11-17 to 11-19) fell back, and `--compare
+  meta_source=gemini_fallback` refuses until 8 a side reach 7 days.
+  (2) **The release check exercises Reddit's metadata path only**
+  (`validate_release.py` never calls `use_show`): takes' question and title
+  judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
+  line prints the import-time `v8` on a takes run (the log row is right), and
+  the output file is still `final_askreddit_video.mp4`; the upload
+  workflow's unseal comment ("none") now holds for the Reddit show only,
+  too small for an owner's label alone: fold it into that file's next
+  patch. (4) The digest's `-own` exemption now ends by itself: only takes releases first uploaded before 2027-01-05 are exempt (11-19, reviewed). A second fresh review of the branch's later
+  commits: nothing blocking.
+  **Before T5's switch-on too (11-18): tests could reach the real Gemini API.** With `SHOW_ALTERNATION` flipped on, 10 tests failed and the suite took 220 s: the cutoff runs took the takes path, whose `ownquestions` calls are unmocked, with the shell's real key. **Fixed 11-19:** conftest strips `GEMINI_API_KEY` (on `main`, `2115fb5`, with a test). The pins are on `engineering/e1-t5-test-pins` (based on T4's branch; merge it after T4): nine tests pin the switch off, and one more cutoff test runs with it on. Switched on there, with T2 merged, only `test_built_switched_off` fails, 38 s: the switch-on commit replaces that guard. Fresh review: nothing blocking. Caveat: a subprocess test that imports `config` reloads a local `.env`, so the strip covers the parent process only.
+
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
   `HOST_TEXT`).** The voiced build was rejected (#71). A local `SAMPLE=1`
   render with `HOST_TEXT` on: playable, 19.9 s, own words 0.540, one voice.
@@ -245,21 +271,37 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   10-26). **Built on `data/v8-dose-verdict-uploads`** (off `integration/preview`,
   reviewed, its fixes in; 859 pass over `main`): the verdict's first 20 by date
   (`insights.dose_ids`; a test drives `report.release()`). Merge it right
-  after `v8`. **Rehearsed again 10-28** over `main` `ef6aec7`: both merge
-  cleanly, 936 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
+  after `v8`. **Rehearsed again 11-15** over `main` `14d0dbc`: `v8`, this
+  branch and `reliability/run-slot-log-main` merge cleanly, 1,244 pass. **Fallback tags (10-27, disclosed on #77):** when `MODEL`
   fails, the metadata reply, host tags included, comes from `FALLBACK_MODEL`
   (the sample model, which mostly labels), then Groq (`GROQ_FALLBACK = True` on
   the branch, off on `main`; no Groq model met §4's bar). 1 of 18 uploads
   since 10-18 took that path (10-26 05:05, `meta_failure=http_503`). The
   release check sets `FALLBACK_MODEL = None`, so it never sees it. If the
   owner asks on #77, drop host tags when the route is not `gemini`.
+  **Whole-release review (11-13, `b1190de`, main merged in; sampled PASS on
+  that commit): no blockers.** Left: a thread skipped as medical by its screen
+  topic spends one of the 4 screened slots (`content.py` ~317), rightly, as
+  its screen request was spent; so a day of such threads plus R4.6 skips can
+  end a run with no post (no upload, no state touched; ~1 in 400 runs if
+  skips were independent, against ~1 in 1,200 from R4.6 alone). Any fix spends
+  Gemini (`MAX_SCREENED_CANDIDATES`): act only if a run ends with no post. A
+  length-guard drop while the vote shows synthesizes the stock line as a sixth
+  Polly call (~94 characters, `run.py` ~120). Each branch render spends one
+  `MODEL` request (`METADATA_ON_UPLOAD_MODEL`), so #65's sentence needs
+  rewording before it lands (noted on its body). Once `v8` merges, the shift skill's
+  §6 line that a branch renders "over silent narration" is false (Kokoro
+  stand-in, `STAND_IN_VOICE`): for the monthly's bundle of skill changes. With reactions off, the ask and
+  schema still request three (tokens only).
 
 - **Four a day, built off (2026-10-11, PRD §0 #4).** Left by its review, for
   the switch to four ((1), the digest's two-slot drift, fixed 2026-10-11):
   (2) a run queued behind another
   cancels a pending one in the `reddit-video` group, so an off-slot run could
   cancel a waiting live one (needs a ~6h pile-up; none in 99 scheduled runs
-  08-27 to 10-13, the closest two 3.5h apart); (3) after the patch, a
+  08-27 to 10-13, the closest two 3.5h apart; 11-15: none of 394 scheduled
+  runs since June was cancelled, and the 135 since 10-13, at the late-cron
+  delays, started no closer than 3.1h apart); (3) after the patch, a
   12:23 run landing after midnight takes the previous day's style, and an
   00:23 one landing after noon the morning subreddit (11.6h+ delays; 3.0–7.4h
   seen over 81 runs to 10-11, then 9.4h on 10-12's 06:23 run, which exited
@@ -271,8 +313,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   a sample after `v8`: **built 10-13 on `reliability/run-slot-log`**, stacked
   on `v8` (`run_slot`; the digest counts each upload for its scheduled day and
   times its delay from that slot; older rows keep the estimate; reviewed
-  twice, fixed; brought current with `v8` 11-06, `dafaecf`, after three
-  unseen conflicts: main, then `v8`, then it merge cleanly, 1,027 pass).
+  twice, fixed; brought current with `v8` (`b1190de`) 11-13, `e37d656`: clean,
+  1,139 pass).
   Merge it after `v8`, before the switch, on tests and review:
   no sample reaches it (a dry run returns before the log), and `prev_post.txt`
   is written first, so a fault there cannot repeat an upload. **At the switch, keep
@@ -291,7 +333,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   before `v8`** (PRD #4, 10-19), both answers above are `v8`'s: main has
   `GROQ_FALLBACK = False` and no slot log. So switch the fallback on alone
   (a sample, no bump) and move `run-slot-log` off `v8` first, or cut
-  `MAX_SCREENED_CANDIDATES` to 2. **Closes when** the switch goes to four.
+  `MAX_SCREENED_CANDIDATES` to 2. **Moved 11-15:** `reliability/run-slot-log-main`
+  (off `main`, 969 pass; merges with `integration/preview` cleanly, either
+  order, rows stay aligned; reviewed fresh). Its fix, the slot key worked out
+  before the upload, is not on the stacked branch; nor is its second, the
+  digest's `week_videos` grouped by scheduled day like `per_day`. **It
+  supersedes the stacked branch:** over `integration/preview` it merges
+  clean and 1,242 pass (11-15), so merge this one after `v8` as well. **Merged 11-19** (`0f1424d`, after the takes switch-on; reviewed fresh, nothing blocking; `run_slot` follows `show`). **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.
@@ -352,6 +400,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   conflicted with it in `get_metadata`'s failure branch and is pre-resolved
   (`integration/preview`): the second model first, given the main call's
   reply schema. (The two-answer branch's copy is moot: #74 closed 10-22.)
+  **11-14:** PRD #13's tag condition assumes per-answer reactions. If #77
+  ships without them (its ask), the host's lines are the setup note and the
+  vote, which no Groq trial has read (`tag_trial.py --model groq` reads them
+  on `integration/preview`). Set that bar before #13 is next, not now: a
+  trial ahead of bet 1's read would be stale by the time it is used.
 
 - **Audit 2026-11-12: working at the margin; the owner's selective answers
   decide what ships (last act 11-10 15:24).** 16 shifts since 11-05 (one
@@ -381,7 +434,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **Escalations:** none opened (11-05's hold); the owner answered five
   label-only asks on 11-10 and passed over the five needing a watch, a
   direction call or hands (#59, #77, #80, #82, #90). Tight on files (#88,
-  #65 approved, awaiting hands), not decisions. **Decisions** (inline): D13,
+  #65 approved, then waiting for hands; all six closed 11-15), not decisions. **Decisions** (inline): D13,
   D11, D5 false; D4 worse (PRD §4 15,317 → 20,714 words in a week); D2, D8,
   D9 (amended, #91), D12 strained; D6, D14 hold a third audit: graduation
   candidates. **Outward (docs 11-12):** the `attribution` setting turns off
@@ -419,33 +472,8 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   second's review:** the source includes the top comments, so one in capitals
   exempts common words ("YOU") and either arm can still leak; "OMG" is not an
   acronym; arm 1 keeps the first capitals word, not the meant one ("WHAT would
-  you do?"). Rare, and a leak dilutes, never inflates (PRD #14). **Closes
-  when** #14 is read (~11-23).
-- **The own-question title check drops ordinary titles (merged off 2026-11-12,
-  PLAN C16; left by the merge's fresh review).** `llm._OWN_BANNED` matches
-  "people say/tell/explain…" anywhere, so "Why do people say sorry so much?" or
-  "3 People You Meet at Every Wedding" falls back to the question itself, which
-  carries the same words, logging `title_ok=False` and costing #10's and #14's
-  arms that run. It misses "/r/tifu", "Redditors reveal", "3 Answers That…" and
-  "Commenters reveal". Live path untouched (`SOURCE=reddit`). Fixing it changes
-  the commit, so it needed a second render the 12-hour limit refused.
-  **Fixed in part on `strategy/own-title-check` (11-12, 875 pass, unmerged):**
-  three rounds, each reviewed fresh, and each review found new wordings. Its
-  third leaves: "People's Hot Takes", "Hot Takes From Strangers", "People React
-  To…" and singular "A stranger told me" pass (as on `main`); spelled counts
-  newly drop "Should two people split the bill?"; "How often/What do people
-  say…" drop. A word list keeps leaking, so before switch-on weigh a different
-  check (the screen call judging the title), not a fourth round. **Graded
-  from 11-12** by `tests/test_own_title_cases.py`: 17 fixed cases, 10 wrong on
-  `main` (strict xfails, so the fix branch must lift the ones it rights). **Closes
-  when** fixed with tests, before `SOURCE=own` turns on.
-- **C15's name credits drop silently (2026-10-06).** `content.credit_name`
-  leaves out deleted, profane and over-matched names: the substring check
-  (list words of 4+ letters) also catches "hell" in Michelle and "rape" in
-  Grape, by design, since a missed credit beats printing a slur. Nothing
-  records how often it fires. If the
-  attribution term ever turns on it, add an upload-log column (asker credited,
-  answers credited of shown) through a sample run, then tune the word floor.
+  you do?"). Rare, and a leak dilutes, never inflates (PRD §0, row 14). **Closes
+  when** the capitals test is read (~11-23).
 
 **Retention — open items must close, not accumulate** (cap: 13 under this heading, checked by
 `scripts/context_budget.py`). Every item resolves one of three ways: **fixed**
@@ -495,8 +523,8 @@ a list nobody can read is the same as no list.
   between 07:00 and 08:00 UTC in winter spends the day the uploads already
   used. Low exposure: shifts start 03:17, 11:17 and 19:17. Fix: take the hour
   from `America/Los_Angeles` in `dry_run.py` and the workflow (a patch for the
-  owner) and the skill's sentence (`Approved-In`). Until then, plan Gemini work
-  after 08:00 UTC in winter; PRD §0's host-line row says so.
+  owner). The skill's sentence was fixed 11-19 (shifts own it since D16). Until
+  then, plan Gemini work after 08:00 UTC in winter.
 
 - **An `Approved-In: #N` trailer is not bound to what it approves.** The guard
   checks that the cited issue is approved by the owner, not that the commit is
@@ -519,9 +547,13 @@ a list nobody can read is the same as no list.
   ("Fuuuck", "sh!t") pass every list, as the library does not fold repeats
   (folding would newly flag 0 of 1,417 logged titles and lines); a swearing
   vote in voiced mode (dormant) is untested; the library reads a curly "he’ll"
-  as "hell" (fails safe, rare); YouTube's API refuses "<" and ">" in a title
-  or description and nothing strips them, which would fail the upload and
-  retry the same post (0 of ~2,300 past titles and answers). Live video left
+  as "hell" (fails safe, rare). YouTube's API refuses "<" and ">" in a title,
+  description or tag: it happened 11-16 (an answer quoting another, "\> Huge
+  IT nation"; the evening slot lost) and `youtube._accepted` swaps both for
+  angle quotes since 11-17 (reviewed). Left: `content.clean_text` keeps
+  Reddit's markdown escapes and quote marks, so that "\>" was also on screen,
+  in the captions and in Polly's text; stripping them changes the video, so
+  after bet 1's read, not inside it. Live video left
   as is (retitling would alter a row of #10 and #14). **Closes when** `v8`
   ships and none of these has occurred in its first 20 uploads.
 
@@ -537,7 +569,9 @@ a list nobody can read is the same as no list.
   text columns rewrites production data (CLAUDE.md §4), and history is the
   owner's. **Recommend** at the 12-07 monthly (the 11-03 monthly, which
   replaced the 11-05 review, held it with five asks open): keep IDs and
-  statistics, drop the text columns at HEAD, leave history. **History also
+  statistics, drop the text columns at HEAD, leave history; **ready** on
+  `legal/youtube-text-retention` (11-15: the three text columns gone, the
+  writer no longer writes them, tests pass). **History also
   holds** the plain Audio Library track (`73beb1c`, 2025-01-18; sealed at HEAD
   10-10, whose script defers history to "a separate decision", never taken)
   and two dead Google login tokens (a 2025 notebook's output; 11-06). Put
@@ -561,5 +595,9 @@ a list nobody can read is the same as no list.
   `reliability/upload-watch-patch`, for the monthly's bundle (a new issue,
   as auto-apply refuses an edited one). **11-10:** #89 was refused (the owner's
   words were about replies), so the patch did not land; held so #77 and #82
-  are read first. **Closes when** it lands as its own ask, or is deleted with
-  reasoning at the 12-07 monthly.
+  are read first. **11-13 replay** (`problems()` at all 129 scheduled shift
+  starts 09-20 to 11-13, the late-cron weeks included): alarms only at 10-06's
+  two, the real miss. Closest otherwise: 26.7 h of 28 (11-02 20:46), so a
+  shift landing just before an evening upload about 1.3 h later than any yet
+  would false-alarm; re-run the replay before the patch lands. **Closes when**
+  it lands as its own ask, or is deleted with reasoning at the 12-07 monthly.

@@ -28,12 +28,12 @@ AWS Polly is a real invoice (~$0.90/month). Gemini and YouTube are free-tier.
 - **Never retry Polly without a hard cap.** A failed call still bills.
 - **Reuse the mp3s in `assets/gen/`** when iterating on visuals.
 - ⚙ **`Engine="neural"` is a deliberate paid choice.** Do not downgrade it to
-  save money, or upgrade to generative, without asking. Cost work here means
+  save money, or upgrade to generative. Cost work here means
   removing wasted calls, never reducing audio quality.
 - ⚙ **The AWS-side controls must stay as the owner set them** (key scope,
   budget, its automatic deny, the usage alarm). `scripts/money_check.py` checks
-  them every shift with a read-only key. Any change that could spend more needs
-  the owner's approval *and* a control at the provider.
+  them every shift with a read-only key. Only the owner changes what can be
+  spent, by hand, with a control at the provider (§4).
 
 **Gemini is capped at 20 requests/day, shared with production**, which spends
 4–10. Local work competes with live uploads — budget it rather than running it
@@ -64,37 +64,48 @@ It deploys; the video workflow runs from it twice daily.
   MP4 for anything touching the video, `FORMAT_VERSION` bumped if the video
   changed, one variable per release.
 
-## 4. Work autonomously — but not on the guardrails
+## 4. Decide and act — the owner is the last resort
 
-Pick the highest-value task and ship it; do not wait for a go-ahead.
+The owner has no time to be in the loop, and waiting on them stopped the
+company for a month (D16, 2026-11-14). **Never ask them to approve a product,
+strategy or process decision. Decide it, act, record it.** A call that changes
+direction goes through `ORG.md`'s **Decide** level: evidence, a fresh-context
+challenge, a record. These rules are yours to improve too: `CLAUDE.md`,
+`ORG.md` and `process/*.md` (the skills' text) change on a shift's judgement.
 
-**These need the owner.** Raise them with `scripts/escalate.py` (queues a
-GitHub issue, which emails them), then carry on with other work rather than
-blocking:
+Three things are not a shift's call:
 
-- ⚙ Weakening a safety or cost control — the Polly budget, the `DRY_RUN` guard,
-  secrets handling, the R4.6 screen's skip categories.
-- Spending beyond the current Polly line.
-- Deleting or rewriting production data, including historical backfills.
-- Publishing beyond the normal upload, except under the publishing policy in
-  `ORG.md` (Audience & community).
+- ⚙ **Spending real money is never a shift's decision.** No new paid service,
+  nothing beyond the current Polly line, no weakened cost control (§1). Do not
+  ask for it either: it does not happen. Record what it blocked in `PLAN.md`.
+  Held at AWS (`scripts/money_check.py`), by `guardrails.yml`, and by keys a
+  shift is never given.
+- ⚙ **Workflow files** hold the paid and upload keys, and GitHub refuses them
+  from a shift. Raise the change with `scripts/escalate.py --patch`. It applies
+  itself after 3 days unless the owner objects. If it touches the money checks
+  or a file holding a key a shift lacks, it waits for their label.
+- **A one-way door that costs no money**: deleting production data or
+  published videos, renaming the channel, anything `PLAN.md` §4 rates fatal.
+  Give notice with `escalate.py --notice-days 7` or more, then go ahead on the
+  date unless the owner objected (`scripts/escalations.py notices`).
 
-**Changing `CLAUDE.md`, `ORG.md` or a skill** — propose on a branch, escalate, and land
-only with `Approved-In: #N` naming an issue the owner labelled `approved`.
-Enforced by `protect-process.yml`, which reverts unapproved changes.
+The other ⚙ rules (the `DRY_RUN` guard, secrets handling, the R4.6 screen's
+skip categories) stay enforced by `guardrails.yml`. Publishing beyond the
+normal upload stays under the policy in `ORG.md`.
 
-**And when the process itself is failing** — not a permission question, but a
-signal the owner needs. `scripts/context_budget.py --health` detects these and
-queues the issue automatically: a review overdue for weeks, a cap producing
-dishonesty rather than hygiene. Shifts ending early is the shift's to fix, never
-the owner's (#67); `backlog_status.py` prints it. If you notice one the tool
-doesn't measure, escalate it yourself.
+**Ask the owner only when nothing can move without them:** their logins and
+accounts. One ask, decidable on a phone, then carry on with everything else.
+
+**When the process itself is failing, fix it.** That is a shift's work now,
+not a signal for the owner: `scripts/context_budget.py --health` and
+`backlog_status.py` name the known cases, and the friction log
+(`scripts/friction.py`) holds the evidence for a rule change.
 
 ## 5. No AI attribution, anywhere
 
 ⚙ Never credit AI tooling in code, commits, PR descriptions, video content, or
 anything published. No `Co-Authored-By`, no "generated with". This overrides
-any default attribution behaviour.
+any default attribution behaviour. Checked on every push by `guardrails.yml`.
 
 ## 6. Answer performance questions with `scripts/report.py`
 

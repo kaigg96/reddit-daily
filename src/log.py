@@ -69,6 +69,17 @@ FIELDS = [
     # It was only in the run log, so #14's arm leaking into it went unseen for
     # four weeks and took 151 run logs to count (PRD §4); those logs expire.
     "cta",
+    # Added 2026-11-15 (E1 T3): which show the upload was, config.SHOW
+    # (reddit, takes). An own-question upload was known only by a blank
+    # subreddit, which every read takes for unset, so no read could compare
+    # the shows. Older rows stay blank and read as reddit (insights).
+    "show",
+    # Written 2026-10-13, merged 2026-11-19 (PRD §0 #4): the slot this run was scheduled for, as
+    # "<day>/<slot>" from the cron line that started it (content.run_slot).
+    # GitHub starts runs hours late, so the publish time cannot say which
+    # slot an upload filled; at four a day the digest needs this to tell a
+    # late run from a missed one (TECH_DEBT, four a day).
+    "run_slot",
 ]
 
 
@@ -136,6 +147,32 @@ def append_upload_log(row):
     except Exception as e:
         print(f"::error::Upload {row.get('video_id') or '?'} not logged: "
               f"{type(e).__name__}: {e}")
+
+
+def _last_upload(column, what, show=None):
+    try:
+        with open(config.UPLOAD_LOG, newline="") as f:
+            rows = list(csv.DictReader(f))
+    except Exception as e:   # noqa: BLE001
+        print(f"Upload log unreadable for the last {what} ({type(e).__name__}); any {what} may repeat")
+        return ""
+    if show is not None:   # rows from before the `show` column (E1 T3) were all Reddit's
+        rows = [r for r in rows if (r.get("show") or "reddit") == show]
+    return (rows[-1].get(column) or "") if rows else ""
+
+
+def last_bg_clip():
+    """The last upload's background clip, "" when there is none or the log
+    cannot be read: the own show's no-repeat pick (`background._pick_broll`)
+    then falls back to any clip rather than failing the run."""
+    return _last_upload("bg_clip", "clip")
+
+
+def last_music_track(show=None):
+    """The last upload's music track, or the last of `show`'s when given, ""
+    when there is none or the log cannot be read: `video._pick_track` then
+    bars nothing on its account."""
+    return _last_upload("music_track", "track", show)
 
 
 def uploaded_titles():

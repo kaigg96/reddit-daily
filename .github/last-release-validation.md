@@ -3,12 +3,12 @@
 Written by `validate-release.yml`. A shift reads this instead of
 needing live Gemini quota to find out whether the gates pass.
 
-- **Branch:** `integration/preview`
-- **Commit:** `4e5f4bb`
-- **When:** 2026-11-12T16:49:12Z
+- **Branch:** `main`
+- **Commit:** `98147519`
+- **When:** 2026-11-18T17:15:23Z
 - **Verdict:** ⚠️ INCONCLUSIVE — gates could not be exercised; not a failure
 
-[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/43262345293)
+[Full output](https://github.com/kaigg96/reddit-daily/actions/runs/44356233476)
 
 ## What the gates said
 

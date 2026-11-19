@@ -54,7 +54,30 @@ CRON_SLOTS = tuple(s * 360 + 23 for s in LIVE_SLOTS)
 DRIFT_ALERT_MIN = 120
 
 
-def median_publish_drift(channel_videos, days=7):
+def scheduled_slots(log_rows):
+    """video_id -> (day, slot) its run was scheduled for, from the upload
+    log's run_slot ("2026-10-05/3"). Uploads logged before the column have
+    none, and fall back to their publish time below."""
+    out = {}
+    for r in log_rows:
+        day, _, slot = (r.get("run_slot") or "").partition("/")
+        try:   # a hand-edited value falls back to the estimate, never stops the report
+            day = datetime.date.fromisoformat(day).isoformat()   # "20261005" too
+        except ValueError:
+            continue
+        if slot in ("0", "1", "2", "3"):
+            out[r["video_id"]] = (day, int(slot))
+    return out
+
+
+def upload_day(video, sched):
+    """The day an upload counts for: its scheduled day where logged, since a
+    run can land hours late, past midnight (TECH_DEBT, four a day); else its
+    publish date."""
+    return sched[video["id"]][0] if video.get("id") in sched else video["published"][:10]
+
+
+def median_publish_drift(channel_videos, days=7, sched=None):
     """Median minutes between the scheduled slot and actual publish.
 
     The cadence check counts uploads per calendar day, so it stays green while
@@ -62,10 +85,20 @@ def median_publish_drift(channel_videos, days=7):
     and the delay has repeatedly grown unnoticed."""
     now = datetime.datetime.now(datetime.timezone.utc)
     cutoff = (now - datetime.timedelta(days=days)).isoformat()
+    sched = sched or {}
     drifts = []
     for v in channel_videos:
         p = v.get("published", "")
         if p < cutoff:
+            continue
+        if v.get("id") in sched:
+            # Exact: from the slot the run was scheduled for. The estimate
+            # below reads a delay over one slot's spacing as small.
+            day, slot = sched[v["id"]]
+            start = datetime.datetime.fromisoformat(f"{day}T00:00:00+00:00")
+            start += datetime.timedelta(minutes=slot * 360 + 23)
+            published = datetime.datetime.fromisoformat(p.replace("Z", "+00:00"))
+            drifts.append(int((published - start).total_seconds() // 60))
             continue
         mins = int(p[11:13]) * 60 + int(p[14:16])
         # A run never starts before its slot, so the delay is measured forward
@@ -115,6 +148,17 @@ def refused_columns(rows):
     return dict(sorted(counts.items()))
 
 
+def unused_sealed(log_rows, since, sealed, min_uploads=10):
+    """Sealed tracks no upload since `since` used. With plain tracks in the
+    rotation (E1 T2), a sealed one that fails to unseal drops out instead of
+    logging "none", so this is its trace. At five tracks, one never drawn in
+    ten or more uploads is chance about one week in 50."""
+    recent = [r.get("music_track") for r in log_rows if r["timestamp_utc"] >= since]
+    if len(recent) < min_uploads:
+        return []
+    return sorted(name for name in sealed if name not in recent)
+
+
 def humanize(n):
     return f"{n / 1_000_000:.1f}M" if n >= 1_000_000 else (f"{n / 1000:.1f}K" if n >= 1000 else str(n))
 
@@ -139,10 +183,13 @@ def main():
     # Cadence over complete calendar days (a rolling cutoff would clip the
     # earliest day's uploads and report false misses at the boundary).
     last_7_days = [(now.date() - datetime.timedelta(days=d)).isoformat() for d in range(1, 8)]
-    per_day = Counter(v["published"][:10] for v in channel_videos if v["published"] >= iso(9))
+    sched = scheduled_slots(log_rows)
+    per_day = Counter(upload_day(v, sched) for v in channel_videos if v["published"] >= iso(9))
     week_count = sum(per_day.get(d, 0) for d in last_7_days)
     missed_days = [d for d in last_7_days if per_day.get(d, 0) < config.UPLOADS_PER_DAY]
-    week_videos = [v for v in channel_videos if v["published"][:10] in last_7_days]
+    # The same day as the cadence above, so a late upload is measured in the
+    # window it is counted in.
+    week_videos = [v for v in channel_videos if upload_day(v, sched) in last_7_days]
 
     # Unlogged = on the channel but absent from upload_log: catches uploads
     # where the run died between upload and logging. 15-min buffer covers a
@@ -183,8 +230,9 @@ def main():
     # than failing the upload (scripts/seal_assets.sh); this column is the trace.
     no_music = [r for r in log_rows
                 if r["timestamp_utc"] >= iso(7) and r.get("music_track") == "none"]
+    unsealed = unused_sealed(log_rows, iso(7), [config.FALLBACK_MUSIC.name])
     skips = screen_skips()
-    drift = median_publish_drift(channel_videos)
+    drift = median_publish_drift(channel_videos, sched=sched)
 
     # --- status ---
     hard, soft = [], []
@@ -202,6 +250,8 @@ def main():
         soft.append(f"{len(non_public)} upload(s) not public")
     if no_music:
         soft.append(f"{len(no_music)} upload(s) rendered without music")
+    if unsealed:
+        soft.append(f"sealed music unused all week (failed to unseal?): {', '.join(unsealed)}")
     refused = refused_columns(latest.values())
     if refused:
         soft.append("snapshot did not collect " + ", ".join(refused))

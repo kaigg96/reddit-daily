@@ -1,100 +1,101 @@
-## Shift trace — run 43336662575
+## Shift trace — run 44435164568
 
-**Ended:** success, is_error false, 87 turns, 36.0 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 84, 1 failed. Helper agents made 110 more, 0 failed.
+**Ended:** success, is_error false, 117 turns, 44.5 min, stop end_turn; 3 permission denial(s): Bash, Task. **Tool calls:** 116, 2 failed. Helper agents made 98 more, 3 failed.
 
 **Last message:**
 
-> I handed over at 01:00, 23 minutes early. Nothing this shift moved the company toward revenue directly: every change viewers would see still waits on the owner, starting with bet 1 (#77). The handover entry is committed and pushed, and `main` is clean, with all 864 tests passing.
+> The handover is pushed, it's 01:58, and the guardrail checks have passed on every push of mine they've finished so far. Nothing touched the live channel: no uploads, no live files changed, no paid voice and no Google requests.
 >
-> **Done:**
-> - **Test #14 can't be read on too few videos (merged, live).** This is the capitals-in-titles test, our only live test of a views lever. Its rule says it is read at 30 videos per half. Its peek-lock was due to open on 23 November regardless of size, with the capitals half projected one or two short. The lock now stays shut until both halves hold 30 videos in the exact set the read uses. It counts only which half each video was in, never results. The read is most likely still 23 November, with about a 1-in-5 chance it moves to 30 November. I wrote that rule into the plan before anyone looked at a result.
->   - Three fresh reviews checked it. The first two each found I had counted the read's videos wrongly. I fixed both before merging, and the third found no defects.
-> - **Account-security ask (#59) is easier.** It guards our one fatal risk, losing the Google account and the channel with it. It now opens with the two checks that matter most, about five minutes together. The other four follow, unchanged. I edited the issue rather than commenting, so it sent the owner no email.
-> - **Ranking:** a helper proposed eight ideas, and two others ranked them forwards and reversed. A second, narrower round found two more. Both came back "no change" within minutes, and I recorded what was dropped and why.
-> - **Standing checks:** both of yesterday's uploads landed. The money controls are intact ($0.31 this month, forecast $0.79 of $3). No secrets are in the repository, and the workflows are unchanged. No AI requests, sample videos or Polly calls were used.
+> **What moved:** the takes show's switch-on is ready on its own branch, `strategy/e1-t5-switch-on`. Takes is the replacement show that keeps uploads going after Reddit ends for us on 12 January. Going live had needed two test videos and four merges. Now it needs one daytime test video and one merge.
 >
-> **Two corrections:**
-> - **I dropped one idea for a wrong reason.** I set aside a tool to read the new AI model's titles from the upload runs' logs
+> **Done this shift:**
+> - **Tests can no longer use the real Google key.** Any code a test forgot to fake could have spent the 20 Google requests a day the uploads share. This fix is live on `main`, with a test.
+> - **The switch-on branch:** it combines the slot switching, the music rotation, the switch itself and nine tests pinned to the old single-show behaviour. One more test checks that the Reddit cut-off still stops a run cleanly with the shows alternating. All 1,479 tests pass with the switch on. A free local test video of the switched-on code played: the takes show, 25.8 s, with a new track. A twin branch, `e1-t5-switch-on-render`, adds one line that forces the takes show in a dry run. A pass there covers the exact code that merges.
+> - **The review caught two faults, both fixed.** Two fresh reviews (one of the whole change, one of what came after) found nothing blocking. The first caught:
+>   - About 1 takes video in 9 would have used the Reddit show's music, which contradicts the rule that judges takes on 4 January.
+>   - From mid-December, the Monday report would have told a shift to switch takes off under the wrong rule, before its own 4 January read.
+> - **The 4 January read has a test:** the command it uses gives a real comparison, not a refusal, once there are enough videos.
+> - **Copyright claims on the new tracks:** a shift can see a claim that blocks or rejects a video. A claim that only takes the ad money, tracks the video or mutes it reaches o
 
-### Tool calls (last 80 of 84)
+### Tool calls (last 80 of 116)
 
-5. Bash: venv/bin/python scripts/escalations.py --help 2>&1 | head -20; venv/bin/python scripts/escalations.py list 2>&1 | head -60
-6. Bash: venv/bin/python scripts/escalations.py open 2>&1 | head -60; gh issue view 65 --comments 2>&1 | tail -40
-7. Bash: venv/bin/python scripts/backlog_status.py --dropped 2>&1 | head -120
-8. Skill: backlog
-9. Bash: venv/bin/python scripts/report.py --trajectory 2>&1 | tail -30; venv/bin/python scripts/check_docs.py 2>&1 | tail -15
-10. Bash: grep -n "^## \|^### " PLAN.md | head -40; grep -n "^## 0\|^### " PRD.md | head -30
-11. Bash: sed -n 1,70p PLAN.md
-12. Bash: sed -n 13,118p PRD.md
-13. ✗ Agent: Generate 8 candidate work items — PreToolUse:Agent hook error: [python3 "$CLAUDE_PROJECT_DIR/.github/workflows/foreground_in_ci.py"]: In an unattended shift a background age…
-14. Agent: Generate 8 candidate work items
-15. Bash: git ls-files | grep -iE '\.env$|secret|token|credential|\.pem$|client_secret' ; git check-ignore -v .env; git log -3 --format='%h %ad %s' -…
-16. Agent: Rank candidates, forward order
-17. Agent: Rank candidates, reversed order
-18. Bash: date -u +%H:%M; head -1 upload_log.csv; grep -n "title_caps" PRD.md | head -30
-19. Bash: venv/bin/python - <<'EOF'
-20. Bash: grep -n "def parse_compare\|def compare\|--compare\|def _split_compare\|def cmp_\|compare=" src/insights.py scripts/report.py | head -30
-21. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-22. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-23. Bash: venv/bin/python scripts/report.py --balance title_caps 2>&1 | tail -30; head -1 analysis/experiments.csv; grep -n "^#14\|,#14,\|title_caps\…
-24. Bash: grep -n "def blind_reads" -A 40 src/insights.py; sed -n 2785,2800p src/insights.py; grep -n "blind_reads\|BLIND_FIELDS" -r src scripts test…
-25. Bash: cat tests/test_blind_reads.py; grep -n "refuse_blind(" -B 8 scripts/report.py | sed -n 1,40p | grep -v "^8[0-2][0-9]-"
-26. Bash: grep -n "def show_balance" -A 25 scripts/report.py; grep -n "def load_upload_log\|def load_log\|def read_log\|UPLOAD_LOG" src/insights.py |…
-27. Bash: grep -n "def assignment_balance" -A 30 src/insights.py; git checkout -b data/14-arm-floor; date -u +%H:%M
-28. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-29. Bash: sed -n 1,40p src/insights.py | grep -n "^import\|^from"; grep -n "def _read_upload_log" -A 6 src/insights.py
-30. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-31. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-32. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
-33. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_blind_reads.py
-34. Bash: python3 - <<'EOF'
-35. Bash: python3 - <<'EOF'
-36. Bash: date -u +%H:%M && git add -A && git commit -q -m "Hold test #14 blind past its date until both arms hold 30 uploads at 7 days
-37. Agent: Fresh review of the #14 floor diff
-38. Bash: gh issue view 59 2>&1 | head -60
-39. Bash: date -u +%H:%M; grep -n "def load_videos_at_age" -A 45 src/insights.py | head -70
-40. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
-41. Bash: grep -n "^AGE_MATCH_TARGET_DAYS\|^AGE_MATCH_TOLERANCE_DAYS" src/insights.py; head -1 analysis/*snapshot* 2>/dev/null | head -3; grep -n "AN…
-42. Bash: grep -n "def _parse_ts" -A 8 src/insights.py; grep -n "a read at 7 days sees" src/insights.py
-43. Bash: python3 - <<'EOF'
-44. Bash: python3 - <<'EOF'
-45. Bash: python3 - <<'EOF'
-46. Bash: date -u +%H:%M && python3 - <<'EOF'
-47. Bash: git add -A && git commit -q -m "Count #14's floor in the cohort the newest snapshot's read takes
-48. Agent: Re-review the fixed #14 floor diff
-49. Bash: date -u +%H:%M && sed -n 930,938p scripts/report.py && grep -n "^## Open items" -A 6 TECH_DEBT.md | head -12
-50. Bash: python3 - <<'EOF'
-51. Bash: python3 - <<'EOF'
-52. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A && git commit -q -m "Count #14's floor only over uploads a snapshot measur…
-53. Agent: Final review of #14 floor branch
-54. Bash: git log --merges --oneline -3 main && git fetch -q origin && git status -sb | head -2 && git checkout -q main && git pull -q --ff-only orig…
-55. Bash: git push -q origin --delete data/14-arm-floor; venv/bin/python scripts/friction.py add --help 2>&1 | head -25
-56. Bash: tail -3 analysis/friction.csv 2>/dev/null || ls analysis | grep -i fric
-57. Bash: grep -n "FRICTION\|\.csv" scripts/friction.py | head -5; venv/bin/python scripts/friction.py report 2>&1 | head -15
-58. Bash: venv/bin/python scripts/friction.py add --function data --task "#14 arm floor on the blind lock (merged)" --outcome merged --category mista…
-59. Bash: venv/bin/python scripts/friction.py add --function data --task "#14 arm floor on the blind lock (merged)" --outcome done --category mistake…
-60. Bash: venv/bin/python scripts/escalate.py --help 2>&1 | head -30; git log --oneline --since=2026-11-11 | grep -i "#77" | head -3
-61. Bash: git show 1648fe4 --stat | head -20; git log --format='%h %s' -S "one label" --since=2026-11-12 -- .github/escalations | head -3; ls .github…
-62. Bash: gh issue view 59 --json body --jq .body > /tmp/issue59_before.md && wc -w /tmp/issue59_before.md && cat > /tmp/issue59.md <<'EOF'
-63. Bash: venv/bin/python scripts/friction.py add --function security --task "#59 rewritten: two five-minute checks first" --outcome done --category …
-64. Bash: python3 - <<'EOF'
-65. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add -A && git commit -q -m "Test #14's floor counts from the coin's first day
-66. Bash: python3 - <<'EOF'
-67. Bash: awk '/^## Open items/{f=1} f' TECH_DEBT.md | sed -n '266,271p;337,348p'
-68. Bash: sed -i 's/^\*\*Last updated:\*\* 2026-11-12 ·/**Last updated:** 2026-11-13 ·/' PRD.md && venv/bin/python -m pytest tests/ -q 2>&1 | tail -1…
-69. Bash: venv/bin/python scripts/report.py --trajectory --metric views 2>&1 | tail -12; awk '/^## Open items/{f=1} f' TECH_DEBT.md | sed -n '290,336…
-70. Bash: date -u +%H:%M && cat > /tmp/entry.md <<'EOF'
-71. Bash: grep -n "^## 20" WORKLOG.md; wc -l WORKLOG.md
-72. Bash: python3 - <<'EOF'
-73. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && venv/bin/python scripts/check_docs.py 2>&1 | tail -3 && git add -A && git commit -q -…
-74. Bash: awk '/^## Open items/{f=1} f' TECH_DEBT.md | sed -n '360,410p'
-75. Agent: Quick second idea round, small items
-76. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
-77. Bash: grep -n "20th upload\|its 20th\|title count\|shock refusal" PRD.md | head -8
-78. Bash: id=$(gh run list -w run-reddit-video.yml -s success -L 1 --json databaseId -q '.[0].databaseId') && echo $id && gh run view $id --log 2>&1 …
-79. Bash: gh run view 43331106080 --log 2>&1 | head -5; gh run view 43331106080 --log 2>&1 | wc -l
-80. Bash: for id in $(gh run list -w run-reddit-video.yml -s success -L 4 --json databaseId -q '.[].databaseId'); do gh run view $id --log 2>/dev/nul…
-81. Bash: python3 - <<'EOF'
-82. Bash: venv/bin/python - <<'EOF'
-83. Bash: date -u +%H:%M && python3 - <<'EOF'
-84. Bash: sed -i 's/So I handed over at 01:01, 22 minutes early\./So I handed over at 01:00, 23 minutes early./' WORKLOG.md && grep -c "handed over a…
+37. Bash: venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | grep -E "FAILED|passed|failed" | tail -5; sed -i 's/^SHOW_ALTERNATION = Fals…
+38. Bash: git add tests/ && git commit -q -m "E1 T5 prep: ten tests that pin the single-show key say so
+39. Bash: git push -q -u origin engineering/tests-no-gemini-key engineering/e1-t5-test-pins 2>&1 | tail -3; date -u +%H:%M
+40. ✗ Agent: Review two test-only branches — PreToolUse:Agent hook error: [python3 "$CLAUDE_PROJECT_DIR/.github/workflows/foreground_in_ci.py"]: In an unattended shift a background age…
+41. Agent: Review two test-only branches
+42. Bash: sed -n 160,185p src/run.py; sed -n 230,262p src/content.py; sed -n 80,140p tests/test_reddit_cutoff.py
+43. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_reddit_cutoff.py
+44. Bash: venv/bin/python -m pytest tests/test_reddit_cutoff.py -q -p no:cacheprovider 2>&1 | tail -3; sed -i 's/^SHOW_ALTERNATION = False/SHOW_ALTER…
+45. Bash: venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -1 && git add tests/test_reddit_cutoff.py && git commit -q -m "E1 T5 pr…
+46. Bash: git fetch -q origin && git log --oneline -1 origin/main && git checkout -q main && git pull -q --ff-only && git merge -q --ff-only engineer…
+47. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+48. Bash: venv/bin/python scripts/friction.py --help 2>&1 | head -20
+49. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | tail -20
+50. Bash: tail -3 .github/friction.csv 2>/dev/null || ls .github | grep -i fric; grep -rn "category" scripts/friction.py | head -5
+51. Bash: venv/bin/python scripts/friction.py add --function engineering --task "Switch-on prep: tests never inherit the shell's Gemini key (merged t…
+52. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+53. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -5; venv/bin/python scripts/epics.py --check 2>&1 | tail -3; git add -A TECH_DEBT.md epic…
+54. Bash: grep -n "^## " process/backlog.md; sed -n '/^## 1/,/^## 3/p' process/backlog.md | head -120
+55. Bash: venv/bin/python scripts/report.py --trajectory 2>&1 | tail -15; echo ---; venv/bin/python scripts/backlog_status.py --dropped 2>&1 | head -…
+56. Bash: grep -n "^## \|^### " PLAN.md | head -30; sed -n '/^## 4/,/^## 5/p' PLAN.md | head -50
+57. Bash: sed -n 26,48p PLAN.md; grep -n -i "research" PRD.md | head -10
+58. Bash: sed -n 45,75p PRD.md | cut -c1-600
+59. Bash: git checkout -q origin/product/e1-t4-show-slots 2>&1; grep -rln "takes\|own" tests/ | xargs grep -ln -i "reddit" | xargs grep -n -i "not in…
+60. Agent: Rank candidates forward and reversed
+61. Bash: date -u +%H:%M && git checkout -q -b strategy/e1-t5-switch-on origin/engineering/e1-t5-test-pins && git merge -q --no-edit origin/product/e…
+62. Bash: grep -n "SOURCE\|use_show\|SHOW\b\|show_for_run\|SHOW_ALTERNATION" scripts/validate_release.py scripts/dry_run.py src/run.py | head -20; gr…
+63. Bash: grep -n "def \|get_metadata\|ownquestions\|config\.\(SOURCE\|SHOW\)" scripts/validate_release.py | head -30
+64. Bash: grep -n "config.SOURCE\|config.SHOW\b" src/*.py | head -20
+65. Bash: grep -n "RUN_SCHEDULE\|DRY_RUN\|env:\|FORCE\|SHOW" .github/workflows/dry-run.yml | head -15; git show origin/e1-t4-takes-render --stat | he…
+66. Bash: git show 4097c169 | head -40
+67. Bash: venv/bin/python - <<'EOF'
+68. Bash: date -u +%H:%M && env -u GEMINI_API_KEY -u GROQ_API_KEY -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY SAMPLE=1 DRY_RUN=1 timeout 280 venv/b…
+69. Bash: grep -i -E "error|traceback|dry_run|skip|would upload|done|not upload" /home/runner/.claude/projects/-home-runner-work-reddit-daily-reddit-…
+70. Bash: git add src/config.py tests/test_show_slots.py && git commit -q -m "E1 T5: the takes show runs as a daily arm (SHOW_ALTERNATION on)
+71. Agent: Review the switch-on as a live change
+72. Agent: Research Content ID claim detection
+73. Bash: date -u +%H:%M && git checkout -q strategy/e1-t5-switch-on && sed -n 160,200p src/video.py
+74. Bash: grep -n "def test_\|def _\|fixture\|FALLBACK_MUSIC" tests/test_music_rotation.py | head -30
+75. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_music_rotation.py
+76. Bash: venv/bin/python - <<'EOF'
+77. Bash: git add src/video.py tests/test_music_rotation.py && git commit -q -m "E1 T5: takes rotates the four plain tracks, never the Reddit show's …
+78. Bash: sed -n 1185,1230p src/insights.py
+79. Bash: git checkout -q strategy/e1-t5-switch-on && grep -n "def latest_releases\|OWN_SUFFIX\|-own" src/insights.py | head; grep -n "release_digest…
+80. Bash: sed -n 2325,2365p tests/test_insights.py
+81. Bash: venv/bin/python - <<'EOF'
+82. Bash: git add src/insights.py tests/test_insights.py && git commit -q -m "E1 T5: the Monday digest never auto-reverts the takes show
+83. Bash: grep -rn "takes-gate" --include=*.csv --include=*.md . 2>/dev/null | grep -v "^./epics\|WORKLOG\|TECH_DEBT" | head -3; grep -n "def test.*s…
+84. Bash: sed -n 795,850p tests/test_insights.py; grep -n "\"--since\"\|since" scripts/report.py | head -8
+85. Bash: grep -n "add_argument(\"--since\"\|add_argument('--since'\|\"--since\"" scripts/report.py | head -3; grep -n "def _era\|def _write_series" …
+86. Bash: git checkout -q strategy/e1-t5-switch-on && cat > /tmp/t_gate.py <<'EOF'
+87. Bash: cp /tmp/ti_backup.py tests/test_insights.py && sed -i 's/\[l + ("," + ("takes" if ",t" in l else "reddit")) for l in lines\[1:\]\]/[l + (",…
+88. Bash: cp /tmp/ti_backup.py tests/test_insights.py && venv/bin/python - <<'EOF'
+89. Bash: git add tests/test_insights.py && git commit -q -m "E1 T5: a test that ledger takes-gate's exact read compares, not refuses
+90. Bash: git pull -q --ff-only && venv/bin/python - <<'EOF'
+91. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+92. Bash: venv/bin/python - <<'EOF'
+93. Bash: date -u +%H:%M && venv/bin/python scripts/friction.py add --function strategy --task "E1 T5 switch-on prepared on a branch with a render tw…
+94. Edit: /home/runner/work/reddit-daily/reddit-daily/process/shift.md
+95. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | tail -8; venv/bin/python scripts/backlog_status.py 2>&1 | head -8
+96. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | head -12
+97. Bash: venv/bin/python - <<'EOF'
+98. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -2 && git add PRD.md PLAN.md process/shift.md && git commit -q -m "Shift process: the tak…
+99. Bash: grep -n "^## 2026" WORKLOG.md; wc -l WORKLOG.md
+100. Bash: date -u +%H:%M && venv/bin/python - <<'EOF'
+101. Bash: venv/bin/python - <<'EOF'
+102. Bash: venv/bin/python scripts/check_docs.py 2>&1 | grep -v "^ ok" | tail -3; git add WORKLOG.md && git commit -q -m "Handover: the takes show's s…
+103. Bash: grep -rn -i "08:00\|winter reset\|PST\|Pacific" CLAUDE.md process/shift.md PRD.md scripts/statusline.py scripts/dry_run.py 2>/dev/null | cu…
+104. Bash: grep -rn -i "reset" PRD.md TECH_DEBT.md process/*.md | grep -i "gemini\|07:00\|utc\|pacific\|midnight" | cut -c1-300 | head -10
+105. Read: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+106. Bash: venv/bin/python - <<'EOF'
+107. Bash: venv/bin/python scripts/friction.py add --function gm --task "Shift process: Gemini's reset named as 08:00 UTC in winter (it said 07:00 all…
+108. Bash: git checkout -q strategy/e1-t5-switch-on && cat scripts/seal_assets.sh | head -30; grep -n -i "music" README.md | head -8
+109. Bash: sed -n 150,162p README.md
+110. Bash: venv/bin/python - <<'EOF'
+111. Bash: sed -n '/def test_the_committed_rotation_has_four_licensed_tracks/,/^def /p' tests/test_music_rotation.py | head -12
+112. Bash: venv/bin/python - <<'EOF'
+113. Agent: Review the switch-on's later commits
+114. Bash: date -u +%H:%M && git checkout -q strategy/e1-t5-switch-on && sed -i 's/ takes = \[r for r in log_rows if r.get("format_version", "").endsw…
+115. Bash: git pull -q --ff-only && venv/bin/python - <<'EOF'
+116. Bash: venv/bin/python scripts/friction.py add --function engineering --task "Switch-on branch: T2's merge nits (README music line, four-track tes…

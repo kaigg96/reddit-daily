@@ -56,7 +56,14 @@ _NAME_WORDS = sorted({str(w) for w in profanity.CENSOR_WORDSET
 
 def credit_name(author):
     """A Reddit username we may print, else "". Names are untrusted input:
-    deleted accounts and profane names are left uncredited."""
+    deleted accounts and profane names are left uncredited.
+
+    The substring check (list words of 4+ letters) also drops "hell" in
+    Michelle and "rape" in Grape, by design: a missed credit beats printing a
+    slur. Nothing records how often it fires (C15, 2026-10-06). If Reddit's
+    attribution term ever turns on it, add an upload-log column (asker
+    credited, answers credited of shown) through a sample run, then tune the
+    word floor."""
     name = str(getattr(author, "name", "") or "")
     if name in ("", "[deleted]", "[removed]"):
         return ""
@@ -226,10 +233,36 @@ def subreddit_for_run(now, subreddits=None, schedule=""):
     confounded with slot. At four a day each run takes the next entry, so
     no subreddit runs more than twice in a row."""
     subs = subreddits or config.SUBREDDITS
+    day, position = _day_position(now, schedule)
+    if config.SHOW_ALTERNATION:
+        # The Reddit arm runs at (day + position) even (show_for_run), so the
+        # key above would pin it to one subreddit. Moving the subreddit every
+        # two days instead, while the slot swaps daily, gives the arm every
+        # subreddit in every slot over 2 * len(subs) days.
+        return subs[(day.toordinal() // 2 + position // 2) % len(subs)]
+    return subs[(day.toordinal() + position) % len(subs)]
+
+
+def show_for_run(now, schedule=""):
+    """E1 T4: the show this run uploads ("reddit" or "takes"), deterministic
+    per run, when config.SHOW_ALTERNATION is on (off, SOURCE decides).
+
+    Keyed like subreddit_for_run, on (day + slot position) % 2: one show each
+    slot, the two swapping slots every day, so over any two days each show
+    has the morning and the evening once. At four a day each show takes
+    alternate slots. Because this uses the subreddits' old key, the Reddit
+    arm's subreddit moves on day // 2 instead (see subreddit_for_run), or
+    it would draw one subreddit forever."""
+    day, position = _day_position(now, schedule)
+    return config.SHOWS[(day.toordinal() + position) % len(config.SHOWS)]
+
+
+def _day_position(now, schedule=""):
+    """(day, index of this run's slot among the live ones)."""
     day, slot = run_slot(now, schedule)
     live = live_slots()
     position = live.index(slot) if slot in live else slot // 2
-    return subs[(day.toordinal() + position) % len(subs)]
+    return day, position
 
 
 def run_slot(now, schedule=""):
@@ -249,6 +282,13 @@ def run_slot(now, schedule=""):
     if now.hour < 6 * slot:
         day -= datetime.timedelta(days=1)
     return day, slot
+
+
+def slot_key(day, slot, schedule):
+    """How the upload log records a run's slot: "2026-10-05/3". Blank for a
+    run no cron line started: its slot is the clock's guess, and a guess that
+    looks like a scheduled slot would count a manual upload as filling one."""
+    return f"{day.isoformat()}/{slot}" if schedule in config.SLOT_CRONS else ""
 
 
 def live_slots():

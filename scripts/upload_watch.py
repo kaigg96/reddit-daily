@@ -11,9 +11,10 @@ missed upload reaches them however the upload job's schedule was last edited.
 Two checks:
 - fewer than MIN_UPLOADS uploads in the last WINDOW_HOURS: catches any missed
   slot, a run that never started or was cancelled included. Replayed over the
-  95 scheduled shift starts from 09-20 to 11-01 it raises no false alarm, and
-  flags the one real miss (10-05's evening) at both shifts after it; 26 hours
-  raised one false alarm (10-12, a 15-hour gap);
+  129 scheduled shift starts from 09-20 to 11-13 it raises no false alarm, and
+  flags the one real miss (10-05's evening) at both shifts after it; the
+  closest call was 26.7 hours (11-02), and 26 hours would have raised one
+  false alarm (10-12, a 15-hour gap);
 - a scheduled upload run that failed in the last day: the same day's news,
   where the count can wait for the next morning.
 

@@ -74,6 +74,63 @@ def test_any_shipped_question_is_refused_not_only_the_last(monkeypatch):
         ownquestions.select_post(OTHER["question"], uploaded={GOOD["question"]})
 
 
+def test_a_reworded_shipped_question_is_refused_too(monkeypatch):
+    """#90's sameness check (PLAN C16): new words, the same question."""
+    _routes(monkeypatch, GOOD, OTHER)
+    post = ownquestions.select_post(uploaded={"Is it rude to recline a plane seat?"})
+    assert post.title == OTHER["question"]
+    # Sharing a topic is not a repeat.
+    _routes(monkeypatch, OTHER, GOOD)
+    post = ownquestions.select_post(uploaded={"Should you tip at a restaurant?"})
+    assert post.title == OTHER["question"]
+
+
+def _upload_only(monkeypatch, *replies):
+    """GROQ_FALLBACK off, as in production: the upload model answers in turn."""
+    monkeypatch.setattr(config, "GROQ_FALLBACK", False)
+    sent, queue = [], list(replies)
+    monkeypatch.setattr(llm, "generate_retrying",
+                        lambda prompt, **kw: sent.append(prompt) or json.dumps(queue.pop(0)))
+    monkeypatch.setattr(llm, "_generate_groq",
+                        lambda prompt: (_ for _ in ()).throw(AssertionError("groq asked")))
+    return sent
+
+
+def test_a_repeat_earns_the_upload_model_one_more_request_told_its_question(monkeypatch):
+    """Fresh review, 11-14: with GROQ_FALLBACK off a repeat failed the run."""
+    sent = _upload_only(monkeypatch, GOOD, OTHER)
+    post = ownquestions.select_post(uploaded={"Is it rude to recline a plane seat?"})
+    assert post.title == OTHER["question"] and len(sent) == 2
+    assert sent[0] == ownquestions.PROMPT and sent[1].startswith(ownquestions.PROMPT)
+    assert json.dumps(GOOD["question"]) in sent[1]
+    assert "recline a plane seat" not in sent[1]      # never the shipped text
+
+
+def test_the_told_request_is_the_only_extra_one(monkeypatch):
+    sent = _upload_only(monkeypatch, GOOD, GOOD, OTHER)
+    with pytest.raises(RuntimeError):
+        ownquestions.select_post(uploaded={GOOD["question"]})
+    assert len(sent) == 2
+    persona = {**GOOD, "takes": GOOD["takes"][:2] + ["As a parent, never."]}
+    sent = _upload_only(monkeypatch, persona, GOOD)
+    with pytest.raises(RuntimeError):                  # an unusable reply earns none
+        ownquestions.select_post()
+    assert len(sent) == 1
+
+
+@pytest.mark.parametrize("question, shipped, hit", [
+    ("What is the best way to relax after a long day?",
+     "what is the best way to unwind after a long day?", True),
+    ("What is the best way to spend a rainy Sunday?",
+     "how should people spend a completely free saturday?", False),
+    ("Should two people split the bill on a first date?", "who should pay on a first date?", False),
+    ("Why?", "why?", False),                  # no words to compare: the exact match's
+])
+def test_near_repeat_uses_r13s_words_and_bar(question, shipped, hit):
+    assert ownquestions.near_repeat(question, {shipped, "an unrelated question entirely"}) == \
+        (shipped if hit else "")
+
+
 def test_the_screen_runs_and_a_skip_or_a_dropped_take_refuses_the_episode(monkeypatch):
     _routes(monkeypatch, GOOD, OTHER)
     seen, refused = [], []
@@ -126,6 +183,24 @@ def test_the_source_is_reddit_unless_switched_and_an_unknown_one_fails(monkeypat
         monkeypatch.delenv("SOURCE", raising=False)
         importlib.reload(config)
     assert config.SOURCE == "reddit" and config.ANSWER_LABEL == "ANSWER"
+
+
+def test_our_own_questions_log_as_their_own_release(monkeypatch):
+    """C16's rule: the switch ships as its own FORMAT_VERSION, read at 20, so
+    an own upload can never pool with Reddit's in either release's read; named
+    for its Reddit format, so a later bump (bet 1) is a release of its own."""
+    import importlib
+    from src import insights
+    reddits = config.FORMAT_VERSION
+    monkeypatch.delenv("SAMPLE", raising=False)
+    try:
+        monkeypatch.setenv("SOURCE", "own")
+        assert importlib.reload(config).FORMAT_VERSION == f"{reddits}-own"
+    finally:
+        monkeypatch.setenv("SOURCE", "reddit")
+        importlib.reload(config)
+    assert config.FORMAT_VERSION == reddits
+    assert insights.RELEASE_MIN_UPLOADS[config.OWN_FORMAT_VERSION] == 20
 
 
 def test_our_own_question_credits_no_one_and_names_no_subreddit():
@@ -183,17 +258,28 @@ def test_a_demoted_post_risk_is_logged_as_on_the_reddit_path(monkeypatch):
     assert logged == [(GOOD["question"], "demoted_post_risk")]
 
 
+def _cleared(reply):
+    """The metadata reply, with the title judge (llm._own_judged) clearing
+    every line, so these tests grade the word list alone."""
+    def fake(prompt, **kw):
+        if prompt.startswith(llm._OWN_JUDGE[:30]):
+            return '{"title": "no", "cta": "no"}'
+        return json.dumps(reply)
+    return fake
+
+
 @pytest.mark.parametrize("field, value", [
-    ("title", "3 People Reveal Their Seat Etiquette"), ("title", "Reddit settles the recline debate"),
-    ("title", "Strangers confess their worst flight habit"), ("cta", "Tell r/AskReddit which take wins.")])
-def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field, value):
+    ("title", "Redditors Reveal Their Seat Etiquette"), ("title", "Reddit settles the recline debate"),
+    ("title", "/r/flying's worst flight habit"), ("cta", "Tell r/AskReddit which take wins.")])
+def test_a_field_naming_reddit_falls_back(monkeypatch, field, value):
     reply = {"title": "3 Takes On Reclining Your Seat", "keywords": ["reclining seat", "reddit ama"],
              "cta": "Which take do you pick? Tell us below."}
     reply[field] = value
-    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
+    monkeypatch.setattr(llm, "generate_retrying", _cleared(reply))
     monkeypatch.setattr(config, "SOURCE", "own")
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert getattr(meta, field) is None and meta.keywords == ["reclining seat"]
+    assert meta.failure == f"own_list_{field}"
     other = "cta" if field == "title" else "title"
     assert getattr(meta, other) == reply[other]
     monkeypatch.setattr(config, "SOURCE", "reddit")   # the show itself names Reddit freely
@@ -201,14 +287,17 @@ def test_a_field_naming_reddit_or_peoples_answers_falls_back(monkeypatch, field,
     assert getattr(meta, field) and "reddit ama" in meta.keywords
 
 
+# People telling is the judge's since 11-14 (cleared here), so the list drops
+# only Reddit's names.
 @pytest.mark.parametrize("title, dropped", [
     ("What Your Coffee Order Reveals About You", False), ("The Most Revealing Morning Habit", False),
     ("Gender Reveal Parties: Worth It?", False), ("Are R/C cars a waste of money?", False),
-    ("Do people still recline their seats?", False), ("3 Strangers On Reclining", True),
-    ("Real People Answer: Recline Or Not?", True), ("What people told us about reclining", True)])
-def test_the_title_check_catches_people_telling_not_ordinary_words(monkeypatch, title, dropped):
+    ("Do people still recline their seats?", False), ("3 Strangers On Reclining", False),
+    ("Real People Answer: Recline Or Not?", False), ("Seen at example.com/r/flying", False),
+    ("Redditors On Reclining", True), ("What /r/flying says about reclining", True)])
+def test_the_list_catches_reddits_names_not_ordinary_words(monkeypatch, title, dropped):
     reply = {"title": title, "keywords": ["recline"], "cta": "Which take do you pick?"}
-    monkeypatch.setattr(llm, "generate_retrying", lambda prompt, **kw: json.dumps(reply))
+    monkeypatch.setattr(llm, "generate_retrying", _cleared(reply))
     monkeypatch.setattr(config, "SOURCE", "own")
     meta = llm.get_metadata(GOOD["question"], GOOD["takes"], style="C", caps=False)
     assert (meta.title is None) == dropped

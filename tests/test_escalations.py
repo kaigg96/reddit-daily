@@ -353,3 +353,79 @@ def test_a_failed_expiry_check_says_so_and_the_listing_goes_on(monkeypatch, caps
         out = capsys.readouterr().out
         assert "could not be checked for deletion" in out
         assert "#65  Approved ask" in out
+
+
+# --- Notices (D16): a one-way door goes ahead on its date unless the owner objects ---
+
+def notice_issue(n, title, date, comments=0, labels=("notice",), body=None):
+    return {"number": n, "title": title, "comments": comments,
+            "labels": [{"name": l} for l in labels],
+            "body": body if body is not None else f"<!-- notice-date: {date} -->\n\nWhat happens."}
+
+
+def fake_notices(monkeypatch, issues, comments=None, events=None):
+    def api(path, data=None, method=None):
+        base = path.split("?")[0]
+        if base.endswith("/comments"):
+            return [] if "page=2" in path else (comments or {}).get(int(base.split("/")[-2]), [])
+        if base.endswith("/events"):
+            return (events or {}).get(int(base.split("/")[-2]), [])
+        return issues
+    monkeypatch.setattr(escalations, "_api", api)
+    monkeypatch.setattr(escalations, "REPO", "kaigg96/reddit-daily")
+
+
+NOTICE_NOW = escalations.datetime(2026, 11, 30, tzinfo=escalations.timezone.utc)
+
+
+def test_a_notice_is_due_on_its_date_and_running_before_it(monkeypatch, capsys):
+    fake_notices(monkeypatch, [notice_issue(101, "Delete the old videos", "2026-11-30"),
+                               notice_issue(102, "Rename the channel", "2026-12-05")])
+    escalations.notices(now=NOTICE_NOW)
+    out = capsys.readouterr().out
+    assert "#101  Delete the old videos  [DUE since 2026-11-30]" in out
+    assert "#102  Rename the channel  [running until 2026-12-05]" in out
+
+
+def test_any_sign_of_the_owner_holds_a_notice_past_its_date(monkeypatch, capsys):
+    fake_notices(monkeypatch,
+                 [notice_issue(101, "Replied", "2026-11-20", comments=1),
+                  notice_issue(102, "Closed, then reopened by a shift", "2026-11-20"),
+                  notice_issue(103, "Objection label, since removed", "2026-11-20"),
+                  notice_issue(104, "Objection label now", "2026-11-20", labels=("notice", "Objection")),
+                  notice_issue(105, "Only a shift spoke", "2026-11-20", comments=1)],
+                 comments={101: [{"author_association": "OWNER", "body": "Keep them."}],
+                           105: [{"author_association": "NONE", "body": "Raised again"}]},
+                 events={102: [{"event": "closed", "actor": {"login": "kaigg96"}}],
+                         103: [{"event": "labeled", "label": {"name": "objection"},
+                                "actor": {"login": "kaigg96"}}],
+                         105: [{"event": "closed", "actor": {"login": "github-actions[bot]"}}]})
+    escalations.notices(now=NOTICE_NOW)
+    out = capsys.readouterr().out
+    for n in (101, 102, 103, 104):
+        assert f"#{n} " in out and out.split(f"#{n} ")[1].split("\n")[0].endswith("[HELD by the owner]")
+    assert "owner: Keep them." in out
+    assert "#105  Only a shift spoke  [DUE since 2026-11-20]" in out
+
+
+def test_a_workflow_notice_is_the_applying_jobs_to_land(monkeypatch, capsys):
+    fake_notices(monkeypatch, [notice_issue(101, "Tidy the shift job", None, body=PATCH_BODY)])
+    escalations.notices(now=NOTICE_NOW)
+    assert "applies itself once its notice has run" in capsys.readouterr().out
+
+
+def test_the_decided_listing_shows_notices_and_stays_quiet_without_any(monkeypatch, capsys):
+    fake_notices(monkeypatch, [notice_issue(101, "Delete the old videos", "2026-11-01")])
+    escalations.show(True)
+    assert "DUE since 2026-11-01" in capsys.readouterr().out
+    fake_notices(monkeypatch, [])
+    escalations.show(True)
+    assert "NOTICES" not in capsys.readouterr().out
+
+
+def test_a_deleted_comment_holds_a_notice(monkeypatch, capsys):
+    """A shift's token can delete the owner's reply, not the record of the deletion."""
+    fake_notices(monkeypatch, [notice_issue(101, "Delete the old videos", "2026-11-01")],
+                 events={101: [{"event": "comment_deleted", "actor": {"login": "claude[bot]"}}]})
+    escalations.notices(now=NOTICE_NOW)
+    assert "[HELD by the owner]" in capsys.readouterr().out

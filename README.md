@@ -8,7 +8,7 @@ and [TECH_DEBT.md](TECH_DEBT.md) for the code-health check-in log.
 
 ## Picking this up (new session / new contributor)
 
-Run **`/pickup`** (`.claude/skills/pickup/`), which walks this section and the
+Run **`/pickup`** (`process/pickup.md`), which walks this section and the
 delivery plan, then reports where things stand before touching anything. Doing
 it by hand instead — read in this order; it's ~5 minutes and avoids re-deriving
 decisions:
@@ -31,12 +31,12 @@ Standing conventions, non-negotiable (the full set, with the reasoning, is in
   billed service here ($16/1M chars, billed twice per segment because of the
   speech-mark call). Production is ~$0.90/month; a batch job is where a
   surprise bill comes from. Reuse the mp3s in `assets/gen/` when iterating on
-  visuals, and ask the owner before any deliberate bulk synthesis.
+  visuals. Deliberate bulk synthesis is spending, which no shift decides.
   `POLLY_CHAR_BUDGET` in `src/tts.py` enforces a per-process cap.
 - Feature work goes on a branch; `main` runs live twice daily (see below).
 - Work autonomously and merge your own work (owner, 2026-09-19) — under the
-  gates in `CLAUDE.md` §3. Safety and cost controls,
-  production data and spending still need the owner.
+  gates in `CLAUDE.md` §3. Since 2026-11-14 the owner is the last resort
+  (`CLAUDE.md` §4): decide and act; never spend money.
 - Answer performance questions with `scripts/report.py`, never ad-hoc analysis
   (see "Answering 'did X work?'").
 - Never credit AI tooling in code, commits, or anything published.
@@ -151,11 +151,11 @@ Secrets go in `.env` (gitignored): `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`,
    `venv/bin/python scripts/prep_broll.py <downloaded file> <short_name>`,
    then record the source URL. Prefer dark/mid-tone footage — bright clips
    wash out the white captions even under the scrim.
-2. **Music variety (PRD R1.6, optional — still open).** The current track
-   (`funk_bg_lower.mp3`) is from the YouTube Audio Library and license-clean.
-   For per-video variety, drop 2–3 more Audio Library tracks into
-   `assets/music/` (rotation is automatic) and list them in
-   `assets/CREDITS.md`.
+2. **Music variety (PRD R1.6).** The Reddit show keeps `funk_bg_lower.mp3`
+   (YouTube Audio Library, sealed) until `v8`'s read; the takes show rotates
+   four CC0 tracks in `assets/music/`, sources and licences in
+   `assets/music/LICENSES.md` (E1 T2). More Audio Library tracks stay
+   welcome: they go in `assets/music/` and are sealed, as PRD §0 says.
 
 ### OAuth re-auth (reference — already done)
 

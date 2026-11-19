@@ -68,3 +68,27 @@ def test_the_closing_line_is_logged_whole_and_old_rows_stay_blank(monkeypatch, t
     rows = list(csv.DictReader(path.open(newline="")))
     assert list(rows[0]) == log.FIELDS
     assert (rows[0]["cta"], rows[1]["cta"]) == ("", line)
+
+
+def test_every_upload_logs_its_show_and_old_rows_stay_blank(monkeypatch, tmp_path):
+    """Added 2026-11-15 (E1 T3): an own-question upload was known only by a
+    blank subreddit. A blank show reads as reddit (insights), so old rows are
+    never written a value they did not log."""
+    import importlib
+    from src import config
+    path = tmp_path / "upload_log.csv"
+    old = [f for f in log.FIELDS if f != "show"]
+    path.write_text(",".join(old) + "\n" + ",".join("x" for _ in old) + "\n")
+    monkeypatch.setattr(log.config, "UPLOAD_LOG", path)
+    log.append_upload_log({"video_id": "new", "show": "takes"})
+    rows = list(csv.DictReader(path.open(newline="")))
+    assert log.FIELDS[-2:] == ["show", "run_slot"]   # each appended in its turn
+    assert (rows[0]["show"], rows[1]["show"]) == ("", "takes")
+    monkeypatch.delenv("SAMPLE", raising=False)
+    try:
+        for source, show in (("own", "takes"), ("reddit", "reddit")):
+            monkeypatch.setenv("SOURCE", source)
+            assert importlib.reload(config).SHOW == show
+    finally:
+        monkeypatch.delenv("SOURCE", raising=False)
+        importlib.reload(config)

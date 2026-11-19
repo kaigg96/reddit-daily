@@ -253,6 +253,32 @@ def test_publish_drift_is_measured_forward_from_the_latest_slot_across_midnight(
     assert wd.median_publish_drift(vids, days=36500) == 397   # of 687, 17 and 397 (6.6h)
 
 
+def test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for():
+    """At four a day an 18:23 run can land after midnight: counted by publish
+    date it reads as a missed day, and its 7h delay as 1h past 00:23."""
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from scripts import weekly_digest as wd
+    import inspect
+    log = [{"video_id": "late", "run_slot": "2026-10-05/3"}, {"video_id": "old", "run_slot": ""}]
+    log += [{"video_id": "odd", "run_slot": v}
+            for v in ("garbage", "garbage/3", " 2026-10-05/3", "2026-10-05/9", "2026-10-05/\u00b2")]
+    sched = wd.scheduled_slots(log)
+    assert sched == {"late": ("2026-10-05", 3)}
+    # a compact date Python accepts is keyed as the digest's days are
+    assert wd.scheduled_slots([{"video_id": "c", "run_slot": "20261005/3"}]) == {"c": ("2026-10-05", 3)}
+    src = inspect.getsource(wd.main)
+    assert "upload_day(v, sched)" in src and "median_publish_drift(channel_videos, sched=sched)" in src
+    # The week's metrics read the same days its cadence counts.
+    assert "week_videos = [v for v in channel_videos if upload_day(v, sched) in last_7_days]" in src
+    late = {"id": "late", "published": "2026-10-06T01:23:00Z"}
+    old = {"id": "old", "published": "2026-10-06T01:23:00Z"}
+    assert wd.upload_day(late, sched) == "2026-10-05"
+    assert wd.upload_day(old, sched) == "2026-10-06"
+    assert wd.median_publish_drift([late], days=36500, sched=sched) == 420   # 7h from 18:23
+    assert wd.median_publish_drift([late], days=36500) == 60                 # the estimate's misread
+
+
 def test_publish_drift_reads_four_slots_at_four_a_day(monkeypatch):
     import importlib, sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
@@ -805,6 +831,35 @@ def test_an_interleaved_field_is_age_matched_when_read_at_a_common_age(tmp_path,
     assert c.age_matched
 
 
+def test_the_takes_show_compares_at_a_common_age_and_old_rows_are_reddit(
+        tmp_path, monkeypatch, capsys):
+    """E1 T3: `report.py --at-age 7 --compare show=takes`. Rows from before
+    the column carry no show and are Reddit's, so they fill the other arm
+    rather than leave both; three takes uploads are thin and get no verdict."""
+    import re
+    import sys
+    from scripts import report
+    from src import config
+    r_u, r_s = _era("r", 0, 10, "v7s", 200, 12.0)
+    t_u, t_s = _era("t", 20, 3, "v7s-own", 200, 14.0)
+    _write_series(tmp_path, monkeypatch, r_u + t_u, r_s + t_s)
+    lines = config.UPLOAD_LOG.read_text().splitlines()
+    config.UPLOAD_LOG.write_text("\n".join(
+        [lines[0] + ",show"] + [l + "," for l in lines[1:11]] + [l + ",takes" for l in lines[11:]]
+    ) + "\n")
+    monkeypatch.setattr(sys, "argv", ["report.py", "--at-age", "7", "--compare", "show=takes"])
+    report.main()
+    out = capsys.readouterr().out
+    assert "show=takes vs show!=takes -> insufficient data" in out
+    assert re.search(r"show=takes\s+n=3 .*below MIN_COHORT", out)
+    assert re.search(r"show!=takes\s+n=10 ", out)
+    assert "no show recorded" not in out
+    # A filter may name the takes show before its first upload (T5).
+    config.UPLOAD_LOG.write_text("\n".join(lines[:11]) + "\n")
+    assert insights.ids_within("show=takes") == set()
+    assert len(insights.ids_within("show=reddit")) == 10
+
+
 def test_upload_slot_is_derived_from_the_log_timestamp():
     """Research row R3. The runs drift within a slot, so noon is the split."""
     slot = lambda ts: insights._with_derived_dimensions({"timestamp_utc": ts})["slot"]
@@ -842,6 +897,28 @@ def test_question_person_marks_questions_that_address_the_viewer():
     assert person("Which famous person died in the dumbest way?") == "other"
     assert person("What happened to young people's hobbies?") == "other"
     assert person("") == ""
+
+
+def test_question_kind_marks_the_own_shows_kind_of_question():
+    """Research row R9: everyday topics with nothing named, as the own show
+    writes (ownquestions.PROMPT); an unlabelled topic is in neither arm."""
+    kind = lambda q, topic: insights._with_derived_dimensions(
+        {"post_title": q, "topic": topic})["question_kind"]
+    assert kind("What's the best way to relax after a long day?", "life-advice") == "everyday"
+    assert kind("I'm broke. What hobby costs nothing?", "money-work") == "everyday"
+    assert kind("What would you do if you’d won? I’d quit.", "hypotheticals") == "everyday"
+    assert kind("Educators of Reddit, what happened to your smartest student?", "other") == "everyday"
+    assert kind("What is a FREE thing everyone should use?", "life-advice") == "everyday"
+    assert kind("[Serious] What did you do this Halloween?", "nostalgia") == "everyday"
+    assert kind('Lawyers of Reddit - What was the last straw, "Yep I\'m out"?', "other") == "everyday"
+    assert kind("What TV show still keeps you up at 3AM?", "nostalgia") == "everyday"
+    assert kind("Could GTA 6 lower real life crime rates?", "hypotheticals") == "excluded"
+    assert kind("What's the best thing at McDonald's?", "other") == "excluded"
+    assert kind("What’s it like inside of Microsoft right now?", "money-work") == "excluded"
+    assert kind("Why are all flights grounded right now?", "politics-news") == "excluded"
+    assert kind("What's the creepiest thing you've seen?", "dark-morbid") == "excluded"
+    assert kind("What is a question nobody has labelled yet, zqx?", "") == ""
+    assert kind("", "life-advice") == ""
 
 
 def test_title_source_marks_uploads_that_shipped_the_raw_question():
@@ -2310,6 +2387,32 @@ def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch
     assert "`v7`: NO VERDICT" in line
 
 
+def test_the_digest_never_auto_reverts_the_takes_show(monkeypatch):
+    """With the shows alternating, `v8-own` and `v8` are the two latest
+    releases; read as a release, takes would face all of Reddit's history and
+    could be reverted before ledger `takes-gate`'s 01-04 read."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": v} for v in ("v7s", "v8", "v8-own", "v8", "v8-own")]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v8", "v7s"]
+    assert "`v8-own`: not auto-reverted, ledger `takes-gate`" in line
+
+
+def test_a_takes_release_first_uploaded_from_the_cutover_is_auto_reverted(monkeypatch):
+    """TECH_DEBT: the exclusion ends by itself once takes holds every slot."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": v, "timestamp_utc": t} for v, t in (
+        ("v8", "2026-11-19T20:46:00+00:00"), ("v8-own", "2026-11-20T20:46:00+00:00"),
+        ("v8-own", "2027-01-05T07:44:00+00:00"), ("v9-own", "2027-01-05T20:46:00+00:00"))]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v9-own", "v8"]
+    assert "`v8-own`: not auto-reverted" in line and "`v9-own`: not auto" not in line
+
+
 def test_each_committed_release_cut_names_a_logged_field_and_value():
     """A misspelt cut would filter every upload out, and the digest would print
     NO VERDICT rather than fail (review, 2026-10-25)."""
@@ -2536,6 +2639,20 @@ def test_a_release_read_refuses_a_metric_it_does_not_judge(monkeypatch):
     assert len(called) == 2
 
 
+def test_topic_mix_refuses_options_it_would_ignore(monkeypatch):
+    """--topic-mix always reads engaged share on R12's sample: a --compare or
+    another --metric must be refused, never dropped silently."""
+    import sys
+    import pytest
+    from scripts import report
+    for extra in (["--compare", "title_style=B"], ["--metric", "views"], ["--at-age", "7"],
+                  ["--by", "topic"]):
+        monkeypatch.setattr(sys, "argv", ["report.py", "--offline", "--topic-mix"] + extra)
+        with pytest.raises(SystemExit) as exc:
+            report.main()
+        assert "--topic-mix reads R12's fixed sample" in str(exc.value), extra
+
+
 def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch):
     """A filter the reader believes applied must never be dropped silently:
     --since outside --compare/--by, --min-views outside --compare, and
@@ -2543,13 +2660,14 @@ def test_since_and_min_views_refuse_the_reads_that_would_ignore_them(monkeypatch
     import sys
     import pytest
     from scripts import report
-    since, only, count = ("--since restricts", "--min-views applies to --compare only",
+    since, only, count = ("--since restricts", "--min-views applies to --compare and --topic-mix only",
                           "must count every upload")
     refused = (
         (["--since", "2026-10-07", "--trajectory"], since),
         (["--since", "2026-10-07", "--release", "v7"], since),
         (["--since", "2026-10-07"], since),
         (["--min-views", "10", "--by", "topic"], only),
+        (["--min-views", "10", "--topic-mix", "--trajectory"], only),
         (["--min-views", "10", "--replays", "--compare", "title_style=B"], only),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "views"], count),
         (["--min-views", "10", "--compare", "title_style=B", "--metric", "likes"], count),
@@ -3006,3 +3124,170 @@ def test_theme_buried_flags_a_tag_buried_twice_as_often():
     # Under THEME_MIN_BURIED buried, nothing is a lead.
     few = {k: v for k, v in labels.items() if k.startswith("c")}
     assert not any(r[-1] for r in insights.theme_buried(vids, few)[1])
+
+
+def _mix_videos(spec):
+    """Videos from (late?, topic, engaged share, count) tuples, 100 views each."""
+    early = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    late = datetime.datetime(2026, 11, 1, tzinfo=datetime.timezone.utc)
+    vids = []
+    for is_late, topic, share, n in spec:
+        for _ in range(n):
+            vids.append(Video(video_id=f"v{len(vids)}", published=late if is_late else early,
+                              views=100, engaged_views=share * 100, meta={"topic": topic}))
+    return vids
+
+
+def test_topic_mix_credits_a_fall_made_by_the_mix_alone():
+    # Each topic holds its share; the late period leans to the low one.
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 5), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 15), (True, "c", 0.4, 5)])
+    r = insights.topic_mix(vids)
+    assert (r["n_early"], r["n_late"]) == (25, 25)
+    assert r["mix"] == pytest.approx(r["fall"]) and r["fall"] == pytest.approx(0.08)
+    assert r["verdict"] == "lead"
+
+
+def test_topic_mix_rules_out_a_fall_within_every_topic():
+    # Same mix both periods; every topic falls by 0.1.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.4, 10), (True, "b", 0.2, 10), (True, "c", 0.3, 5)])
+    r = insights.topic_mix(vids)
+    assert r["mix"] == pytest.approx(0) and r["verdict"] == "not topic mix"
+
+
+def test_topic_mix_min_views_leaves_out_barely_shown_uploads():
+    # R16: no fall among watched uploads; ten late uploads seen 3 times, none
+    # past the opening, make one on their own unless a view floor leaves them out.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "c", 0.4, 5),
+                        (True, "a", 0.5, 10), (True, "b", 0.3, 10), (True, "c", 0.4, 5)])
+    late = vids[-1].published
+    vids += [Video(video_id=f"low{i}", published=late, views=3, engaged_views=0,
+                   meta={"topic": "a"}) for i in range(10)]
+    assert insights.topic_mix(vids)["fall"] > 0.1
+    r = insights.topic_mix(vids, min_views=10)
+    assert (r["n_late"], r["below_early"], r["below_late"]) == (25, 0, 10)
+    assert r["fall"] == pytest.approx(0) and r["verdict"] == "no fall"
+    # The fall is read even when too few groups remain to reweight the mix.
+    one = _mix_videos([(False, "a", 0.5, 25), (True, "a", 0.4, 25)])
+    r = insights.topic_mix(one)
+    assert r["verdict"] == "insufficient" and r["fall"] == pytest.approx(0.1) and r["mix"] is None
+
+
+def test_topic_mix_pools_thin_topics_and_refuses_thin_reads():
+    # "d" has 4 late uploads: it pools into "rest" with "e", below 5 either side.
+    vids = _mix_videos([(False, "a", 0.5, 10), (False, "b", 0.3, 10), (False, "d", 0.4, 6),
+                        (False, "e", 0.4, 2), (True, "a", 0.5, 10), (True, "b", 0.3, 10),
+                        (True, "d", 0.4, 4), (True, "e", 0.4, 2)])
+    groups = {g[0]: g[1:3] for g in insights.topic_mix(vids)["groups"]}
+    assert groups == {"a": (10, 10), "b": (10, 10), "rest": (8, 6)}
+    # An unlogged topic or a missing reading is left out, never read as zero.
+    vids += [Video(video_id="x", published=vids[0].published, views=100, engaged_views=0,
+                   meta={"topic": ""}),
+             Video(video_id="y", published=vids[0].published, views=100, meta={"topic": "a"})]
+    assert insights.topic_mix(vids)["n_early"] == 28
+    # A zero-view upload is counted apart, not read as a share of 0.
+    zero = Video(video_id="z", published=vids[0].published, views=0, engaged_views=0,
+                 meta={"topic": "a"})
+    r = insights.topic_mix(vids + [zero])
+    assert (r["n_early"], r["zero_early"], r["zero_late"]) == (28, 1, 0)
+    # Under 20 a period, or under 3 groups: no verdict.
+    assert insights.topic_mix(vids[:28])["verdict"] == "insufficient"
+    two = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 15),
+                       (True, "a", 0.5, 15), (True, "b", 0.3, 15)])
+    assert insights.topic_mix(two)["verdict"] == "insufficient"
+
+
+def test_near_repeat_overlap_scores_against_earlier_questions_only():
+    rows = [{"video_id": "b", "timestamp_utc": "2026-10-02", "post_title": "What is the best pizza topping?"},
+            {"video_id": "a", "timestamp_utc": "2026-10-01", "post_title": "What's the best pizza topping ever?"},
+            {"video_id": "c", "timestamp_utc": "2026-10-03", "post_title": "Why do cats knock things over?"}]
+    o = insights.near_repeat_overlap(rows)
+    assert o["a"] == (0.0, "")                       # the first has nothing earlier
+    assert o["b"][0] == pytest.approx(3 / 4) and o["b"][1].startswith("What's the best")
+    assert o["c"][0] == 0.0
+    assert insights.question_words("What\u2019s the BEST of it?") == {"best"}
+
+
+def test_near_repeats_buried_stratifies_by_release_and_needs_eight():
+    pub = datetime.datetime(2026, 10, 1, tzinfo=datetime.timezone.utc)
+    def vids(prefix, fv, buried, n):
+        return [Video(video_id=f"{prefix}{i}", published=pub, views=0 if i < buried else 50,
+                      meta={"format_version": fv}) for i in range(n)]
+    near = vids("n", "v7", 6, 10)
+    rest = vids("r", "v7", 2, 40) + vids("o", "v6", 0, 40)
+    overlap = {**{v.video_id: (0.6, "q") for v in near}, **{v.video_id: (0.1, "") for v in rest}}
+    r = insights.near_repeats_buried(near + rest, overlap)
+    assert r["strata"] == [(6, 10, 2, 40)]           # v6 has no near-repeat: not compared
+    assert r["higher"] and r["p"] < 0.05 and r["verdict"] == "lead"
+    few = {k: (0.1, "") if k in {"n0", "n1", "n2"} else v for k, v in overlap.items()}
+    assert insights.near_repeats_buried(near + rest, few)["verdict"] == "insufficient"
+    # Buried less often than expected is never a lead.
+    calm = vids("n", "v7", 0, 10)
+    assert insights.near_repeats_buried(calm + rest, overlap)["verdict"] == "no"
+
+
+def test_topic_mix_reads_subreddit_with_two_groups():
+    vids = _mix_videos([(False, "a", 0.5, 15), (False, "b", 0.3, 10),
+                        (True, "a", 0.5, 5), (True, "b", 0.3, 20)])
+    for v in vids:
+        v.meta["subreddit"] = v.meta.pop("topic")
+    assert insights.topic_mix(vids)["verdict"] == "insufficient"   # no topic logged
+    r = insights.topic_mix(vids, key="subreddit", min_groups=2)
+    assert r["verdict"] == "lead" and r["mix"] == pytest.approx(r["fall"])
+
+
+def test_the_trajectory_reads_the_share_watched_as_a_diagnostic(monkeypatch, capsys):
+    """WORKLOG 11-14: is a fall in watch-seconds shorter videos? The share
+    watched is read week by week, labelled a diagnostic, in percent."""
+    import argparse
+    import pathlib
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    import report
+    asked = []
+
+    def rows(metric_col="avg_view_duration_s", path=None):
+        asked.append(metric_col)
+        base = datetime.datetime(2026, 7, 1, tzinfo=datetime.timezone.utc)
+        out = []
+        for w in range(6):
+            for i in range(6):
+                pub = base + datetime.timedelta(weeks=w)
+                out.append({"video_id": f"w{w}v{i}", "published": pub,
+                            "snapshot": pub + datetime.timedelta(days=7), "value": 60.0})
+        return out
+    monkeypatch.setattr(report, "_snapshot_metric_rows", rows)
+    args = argparse.Namespace(metric=Metric.PCT, at_age=None, within=None)
+    report.show_trajectory(args)
+    out = capsys.readouterr().out
+    assert asked == [Metric.PCT]
+    assert "share of each video watched" in out and "never a trigger" in out
+    assert "60.0%" in out and "FLAT" in out and "forces PM's priority" not in out
+
+
+def test_the_takes_gate_read_compares_on_a_full_arm(tmp_path, monkeypatch, capsys):
+    """Ledger `takes-gate`'s exact command, on 22 uploads a side over the same
+    weeks after older Reddit ones: it must print a comparison with a chance
+    gap, or the 01-04 read would pass by refusal for a bug, not for evidence."""
+    import sys
+    from scripts import report
+    from src import config
+    uploads, snaps = _era("old", 0, 20, "v8", 200, 12.0)
+    for arm, fv, base in (("r", "v8", 12.0), ("t", "v8-own", 10.0)):
+        u, s = _era(arm, 40, 22, fv, 200, base)
+        uploads += u
+        snaps += [(d, v, views, base + (i % 5) * 0.8) for i, (d, v, views, _) in enumerate(s)]
+    _write_series(tmp_path, monkeypatch, uploads, snaps)
+    lines = config.UPLOAD_LOG.read_text().splitlines()
+    config.UPLOAD_LOG.write_text("\n".join(
+        [lines[0] + ",show"] + [l + ("," + ("takes" if l.split(",")[1].startswith("t") else "reddit")) for l in lines[1:]]
+    ) + "\n")
+    monkeypatch.setattr(sys, "argv", ["report.py", "--compare", "show=takes", "--metric",
+                                      "watch_seconds", "--at-age", "7", "--since", "2026-08-10"])
+    report.main()
+    out = capsys.readouterr().out
+    import re
+    assert "show=takes vs show!=takes -> worse by" in out
+    assert re.search(r"show=takes\s+n=22 ", out) and re.search(r"show!=takes\s+n=22 ", out)
+    assert re.search(r"chance: random arms of 22 and 22 .* differ by [\d.]+%", out)

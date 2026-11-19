@@ -22,7 +22,12 @@ revisit trigger.
 `scripts/context_budget.py`):
 
 - **Superseded decisions compress to one line** — title, date, "superseded by
-  Dn" — unless kept deliberately as a worked example, as D1 is.
+  Dn" — unless kept deliberately as a worked example, as D1 is. **A stub
+  leaves once its supersessor has been re-reviewed twice**; git keeps it, and
+  its number goes on the line below, which `check_docs.py` reads. The cap
+  counts headings, so stubs count.
+
+Retired stubs: D3 (2026-11-15, superseded by D12).
 - **A decision confirmed stable across three audits graduates.** Fold it into
   the rules it implies (`CLAUDE.md`, a skill) and leave a one-line stub here.
   A decision record is for things still live enough to be worth revisiting; a
@@ -30,6 +35,103 @@ revisit trigger.
 - Past the cap, **resolve before adding**.
 
 ---
+
+## D16 · 2026-11-14 · The owner is the last resort; the one wall is money
+
+The owner, in session (2026-11-14), back after a month away: "the clearest
+failure of this workflow we've been using is my level of engagement. You are
+getting blocked on my actions too often and it's resulted in no large scale
+improvements being made to the product over the course of countless shifts."
+They have no time to be in the loop. Engage them "only ... as the last act
+when there's truly no path forward without me"; shifts get the permissions to
+improve their own shifts and workflows; "the only thing that absolutely is off
+the table is spending real money", behind guardrails shifts cannot supersede.
+
+**Evidence:** bet 1 waited on one label from 10-14 to 11-14 while every shift
+reported that nothing reached viewers; 15 asks were raised in those 31 days;
+#88 and #65, both approved, could not land because a shift cannot write under
+`.claude/` (D5's last two re-reviews).
+
+**What changed:**
+1. Product, strategy and process decisions are a shift's. `ORG.md`'s
+   "Propose" became **Decide**: evidence, a fresh-context challenge, a record.
+   `CLAUDE.md`, `ORG.md` and the process text are no longer protected, and the
+   skills' text moved to `process/*.md`, outside the shift tool's write lock.
+2. Money is never a shift's decision, and not something to ask for. It is
+   held outside a shift's reach: AWS's budget with its automatic deny, the
+   Polly key's scope and the alarm (`money_check.py`); `guardrails.yml`; and
+   the workflow files, which GitHub refuses from a shift's token.
+3. Workflow files change on the owner's label, or after 3 days of notice with
+   no objection. What a notice may not do is written once, in
+   `notice_check.py`: reach a key a shift does not hold (the Polly, YouTube
+   and apply keys), widen `GITHUB_TOKEN` (`actions: write` dispatches the
+   keyed jobs), or touch `guardrails.yml` or the machinery itself.
+   `apply-approved.yml` runs it before landing; `protect-process.yml` re-runs
+   it on what reaches `main`. A deleted comment on a notice holds it, since a
+   shift's token can delete the owner's reply but not their close or label.
+   `shift.yml` itself, its limits included, is within a notice's reach: that
+   is the intent. The attribution check moved to `guardrails.yml` for it.
+4. A one-way door that costs no money (deleting production data or published
+   videos, renaming the channel) takes a dated notice of 7 days or more. Any
+   sign of the owner holds it.
+5. An ask remains only for what the owner's login alone can do.
+
+Same session: the owner will not register the Reddit app (#82), since that
+buys only January to March. The replacement source must be live before
+2027-01-12 (PLAN C16).
+
+**Alternatives:** keep the label with a shorter ask (D13 tried it: one label
+still waited 31 days); a timed default on every ask (the owner chose no ask at
+all, with notice kept for one-way doors); unlock the workflows too (they are
+where the paid keys are wired).
+
+**Assumptions:**
+1. The wall at AWS holds with nobody watching: `money_check.py` clean every shift.
+2. A fresh-context challenge, the gates and auto-revert catch what the label
+   did. D2's re-reviews say reviews catch most defects and gates few.
+3. Shifts free to rewrite their process improve it rather than churn it.
+4. A notice reaches the owner in time to object (GitHub's email).
+
+**How we will know** (D15's pattern; read at the first monthly review on or
+after 2026-12-14, by this rule, set now):
+- **Keep** if, from 11-15: 3 or fewer asks were opened and each needed a login
+  (15 in the 31 days before); at least one format change reached viewers (none
+  in those 31 days but a forced model swap); and the money check never drifted.
+- **Change** if asks stay above 3 or nothing reached viewers: find what still
+  blocks, and fix that.
+- **Stop and tell the owner** on any spend above the line, a notice acted on
+  early or over an objection, or a strike or removal on the channel.
+
+**Revisit when:** a stop condition fires; or the audit finds the same rule
+rewritten twice without new evidence (3 false).
+
+**The owner's two briefs from the same session** (PLAN C19, C20), planned
+the same night as `epics/E2` (C20, with C19 as its T7); `epics/E1` plans the
+show after Reddit. Each is a Decide: the first shift on it has a fresh agent
+argue against it before building.
+
+*C19, lessons that stick.* In the owner's attended projects, their corrections
+are saved as memories and stick between sessions; the same idea should let
+shifts improve themselves. Two differences to design for. A shift's machine is
+fresh each run, so a lesson lives in the repo or nowhere. And with no owner to
+correct it, a lesson must come from evidence outside the shift that wrote it
+(a failed check, a reviewer's finding, a reverted release, a viewer number),
+never from its own opinion of its work. The friction log (D15) is the raw
+half; the missing half was the right to change the rules on it, which this
+decision gives. Each lesson carries its evidence and a way to be retired (D4).
+
+*C20, epics, tickets, many implementers.* The owner's model from their other
+projects. An idea generator proposes **epics**, larger than one shift. A
+filter scrutinises each: cut, modify or approve. An **orchestrator** scopes
+and plans an approved epic into tickets with acceptance criteria.
+**Implementers** each take one ticket, with nothing else in context, and hand
+the result back; the orchestrator judges it against the criteria and updates
+the tracker. One orchestrator, many implementers. "Not something to be built
+right now but rather planned + built within shifts", following published
+examples of the pattern. To design for: tickets must outlive a 70-minute
+shift; parallel implementers spend the usage allowance several times faster
+(`CLAUDE.md` §2); and today's generator proposes what fits one shift, which
+is part of why nothing large shipped. The 01-12 source work does not wait on it.
 
 ## D15 · 2026-10-27 · Every finished item logs its hardest part, read weekly, judged by a rule set now
 
@@ -144,6 +246,7 @@ change label-only. So the handover leads with #50's four commands.
 **2026-11-04: that re-render is withdrawn.** An identical copy is kept on the `sample-frames` branch and linked in #77's 25 October comment (11-03), so the link cannot die; a fresh render would write different host lines from the ones the owner is judging. The owner has not acted since 10-27 21:20 (171 hours, past the 76-hour longest gap): absence, so still no re-ask.
 **Re-reviewed 2026-11-05 (audit) — (1) false: absence.** The owner last acted 10-27 21:20 (~195 hours, past their 76-hour longest gap). Seven asks opened since (#86, #88–#93), plain labels among them (#88, #91–#93), and none is answered. No re-ask. Where waiting is fatal, a shift's one move is a default set in advance that only a label turns on (C16, 11-05).
 **Re-reviewed 2026-11-12 (audit):** (1) false, now selective rather than absent: back on 11-10, the owner settled five label-only asks in a day (#88, #89, #91–#93) and passed over the five needing a watch, a direction call or their hands (#59, #77, #80, #82, #90); last act 11-10 15:24. (2) false: the hands-only list grew (#65, #88's patch, #92's variable).
+**2026-11-14:** its second half is superseded by D16: nothing product or process reaches the owner as a label now. Short shifts remain the shift's to fix.
 
 ## D12 · 2026-10-05 · A media company with functions, not a channel with lanes
 
@@ -367,40 +470,9 @@ evidence under D11 and D13: assumption 1 ("research always has work above the
 bar") has been false since 10-09, because that work waits on the owner.
 Compressed by the 2026-10-25 audit; full text and re-reviews in git (`8f71e60`).
 
-## D5 · 2026-09-19 · The process rules are protected in CI, not in prose
+## D5 · 2026-09-19 · The process rules are protected in CI, not in prose — **SUPERSEDED by D16**
 
-`CLAUDE.md` and `.claude/skills/**` cannot change on `main` without an issue
-the owner labelled `approved`, referenced as `Approved-In: #N`. Unapproved
-changes are reverted automatically and escalated.
-
-**Alternatives:** keep it as prose (it already was, in three places, and
-nothing enforced it); require PR review (we deliberately removed that gate —
-it was the bottleneck); protect via branch rules (cannot express "approved
-issue exists").
-
-**Why:** shifts are autonomous and audit their own process. Prose telling an
-agent not to rewrite its own rules is advisory, and this project has learned
-three times that advisory loses — the R4.6 tier guarantee moved into
-`screen.py`, the Polly limit into `tts.py`, the context limit into a budget.
-
-**Assumptions:**
-1. Branch work stays unrestricted, so proposing costs nothing.
-2. Reverting is safe — the change is never lost, only unlanded.
-3. The owner is reachable to approve. *(Escalation email verified 2026-09-19.)*
-
-**Revisit when:** approval becomes a bottleneck the way review did (1 or 3
-failing); or a revert loses work rather than unlanding it (2 false).
-
-**Re-reviewed 2026-10-06:** 3 holds; the owner approved #52 and #54 within a
-day. The weak link is the apply step after approval. Of the last three
-approved patches, #52 landed, #53 was lost to GitHub's 5 October outage, and
-#50's could not be read. Each failure costs the owner another round trip.
-**Re-reviewed 2026-10-13 (audit):** (1) strained: two shifts held back a rule fix to spare the owner's queue, and no skill change can land until #50 is applied (8 days).
-**Re-reviewed 2026-10-25 (audit) — trigger fired.** #50 approved 10-05 and unapplied 20 days; #65 behind it 17. Its cost is now visible: the shift skill and the backlog skill say the ready floor is 3, `backlog_status.py` says 5, and the skill's "cannot read Actions logs" is false (`gh run view --log` works). Workflow-file patches never needed #50 (`apply-approved.yml` lands them on a label). For the 11-05 monthly: one bundled skill change, not more asks to an absent owner.
-**Re-reviewed 2026-10-28 (audit):** (1) false: #50, approved 10-05, is still unapplied; (3) mixed: process wording is labelled within hours (#84, #85).
-**2026-10-31:** #50 closed as superseded. Since 10-27 a shift lands a labelled skill, `CLAUDE.md` or `ORG.md` change itself with `Approved-In` (#84, #85), so the apply step no longer blocks; only the owner's answer does (#65).
-**Re-reviewed 2026-11-05 (audit):** (1) false in a new way: shifts cannot write `.claude/` or push workflow files even on a branch (F161), so finished guards become asks (#89, #93); (3) the owner has not acted since 10-27.
-**Re-reviewed 2026-11-12 (audit):** (1) false: #88 (approved 11-10) and #65 wait on the owner's hands, as shifts cannot write `.claude/`; (3) holds when they are present: #93 landed through the label path.
+Only the workflow files stay protected (2026-11-14); approval had become the bottleneck its own revisit trigger named. Full text and re-reviews in git.
 
 ## D4 · 2026-09-19 · Retention caps on the append-only docs
 
@@ -436,10 +508,6 @@ entries would come from the template, which is what the owner reads. Left as is.
 **Re-reviewed 2026-11-12 (audit):** worse: PRD §4 grew 15,317 → 20,714 words in a week, unbudgeted; PLAN and PRD §0 sit at their caps. A §4 budget touches no protected file, so it is shift work, not an ask.
 **Corrected 2026-11-12 (shift):** TECH_DEBT's count included 12 bullets from passes 1–2's done and deferred lists, so "26 of 25" meant 14 open, and the cheap way under was deleting history. It now counts only the open list, cap 13: the same pressure, set when those 12 were counted.
 
-## D3 · 2026-09-19 · Full allocation across workstreams each shift — **SUPERSEDED by D12**
-
-Per-lane time slices each shift; replaced by one ranked queue (re-reviewed 2026-10-06). Full text in git history.
-
 ## D2 · 2026-09-19 · Autonomy bounded by guardrails, not by review
 
 Shifts merge to `main` themselves, including live-path changes. Owner review is
@@ -464,8 +532,9 @@ deciding what they shouldn't (3).
 **Re-reviewed 2026-10-28 (audit):** (1) strained: two commits reached `main` before their fresh review (friction F37), which CI does not enforce; (2) untestable, no bad release since; (3) holds.
 **Re-reviewed 2026-11-05 (audit):** (1) strained: two text defects reached viewers for weeks (a dropped closing quote; lower-case closing lines in 11 of #14's no-capitals uploads), found by reading published output, not by a gate. Fresh reviews caught ~19 defects since 10-28; four dry runs and eight release checks caught none. (2) untestable; (3) holds.
 **Re-reviewed 2026-11-12 (audit):** strained: main's tests broke twice for minutes on pushes without a test run (F240, F255); viewer-facing faults were again found only by reading published output.
+**2026-11-14:** widened by D16. Only spending still stops a shift; a one-way door takes a dated notice, and (3) is no longer how decisions are made.
 
-## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3**
+## D1 · 2026-09-19 · Priority queue over allocation — **SUPERSEDED by D3 (2026-09-19, itself superseded by D12)**
 
 Kept as the worked example of why this file exists.
 

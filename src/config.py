@@ -66,6 +66,9 @@ if SOURCE not in ("reddit", "own"):
 # Each answer's on-screen label. Our own takes say so: nobody else wrote them,
 # so they must never pass for a real person's answer (PRD §4).
 ANSWER_LABEL = "TAKE" if SOURCE == "own" and not SAMPLE else "ANSWER"
+# The show an upload logs (upload_log `show`, E1 T3), as report.py compares
+# them: `--compare show=takes`. Our own questions are the takes show.
+SHOW = "takes" if SOURCE == "own" else "reddit"
 
 # --- video geometry / look ---
 W, H, FPS = 1080, 1920, 30
@@ -232,5 +235,38 @@ ANALYTICS_SNAPSHOTS = ROOT / "analysis" / "analytics_snapshots.csv"  # R4.2 week
 TRAFFIC_LOG = ROOT / "analysis" / "traffic_sources.csv"  # R4.7 traffic-source series
 CHANNEL_LOG = ROOT / "analysis" / "channel_stats.csv"  # PLAN C11: subscribers, weekly
 COMMENTS_LOG = ROOT / "analysis" / "viewer_comments.csv"  # PLAN C5: last week's comments
+
+# The own-questions show ships as its own release (PRD §4, C16's rule; ledger
+# C16-own), so its read can never pool with Reddit's. It follows SOURCE, never
+# a hand bump: a run under SOURCE=reddit still logs Reddit's format. Named for
+# the format it runs on, so bet 1 landing on a live own show reads as its own
+# release too (`v8-own` after `v7s-own`), never hidden inside the first. Here,
+# not beside FORMAT_VERSION, so bet 1's bump of that line merges cleanly.
+OWN_FORMAT_VERSION = f"{FORMAT_VERSION}-own"
+REDDIT_FORMAT_VERSION = FORMAT_VERSION
+if SOURCE == "own":
+    FORMAT_VERSION = OWN_FORMAT_VERSION
+
+# E1 T4: one Reddit and one takes upload a day, the two shows trading the
+# morning and evening slots daily (content.show_for_run). Off, SOURCE alone
+# picks the show, as before; on, each run's show overrides SOURCE (use_show).
+# On since E1 T5: takes runs as a daily arm under ledger `takes-gate`, set
+# before its first upload and read once on 2027-01-04.
+SHOW_ALTERNATION = True
+SHOWS = ("reddit", "takes")
+
+
+def use_show(show):
+    """Set everything that follows the show for this run: SOURCE, SHOW,
+    FORMAT_VERSION and ANSWER_LABEL, as SOURCE sets them at import. Other
+    modules read these as config.X at call time, so a run that calls this
+    before its content step runs as that show throughout."""
+    global SOURCE, SHOW, FORMAT_VERSION, ANSWER_LABEL
+    if show not in SHOWS:
+        raise ValueError(f"show {show!r} is not a show {SHOWS}")
+    SOURCE = "own" if show == "takes" else "reddit"
+    SHOW = show
+    FORMAT_VERSION = OWN_FORMAT_VERSION if show == "takes" else REDDIT_FORMAT_VERSION
+    ANSWER_LABEL = "TAKE" if show == "takes" and not SAMPLE else "ANSWER"
 
 GEN.mkdir(parents=True, exist_ok=True)

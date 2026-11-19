@@ -59,9 +59,17 @@ SERVER_RETRIES = analytics.SERVER_RETRIES
 # was the 33rd of 55 queries and those before it answered; this many in a row
 # means the report is down, so the rest wait for next week's run.
 RETENTION_SERVER_ERRORS = 3
+# E1 T5 (11-19): the takes show's new tracks are checked for a Content ID
+# claim after each first plays, and a shift has no YouTube access. So the
+# snapshot records, for uploads under RETENTION_MAX_AGE_DAYS old, what a claim
+# shows anyone but the owner: a rejected upload (`rejected:claim`) or a region
+# restriction (`blocked 12`, `allowed 3`). A claim that only takes the ad
+# money, tracks or mutes reaches the owner alone. A failed read writes its
+# reason in upload_status, as retention does.
+CLAIM_FIELDS = ["upload_status", "region_restriction"]
 FIELDS = ["snapshot_date", "video_id", "published_at", "views", "likes", "comments",
           "shares", "est_minutes_watched", "avg_view_duration_s", "avg_view_pct",
-          "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS
+          "engaged_views", "subs_gained", "privacy_status"] + RETENTION_FIELDS + CLAIM_FIELDS
 METRICS = ("views,likes,comments,shares,estimatedMinutesWatched,"
            "averageViewDuration,averageViewPercentage")
 ENGAGED_METRIC = "engagedViews"
@@ -231,6 +239,47 @@ def add_retention(ya, stats, videos, today):
                 stats[v][RETENTION_FIELDS[0]] = reason
             break
     return stats
+
+
+def recent_uploads(videos, today):
+    """Ids of the uploads published under RETENTION_MAX_AGE_DAYS before today."""
+    cutoff = (datetime.date.fromisoformat(today)
+              - datetime.timedelta(days=RETENTION_MAX_AGE_DAYS)).isoformat()
+    return [v for v, published_at, *_ in videos if (published_at or "")[:10] >= cutoff]
+
+
+def claim_state(yt, video_ids):
+    """video_id -> CLAIM_FIELDS, from videos.list (one request per 50 ids).
+    Every recent upload is asked about, not only those the analytics query
+    returned: a rejected upload has no analytics."""
+    # One the API does not return (deleted, or never processed) says so,
+    # rather than reading blank like an upload too old to be asked about.
+    out = {v: {"upload_status": "not returned"} for v in video_ids}
+    for d in analytics.fetch_video_details(yt, video_ids, part="status,contentDetails"):
+        status = d.get("status", {})
+        upload = status.get("uploadStatus", "")
+        reason = status.get("rejectionReason") or status.get("failureReason")
+        if reason:
+            upload += f":{reason}"
+        rr = d.get("contentDetails", {}).get("regionRestriction") or {}
+        region = (f"blocked {len(rr['blocked'])}" if rr.get("blocked")
+                  else f"allowed {len(rr['allowed'])}" if "allowed" in rr else "")
+        out[d["id"]] = {"upload_status": upload, "region_restriction": region}
+    return out
+
+
+def add_claim_state(yt, videos, today):
+    """claim_state for the recent uploads; never raises. A failure writes its
+    reason into each recent upload's upload_status, so a shift reading the
+    snapshot can tell an unread week from a clean one."""
+    recent = []
+    try:
+        recent = recent_uploads(videos, today)
+        return claim_state(yt, recent)
+    except Exception as e:
+        reason = " ".join(f"refused: {type(e).__name__}: {e}".split())[:160]
+        print(f"::warning::claim state {reason}; snapshotting without it")
+        return {v: {"upload_status": reason} for v in recent}
 
 
 def _server_error(e):
@@ -549,6 +598,7 @@ def main():
             print(f"::warning::retention failed ({type(e).__name__}: {e}); "
                   f"per-video snapshot is unaffected")
         print(f"analytics rows returned for {len(stats)} videos")
+        claims = add_claim_state(yt, videos, today)
 
         is_new = not OUT.exists()
         OUT.parent.mkdir(exist_ok=True)
@@ -578,6 +628,7 @@ def main():
                     "subs_gained": s.get(SUBS_METRIC, ""),
                     "privacy_status": privacy,
                     **{f: s.get(f, "") for f in RETENTION_FIELDS},
+                    **{f: claims.get(video_id, {}).get(f, "") for f in CLAIM_FIELDS},
                 })
         print(f"appended {len(videos)} rows to {OUT}")
         print_experiment_summary(stats)

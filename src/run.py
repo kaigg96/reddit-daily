@@ -164,10 +164,15 @@ def main():
         day, slot = content.run_slot(now, schedule)
     except ValueError as e:
         sys.exit(f"Not uploading: {e}")   # fails the run, so it is seen
+    # Before the upload: a raise after it would skip the commit of prev_post.txt.
+    run_slot = content.slot_key(day, slot, schedule)
     if slot not in content.live_slots():
         print(f"Slot {slot} is off at {config.UPLOADS_PER_DAY} uploads a day; nothing to do")
         return
     check_channel_name()
+    if config.SHOW_ALTERNATION:   # E1 T4: this run's show overrides SOURCE
+        config.use_show(content.show_for_run(now, schedule))
+        print(f"Show this run: {config.SHOW} format={config.FORMAT_VERSION}")
 
     # --- content ---
     prev_title = ""
@@ -367,6 +372,8 @@ def main():
         "meta_source": meta.source,
         "host_lines": host_lines,
         "cta": outro_text,
+        "show": config.SHOW,
+        "run_slot": run_slot,
     })
 
 

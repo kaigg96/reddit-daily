@@ -37,9 +37,9 @@ def test_a_failed_run_is_not_counted_as_a_short_shift(tmp_path, monkeypatch):
     assert not flagged(tmp_path, monkeypatch, [(52.0, 0), (0.0, 1), (55.0, 0), (50.0, 0)])
 
 
-def test_short_shifts_are_never_escalated_to_the_owner(tmp_path, monkeypatch):
-    # The owner on #67: finding and fixing why shifts end early is the
-    # shift's job, not theirs. It prints for the shift instead.
+def test_no_process_problem_is_escalated_to_the_owner(tmp_path, monkeypatch, capsys):
+    # #67 made short shifts the shift's to fix; D16 (2026-11-14) made every
+    # process problem so. Nothing here may queue an issue.
     monkeypatch.setattr(cb, "LEDGER", ledger(tmp_path, [(20.0, 0), (17.0, 0), (35.0, 0)]))
     calls = []
 
@@ -49,9 +49,9 @@ def test_short_shifts_are_never_escalated_to_the_owner(tmp_path, monkeypatch):
     monkeypatch.setattr(cb.subprocess, "run", run)
     problems = cb.health(raise_issues=True)
     assert any(p[0] == "process-capacity-underused" for p in problems)
-    assert not any("process-capacity-underused" in a for a in calls)
-    # Every other problem still reaches the owner (an overdue review, say).
-    assert len(calls) == len(problems) - 1
+    assert calls == []
+    out = capsys.readouterr().out
+    assert "this shift's to fix" in out and "queue" not in out
 
 
 def test_a_cut_off_ledger_row_is_skipped(tmp_path):
