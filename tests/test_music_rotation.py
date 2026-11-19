@@ -1,7 +1,7 @@
-"""Music rotation (E1 T2): for the takes show, the public-domain tracks and
-the sealed funk bed are all in rotation, a missing seal key still leaves the
-plain ones, and the picker never takes the channel's or the show's last
-track. The Reddit show keeps the funk bed alone until `v8`'s read."""
+"""Music rotation (E1 T2): the takes show rotates the public-domain tracks
+(the sealed funk bed only when none is present), and the picker never takes
+the channel's or the show's last track. The Reddit show keeps the funk bed
+alone until `v8`'s read."""
 import random
 
 from src import config, log, video
@@ -37,7 +37,7 @@ def test_the_picker_never_takes_the_last_uploads_track(monkeypatch, tmp_path):
         _log(monkeypatch, tmp_path, last)
         tracks = video._music_tracks()
         picks = {video._pick_track(tracks, random.Random(i))[0].name for i in range(80)}
-        assert picks == set(PLAIN + ["funk_bg_lower.mp3"]) - {last}
+        assert picks == set(PLAIN) - {last}
 
 
 def test_the_reddit_show_keeps_the_funk_bed_alone(monkeypatch, tmp_path):
@@ -80,11 +80,25 @@ def test_with_two_tracks_both_recent_the_channel_track_still_never_repeats(monke
     assert picks == {"freepd_a.mp3"}
 
 
-def test_unsealed_funk_joins_at_its_own_volume(monkeypatch, tmp_path):
+def test_takes_never_plays_the_reddit_shows_funk_bed(monkeypatch, tmp_path):
+    # the switch-on review (11-19): with funk in rotation, the second of two
+    # takes runs in a row (the slots give takes, Reddit, Reddit, takes, ...)
+    # bars only takes' own last track, and 46 of 400 simulated uploads got funk
     _setup(monkeypatch, tmp_path, PLAIN, sealed_unsealed=True)
-    vols = {p.name: v for p, v in video._music_tracks()}
-    assert vols == {**{n: config.MUSIC_VOLUME_LIBRARY for n in PLAIN},
-                    "funk_bg_lower.mp3": config.MUSIC_VOLUME_FALLBACK}
+    p = tmp_path / "upload_log.csv"
+    p.write_text("timestamp_utc,music_track,show\n"
+                 "2026-11-21T19:00:00+00:00,funk_bg_lower.mp3,reddit\n"
+                 "2026-11-22T07:00:00+00:00,freepd_b.mp3,takes\n")
+    monkeypatch.setattr(config, "UPLOAD_LOG", p)
+    assert {p.name: v for p, v in video._music_tracks()} == {
+        n: config.MUSIC_VOLUME_LIBRARY for n in PLAIN}
+    picks = {video._pick_track(video._music_tracks(), random.Random(i))[0].name for i in range(80)}
+    assert picks == {"freepd_a.mp3", "freepd_c.mp3"}
+
+
+def test_with_no_plain_track_takes_falls_back_to_the_funk_bed(monkeypatch, tmp_path):
+    _setup(monkeypatch, tmp_path, [], sealed_unsealed=True)
+    assert video._music_tracks() == [(config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK)]
 
 
 def test_without_the_seal_key_the_plain_tracks_still_play(monkeypatch, tmp_path):

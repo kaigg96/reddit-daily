@@ -167,13 +167,16 @@ def _music_tracks():
 
     The Reddit show keeps the funk bed alone (E1 T2, 11-18): a new track would
     change every Reddit video and cut `v8`'s read, so it joins the rotation as
-    its own release after that read. The takes show has no read to disturb."""
+    its own release after that read. The takes show rotates the plain tracks
+    only, as ledger `takes-gate` names the arms' music; the funk bed is its
+    fallback when none is present. (With the funk bed in its rotation, the
+    second of two takes runs in a row could pick it: about 1 in 9 uploads.)"""
     funk = ([(config.FALLBACK_MUSIC, config.MUSIC_VOLUME_FALLBACK)]
             if config.FALLBACK_MUSIC.exists() else [])
     if config.SHOW == "reddit":
         return funk
     return [(p, config.MUSIC_VOLUME_LIBRARY)
-            for p in sorted(Path(config.MUSIC_DIR).glob("*.mp3"))] + funk
+            for p in sorted(Path(config.MUSIC_DIR).glob("*.mp3"))] or funk
 
 
 def _pick_track(tracks, rng):
