@@ -2361,6 +2361,19 @@ def test_the_digest_line_reads_each_release_inside_its_committed_cut(monkeypatch
     assert "`v7`: NO VERDICT" in line
 
 
+def test_the_digest_never_auto_reverts_the_takes_show(monkeypatch):
+    """With the shows alternating, `v8-own` and `v8` are the two latest
+    releases; read as a release, takes would face all of Reddit's history and
+    could be reverted before ledger `takes-gate`'s 01-04 read."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": v} for v in ("v7s", "v8", "v8-own", "v8", "v8-own")]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v8", "v7s"]
+    assert "`v8-own`: not auto-reverted, ledger `takes-gate`" in line
+
+
 def test_each_committed_release_cut_names_a_logged_field_and_value():
     """A misspelt cut would filter every upload out, and the digest would print
     NO VERDICT rather than fail (review, 2026-10-25)."""
