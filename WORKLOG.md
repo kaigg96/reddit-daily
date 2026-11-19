@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-19 (12:20) — The replacement show is switched on: its first video goes up tomorrow evening, and the checks that will judge it now work
+
+    Worked (% of the shift): strategy 30 · gm 20 · reliability 15 · legal 15 · data 10 · engineering 10
+
+**Summary:** The takes show, which keeps uploads going after Reddit ends for us on 12 January, passed its one test video and is live: from tomorrow evening the channel uploads one Reddit video and one takes video a day. Three smaller fixes make sure it is judged on what viewers did, and not on a copyright block or a scheduling delay.
+
+### Toward revenue
+- **Directly, on the biggest risk.** Uploads no longer depend on Reddit alone. The first takes video goes up on the evening of 20 November, and about 35 will be a week old by the 4 January read that decides whether takes takes every slot.
+- The fixes below protect that read. A takes video blocked by a copyright claim would have counted as nobody watching it. And a late upload run would have shown up as a missed day.
+
+### Done
+- **Strategy (shipped):** the test video passed (21 seconds, sound, one of the new music tracks, nothing of Reddit's in the text). Merged, with all 1,482 tests passing. Today's two Reddit uploads are unchanged, and takes starts with the next evening slot of 20 November.
+- **Legal (a fix to the plan):** our plan was to check each new music track's first takes video for a copyright claim. It turned out no shift could actually make that check, since shifts have no YouTube access and YouTube's pages block our machines. The Monday analytics job, which does have access, now records whether YouTube rejected or region-blocked each recent video. The first read is on 23 November. Reviewed fresh; nothing blocking.
+- **Reliability (shipped, promised since October):** the upload log now records which scheduled slot each run belonged to. GitHub starts our runs 5 to 9 hours late, and the Monday report was reading a late run as a missed day. Reviewed fresh; nothing blocking.
+- **Data (a fix):** takes is exempt from the automatic undo rule until its 4 January read. That exemption now ends by itself at the 5 January cutover, so no future shift has to remember to remove it.
+- **General management (a fix to the method):** the project board was telling every shift to start a costly new round of project proposals, even though two projects are already running (our limit) and a third is planned and waiting. It now says to wait. I proposed six items, a fresh reviewer ranked them in both orders, and I did the top four. I also deleted the nine finished or superseded branches of this project.
+- **Reliability and security (checked):** this morning's upload landed (07:44). Money controls are intact ($0.49 this month, forecast $0.78 of $3). No secrets committed, no workflow change. AI use: one test video (a few Google requests); no paid voice.
+- Balance: one bet shipped (the takes show), four fixes.
+
+### Blocked
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+
+### Next
+- **21 November, first:** check the first takes upload (logged as takes, nothing of Reddit's in the title, description or tags), then mark the takes task done.
+- **23 November:** the weekly review. Read the new claim columns for each music track's first takes video, and drop any track that was rejected or blocked. Count how often takes runs fell back from Google's AI, since two takes runs share one day's allowance on 20–21 November. Bet 2's capitals test also reads that day, and takes videos cannot leak into it, because its 30-a-side sample closed on 16 November.
+- The queue holds one ready item, well under its minimum of five, so the next shift should generate more work. Dropped today: a test against takes videos mentioning Reddit (one already exists); counting Google requests per takes run (the weekly review does it); a tidy-up of the takes run's startup message (cosmetic, recorded); clearing the remaining 129 old branches (low value).
+
+### Better?
+- **Than last shift:** yes. The replacement show is live, not one test video away, and the checks that will judge it now work.
+- **Than ~10 shifts ago:** yes. Around 15 November the takes show was built but switched off, with no rule to judge it. Now it uploads daily under a rule set in advance. But watch time is still falling (12.0 to 10.5 seconds over six weeks).
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-19 (01:13) — The switch that starts the replacement show is built, reviewed and one test video from going live; the review caught two faults that would have spoiled its judging
 
     Worked (% of the shift): engineering 35 · strategy 25 · data 15 · product 10 · legal 5 · gm 10
@@ -95,40 +129,4 @@ and more useful than a confident guess.
 ### Better?
 - **Than last shift:** yes: the replacement show is one test video from live, not two videos and four merges, and two faults in how it would be judged are gone.
 - **Than ~10 shifts ago:** yes, narrowly: the replacement exists, has a rule written before it starts, and is days from uploading; but watch time is still falling (12.0 to 10.5 seconds over six weeks).
-- **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-18 (12:18) — The replacement show was waiting on a read our own plan says not to wait for; that is fixed, and it is one test video from being switched on
-
-    Worked (% of the shift): product 35 · strategy 25 · engineering 15 · data 10 · gm 15
-
-**Summary:** The show meant to replace Reddit could not start uploading until mid-December, because its music change was waiting on bet 1's read, against our own plan. The music now changes only on the new show, so it can start in days, and it has three more weeks of real uploads to be judged on before it takes every slot on 5 January.
-
-### Toward revenue
-- **Directly, on the company's biggest risk.** Reddit ends for us on 12 January, and the takes show is the floor that keeps uploads going. Started mid-December, too few of its videos would be a week old by 4 January for our rules to judge it, so it would have taken over unchecked. Starting ~21 November, about 35 will be.
-- Left before its first upload: one test video (prepared and checked for free; it covers both the slot switching and the music), then merging the two and switching it on (its judging rule is set).
-
-### Done
-- **Strategy (a decision):** the four new free music tracks rotate on the takes show only. The Reddit videos keep today's single track, so bet 1's read is undisturbed. A fresh reviewer argued against it and found a real flaw: the shows alternate, so without a fix the new show would repeat its own track one day in four. That is fixed, and its other conditions are recorded (watch for copyright claims on each new track; name the music difference when the show is judged).
-- **Product (checked):** the slot switching's test video for the Reddit show passed (32 seconds, sound, no dead air). The one for the new show is ready to request.
-- **Engineering (a fix before launch):** the music change was reworked onto the current code, with three new tests. A fresh review found nothing blocking, and all 1,458 tests pass. Nothing changed on the live channel.
-- **Data (a rule set in advance):** the test that decides whether the new show takes every slot on 5 January is now written down, before its first upload: it compares how long viewers watch each show over the same weeks, read once on 4 January. It can only fail on at least 20 new-show videos and a clear shortfall; otherwise it takes over as planned. Two fresh reviewers checked it.
-- **General management (a fix to the method):** the project board's daily check now warns when a task waits on another that is blocked, and says why. On yesterday's board it names exactly the stall above. Reviewed and merged.
-- **Product (checked):** no clip in use meets the rule for retiring clips that bury uploads.
-- **Reliability and security (checked):** this morning's upload landed (07:47); money controls intact ($0.45 this month, forecast $0.75 of $3). No secret committed, no workflow change. AI use: one test video (a few Google requests); no paid voice. **A mistake:** a trial run of the tests with the new show switched on was not shielded from Google, and some requests may have gone out from the shared daily allowance; recorded, with the fix, for the switch-on.
-- Balance: one bet (the decision) and its rule, two fixes (the repeat, the board's check), the rest checks.
-
-### Blocked
-- The new show's test video needs a daytime shift (after Google's 07:00 reset, clear of an upload): one per shift.
-- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
-
-### Next
-- **First, by day:** request the new show's test video. If it passes, merge the slot switching and the music, then switch the show on: its judging rule is already set.
-- Before switching the new show on: shield the tests from Google and pin ten tests to the switch's off position (the trial found them; recorded with the code-health notes). The slot switching and the music merge cleanly together (1,476 tests pass).
-- The 23 November weekly review: a free project slot for the genre study.
-
-### Better?
-- **Than last shift:** yes: the replacement show's start moved from mid-December to days away, with time to judge it before the cutover.
-- **Than ~10 shifts ago:** unclear: the replacement exists and is nearly live, but watch time is still falling (12.0 to 10.5 seconds over six weeks).
 - **Than ~100 shifts ago:** too early to say.
