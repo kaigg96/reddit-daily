@@ -2400,6 +2400,19 @@ def test_the_digest_never_auto_reverts_the_takes_show(monkeypatch):
     assert "`v8-own`: not auto-reverted, ledger `takes-gate`" in line
 
 
+def test_a_takes_release_first_uploaded_from_the_cutover_is_auto_reverted(monkeypatch):
+    """TECH_DEBT: the exclusion ends by itself once takes holds every slot."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": v, "timestamp_utc": t} for v, t in (
+        ("v8", "2026-11-19T20:46:00+00:00"), ("v8-own", "2026-11-20T20:46:00+00:00"),
+        ("v8-own", "2027-01-05T07:44:00+00:00"), ("v9-own", "2027-01-05T20:46:00+00:00"))]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v9-own", "v8"]
+    assert "`v8-own`: not auto-reverted" in line and "`v9-own`: not auto" not in line
+
+
 def test_each_committed_release_cut_names_a_logged_field_and_value():
     """A misspelt cut would filter every upload out, and the digest would print
     NO VERDICT rather than fail (review, 2026-10-25)."""

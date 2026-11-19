@@ -1110,6 +1110,9 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 # `v7s`, MODEL's successor, 20 by #13's rule; the own-questions show on
 # either, `config.OWN_FORMAT_VERSION`, 20 by C16's).
 RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20, "v7s-own": 20, "v8-own": 20}
+# Ledger `takes-gate` reads the takes show on 2027-01-04, and takes takes every
+# slot from this day: its releases first uploaded before it are the gate's.
+TAKES_GATE_ENDS = "2027-01-05"
 
 # Each release's pre-committed cut (PRD §0), read when no --within is given.
 # Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was
@@ -1203,7 +1206,14 @@ def release_digest_line(log_rows, target_age=None):
     # alone, once on 01-04 against Reddit over the same weeks. Read here they
     # would face the whole Reddit history before them, and the auto-revert
     # rule could switch the arm off before its own read (switch-on review).
-    takes = [r for r in log_rows if (r.get("format_version") or "").endswith("-own")]
+    # Only those first uploaded before takes takes every slot (01-05): a later
+    # takes release is auto-reverted like any other, with no shift to remember.
+    first = {}   # each version's earliest upload day, whatever the rows' order
+    for r in log_rows:
+        v, day = r.get("format_version") or "", (r.get("timestamp_utc") or "")[:10]
+        first[v] = min(first.get(v, day), day)
+    gated = {v for v, day in first.items() if v.endswith("-own") and day < TAKES_GATE_ENDS}
+    takes = [r for r in log_rows if (r.get("format_version") or "") in gated]
     parts = []
     for version in latest_releases([r for r in log_rows if r not in takes]):
         cut = RELEASE_WITHIN.get(version)
