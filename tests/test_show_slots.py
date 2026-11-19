@@ -73,7 +73,8 @@ def test_use_show_sets_everything_that_follows_the_show(alternating):
         config.use_show("own")
 
 
-def test_off_the_subreddit_rotation_is_unchanged():
+def test_off_the_subreddit_rotation_is_unchanged(monkeypatch):
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
     subs = config.SUBREDDITS
     for line, now in _runs(8):
         day = now.date().toordinal()

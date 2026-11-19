@@ -59,6 +59,9 @@ def live_run(monkeypatch, tmp_path):
     monkeypatch.setattr(config, "SAMPLE", False)
     monkeypatch.setattr(config, "SILENT_NARRATION", False)
     monkeypatch.setattr(config, "SOURCE", "reddit")
+    # The Reddit show's run, whatever the slot: with E1 T4's alternation on,
+    # half the slots are takes, which never asks Reddit.
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
     monkeypatch.setenv("RUN_SCHEDULE", config.LEGACY_CRON)
     monkeypatch.setattr(run, "check_channel_name", lambda: None)
     prev = tmp_path / "prev_post.txt"
