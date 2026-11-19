@@ -54,7 +54,8 @@ A shift plays whichever role the board needs next, in this order:
    twice was written wrong, and the orchestrator rewrites it.
 2. **Dispatch** `ready` tickets of an `active` epic to implementers: each one
    a fresh agent given its ticket and nothing else, on its own branch.
-3. **Plan** an `approved` epic that has no tickets yet.
+3. **Plan** an `approved` epic that has no tickets yet; one planned starts
+   when an active slot frees, and no new round is proposed while it waits.
 4. **Generate and filter**: propose epics, and have a fresh agent cut them.
 
 At most two epics are `active`. Finishing comes before starting.

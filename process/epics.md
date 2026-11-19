@@ -13,7 +13,7 @@ files). After `process/shift.md` §2 items 1–5 (incident, ship what's built, a
 due review, owner decisions, a closing window), the order never changes:
 **accept** what is in `review`, **dispatch** `ready` tickets of an `active`
 epic whose `Needs` are all `done`, **plan** what is `approved` and
-unticketed, **generate and filter** only when nothing else is open. Finishing beats starting; a shift
+unticketed, **generate and filter** only when nothing else is open, an approved epic waiting included. Finishing beats starting; a shift
 that leaves work in `review` for the next one has chosen the slowest path.
 
 The clock: a shift has 70 minutes and an agent round takes 10–15. Accept tickets
