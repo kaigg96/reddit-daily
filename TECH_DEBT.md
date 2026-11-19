@@ -174,10 +174,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   the output file is still `final_askreddit_video.mp4`; the upload
   workflow's unseal comment ("none") now holds for the Reddit show only,
   too small for an owner's label alone: fold it into that file's next
-  patch. (4) The digest's
-  `-own` exclusion has no end date and names 2027-01-04: once takes holds
-  every slot (01-05), its next release must be auto-reverted like any other;
-  T10's shift ends the exclusion. A second fresh review of the branch's later
+  patch. (4) The digest's `-own` exemption now ends by itself: only takes releases first uploaded before 2027-01-05 are exempt (11-19, reviewed). A second fresh review of the branch's later
   commits: nothing blocking.
   **Before T5's switch-on too (11-18): tests could reach the real Gemini API.** With `SHOW_ALTERNATION` flipped on, 10 tests failed and the suite took 220 s: the cutoff runs took the takes path, whose `ownquestions` calls are unmocked, with the shell's real key. **Fixed 11-19:** conftest strips `GEMINI_API_KEY` (on `main`, `2115fb5`, with a test). The pins are on `engineering/e1-t5-test-pins` (based on T4's branch; merge it after T4): nine tests pin the switch off, and one more cutoff test runs with it on. Switched on there, with T2 merged, only `test_built_switched_off` fails, 38 s: the switch-on commit replaces that guard. Fresh review: nothing blocking. Caveat: a subprocess test that imports `config` reloads a local `.env`, so the strip covers the parent process only.
 
@@ -339,7 +336,7 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   before the upload, is not on the stacked branch; nor is its second, the
   digest's `week_videos` grouped by scheduled day like `per_day`. **It
   supersedes the stacked branch:** over `integration/preview` it merges
-  clean and 1,242 pass (11-15), so merge this one after `v8` as well. **Closes when** the switch goes to four.
+  clean and 1,242 pass (11-15), so merge this one after `v8` as well. **Merged 11-19** (`0f1424d`, after the takes switch-on; reviewed fresh, nothing blocking; `run_slot` follows `show`). **Closes when** the switch goes to four.
 
 - **The Groq route is merged switched off; key and patch are in (#68, #69,
   2026-10-10).** `config.AI_PROVIDER == "groq"` sends every AI call to Groq.

@@ -1208,9 +1208,10 @@ def release_digest_line(log_rows, target_age=None):
     # rule could switch the arm off before its own read (switch-on review).
     # Only those first uploaded before takes takes every slot (01-05): a later
     # takes release is auto-reverted like any other, with no shift to remember.
-    first = {}
+    first = {}   # each version's earliest upload day, whatever the rows' order
     for r in log_rows:
-        first.setdefault(r.get("format_version") or "", (r.get("timestamp_utc") or "")[:10])
+        v, day = r.get("format_version") or "", (r.get("timestamp_utc") or "")[:10]
+        first[v] = min(first.get(v, day), day)
     gated = {v for v, day in first.items() if v.endswith("-own") and day < TAKES_GATE_ENDS}
     takes = [r for r in log_rows if (r.get("format_version") or "") in gated]
     parts = []
