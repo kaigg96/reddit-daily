@@ -351,6 +351,28 @@ def test_a_late_evening_run_belongs_to_the_day_it_was_scheduled_for():
     assert content.run_slot(_at(5, 23, 10), "23 18 * * *") == (datetime.date(2026, 10, 5), 3)
 
 
+def test_the_log_records_the_slot_a_run_was_scheduled_for():
+    """A late run is logged under its cron line's day and slot, not its
+    publish time, so the digest can tell it from a missed day (PRD §0 #4)."""
+    import csv, inspect
+    from src import config, log, run
+    key = lambda now, line: content.slot_key(*content.run_slot(now, line), line)
+    assert key(_at(6, 0, 40), "23 18 * * *") == "2026-10-05/3"
+    assert key(_at(5, 19), "23 12 * * *") == "2026-10-05/2"
+    assert key(_at(5, 19), "") == ""   # a manual run: the clock's guess is not logged
+    src = inspect.getsource(run.main)
+    assert "run_slot = content.slot_key(day, slot, schedule)" in src
+    assert '"run_slot": run_slot' in src
+    # Worked out before the upload, so a raise cannot follow it.
+    assert src.index("run_slot = content.slot_key") < src.index("youtube.upload_video")
+    # No committed column is dropped, and run_slot is appended. The order of
+    # the rest is free: _migrate_header rewrites rows by name, and v8 already
+    # places its host columns before the committed log's cta (11-06).
+    with open(config.UPLOAD_LOG, newline="") as f:
+        header = next(csv.reader(f))
+    assert set(header) <= set(log.FIELDS) and log.FIELDS[-1] == "run_slot"
+
+
 def test_at_four_a_day_no_subreddit_runs_more_than_twice_in_a_row(monkeypatch, one_show):
     monkeypatch.setattr(config, "UPLOADS_PER_DAY", 4)
     subs = ["AskReddit", "NoStupidQuestions"]

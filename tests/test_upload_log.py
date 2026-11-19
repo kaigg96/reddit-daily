@@ -82,7 +82,7 @@ def test_every_upload_logs_its_show_and_old_rows_stay_blank(monkeypatch, tmp_pat
     monkeypatch.setattr(log.config, "UPLOAD_LOG", path)
     log.append_upload_log({"video_id": "new", "show": "takes"})
     rows = list(csv.DictReader(path.open(newline="")))
-    assert log.FIELDS[-1] == "show"
+    assert log.FIELDS[-2:] == ["show", "run_slot"]   # each appended in its turn
     assert (rows[0]["show"], rows[1]["show"]) == ("", "takes")
     monkeypatch.delenv("SAMPLE", raising=False)
     try:

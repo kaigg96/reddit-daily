@@ -74,6 +74,12 @@ FIELDS = [
     # subreddit, which every read takes for unset, so no read could compare
     # the shows. Older rows stay blank and read as reddit (insights).
     "show",
+    # Written 2026-10-13, merged 2026-11-19 (PRD §0 #4): the slot this run was scheduled for, as
+    # "<day>/<slot>" from the cron line that started it (content.run_slot).
+    # GitHub starts runs hours late, so the publish time cannot say which
+    # slot an upload filled; at four a day the digest needs this to tell a
+    # late run from a missed one (TECH_DEBT, four a day).
+    "run_slot",
 ]
 
 
