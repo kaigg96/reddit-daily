@@ -172,7 +172,11 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
   line prints the import-time `v8` on a takes run (the log row is right), and
-  the output file is still `final_askreddit_video.mp4`.
+  the output file is still `final_askreddit_video.mp4`. (4) The digest's
+  `-own` exclusion has no end date and names 2027-01-04: once takes holds
+  every slot (01-05), its next release must be auto-reverted like any other;
+  T10's shift ends the exclusion. A second fresh review of the branch's later
+  commits: nothing blocking.
   **Before T5's switch-on too (11-18): tests could reach the real Gemini API.** With `SHOW_ALTERNATION` flipped on, 10 tests failed and the suite took 220 s: the cutoff runs took the takes path, whose `ownquestions` calls are unmocked, with the shell's real key. **Fixed 11-19:** conftest strips `GEMINI_API_KEY` (on `main`, `2115fb5`, with a test). The pins are on `engineering/e1-t5-test-pins` (based on T4's branch; merge it after T4): nine tests pin the switch off, and one more cutoff test runs with it on. Switched on there, with T2 merged, only `test_built_switched_off` fails, 38 s: the switch-on commit replaces that guard. Fresh review: nothing blocking. Caveat: a subprocess test that imports `config` reloads a local `.env`, so the strip covers the parent process only.
 
 - **Bet 1's text-only host (2026-10-11, branch `product/text-host`, behind
