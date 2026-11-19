@@ -1203,7 +1203,7 @@ def release_digest_line(log_rows, target_age=None):
     # alone, once on 01-04 against Reddit over the same weeks. Read here they
     # would face the whole Reddit history before them, and the auto-revert
     # rule could switch the arm off before its own read (switch-on review).
-    takes = [r for r in log_rows if r.get("format_version", "").endswith("-own")]
+    takes = [r for r in log_rows if (r.get("format_version") or "").endswith("-own")]
     parts = []
     for version in latest_releases([r for r in log_rows if r not in takes]):
         cut = RELEASE_WITHIN.get(version)
