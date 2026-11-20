@@ -2753,8 +2753,8 @@ def test_the_release_read_passes_the_dose_the_verdicts_uploads(monkeypatch, tmp_
     import types
     from scripts import report
     log = tmp_path / "upload_log.csv"
-    log.write_text("video_id,format_version,host_lines,own_words_share\n"
-                   "a,v8,5,0.6\nb,v8,0,0.6\nc,v8,0,0.6\n")
+    log.write_text("video_id,format_version,host_lines,own_words_share,meta_source\n"
+                   "a,v8,5,0.6,gemini_fallback\nb,v8,0,0.6,gemini_fallback\nc,v8,0,0.6,gemini\n")
     monkeypatch.setattr(insights.config, "UPLOAD_LOG", str(log))
     monkeypatch.setattr(insights.config, "COMMENTARY_ANSWERS", 3)   # whole: 5
     monkeypatch.setattr(insights.config, "HOST_REACTIONS", True)    # with reactions
@@ -2772,6 +2772,7 @@ def test_the_release_read_passes_the_dose_the_verdicts_uploads(monkeypatch, tmp_
     out = capsys.readouterr().out
     assert "all 5 on 1 of 1 uploads" in out          # the verdict's one upload
     assert "3 uploads" in out                        # own words: every upload
+    assert "metadata on 1 of 1" in out               # the fallback line: the dose's uploads
 
 
 def test_the_dose_counts_the_verdicts_first_uploads_by_date():
