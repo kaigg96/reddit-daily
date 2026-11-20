@@ -1264,7 +1264,10 @@ def release_digest_line(log_rows, target_age=None):
     # takes release is auto-reverted like any other, with no shift to remember.
     first = {}   # each version's earliest upload day, whatever the rows' order
     for r in log_rows:
-        v, day = r.get("format_version") or "", (r.get("timestamp_utc") or "")[:10]
+        # The scheduled day where the log has it, as show_for_run keys the
+        # cutover on: a late 01-04 run landing after midnight is the gate's.
+        day = (r.get("run_slot") or "")[:10] or (r.get("timestamp_utc") or "")[:10]
+        v = r.get("format_version") or ""
         first[v] = min(first.get(v, day), day)
     gated = {v for v, day in first.items() if v.endswith("-own") and day < TAKES_GATE_ENDS}
     takes = [r for r in log_rows if (r.get("format_version") or "") in gated]

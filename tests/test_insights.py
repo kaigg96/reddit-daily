@@ -2413,6 +2413,20 @@ def test_a_takes_release_first_uploaded_from_the_cutover_is_auto_reverted(monkey
     assert "`v8-own`: not auto-reverted" in line and "`v9-own`: not auto" not in line
 
 
+def test_a_late_run_scheduled_before_the_cutover_stays_the_gates(monkeypatch):
+    """The exemption keys on the scheduled day, as show_for_run's cutover does:
+    01-04's evening slot landing at 01:10 on 01-05 is the gate's release."""
+    seen = []
+    monkeypatch.setattr(insights, "release_read",
+                        lambda version, **kw: seen.append(version))
+    rows = [{"format_version": "v8", "timestamp_utc": "2026-11-19T20:46:00+00:00"},
+            {"format_version": "v9-own", "timestamp_utc": "2027-01-05T01:10:00+00:00",
+             "run_slot": "2027-01-04/2"}]
+    line = insights.release_digest_line(rows)
+    assert seen == ["v8"]
+    assert "`v9-own`: not auto-reverted" in line
+
+
 def test_each_committed_release_cut_names_a_logged_field_and_value():
     """A misspelt cut would filter every upload out, and the digest would print
     NO VERDICT rather than fail (review, 2026-10-25)."""
