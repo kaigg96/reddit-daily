@@ -1009,6 +1009,36 @@ def render_host_lines(log_rows, version, key="format_version", ids=None):
             f"{len(counts)} uploads, some on {len(counts) - full - none}, none on {none}")
 
 
+# What an AI field logs when the run's own model answered. Anything else is
+# Gemini's second model, Groq's rescue, the keyword backstop or no answer.
+_PRIMARY_SOURCES = ("gemini", "groq")
+_SOURCE_FIELDS = (("meta_source", "metadata"), ("screen_source", "screen"))
+
+
+def render_fallbacks(log_rows, version, key="format_version", ids=None):
+    """How many of the release's uploads a fallback wrote, beside its verdict:
+    the metadata call (title, vote, host lines) and the screen. Never a
+    trigger, and a fallback upload still counts as assigned, as a dropped note
+    does (#15's dose): it names what the verdict read. Gemini's 503s, not our
+    code, set it: 4 of `v8`'s first 7, and one lost every host line (PRD §4,
+    2026-11-20); takes' 01-04 read names it too (TECH_DEBT). `ids` limits it
+    as the dose does. An unreadable primary answer logs `gemini` on metadata
+    but `backstop` on the screen, so only the screen counts it; the dose line
+    still shows the host lines it cost. Empty when nothing logs a source."""
+    parts = []
+    for field, name in _SOURCE_FIELDS:
+        logged = [r[field].strip() for r in log_rows
+                  if r.get(key) == version and (r.get(field) or "").strip()
+                  and (ids is None or r.get("video_id") in ids)]
+        if logged:
+            fell = sum(1 for s in logged if s not in _PRIMARY_SOURCES)
+            parts.append(f"{name} on {fell} of {len(logged)}")
+    if not parts:
+        return ""
+    which = "" if ids is None else ", the verdict's first uploads"
+    return f"AI fallback (never a trigger{which}): " + ", ".join(parts)
+
+
 def render_within_length(read, threshold=1.0):
     """When a release shifted length, its watch-seconds within each length half.
 
