@@ -170,6 +170,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   and name each show's fallback share beside the 01-04 read, as music is:
   3 of the first 5 logged (11-17 to 11-19) fell back, and `--compare
   meta_source=gemini_fallback` refuses until 8 a side reach 7 days.
+  **11-20:** the release check was INCONCLUSIVE 11-17, 11-18 and 11-19
+  (Gemini timeouts and 503s), and a non-PASS retries daily, so it spends its
+  6-8 every day; on 11-18 it ran at 17:13 and the 20:46 upload hit
+  `http_429_day`. Its trigger, `GATED_PATHS`, also counts `scripts/` and
+  `tests/`, which the Gemini gates never import; narrowing it would also drop
+  the job's pytest step on those changes, so the fix is a workflow split (a
+  patch). For the 11-23 review's quota count.
   (2) **The release check exercises Reddit's metadata path only**
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
