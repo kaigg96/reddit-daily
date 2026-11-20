@@ -1022,7 +1022,9 @@ def render_fallbacks(log_rows, version, key="format_version", ids=None):
     does (#15's dose): it names what the verdict read. Gemini's 503s, not our
     code, set it: 4 of `v8`'s first 7, and one lost every host line (PRD §4,
     2026-11-20); takes' 01-04 read names it too (TECH_DEBT). `ids` limits it
-    as the dose does. Empty when nothing logs a source."""
+    as the dose does. An unreadable primary answer logs `gemini` on metadata
+    but `backstop` on the screen, so only the screen counts it; the dose line
+    still shows the host lines it cost. Empty when nothing logs a source."""
     parts = []
     for field, name in _SOURCE_FIELDS:
         logged = [r[field].strip() for r in log_rows
