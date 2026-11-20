@@ -245,7 +245,8 @@ def subreddit_for_run(now, subreddits=None, schedule=""):
 
 def show_for_run(now, schedule=""):
     """E1 T4: the show this run uploads ("reddit" or "takes"), deterministic
-    per run, when config.SHOW_ALTERNATION is on (off, SOURCE decides).
+    per run, when config.SHOW_ALTERNATION is on (off, SOURCE decides until
+    config.TAKES_ONLY_FROM, and run.main takes this from that day either way).
 
     Keyed like subreddit_for_run, on (day + slot position) % 2: one show each
     slot, the two swapping slots every day, so over any two days each show
