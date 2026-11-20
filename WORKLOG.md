@@ -84,6 +84,7 @@ and more useful than a confident guess.
 - For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
 
 ### Next
+- **Today's later shifts (20 November):** no test videos and no Google AI requests until 08:00 UTC on 21 November. Tonight's takes video, tomorrow's early-morning takes video and the daily release check all draw on the same day's 20 requests (about 14–16 expected).
 - **21 November, first:** check tonight's first takes video (logged as takes, nothing of Reddit's in its title, description or tags), then mark the takes task done. That frees the next tickets for helper agents.
 - **23 November, the weekly review:** read the new "blocked or rejected" line for each music track's first takes video; count takes runs that fell back from Google's AI; read bet 2's capitals test; give the genre-hits study the project slot it is waiting for.
 - Dropped tonight: testing the takes show in the daily release check (it would spend 2–4 more of Google's 20 daily requests on days already near the limit); starting the genre-hits study three days early (the two-project limit is enforced in code and Monday opens its slot anyway); a reworked startup message (cosmetic, and in the upload code hours before the first takes video); counting Google requests per day (no takes day exists yet). Views per video rose about fourfold in three weeks, but the views the Partner Program counts held level (about 125 a video), so the distance to the bar is unchanged (~696×).
