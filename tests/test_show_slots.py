@@ -174,3 +174,28 @@ def test_a_run_takes_its_show_before_the_content_step(monkeypatch, tmp_path, alt
     takes = show == "takes"
     assert state == {"source": "own" if takes else "reddit", "show": show,
                      "fmt": config.OWN_FORMAT_VERSION if takes else config.REDDIT_FORMAT_VERSION}
+
+
+@pytest.mark.parametrize("days_after, show", [(-1, "reddit"), (0, "takes"), (30, "takes")])
+def test_with_the_alternation_off_the_cutover_still_makes_every_run_takes(
+        monkeypatch, tmp_path, alternating, days_after, show):
+    """Off, SOURCE's "reddit" would stop every upload once Reddit closes on
+    01-12 (E1 T10); before the cutover, off still means SOURCE decides."""
+    from src import run
+    monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
+    monkeypatch.setattr(config, "SOURCE", "reddit")
+    monkeypatch.setattr(config, "SHOW", "reddit")
+    monkeypatch.setattr(config, "PREV_POST_FILE", tmp_path / "prev_post.txt")
+    monkeypatch.setattr(run, "check_channel_name", lambda: None)
+    day = config.TAKES_ONLY_FROM + datetime.timedelta(days=days_after)
+    monkeypatch.setattr(content, "run_slot", lambda now, schedule="": (day, 0))
+    monkeypatch.setattr(content, "_day_position", lambda now, schedule="": (day, 0))
+    state = {}
+
+    def stop(now, schedule=""):
+        state.update(source=config.SOURCE, show=config.SHOW)
+        raise _Stop
+    monkeypatch.setattr(content, "subreddit_for_run", stop)
+    with pytest.raises(_Stop):
+        run.main()
+    assert state == {"source": "own" if show == "takes" else "reddit", "show": show}

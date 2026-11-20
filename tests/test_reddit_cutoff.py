@@ -5,6 +5,7 @@ before any Polly call, title request, upload or live-state write
 a comment fetch after the screen has already spent a request. Which error is
 left open: skipping one refused post is fine, so long as the run still ends
 without spending or writing anything."""
+import datetime
 import types
 
 import prawcore
@@ -62,6 +63,9 @@ def live_run(monkeypatch, tmp_path):
     # The Reddit show's run, whatever the slot: with E1 T4's alternation on,
     # half the slots are takes, which never asks Reddit.
     monkeypatch.setattr(config, "SHOW_ALTERNATION", False)
+    # From the cutover every run is takes, alternation or not; these test
+    # Reddit's path, so they must not turn into takes runs on 2027-01-05.
+    monkeypatch.setattr(config, "TAKES_ONLY_FROM", datetime.date.max)
     monkeypatch.setenv("RUN_SCHEDULE", config.LEGACY_CRON)
     monkeypatch.setattr(run, "check_channel_name", lambda: None)
     prev = tmp_path / "prev_post.txt"
