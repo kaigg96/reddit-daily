@@ -180,6 +180,12 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   release branch keeps `scripts/` and `tests/`, as guardrails never runs on
   its pushes. Left: a hand dispatch cannot force a re-check inside the wait
   (no input for it; a workflow change). For the 11-23 review's quota count.
+  **503s jumped this week (11-20, upload log):** 5 of W47's 8 screens hit
+  `http_503` and fell back, against 0-2 of 14 every week since W38, and 1 of
+  14 in W46 on the same `MODEL` (`v7s`). The screen is unchanged by `v8`, so
+  this is Google's side, not ours; but it means a fallback wrote 4 of `v8`'s
+  first 7, so `report.py --release` now names that share beside the dose
+  (`render_fallbacks`). The review reads whether it persisted.
   (2) **The release check exercises Reddit's metadata path only**
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup
