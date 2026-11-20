@@ -252,8 +252,14 @@ def show_for_run(now, schedule=""):
     has the morning and the evening once. At four a day each show takes
     alternate slots. Because this uses the subreddits' old key, the Reddit
     arm's subreddit moves on day // 2 instead (see subreddit_for_run), or
-    it would draw one subreddit forever."""
+    it would draw one subreddit forever.
+
+    E1 T12: a run scheduled on or after config.TAKES_ONLY_FROM is takes in
+    every slot. The day is run_slot's, so a late run landing after midnight
+    keeps the show of the day it was scheduled for."""
     day, position = _day_position(now, schedule)
+    if day >= config.TAKES_ONLY_FROM:
+        return "takes"
     return config.SHOWS[(day.toordinal() + position) % len(config.SHOWS)]
 
 
