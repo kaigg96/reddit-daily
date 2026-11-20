@@ -3,6 +3,7 @@ requests, and those are shared with live uploads."""
 import argparse
 import datetime
 import os
+import re
 import subprocess
 import sys
 
@@ -78,6 +79,46 @@ def test_a_fail_is_always_retried():
     proceed, why = decide(verdict("c6ee5f7", FAIL), "c6ee5f7")
     assert proceed is True
     assert "FAIL" in why
+
+
+INCONCLUSIVE = "⚠️ INCONCLUSIVE — gates could not be exercised; not a failure"
+
+
+def test_an_inconclusive_on_unchanged_code_waits_rather_than_re_asking_daily():
+    """It re-spent 6-8 of the 20 shared requests on 11-17, 11-18 and 11-19 to
+    learn nothing, and the 11-18 evening upload then hit the daily cap."""
+    text = verdict("c6ee5f7", INCONCLUSIVE)
+    assert validate_release.is_inconclusive(text)
+    assert not validate_release.is_inconclusive(verdict("c6ee5f7", FAIL))
+    for days in range(validate_release.MAX_INCONCLUSIVE_AGE_DAYS):
+        proceed, why = decide(text, "a4fb38c", now=NOW + datetime.timedelta(days=days))
+        assert proceed is False, why
+        assert "INCONCLUSIVE" in why
+    proceed, why = decide(text, "a4fb38c", now=NOW + datetime.timedelta(
+        days=validate_release.MAX_INCONCLUSIVE_AGE_DAYS))
+    assert proceed is True, why
+
+
+def test_an_inconclusive_retries_at_once_on_new_gated_code_or_no_date():
+    proceed, why = decide(verdict("c6ee5f7", INCONCLUSIVE), "89bc245", changed=always)
+    assert proceed is True and "changed" in why
+    assert decide(verdict("c6ee5f7", INCONCLUSIVE, when="whenever"), "c6ee5f7")[0] is True
+
+
+def test_a_fail_still_retries_daily_on_unchanged_code():
+    assert decide(verdict("c6ee5f7", FAIL), "a4fb38c", changed=never)[0] is True
+
+
+def test_only_what_the_gates_run_triggers_them():
+    """The gates import `src` alone; the suite runs on every push (guardrails)."""
+    assert "tests" not in validate_release.GATED_PATHS
+    assert "scripts" not in validate_release.GATED_PATHS
+    assert {"src", "requirements.txt", "scripts/validate_release.py",
+            "scripts/replay_screen.py"} <= set(validate_release.GATED_PATHS)
+    # Every script the gates run is listed: a new one must be added here too.
+    source = open(validate_release.__file__).read()
+    for script in set(re.findall(r"scripts/\w+\.py", source)):
+        assert script in validate_release.GATED_PATHS, script
 
 
 def test_no_verdict_file_validates():

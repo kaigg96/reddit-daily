@@ -28,10 +28,21 @@ MAX_REQUESTS = 8  # screen replay (5) + metadata (1), with headroom for one retr
 
 # What the gates actually exercise. A commit touching nothing here cannot
 # change their verdict, so it must not trigger a re-run -- see should_validate.
-GATED_PATHS = ("src", "scripts", "tests", "requirements.txt")
+# The gates are this file and the screen replay (its cases inline), and both
+# import `src` alone. All of `scripts/` and `tests/` re-ran them on most
+# shifts' pushes (2026-11-20, TECH_DEBT), and the suite those would have caught
+# runs on every push anyway (guardrails.yml's tests job).
+GATED_PATHS = ("src", "requirements.txt", "scripts/validate_release.py",
+               "scripts/replay_screen.py")
 
 # A PASS expires even with no code change, because the model can drift.
 MAX_VERDICT_AGE_DAYS = 7
+
+# An INCONCLUSIVE on unchanged code is retried this often, not every day. It
+# means Gemini did not answer, and re-asking daily spent 6-8 of the 20 shared
+# requests on 11-17, 11-18 and 11-19 to learn nothing; on 11-18 the 20:46
+# upload then hit the daily cap (`http_429_day`).
+MAX_INCONCLUSIVE_AGE_DAYS = 3
 
 SUMMARY = []
 
@@ -54,6 +65,11 @@ def parse_verdict(text):
         except ValueError:
             stamp = None
     return (commit.group(1) if commit else None), bool(passed), stamp
+
+
+def is_inconclusive(text):
+    """Was the recorded verdict INCONCLUSIVE (Gemini did not answer)?"""
+    return re.search(r"^- \*\*Verdict:\*\*.*\bINCONCLUSIVE\b", text or "", re.M) is not None
 
 
 def should_validate(verdict_text, target_sha, gated_code_changed, now=None,
@@ -80,13 +96,24 @@ def should_validate(verdict_text, target_sha, gated_code_changed, now=None,
     prev_sha, passed, when = parse_verdict(verdict_text)
     if not prev_sha:
         return True, "no previous verdict recorded"
-    if not passed:
-        # Commonest cause of a FAIL is an exhausted quota, not bad output.
-        return True, f"last verdict ({prev_sha}) was a FAIL — retrying"
 
     age = None
     if when is not None:
         age = ((now or datetime.datetime.utcnow()) - when).days
+    if not passed and is_inconclusive(verdict_text):
+        # Nothing was learned, so only new code or time makes a re-run worth
+        # the requests the uploads share.
+        if age is None or age >= MAX_INCONCLUSIVE_AGE_DAYS:
+            shown = "undated" if age is None else f"{age}d old"
+            return True, f"last verdict ({prev_sha}) was INCONCLUSIVE, {shown} — retrying"
+        if gated_code_changed(prev_sha):
+            return True, f"last verdict was INCONCLUSIVE; gated code changed since {prev_sha}"
+        return False, (f"last verdict ({prev_sha}) was INCONCLUSIVE {age}d ago and nothing the"
+                       f" gates exercise changed; retrying at {MAX_INCONCLUSIVE_AGE_DAYS}d")
+    if not passed:
+        # Commonest cause of a FAIL is an exhausted quota, not bad output.
+        return True, f"last verdict ({prev_sha}) was a FAIL — retrying"
+
     if age is None or age >= max_age_days:
         shown = "undated" if age is None else f"{age}d old"
         return True, f"last PASS is {shown} — re-checking for model drift"
