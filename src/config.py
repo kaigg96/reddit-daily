@@ -254,6 +254,12 @@ if SOURCE == "own":
 # before its first upload and read once on 2027-01-04.
 SHOW_ALTERNATION = True
 SHOWS = ("reddit", "takes")
+# E1 T12, decision 4 (continuity is the floor): from this scheduled day
+# (content.run_slot's day, not the clock) every slot is takes, so the slots
+# keep uploading when Reddit's API closes to this app on 2027-01-12 (PLAN §4).
+# A FAIL at ledger `takes-gate`'s 01-04 read moves this date, never the code;
+# insights.TAKES_GATE_ENDS reads it, so the gate's exemption moves with it.
+TAKES_ONLY_FROM = datetime.date(2027, 1, 5)
 
 
 def use_show(show):
