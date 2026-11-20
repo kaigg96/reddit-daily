@@ -258,7 +258,7 @@ SHOWS = ("reddit", "takes")
 # (content.run_slot's day, not the clock) every slot is takes, so the slots
 # keep uploading when Reddit's API closes to this app on 2027-01-12 (PLAN §4).
 # A FAIL at ledger `takes-gate`'s 01-04 read moves this date, never the code;
-# insights.TAKES_GATE_ENDS names the same day and moves with it.
+# insights.TAKES_GATE_ENDS reads it, so the gate's exemption moves with it.
 TAKES_ONLY_FROM = datetime.date(2027, 1, 5)
 
 

@@ -1125,7 +1125,8 @@ def render_without_near_zero(read, min_uploads=MIN_COHORT, min_views=RELEASE_MIN
 RELEASE_MIN_UPLOADS = {"v7": 20, "v7s": 20, "v8": 20, "v7s-own": 20, "v8-own": 20}
 # Ledger `takes-gate` reads the takes show on 2027-01-04, and takes takes every
 # slot from this day: its releases first uploaded before it are the gate's.
-TAKES_GATE_ENDS = "2027-01-05"
+# One date, so a FAIL that moves the cutover moves the exemption with it.
+TAKES_GATE_ENDS = config.TAKES_ONLY_FROM.isoformat()
 
 # Each release's pre-committed cut (PRD §0), read when no --within is given.
 # Bet 1 reads inside AskReddit while #3 rotates subreddits (#15): `v7` was

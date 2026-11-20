@@ -108,7 +108,7 @@ def _scheduled_on(day):
 
 def test_takes_only_from_is_5_january_the_day_after_the_takes_gate_read():
     # Decision 4: a FAIL at ledger `takes-gate`'s 01-04 read moves this date
-    # (here, in config and in insights), never the code.
+    # (here and in config; insights reads config), never the code.
     from src import insights
     assert config.TAKES_ONLY_FROM == datetime.date(2027, 1, 5)
     assert insights.TAKES_GATE_ENDS == config.TAKES_ONLY_FROM.isoformat()
