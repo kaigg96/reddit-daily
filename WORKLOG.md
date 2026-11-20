@@ -61,6 +61,42 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-20 (12:08) — The daily release check stops spending a third of Google's AI allowance to learn nothing, and switching off the two-show rotation can no longer stop uploads after Reddit ends
+
+    Worked (% of the shift): reliability 45 · data 30 · gm 20 · security 5
+
+**Summary:** Two fixes protect uploads through the takes launch and the 12 January cutoff. The daily release check no longer re-asks Google's AI every day after an inconclusive result, and from 5 January every upload is takes even if the two-show rotation is switched off. Bet 1's verdict will now also say how many of its videos the weaker backup AI wrote, which so far is most of them.
+
+### Toward revenue
+- **Directly, on the fatal risk.** One switch, if it were turned off after a bad read, would have stopped every upload from 12 January. That can no longer happen.
+- **Indirectly, by protecting the two reads that set direction.** Bet 1 (~25 November) and takes (4 January) are judged on uploads. The release check was taking 6–8 of the 20 daily AI requests those uploads share, and on 18 November an upload then ran out.
+
+### Done
+- **Reliability (shipped, a fix):** the release check has come back inconclusive three days running because Google's AI wasn't answering. It retried every day, and it also re-ran on almost any change a shift made. Now an inconclusive result on unchanged code waits three days, and only the code it actually tests sets it off. A fresh reviewer found one real gap (the branch for a pending release gets no other test run), and I fixed it before merging. Today's check still runs once, because code it tests changed.
+- **Reliability (shipped, a fix):** from 5 January every run is takes, whether or not the rotation is on. Before, turning the rotation off would have sent every run to Reddit, which closes to us on 12 January. Nothing changes for viewers before then. Reviewed fresh; nothing blocking.
+- **Data (shipped):** bet 1's verdict now prints, beside its other side figures, how many of the videos it reads were written by the backup AI. It never triggers anything.
+- **Data (a finding):** in practice, bet 1's host is its closing vote alone. On its first 7 videos our quality filter dropped the opening line every time (we expected about 1 in 6–8 to pass), and the vote shipped on 6. This morning's video lost both: the backup AI wrote a vote one word too long, so it went out as a plain reading. Not acted on, because bet 1's rule already covers a thin dose, and raising it comes after the read.
+- **Reliability (a finding):** Google's AI was overloaded on 5 of this week's 8 uploads, against 0–2 a week before, on the same model as last week. The cause is on Google's side, not our change, but it means the backup wrote most of bet 1's videos so far. Recorded for Monday.
+- **General management:** the queue had no ready items against a minimum of five. I proposed two rounds of eight, and a fresh reviewer ranked each round in both orders. I did the top items that were neither blocked nor already done.
+- **Checked:** this morning's upload landed (07:33) and its run succeeded. Money controls are intact ($0.52 this month, forecast $0.79 of $3). No secrets committed, no workflow change. AI use: none of Google's allowance, no paid voice.
+- Balance: three fixes and two findings, no bet. The takes show, which changes what we ship, goes live tonight.
+
+### Blocked
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+
+### Next
+- **Today's later shifts (20 November):** still no test videos and no Google AI requests until 08:00 UTC on 21 November.
+- **21 November, first:** check tonight's first takes video (logged as takes, nothing of Reddit's in its title, description or tags), then mark the takes task done. That frees the next tickets for helper agents, starting with the choice of how the play-along show gets its slots.
+- **23 November, the weekly review:** check whether Google's overload persisted (this week, 5 of 8), and read the new backup-AI figure beside bet 1's verdict. Also: the "blocked or rejected" line for each music track's first takes video, bet 2's capitals test, and the genre-hits study's project slot. The release check should by then have skipped at least one day.
+- Dropped this shift: telling the backup AI the vote's word limit (it changes the video during bet 1's read); a brand-name check (the handles were checked on 15 November, and the pick waits for the show choice); an automatic check of the first takes video (a minute by hand, once); the cosmetic startup line; pricing fan funding (no show chosen yet, and we are ~209× short); how concentrated views are (dropped before); the winter reset hour for test videos (a workflow change only you can approve, and low exposure); retrying Google's main model before the backup (it already retries once); the vote's opening repeating across videos (the prompt asks for it: it's the show's signature line, not template content). Nothing else cleared the bar, so I handed over at 12:08, 31 minutes early.
+
+### Better?
+- **Than last shift:** yes, slightly. Uploads after 12 January no longer depend on a switch staying on, and from tomorrow the uploads keep more of their AI allowance.
+- **Than ~10 shifts ago:** yes. On 15 November the replacement show was switched off. Tonight it uploads, and the reads that will judge it now show which AI wrote each video. Watch time still reads as falling (12.0 to 10.5 seconds).
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-20 (01:16) — The 5 January switch to the takes show is now automatic, so uploads keep going after Reddit ends even if no shift runs that day
 
     Worked (% of the shift): engineering 35 · gm 20 · legal 20 · data 15 · reliability 10
@@ -93,40 +129,3 @@ and more useful than a confident guess.
 - **Than last shift:** yes, slightly. Continuity after 12 January no longer depends on someone remembering a date.
 - **Than ~10 shifts ago:** yes. On 15 November the replacement show was switched off and Reddit's end had no plan in code. Now takes uploads daily and takes over by date. Watch time still reads as falling (12.0 to 10.5 seconds).
 - **Than ~100 shifts ago:** too early to say.
-
----
-
-## 2026-11-19 (12:20) — The replacement show is switched on: its first video goes up tomorrow evening, and the checks that will judge it now work
-
-    Worked (% of the shift): strategy 30 · gm 20 · reliability 15 · legal 15 · data 10 · engineering 10
-
-**Summary:** The takes show, which keeps uploads going after Reddit ends for us on 12 January, passed its one test video and is live: from tomorrow evening the channel uploads one Reddit video and one takes video a day. Three smaller fixes make sure it is judged on what viewers did, and not on a copyright block or a scheduling delay.
-
-### Toward revenue
-- **Directly, on the biggest risk.** Uploads no longer depend on Reddit alone. The first takes video goes up on the evening of 20 November, and about 35 will be a week old by the 4 January read that decides whether takes takes every slot.
-- The fixes below protect that read. A takes video blocked by a copyright claim would have counted as nobody watching it. And a late upload run would have shown up as a missed day.
-
-### Done
-- **Strategy (shipped):** the test video passed (21 seconds, sound, one of the new music tracks, nothing of Reddit's in the text). Merged, with all 1,482 tests passing. Today's two Reddit uploads are unchanged, and takes starts with the next evening slot of 20 November.
-- **Legal (a fix to the plan):** our plan was to check each new music track's first takes video for a copyright claim. It turned out no shift could actually make that check, since shifts have no YouTube access and YouTube's pages block our machines. The Monday analytics job, which does have access, now records whether YouTube rejected or region-blocked each recent video. The first read is on 23 November. Reviewed fresh; nothing blocking.
-- **Reliability (shipped, promised since October):** the upload log now records which scheduled slot each run belonged to. GitHub starts our runs 5 to 9 hours late, and the Monday report was reading a late run as a missed day. Reviewed fresh; nothing blocking.
-- **Data (a fix):** takes is exempt from the automatic undo rule until its 4 January read. That exemption now ends by itself at the 5 January cutover, so no future shift has to remember to remove it.
-- **General management (a fix to the method):** the project board was telling every shift to start a costly new round of project proposals, even though two projects are already running (our limit) and a third is planned and waiting. It now says to wait. I proposed six items, a fresh reviewer ranked them in both orders, and I did the top four. I also deleted 123 old branches whose work was already merged or superseded, and merged a second one promised for after the current release (the Monday report's count for bet 1 now reads only the videos its verdict reads, as set in October); 20 unmerged remain.
-- **Reliability and security (checked):** this morning's upload landed (07:44). Money controls are intact ($0.49 this month, forecast $0.78 of $3). No secrets committed, no workflow change. AI use: one test video (a few Google requests); no paid voice.
-- Balance: one bet shipped (the takes show), four fixes.
-
-### Blocked
-- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
-
-### Next
-- **21 November, first:** check the first takes upload (logged as takes, nothing of Reddit's in the title, description or tags), then mark the takes task done.
-- **Then:** a new task, written tonight. Nothing in the code yet hands every slot to takes on 5 January, so without a shift that day, half the uploads would fail from 12 January. The task makes it a date in the code. It can be handed to a helper agent as the first task of the trial of that way of working.
-- **23 November:** the weekly review. Read the new claim columns for each music track's first takes video, and drop any track that was rejected or blocked. Count how often takes runs fell back from Google's AI, since two takes runs share one day's allowance on 20–21 November; already 3 of the last 5 uploads did, so each show's rate gets named beside the 4 January read. Bet 2's capitals test also reads that day, and takes videos cannot leak into it, because its 30-a-side sample closed on 16 November.
-- The queue holds one ready item, well under its minimum of five, so the next shift should generate more work. Dropped today: a test against takes videos mentioning Reddit (one already exists); counting Google requests per takes run (the weekly review does it); a tidy-up of the takes run's startup message (cosmetic, recorded).
-
-### Better?
-- **Than last shift:** yes. The replacement show is live, not one test video away, and the checks that will judge it now work.
-- **Than ~10 shifts ago:** yes. Around 15 November the takes show was built but switched off, with no rule to judge it. Now it uploads daily under a rule set in advance. But watch time is still falling (12.0 to 10.5 seconds over six weeks).
-- **Than ~100 shifts ago:** too early to say.
-
----

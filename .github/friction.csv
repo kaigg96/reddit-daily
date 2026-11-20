@@ -396,3 +396,4 @@ F394,2026-11-20T11:51:45+00:00,44729325075,reliability,Release check stops re-sp
 F395,2026-11-20T11:53:09+00:00,44729325075,data,How often the backup model cost a v8 upload its host lines,done,,none,None: the run logs carried every line as written,None,0,
 F396,2026-11-20T11:58:50+00:00,44729325075,data,Release read names the AI-fallback share beside the dose,done,,none,None: the dose line's shape and its ids hand-off were there to copy,None,0,
 F397,2026-11-20T12:04:06+00:00,44729325075,reliability,From the cutover a run is takes with the alternation off too,done,,none,"Spotting that the Reddit-cutoff tests use the real clock with alternation off, so the fix would have turned them red on 01-05",None,2,
+F398,2026-11-20T12:05:21+00:00,44729325075,reliability,Are Gemini 503s rising week on week,done,,none,None: the log's screen columns go back to W38,None,0,
