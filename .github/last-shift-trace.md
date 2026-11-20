@@ -1,109 +1,99 @@
-## Shift trace — run 44652295279
+## Shift trace — run 44729325075
 
-**Ended:** success, is_error false, 119 turns, 35.1 min, stop end_turn; 1 permission denial(s): Task. **Tool calls:** 118, 1 failed. Helper agents made 77 more, 1 failed.
+**Ended:** success, is_error false, 151 turns, 29.5 min, stop end_turn; 2 permission denial(s): Bash, Task. **Tool calls:** 150, 3 failed. Helper agents made 54 more, 0 failed.
 
 **Last message:**
 
-> I handed over at 01:52, 23 minutes early. I generated new work three times, and nothing left cleared the bar. Everything is merged to `main` and the handover entry is pushed. The full suite (1,500 tests) passed before each merge, and a fresh-context agent reviewed each change and found nothing blocking.
+> I handed over at 12:08, 31 minutes early. The queue had no ready work, and three rounds of looking for more found nothing else worth doing. Every merge passed its guardrail check; the check on the final handover push (the log entry and friction rows) was still queued when I finished.
 >
-> **What moved the company toward revenue**
-> - **From 5 January every upload slot goes to the takes show automatically.** Until tonight the code alternated shows indefinitely, so from 12 January (when Reddit's API closes to us) half the uploads would have failed unless a shift remembered to make the switch. If the 4 January read goes against takes, a shift changes the date, not the code. A separate helper agent built this from its ticket, the first task run that way, and it passed my re-run of its checks first time. It changes nothing before 5 January, so it's safe to have merged before tonight's first takes video.
-> - **The Monday report now names any recent video YouTube rejected, region-blocked or no longer shows**, with its show and music track. A copyright-claimed takes video would otherwise read as one nobody watched and skew the 4 January decision.
+> **Shipped to `main`** (each through the full test suite, 1,510 passing at the end, plus a fresh-context review):
+> - **The daily release check stops wasting the shared AI allowance.** It had come back inconclusive three days running and was re-asking Google's AI every day, spending 6–8 of the 20 daily requests the uploads share. On 18 November an evening upload then ran out. Now an inconclusive result on unchanged code waits 3 days. On `main`, only the code the check actually tests triggers it; a pending-release branch keeps the wider trigger, because the reviewer found the other test workflow never runs on that branch. Today's check still runs once, because source code changed since its last verdict.
+> - **Uploads can't stop on 12 January if the show rotation is switched off.** With it off, every run used to fall back to Reddit, which closes to us that day. From 5 January every run is now takes either way. Nothing changes before then, and the Reddit-cutoff tests were pinned so they won't turn red on that date.
+> - **Bet 1's verdict now says how many of its videos the backup AI wrote**, next to its other side figures. It never triggers anything.
 >
-> **Smaller fixes**
-> - The rule that keeps takes out of the automatic undo now uses the same scheduled day as the switch, so a late 4 January run can't fall between them.
-> - The 5 January date is now set in one place only.
-> - The instructions generated for helper agents now say where Python lives; the first helper had to be told by hand.
->
-> **Checks**
-> - Both of yesterday's uploads landed.
-> - Tonight's evening run will be takes however late it starts. If Google's AI allowance is spent, the free backup service is on and tested.
-> - The money controls at AWS are intact ($0.49 spent this month, of a $3 budget).
-> - No secrets are committed and no workflow files changed.
-> - I used none of Google's allowance and no paid voice.
->
-> **Found, not fixed**
-> - The daily release check came back inconclusive on 17, 18 and 19 November because Google'
+> **Findings** (recorded in the product doc and the code-health log, not acted on):
+> - **In practice, bet 1's host is its closing vote line alone.** The opening line was dropped by the quality filter on all 7 videos so far (about 1 in 6–8 was expected to pass). The vote shipped on 6. This morning's video lost both, because the backup AI's vote ran 23 words against a 22.5-word cap, so it went out as a plain reading.
+> - **Google's AI was overloaded on 5 of this week's 8 uploads,** against 0–2 a week before, on the same model as last week. The cause is on 
 
-### Tool calls (last 80 of 118)
+### Tool calls (last 80 of 150)
 
-39. Bash: venv/bin/python - <<'EOF'
-40. Bash: venv/bin/python - <<'EOF'
-41. Bash: git add epics/ PRD.md && git commit -q -m "E1 T12 accepted first time (the pilot's first dispatch): evidence recorded, PRD #17 names the 01…
-42. Bash: venv/bin/python scripts/check_docs.py 2>&1 | tail -3 && git push -q origin main && git log --oneline -1 && git branch -d e1-t12-takes-only-…
-43. Bash: venv/bin/python scripts/friction.py add --help 2>&1 | head -25
-44. Bash: tail -3 .github/friction.csv 2>/dev/null || ls analysis | grep -i fric; grep -n 'choices\|CATEGORIES\|OUTCOMES' scripts/friction.py | head
-45. Bash: sed -n 108,110p scripts/friction.py && venv/bin/python scripts/friction.py add --function reliability --task "Pre-flight of the first takes…
-46. Bash: grep -n 'Gates and allotment\|Allotment\|def brief\|Never upload' scripts/epics.py | head; grep -n 'Allotment' -A3 scripts/epics.py | head …
-47. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/epics.py
-48. Bash: grep -n '^ROOT\|^REPO\|Path(__file__)' scripts/epics.py | head -3; grep -n 'def test.*brief' tests/test_epics.py | head
-49. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_epics.py
-50. Bash: git checkout -q -b gm/brief-interpreter && venv/bin/python - <<'EOF'
-51. Agent: Fresh review of brief diff
-52. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:%M
-53. Bash: git add scripts/epics.py tests/test_epics.py && git commit -q -m "Implementer briefs name the repository's interpreter: a worktree has no v…
-54. Bash: venv/bin/python scripts/context_budget.py --health 2>&1 | tail -30; grep -n -i 'audit' WORKLOG.md | head -5
-55. Bash: venv/bin/python - <<'EOF'
-56. Bash: venv/bin/python - <<'EOF'
-57. Bash: venv/bin/python - <<'EOF'
-58. Bash: sed -i 's/else takes take every slot 01-05, set in code (E1 T12). |/else takes take every slot 01-05 (in code: E1 T12). |/' PRD.md && venv/…
-59. Bash: venv/bin/python - <<'EOF'
-60. Bash: git add PRD.md PLAN.md epics/ .github/friction.csv && git commit -q -m "Trackers: C20 waits on T5 with the pilot 1 of 4; T10 names the swit…
-61. Bash: sed -n 1,30p epics/E6-what-the-hits-in-our-genre-share.md | cut -c1-600; sed -n 95,115p epics/E6-what-the-hits-in-our-genre-share.md
-62. Bash: grep -n -i 'at most\|MAX_ACTIVE\|active.*2' scripts/epics.py | head -8; date -u +%H:%M
-63. Bash: venv/bin/python scripts/report.py --zeros 2>&1 | tail -15; venv/bin/python scripts/report.py --scorecard 2>&1 | tail -15
-64. Bash: venv/bin/python scripts/report.py --scorecard 2>&1 | head -12; grep -n -i 'views.*234\|scorecard' PRD.md | tail -5 | cut -c1-300
-65. Bash: venv/bin/python scripts/report.py --trajectory --metric engaged_views 2>&1 | tail -14; venv/bin/python scripts/report.py --routes 2>&1 | ta…
-66. Bash: ls analysis/ | head -30; grep -rn 'region_restriction' src/*.py scripts/*.py | head -8
-67. Bash: grep -rn 'upload_status\|region_restriction\|CLAIM_FIELDS' scripts/weekly_digest.py src/insights.py scripts/report.py tests/*.py | head -10
-68. Bash: grep -n 'insights\.\|def ' scripts/weekly_digest.py | head -40; head -3 analysis/analytics_snapshots.csv | cut -c1-400; head -1 upload_log.…
-69. Bash: grep -n 'CLAIM_FIELDS\|RETENTION_FIELDS\|def write\|header\|DictWriter\|fieldnames' scripts/weekly_analytics.py | head -20; sed -n 296,330p…
-70. Bash: sed -n 141,150p scripts/weekly_digest.py; sed -n 166,215p scripts/weekly_digest.py | grep -n 'rows\|snap\|log_rows'
-71. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/weekly_analytics.py
-72. Bash: git checkout -q -b legal/claims-digest-line && grep -n '^def release_digest_line' src/insights.py && ls tests | grep -i digest
-73. Bash: venv/bin/python - <<'EOF'
-74. Bash: cat >> tests/test_insights.py <<'EOF'
-75. Bash: date -u +%H:%M; grep -ln 'weekly_digest' tests/*.py | head; venv/bin/python -c "
-76. Bash: venv/bin/python - <<'EOF'
-77. Agent: Fresh review of claims digest
-78. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1
-79. Bash: venv/bin/python - <<'EOF'
-80. Bash: date -u +%H:%M && venv/bin/python -m pytest tests/ -q 2>&1 | tail -1 && git add src/insights.py scripts/weekly_digest.py tests/test_insight…
-81. Bash: venv/bin/python - <<'EOF'
-82. Bash: venv/bin/python scripts/friction.py --help 2>&1 | head -15
-83. Bash: git add epics/ .github/friction.csv && git commit -q -m "E1 T5 points at the digest's Blocked or rejected line; friction row" && git push -…
-84. Bash: sed -n '580,600p' TECH_DEBT.md; awk 'NR>=157' TECH_DEBT.md | sed -n '424,445p'
-85. Bash: grep -n 'TAKES_GATE_ENDS' -B12 src/insights.py | sed -n '/def release_digest_line/,$p' | head -30
-86. Bash: n=$(grep -n 'day < TAKES_GATE_ENDS' src/insights.py | cut -d: -f1); sed -n "$((n-14)),$((n+3))p" src/insights.py
-87. Bash: git checkout -q -b data/gate-exemption-scheduled-day && venv/bin/python - <<'EOF'
-88. Bash: sed -n 2395,2425p tests/test_insights.py
-89. Bash: venv/bin/python - <<'EOF'
-90. Agent: Fresh review of exemption fix
-91. Bash: venv/bin/python -m pytest tests/ -q 2>&1 | tail -1; date -u +%H:%M
-92. Bash: git add src/insights.py tests/test_insights.py && git commit -q -m "The takes gate's auto-revert exemption keys on the scheduled day, as th…
-93. Bash: venv/bin/python scripts/friction.py add --function data --task "The takes gate's auto-revert exemption keys on the scheduled day like the c…
-94. Read: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-95. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-96. Bash: date -u +%H:%M && venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E 'OVER|WORKLOG|TOTAL' | head -5; venv/bin/python scripts/…
-97. Bash: grep -n '^## 20' WORKLOG.md && wc -l WORKLOG.md
-98. Bash: sed -n 128,133p WORKLOG.md && head -n 131 WORKLOG.md > /tmp/wl && tail -c 300 /tmp/wl && cp /tmp/wl WORKLOG.md && venv/bin/python scripts/c…
-99. Bash: git add WORKLOG.md && git commit -q -m "Handover: the 01-05 cutover is in code (E1 T12, the pilot's first dispatch), the digest flags block…
-100. Bash: git add .github/friction.csv && git commit -q -m "Friction row: the exemption's scheduled day" && git push -q origin main; awk 'NR>=157' TE…
-101. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-102. Bash: grep -n 'schedule\|cron' .github/workflows/validate-release.yml | head -4
-103. Bash: git add WORKLOG.md && git commit -q -m "Handover: 20 November is a double takes quota day, so later shifts spend no Gemini or dry runs unti…
-104. Bash: git ls-remote origin integration/preview | head -2; git fetch -q origin integration/preview 2>/dev/null && git log --oneline -1 FETCH_HEAD …
-105. Bash: sed -n 30,75p .github/workflows/validate-release.yml
-106. Bash: venv/bin/python scripts/validate_release.py --should-run --target main --verdict-file .github/last-release-validation.md 2>&1 | tail -5; gr…
-107. Read: /home/runner/work/reddit-daily/reddit-daily/scripts/validate_release.py
-108. Bash: for c in $(git log --since=2026-10-28 --format=%h -- .github/last-release-validation.md); do d=$(git show -s --format=%ad --date=short $c);…
-109. Bash: git log --since=2026-11-16 --format='%ad %s' --date=iso -- .github/last-release-validation.md; gh run list --workflow validate-release.yml …
-110. Bash: grep -n '^from\|^import\|scripts/\|subprocess.run(\[' scripts/validate_release.py | head -20; grep -n 'run:' -A3 .github/workflows/validate…
-111. Bash: grep -n 'open(\|Path(\|\.json\|\.csv\|^from\|^import' scripts/replay_screen.py | head -12; grep -n 'open(\|\.json\|\.csv\|CASES' scripts/va…
-112. Bash: grep -n 'GATED_PATHS' -r scripts tests | head; sed -n 26,32p scripts/validate_release.py
-113. Bash: grep -n 'pytest\|python ' .github/workflows/validate-release.yml | head; git log -S'"tests", "requirements.txt"' --format='%h %ad %s' --dat…
-114. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
-115. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
-116. Bash: venv/bin/python scripts/friction.py add --function reliability --task "Why the release check spends Gemini daily: INCONCLUSIVE 11-17 to 11-…
-117. Bash: venv/bin/python - <<'EOF'
-118. Bash: venv/bin/python - <<'EOF'
+71. Bash: gh run list -w run-reddit-video.yml -s success -L 16 --json databaseId,createdAt,event -q '.[] | "\(.databaseId) \(.createdAt) \(.event)"' …
+72. Bash: for r in 44176183607 44044425286; do echo "== $r"; gh run view $r --log 2>/dev/null | grep -o -E "(Gemini metadata failed.*|Commentary.*|CT…
+73. Bash: grep -n -E "^## |^### " PRD.md | sed -n '1,30p'; venv/bin/python scripts/context_budget.py --check 2>&1 | tail -12
+74. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -i prd; grep -n -E "^\*\*.*\(2026-11-1[0-9]" PRD.md | cut -c1-160 | head -12
+75. Read: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+76. Edit: /home/runner/work/reddit-daily/reddit-daily/PRD.md
+77. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "PRD|TOTAL|over|OVER"; date -u +%H:%M
+78. Bash: git add PRD.md && git commit -qm "Finding: bet 1's host is the vote line alone on v8's first 7 uploads (setup 0 of 7, vote 6 of 7; the miss…
+79. Bash: head -6 epics/E3*.md | cut -c1-250; timeout 60 venv/bin/python scripts/report.py --by meta_source 2>&1 | tail -12
+80. Bash: timeout 60 venv/bin/python scripts/report.py --offline --by meta_source 2>&1 | tail -14; grep -n -i -E "fallback" scripts/report.py | head …
+81. Bash: timeout 120 venv/bin/python scripts/check_docs.py 2>&1 | tail -15; echo ---; timeout 120 venv/bin/python scripts/context_budget.py --health…
+82. Bash: git check-ignore -q .env && echo ".env ignored"; git ls-files | grep -E -i "(^|/)\.env$|credentials|token\.json|client_secret" | head; git …
+83. Agent: Rank round-2 candidates
+84. Bash: gh run list -w validate-release.yml -L 2 --json createdAt,status,conclusion -q '.[] | "\(.createdAt) \(.status) \(.conclusion)"'; grep -n -…
+85. Read: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
+86. Bash: grep -n -E "render_host_lines|render_own_words|dose_ids" scripts/report.py src/*.py scripts/*.py | grep -v "def " | head
+87. Bash: python3 -c "
+88. Bash: grep -n -o -E "source ?= ?\"[a-z_]+\"|\"(gemini|groq)[a-z_]*\"|\"backstop\"|\"keyword\"" src/llm.py src/screen.py src/run.py | sort | uniq …
+89. Bash: sed -n 40,50p src/llm.py; sed -n 280,310p src/screen.py; sed -n 890,915p src/llm.py
+90. Bash: grep -n "GROQ_SOURCE =" src/*.py; grep -n "^def test_.*host_lines\|^def test_.*own_words" tests/*.py | head -5; date -u +%H:%M
+91. Read: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
+92. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
+93. Edit: /home/runner/work/reddit-daily/reddit-daily/scripts/report.py
+94. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_insights.py
+95. Bash: git checkout -q -b data/fallback-share && venv/bin/python -m pytest tests/test_insights.py -q -p no:warnings -k "fallback or dose or host_l…
+96. Bash: timeout 90 venv/bin/python scripts/report.py --offline --release v8 2>&1 | tail -12
+97. Bash: git add -A src/insights.py scripts/report.py tests/test_insights.py && git commit -qm "The release read names how many of the verdict's upl…
+98. Agent: Fresh review of fallback-share diff
+99. Edit: /home/runner/work/reddit-daily/reddit-daily/src/insights.py
+100. Bash: venv/bin/python -m pytest tests/test_insights.py -q -p no:warnings 2>&1 | tail -1 && git add src/insights.py && git commit -qm "render_fall…
+101. Bash: grep -n -E "SHOW_ALTERNATION|TAKES_CUTOVER|CUTOVER|^SOURCE|def show_for|def use_show" src/*.py | head -30
+102. Bash: sed -n 55,70p src/config.py; sed -n 240,290p src/config.py; sed -n 225,290p src/content.py; sed -n 165,185p src/run.py
+103. Bash: sed -n 150,166p src/run.py; grep -n "TAKES_ONLY_FROM\|SHOW_ALTERNATION" tests/*.py | head -20
+104. Bash: sed -n 1,40p tests/test_show_slots.py; sed -n 75,110p tests/test_show_slots.py; sed -n 55,120p tests/test_reddit_cutoff.py
+105. Bash: sed -n 1,60p tests/conftest.py; grep -ln "run.main()" tests/*.py
+106. Bash: grep -n -B3 -A3 "run.main()" tests/test_show_slots.py tests/test_slate.py | head -60; grep -n "datetime.now\|freeze\|_NOW\|monkeypatch.seta…
+107. Bash: sed -n 150,180p tests/test_show_slots.py; date -u +%H:%M
+108. Edit: /home/runner/work/reddit-daily/reddit-daily/src/run.py
+109. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_reddit_cutoff.py
+110. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_show_slots.py
+111. Bash: git checkout -q -b reliability/cutover-without-alternation && grep -n "^import datetime\|^import" tests/test_reddit_cutoff.py | head -5; gr…
+112. Bash: sed -n 1,9p tests/test_reddit_cutoff.py
+113. Edit: /home/runner/work/reddit-daily/reddit-daily/tests/test_reddit_cutoff.py
+114. Bash: venv/bin/python -m pytest tests/test_show_slots.py tests/test_reddit_cutoff.py -q -p no:warnings 2>&1 | tail -2; git stash -q; venv/bin/pyt…
+115. Bash: cp src/run.py /tmp/run.py.new && git show HEAD:src/run.py > src/run.py && venv/bin/python -m pytest tests/test_show_slots.py -q -p no:warni…
+116. Bash: git add src/run.py tests/test_reddit_cutoff.py tests/test_show_slots.py && git commit -qm "From the cutover a run is takes with the shows' …
+117. Agent: Fresh review of cutover diff
+118. Edit: /home/runner/work/reddit-daily/reddit-daily/src/config.py
+119. Edit: /home/runner/work/reddit-daily/reddit-daily/src/content.py
+120. Bash: venv/bin/python -m pytest tests/test_show_slots.py tests/test_reddit_cutoff.py tests/test_slate.py -q -p no:warnings 2>&1 | tail -1 && git …
+121. Edit: /home/runner/work/reddit-daily/reddit-daily/epics/E1-the-show-after-reddit.md
+122. Bash: venv/bin/python scripts/friction.py add --function reliability --task "From the cutover a run is takes with the alternation off too" --outc…
+123. ✗ Bash: python3 - <<'EOF' — Exit code 1: Traceback (most recent call last):
+124. Bash: head -1 upload_log.csv | cut -d, -f1-3; python3 - <<'EOF'
+125. Bash: grep -n -E '^MODEL|^TITLE_JUDGE_MODEL|^[A-Z_]*MODEL = ' src/llm.py src/*.py | head; grep -n -i "deprecat\|retire\|shut.*down" PRD.md | grep…
+126. ToolSearch: select:WebSearch,WebFetch
+127. Bash: git log -L33,33:src/llm.py --format='%h %ad %s' --date=short 2>/dev/null | grep -E '^[0-9a-f]{8} ' | head -4; sed -n 25,38p src/llm.py
+128. Bash: python3 - <<'EOF'
+129. Edit: /home/runner/work/reddit-daily/reddit-daily/TECH_DEBT.md
+130. Bash: git add TECH_DEBT.md && git commit -qm "TECH_DEBT: Gemini 503s jumped to 5 of this week's 8 screens on the same model (W46: 1 of 14), Googl…
+131. Bash: grep -n "def generate_retrying" -A 40 src/llm.py | head -60
+132. Bash: awk '/^- \*\*Google.s daily reset is 08:00/,/^- \*\*An `Approved-In/' TECH_DEBT.md | head -30
+133. Bash: grep -n "def test_the_release_read_passes_the_dose_the_verdicts_uploads" -A 45 tests/test_insights.py
+134. Bash: python3 - <<'EOF'
+135. Bash: sed -i 's/insights.render_fallbacks(rows, version, key, ids=read_ids)/insights.render_fallbacks(rows, version, key)/' scripts/report.py && …
+136. Bash: git add tests/test_insights.py && git commit -qm "The release-read wiring test pins the fallback line to the dose's uploads (review note on…
+137. Bash: timeout 60 venv/bin/python scripts/report.py --offline --routes 2>&1 | tail -15; ls analysis/ | head -30
+138. Bash: head -1 analysis/replies.csv; tail -4 analysis/replies.csv | cut -c1-200; wc -l analysis/replies.csv
+139. Bash: date -u +%H:%M; grep -n "^## 20" WORKLOG.md
+140. Bash: head -1 analysis/experiments.csv; tail -3 analysis/experiments.csv | cut -c1-400; grep -c '' analysis/experiments.csv; grep -n -i "sameness…
+141. Bash: grep -n -i "raise my hand\|raising my hand\|gets your vote\|voting for" src/*.py | cut -c1-220 | head -10
+142. Bash: grep -n -i '"cta"\|vote' src/llm.py | grep -i -E "prompt|hand|vote|cta" | cut -c1-200 | head -15
+143. Read: /home/runner/work/reddit-daily/reddit-daily/src/llm.py
+144. Edit: /home/runner/work/reddit-daily/reddit-daily/WORKLOG.md
+145. Bash: venv/bin/python scripts/context_budget.py --check 2>&1 | grep -E "WORKLOG|TOTAL|over|OVER|exceed"; date -u +%H:%M
+146. Bash: python3 - <<'EOF'
+147. Bash: git status --short; date -u +%H:%M
+148. Bash: T=$(date -u +%H:%M) && M=$(( (12*60+39) - (10#${T%:*}*60 + 10#${T#*:}) )) && sed -i "s/so I handed over at 12:12, 27 minutes early\./so I h…
+149. Bash: gh run list -w guardrails.yml -L 6 --json displayTitle,status,conclusion,createdAt -q '.[] | "\(.createdAt) \(.status) \(.conclusion) \(.di…
+150. Bash: gh run list -w guardrails.yml -L 9 --json displayTitle,conclusion -q '.[6:] | .[] | "\(.conclusion) \(.displayTitle[0:70])"'
