@@ -390,6 +390,13 @@ def test_brief_ends_with_the_report_format(tmp_path, capsys):
         ["Branch", "Changed", "Accept", "Could not do", "Learned"]
 
 
+def test_brief_names_the_repository_interpreter(tmp_path, capsys):
+    """An implementer's worktree has no venv/; the brief says which to use."""
+    assert ep.main(["brief", "E1", "T1", "--dir", write(tmp_path, BRIEF_BOARD)]) == 0
+    python = os.path.join(ep.ROOT, "venv", "bin", "python")
+    assert f"- Run Python as `{python}`" in capsys.readouterr().out
+
+
 def test_brief_of_an_unknown_ticket_exits_non_zero(tmp_path, capsys):
     d = write(tmp_path, BRIEF_BOARD)
     for args in (["E1", "T9"], ["E9", "T1"], ["E1"]):
