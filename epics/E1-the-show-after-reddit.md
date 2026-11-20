@@ -347,7 +347,7 @@ Evidence:
 Status: todo
 Needs: T9
 Touches: src/config.py, src/run.py, tests/, README.md
-Context: by 2027-01-05, a week clear of the cutoff. `tests/test_reddit_cutoff.py` already proves a refused request cannot cost money or duplicate an upload. Since T12, every slot is takes from 01-05, but only while `SHOW_ALTERNATION` is on: switched off, every run falls back to `SOURCE` (`"reddit"` by default), so from 01-12 that switch would stop every upload; making `SOURCE` takes closes it (T12's implementer, 11-20).
+Context: by 2027-01-05, a week clear of the cutoff. `tests/test_reddit_cutoff.py` already proves a refused request cannot cost money or duplicate an upload. Since T12, every slot is takes from 01-05, and since 11-20 with `SHOW_ALTERNATION` off too (`run.main`, `bbe0272`): off had left `SOURCE`'s `"reddit"`, which would have stopped every upload from 01-12 (T12's implementer). Left here: Reddit's code and config.
 Accept:
 - [ ] seven days of uploads with no request to Reddit in any run log
 - [ ] descriptions and tags name nothing of Reddit's
