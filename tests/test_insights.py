@@ -3291,3 +3291,34 @@ def test_the_takes_gate_read_compares_on_a_full_arm(tmp_path, monkeypatch, capsy
     assert "show=takes vs show!=takes -> worse by" in out
     assert re.search(r"show=takes\s+n=22 ", out) and re.search(r"show!=takes\s+n=22 ", out)
     assert re.search(r"chance: random arms of 22 and 22 .* differ by [\d.]+%", out)
+
+
+def test_claims_digest_line_names_each_blocked_or_rejected_upload():
+    """E1 T5's Content ID check reaches the Monday digest: rejected, failed,
+    gone or region-blocked uploads are named with show and track; fine ones,
+    old ones (blank) and an unread week are not."""
+    latest = {
+        "ok": {"upload_status": "processed", "region_restriction": ""},
+        "busy": {"upload_status": "uploaded", "region_restriction": ""},
+        "old": {"upload_status": "", "region_restriction": ""},
+        "claimed": {"upload_status": "rejected:claim", "region_restriction": ""},
+        "blocked": {"upload_status": "processed", "region_restriction": "blocked 2"},
+        "gone": {"upload_status": "not returned"},
+        "unread": {"upload_status": "refused: RuntimeError: quota"},
+        "early": {"video_id": "early", "views": "3"},   # a snapshot before the columns
+    }
+    log = [{"video_id": "claimed", "show": "takes", "music_track": "freepd_funshine.mp3"},
+           {"video_id": "blocked", "show": "", "music_track": "funk_bg_lower.mp3"}]
+    line = insights.claims_digest_line(latest, log)
+    assert line.startswith("**Blocked or rejected** — ")
+    assert "claimed (takes, freepd_funshine.mp3): rejected:claim" in line
+    assert "blocked (reddit, funk_bg_lower.mp3): region blocked 2" in line
+    assert "gone (reddit, not in the log): not returned" in line
+    for quiet in ("ok", "busy", "old", "unread", "early"):
+        assert f"{quiet} (" not in line
+    clean = insights.claims_digest_line({"ok": latest["ok"], "unread": latest["unread"]}, log)
+    assert clean == "**Blocked or rejected** — none among uploads under 30 days"
+    unread = insights.claims_digest_line({"unread": latest["unread"], "old": latest["old"]}, log)
+    assert unread == "**Blocked or rejected** — not collected this week"
+    before = insights.claims_digest_line({"early": latest["early"]}, log)
+    assert before == "**Blocked or rejected** — not collected in this snapshot"
