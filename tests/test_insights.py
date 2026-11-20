@@ -2733,6 +2733,20 @@ def test_host_lines_report_the_dose_of_the_release(monkeypatch):
     assert "the verdict's first uploads" in line
 
 
+def test_fallbacks_name_how_many_of_the_releases_uploads_a_second_model_wrote():
+    """4 of v8's first 7 metadata calls fell back (PRD §4, 2026-11-20)."""
+    rows = [{"format_version": "v8", "meta_source": m, "screen_source": s, "video_id": i}
+            for m, s, i in (("gemini_fallback", "gemini_fallback", "a"), ("gemini", "gemini", "b"),
+                            ("groq_fallback", "backstop", "c"), ("error", "", "d"), ("groq", "gemini", "e"))]
+    rows += [{"format_version": "v7", "meta_source": "gemini_fallback"}, {"format_version": "v8"}]
+    line = insights.render_fallbacks(rows, "v8")
+    assert line == "AI fallback (never a trigger): metadata on 3 of 5, screen on 2 of 4"
+    line = insights.render_fallbacks(rows, "v8", ids={"a", "b"})
+    assert line.endswith("first uploads): metadata on 1 of 2, screen on 1 of 2")
+    # Before the columns, nothing is claimed.
+    assert insights.render_fallbacks([{"format_version": "v7", "meta_source": ""}], "v7") == ""
+
+
 def test_the_release_read_passes_the_dose_the_verdicts_uploads(monkeypatch, tmp_path, capsys):
     """`report.py --release` must hand the dose line the verdict's uploads,
     not the log's every row nor the baseline's (PRD §4, 2026-10-26)."""
