@@ -3,6 +3,7 @@ requests, and those are shared with live uploads."""
 import argparse
 import datetime
 import os
+import re
 import subprocess
 import sys
 
@@ -78,6 +79,82 @@ def test_a_fail_is_always_retried():
     proceed, why = decide(verdict("c6ee5f7", FAIL), "c6ee5f7")
     assert proceed is True
     assert "FAIL" in why
+
+
+INCONCLUSIVE = "⚠️ INCONCLUSIVE — gates could not be exercised; not a failure"
+
+
+def test_an_inconclusive_on_unchanged_code_waits_rather_than_re_asking_daily():
+    """It re-spent 6-8 of the 20 shared requests on 11-17, 11-18 and 11-19 to
+    learn nothing, and the 11-18 evening upload then hit the daily cap."""
+    text = verdict("c6ee5f7", INCONCLUSIVE)
+    assert validate_release.is_inconclusive(text)
+    assert not validate_release.is_inconclusive(verdict("c6ee5f7", FAIL))
+    for days in range(validate_release.MAX_INCONCLUSIVE_AGE_DAYS):
+        proceed, why = decide(text, "a4fb38c", now=NOW + datetime.timedelta(days=days))
+        assert proceed is False, why
+        assert "INCONCLUSIVE" in why
+    proceed, why = decide(text, "a4fb38c", now=NOW + datetime.timedelta(
+        days=validate_release.MAX_INCONCLUSIVE_AGE_DAYS))
+    assert proceed is True, why
+
+
+def test_an_inconclusive_retries_at_once_on_new_gated_code_or_no_date():
+    proceed, why = decide(verdict("c6ee5f7", INCONCLUSIVE), "89bc245", changed=always)
+    assert proceed is True and "changed" in why
+    assert decide(verdict("c6ee5f7", INCONCLUSIVE, when="whenever"), "c6ee5f7")[0] is True
+
+
+def test_a_fail_still_retries_daily_on_unchanged_code():
+    assert decide(verdict("c6ee5f7", FAIL), "a4fb38c", changed=never)[0] is True
+
+
+def test_the_inconclusive_fixture_is_the_workflow_s_own_text():
+    """If the record job's wording changes, the wait must not quietly lapse."""
+    workflow = open(os.path.join(validate_release.ROOT, ".github", "workflows",
+                                 "validate-release.yml")).read()
+    assert f"2) V='{INCONCLUSIVE}'" in workflow
+
+
+def test_on_main_only_what_the_gates_run_triggers_them():
+    """The gates import `src` alone; the suite runs on every push to main."""
+    assert "tests" not in validate_release.GATED_PATHS
+    assert "scripts" not in validate_release.GATED_PATHS
+    # Every script the gates run is listed: a new one must be added here too.
+    for name in ("validate_release.py", "replay_screen.py"):
+        source = open(os.path.join(validate_release.ROOT, "scripts", name)).read()
+        assert not re.search(r"from scripts\b|import scripts\b", source), name
+        for script in set(re.findall(r"scripts/\w+\.py", source)) | {f"scripts/{name}"}:
+            assert script in validate_release.GATED_PATHS, script
+    # A release branch's pushes get no guardrails run, so its tests still count.
+    assert {"scripts", "tests"} <= set(validate_release.BRANCH_GATED_PATHS)
+
+
+def test_a_tests_only_change_skips_on_main_but_not_on_a_branch(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q", "-b", "main")
+    for d in ("src", "tests", "scripts"):
+        (repo / d).mkdir()
+        (repo / d / "a.py").write_text("x = 1\n")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "base")
+    validated = _git(repo, "rev-parse", "--short", "HEAD")
+    (repo / "tests" / "a.py").write_text("x = 2\n")
+    (repo / "scripts" / "a.py").write_text("x = 2\n")
+    _git(repo, "commit", "-qam", "tests and an unrelated script")
+    _git(repo, "branch", "integration/preview")
+    (repo / ".github").mkdir()
+    when = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    (repo / ".github" / "v.md").write_text(verdict(validated, INCONCLUSIVE, when=when))
+    monkeypatch.setattr(validate_release, "ROOT", str(repo))
+    out = tmp_path / "out"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+    for target, expected in (("main", "proceed=false"), ("integration/preview", "proceed=true")):
+        out.write_text("")
+        validate_release.should_run_cli(argparse.Namespace(
+            target=target, verdict_file=".github/v.md"))
+        assert expected in out.read_text(), (target, out.read_text())
 
 
 def test_no_verdict_file_validates():
