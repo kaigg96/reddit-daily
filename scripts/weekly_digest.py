@@ -324,6 +324,12 @@ def main():
     except Exception as e:  # noqa: BLE001
         lines.append(f"**Release checks** — could not run ({type(e).__name__}: {e}); "
                      f"run `scripts/report.py --release {config.FORMAT_VERSION}` by hand")
+    # The Content ID check (E1 T5), from the snapshot's claim columns; like
+    # the line above, it must never cost the digest.
+    try:
+        lines.append(insights.claims_digest_line(latest, log_rows))
+    except Exception as e:  # noqa: BLE001
+        lines.append(f"**Blocked or rejected** — could not run ({type(e).__name__}: {e})")
     lines.append("")
     if measurable:
         top = max(measurable, key=lambda v: views(v["id"]))

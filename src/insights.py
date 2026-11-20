@@ -1212,6 +1212,46 @@ def latest_releases(log_rows, key="format_version", n=2):
     return order[::-1][:n]
 
 
+# videos.list's uploadStatus for an upload that is fine; anything else the
+# Monday snapshot records (rejected:claim, failed:codec, deleted, not returned)
+# means viewers cannot see it, and its zero would read as nobody watching.
+UPLOAD_STATUS_OK = ("processed", "uploaded")
+
+
+def claims_digest_line(latest, log_rows):
+    """E1 T5's Content ID check, every Monday rather than when a shift
+    remembers: each upload in the latest snapshot that YouTube rejected,
+    failed, no longer returns, or blocks by region, with its show and music
+    track. `latest` maps video_id to that snapshot's row. A claim that only
+    monetizes, tracks or mutes never shows here (only the owner sees it), and
+    an unread week ("refused: ...") is the freshness line's to report."""
+    if all(row.get("upload_status") is None for row in latest.values()):
+        # A snapshot from before the columns existed reads blank, not clean.
+        return "**Blocked or rejected** — not collected in this snapshot"
+    logged = {r.get("video_id"): r for r in log_rows}
+    flagged = []
+    for vid, row in sorted(latest.items()):
+        status = (row.get("upload_status") or "").strip()
+        region = (row.get("region_restriction") or "").strip()
+        if status.startswith("refused:"):
+            continue
+        bad = [status] if status and status not in UPLOAD_STATUS_OK else []
+        bad += [f"region {region}"] if region else []
+        if bad:
+            log = logged.get(vid, {})
+            flagged.append(f"{vid} ({log.get('show') or 'reddit'}, "
+                           f"{log.get('music_track') or 'not in the log'}): {', '.join(bad)}")
+    statuses = [(r.get("upload_status") or "").strip() for r in latest.values()]
+    if not flagged and not any(x and not x.startswith("refused:") for x in statuses):
+        # Every recent upload's read was refused: an unread week, not a clean one.
+        return "**Blocked or rejected** — not collected this week"
+    if not flagged:
+        return "**Blocked or rejected** — none among uploads under 30 days"
+    return ("**Blocked or rejected** — " + "; ".join(flagged)
+            + ". A takes track whose upload a claim rejected or region-blocked is "
+            "dropped, never disputed (E1 T5)")
+
+
 def release_digest_line(log_rows, target_age=None):
     """One line for the Monday digest, so a due verdict reaches the owner
     whether or not a shift remembers to run the check (TECH_DEBT)."""
