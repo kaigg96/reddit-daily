@@ -366,12 +366,12 @@ Accept:
 Evidence:
 
 ### T12 · From 5 January every slot is takes, by date, with no shift needed
-Status: todo: ready once T5 is done (its first takes upload, ~11-21); written 11-19 for dispatch (E2 T8)
-Needs: T5
+Status: done
+Needs: T5 (merged before it: inert until 01-05, and while `SHOW_ALTERNATION` is off `show_for_run` is never called, so a T5 failure tonight cannot reach it)
 Touches: src/config.py, src/content.py, tests/test_show_slots.py
 Context: decision 4 (continuity is the floor): takes take every slot on 2027-01-05 unless ledger `takes-gate` fails on 01-04. Today nothing in code does it: `content.show_for_run` alternates `config.SHOWS` forever, so if no shift changes it, every Reddit slot from 01-12 ends in an error (`tests/test_reddit_cutoff.py`) and half the uploads stop. Add a dated constant (`TAKES_ONLY_FROM = datetime.date(2027, 1, 5)` in `src/config.py`, beside `SHOW_ALTERNATION`) and make `show_for_run` return `"takes"` for a run whose scheduled day (`content.run_slot`'s day, not the clock) is on or after it. A FAIL at the 01-04 read changes the date, never the code. Nothing else changes: before the date the slots alternate exactly as now (the existing tests pass untouched). No `FORMAT_VERSION` bump: no video changes before the date.
 Accept:
-- [ ] a test: a run scheduled on 2027-01-04 still alternates, and every slot from 2027-01-05 (both slots, at two and at four a day, a late run landing after midnight included) is takes
-- [ ] with the date moved past the test's days, `show_for_run` matches today's alternation for 28 days (a test)
-- [ ] the full suite passes and PRD §0 #17 names the date
-Evidence:
+- [x] a test: a run scheduled on 2027-01-04 still alternates, and every slot from 2027-01-05 (both slots, at two and at four a day, a late run landing after midnight included) is takes
+- [x] with the date moved past the test's days, `show_for_run` matches today's alternation for 28 days (a test)
+- [x] the full suite passes and PRD §0 #17 names the date
+Evidence: **Accepted 2026-11-20 (01:16 shift), first time; the pilot's first ticket (E2 T8).** Implementer from `epics.py brief E1 T12` on `e1-t12-takes-only-from` (`dd3bc1c8`). Re-run on the branch: `pytest tests/test_show_slots.py -k "takes_only_from or day_before or moved"` 7 passed (two and four a day; late runs land 00:40 next day and keep their scheduled day; 60 days from the date; the 28-day loop crosses 01-05 and 01-12 with the date moved); full suite 1,497 passed. The implementer showed the tests fail on the clock's day (4 failed) and the reviewer on `>` for `>=` (4 failed). Fresh review: nothing blocking; notes: the legacy cron line's path from 01-05 is untested (correct as written), and the digest's `-own` exemption keys on the clock's day, which matters only for a release first shipped on a late 01-04 run. Orchestrator's fix (`416fbc4d`): the digest's `TAKES_GATE_ENDS` reads `config.TAKES_ONLY_FROM`, so one date moves both. PRD §0 #17 names the date.
