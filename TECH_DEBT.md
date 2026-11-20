@@ -173,10 +173,13 @@ the commit message they were noticed in. Not a formal pass; fold into the next o
   **11-20:** the release check was INCONCLUSIVE 11-17, 11-18 and 11-19
   (Gemini timeouts and 503s), and a non-PASS retries daily, so it spends its
   6-8 every day; on 11-18 it ran at 17:13 and the 20:46 upload hit
-  `http_429_day`. Its trigger, `GATED_PATHS`, also counts `scripts/` and
-  `tests/`, which the Gemini gates never import; narrowing it would also drop
-  the job's pytest step on those changes, so the fix is a workflow split (a
-  patch). For the 11-23 review's quota count.
+  `http_429_day`. **Fixed 11-20 in the script, no patch needed:** an
+  INCONCLUSIVE on unchanged gated code now waits 3 days (a FAIL still retries
+  daily), and on `main` only `src`, `requirements.txt` and the two gate
+  scripts trigger it (guardrails runs the suite on every push to `main`); a
+  release branch keeps `scripts/` and `tests/`, as guardrails never runs on
+  its pushes. Left: a hand dispatch cannot force a re-check inside the wait
+  (no input for it; a workflow change). For the 11-23 review's quota count.
   (2) **The release check exercises Reddit's metadata path only**
   (`validate_release.py` never calls `use_show`): takes' question and title
   judge are checked only by its dry run. (3) Cosmetic: `run.py`'s startup

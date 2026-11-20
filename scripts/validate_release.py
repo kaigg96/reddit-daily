@@ -29,11 +29,14 @@ MAX_REQUESTS = 8  # screen replay (5) + metadata (1), with headroom for one retr
 # What the gates actually exercise. A commit touching nothing here cannot
 # change their verdict, so it must not trigger a re-run -- see should_validate.
 # The gates are this file and the screen replay (its cases inline), and both
-# import `src` alone. All of `scripts/` and `tests/` re-ran them on most
-# shifts' pushes (2026-11-20, TECH_DEBT), and the suite those would have caught
-# runs on every push anyway (guardrails.yml's tests job).
+# import `src` alone. On `main`, all of `scripts/` and `tests/` re-ran them on
+# most shifts' pushes (2026-11-20, TECH_DEBT), and the suite those would have
+# caught runs on every push to `main` anyway (guardrails.yml's tests job).
 GATED_PATHS = ("src", "requirements.txt", "scripts/validate_release.py",
                "scripts/replay_screen.py")
+# A release branch keeps the wide set: guardrails.yml never runs on its pushes,
+# so this job's unit-test step is the only one its `tests/` changes get.
+BRANCH_GATED_PATHS = ("src", "scripts", "tests", "requirements.txt")
 
 # A PASS expires even with no code change, because the model can drift.
 MAX_VERDICT_AGE_DAYS = 7
@@ -41,7 +44,8 @@ MAX_VERDICT_AGE_DAYS = 7
 # An INCONCLUSIVE on unchanged code is retried this often, not every day. It
 # means Gemini did not answer, and re-asking daily spent 6-8 of the 20 shared
 # requests on 11-17, 11-18 and 11-19 to learn nothing; on 11-18 the 20:46
-# upload then hit the daily cap (`http_429_day`).
+# upload then hit the daily cap (`http_429_day`). Whole days, as a PASS's age:
+# a run starting earlier in the day than the verdict was stamped waits one more.
 MAX_INCONCLUSIVE_AGE_DAYS = 3
 
 SUMMARY = []
@@ -125,7 +129,7 @@ def should_validate(verdict_text, target_sha, gated_code_changed, now=None,
     return False, f"nothing the gates exercise changed since {prev_sha} ({age}d ago)"
 
 
-def _git_gated_code_changed(target_ref):
+def _git_gated_code_changed(target_ref, paths=GATED_PATHS):
     """`gated_code_changed` backed by the real repo, failing toward validating."""
     def changed(prev_sha):
         found = subprocess.run(
@@ -134,7 +138,7 @@ def _git_gated_code_changed(target_ref):
         if found.returncode != 0:
             return True  # can't resolve it, so can't prove it is still valid
         diff = subprocess.run(
-            ["git", "diff", "--quiet", prev_sha, target_ref, "--", *GATED_PATHS],
+            ["git", "diff", "--quiet", prev_sha, target_ref, "--", *paths],
             cwd=ROOT, capture_output=True)
         # 0 = identical, 1 = differs, >1 = git failed (treat as differing).
         return diff.returncode != 0
@@ -171,8 +175,9 @@ def should_run_cli(args):
     ref = _resolve_ref(args.target)
     target_sha = subprocess.run(["git", "rev-parse", "--short", ref],
                                 cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    paths = GATED_PATHS if args.target == "main" else BRANCH_GATED_PATHS
     proceed, why = should_validate(verdict_text, target_sha,
-                                   _git_gated_code_changed(ref))
+                                   _git_gated_code_changed(ref, paths))
 
     print(f"{'validating' if proceed else 'skipping'}: {why}")
     out = os.environ.get("GITHUB_OUTPUT")
