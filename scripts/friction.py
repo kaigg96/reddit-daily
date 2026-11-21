@@ -27,6 +27,19 @@ abandoned.
     venv/bin/python scripts/friction.py evaluate   # D15's rule, then its checks
     venv/bin/python scripts/friction.py gaps       # shifts since START with no row
 
+At the end of every shift, the retro: its rows, then its one vote.
+
+    venv/bin/python scripts/friction.py retro      # this shift's rows, the requests
+    venv/bin/python scripts/friction.py vote --request R3 --row F402 \\
+        --saved 10 --why "how R3 would have saved those minutes"
+    venv/bin/python scripts/friction.py vote --new "what to build or change" \\
+        --row F402 --saved 10 --why "..." [--group G2] [--distinct]
+    venv/bin/python scripts/friction.py vote --none --why "why nothing would have"
+    venv/bin/python scripts/friction.py requests [--due]   # ranked by minutes saved
+    venv/bin/python scripts/friction.py mark R3 queued C21  # | shipped <commit>
+                                                   # | declined "why" | merged R2
+    venv/bin/python scripts/friction.py evaluate --requests  # the requests rule
+
 FILES
 
 .github/friction.csv, append-only, one row per item:
@@ -83,6 +96,43 @@ WHAT THE BUILD MUST KEEP
   as 60) x distinct functions. A fixed group with a row after `resolved` is
   flagged RECURRED.
 - Tests in tests/test_friction.py, like the other scripts'.
+
+REQUESTS (D15, amended 2026-11-20)
+
+Rows were logged and grouped on time, and nothing turned a group into a fix:
+on 11-20 no group had ever been `queued`, and none of 31 open was fixed since
+START. A group says what hurt, not what to build, and only the weekly review
+could queue one. A request says what to build; the shift that just lost the
+minutes is the one that votes for it.
+
+.github/friction-requests.csv, one row per request:
+    request   R1, R2, ... (renumber on merge, as F ids)
+    title     one line: what to build or change
+    group     the friction group it answers, else blank
+    status    open | queued | shipped | declined | merged
+    item      queued: the queue id; shipped: the commit or PR; merged: the
+              request it joined
+    opened, resolved, note
+
+.github/friction-votes.csv, append-only, one row per retro:
+    id V1, V2, ...; timestamp_utc; run_id; request (an R id, or "none" for an
+    abstention); row (the F id it cites); saved (minutes); why (one line)
+
+WHAT THE REQUESTS BUILD MUST KEEP
+- One retro a shift: `vote` refuses a second from the same GITHUB_RUN_ID. A
+  local session's retro cites "local" rows from the last LOCAL_HOURS.
+- A vote is evidence or nothing: it cites a non-"none" row this shift logged,
+  that no other vote cites, and claims at most that row's minutes lost
+  ("blocked" = 60). An abstention needs only its reason.
+- A new request whose group already has an open one is refused unless
+  --distinct: duplicates split the votes, and the bar is never reached.
+- Requests rank by minutes saved, votes of merged requests included. One is
+  past the bar at BAR_VOTES votes from different shifts; `backlog_status.py`
+  prints each open one past it, for /backlog §2 to rank.
+- `mark ... shipped` marks the request's group fixed, so D15 (e) counts it and
+  (f) and RECURRED test it. `mark ... queued` refuses past QUEUED_CAP.
+- The requests rule's thresholds are constants here, checked against D15's
+  text like the decision rule's; `evaluate --requests` quotes it first.
 """
 import argparse
 import csv
@@ -132,6 +182,30 @@ PROCESS_MINUTES = 20      # (h) a week's processing
 BLOCKED_MINUTES = 60      # "blocked", for leverage
 GAP_SLACK = dt.timedelta(minutes=5)
 
+REQUESTS = os.path.join(ROOT, ".github", "friction-requests.csv")
+VOTES = os.path.join(ROOT, ".github", "friction-votes.csv")
+REQUEST_FIELDS = ["request", "title", "group", "status", "item", "opened",
+                  "resolved", "note"]
+VOTE_FIELDS = ["id", "timestamp_utc", "run_id", "request", "row", "saved", "why"]
+REQUEST_STATUSES = ["open", "queued", "shipped", "declined", "merged"]
+
+# When the requests landed on main, a full UTC timestamp like START. The
+# landing commit sets it; no vote before it is read.
+REQ_START = None
+
+# The requests rule's thresholds (D15, amended 2026-11-20). test_friction
+# checks D15 states each, as for the decision rule's.
+BAR_VOTES = 3             # votes, each a different shift's: past the bar
+QUEUED_CAP = 2            # requests queued at once; `mark` enforces it
+RETRO_SHARE = 0.80        # (r1) share of shifts that hold a retro
+VOTE_SHARE = 1 / 3        # (r2) retros that vote for a request
+CONVERGE_DAYS = 14        # (r3) its read's age
+CONVERGED = 2             # (r3) requests past the bar
+REQ_RESULTS_DAYS = 28     # (r4)-(r5) and "not yet"
+SHIPPED = 1               # (r4) requests shipped
+DUE_DAYS = 14             # (r5) longest past the bar, neither queued nor declined
+LOCAL_HOURS = 12          # a local retro's rows: "local" ones this recent
+
 _WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five"}
 _FRACTIONS = {1 / 2: "half", 1 / 3: "a third", 1 / 4: "a quarter"}
 
@@ -155,18 +229,42 @@ def stated():
     ]
 
 
-def rule_text(path=None):
-    """D15's decision rule, verbatim from DECISIONS.md."""
+def stated_requests():
+    """The phrases D15's requests rule must contain, as stated() for its own."""
+    return [
+        f"(r1) {RETRO_SHARE:.0%}+ of shifts since REQ_START hold a retro",
+        f"(r2) at least {_FRACTIONS.get(VOTE_SHARE, VOTE_SHARE)} of retros "
+        "vote for a request",
+        f"{CONVERGE_DAYS}+ days after REQ_START: (r3) {CONVERGED}+ requests "
+        f"past the bar of {_WORDS.get(BAR_VOTES, BAR_VOTES)} votes, each a "
+        "different shift's",
+        f"{REQ_RESULTS_DAYS}+ days after REQ_START: (r4) {SHIPPED}+ request "
+        "shipped",
+        f"(r5) no request past the bar for more than {DUE_DAYS} days",
+        f"at most {_WORDS.get(QUEUED_CAP, QUEUED_CAP)} requests queued at once",
+        f"**Not yet** under {REQ_RESULTS_DAYS} days",
+    ]
+
+
+def rule_text(path=None, label="Decision rule"):
+    """A rule in D15, verbatim from DECISIONS.md: its decision rule, or with
+    label="Requests rule" the rule its 11-20 amendment set."""
     text = open(path or DECISIONS, encoding="utf-8").read()
-    m = re.search(r"^## D15 .*?(\*\*Decision rule\*\*.*?)\n\n\*\*", text,
-                  re.S | re.M)
-    return m.group(1).strip() if m else ""
+    m = re.search(r"^## D15 .*?(\*\*" + re.escape(label) + r"\*\*.*?)\n\n\*\*",
+                  text, re.S | re.M)
+    if not m or "\n## " in m.group(0):     # found past D15's own section
+        return ""
+    return m.group(1).strip()
 
 
-def drift(path=None):
-    """Phrases in stated() that D15 no longer contains."""
-    rule = " ".join(rule_text(path).split())
-    return [p for p in stated() if p not in rule]
+def drift(path=None, label="Decision rule", phrases=None):
+    """Phrases in stated() (or `phrases`) that the D15 rule no longer contains."""
+    rule = " ".join(rule_text(path, label).split())
+    return [p for p in (stated() if phrases is None else phrases) if p not in rule]
+
+
+def drift_requests(path=None):
+    return drift(path, "Requests rule", stated_requests())
 
 
 def _ts(s):
@@ -184,14 +282,20 @@ def _date(s):
         return None
 
 
-def _start():
-    """START as a datetime. A bare date would read as midnight and let that
-    day's rows in, the 2026-10-27 seed among them, so it is refused."""
-    if not START:
+def _start(value=None, name="START"):
+    """START (or REQ_START) as a datetime. A bare date would read as midnight
+    and let that day's rows in, the 2026-10-27 seed among them, so it is
+    refused."""
+    value = START if name == "START" else value
+    if not value:
         return None
-    if "T" not in START:
-        raise ValueError(f"friction.py START {START!r} needs a time, in UTC")
-    return _ts(START)
+    if "T" not in value:
+        raise ValueError(f"friction.py {name} {value!r} needs a time, in UTC")
+    return _ts(value)
+
+
+def _req_start():
+    return _start(REQ_START, "REQ_START")
 
 
 def _now(now=None):
@@ -269,37 +373,59 @@ def add(function, task, outcome, category, hardest="", helped="", minutes="",
     if errors:
         raise ValueError("\n".join(errors))
 
-    rows = load(path)
-    ids = [int(r["id"][1:]) for r in rows if re.fullmatch(r"F\d+", r.get("id", ""))]
     row = {
-        "id": f"F{max(ids, default=0) + 1}",
+        "id": _next_id(load(path), "id", "F"),
         "timestamp_utc": _now(now).isoformat(timespec="seconds"),
         "run_id": os.environ.get("GITHUB_RUN_ID") or "local",
         "function": function, "task": task.strip(), "outcome": outcome,
         "fixes": fixes, "category": category, "hardest": hardest.strip(),
         "helped": helped.strip(), "minutes_lost": minutes, "group": group,
     }
-    target = path or LOG
-    new = not os.path.exists(target) or os.path.getsize(target) == 0
+    _append(path or LOG, FIELDS, row)
+    return row
+
+
+def _next_id(rows, key, prefix):
+    """The next after the highest, so two branches appending both write it:
+    renumber on merge."""
+    ids = [int(r[key][len(prefix):]) for r in rows
+           if re.fullmatch(prefix + r"\d+", r.get(key) or "")]
+    return f"{prefix}{max(ids, default=0) + 1}"
+
+
+def _append(path, fields, row):
+    """Append one row, with the header if the file is new, and a newline first
+    if a hand edit left the last line without one."""
+    new = not os.path.exists(path) or os.path.getsize(path) == 0
+    ends_clean = True
     if not new:
-        with open(target, "rb") as f:
+        with open(path, "rb") as f:
             f.seek(-1, os.SEEK_END)
             ends_clean = f.read(1) == b"\n"
-    with open(target, "a", newline="", encoding="utf-8") as f:
-        if not new and not ends_clean:
+    with open(path, "a", newline="", encoding="utf-8") as f:
+        if not ends_clean:
             f.write("\n")
-        w = csv.DictWriter(f, fieldnames=FIELDS, lineterminator="\n")
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         if new:
             w.writeheader()
         w.writerow(row)
-    return row
+
+
+def _write_all(path, fields, rows):
+    """Rewrite a small table whole. Minimal quoting, "\\n" endings: a file this
+    module wrote reads back and rewrites byte for byte."""
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
 
 
 # ---------------------------------------------------------------- gaps
 
-def shifts(path=None):
-    """Completed shifts since START, oldest first: (end, minutes, run_id)."""
-    start = _start()
+def shifts(path=None, start=None):
+    """Completed shifts since START (or `start`), oldest first:
+    (end, minutes, run_id)."""
+    start = start or _start()
     if not start:
         return []
     try:
@@ -321,15 +447,15 @@ def shifts(path=None):
     return sorted(out)
 
 
-def gaps(rows=None, ledger=None):
-    """Each shift since START and whether a row was logged during it: a row
-    whose run_id is the shift's, or whose time falls inside
-    [end - duration - 5 min, end + 5 min]."""
+def gaps(rows=None, ledger=None, start=None):
+    """Each shift since START (or `start`) and whether a row was logged during
+    it: a row whose run_id is the shift's, or whose time falls inside
+    [end - duration - 5 min, end + 5 min]. The retro's check passes votes."""
     rows = load() if rows is None else rows
     stamped = [(_ts(r.get("timestamp_utc")), r.get("run_id"))
                for r in rows if r.get("run_id") != "backfill"]
     out = []
-    for end, minutes, run_id in shifts(ledger):
+    for end, minutes, run_id in shifts(ledger, start):
         lo = end - dt.timedelta(minutes=minutes) - GAP_SLACK
         hi = end + GAP_SLACK
         logged = any(rid == run_id or (t and lo <= t <= hi) for t, rid in stamped)
@@ -404,6 +530,10 @@ def report(rows=None, groups=None, now=None):
     held = [g for g, rs in back if not rs]
     if held:
         print(f"\nFIXED and holding: {', '.join(g['group'] for g in held)}")
+    print()
+    print_requests(now=now)
+    print("  Merge duplicates (friction.py mark R… merged R…): split votes never "
+          "reach the bar.")
     return {"ungrouped": ungrouped, "ranked": scored, "recurred": again}
 
 
@@ -572,6 +702,456 @@ def evaluate(rows=None, groups=None, ledger=None, now=None, seed=None,
     return v, results
 
 
+# ---------------------------------------------------------------- requests
+
+def load_requests(path=None):
+    return load(path or REQUESTS)
+
+
+def load_votes(path=None):
+    return load(path or VOTES)
+
+
+def _int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _run_id():
+    return os.environ.get("GITHUB_RUN_ID") or "local"
+
+
+def resolve(rid, reqs):
+    """The request a vote for `rid` counts toward: itself, or where its merges
+    lead. A loop stops where it closes."""
+    by = {r.get("request"): r for r in reqs}
+    seen = set()
+    while rid in by and by[rid].get("status") == "merged" and rid not in seen:
+        seen.add(rid)
+        rid = by[rid].get("item", "")
+    return rid
+
+
+def _shift_key(v):
+    """A shift's identity, for "each a different shift's". Local sessions
+    cannot be told apart, so each local vote is its own."""
+    rid = v.get("run_id") or "local"
+    return f"local:{v.get('id')}" if rid == "local" else rid
+
+
+def tally(reqs=None, votes=None):
+    """Each request not merged away, with every vote it counts, its merged
+    requests' included: {id: {"req", "votes", "saved", "shifts", "bar"}},
+    "bar" the time its BAR_VOTES-th shift voted, else None."""
+    reqs = load_requests() if reqs is None else reqs
+    votes = load_votes() if votes is None else votes
+    out = {r["request"]: {"req": r, "votes": []} for r in reqs
+           if r.get("status") != "merged"}
+    for v in votes:
+        target = resolve(v.get("request", ""), reqs)
+        if target in out:
+            out[target]["votes"].append(v)
+    for t in out.values():
+        t["votes"].sort(key=lambda v: v.get("timestamp_utc") or "")
+        t["saved"] = sum(_int(v.get("saved")) for v in t["votes"])
+        seen, t["bar"] = set(), None
+        for v in t["votes"]:
+            seen.add(_shift_key(v))
+            if len(seen) == BAR_VOTES and t["bar"] is None:
+                t["bar"] = _ts(v.get("timestamp_utc"))
+        t["shifts"] = len(seen)
+    return out
+
+
+def ranked(reqs=None, votes=None):
+    """Open and queued requests, most minutes saved first."""
+    t = tally(reqs, votes)
+    live = [x for x in t.values() if x["req"].get("status") in ("open", "queued")]
+    return sorted(live, key=lambda x: (-x["saved"], -x["shifts"],
+                                       _int(x["req"]["request"][1:])))
+
+
+def due(reqs=None, votes=None):
+    """Open requests past the bar: /backlog §2 ranks each until it is queued
+    or declined."""
+    return [x for x in ranked(reqs, votes)
+            if x["req"].get("status") == "open" and x["bar"]]
+
+
+def shift_rows(rows=None, now=None, run_id=None):
+    """This shift's friction rows: its run's, or for a local session the
+    "local" rows of the last LOCAL_HOURS."""
+    rows = load() if rows is None else rows
+    run_id = run_id or _run_id()
+    if run_id != "local":
+        return [r for r in rows if r.get("run_id") == run_id]
+    since = _now(now) - dt.timedelta(hours=LOCAL_HOURS)
+    return [r for r in rows if r.get("run_id") == "local"
+            and (_ts(r.get("timestamp_utc")) or since) > since]
+
+
+def vote(request="", new="", none=False, row="", saved="", why="", group="",
+         distinct=False, path=None, requests_path=None, rows_path=None,
+         groups_path=None, now=None):
+    """Cast this shift's one vote, or its abstention, refusing anything that
+    is not evidence. Returns (the vote, the request it counts for or None)."""
+    now = _now(now)
+    run_id = _run_id()
+    votes, reqs = load_votes(path), load_requests(requests_path)
+    rows = load(rows_path)
+    request, new, row, why = (str(x or "").strip() for x in (request, new, row, why))
+    errors = []
+    if [bool(request), bool(new), bool(none)].count(True) != 1:
+        errors.append('give exactly one of --request R…, --new "what to build", --none')
+    if not why:
+        errors.append("--why is required: how the request would have saved the "
+                      "minutes, or why no change would have")
+    for name, value in (("--why", why), ("--new", new)):
+        if "\n" in value or "\r" in value:
+            errors.append(f"{name} must be one line")
+    if run_id != "local":
+        held = [v for v in votes if v.get("run_id") == run_id]
+        if held:
+            errors.append(f"this shift (run {run_id}) already held its retro: "
+                          f"{held[0]['id']}, for {held[0]['request']}")
+
+    target = None
+    if request:
+        by = {r["request"]: r for r in reqs}
+        final = resolve(request, reqs)
+        if request not in by:
+            errors.append(f"--request {request!r} is not in friction-requests.csv "
+                          "(friction.py requests lists them)")
+        elif final not in by or by[final].get("status") == "merged":
+            errors.append(f"{request} was merged into {final!r}, which is not an "
+                          "open request")
+        else:
+            target = by[final]
+            st = target.get("status")
+            if st == "shipped":
+                errors.append(f"{final} shipped ({target.get('item')}, "
+                              f"{target.get('resolved')}). If it did not hold, "
+                              "vote --new for what would, and say so in --why")
+            elif st == "declined":
+                errors.append(f"{final} was declined {target.get('resolved')}: "
+                              f"{target.get('note')}. If that no longer holds, "
+                              "vote --new and say what changed")
+
+    cited = None
+    if not none:
+        if not row:
+            errors.append("--row is required: this shift's friction row the "
+                          "request would have saved")
+        else:
+            cited = next((r for r in rows if r.get("id") == row), None)
+            if cited is None:
+                errors.append(f"--row {row!r} is not in friction.csv")
+            else:
+                if row not in {r["id"] for r in shift_rows(rows, now, run_id)}:
+                    where = (f"run {run_id}" if run_id != "local" else
+                             f"a local session in the last {LOCAL_HOURS} hours")
+                    errors.append(f"--row {row} was not logged by this shift "
+                                  f"({where}): a vote cites friction its voter hit")
+                if cited.get("category") == "none":
+                    errors.append(f"--row {row} is a 'none' row: it lost nothing")
+                taken = next((v for v in votes if v.get("row") == row), None)
+                if taken:
+                    errors.append(f"--row {row} already backs {taken['id']}")
+        lost = _minutes(cited.get("minutes_lost")) if cited else None
+        s = str(saved).strip()
+        if not re.fullmatch(r"\d+", s) or int(s) < 1:
+            errors.append(f"--saved {saved!r} must be whole minutes, 1 or more")
+        elif cited is not None and (lost is None or int(s) > lost):
+            errors.append(f"--saved {s} is more than {row} lost "
+                          f"({cited.get('minutes_lost') or 'nothing recorded'}): "
+                          "a vote claims at most its row's minutes")
+    elif row or str(saved).strip():
+        errors.append("--none takes no --row or --saved: it says why nothing "
+                      "would have helped")
+
+    if new:
+        group = (group or (cited or {}).get("group") or "").strip()
+        if group and group not in {g["group"] for g in load_groups(groups_path)}:
+            errors.append(f"--group {group!r} is not a group in friction-groups.csv")
+        elif group and not distinct:
+            same = [r for r in reqs if r.get("group") == group
+                    and r.get("status") in ("open", "queued")]
+            if same:
+                errors.append(
+                    f"{group} already has an open request: "
+                    + "; ".join(f"{r['request']} {r['title']}" for r in same)
+                    + ". Vote for it with --request, or pass --distinct if "
+                    "yours is a different change")
+    elif group:
+        errors.append("--group goes with --new: a request's group is set when "
+                      "it opens")
+    if errors:
+        raise ValueError("\n".join(errors))
+
+    if new:
+        target = {"request": _next_id(reqs, "request", "R"), "title": new,
+                  "group": group, "status": "open", "item": "",
+                  "opened": now.date().isoformat(), "resolved": "", "note": ""}
+        _append(requests_path or REQUESTS, REQUEST_FIELDS, target)
+    v = {"id": _next_id(votes, "id", "V"),
+         "timestamp_utc": now.isoformat(timespec="seconds"), "run_id": run_id,
+         "request": target["request"] if target else "none",
+         "row": "" if none else row, "saved": "" if none else str(int(saved)),
+         "why": why}
+    _append(path or VOTES, VOTE_FIELDS, v)
+    return v, target
+
+
+_MOVES = {"queued": ("open",), "shipped": ("open", "queued"),
+          "declined": ("open", "queued"), "merged": ("open", "queued"),
+          "open": ("declined", "shipped")}
+
+
+def mark(rid, status, value="", requests_path=None, groups_path=None, now=None):
+    """Move a request on, and its friction group with it: queued makes an open
+    group queued, shipped makes it fixed (D15 (e) counts it; (f) and RECURRED
+    test it), declined returns a group it had queued to open.
+    Returns (the request, the group changed or None)."""
+    today = _now(now).date().isoformat()
+    value = str(value or "").strip()
+    reqs = load_requests(requests_path)
+    by = {r["request"]: r for r in reqs}
+    if rid not in by:
+        raise ValueError(f"{rid!r} is not a request (friction.py requests)")
+    r = by[rid]
+    if status not in _MOVES:
+        raise ValueError(f"status {status!r} is not one of {', '.join(_MOVES)}")
+    if r.get("status") not in _MOVES[status]:
+        raise ValueError(f"{rid} is {r.get('status')}; only "
+                         f"{' or '.join(_MOVES[status])} can become {status}")
+    if status != "open" and not value:
+        need = {"queued": "the queue id (PLAN C…, PRD #…, an epic ticket)",
+                "shipped": "the commit or PR", "declined": "the reason",
+                "merged": "the request it joins"}[status]
+        raise ValueError(f"{status} needs {need}")
+    if status == "queued":
+        n = sum(x.get("status") == "queued" for x in reqs)
+        if n >= QUEUED_CAP:
+            raise ValueError(f"{n} requests are queued already, the most at once "
+                             f"(D15's requests rule): ship or decline one first")
+    if status == "merged":
+        if value not in by or value == rid or resolve(value, reqs) == rid:
+            raise ValueError(f"{value!r} is not another request to merge into")
+        if by[resolve(value, reqs)].get("status") not in ("open", "queued"):
+            raise ValueError(f"{value} is not open or queued: merge into a live one")
+
+    r["status"] = status
+    if status in ("queued", "shipped", "merged"):
+        r["item"] = value
+    if status == "declined":
+        r["note"] = value
+    r["resolved"] = "" if status in ("open", "queued") else today
+    if status == "open" and value:
+        r["note"] = value
+    _write_all(requests_path or REQUESTS, REQUEST_FIELDS, reqs)
+
+    changed = None
+    groups = load_groups(groups_path)
+    g = next((x for x in groups if x["group"] == r.get("group")), None)
+    if g and status == "queued" and g.get("status") == "open":
+        g.update(status="queued", item=value)
+        changed = g
+    elif g and status == "shipped" and g.get("status") not in ("fixed", "wontfix"):
+        g.update(status="fixed", item=value, resolved=today)
+        g["note"] = "; ".join(x for x in (g.get("note"), f"{today}: fixed by "
+                                          f"{rid}, {r['title']}") if x)
+        changed = g
+    elif (g and status == "declined" and g.get("status") == "queued"
+          and g.get("item") == r.get("item")):
+        g.update(status="open", item="")
+        changed = g
+    if changed:
+        _write_all(groups_path or GROUPS, GROUP_FIELDS, groups)
+    return r, changed
+
+
+def print_requests(reqs=None, votes=None, now=None, limit=None):
+    reqs = load_requests() if reqs is None else reqs
+    votes = load_votes() if votes is None else votes
+    now = _now(now)
+    live = ranked(reqs, votes)
+    print(f"REQUESTS by minutes saved (past the bar: {BAR_VOTES} votes, each a "
+          "different shift's)")
+    if not live:
+        print("  none open: a retro opens one with vote --new")
+    for x in live[:limit]:
+        r = x["req"]
+        bar = ""
+        if x["bar"]:
+            bar = (f"  PAST THE BAR {(now - x['bar']).days}d"
+                   + (": rank it, /backlog §2" if r["status"] == "open" else ""))
+        print(f"  {r['request']:>4} {x['saved']:>4} min  {len(x['votes'])} votes  "
+              f"[{r['status']}{' ' + r['item'] if r.get('item') else ''}"
+              f"{' ' + r['group'] if r.get('group') else ''}]{bar}  {r['title']}")
+    if limit and len(live) > limit:
+        print(f"  … {len(live) - limit} more: friction.py requests")
+    done = {s: sum(r.get("status") == s for r in reqs)
+            for s in ("shipped", "declined", "merged")}
+    if any(done.values()):
+        print("  " + ", ".join(f"{n} {s}" for s, n in done.items() if n))
+    return live
+
+
+def retro(rows=None, reqs=None, votes=None, now=None, run_id=None):
+    """The end-of-shift retrospective: this shift's rows, the requests, and
+    the one command that closes it."""
+    rows = load() if rows is None else rows
+    votes = load_votes() if votes is None else votes
+    run_id = run_id or _run_id()
+    mine = shift_rows(rows, now, run_id)
+    citable = [r for r in mine if r.get("category") != "none"]
+    lost = sum(_minutes(r.get("minutes_lost")) or 0 for r in citable)
+    who = (f"run {run_id}" if run_id != "local" else
+           f"this session (local rows, last {LOCAL_HOURS} hours)")
+    print(f"RETRO for {who}: {len(mine)} rows, {len(citable)} to cite, "
+          f"{lost} minutes lost")
+    cited = {v.get("row") for v in votes}
+    for r in mine:
+        print(f"  {r.get('id'):>5} {r.get('category'):<9} "
+              f"{r.get('minutes_lost') or '0':>7} min {r.get('group') or '-':>4}"
+              f"{' (cited)' if r.get('id') in cited else ''}  "
+              f"{r.get('hardest') or r.get('task')}")
+    if not mine:
+        print("  no rows yet: log each finished item first (friction.py add)")
+    held = [v for v in votes if run_id != "local" and v.get("run_id") == run_id]
+    if held:
+        v = held[0]
+        print(f"\nRetro held: {v['id']}, for {v['request']}"
+              + (f", citing {v['row']} ({v['saved']} min)" if v.get("row") else "")
+              + f": {v['why']}")
+        return held[0]
+    print()
+    print_requests(reqs, votes, now, limit=10)
+    print("\nClose it with this shift's one vote: the row a change would have "
+          "saved, and at most the minutes that row lost.")
+    print("  friction.py vote --request R… --row F… --saved N --why \"how\"")
+    print("  friction.py vote --new \"what to build or change\" --row F… "
+          "--saved N --why \"how\"")
+    print("  friction.py vote --none --why \"why no change would have helped\"")
+    return None
+
+
+def request_checks(votes=None, reqs=None, ledger=None, now=None):
+    """The requests rule's checks (r1)-(r5): (id, label, value, threshold,
+    verdict), verdict one of pass / fail / not yet."""
+    votes = load_votes() if votes is None else votes
+    reqs = load_requests() if reqs is None else reqs
+    now = _now(now)
+    start = _req_start()
+    win = [v for v in votes if start
+           and (_ts(v.get("timestamp_utc")) or start - GAP_SLACK) >= start]
+    out = []
+
+    g = gaps(win, ledger, start) if start else []
+    if g:
+        share = sum(s["logged"] for s in g) / len(g)
+        out.append(("r1", "shifts that held a retro", f"{share:.0%} of {len(g)}",
+                    f">= {RETRO_SHARE:.0%}",
+                    "pass" if share >= RETRO_SHARE else "fail"))
+    else:
+        out.append(("r1", "shifts that held a retro", "no shift since REQ_START",
+                    f">= {RETRO_SHARE:.0%}", "not yet"))
+
+    if win:
+        share = sum(v.get("request") != "none" for v in win) / len(win)
+        out.append(("r2", "retros that voted for a request",
+                    f"{share:.0%} of {len(win)}", f">= {VOTE_SHARE:.0%}",
+                    "pass" if share >= VOTE_SHARE else "fail"))
+    else:
+        out.append(("r2", "retros that voted for a request", "no retro",
+                    f">= {VOTE_SHARE:.0%}", "not yet"))
+
+    age = (now - start).days if start else 0
+    t = tally(reqs, votes)
+    past = sorted(k for k, x in t.items() if x["bar"] and start and x["bar"] >= start)
+    out.append(("r3", "requests past the bar", f"{len(past)}"
+                + (f" ({', '.join(past)})" if past else ""), f">= {CONVERGED}",
+                "pass" if len(past) >= CONVERGED else
+                "fail" if age >= CONVERGE_DAYS else "not yet"))
+
+    shipped = [r["request"] for r in reqs if r.get("status") == "shipped" and start
+               and (_date(r.get("resolved")) or dt.date.min) >= start.date()]
+    out.append(("r4", "requests shipped", f"{len(shipped)}"
+                + (f" ({', '.join(shipped)})" if shipped else ""), f">= {SHIPPED}",
+                "pass" if len(shipped) >= SHIPPED else
+                "fail" if age >= REQ_RESULTS_DAYS else "not yet"))
+
+    stale = [f"{k} {(now - x['bar']).days}d" for k, x in t.items()
+             if x["req"].get("status") == "open" and x["bar"]
+             and now - x["bar"] > dt.timedelta(days=DUE_DAYS)]
+    out.append(("r5", f"open past the bar over {DUE_DAYS} days",
+                f"{len(stale)}" + (f" ({', '.join(stale)})" if stale else ""), "0",
+                "fail" if stale else "pass" if past else "not yet"))
+    return out
+
+
+def request_verdict(results, now=None):
+    """The requests rule's verdict: keep, change or not yet; stop is named
+    inside change's reason, since it turns on the last read's record."""
+    start = _req_start()
+    if not start:
+        return "not yet", "REQ_START is not set: the requests have not landed on main"
+    by = {c[0]: c[4] for c in results}
+    failed = [k for k, v in by.items() if v == "fail"]
+    if (_now(now) - start).days < REQ_RESULTS_DAYS or (
+            not failed and any(by[k] == "not yet" for k in ("r1", "r2", "r3", "r4"))):
+        why = f"under {REQ_RESULTS_DAYS} days since REQ_START, or a check unread"
+        if failed:
+            why += ("; failing now: " + ", ".join(f"({k})" for k in failed)
+                    + ", for the weekly review to act on")
+        return "not yet", why
+    if not failed:
+        return "keep", "every check passes"
+    parts = []
+    if {"r1", "r2"} & set(failed):
+        parts.append("(r1)-(r2) failed: change the retro")
+    if "r3" in failed:
+        parts.append("(r3) failed: change how requests are named and merged")
+    if {"r4", "r5"} & set(failed):
+        parts.append("(r4)-(r5) failed: change how /backlog takes them")
+    why = "; ".join(parts)
+    if "r4" in failed:
+        why += ("; if (r4) also failed at the last read after a change, the "
+                "verdict is stop")
+    return "change", why + " (a process change: CLAUDE.md §4)"
+
+
+def evaluate_requests(votes=None, reqs=None, ledger=None, now=None,
+                      decisions=None):
+    votes = load_votes() if votes is None else votes
+    reqs = load_requests() if reqs is None else reqs
+    print("D15's requests rule, verbatim (DECISIONS.md):\n")
+    print(rule_text(decisions, "Requests rule")
+          or "  (the requests rule was not found in D15)")
+    print()
+    missing = drift_requests(decisions)
+    if missing:
+        print("WARNING: D15 no longer states these thresholds the code uses:")
+        for p in missing:
+            print(f"  - {p}")
+        print()
+    print(f"REQ_START: {REQ_START or 'not set (the requests have not landed)'}")
+    results = request_checks(votes, reqs, ledger, now)
+    for cid, label, value, threshold, v in results:
+        print(f"  ({cid}) {v.upper():<8} {label}: {value}"
+              + (f"  [threshold {threshold}]" if threshold else ""))
+    start = _req_start()
+    win = [v for v in votes if start and v.get("request") != "none"
+           and (_ts(v.get("timestamp_utc")) or start) >= start]
+    print(f"\nMinutes saved, claimed (reported, never decisive): "
+          f"{sum(_int(v.get('saved')) for v in win)} over {len(win)} votes")
+    v, why = request_verdict(results, now)
+    print(f"\nVERDICT: {v.upper()} — {why}")
+    return v, results
+
+
 def print_gaps():
     g = gaps()
     if not _start():
@@ -607,7 +1187,25 @@ def main(argv=None):
     sub.add_parser("report", help="weekly review: ungrouped rows, groups by leverage")
     e = sub.add_parser("evaluate", help="D15's rule, then its checks")
     e.add_argument("--seed", type=int, default=None)
+    e.add_argument("--requests", action="store_true",
+                   help="the requests rule (D15, amended 11-20) instead")
     sub.add_parser("gaps", help="shifts since START with no row")
+    sub.add_parser("retro", help="end of shift: this shift's rows, the requests")
+    v = sub.add_parser("vote", help="this shift's one vote, or its abstention")
+    v.add_argument("--request", default="")
+    v.add_argument("--new", default="", metavar="TITLE")
+    v.add_argument("--none", action="store_true")
+    v.add_argument("--row", default="")
+    v.add_argument("--saved", default="")
+    v.add_argument("--why", default="")
+    v.add_argument("--group", default="")
+    v.add_argument("--distinct", action="store_true")
+    q = sub.add_parser("requests", help="requests ranked by minutes saved")
+    q.add_argument("--due", action="store_true", help="only those past the bar")
+    m = sub.add_parser("mark", help="queue, ship, decline, merge or reopen a request")
+    m.add_argument("request")
+    m.add_argument("status", choices=list(_MOVES))
+    m.add_argument("value", nargs="?", default="")
     args = ap.parse_args(argv)
 
     if args.cmd == "add":
@@ -623,9 +1221,44 @@ def main(argv=None):
     elif args.cmd == "report":
         report()
     elif args.cmd == "evaluate":
-        evaluate(seed=args.seed)
+        if args.requests:
+            evaluate_requests()
+        else:
+            evaluate(seed=args.seed)
     elif args.cmd == "gaps":
         print_gaps()
+    elif args.cmd == "retro":
+        retro()
+    elif args.cmd == "vote":
+        try:
+            cast, req = vote(args.request, args.new, args.none, args.row,
+                             args.saved, args.why, args.group, args.distinct)
+        except ValueError as err:
+            sys.exit(f"friction.py vote: refused\n{err}")
+        if req is None:
+            print(f"retro held: {cast['id']}, no vote")
+        else:
+            x = tally().get(req["request"], {})
+            moved = (f" ({args.request} was merged into it)"
+                     if args.request and args.request != req["request"] else "")
+            print(f"retro held: {cast['id']} for {req['request']}{moved}, now "
+                  f"{x.get('saved', 0)} min over {len(x.get('votes', []))} votes"
+                  + (", past the bar" if x.get("bar") else ""))
+    elif args.cmd == "requests":
+        if args.due:
+            for x in due():
+                r = x["req"]
+                print(f"  {r['request']} {x['saved']} min over {x['shifts']} "
+                      f"shifts [{r.get('group') or '-'}] {r['title']}")
+        else:
+            print_requests()
+    elif args.cmd == "mark":
+        try:
+            r, g = mark(args.request, args.status, args.value)
+        except ValueError as err:
+            sys.exit(f"friction.py mark: refused\n{err}")
+        print(f"{r['request']} {r['status']}"
+              + (f"; group {g['group']} now {g['status']}" if g else ""))
 
 
 if __name__ == "__main__":

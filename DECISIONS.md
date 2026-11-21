@@ -189,6 +189,44 @@ recorded each time it runs, a scheduled read, and a keep/change/stop rule set
 in advance; `/audit` checks for all three. The experiment process has none of
 them yet (`PLAN.md` C18).
 
+**Amended 2026-11-20: requests, voted at each shift's retro.** Rows are
+written and grouped on time ((a)–(d) pass; since 11-10, 61 of 73 non-"none"
+rows grouped, the other 12 under 4 days old). Nothing turns a group into a
+fix: no group has ever been `queued`, and none of 31 open is fixed since
+START, so (e) fails on 11-24 unless two ship first. A group names what hurt,
+not what to build, and only the weekly review could queue one. So each shift
+ends with a retro (`friction.py retro`): one vote for a request (what to build
+or change), citing one of its own non-"none" rows and the minutes the request
+would have saved there, at most that row's minutes lost; or an abstention
+with its reason. Requests rank by minutes saved; `backlog_status.py` hands any
+open one past the bar to `/backlog` §2 until it is queued or declined.
+Shipping one marks its group fixed, so (e)–(f) read it. The 11-24 read runs as
+written; if it says change, this is that change. Spec: `friction.py`.
+*Rejected:* waiting for the read (four days, and nothing it measures moves);
+queueing top groups straight into `PLAN.md` (the rule already said to, for
+four weekly reviews); votes on any row (one shift could mine old rows for a
+favourite; its own rows make each vote an independent occurrence); GitHub
+reactions (no evidence, and a second system). *Assumes* the shift that lost
+the minutes names the change better than a weekly reader, and that a retro
+costs about two minutes.
+
+**Requests rule** (pre-committed 2026-11-20, before any vote; REQ_START is
+when the requests land on `main`; quote this before any number):
+- *Collection*, each weekly review: (r1) 80%+ of shifts since REQ_START hold a
+  retro; (r2) at least a third of retros vote for a request.
+- *Convergence*, at the first weekly review 14+ days after REQ_START: (r3) 2+
+  requests past the bar of three votes, each a different shift's.
+- *Results*, at the first weekly review 28+ days after REQ_START: (r4) 1+
+  request shipped; (r5) no request past the bar for more than 14 days without
+  being queued or declined. Minutes saved is reported, never decisive.
+- *Guardrail*, enforced by `friction.py mark`: at most two requests queued at
+  once, so friction fixes cannot crowd out the bets.
+- **Keep** if all pass. **Change** if any fail: (r1)–(r2) point at the retro,
+  (r3) at how requests are named and merged, (r4)–(r5) at how `/backlog` takes
+  them. **Stop** if (r4) still fails at the read after one change: drop the
+  retro and the votes, keep the data. **Not yet** under 28 days. A read
+  changes a threshold only for the next read.
+
 **Revisit:** at the rule's read, and at each `/audit`.
 **Re-reviewed 2026-10-28 (audit):** holds: all four shifts since it went live logged their rows, about 40% "none"; the rest untestable until the 11-24 read.
 **Re-reviewed 2026-11-05 (audit):** holds: every shift since 10-28 logged rows, about 45% "none"; the 11-24 read passes its fixed-groups test only if G1 and G2 (fixes shipped 11-02, 11-03) are marked fixed by then.
