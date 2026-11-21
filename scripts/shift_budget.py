@@ -19,7 +19,10 @@ interactive work, so shifts are a small slice. The allowance therefore only
 needs to be low enough to catch a shift looping, not to manage their week.
 
     shift_budget.py check <ledger> <ceiling>   -> prints spend; exit 1 if over
-    shift_budget.py record <output> <ledger> <run_id> <model> <effort>
+    shift_budget.py record <output> <ledger> <run_id> <model> <effort> [<start> <slot> <minutes>]
+
+Where a measured reading exists, quota.py gates on the plan's real 5-hour and
+weekly % instead, and this allowance is its fallback.
 
 The ceiling lives in a GitHub repository variable, not in the repo, so a shift
 cannot raise its own allowance by editing a file.
@@ -107,8 +110,12 @@ def _count(ledger, now=None):
     return n
 
 
-def record(output, ledger, run_id, model, effort):
-    """Append what the run actually cost. Best-effort: never fail the job."""
+def record(output, ledger, run_id, model, effort, start="", slot="", minutes=""):
+    """Append what the run actually cost. Best-effort: never fail the job.
+
+    With the gate's start reading (`start`, quota.py), the row also carries the
+    plan's 5-hour and weekly % at the start and the end. The end is the last
+    rate_limit_event in the execution output, which keeps every SDK message."""
     try:
         text = open(output).read()
         # The action writes a JSON array, a single object, or a stream of
@@ -119,6 +126,7 @@ def record(output, ledger, run_id, model, effort):
         except ValueError:
             data = [json.loads(l) for l in text.splitlines()
                     if l.strip().startswith("{")]
+        messages = data if isinstance(data, list) else [data]
         if isinstance(data, list):
             results = [d for d in data if isinstance(d, dict)
                        and ("total_cost_usd" in d or d.get("type") == "result")]
@@ -140,20 +148,65 @@ def record(output, ledger, run_id, model, effort):
     if data.get("is_error") and result.startswith("API Error"):
         print(f"::error::{result[:500]}")
 
-    new = not os.path.exists(ledger)
-    with open(ledger, "a", newline="") as f:
-        w = csv.writer(f, lineterminator="\n")
-        if new:
-            w.writerow(["timestamp_utc", "run_id", "model", "effort",
-                        "turns", "duration_min", "quota_units", "is_error"])
-        row = [datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-               run_id, model, effort, data.get("num_turns", ""),
-               f'{data.get("duration_ms", 0) / 60000:.1f}',
-               f'{data.get("total_cost_usd", 0):.4f}',
-               int(bool(data.get("is_error")))]
-        w.writerow(row)
-    print("recorded:", row)
+    row = {"timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+           "run_id": run_id, "model": model, "effort": effort,
+           "turns": data.get("num_turns", ""),
+           "duration_min": f'{data.get("duration_ms", 0) / 60000:.1f}',
+           "quota_units": f'{data.get("total_cost_usd", 0):.4f}',
+           "is_error": int(bool(data.get("is_error"))),
+           "slot": slot, "minutes": minutes}
+    row.update(_quota_columns(start, messages))
+    _append(ledger, row)
+    print("recorded:", list(row.values()))
     return 0
+
+
+def _quota_columns(start, messages):
+    """The start and end readings, and what the shift moved each window by."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import quota
+    try:
+        begin = json.load(open(start)) if start else None
+    except (OSError, ValueError):
+        begin = None
+    found = quota.readings([m for m in messages if isinstance(m, dict)])
+    end = found[-1] if found else None
+    pct = lambda r, w: ((r or {}).get(w) or {}).get("used_percentage", "")
+    moved = lambda w: "" if quota.used(begin, end, w) is None else quota.used(begin, end, w)
+    resets = ((end or begin or {}).get("seven_day") or {}).get("resets_at", "")
+    return {"five_hour_start": pct(begin, "five_hour"), "five_hour_end": pct(end, "five_hour"),
+            "weekly_start": pct(begin, "seven_day"), "weekly_end": pct(end, "seven_day"),
+            "five_hour_used": moved("five_hour"), "weekly_used": moved("seven_day"),
+            "weekly_resets_at": resets}
+
+
+BASE_COLUMNS = ["timestamp_utc", "run_id", "model", "effort",
+                "turns", "duration_min", "quota_units", "is_error"]
+
+
+def _append(ledger, row):
+    """Append one row, widening the header first if the ledger predates a
+    column (old rows get blanks). Columns another change added are kept."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import quota
+    rows, header = [], []
+    if os.path.exists(ledger):
+        with open(ledger, newline="") as f:
+            reader = csv.reader(f)
+            header = next(reader, [])
+            rows = list(reader)
+    want = header or list(BASE_COLUMNS)
+    want += [c for c in BASE_COLUMNS + quota.COLUMNS if c not in want]
+    if want != header:
+        tmp = ledger + ".tmp"
+        with open(tmp, "w", newline="") as f:
+            w = csv.writer(f, lineterminator="\n")
+            w.writerow(want)
+            w.writerows(r + [""] * (len(want) - len(r)) for r in rows)
+        os.replace(tmp, ledger)
+    with open(ledger, "a", newline="") as f:
+        csv.DictWriter(f, fieldnames=want, lineterminator="\n",
+                       extrasaction="ignore").writerow(row)
 
 
 def actions_minutes(repo, token, days=30):
@@ -233,7 +286,8 @@ if __name__ == "__main__":
     if cmd == "check":
         sys.exit(check(sys.argv[2], float(sys.argv[3])))
     if cmd == "record":
-        sys.exit(record(*sys.argv[2:7]))
+        # output, ledger, run_id, model, effort[, start reading, slot, minutes]
+        sys.exit(record(*sys.argv[2:10]))
     if cmd == "actions":
         # repo, token, allowance, reserve_share
         sys.exit(check_actions(sys.argv[2], sys.argv[3],
