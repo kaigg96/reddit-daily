@@ -373,3 +373,231 @@ def test_unset_start_reads_nothing(tmp_path, monkeypatch, capsys):
     v, _ = fr.evaluate(rows=[row(1, t(2))], groups=[], ledger=ledger(tmp_path, []),
                        now=t(5))
     assert v == "not yet" and "has not landed" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------- requests
+# D15, amended 2026-11-20: a retro a shift, one vote citing its own row.
+
+REQ_START = "2026-11-01T10:00:00+00:00"
+
+
+@pytest.fixture
+def reqs(tmp_path, monkeypatch):
+    """Files for the requests, the shift's own run id, REQ_START set."""
+    monkeypatch.setenv("GITHUB_RUN_ID", "100")
+    monkeypatch.setattr(fr, "REQ_START", REQ_START)
+    log = tmp_path / "f.csv"
+    with open(log, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fr.FIELDS, lineterminator="\n")
+        w.writeheader()
+        w.writerows([row(1, t(2), run_id="100", minutes="10", group="G1"),
+                     row(2, t(2), run_id="100", category="none", minutes="0"),
+                     row(3, t(2), run_id="99", minutes="10"),
+                     row(4, t(2), run_id="100", minutes="blocked")])
+    return {"path": str(tmp_path / "v.csv"), "requests_path": str(tmp_path / "r.csv"),
+            "rows_path": str(log),
+            "groups_path": groups_file(tmp_path, (("G1", "open", "", ""),
+                                                  ("G2", "open", "", "")))}
+
+
+def cast(files, now=None, **kw):
+    args = dict(row="F1", saved="5", why="it would have")
+    args.update(kw)
+    return fr.vote(**args, now=now or t(2, 13), **files)
+
+
+def test_d15_states_every_requests_threshold():
+    assert fr.rule_text(label="Requests rule").startswith("**Requests rule**")
+    assert fr.drift_requests() == []
+
+
+def test_a_changed_requests_threshold_is_caught(monkeypatch):
+    monkeypatch.setattr(fr, "BAR_VOTES", 4)
+    assert any("four votes" in p for p in fr.drift_requests())
+
+
+def test_a_vote_that_is_not_evidence_is_refused(reqs):
+    for kw in ({"row": "F3"},                   # another shift's row
+               {"row": "F2"},                   # a "none" row lost nothing
+               {"row": "F9"},                   # no such row
+               {"saved": "11"},                 # more than the row lost
+               {"saved": "0"}, {"saved": "ten"},
+               {"why": ""}, {"why": "two\nlines"},
+               {"row": ""},
+               {"request": "R1"},               # two choices, with new
+               {"new": ""}):                    # no choice
+        with pytest.raises(ValueError):
+            cast(reqs, **{"new": "a thing", **kw})
+    assert fr.load_votes(reqs["path"]) == []
+    assert fr.load_requests(reqs["requests_path"]) == []
+
+
+def test_a_blocked_row_backs_up_to_an_hour(reqs):
+    v, r = cast(reqs, new="a thing", row="F4", saved="60")
+    assert v["saved"] == "60" and r["request"] == "R1"
+
+
+def test_one_retro_a_shift_and_one_vote_a_row(reqs, monkeypatch):
+    v, r = cast(reqs, new="Compute the render slot")
+    assert (v["id"], v["request"], r["group"]) == ("V1", "R1", "G1")  # the row's group
+    with pytest.raises(ValueError, match="already held its retro"):
+        cast(reqs, request="R1", row="F4")
+    monkeypatch.setenv("GITHUB_RUN_ID", "101")
+    with pytest.raises(ValueError, match="already backs V1"):
+        cast(reqs, request="R1")
+
+
+def test_an_abstention_is_a_retro_with_its_reason(reqs):
+    v, r = fr.vote(none=True, why="nothing a change would have saved",
+                   now=t(2, 13), **reqs)
+    assert r is None and v["request"] == "none" and v["row"] == ""
+    with pytest.raises(ValueError):
+        fr.vote(none=True, row="F1", why="x", now=t(2, 13), **reqs)
+
+
+def test_a_duplicate_request_in_a_group_is_refused_unless_distinct(reqs, monkeypatch):
+    cast(reqs, new="Compute the render slot")
+    monkeypatch.setenv("GITHUB_RUN_ID", "101")
+    reqs_rows = reqs["rows_path"]
+    fr._append(reqs_rows, fr.FIELDS, row(5, t(3), run_id="101", group="G1"))
+    with pytest.raises(ValueError, match="G1 already has an open request: R1"):
+        cast(reqs, new="Render twice a shift", row="F5", now=t(3, 13))
+    v, r = cast(reqs, new="Render twice a shift", row="F5", distinct=True,
+                now=t(3, 13))
+    assert r["request"] == "R2"
+
+
+def test_local_sessions_cite_recent_local_rows(reqs, monkeypatch):
+    monkeypatch.delenv("GITHUB_RUN_ID")
+    fr._append(reqs["rows_path"], fr.FIELDS, row(5, t(3, 9), run_id="local"))
+    with pytest.raises(ValueError, match="not logged by this shift"):
+        cast(reqs, new="x", row="F5", now=t(4, 9))      # 24 hours old
+    v, _ = cast(reqs, new="x", row="F5", now=t(3, 12))
+    assert v["run_id"] == "local"
+
+
+def votes_for(spec):
+    """spec: [(request, run_id, saved, day)] -> vote rows."""
+    return [{"id": f"V{i}", "timestamp_utc": t(day).isoformat(), "run_id": rid,
+             "request": req, "row": f"F{i}", "saved": str(s), "why": "w"}
+            for i, (req, rid, s, day) in enumerate(spec, 1)]
+
+
+def request(rid, status="open", item="", group="", resolved=""):
+    return {"request": rid, "title": f"title {rid}", "group": group,
+            "status": status, "item": item, "opened": "2026-11-01",
+            "resolved": resolved, "note": ""}
+
+
+def test_merged_votes_count_and_the_bar_needs_different_shifts():
+    reqs = [request("R1"), request("R2", "merged", "R1"), request("R3")]
+    votes = votes_for([("R1", "1", 5, 2), ("R2", "2", 4, 3), ("R3", "3", 20, 3),
+                       ("R1", "local", 2, 4), ("R1", "local", 1, 5)])
+    t_ = fr.tally(reqs, votes)
+    assert "R2" not in t_ and t_["R1"]["saved"] == 12 and t_["R1"]["shifts"] == 4
+    assert t_["R1"]["bar"] == t(4)                    # the third shift's vote
+    assert [x["req"]["request"] for x in fr.ranked(reqs, votes)] == ["R3", "R1"]
+    assert [x["req"]["request"] for x in fr.due(reqs, votes)] == ["R1"]
+
+
+def test_shipping_a_request_marks_its_group_fixed_for_d15(reqs, started):
+    rp, gp = reqs["requests_path"], reqs["groups_path"]
+    cast(reqs, new="Compute the render slot")
+    r, g = fr.mark("R1", "queued", "C21", requests_path=rp, groups_path=gp, now=t(3))
+    assert r["status"] == "queued" and (g["status"], g["item"]) == ("queued", "C21")
+    r, g = fr.mark("R1", "shipped", "abc123", requests_path=rp, groups_path=gp, now=t(4))
+    assert (g["status"], g["resolved"], g["item"]) == ("fixed", "2026-11-04", "abc123")
+    groups = fr.load_groups(gp)
+    e = {c[0]: c for c in fr.checks(rows=[], groups=groups, ledger=None, now=t(4))}["e"]
+    assert e[2] == "1"                                  # D15 (e) counts it
+    with pytest.raises(ValueError):
+        fr.mark("R1", "shipped", "again", requests_path=rp, groups_path=gp)
+
+
+def test_the_queue_cap_and_the_marks_that_need_a_value(tmp_path):
+    rp, gp = str(tmp_path / "r.csv"), groups_file(tmp_path)
+    fr._write_all(rp, fr.REQUEST_FIELDS, [request("R1", "queued", "C1"),
+                                          request("R2", "queued", "C2"),
+                                          request("R3"), request("R4", "merged", "R3")])
+    with pytest.raises(ValueError, match="2 requests are queued"):
+        fr.mark("R3", "queued", "C3", requests_path=rp, groups_path=gp)
+    for status, value in (("declined", ""), ("merged", "R3"), ("merged", "R4"),
+                          ("merged", "R9")):
+        with pytest.raises(ValueError):
+            fr.mark("R3", status, value, requests_path=rp, groups_path=gp)
+    with pytest.raises(ValueError, match="R4 is merged"):
+        fr.mark("R4", "declined", "x", requests_path=rp, groups_path=gp)
+    r, _ = fr.mark("R3", "declined", "loses to bet 1", requests_path=rp,
+                   groups_path=gp, now=t(5))
+    assert (r["status"], r["note"], r["resolved"]) == ("declined", "loses to bet 1",
+                                                       "2026-11-05")
+
+
+def test_a_vote_for_a_closed_request_is_refused(reqs):
+    fr._write_all(reqs["requests_path"], fr.REQUEST_FIELDS,
+                  [request("R1", "shipped", "abc", resolved="2026-11-01"),
+                   request("R2", "declined"), request("R3", "merged", "R2")])
+    for rid in ("R1", "R2", "R3", "R9"):
+        with pytest.raises(ValueError):
+            cast(reqs, request=rid)
+
+
+def test_the_requests_rule_reads_not_yet_then_fails_what_it_should(tmp_path, monkeypatch):
+    monkeypatch.setattr(fr, "REQ_START", REQ_START)
+    shifts = [(t(d, 12), 30, str(d), 0) for d in range(2, 12)]
+    led = ledger(tmp_path, shifts)
+    votes = votes_for([("R1", str(d), 5, d) for d in (2, 3, 4)]
+                      + [("none", str(d), "", d) for d in (5, 6)])
+    for v in votes:
+        v["timestamp_utc"] = t(int(v["run_id"]), 11, 50).isoformat()
+    reqs = [request("R1")]
+    early = {c[0]: c[4] for c in fr.request_checks(votes, reqs, led, now=t(12))}
+    assert early == {"r1": "fail", "r2": "pass", "r3": "not yet", "r4": "not yet",
+                     "r5": "pass"}                      # 5 of 10 shifts held one
+    v, why = fr.request_verdict(list(fr.request_checks(votes, reqs, led, now=t(12))),
+                                now=t(12))
+    assert v == "not yet" and "failing now: (r1)" in why
+    late = fr.request_checks(votes, reqs, led, now=t(30))
+    by = {c[0]: c[4] for c in late}
+    assert by["r3"] == "fail" and by["r4"] == "fail" and by["r5"] == "fail"
+    v, why = fr.request_verdict(late, now=t(30))
+    assert v == "change" and "verdict is stop" in why
+
+
+def test_evaluate_requests_quotes_its_rule_before_any_number(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(fr, "REQ_START", REQ_START)
+    fr.evaluate_requests(votes=[], reqs=[], ledger=ledger(tmp_path, []), now=t(3))
+    out = capsys.readouterr().out
+    assert fr.rule_text(label="Requests rule") in out
+    assert (out.index("**Requests rule**") < out.index("\nREQ_START: ")
+            < out.index("\n  (r1) "))
+
+
+def test_the_retro_shows_the_shifts_rows_and_says_when_it_is_held(reqs, capsys):
+    rows = fr.load(reqs["rows_path"])
+    assert fr.retro(rows=rows, reqs=[], votes=[], now=t(2, 13)) is None
+    out = capsys.readouterr().out
+    assert "3 rows, 2 to cite" in out and "F3" not in out and "vote --none" in out
+    held = votes_for([("R1", "100", 5, 2)])
+    assert fr.retro(rows=rows, reqs=[request("R1")], votes=held, now=t(2, 13))
+    assert "Retro held: V1" in capsys.readouterr().out
+
+
+def test_the_request_files_parse_and_use_only_known_values():
+    reqs, votes = fr.load_requests(), fr.load_votes()
+    with open(fr.REQUESTS) as f:
+        assert f.readline().strip().split(",") == fr.REQUEST_FIELDS
+    with open(fr.VOTES) as f:
+        assert f.readline().strip().split(",") == fr.VOTE_FIELDS
+    ids = {r["request"] for r in reqs}
+    assert all(r["status"] in fr.REQUEST_STATUSES for r in reqs)
+    assert all(v["request"] in ids | {"none"} for v in votes)
+
+
+def test_backlog_status_hands_requests_past_the_bar_to_the_ranking(monkeypatch, capsys):
+    from scripts import backlog_status as bs
+    monkeypatch.setattr(fr, "load_requests", lambda path=None: [request("R1", group="G2")])
+    monkeypatch.setattr(fr, "load_votes", lambda path=None: votes_for(
+        [("R1", str(d), 5, d) for d in (2, 3, 4)]))
+    lines = bs.friction_requests()
+    assert lines and "R1" in lines[1] and "15 min" in lines[1]

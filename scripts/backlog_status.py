@@ -191,9 +191,34 @@ def main(argv=None):
               "names what no function is yet answering. What the last ten "
               "shifts already dropped, and why, what they did, and what the "
               "findings already answer: --dropped.")
+    for line in friction_requests():
+        print(line)
     for line in short_shifts():
         print(line)
     return 0
+
+
+def friction_requests():
+    """Open requests past the friction log's bar (D15, amended 11-20): each
+    is a candidate in this shift's ranking until it is queued or declined.
+    They are not ready items; ranking decides whether one becomes one."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    try:
+        if here not in sys.path:     # the bare name, as context_budget imports it
+            sys.path.insert(0, here)
+        import friction
+        found = friction.due(friction.load_requests(), friction.load_votes())
+    except Exception as err:          # a broken registry must not hide the queue
+        return [f"\nFRICTION REQUESTS unreadable: {err}"]
+    if not found:
+        return []
+    lines = ["\nFRICTION REQUESTS past the bar: rank each in this pass "
+             "(/backlog §2), then queue or decline it (friction.py mark)"]
+    for x in found:
+        r = x["req"]
+        lines.append(f"  - {r['request']} {x['saved']} min saved over "
+                     f"{x['shifts']} shifts [{r.get('group') or '-'}] {r['title']}")
+    return lines
 
 
 _ENTRY = re.compile(r"^## (\d{4}-\d{2}-\d{2}.*)$")
