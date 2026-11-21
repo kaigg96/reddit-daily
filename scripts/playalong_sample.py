@@ -3,7 +3,10 @@ committed records, to assets/gen/playalong_<template>.mp4 (gitignored), with
 three PNG frames each (hook, mid-countdown, reveal). Local only: no model,
 no TTS, no network, no upload.
 
-    venv/bin/python scripts/playalong_sample.py [--price APU0000703112] [--narrate]
+    venv/bin/python scripts/playalong_sample.py [--price APU0000703112 | --supply] [--narrate]
+
+`--supply` renders the first episode of each template `playalong.supply()`
+ships instead, the set the viewer bar judges before the arm goes live (E1 T15).
 
 `--narrate` reads it with the sample voice (STAND_IN_VOICE=1 for the free
 stand-in; else silence of the estimated length; never Polly) and times the
@@ -55,12 +58,16 @@ def main():
     config.GEN.mkdir(parents=True, exist_ok=True)
     # `--price APU0000703112` renders another BLS series on file (ground beef).
     price = sys.argv[sys.argv.index("--price") + 1] if "--price" in sys.argv else playalong.GAS_SERIES
-    cands = playalong.candidates(price)
-    episodes, _ = playalong.select_day(cands)
+    cands = playalong.supply() if "--supply" in sys.argv else playalong.candidates(price)
+    episodes, _ = playalong.select_day(cands, shipped=[] if "--supply" in sys.argv else None)
     by_hook = {playalong._frame(c["template"], c["records"])["hook"]: c["template"]
                for c in cands}
+    done = set()
     for episode in episodes:
         template = by_hook[episode["hook"]]
+        if template in done:   # one file per template: the first of each
+            continue
+        done.add(template)
         out = config.GEN / f"playalong_{template}.mp4"
         narration = pr.narrate(episode, "Danielle") if "--narrate" in sys.argv else None
         said = None
