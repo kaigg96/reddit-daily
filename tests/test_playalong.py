@@ -336,3 +336,23 @@ def test_a_reworded_hook_on_the_same_subject_is_still_refused():
 def test_the_samples_keep_their_three_worked_examples():
     assert [c["template"] for c in playalong.candidates()] == [
         playalong.PRICE_THEN, playalong.BIGGER, playalong.HOW_MANY]
+
+
+def test_a_name_that_holds_its_answer_is_refused():
+    """Review of T13 (11-21): "Apple Park has 4 floors. Landmark 81?" gives
+    the answer away in the name."""
+    floors = [{"source": playalong.WIKIDATA, "id": f"Q{i} P1101", "subject": name, "short": name,
+               "kind": "building", "quantity": "floors", "unit": "floors", "value": v,
+               "period": "", "category": "buildings", "fetched": "2026-11-21",
+               "provenance": "fetched", "credit": "Data: Wikidata (CC0)."}
+              for i, (name, v) in enumerate((("Apple Park", 4), ("Landmark 81", 81)))]
+    episode, why = playalong.select({"template": playalong.HOW_MANY, "records": floors})
+    assert episode is None and why.startswith("rule1") and "Landmark 81" in why
+
+
+def test_a_shipped_title_made_only_of_frame_words_matches_nothing():
+    """Review of T13 (11-21): a title whose words all fall in the frame keyed
+    as "" and was returned whenever nothing was near."""
+    gas = playalong.candidates()[0]
+    episode, why = playalong.select(gas, "", ["Why?"])
+    assert "rule4" not in why

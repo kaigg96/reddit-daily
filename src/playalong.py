@@ -381,7 +381,7 @@ def _repeats_subject(records, hook, shipped):
     core = " ".join(sorted(insights.question_words(hook) - frame))
     titles = {" ".join(sorted(insights.question_words(t) - frame)): t for t in shipped}
     near = ownquestions.near_repeat(core, list(titles))
-    return titles.get(near, "")
+    return titles.get(near, "") if near else ""
 
 
 def select(candidate, prev_template="", shipped=()):
@@ -394,6 +394,12 @@ def select(candidate, prev_template="", shipped=()):
     off = [r.get("quantity") for r in records if r.get("quantity") not in ALLOWED[template]]
     if off:
         return None, f"rule1: {off[0]!r} is not an everyday quantity for {template}"
+    # A name that holds its own number gives the answer away ("Landmark 81").
+    told = [r["subject"] for r in records if isinstance(r.get("value"), (int, float))
+            and float(r["value"]).is_integer()
+            and str(int(r["value"])) in re.findall(r"\d+", r.get("subject") or "")]
+    if told:
+        return None, f"rule1: {told[0]!r} names its own number"
     # 2. A surprising distance, from a stated anchor. The viewer bar's "twice
     # as far" governs every shape: a pick's two values too.
     if template in (PRICE_THEN, HOW_MANY):
