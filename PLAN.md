@@ -45,7 +45,6 @@ Everything outside the channel product (PRD §0), with the same statuses;
 | C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments`. Done when quarterly prep reads it and proposes the process's own rule. |
 | C19 | blocked: `epics/E2` T9 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to role and files. Done at E2 T9. |
 | C20 | blocked: E1 T14; pilot 2 of 4 (`epics/E2` T8) | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (README). Done at E2 T9. |
-| C21 | ready | Reliability | **A refused push can cost a shift its usage row** | `shift.yml`'s cost-row push carries the agent's unpushed commits, so one the pre-push gate refused blocks the row. Patch it to push the row alone, from a fresh `origin/main`. |
 
 ## 4. Risks
 

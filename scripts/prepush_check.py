@@ -71,15 +71,18 @@ PLACEHOLDER = re.compile("|".join(shift_trace.PLACEHOLDER_ACCOUNTS))
 TWELVE_DIGITS = re.compile(r"(?<!\d)\d{12}(?!\d)")
 
 Problem = namedtuple("Problem", "commit where rule")
-Commit = namedtuple("Commit", "sha author_name author committer_name committer message added paths binaries")
+Commit = namedtuple("Commit", "sha parents author_name author committer_name committer message "
+                               "added paths binaries")
 
 
 def git(*args, cwd=None, check=True):
-    r = subprocess.run(["git", "-c", "core.quotepath=off", *args], cwd=cwd,
-                       capture_output=True, text=True, errors="replace")
+    # Bytes, decoded here: text mode's universal newlines turn a "\r" in a
+    # committed line into a line break, and what follows it would go unread.
+    r = subprocess.run(["git", "-c", "core.quotepath=off", *args], cwd=cwd, capture_output=True)
     if check and r.returncode:
-        raise RuntimeError(f"git {args[0]} failed: {r.stderr.strip()[:300]}")
-    return r.stdout
+        err = r.stderr.decode("utf-8", "replace").strip()[:300]
+        raise RuntimeError(f"git {next(a for a in args if not a.startswith('-') and '=' not in a)} failed: {err}")
+    return r.stdout.decode("utf-8", "replace")
 
 
 # --- what this session holds ----------------------------------------------
@@ -194,13 +197,28 @@ def _pushed(lines):
             yield parts[1], parts[2], parts[3]
 
 
+def _remote_name(remote, cwd=None):
+    """The configured remote a push names, by name or by URL; None if none."""
+    remotes = git("remote", cwd=cwd, check=False).split()
+    if remote in remotes:
+        return remote
+    for name in remotes:
+        urls = (git("config", "--get-all", f"remote.{name}.url", cwd=cwd, check=False).split()
+                + git("config", "--get-all", f"remote.{name}.pushurl", cwd=cwd, check=False).split())
+        if remote in urls:
+            return name
+    return None
+
+
 def ranges_from_hook(lines, remote, cwd=None):
     """One rev-list argument list per pushed ref: what it reaches that no ref
     of that remote does. Excluding the remote's refs, not only the ref's old
     value, keeps a branch rebased onto main (or merged with it) from re-checking
-    main's commits, which are public already."""
-    remotes = git("remote", cwd=cwd, check=False).split()
-    not_public = [f"--remotes={remote}"] if remote in remotes else ["--remotes"]
+    main's commits, which are public already. What counts as public is what
+    this checkout's tracking refs say: after deleting a branch from the remote
+    elsewhere, `git fetch --prune`."""
+    name = _remote_name(remote, cwd)
+    not_public = [f"--remotes={name}"] if name else ["--remotes"]
     out = []
     for local, _, remote_sha in _pushed(lines):
         known = (not _is_zero(remote_sha)
@@ -227,34 +245,69 @@ def pushed_tags(lines, cwd=None):
 _HUNK = re.compile(r"^@@ -\d+(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
-def _unquote(path):
-    return path[1:-1] if len(path) > 1 and path[0] == path[-1] == '"' else path
+_ESCAPES = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11, "f": 12, "r": 13, '"': 34, "\\": 92}
+_QUOTED = r'"(?:[^"\\]|\\.)*"'
+
+
+def _c_unquote(name):
+    """A path as git prints it -> the path. git C-quotes a name holding a
+    quote, a backslash or a control character, even with core.quotepath off."""
+    if not (len(name) > 1 and name[0] == name[-1] == '"'):
+        return name
+    body, out, i = name[1:-1], bytearray(), 0
+    while i < len(body):
+        if body[i] == "\\" and re.match(r"[0-7]{3}", body[i + 1:i + 4]):
+            out.append(int(body[i + 1:i + 4], 8))
+            i += 4
+        elif body[i] == "\\" and body[i + 1:i + 2] in _ESCAPES:
+            out.append(_ESCAPES[body[i + 1]])
+            i += 2
+        else:
+            out += body[i].encode("utf-8")
+            i += 1
+    return out.decode("utf-8", "replace")
 
 
 def _strip_prefix(path):
-    path = _unquote(path)
     return path[2:] if path[:2] in ("a/", "b/") else path
 
 
 def _header_path(line):
     """`diff --git a/P b/P` -> P, when the two halves agree (no rename)."""
-    s = line[len("diff --git a/"):]
+    rest = line[len("diff --git "):]
+    m = re.fullmatch(f"({_QUOTED}) ({_QUOTED})", rest)
+    if m:
+        a, b = (_strip_prefix(_c_unquote(g)) for g in m.groups())
+        return b if a == b else None
+    s = rest[2:]
     n = (len(s) - 3) // 2
-    return s[:n] if n > 0 and s[n:n + 3] == " b/" and s[n + 3:] == s[:n] else None
+    return s[:n] if n > 0 and rest[:2] == "a/" and s[n:n + 3] == " b/" and s[n + 3:] == s[:n] else None
+
+
+# Pinned, so this machine's config cannot change what the parser reads: no
+# prefixes, merged hunks with context, a textconv driver, a hidden root commit,
+# or a signature check printed into the output would each hide added lines.
+LOG_CONFIG = ("-c", "diff.noprefix=false", "-c", "diff.mnemonicPrefix=false", "-c", "log.showSignature=false")
+LOG_OPTIONS = ("-p", "--unified=0", "--inter-hunk-context=0", "--no-color", "--no-ext-diff", "--no-textconv",
+               "--no-relative", "--root", "--src-prefix=a/", "--dst-prefix=b/", "--diff-merges=remerge")
+REMERGE_GIT = (2, 36)
 
 
 def commits(rev_args, cwd=None):
     """Yield a Commit for each commit in range: the lines it adds, every path it
     publishes, its binary files. A merge shows only what it adds beyond the
     automatic merge of its parents (remerge): what it brings in from each
-    side is the side's own commits, checked as themselves."""
-    out = git("log", "-p", "--unified=0", "--no-color", "--no-ext-diff", "--diff-merges=remerge",
-              "--format=%x00%x01%H%x00%an%x00%ae%x00%cn%x00%ce%x00%B%x00", *rev_args, "--", cwd=cwd)
+    side is the side's own commits, checked as themselves. git shows nothing
+    for an octopus merge, so check() refuses one."""
+    out = git(*LOG_CONFIG, "log", *LOG_OPTIONS,
+              "--format=%x00%x01%H%x00%P%x00%an%x00%ae%x00%cn%x00%ce%x00%B%x00", *rev_args, "--", cwd=cwd)
     for chunk in out.split("\x00\x01")[1:]:
-        sha, an, ae, cn, ce, message, diff = (chunk.split("\x00", 6) + [""] * 7)[:7]
+        sha, parents, an, ae, cn, ce, message, diff = (chunk.split("\x00", 7) + [""] * 8)[:8]
         added, paths, binaries = [], [], []
-        path, n, old_left, new_left = None, 0, 0, 0
-        for line in diff.splitlines():
+        path, target, n, old_left, new_left = None, None, 0, 0, 0
+        # "\n" only: splitlines() also breaks at \r, \f and others, and would
+        # read what follows one as a header line, unchecked.
+        for line in diff.split("\n"):
             if old_left > 0 or new_left > 0:
                 # Inside a hunk the counts say what each line is, so a content
                 # line that looks like a header ("++ x" shows as "+++ x") is content.
@@ -265,31 +318,35 @@ def commits(rev_args, cwd=None):
                     new_left -= 1
                 elif line.startswith("-"):
                     old_left -= 1
+                elif line.startswith(" "):
+                    old_left, new_left, n = old_left - 1, new_left - 1, n + 1
                 continue
             if line.startswith("diff --git "):
                 path = None
-                header = _header_path(line)
-                if header:
-                    paths.append(header)
+                target = _header_path(line)
+                if target:
+                    paths.append(target)
             elif line.startswith(("rename to ", "copy to ")):
-                paths.append(_unquote(line.split(" to ", 1)[1]))
+                target = _c_unquote(line.split(" to ", 1)[1])
+                paths.append(target)
             elif line.startswith("+++ "):
-                target = _unquote(line[4:])
-                path = None if target == "/dev/null" else _strip_prefix(target)
+                # git ends a name holding a space with a tab here.
+                name = _c_unquote(line[4:].rstrip("\t"))
+                path = None if name == "/dev/null" else _strip_prefix(name)
                 if path is not None:
+                    target = path
                     paths.append(path)
             elif line.startswith("Binary files ") and line.endswith(" differ"):
-                target = line[len("Binary files "):-len(" differ")].rsplit(" and ", 1)[-1]
-                if _unquote(target) != "/dev/null":
-                    binaries.append(_strip_prefix(target))
-                    paths.append(binaries[-1])
+                if target and not line.endswith(" and /dev/null differ"):
+                    binaries.append(target)
             elif line.startswith("@@"):
                 m = _HUNK.match(line)
                 if m:
                     old_left = int(m.group(1) if m.group(1) is not None else 1)
                     n = int(m.group(2))
                     new_left = int(m.group(3) if m.group(3) is not None else 1)
-        yield Commit(sha, an, ae, cn, ce, message, added, list(dict.fromkeys(paths)), binaries)
+        yield Commit(sha, parents.split(), an, ae, cn, ce, message, added,
+                     list(dict.fromkeys(paths)), list(dict.fromkeys(binaries)))
 
 
 def _blob_texts(sha, path, cwd=None):
@@ -303,14 +360,17 @@ def _blob_texts(sha, path, cwd=None):
 
 # --- the rules --------------------------------------------------------------
 
-def _rules(text, values, shapes=True):
+def _rules(text, values, shapes=True, people=True):
     """The rule names text breaks. Values compare case-insensitively: an address
-    is the same address in any case, and a secret never collides by accident."""
+    is the same address in any case, and a secret never collides by accident.
+    `people` is the address and account-ID patterns, which compressed bytes
+    match by chance (a committed mp3 does): off for binary files, where the
+    owner's own values still count."""
     low = text.lower()
     found = [label for value, label in values.items() if value.lower() in low]
-    if any(not NOT_A_PERSON.search(m.group()) for m in EMAIL.finditer(text)):
+    if people and any(not NOT_A_PERSON.search(m.group()) for m in EMAIL.finditer(text)):
         found.append("private-email")
-    if any(not PLACEHOLDER.search(m.group(1)) for m in ACCOUNT.finditer(text)):
+    if people and any(not PLACEHOLDER.search(m.group(1)) for m in ACCOUNT.finditer(text)):
         found.append("aws-account-id")
     if shapes and CREDENTIAL.search(text):
         found.append("credential shape")
@@ -327,9 +387,10 @@ def _identity(short, where, who, name, email, values):
 
 
 def check(rev_args_list, values, cwd=None, shapes=True):
-    """Everything the commits in range publish. `shapes` covers added text
-    lines only: gitleaks, when it runs, checks those instead. Messages, names,
-    paths and binary files are never in a patch gitleaks reads."""
+    """Everything the commits in range publish. `shapes` covers a plain
+    commit's added text lines only: gitleaks, when it runs, checks those
+    instead. Messages, names, paths, binary files and what a merge adds are
+    never in a patch gitleaks reads."""
     problems = []
     seen = set()
     for rev_args in rev_args_list:
@@ -338,6 +399,10 @@ def check(rev_args_list, values, cwd=None, shapes=True):
                 continue
             seen.add(c.sha)
             short = c.sha[:9]
+            if len(c.parents) > 2:
+                problems.append(Problem(short, "commit", "an octopus merge, which git cannot show "
+                                        "what it adds: merge one branch at a time"))
+            line_shapes = shapes or len(c.parents) > 1
             problems += _identity(short, "commit metadata", "author", c.author_name, c.author, values)
             problems += _identity(short, "commit metadata", "committer", c.committer_name, c.committer, values)
             for rule in _rules(c.message, values):
@@ -349,7 +414,7 @@ def check(rev_args_list, values, cwd=None, shapes=True):
                     problems.append(Problem(short, "a file path", rule))
             for path, n, text in c.added:
                 place = WITHHELD if path in flagged else f"{path}:{n}"
-                for rule in _rules(text, values, shapes and path not in FIXTURE_PATHS):
+                for rule in _rules(text, values, line_shapes and path not in FIXTURE_PATHS):
                     problems.append(Problem(short, place, rule))
             for path in c.binaries:
                 place = WITHHELD if path in flagged else f"{path} (binary)"
@@ -357,7 +422,7 @@ def check(rev_args_list, values, cwd=None, shapes=True):
                 if texts is None:
                     problems.append(Problem(short, place, "binary file could not be read"))
                     continue
-                for rule in dict.fromkeys(r for t in texts for r in _rules(t, values)):
+                for rule in dict.fromkeys(r for t in texts for r in _rules(t, values, people=False)):
                     problems.append(Problem(short, place, rule))
     return problems
 
@@ -440,9 +505,18 @@ def report(problems, out=sys.stderr):
     print(FIX, file=out)
 
 
+def _git_version(cwd=None):
+    m = re.search(r"(\d+)\.(\d+)", git("version", cwd=cwd, check=False))
+    return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
+
+
 def run(rev_args_list, cwd=None, values=None, tags=(), refs=()):
     if not rev_args_list and not tags and not refs:
         return 0
+    if rev_args_list and _git_version(cwd) < REMERGE_GIT:
+        print("pre-push: refused, nothing was pushed: this check needs git %d.%d or later "
+              "(git --version)." % REMERGE_GIT, file=sys.stderr)
+        return 1
     if values is None:
         tops, common = checkouts(cwd)
         values = held_values(tops=tops, common=common)
@@ -490,30 +564,64 @@ def install(check_only=False, cwd=ROOT):
 
 NO_VERIFY = "--no-verify skips the pre-push gate"
 REPOINTS = "it changes core.hooksPath, which switches off the pre-push gate"
-_HEREDOC = re.compile(r"<<(-?)\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2")
+_HEREDOC = re.compile(r"<<(-?)[ \t]*(?:'([^'\n]*)'|\"([^\"\n]*)\"|\\?([^\s;&|<>()'\"`]+))")
 _ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _CONFIG_ENV = re.compile(r"^GIT_CONFIG_(?:PARAMETERS|KEY_\d+)=", re.I)
-_WRAPPERS = {"env", "command", "exec", "nohup", "time", "nice", "sudo"}
-_WRAPPER_ARGS = {"-u", "--unset", "-C", "--chdir", "-g", "--group", "-n"}   # options that take one
-_SHELLS = {"sh", "bash", "zsh", "dash"}
+_RESERVED = {"if", "then", "elif", "else", "fi", "do", "done", "while", "until", "!", "{", "}",
+             "case", "esac", "time", "coproc"}
+# A command that runs the next one: (its options that take a value, the
+# positional arguments it takes before the command).
+_WRAPPERS = {
+    "env": ({"-u", "--unset", "-C", "--chdir", "-S", "--split-string"}, 0),
+    "command": (set(), 0), "builtin": (set(), 0), "exec": ({"-a"}, 0), "nohup": (set(), 0),
+    "nice": ({"-n", "--adjustment"}, 0), "sudo": ({"-u", "-g", "-C", "-h", "-p", "-U", "-r", "-t", "-D"}, 0),
+    "timeout": ({"-s", "--signal", "-k", "--kill-after"}, 1),
+    "stdbuf": ({"-i", "-o", "-e", "--input", "--output", "--error"}, 0),
+    "xargs": ({"-I", "-n", "-P", "-L", "-d", "-E", "-s", "-a", "--max-args", "--max-procs",
+               "--delimiter", "--arg-file", "--max-lines", "--max-chars"}, 0),
+}
+_SHELLS = {"sh", "bash", "zsh", "dash", "ksh"}
 _GIT_ARGS = {"-C", "--git-dir", "--work-tree", "--namespace", "--super-prefix", "--attr-source"}
 _CONFIG_ARGS = {"-f", "--file", "--blob", "--type", "--default", "--comment", "--value"}
 _CONFIG_READS = {"--get", "--get-all", "--get-regexp", "--get-urlmatch", "-l", "--list",
                  "--get-color", "--get-colorbool", "-e", "--edit", "--rename-section", "--remove-section"}
+_MAX_NESTING = 50
 
 
-def _segments(command):
-    """A shell command split into its simple commands: at unquoted ; & | ( ) `
-    $( and newlines, with comments and heredoc bodies left out."""
-    segs, cur, quote, pending, i, n = [], [], None, [], 0, len(command)
+def _skip_bodies(command, i, pending):
+    """i is at the newline ending a line that opened heredocs: the index of the
+    newline ending the last one's delimiter line (or the end)."""
+    n = len(command)
+    for word, dash in pending:
+        while i < n:
+            j = command.find("\n", i + 1)
+            line = command[i + 1:n if j < 0 else j]
+            i = n if j < 0 else j
+            if (line.lstrip("\t") if dash else line) == word:
+                break
+    return i
+
+
+def _lex(command, i, stop, out, level=0):
+    """Split command[i:] into simple commands, appended to `out`, up to the
+    unquoted `stop` (")" or "`") that closes a substitution; return the index
+    after it. A substitution, `$(…)` or backticks, in double quotes too, is a
+    command of its own; comments and heredoc bodies are left out."""
+    cur, quote, pending, depth, n = [], None, [], 0, len(command)
+
+    def flush():
+        if "".join(cur).strip():
+            out.append("".join(cur))
+        cur.clear()
+
     while i < n:
         c = command[i]
-        if quote:
+        if quote in ("'", "$'"):                  # literal, but $'…' takes \' escapes
             cur.append(c)
-            if c == "\\" and quote == '"' and i + 1 < n:
+            if c == "\\" and quote == "$'" and i + 1 < n:
                 cur.append(command[i + 1])
                 i += 1
-            elif c == quote:
+            elif c == "'":
                 quote = None
             i += 1
             continue
@@ -522,8 +630,31 @@ def _segments(command):
                 cur += [c, command[i + 1]]
             i += 2
             continue
+        if level < _MAX_NESTING and command.startswith("$(", i):
+            i = _lex(command, i + 2, ")", out, level + 1)
+            cur.append("_")                       # its output is a word here, not a command
+            continue
+        if c == "`":
+            if stop == "`":
+                flush()
+                return i + 1
+            if level < _MAX_NESTING:
+                i = _lex(command, i + 1, "`", out, level + 1)
+                cur.append("_")
+                continue
+        if quote == '"':
+            cur.append(c)
+            if c == '"':
+                quote = None
+            i += 1
+            continue
         if c in "'\"":
             quote = c
+        elif command.startswith("$'", i):
+            quote = "$'"
+            cur.append("$")
+            i += 1
+            c = "'"
         elif c == "#" and (not cur or cur[-1].isspace()):
             j = command.find("\n", i)
             i = n if j < 0 else j
@@ -531,30 +662,32 @@ def _segments(command):
         elif command.startswith("<<", i) and not command.startswith("<<<", i):
             m = _HEREDOC.match(command, i)
             if m:
-                pending.append((m.group(3), m.group(1) == "-"))
+                pending.append((next(g for g in m.groups()[1:] if g is not None), m.group(1) == "-"))
                 cur.append(m.group(0))
                 i = m.end()
                 continue
-        elif c in ";&|()`\n" or command.startswith("$(", i):
-            segs.append("".join(cur))
-            cur = []
-            if c == "$":
-                i += 1
-            if c == "\n":
-                for word, dash in pending:        # skip each body to its delimiter
-                    while i < n:
-                        j = command.find("\n", i + 1)
-                        line = command[i + 1:n if j < 0 else j]
-                        i = n if j < 0 else j
-                        if (line.lstrip("\t") if dash else line) == word:
-                            break
+        elif c == ")" and stop == ")" and depth == 0:
+            flush()
+            return i + 1
+        elif c in ";&|()\n":
+            depth += 1 if c == "(" else -1 if c == ")" and depth else 0
+            flush()
+            if c == "\n" and pending:
+                i = _skip_bodies(command, i, pending)
                 pending = []
             i += 1
             continue
         cur.append(c)
         i += 1
-    segs.append("".join(cur))
-    return [s for s in segs if s.strip()]
+    flush()
+    return n
+
+
+def _segments(command):
+    """A shell command split into its simple commands."""
+    out = []
+    _lex(command, 0, None, out)
+    return out
 
 
 def _words(segment):
@@ -627,18 +760,40 @@ def _git_refusal(args):
     return None
 
 
+def _shell_command(args):
+    """The command string `sh -c`, `bash -lc` or `sh -ec` runs, or None."""
+    j, runs = 0, False
+    while j < len(args) and args[j][:1] in "-+" and args[j] not in ("-", "--"):
+        a = args[j]
+        if a[:1] == "-" and not a.startswith("--") and "c" in a[1:]:
+            runs = True
+        j += 2 if a in ("-o", "+o", "-O", "+O") else 1
+    if j < len(args) and args[j] == "--":
+        j += 1
+    return args[j] if runs and j < len(args) else None
+
+
 def _command_refusal(words, depth):
     i = 0
     while i < len(words):
         w = words[i]
-        if _ASSIGN.match(w):
+        if w in _RESERVED:
+            i += 1
+        elif _ASSIGN.match(w):
             if _CONFIG_ENV.match(w) and "core.hookspath" in w.lower():
                 return REPOINTS
             i += 1
         elif os.path.basename(w) in _WRAPPERS:
+            takes, positional = _WRAPPERS[os.path.basename(w)]
             i += 1
-            while i < len(words) and words[i].startswith("-"):
-                i += 2 if words[i] in _WRAPPER_ARGS else 1
+            while i < len(words) and words[i].startswith("-") and words[i] != "-":
+                opt = words[i]
+                i += 1
+                if opt == "--":
+                    break
+                if opt in takes:
+                    i += 1
+            i += positional
         else:
             break
     if i >= len(words):
@@ -646,9 +801,9 @@ def _command_refusal(words, depth):
     cmd, args = os.path.basename(words[i]), words[i + 1:]
     if cmd in ("export", "declare", "typeset"):
         return next((REPOINTS for a in args if _CONFIG_ENV.match(a) and "core.hookspath" in a.lower()), None)
-    if cmd in _SHELLS and "-c" in args and depth < 3:
-        k = args.index("-c")
-        return refusal(args[k + 1], depth + 1) if k + 1 < len(args) else None
+    if cmd in _SHELLS and depth < 3:
+        inner = _shell_command(args)
+        return refusal(inner, depth + 1) if inner else None
     if cmd == "eval" and depth < 3:
         return refusal(" ".join(args), depth + 1)
     return _git_refusal(args) if cmd == "git" else None
@@ -668,9 +823,11 @@ def guard(stdin=sys.stdin):
         call = json.load(stdin)
     except ValueError:
         return 0
-    if call.get("tool_name") != "Bash":
+    if not isinstance(call, dict) or call.get("tool_name") != "Bash":
         return 0
-    why = refusal((call.get("tool_input") or {}).get("command", ""))
+    tool_input = call.get("tool_input")
+    command = tool_input.get("command") if isinstance(tool_input, dict) else None
+    why = refusal(command) if isinstance(command, str) else None
     if why:
         print(f"Refused: {why}. If the gate refused a push, fix what it names "
               "(scripts/prepush_check.py explains how); it never blocks a clean one.", file=sys.stderr)

@@ -190,7 +190,10 @@ def test_hook_input_becomes_one_range_per_pushed_ref(work):
              "garbage"]
     ranges = gate.ranges_from_hook(lines, "origin", cwd=str(work))
     assert ranges == [[new, "--not", "--remotes=origin"], [new, "--not", base, "--remotes=origin"]]
-    # A remote given as a URL (no remote name): every remote ref counts as public.
+    # A remote given as a URL is the configured remote with that URL; an
+    # unknown one falls back to every remote's refs.
+    url = _git(work, "remote", "get-url", "origin").strip()
+    assert gate.ranges_from_hook(lines[:1], url, cwd=str(work)) == [[new, "--not", "--remotes=origin"]]
     assert gate.ranges_from_hook(lines[:1], "https://example.invalid/r.git", cwd=str(work)) == [
         [new, "--not", "--remotes"]]
     shas = [c[0] for r in ranges for c in gate.commits(r, cwd=str(work))]
@@ -258,14 +261,95 @@ def test_a_content_line_shaped_like_a_diff_header_is_content(work):
     assert [(p.where, p.rule) for p in _problems(work)] == [("a.md:2", "private-email")]
 
 
-def test_a_binary_file_is_read_whole(work):
-    _commit(work, "blob.bin", b"\x00\x01\x02 " + PERSON.encode() + b" \x00\xff")
-    assert [(p.where, p.rule) for p in _problems(work)] == [("blob.bin (binary)", "private-email")]
+def test_a_binary_file_is_read_whole_for_held_values_and_credentials(work):
+    key = "AK" + "IA" + "Q" * 16
+    _commit(work, "Q and A.bin", b"\x00\x01\x02 " + HELD.encode() + b" \x00\xff")
+    _commit(work, 'say "hi".bin', b"\x00 " + key.encode() + b" \x00")
+    assert sorted((p.where, p.rule) for p in _problems(work, {HELD: ".env X"})) == [
+        ("Q and A.bin (binary)", ".env X"), ('say "hi".bin (binary)', "credential shape")]
+
+
+def test_a_binary_file_is_not_held_to_the_address_patterns(work):
+    # Compressed media matches them by chance (a committed mp3 does), and a
+    # refusal nothing can clear is worse than the owner's own values alone.
+    _commit(work, "music.bin", b"\x00\x01 " + PERSON.encode() + b" account id: " + ACCOUNT.encode() + b"\x00")
+    assert _problems(work) == []
 
 
 def test_utf16_text_which_git_calls_binary_is_read(work):
     _commit(work, "notes.txt", f"key {HELD}\n".encode("utf-16"))
     assert [(p.where, p.rule) for p in _problems(work, {HELD: ".env X"})] == [("notes.txt (binary)", ".env X")]
+
+
+@pytest.mark.parametrize("text", [
+    "progress 10%\rdone {held}\n",
+    "a\x0c{held}\n",
+    "a\x1e{held}\n",
+    "x\r+y\n{held}\n",
+], ids=["carriage-return", "form-feed", "record-separator", "cr-then-plus"])
+def test_a_line_break_python_knows_and_git_does_not_hides_nothing(work, text):
+    _commit(work, "trace.md", text.format(held=HELD))
+    assert _rules(_problems(work, {HELD: ".env X"})) == [".env X"]
+
+
+def test_this_machines_diff_config_cannot_hide_added_lines(work):
+    """Each of these once hid something from the parser: merged hunks with
+    context, no a/ b/ prefixes, a textconv driver, a hidden root commit."""
+    _commit(work, "long.txt", "".join(f"line {i}\n" for i in range(20)))
+    _git(work, "push", "-q", "origin", "main")
+    for key, value in (("diff.interHunkContext", "5"), ("diff.noprefix", "true"),
+                       ("diff.rev.textconv", "rev"), ("log.showRoot", "false")):
+        _git(work, "config", key, value)
+    (work / ".gitattributes").write_text("*.dat diff=rev\n")
+    (work / "long.txt").write_text("".join(f"line {i}{' changed' if i in (2, 6) else ''}\n" for i in range(20)))
+    (work / "x.dat").write_text(f"{HELD}\n")
+    (work / "zz.bin").write_bytes(b"\x00" + HELD.encode())
+    (work / f"empty-{HELD}").write_text("")
+    _git(work, "add", "-A")
+    _git(work, "commit", "-q", "-m", "change", env={"GIT_AUTHOR_EMAIL": NOREPLY, "GIT_COMMITTER_EMAIL": NOREPLY})
+    where = sorted({p.where for p in _problems(work, {HELD: ".env X"})})
+    assert where == sorted(["a file path", "x.dat:1", "zz.bin (binary)"])
+    # A root commit, with log.showRoot off.
+    root = work.parent / "root"
+    _git(work.parent, "init", "-q", "-b", "main", str(root))
+    _git(root, "config", "user.name", "tester")
+    _git(root, "config", "log.showRoot", "false")
+    _commit(root, "a.txt", f"{HELD}\n")
+    assert _rules(gate.check([["HEAD"]], {HELD: ".env X"}, cwd=str(root))) == [".env X"]
+
+
+def test_a_merge_gets_the_credential_shapes_even_when_gitleaks_runs(work):
+    # gitleaks reads no merge diffs, so what a merge adds is the gate's.
+    _git(work, "checkout", "-q", "-b", "side")
+    _commit(work, "side.txt", "side\n")
+    _git(work, "checkout", "-q", "main")
+    _git(work, "merge", "-q", "--no-ff", "--no-commit", "side")
+    (work / "evil.py").write_text("KEY = '" + "AK" + "IA" + "Q" * 16 + "'\n")
+    _git(work, "add", "evil.py")
+    _git(work, "commit", "-q", "--no-edit")
+    assert [(p.where, p.rule) for p in _problems(work, shapes=False)] == [("evil.py:1", "credential shape")]
+
+
+def test_an_octopus_merge_is_refused(work):
+    # git shows nothing for one, so what it adds cannot be checked.
+    for b in ("b1", "b2"):
+        _git(work, "checkout", "-q", "-b", b, "main")
+        _commit(work, f"{b}.txt", f"{b}\n")
+    _git(work, "checkout", "-q", "main")
+    _git(work, "merge", "-q", "--no-ff", "--no-edit", "b1", "b2")
+    assert [p.rule for p in _problems(work)] == [
+        "an octopus merge, which git cannot show what it adds: merge one branch at a time"]
+
+
+def test_a_name_with_a_space_is_reported_once_and_plainly(work):
+    _commit(work, "my notes.txt", f"{PERSON}\n")
+    assert [(p.where, p.rule) for p in _problems(work)] == [("my notes.txt:1", "private-email")]
+
+
+def test_an_old_git_is_refused_plainly(work, monkeypatch, capsys):
+    monkeypatch.setattr(gate, "_git_version", lambda cwd=None: (2, 35))
+    assert gate.run([["HEAD"]], cwd=str(work), values={}) == 1
+    assert "needs git 2.36" in capsys.readouterr().err
 
 
 def test_an_annotated_tag_is_checked(work):
@@ -349,6 +433,26 @@ def test_rebasing_or_merging_main_into_a_pushed_branch_rechecks_nothing_public(w
     "GIT_CONFIG_PARAMETERS=\"'core.hooksPath=/tmp'\" git push",
     "export GIT_CONFIG_PARAMETERS=\"'core.hooksPath=/tmp'\"",
     "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/x git push",
+    # Shell keywords and wrappers in front of the command.
+    "if git push --no-verify; then echo ok; fi",
+    "if ! git push --no-verify; then exit 1; fi",
+    "for i in 1 2 3; do git push --no-verify && break; done",
+    "until git push --no-verify; do sleep 1; done",
+    "{ git push --no-verify; }",
+    "! git push --no-verify",
+    "case x in a) git push --no-verify;; esac",
+    "timeout 120 git push --no-verify",
+    "stdbuf -oL git push --no-verify",
+    "echo main | xargs git push --no-verify origin",
+    "bash -lc 'git push --no-verify'",
+    "sh -ec 'git push --no-verify'",
+    # A substitution runs, in double quotes too.
+    'out="$(git push --no-verify 2>&1)"',
+    'echo "`git push --no-verify`"',
+    # Quoting a heredoc or $'…' must not swallow a real command after it.
+    "cat <<'END-NOTES'\nnotes\nEND-NOTES\ngit push --no-verify",
+    "git commit -m \"$(cat <<'EOF'\nsay \"hi\nEOF\n)\" && git push --no-verify",
+    "echo $'it\\'s' && git push --no-verify",
 ])
 def test_the_guard_refuses_switching_the_gate_off(command):
     assert gate.refusal(command)
@@ -373,6 +477,13 @@ def test_the_guard_refuses_switching_the_gate_off(command):
     "git commit -q -F - <<EOF\nwhy git push --no-verify is refused\nEOF",
     "git commit -m \"$(cat <<'EOF'\nGate: git push --no-verify is refused\nEOF\n)\"",
     "python3 scripts/prepush_check.py install --check",
+    "cat <<'END-NOTES'\ngit push --no-verify\nEND-NOTES",
+    "cat <<\\EOF\ngit push --no-verify\nEOF",
+    "cat <<-EOF\n\tgit push --no-verify\n\tEOF\ngit status",
+    "git commit -m \"$(cat <<'EOF'\nsay \"hi; git push --no-verify\nEOF\n)\"",
+    "echo $((1 + 2)) && git push",
+    "python3 -c \"print('git push --no-verify')\"",
+    "for f in a b; do echo \"$f\"; done",
 ])
 def test_the_guard_lets_everything_else_through(command):
     assert gate.refusal(command) is None
@@ -385,6 +496,25 @@ def test_the_guard_speaks_claude_codes_hook_protocol(monkeypatch, capsys):
     assert gate.guard(io.StringIO(json.dumps({**call, "tool_input": {"command": "ls"}}))) == 0
     assert gate.guard(io.StringIO(json.dumps({"tool_name": "Read", "tool_input": {}}))) == 0
     assert gate.guard(io.StringIO("not json")) == 0
+    # Malformed input is not a command: never an exception (Claude Code would
+    # run the call anyway, having learnt nothing).
+    assert gate.guard(io.StringIO("[1]")) == 0
+    assert gate.guard(io.StringIO(json.dumps({"tool_name": "Bash", "tool_input": {"command": 5}}))) == 0
+    assert gate.guard(io.StringIO(json.dumps({"tool_name": "Bash", "tool_input": "x"}))) == 0
+
+
+def test_the_guard_never_raises_or_hangs_on_shell_like_noise():
+    import random
+    import time
+    rng = random.Random(7)
+    alphabet = ["git", " push", " --no-verify", "'", '"', "`", "$(", "$'", ")", "(", "\\", "\n", ";",
+                "&&", "|", "<<", "EOF", "<<-", "#", " ", "x", "\t", "{", "}", "$((", "-c", "bash"]
+    start = time.time()
+    for _ in range(3000):
+        gate.refusal("".join(rng.choice(alphabet) for _ in range(rng.randint(0, 40))))
+    gate.refusal("$(" * 5000)
+    gate.refusal("`" * 5000)
+    assert time.time() - start < 20
 
 
 def test_install_points_git_at_the_hooks_and_check_needs_the_hook_itself(work, capsys):
