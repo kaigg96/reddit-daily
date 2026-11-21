@@ -33,8 +33,9 @@ def reading(five, seven, now, five_resets_in=4 * H, seven_resets=RESET):
     return quota.from_event(event(five / 100, seven / 100, now + five_resets_in, seven_resets))
 
 
-def measured(n, weekly=4.0, five=20.0):
-    return [{"weekly_used": str(weekly), "five_hour_used": str(five)} for _ in range(n)]
+def measured(n, weekly=4.0, five=20.0, minutes=60):
+    return [{"weekly_used": str(weekly), "five_hour_used": str(five),
+             "duration_min": str(minutes)} for _ in range(n)]
 
 
 def test_the_owners_reserve_is_as_set():
@@ -134,10 +135,72 @@ def test_the_late_window_paces_toward_the_late_ceiling():
 
 
 def test_measured_shifts_replace_the_prior():
-    assert quota.shift_cost(measured(2, 9.0))["seven_day"] == (quota.PRIOR["seven_day"], 2)
-    assert quota.shift_cost(measured(3, 9.0))["seven_day"] == (9.0, 3)
+    prior = quota.PRIOR["seven_day"]
+    assert quota.shift_cost(measured(2, 9.0))["seven_day"] == (prior, prior, 2)
+    assert quota.shift_cost(measured(3, 9.0))["seven_day"] == (9.0, 9.0, 3)
     rows = measured(3, 9.0) + [{"weekly_used": ""}, {"weekly_used": "-3"}]
-    assert quota.shift_cost(rows)["seven_day"] == (9.0, 3)     # blanks and resets ignored
+    assert quota.shift_cost(rows)["seven_day"] == (9.0, 9.0, 3)     # blanks and resets ignored
+    assert quota.shift_cost(measured(3, 9.0, minutes=30))["seven_day"] == (9.0, 18.0, 3)
+
+
+def test_a_full_hour_is_judged_at_the_hourly_rate_of_shifts_that_ended_early():
+    """Review, 2026-11-21: 10 five-hour points in 30-minute shifts is 20 an
+    hour, so from 60% a full hour would reach the 80% reserve."""
+    now = RESET - 5 * 86400
+    d = quota.decide(reading(60, 10, now), now=now, rows=measured(5, 2.0, 10.0, minutes=30))
+    assert d["minutes"] < 60 and d["verdict"] in ("BOUNDED", "WRAP"), d
+    assert 60 + 20 * d["minutes"] / 60 <= quota.RESERVE_5H
+
+
+def test_a_missing_window_is_unknown_not_empty():
+    now = RESET - 5 * 86400
+    only_five = {"five_hour": reading(10, 10, now)["five_hour"]}
+    assert quota.decide(only_five, now=now, rows=measured(5)) is None
+    merged = quota.latest([reading(10, 40, now), only_five])
+    assert merged["seven_day"]["used_percentage"] == 40.0     # the older figure beats none
+
+
+def test_a_reset_in_milliseconds_is_rejected():
+    assert quota.from_event(event(0.1, 0.2, seven_resets=RESET * 1000)).get("seven_day") is None
+
+
+def test_the_units_allowance_still_binds_with_a_reading(tmp_path, capsys):
+    """Its ceiling is a repository variable, the one bound a shift cannot raise."""
+    now = RESET - 5 * 86400
+    stream = tmp_path / "probe.json"
+    stream.write_text(json.dumps(event(0.1, 0.1, now + 3 * H)))
+    ledger = tmp_path / "usage.csv"
+    ledger.write_text("timestamp_utc,run_id,model,effort,turns,duration_min,quota_units,is_error\n"
+                      f"{datetime.datetime.now(UTC).isoformat()},1,m,e,1,1,150,0\n")
+    out = tmp_path / "out"
+    assert quota.gate(str(stream), str(ledger), 120, github_output=str(out),
+                      snapshot=str(tmp_path / "s.json"), now=now) == 1
+    printed = capsys.readouterr().out
+    assert "binds before the measured reserve" in printed and "minutes=0" in out.read_text()
+
+
+def test_any_failure_reading_falls_back_to_the_units_allowance(tmp_path, monkeypatch):
+    stream = tmp_path / "probe.json"
+    stream.write_text(json.dumps(event(0.1, 0.1)))
+    def broken(*a, **k):
+        raise ValueError("a bug")
+    monkeypatch.setattr(quota, "decide", broken)
+    assert quota.gate(str(stream), str(tmp_path / "none.csv"), 100,
+                      snapshot=str(tmp_path / "s.json")) == 0
+    assert quota.gate(str(stream), str(tmp_path / "none.csv"), 100, kind="catch-up",
+                      snapshot=str(tmp_path / "s.json")) == 1
+
+
+def test_the_ledger_columns_survive_a_broken_quota_module():
+    assert shift_budget.QUOTA_COLUMNS == quota.COLUMNS
+
+
+def test_pace_answers_a_host_that_can_add_runs(tmp_path, capsys):
+    stream = tmp_path / "s.json"
+    stream.write_text(json.dumps(event(0.05, 0.05, seven_resets=quota.next_reset(datetime.datetime.now(UTC).timestamp()))))
+    code = quota.pace_command(str(stream), kind="catch-up", ledger=str(tmp_path / "none.csv"))
+    decided = json.loads(capsys.readouterr().out)
+    assert code == (0 if decided["run"] else 1) and "reason" in decided
 
 
 def test_use_across_a_reset_is_not_a_measurement():
@@ -166,7 +229,7 @@ def test_gate_without_a_reading_falls_back_to_the_units_allowance(tmp_path, caps
     out = tmp_path / "out"
     assert quota.gate(str(stream), str(ledger), 120, github_output=str(out),
                       snapshot=str(tmp_path / "snap.json")) == 1
-    assert "falling back" in capsys.readouterr().out
+    assert "units allowance alone decides" in capsys.readouterr().out
     assert quota.gate(str(stream), str(ledger), 200, github_output=str(out),
                       snapshot=str(tmp_path / "snap.json")) == 0
     assert quota.gate(str(stream), str(ledger), 200, kind="catch-up",
@@ -191,13 +254,14 @@ def test_record_carries_start_and_end_and_widens_an_old_ledger(tmp_path, capsys)
     ledger.write_text("timestamp_utc,run_id,model,effort,turns,duration_min,quota_units,is_error\n"
                       "2026-11-20T01:51:33+00:00,9,m,e,119,35.1,8.2702,0\n")
     start = tmp_path / "start.json"
-    start.write_text(json.dumps({"five_hour": {"used_percentage": 10.0, "resets_at": 5},
-                                 "seven_day": {"used_percentage": 20.0, "resets_at": 7}}))
+    five_at, week_at = int(RESET - 100 * H), int(RESET)
+    start.write_text(json.dumps({"five_hour": {"used_percentage": 10.0, "resets_at": five_at},
+                                 "seven_day": {"used_percentage": 20.0, "resets_at": week_at}}))
     output = tmp_path / "out.json"
     output.write_text(json.dumps([
         {"type": "system"},
-        event(0.12, 0.2, 5, 7),
-        event(0.31, 0.235, 5, 7),
+        event(0.12, 0.2, five_at, week_at),
+        event(0.31, 0.235, five_at, week_at),
         {"type": "result", "num_turns": 3, "duration_ms": 60000, "total_cost_usd": 2.5,
          "is_error": False}]))
     assert shift_budget.record(str(output), str(ledger), "10", "m", "e",
@@ -207,10 +271,22 @@ def test_record_carries_start_and_end_and_widens_an_old_ledger(tmp_path, capsys)
     new = rows[1]
     assert (new["five_hour_start"], new["five_hour_end"]) == ("10.0", "31.0")
     assert (new["weekly_start"], new["weekly_end"], new["weekly_used"]) == ("20.0", "23.5", "3.5")
-    assert new["five_hour_used"] == "21.0" and new["weekly_resets_at"] == "7"
+    assert new["five_hour_used"] == "21.0" and new["weekly_resets_at"] == str(week_at)
     assert new["slot"] == "scheduled" and new["minutes"] == "60"
     # The units breaker still reads the widened ledger.
     assert shift_budget._recent(str(ledger)) >= 0
+
+
+def test_record_survives_a_broken_reading(tmp_path, monkeypatch):
+    def broken(*a):
+        raise KeyError("x")
+    monkeypatch.setattr(shift_budget, "_quota_columns", broken)
+    output = tmp_path / "out.json"
+    output.write_text(json.dumps([{"type": "result", "num_turns": 1, "duration_ms": 1,
+                                   "total_cost_usd": 0.5, "is_error": False}]))
+    ledger = tmp_path / "usage.csv"
+    assert shift_budget.record(str(output), str(ledger), "1", "m", "e", "", "scheduled", "60") == 0
+    assert list(csv.DictReader(open(ledger)))[0]["quota_units"] == "0.5000"
 
 
 def test_record_without_readings_still_records_cost(tmp_path):

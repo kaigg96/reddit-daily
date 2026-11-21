@@ -34,7 +34,7 @@ SNAPSHOT = os.path.expanduser("~/.claude/usage-snapshot.json")
 # The reserve and the pacing that reads these numbers live in quota.py, which
 # is also stdlib-only; only `--budget` imports it, so the status bar never
 # depends on it.
-FRESH = 900   # seconds: older than this, --budget takes a new reading
+FRESH = 300   # seconds: older than this, --budget takes a new reading (busy sessions move 5h fast)
 
 
 def _num(value):
@@ -174,12 +174,17 @@ def print_budget():
                 snap = quota.save_snapshot(reading, SNAPSHOT, source="probe")
         except Exception:
             pass
-    verdict, reason, pace = budget_verdict(snap)
+    decision = (snap or {}).get("decision")
+    if decision and os.environ.get("GITHUB_ACTIONS") == "true":
+        # In CI the gate decided this shift from this same reading: say what it
+        # decided rather than deciding again from older numbers.
+        verdict, reason, pace = decision["verdict"], decision["reason"], decision.get("pace")
+    else:
+        verdict, reason, pace = budget_verdict(snap)
     print(f"{verdict}: {reason}")
     if pace:
         print(f"pace: {pace}")
-    decision = (snap or {}).get("decision")
-    if decision and decision.get("minutes"):
+    if decision and decision.get("minutes") and os.environ.get("GITHUB_ACTIONS") == "true":
         print(f"this shift was given {decision['minutes']} minutes at its start")
     if snap and snap.get("captured_at"):
         age = int(time.time() - snap["captured_at"])

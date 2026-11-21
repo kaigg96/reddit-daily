@@ -155,7 +155,10 @@ def record(output, ledger, run_id, model, effort, start="", slot="", minutes="")
            "quota_units": f'{data.get("total_cost_usd", 0):.4f}',
            "is_error": int(bool(data.get("is_error"))),
            "slot": slot, "minutes": minutes}
-    row.update(_quota_columns(start, messages))
+    try:
+        row.update(_quota_columns(start, messages))
+    except Exception as e:      # the cost row matters more: the breaker counts it
+        print(f"could not read the usage readings ({type(e).__name__}) — recording cost only")
     _append(ledger, row)
     print("recorded:", list(row.values()))
     return 0
@@ -169,11 +172,11 @@ def _quota_columns(start, messages):
         begin = json.load(open(start)) if start else None
     except (OSError, ValueError):
         begin = None
-    found = quota.readings([m for m in messages if isinstance(m, dict)])
-    end = found[-1] if found else None
+    end = quota.latest(quota.readings([m for m in messages if isinstance(m, dict)]))
     pct = lambda r, w: ((r or {}).get(w) or {}).get("used_percentage", "")
     moved = lambda w: "" if quota.used(begin, end, w) is None else quota.used(begin, end, w)
-    resets = ((end or begin or {}).get("seven_day") or {}).get("resets_at", "")
+    week = (end or {}).get("seven_day") or (begin or {}).get("seven_day") or {}
+    resets = week.get("resets_at", "")
     return {"five_hour_start": pct(begin, "five_hour"), "five_hour_end": pct(end, "five_hour"),
             "weekly_start": pct(begin, "seven_day"), "weekly_end": pct(end, "seven_day"),
             "five_hour_used": moved("five_hour"), "weekly_used": moved("seven_day"),
@@ -182,13 +185,15 @@ def _quota_columns(start, messages):
 
 BASE_COLUMNS = ["timestamp_utc", "run_id", "model", "effort",
                 "turns", "duration_min", "quota_units", "is_error"]
+# quota.COLUMNS, written out so the cost row survives a broken quota.py
+# (tests/test_quota.py checks the two match).
+QUOTA_COLUMNS = ["slot", "minutes", "five_hour_start", "five_hour_end", "weekly_start",
+                 "weekly_end", "five_hour_used", "weekly_used", "weekly_resets_at"]
 
 
 def _append(ledger, row):
     """Append one row, widening the header first if the ledger predates a
     column (old rows get blanks). Columns another change added are kept."""
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import quota
     rows, header = [], []
     if os.path.exists(ledger):
         with open(ledger, newline="") as f:
@@ -196,7 +201,7 @@ def _append(ledger, row):
             header = next(reader, [])
             rows = list(reader)
     want = list(header or BASE_COLUMNS)
-    want += [c for c in BASE_COLUMNS + quota.COLUMNS if c not in want]
+    want += [c for c in BASE_COLUMNS + QUOTA_COLUMNS if c not in want]
     if want != header:
         tmp = ledger + ".tmp"
         with open(tmp, "w", newline="") as f:

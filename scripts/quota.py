@@ -37,12 +37,18 @@ left unused there is lost. Each shift gets an allowance: the headroom left to
 the ceiling, shared over the scheduled shifts expected before the reset (and,
 before the late window, the headroom to 90 over the shifts before it). That is
 compared with what a shift measurably uses: the median start-to-end change of
-recent shifts, which includes whatever the owner did meanwhile.
+recent shifts, which includes whatever the owner did meanwhile. Whether a shift
+fits under a reserve uses the same change per hour run, since shifts end early.
+The units allowance applies as well: a shift runs only if both pass, because
+its ceiling is a repository variable a shift cannot raise.
 
     allowance / cost >= 1.5  behind pace: a full shift, and catch-up slots run
                      >= 0.75 on pace: a full shift
                      >= 0.4  ahead: a short one
                      below   well ahead: a scheduled slot is skipped
+
+A host that can add runs cheaply (cloud tasks; on Actions each one spends
+minutes) asks `pace --kind catch-up`: exit 0 means the week is behind pace.
 
 Known limits (2026-11-21; the quota-pacing read in analysis/experiments.csv
 judges whether they matter): pacing shares the headroom as if shifts alone will
@@ -54,6 +60,7 @@ a stream with a rate_limit_event for `gate`, and the end stream for
 `shift_budget.py record`.
 
     quota.py gate <probe-stream> <ledger> <units-ceiling> [--kind K] [--start F] [--github-output F]
+    quota.py pace [<stream>] [--kind K]   # the decision as JSON; exit 0 if it runs
     quota.py probe              # take a reading now (local only) and save the snapshot
     quota.py report [<ledger>]  # per-week landing and per-shift use: the scheduled read
 """
@@ -125,7 +132,10 @@ def from_event(message):
         if not isinstance(w, dict):
             continue
         u, r = w.get("utilization"), w.get("resetsAt")
-        if isinstance(u, (int, float)) and isinstance(r, (int, float)) and 0 <= u <= 5:
+        # Epoch seconds only: a value in milliseconds would read as a reset
+        # thousands of years away (and crash a date conversion).
+        if (isinstance(u, (int, float)) and isinstance(r, (int, float))
+                and 0 <= u <= 5 and 1e9 < r < 1e10):
             out[name] = {"used_percentage": round(u * 100, 1), "resets_at": int(r)}
     return out or None
 
@@ -134,13 +144,22 @@ def readings(messages):
     return [r for r in (from_event(m) for m in messages) if r]
 
 
+def latest(found):
+    """The newest figure for each window across readings; None if none. An
+    event can carry one window only, and the older figure beats none."""
+    out = {}
+    for r in found or ():
+        out.update({k: v for k, v in r.items() if k in WINDOWS})
+    return out or None
+
+
 def first_last(path):
-    """(first, last) reading in a stream file; (None, None) if it has none."""
+    """(first, latest) reading in a stream file; (None, None) if it has none."""
     try:
         found = readings(load_messages(path))
     except (OSError, ValueError):
         return None, None
-    return (found[0], found[-1]) if found else (None, None)
+    return (found[0], latest(found)) if found else (None, None)
 
 
 def live(window, now):
@@ -219,15 +238,25 @@ def _float(value):
 
 
 def shift_cost(rows):
-    """{window: (median points a shift uses, samples)}, from measured shifts."""
+    """{window: (points a shift uses, points per hour run, samples)}: medians
+    of measured shifts. Pacing compares the first with the allowance; whether a
+    shift fits under a reserve uses the second, because shifts end early (29-46
+    of 60 minutes, 11-19 to 11-21) and a per-shift figure read as an hour's
+    would let a full hour cross the reserve."""
     out = {}
     for name, col in (("seven_day", "weekly_used"), ("five_hour", "five_hour_used")):
-        seen = [v for v in (_float(r.get(col)) for r in rows) if v is not None and v >= 0]
-        seen = seen[-RECENT:]
-        if len(seen) >= MIN_SAMPLES:
-            out[name] = (max(statistics.median(seen), 0.5), len(seen))
-        else:
-            out[name] = (PRIOR[name], len(seen))
+        shift, hour = [], []
+        for r in rows:
+            v, mins = _float(r.get(col)), _float(r.get("duration_min"))
+            if v is None or v < 0:
+                continue
+            shift.append(v)
+            if mins and mins >= 5:
+                hour.append(v * 60 / mins)
+        shift, hour = shift[-RECENT:], hour[-RECENT:]
+        per_shift = max(statistics.median(shift), 0.5) if len(shift) >= MIN_SAMPLES else PRIOR[name]
+        per_hour = max(statistics.median(hour), 0.5) if len(hour) >= MIN_SAMPLES else max(per_shift, PRIOR[name])
+        out[name] = (per_shift, per_hour, len(shift))
     return out
 
 
@@ -273,16 +302,15 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
     reading = reading or {}
     five = live(reading.get("five_hour"), now)
     seven = live(reading.get("seven_day"), now)
-    if five is None and seven is None:
-        return None
-    five, seven = five or 0.0, seven or 0.0
+    if five is None or seven is None:
+        return None     # a missing window is unknown, not empty: the caller falls back
     resets = (reading.get("seven_day") or {}).get("resets_at") or 0
     if resets <= now:
         resets = next_reset(now)
     late = resets - now <= LATE_HOURS * 3600
     ceiling = weekly_ceiling(now, resets)
     cost = shift_cost(list(rows))
-    c7, c5 = cost["seven_day"][0], cost["five_hour"][0]
+    c7, r7, r5 = cost["seven_day"][0], cost["seven_day"][1], cost["five_hour"][1]
     head = f"5h {five:.0f}%, weekly {seven:.0f}%"
 
     def out(verdict, minutes, why, pace=""):
@@ -295,12 +323,12 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
     if five >= RESERVE_5H:
         return out("STOP", 0, f"at the 5-hour reserve ({RESERVE_5H:.0f}%)")
 
-    # Minutes that fit under each reserve at SAFETY times a shift's usual rate.
-    fit7 = SHIFT_MINUTES * (ceiling - seven) / (c7 * SAFETY)
-    fit5 = SHIFT_MINUTES * (RESERVE_5H - five) / (c5 * SAFETY)
+    # Minutes that fit under each reserve at SAFETY times a shift's hourly rate.
+    fit7 = 60 * (ceiling - seven) / (r7 * SAFETY)
+    fit5 = 60 * (RESERVE_5H - five) / (r5 * SAFETY)
     resets5 = (reading.get("five_hour") or {}).get("resets_at") or 0
     left5 = (resets5 - now) / 60
-    if 0 < left5 < SHIFT_MINUTES and five + c5 * SAFETY * left5 / SHIFT_MINUTES <= RESERVE_5H:
+    if 0 < left5 < SHIFT_MINUTES and five + r5 * SAFETY * left5 / 60 <= RESERVE_5H:
         fit5 = SHIFT_MINUTES     # the 5-hour window resets mid-shift, in time
 
     # Pace: the headroom per scheduled shift left before the reset.
@@ -312,8 +340,8 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
         allowance = min(allowance, (RESERVE_7D - seven) / max(1.0, per_day * (hours - LATE_HOURS) / 24))
     ratio = allowance / c7
     when = datetime.datetime.fromtimestamp(resets, datetime.timezone.utc).strftime("%a %d %b %H:%M")
-    measured = (f"~{c7:.1f} points a shift, measured over {cost['seven_day'][1]}"
-                if cost["seven_day"][1] >= MIN_SAMPLES else f"~{c7:.0f} assumed until {MIN_SAMPLES} are measured")
+    measured = (f"~{c7:.1f} points a shift, measured over {cost['seven_day'][2]}"
+                if cost["seven_day"][2] >= MIN_SAMPLES else f"~{c7:.0f} assumed until {MIN_SAMPLES} are measured")
     pace = (f"{allowance:.1f} weekly points per shift left for ~{n:.0f} shifts to the {when} UTC "
             f"reset ({measured})" + ("; the late-week reserve is open" if late else ""))
 
@@ -347,33 +375,59 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
 
 def gate(stream, ledger, units_ceiling, kind="scheduled", start=None,
          github_output=None, snapshot=SNAPSHOT, now=None):
-    """shift.yml's weekly breaker. Exit 0 runs the shift, 1 skips it. Without a
-    reading it falls back to the units allowance, as before 2026-11-21."""
-    _, reading = first_last(stream)
-    rows = _rows(ledger)
-    result = decide(reading, now=now, rows=rows, kind=kind) if reading else None
-    outputs = {}
-    if result is None:
-        print("No usage reading from the probe — falling back to the weekly units allowance.")
-        if kind == "catch-up":
-            print("A catch-up slot runs only when a reading shows the week behind pace: skipped.")
-            return _emit(github_output, {"minutes": 0}, 1)
-        sys.path.insert(0, HERE)
-        import shift_budget
-        code = shift_budget.check(ledger, float(units_ceiling))
-        return _emit(github_output, {"minutes": SHIFT_MINUTES}, code)
+    """shift.yml's weekly breaker. Exit 0 runs the shift, 1 skips it.
 
-    print(f"{result['verdict']}: {result['reason']}")
+    Two checks, and a shift runs only if both pass: the measured reserve and
+    pace (decide), and the units allowance (shift_budget.check), whose ceiling
+    is a repository variable a shift cannot raise. Without a reading, or if
+    reading it fails in any way, the allowance alone decides, as before."""
+    sys.path.insert(0, HERE)
+    import shift_budget
+    units_ok = shift_budget.check(ledger, float(units_ceiling)) == 0
+    try:
+        _, reading = first_last(stream)
+        result = decide(reading, now=now, rows=_rows(ledger), kind=kind) if reading else None
+    except Exception as e:                      # never let a bug here stop every shift
+        print(f"Could not use the usage reading ({type(e).__name__}).")
+        reading = result = None
+    if result is None:
+        print("No usable usage reading: the weekly units allowance alone decides.")
+        if kind == "catch-up":
+            print("A catch-up run goes ahead only when a reading shows the week behind pace: skipped.")
+            return _emit(github_output, {"minutes": 0}, 1)
+        return _emit(github_output, {"minutes": SHIFT_MINUTES if units_ok else 0},
+                     0 if units_ok else 1)
+
+    run = result["run"] and units_ok
+    if result["run"] and not units_ok:
+        print(f"::warning::The units allowance binds before the measured reserve "
+              f"({result['reason']}). `quota.py report` gives units per weekly point; "
+              f"the owner can raise SHIFT_WEEKLY_QUOTA_BUDGET to let pacing fill the week.")
+    print(f"{result['verdict'] if run else 'STOP'}: {result['reason']}")
     if result["pace"]:
         print(f"pace: {result['pace']}")
-    outputs["minutes"] = result["minutes"]
+    result = dict(result, run=run, minutes=result["minutes"] if run else 0, kind=kind)
     try:
         save_snapshot(reading, snapshot, source="shift start", extra={"decision": result})
         if start:
             save_snapshot(reading, start, source="shift start")
     except OSError as e:
         print(f"could not save the reading ({type(e).__name__}); the shift still runs on this decision")
-    return _emit(github_output, outputs, 0 if result["run"] else 1)
+    return _emit(github_output, {"minutes": result["minutes"]}, 0 if run else 1)
+
+
+def pace_command(stream=None, kind="scheduled", ledger=LEDGER):
+    """The decision as JSON, from a stream file or else a fresh local reading
+    or snapshot; exit 0 if a run of this kind should go ahead."""
+    reading = first_last(stream)[1] if stream else probe()
+    if reading is None and not stream:
+        try:
+            reading = json.load(open(SNAPSHOT))
+        except (OSError, ValueError):
+            reading = None
+    result = decide(reading, rows=_rows(ledger), kind=kind) if reading else None
+    print(json.dumps(result if result else {"run": None, "reason": "no usage reading"}))
+    return 0 if result and result["run"] else 1
 
 
 def _emit(path, outputs, code):
@@ -402,7 +456,8 @@ def report(ledger=LEDGER):
         rows = weeks[key]
         w = [v for v in (_float(r.get("weekly_used")) for r in rows) if v is not None]
         f = [v for v in (_float(r.get("five_hour_used")) for r in rows) if v is not None]
-        ends = [v for v in (_float(r.get("weekly_end")) or _float(r.get("weekly_start")) for r in rows) if v is not None]
+        ends = [v for v in (_float(r.get("weekly_end")) if _float(r.get("weekly_end")) is not None
+                            else _float(r.get("weekly_start")) for r in rows) if v is not None]
         units = sum(_float(r.get("quota_units")) or 0 for r in rows)
         per_point = f"{units / sum(w):.1f}" if sum(w) > 0 else "-"
         when = datetime.datetime.fromtimestamp(int(float(key)), datetime.timezone.utc).strftime("%a %d %b %H:%M")
@@ -422,12 +477,17 @@ def main(argv=None):
     g.add_argument("--kind", default="scheduled", choices=["scheduled", "catch-up", "dispatch"])
     g.add_argument("--start")
     g.add_argument("--github-output")
+    pc = sub.add_parser("pace")
+    pc.add_argument("stream", nargs="?")
+    pc.add_argument("--kind", default="scheduled", choices=["scheduled", "catch-up", "dispatch"])
     sub.add_parser("probe")
     rp = sub.add_parser("report")
     rp.add_argument("ledger", nargs="?", default=LEDGER)
     a = ap.parse_args(argv)
     if a.cmd == "gate":
         return gate(a.stream, a.ledger, a.units_ceiling, a.kind, a.start, a.github_output)
+    if a.cmd == "pace":
+        return pace_command(a.stream, a.kind)
     if a.cmd == "probe":
         reading = probe()
         if not reading:
