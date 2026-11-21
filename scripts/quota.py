@@ -44,6 +44,15 @@ recent shifts, which includes whatever the owner did meanwhile.
                      >= 0.4  ahead: a short one
                      below   well ahead: a scheduled slot is skipped
 
+Known limits (2026-11-21; the quota-pacing read in analysis/experiments.csv
+judges whether they matter): pacing shares the headroom as if shifts alone will
+spend it, so early in the week shifts run ahead of the owner (the 90% reserve
+bounds that); a CI shift cannot take a reading mid-run, so its minutes are set
+at the start; the measured reserve is held by tests/test_quota.py, not by a
+guardrails.yml grep. A new host (cloud tasks) owes the same two readings:
+a stream with a rate_limit_event for `gate`, and the end stream for
+`shift_budget.py record`.
+
     quota.py gate <probe-stream> <ledger> <units-ceiling> [--kind K] [--start F] [--github-output F]
     quota.py probe              # take a reading now (local only) and save the snapshot
     quota.py report [<ledger>]  # per-week landing and per-shift use: the scheduled read
