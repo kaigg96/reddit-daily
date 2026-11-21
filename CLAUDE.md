@@ -43,13 +43,16 @@ opportunistically. Reasoning and numbers: PRD §5.
 
 **Nothing here bills per token.** The Claude subscription has overage disabled,
 so quota runs out rather than costing money. The "quota units" in
-`.github/shift-usage.csv` are an API-list-price *equivalent*, used only as a
-consistent yardstick — never read them as spending. The one thing that does
-cost money is Polly (§1).
+`.github/shift-usage.csv` are an API-list-price *equivalent*, never spending;
+the measured 5h and weekly % beside them is what counts. The one thing that
+does cost money is Polly (§1).
 
 Autonomous work stops at **80% of the 5-hour limit and 90% of the weekly
-limit** — the rest is the owner's to use, not headroom to plan around. Check
-with `venv/bin/python scripts/statusline.py --budget`.
+limit** — the rest is the owner's. In the **last 12 hours before the Friday
+18:00 UTC reset** the weekly reserve is the shifts' too, to 98%, because it
+expires unused (owner, 2026-11-20); the 5-hour reserve always holds. Quota
+left at the reset is waste, so shifts are paced to land near the ceiling.
+Check with `venv/bin/python scripts/statusline.py --budget` (`scripts/quota.py`).
 
 ## 3. `main` is live
 
