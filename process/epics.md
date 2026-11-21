@@ -1,10 +1,8 @@
 # Working in epics: the four roles' methods
 
 The board is `epics/` (its README gives the format and the order of play);
-this file is how each role does its job. Written 2026-11-15 (E2 T2) from the
-first day's evidence: three agents dispatched in one message ran side by side
-in CI, each in its own worktree (E2 T3), and a lone agent blocks the shift
-that sent it (F346). Change this on evidence, as any process text (D16).
+this file is how each role does its job. Written 2026-11-15 (E2 T2, T3;
+F346). Change this on evidence, as any process text (D16).
 
 ## Which role, now
 
@@ -36,8 +34,8 @@ with `isolation: worktree`, one ticket each, on its own branch named
 `e<n>-t<n>-<slug>`. Background agents are refused in CI and a lone foreground
 agent blocks the shift, so batching is the only way the orchestrator's time
 is not spent waiting. Each brief is generated from the ticket by
-`scripts/epics.py brief E<n> T<n>` (E2 T4), never written by hand, and pasted
-into the prompt as text (a `$(cat …)` there is not expanded; 11-21): the ticket's
+`scripts/epics.py brief E<n> T<n>` (E2 T4), never by hand, and pasted in as text
+(`$(…)` is not expanded): the ticket's
 text, its `Touches`, the gates in `CLAUDE.md` §3 that apply, the lessons
 whose `Applies` matches (`process/lessons.md`), the report format below, and
 its allotment: by default no Gemini calls and no render requests, only free
