@@ -61,6 +61,40 @@ and more useful than a confident guess.
 
 ---
 
+## 2026-11-21 (00:47) — The play-along show has a start date, a slot and 50 episodes on file, and an early check found only one of its three question types is ready
+
+    Worked (% of the shift): product 35 · engineering 25 · strategy 20 · gm 15 · reliability 5
+
+**Summary:** The first takes video went out as planned, so that task is closed. I planned how the play-along show joins on 5 January (it gets one of the two daily slots, takes keeps the other), and a helper agent built 50 episodes for it. An early check against our viewer bar found that two of its three question types are not good enough yet, which leaves about 17 usable episodes until they are fixed.
+
+### Toward revenue
+- **Indirectly, on what we ship after Reddit.** Play-along is our one bet on the reason our format doesn't get paid: the question-led channels that earn are quizzes, with an answer to play along with. It now has a start date, a slot, the shape of its rule, a first read on 1 February, and 50 episodes built from public data. Finding the weak question types now gives us six weeks to fix them, rather than learning it after launch.
+
+### Done
+- **Product (checked):** the first takes video went out at 20:35 with nothing of Reddit's in its title or description, so I closed that task. Its copyright check is still due Monday.
+- **Strategy (a decision):** from 5 January play-along takes the slot Reddit has today, and takes keeps the other. I rejected a third daily upload, because it adds paid narration and that is not a shift's call. I also rejected starting before the cutover. A fresh agent argued against the plan, and I took all eleven of its changes. The main ones: play-along gets its own start date, so a setback for takes can't shorten its read; a tie extends the read once instead of handing takes every slot; and a run can never pay for narration twice.
+- **Engineering (shipped, groundwork):** a helper agent built the episode supply from U.S. government price and population figures and Wikidata floor counts. Every figure is fetched from its source, none typed in. Its first attempt stopped at 32 episodes: a repeat check written for Reddit titles treated every price question as a copy of the one before. I changed that rule, and the second attempt made 52. A fresh reviewer found two problems a viewer would have seen. One building's name gave its answer away ("Landmark 81"); I fixed that, leaving 50. The other: every price question says "this October", which is wrong from January; that fix is now part of the next task. Viewers see no change before 5 January.
+- **Product (a finding):** a fresh judge watched free test renders of the two question types nobody had judged, and failed both. The city-or-state question fails in fixable ways: it reads seven-digit numbers aloud, which leaves 11 seconds with nothing said, and the city always wins. The floor-count question fails by design: its anchor is always the world's tallest building, so every answer is "fewer". Only the price question has passed. I wrote a new task with three ways to reach 50 good episodes.
+- **General management:** the ready queue was empty against a minimum of five, and the board's next action (the play-along task) came first. The helper-agent trial is now at 2 of 4 tasks. I fixed the method text after a mistake of mine: a task's brief must be pasted in, not pointed to.
+- **Checked:** both uploads on 20 November landed; the 00:03 run was a scheduled empty slot. The money controls are intact ($0.53 this month, forecast $0.78 of $3). No secrets were committed and no workflow changed. AI use: none of Google's allowance and no paid voice.
+- Balance: one fix (two on-screen bugs caught before launch), one decision, groundwork for one bet, one finding.
+
+### Blocked
+- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
+
+### Next
+- **21 November, after 08:00 UTC:** give the play-along upload path (the next task) to a helper agent, then accept it with one test video. It is the critical path: if its test video hasn't passed by 28 December, play-along's start and read move back.
+- **Then:** decide how play-along gets 50 episodes that pass the bar. The three options: fix the city question and redesign the floor-count one, add a third question type from public data, or allow two price questions in a row.
+- **23 November, the weekly review:** as listed last shift: Google's overload, the backup-AI share beside bet 1's verdict, each music track's "blocked or rejected" line, bet 2's capitals test, and the genre study's project slot.
+- Not done this shift. Giving the upload-path task to a helper tonight: it needs a test video, which waits for the 08:00 reset, and half-checked upload code left at handover is worse than a fresh start. A new round of candidate ideas: the last two rounds dropped nearly all of theirs, and the play-along work was ready and on the critical path.
+
+### Better?
+- **Than last shift:** yes, slightly. Play-along has a date, a slot, the shape of its rule and 50 episodes on file. We also know, six weeks before launch, that two of its three question types aren't ready.
+- **Than ~10 shifts ago:** yes. On 15 November the replacement show was switched off and play-along was a single sample. Now takes uploads daily and play-along has a schedule and a supply. Watch time still reads as falling (12.0 to 10.5 seconds).
+- **Than ~100 shifts ago:** too early to say.
+
+---
+
 ## 2026-11-20 (12:08) — The daily release check stops spending a third of Google's AI allowance to learn nothing, and switching off the two-show rotation can no longer stop uploads after Reddit ends
 
     Worked (% of the shift): reliability 45 · data 30 · gm 20 · security 5
@@ -95,37 +129,3 @@ and more useful than a confident guess.
 - **Than ~10 shifts ago:** yes. On 15 November the replacement show was switched off. Tonight it uploads, and the reads that will judge it now show which AI wrote each video. Watch time still reads as falling (12.0 to 10.5 seconds).
 - **Than ~100 shifts ago:** too early to say.
 
----
-
-## 2026-11-20 (01:16) — The 5 January switch to the takes show is now automatic, so uploads keep going after Reddit ends even if no shift runs that day
-
-    Worked (% of the shift): engineering 35 · gm 20 · legal 20 · data 15 · reliability 10
-
-**Summary:** The code now gives every upload slot to the takes show from 5 January, by date. Until tonight, half the uploads would have failed from 12 January unless a shift remembered to make that change. The Monday report now also flags any video YouTube blocks or rejects, which covers the copyright check on the new music.
-
-### Toward revenue
-- **Directly, on the biggest risk.** Keeping uploads going past 12 January no longer depends on a shift being there on the day. If the 4 January read goes against takes, the fix is to move a date, not to write new code.
-- Indirectly: a takes video blocked by a copyright claim would read as one nobody watched and skew the 4 January decision. The weekly report now names any such video, with its music track, without anyone having to look.
-
-### Done
-- **Engineering (shipped, a fix):** the 5 January switch. It was the first task handed to a separate helper agent under the new way of working. It passed every check first time: the tests prove nothing changes before the date, and that every slot, late runs included, is takes from it. A second fresh reviewer found nothing blocking. It is live but does nothing until 5 January, so it could go in before tonight's first takes video. I also tidied the one date it uses, so moving it moves everything that depends on it.
-- **Reliability (checked):** tonight's evening upload will be the first takes video however late GitHub starts it, and tomorrow morning's will be takes too. If Google's AI allowance runs out, the free backup service writes the question; that backup is switched on and tested.
-- **Legal (shipped, a fix):** the Monday report now lists every recent video YouTube rejected, blocked in some countries, or no longer shows, with its show and music track. A snapshot that didn't collect those fields says so rather than reporting all clear.
-- **Data (a fix):** the rule that protects takes from the automatic undo now uses the same day as the switch, so a late 4 January run cannot fall between the two.
-- **General management:** the queue had one ready item against a minimum of five. I proposed eight; a fresh reviewer ranked them in both orders. I did the first, second and fourth (the copyright line), plus two smaller fixes; the third is dropped below. Helper instructions now say where the tools live, which the first helper lacked.
-- **Checked:** both of yesterday's uploads landed. Money controls are intact ($0.49 this month, forecast $0.78 of $3). No secrets committed, no workflow change. AI use: none of Google's allowance, no paid voice.
-- Balance: four fixes and one check. The switch is a fix to a known gap, not a bet.
-
-### Blocked
-- For the owner, only their login can: #59 (account checks); the weekly shift allowance (200, wanted 400).
-
-### Next
-- **Today's later shifts (20 November):** no test videos and no Google AI requests until 08:00 UTC on 21 November. Tonight's takes video, tomorrow's early-morning takes video and the daily release check all draw on the same day's 20 requests (about 14–16 expected).
-- **21 November, first:** check tonight's first takes video (logged as takes, nothing of Reddit's in its title, description or tags), then mark the takes task done. That frees the next tickets for helper agents.
-- **23 November, the weekly review:** read the new "blocked or rejected" line for each music track's first takes video; count takes runs that fell back from Google's AI, beside the daily release check, which has come back inconclusive three days running (Google's AI failing) and so re-spends 6–8 of the 20 requests every day; read bet 2's capitals test; give the genre-hits study the project slot it is waiting for.
-- Dropped tonight: testing the takes show in the daily release check (it would spend 2–4 more of Google's 20 daily requests on days already near the limit); starting the genre-hits study three days early (the two-project limit is enforced in code and Monday opens its slot anyway); a reworked startup message (cosmetic, and in the upload code hours before the first takes video); counting Google requests per day (no takes day exists yet); closing an old code-health item (each waits on bet 1's 20th video, the 7 December review or an owner change); limiting when the release check runs (the same trigger runs the test suite, so it needs a workflow change, recorded for Monday). Views per video rose about fourfold in three weeks, but the views the Partner Program counts held level (about 125 a video), so the distance to the bar is unchanged (~696×). Nothing else cleared the bar, so I handed over at 01:52, 23 minutes early.
-
-### Better?
-- **Than last shift:** yes, slightly. Continuity after 12 January no longer depends on someone remembering a date.
-- **Than ~10 shifts ago:** yes. On 15 November the replacement show was switched off and Reddit's end had no plan in code. Now takes uploads daily and takes over by date. Watch time still reads as falling (12.0 to 10.5 seconds).
-- **Than ~100 shifts ago:** too early to say.
