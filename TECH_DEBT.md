@@ -155,6 +155,24 @@ Run this check-in after each version bump (`FORMAT_VERSION` change in `src/confi
 Findings that surface during feature work, recorded here so they survive past
 the commit message they were noticed in. Not a formal pass; fold into the next one.
 
+- **Quota readings and pacing (`scripts/quota.py`, 2026-11-21).** Open edges:
+  - *Capture lands with a workflow patch.* Until shift.yml's probe step does,
+    CI shifts gate on the units allowance as before; `quota.py report` stays
+    empty. The first shift after it should log `GO: 5h …%, weekly …%`.
+  - *Cloud tasks need the same two readings.* The host must give `quota.py
+    gate` a stream with a `rate_limit_event` before the shift (a probe, or its
+    own first event) and pass the end stream to `shift_budget.py record`.
+  - *The owner's own rate is not modelled.* Pacing shares headroom as if
+    shifts alone will spend it, so shifts run ahead of the owner early in the
+    week. The 90% reserve bounds that; refine once readings exist.
+  - *No mid-shift reading in CI.* The agent cannot probe (the token is out of
+    its reach); its minutes are set at the start.
+  - *The measured reserve is held by tests/test_quota.py, not a guardrails.yml
+    grep* (that file is label-only and two other changes are pending on it).
+- **`test_insights.py::test_a_late_run_counts_for_the_day_and_slot_it_was_scheduled_for`
+  fails on `main` at `4dd3480f`** (2026-11-21, also under TZ=UTC): `{}` where
+  `{'c': ('2026-10-05', 3)}` was expected. Predates the quota work.
+
 - **The takes show's switch-on (E1 T5; merged 11-19, `5f732aa`, after its
   render twin's PASS at `3311579`; the E1 branches deleted).** Its fresh
   review as a live change: nothing blocking; two fixes made
