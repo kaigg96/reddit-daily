@@ -336,7 +336,10 @@ def _frame(template, records):
         r = anchor["value"] / then["value"]
         when = f"{then['month']} {then['period'][:4]}"
         named = anchor.get("hook") or f"a {anchor['unit']} of {anchor['subject']}"
-        hook = f"What did {named} cost in {when}? This {anchor['month']} it's {_fmt(anchor)}."
+        # The anchor's month with its year: "this October" is wrong once the
+        # year turns, and the show starts in January (T13's review, 11-21).
+        hook = (f"What did {named} cost in {when}? "
+                f"In {anchor['month']} {anchor['period'][:4]} it was {_fmt(anchor)}.")
         answer, ans_rec, options = _fmt(then), then, None
         more = f"{r:.1f}× more now" if r >= 1 else f"{1 / r:.1f}× less now"
         # Under the answer it reads "$1.04 / in Jan 1990 / 4.3× more now".

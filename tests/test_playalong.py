@@ -4,6 +4,7 @@ import copy
 import csv
 from decimal import ROUND_HALF_UP, Decimal
 import json
+import re
 
 import pytest
 
@@ -52,7 +53,7 @@ def test_the_revealed_values_are_the_source_records():
     (gas,), _ = playalong.select_day(playalong.candidates(), "", [])
     people = playalong._frame(playalong.BIGGER, PEOPLE["records"])
     assert gas["hook"] == ("What did a gallon of regular gas cost in January 1990? "
-                           "This October it's $4.45.")
+                           "In October 2026 it was $4.45.")
     assert (gas["answer"], gas["comparison"], gas["options"]) == ("$1.04", "in Jan 1990\n4.3× more now", None)
     assert gas["source"] == {"name": "U.S. Bureau of Labor Statistics", "id": "APU000074714",
                              "value": 1.042, "fetched": "2026-11-16"}
@@ -265,7 +266,7 @@ def test_ground_beef_is_a_price_question_copied_from_its_record():
     # Rounded as a reader rounds, from the record's own digits ("6.755").
     shown = Decimal(str(now)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     assert beef["hook"] == (f"What did a pound of ground beef cost in January 1990? "
-                            f"This October it's ${shown}.") and str(shown) == "6.76"
+                            f"In October 2026 it was ${shown}.") and str(shown) == "6.76"
     assert beef["answer"] == f"${then:.2f}" == "$1.56"
     assert beef["comparison"] == f"in Jan 1990\n{now / then:.1f}× more now"
     assert beef["source"]["id"] == "APU0000703112"
@@ -356,3 +357,12 @@ def test_a_shipped_title_made_only_of_frame_words_matches_nothing():
     gas = playalong.candidates()[0]
     episode, why = playalong.select(gas, "", ["Why?"])
     assert "rule4" not in why
+
+
+def test_a_price_hook_names_its_anchors_year_so_it_holds_after_new_year():
+    """T13's review (11-21): "This October it's $X" is wrong from January,
+    when the show starts; every price hook names the month and its year."""
+    episodes, _ = playalong.select_day(playalong.supply(), shipped=[])
+    prices = [e for e in episodes if "cost in" in e["hook"]]
+    assert prices and all("This " not in e["hook"] for e in prices)
+    assert all(re.search(r"\? In [A-Z][a-z]+ 20\d\d it was \$", e["hook"]) for e in prices)
