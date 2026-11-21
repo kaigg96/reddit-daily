@@ -73,29 +73,73 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # The plan's real 5-hour and weekly usage. One minimal request on the
+      # smallest model (~600 input tokens, 3 seconds) returns it in a
+      # rate_limit_event. It runs BEFORE checkout, from an empty directory
+      # with an empty HOME and the pinned CLI, so nothing a shift could have
+      # edited (code, settings, hooks, CLAUDE.md) runs while the subscription
+      # token is in the environment; the installer never sees the token. Only
+      # the stream is kept, and the gate below reads it without the token.
+      # Any failure here falls back to the units allowance.
+      - name: Read the plan's usage
+        if: steps.auth.outputs.ready == 'true'
+        continue-on-error: true
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          probe="$RUNNER_TEMP/quota-probe"
+          mkdir -p "$probe/home" "$probe/cwd"
+          cd "$probe/cwd"
+          export HOME="$probe/home"
+          if ! env -u CLAUDE_CODE_OAUTH_TOKEN timeout 120 \
+               bash -c 'curl -fsSL https://claude.ai/install.sh | bash -s -- 2.1.280' >/dev/null 2>&1; then
+            echo "::warning::Could not install Claude Code for the usage probe."
+            rm -rf "$probe"; exit 0
+          fi
+          timeout 90 "$HOME/.local/bin/claude" -p "Reply with OK." --model haiku --tools "" \
+            --system-prompt "Reply with OK." --max-turns 1 --output-format stream-json \
+            --verbose --no-session-persistence --strict-mcp-config < /dev/null \
+            > "$RUNNER_TEMP/quota-probe.json" 2>/dev/null \
+            || echo "::warning::The usage probe failed; the gate falls back to the units allowance."
+          rm -rf "$probe"
+
       - uses: actions/checkout@v4
         if: steps.auth.outputs.ready == 'true'
         with:
           fetch-depth: 0     # shifts read git history
 
-      # A runaway breaker, not a budget. Remaining quota is not observable on a
-      # runner, and the owner's real weekly figure (their Claude console)
-      # includes their own interactive sessions, which dwarf shift usage --
-      # two shifts came to 15 units while the console read 38%. So this only
-      # needs to catch a shift looping. 120 allows a daily shift at the
-      # observed ~10.5 units with generous headroom. The window aligns with the
-      # real Friday 18:00 UTC reset rather than rolling. Units are an
-      # API-list-price equivalent, never money: overage is disabled on this
-      # account. Lives in a repository variable so a shift cannot raise its own.
-      - name: Within the weekly shift budget?
+      # The weekly breaker. With a reading it gates on the owner's reserve
+      # itself: 80% of the 5-hour window, 90% of the weekly one, or 98% in the
+      # last 12 hours before the Friday 18:00 UTC reset (CLAUDE.md §2). It also
+      # paces shifts to land near that ceiling at the reset, because quota
+      # left unused there is lost (owner, 2026-11-20): it sets this shift's
+      # minutes, and skips a scheduled slot only when the week is well ahead.
+      # Without a reading it falls back to the units allowance, a runaway
+      # breaker in an API-list-price equivalent, never money (overage is
+      # disabled). The allowance is a repository variable, so a shift cannot
+      # raise its own; tests/test_quota.py holds the reserves in CI. Before
+      # quota.py reaches main, the allowance alone runs, as it did before.
+      - name: Within the reserve, and on pace?
         id: budget
         if: steps.auth.outputs.ready == 'true'
         run: |
-          if python3 scripts/shift_budget.py check .github/shift-usage.csv \
-               "${{ vars.SHIFT_WEEKLY_QUOTA_BUDGET || '120' }}"; then
+          kind=scheduled
+          # Extra catch-up runs (quota.py pace) belong to a host where a run
+          # costs no Actions minutes, so here a slot is scheduled or dispatched.
+          [ "${{ github.event_name }}" = "workflow_dispatch" ] && kind=dispatch
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          ceiling="${{ vars.SHIFT_WEEKLY_QUOTA_BUDGET || '120' }}"
+          if [ -f scripts/quota.py ]; then
+            gate=(python3 scripts/quota.py gate "$RUNNER_TEMP/quota-probe.json"
+                  .github/shift-usage.csv "$ceiling" --kind "$kind"
+                  --start "$RUNNER_TEMP/quota-start.json" --github-output "$GITHUB_OUTPUT")
+          else
+            gate=(python3 scripts/shift_budget.py check .github/shift-usage.csv "$ceiling")
+          fi
+          if "${gate[@]}"; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::warning::Weekly shift allowance spent — skipping."
+            echo "::warning::Skipping this shift: the reserve, the pace or the allowance said so above."
             echo "proceed=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -117,13 +161,20 @@ jobs:
 
       - name: Remember where this shift started
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
+        env:
+          MINUTES: ${{ steps.budget.outputs.minutes }}
         run: |
           echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           # The job is killed at 70 minutes and the agent has no clock of its
           # own, so it guessed: on 2026-09-24 one stopped at 8 minutes, skipping
           # research "because of the 30-minute limit". Its deadline now goes in
-          # the prompt. 60 leaves room for the handover and the steps after it.
-          echo "SHIFT_DEADLINE=$(date -u -d '+60 minutes' +%H:%M)" >> "$GITHUB_ENV"
+          # the prompt. 60 at most leaves room for the handover and the steps
+          # after it; the gate gives less when the week is ahead of pace or a
+          # reserve is near.
+          case "$MINUTES" in ''|*[!0-9]*) MINUTES=60 ;; esac
+          [ "$MINUTES" -le 60 ] || MINUTES=60
+          echo "SHIFT_MINUTES=$MINUTES" >> "$GITHUB_ENV"
+          echo "SHIFT_DEADLINE=$(date -u -d "+$MINUTES minutes" +%H:%M)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         if: steps.auth.outputs.ready == 'true' && steps.budget.outputs.proceed == 'true' && steps.minutes.outputs.proceed == 'true'
@@ -233,7 +284,9 @@ jobs:
             /home/runner/work/_temp/claude-execution-output.json \
             .github/shift-usage.csv "${{ github.run_id }}" \
             "${{ inputs.model || 'claude-opus-5-5' }}" \
-            "${{ inputs.effort || 'ultracode' }}"
+            "${{ inputs.effort || 'ultracode' }}" \
+            "$RUNNER_TEMP/quota-start.json" "${{ steps.budget.outputs.kind }}" \
+            "${SHIFT_MINUTES:-60}"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           # claude-code-action re-authenticates the remote as the Claude App,
