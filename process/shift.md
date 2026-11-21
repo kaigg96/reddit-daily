@@ -232,9 +232,14 @@ out mid-task:
 1. Commit work in progress on a branch; never leave `main` half-finished.
 2. Keep every item's **Status** true in `PRD.md` §0 and `PLAN.md` §3 — it is
    what the ready count reads. `TECH_DEBT.md` for findings you did not fix.
-3. Prepend a `WORKLOG.md` entry **following the template in that file's
+3. **Hold the retro:** `venv/bin/python scripts/friction.py retro` lists this
+   shift's friction rows and the open requests. Cast the shift's one vote with
+   `friction.py vote`: the change that would have saved one of *its own*
+   rows, and at most the minutes that row lost. Or abstain, with the reason
+   (D15, amended 11-20). An invented vote is worse than an abstention.
+4. Prepend a `WORKLOG.md` entry **following the template in that file's
    header**. It is emailed to the owner verbatim and is the only thing they
    see, so write it for a manager: plain language, no filenames, no jargon.
    Lead with what moved the company toward revenue, or say plainly that
    nothing did and why.
-4. State plainly what you did and what you would do next.
+5. State plainly what you did and what you would do next.

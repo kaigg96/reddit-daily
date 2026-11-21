@@ -44,6 +44,8 @@ three of these, and say which you used:
 - **Distribution** — `analysis/traffic_sources.csv`. Where views actually come
   from, which killed the SEO work once already.
 - **Constraints** — anything in §3 below that is forcing workarounds.
+- **Friction requests** — `scripts/friction.py requests`: changes shifts voted
+  for, each vote a row the voter logged and the minutes it would have saved.
 - **The company** — `PLAN.md`: the revenue routes, and any risk in §4 with no
   item answering it. Candidates need not be product work: a price, a policy
   read, a platform, a change of direction (a Decide).
@@ -93,6 +95,14 @@ judgement. Dimensions, in this project's terms:
 | **Cost** | Gemini requests, Polly characters, Actions minutes, shift time. |
 | **Reversibility** | One `FORMAT_VERSION` bump, or something that cannot be undone. |
 | **Blocked?** | Gated on uploads accumulating is not a reason to rank it high now. |
+
+**A friction request past the bar** (`backlog_status.py` prints it) is a
+candidate in every ranking until it is queued or declined, 14 days at most
+(D15's requests rule). Its evidence is measured on our shifts; its effect on
+the path to revenue is the shift time it returns. If it wins: its queue row,
+then `friction.py mark R… queued <id>`, and `mark R… shipped <commit>` when
+it lands, which marks its friction group fixed. If it loses: `mark R…
+declined "why"`.
 
 Rank on the dimensions, not on enthusiasm. Then write the top item into
 `PRD.md` §0 (product) or `PLAN.md` §3 (everything else) **with its decision

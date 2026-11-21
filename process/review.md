@@ -42,8 +42,11 @@ Due when there is a snapshot no weekly review has read.
    Dependency advisories. `money_check.py` was clean every day?
 6. **General management.** Every Status in both trackers true; re-rank the
    ready queue on the path to revenue (`/backlog` §2); close what finished.
-   **The friction log** (D15): `friction.py report`. Group every new row,
-   queue the groups worth fixing with their counts, record each resolution.
+   **The friction log** (D15): `friction.py report`. Group every new row and
+   record each resolution. Groups reach the queue as requests, which shifts
+   vote for at their retros: merge duplicates (`friction.py mark R… merged
+   R…`), and from 14 days after REQ_START read `friction.py evaluate
+   --requests`, its rule quoted first.
 
 7. **Lessons** (E2 T7, from 2026-11-15). Read the friction log's groups
    (`scripts/friction.py`, `.github/friction-groups.csv`): a group with
