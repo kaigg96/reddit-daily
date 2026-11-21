@@ -88,3 +88,13 @@ def test_short_shifts_print_even_with_work_ready(tmp_path, monkeypatch, capsys):
         "## 3. Work queue\n\n| # | Status | Item |\n|---|---|---|\n" + rows), b.queue_section)])
     b.main([])
     assert "SHIFTS ARE ENDING EARLY" in capsys.readouterr().out
+
+
+def test_a_short_shift_is_measured_against_the_time_it_was_given(tmp_path):
+    """Quota pacing gives a shift ahead of pace 30 minutes (2026-11-21)."""
+    p = tmp_path / "usage.csv"
+    p.write_text(HEADER.rstrip("\n") + ",slot,minutes\n"
+                 + "".join(f"t,{i},m,e,50,27.0,1.0,0,scheduled,30\n" for i in range(3)))
+    assert cb.capacity_shortfall(str(p)) is None
+    p.write_text(HEADER + "".join(f"t,{i},m,e,50,27.0,1.0,0\n" for i in range(3)))
+    assert cb.capacity_shortfall(str(p)) is not None      # 27 of 60 is early

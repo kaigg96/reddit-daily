@@ -31,10 +31,10 @@ import time
 
 SNAPSHOT = os.path.expanduser("~/.claude/usage-snapshot.json")
 
-# The owner keeps a reserve so autonomous shifts never leave them unable to use
-# Claude themselves. Autonomous work stops at these, NOT at 100%.
-RESERVE_5H = 80.0   # stop the shift once the 5-hour window is this % spent
-RESERVE_7D = 90.0   # ...or the weekly window
+# The reserve and the pacing that reads these numbers live in quota.py, which
+# is also stdlib-only; only `--budget` imports it, so the status bar never
+# depends on it.
+FRESH = 900   # seconds: older than this, --budget takes a new reading
 
 
 def _num(value):
@@ -131,74 +131,62 @@ def render(payload):
     return "  |  ".join(bits)
 
 
-def _live_pct(window, now):
-    """Used-percentage, or 0.0 if the window has already rolled over.
-
-    A snapshot from a previous session is stale, but `resets_at` still says
-    whether that staleness matters: past it, the window reset and the budget is
-    fresh. Without this check a shift would refuse to start on yesterday's
-    exhausted numbers.
-    """
-    if not window or window.get("used_percentage") is None:
-        return None
-    if window.get("resets_at") and window["resets_at"] <= now:
-        return 0.0
-    return float(window["used_percentage"])
-
-
-def budget_verdict(snap, now=None):
-    """How much work this shift may take on. Returns (verdict, reason).
+def budget_verdict(snap, now=None, rows=None):
+    """How much work this shift may take on. Returns (verdict, reason, pace).
 
     STOP    — at or past a reserve; close the loop and end
     WRAP    — finish or park what's open, hand over; start nothing new
     BOUNDED — one small task, then hand over
     GO      — full shift, including a feature through dry run and merge
     """
-    now = now or time.time()
-    five = _live_pct((snap or {}).get("five_hour"), now)
-    seven = _live_pct((snap or {}).get("seven_day"), now)
-
-    if five is None and seven is None:
-        # No reading at all. On a runner that is expected -- statusLine does not
-        # fire headlessly -- and the reserve has ALREADY been enforced before
-        # the shift started, by the weekly quota allowance and the Actions
-        # minutes guard in shift.yml. Returning BOUNDED here caps the shift a
-        # second time: the first CI shift was told to do "one small task" and
-        # duly stopped after 9.5 minutes having used 4.9 of 25 allowed units.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import quota
+    rows = quota._rows(quota.LEDGER) if rows is None else rows
+    decided = quota.decide(snap, now=now, rows=rows, kind="dispatch") if snap else None
+    if decided is None:
+        # No reading at all. In CI that means the gate's probe failed and the
+        # units allowance already gated this shift: returning BOUNDED there
+        # capped it twice (the first CI shift stopped after 9.5 minutes).
         if os.environ.get("GITHUB_ACTIONS") == "true":
-            return "GO", ("running in CI — the weekly allowance and Actions "
-                          "guard already gated this shift")
-        # Locally, a missing snapshot really is unknown: assume the middle.
-        return "BOUNDED", "no usage snapshot — assuming mid-budget"
-    five = 0.0 if five is None else five
-    seven = 0.0 if seven is None else seven
-
-    if seven >= RESERVE_7D:
-        return "STOP", f"weekly at {seven:.0f}% (reserve {RESERVE_7D:.0f}%)"
-    if five >= RESERVE_5H:
-        return "STOP", f"5h at {five:.0f}% (reserve {RESERVE_5H:.0f}%)"
-    if five >= RESERVE_5H - 10:
-        return "WRAP", f"5h at {five:.0f}%, near the {RESERVE_5H:.0f}% reserve"
-    if five >= 50 or seven >= 75:
-        return "BOUNDED", f"5h {five:.0f}%, weekly {seven:.0f}%"
-    return "GO", f"5h {five:.0f}%, weekly {seven:.0f}%"
+            return "GO", ("running in CI without a reading — the units allowance "
+                          "gated this shift"), ""
+        return "BOUNDED", "no usage reading — assuming mid-budget", ""
+    return decided["verdict"], decided["reason"], decided["pace"]
 
 
 def print_budget():
-    """`statusline.py --budget` — what a shift reads before choosing work."""
+    """`statusline.py --budget` — what a shift reads before choosing work.
+
+    Uses the snapshot when it is fresh. Otherwise, locally, it takes a reading
+    (quota.py probe): the VSCode extension never runs a status line."""
     try:
         with open(SNAPSHOT) as f:
             snap = json.load(f)
     except Exception:
         snap = None
-    verdict, reason = budget_verdict(snap)
+    age = time.time() - (snap or {}).get("captured_at", 0)
+    if age > FRESH and os.environ.get("GITHUB_ACTIONS") != "true":
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import quota
+            reading = quota.probe()
+            if reading:
+                snap = quota.save_snapshot(reading, SNAPSHOT, source="probe")
+        except Exception:
+            pass
+    verdict, reason, pace = budget_verdict(snap)
     print(f"{verdict}: {reason}")
+    if pace:
+        print(f"pace: {pace}")
+    decision = (snap or {}).get("decision")
+    if decision and decision.get("minutes"):
+        print(f"this shift was given {decision['minutes']} minutes at its start")
     if snap and snap.get("captured_at"):
         age = int(time.time() - snap["captured_at"])
-        print(f"snapshot age: {age // 60}m "
-              f"({'current session' if age < 900 else 'stale — trust resets_at, not the %'})")
-    print(f"reserves: 5h stops at {RESERVE_5H:.0f}%, weekly at {RESERVE_7D:.0f}% "
-          f"— the rest is the owner's to use")
+        print(f"reading age: {age // 60}m ({snap.get('source') or 'status line'}"
+              f"{'' if age < FRESH else '; stale — trust resets_at, not the %'})")
+    print("reserves: 5h stops at 80%; weekly at 90%, or 98% in the last 12h before "
+          "the Friday 18:00 UTC reset — the rest is the owner's to use")
     return 0
 
 

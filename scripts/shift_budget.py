@@ -195,7 +195,7 @@ def _append(ledger, row):
             reader = csv.reader(f)
             header = next(reader, [])
             rows = list(reader)
-    want = header or list(BASE_COLUMNS)
+    want = list(header or BASE_COLUMNS)
     want += [c for c in BASE_COLUMNS + quota.COLUMNS if c not in want]
     if want != header:
         tmp = ledger + ".tmp"

@@ -448,13 +448,38 @@ def shift_minutes(path=None):
     return out
 
 
+def shift_allotted(path=None):
+    """Minutes each completed shift was given, in shift_minutes' order: the
+    ledger's `minutes` column, or SHIFT_MINUTES for rows that predate it."""
+    try:
+        rows = list(csv.DictReader(open(path or LEDGER)))
+    except OSError:
+        return []
+    out = []
+    for r in reversed(rows):
+        if r.get("is_error") == "1":
+            continue
+        try:
+            float(r["duration_min"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        try:
+            given = float(r.get("minutes") or SHIFT_MINUTES)
+        except ValueError:
+            given = SHIFT_MINUTES
+        out.append(given if given > 0 else SHIFT_MINUTES)
+    return out
+
+
 def capacity_shortfall(path=None):
     """(minutes, share used) when the last WASTE_SHIFTS shifts used under
     WASTE_RATIO of their time; None when they did, or too few have run."""
     minutes = shift_minutes(path)[:WASTE_SHIFTS]
     if len(minutes) < WASTE_SHIFTS:
         return None
-    used = sum(minutes) / (WASTE_SHIFTS * SHIFT_MINUTES)
+    # Against the time each was given: since 2026-11-21 quota pacing gives a
+    # shift ahead of pace 30 minutes, which is not a shift ending early.
+    used = sum(minutes) / sum(shift_allotted(path)[:WASTE_SHIFTS])
     return (minutes, used) if used < WASTE_RATIO else None
 
 

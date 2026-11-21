@@ -239,7 +239,13 @@ def footer(ledger, run_url):
         except Exception:
             due = []
         import context_budget
-        out.append(f"*{cost.get('duration_min','?')} of {context_budget.SHIFT_MINUTES} min · "
+        # The plan's real usage, start to end (quota.py); blank before a reading.
+        usage = ""
+        if cost.get("weekly_start") or cost.get("weekly_end"):
+            usage = (f"weekly {cost.get('weekly_start') or '?'}→{cost.get('weekly_end') or '?'}% · "
+                     f"5h {cost.get('five_hour_start') or '?'}→{cost.get('five_hour_end') or '?'}% · ")
+        given = cost.get("minutes") or context_budget.SHIFT_MINUTES
+        out.append(f"*{cost.get('duration_min','?')} of {given} min · {usage}"
                    f"{cost.get('turns','?')} steps · "
                    f"{cost.get('quota_units','?')} quota units · "
                    f"ready work left: {ready} (floor {backlog_status.FLOOR})"

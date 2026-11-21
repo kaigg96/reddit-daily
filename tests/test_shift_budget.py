@@ -27,7 +27,8 @@ def run(tmp_path, capsys, payload):
 def test_an_api_refusal_explains_itself(tmp_path, capsys):
     printed, ledger = run(tmp_path, capsys, REFUSED)
     assert "::error::API Error: 400 Claude Code 2.1.278 does not support" in printed
-    assert ledger.strip().splitlines()[-1].endswith(",1")   # still recorded as an error
+    last = ledger.strip().splitlines()
+    assert dict(zip(last[0].split(","), last[-1].split(",")))["is_error"] == "1"   # still recorded as an error
 
 
 def test_a_normal_final_message_stays_hidden(tmp_path, capsys):
