@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """The CI usage reserve: a rolling 7-day ceiling on what shifts have cost.
 
-The owner's 80%/90% reserve cannot be enforced on a runner. Established by
+Before scripts/quota.py (2026-11-21) the owner's reserve (`CLAUDE.md` §2)
+could not be enforced on a runner. Established by
 experiment 2026-09-20: statusLine does not fire in headless mode, transcripts
 record only the moment a limit is *hit* (`quotaLimits.status = rejected`), and
 there is no plan-usage API. Remaining quota is simply not observable there.

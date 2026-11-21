@@ -91,7 +91,7 @@ def test_a_shift_starts_only_if_it_fits_under_the_ceiling():
     assert d["verdict"] == "STOP"     # 12 minutes would fit: not worth starting
 
 
-def test_five_hour_reserve_always_holds():
+def test_the_five_hour_ceiling_always_holds():
     now = RESET - 3 * 86400
     assert quota.decide(reading(97, 10, now), now=now, rows=measured(5))["verdict"] == "STOP"
     late = RESET - 2 * H
@@ -101,9 +101,34 @@ def test_five_hour_reserve_always_holds():
 
 
 def test_a_five_hour_reset_mid_shift_frees_the_window():
+    """Review, 2026-11-21: started where a full hour would NOT fit, so only the
+    reset branch can give 60; and only if the window absorbs the minutes left."""
     now = RESET - 3 * 86400
-    d = quota.decide(reading(70, 10, now, five_resets_in=15 * 60), now=now, rows=measured(5))
+    d = quota.decide(reading(90, 10, now, five_resets_in=15 * 60), now=now, rows=measured(5))
     assert d["verdict"] == "GO" and d["minutes"] == 60
+    d = quota.decide(reading(95, 10, now, five_resets_in=5 * 60), now=now, rows=measured(5))
+    assert d["verdict"] == "STOP"
+
+
+def test_a_local_session_near_the_ceiling_gets_one_short_step():
+    """Owner, 2026-11-21: "use it all, always". A dispatch reads again after
+    each step, so a few minutes still fit where a scheduled shift stops."""
+    now = RESET - 3 * 86400
+    local = quota.decide(reading(93, 10, now), now=now, rows=measured(5), kind="dispatch")
+    assert local["verdict"] == "WRAP" and local["minutes"] == 5, local
+    assert quota.decide(reading(93, 10, now), now=now, rows=measured(5))["verdict"] == "STOP"
+    assert quota.decide(reading(96.5, 10, now), now=now, rows=measured(5),
+                        kind="dispatch")["verdict"] == "STOP"
+
+
+def test_an_unmeasured_five_hour_rate_starts_ci_with_a_wider_margin():
+    """Review, 2026-11-21: a CI shift cannot read mid-run, so until its 5-hour
+    rate is measured the start gate assumes 1.75x the guess, not 1.25x."""
+    now = RESET - 3 * 86400
+    unmeasured = [{"weekly_used": "4.0", "duration_min": "60"} for _ in range(5)]
+    assert quota.decide(reading(72, 10, now), now=now, rows=measured(5))["minutes"] == 60
+    d = quota.decide(reading(72, 10, now), now=now, rows=unmeasured)
+    assert d["minutes"] < 60 and 72 + 20 * 1.75 * d["minutes"] / 60 <= quota.RESERVE_5H, d
 
 
 def test_pacing_behind_on_and_ahead():

@@ -27,9 +27,10 @@ venv/bin/python scripts/money_check.py --escalate   # the money controls at AWS
 ```
 
 **The owner keeps a weekly reserve.** Work stops at 97% of the 5-hour window
-(its margin to hand over) and 90% of the weekly one, or 98% in the last 12
-hours before the Friday reset (`CLAUDE.md` §2). Within that, unused quota is waste: `--budget` prints the
-pace, and CI gave this shift its minutes from it (`scripts/quota.py`).
+(the last 3% is for handing over) and 90% of the weekly one, or 98% in the
+last 12 hours before the Friday reset (`CLAUDE.md` §2). Within that, unused
+quota is waste: `--budget` prints the pace, and CI gave this shift its
+minutes from it (`scripts/quota.py`).
 **`GO`** — real work: a feature through dry run and merge, a review, `/audit`;
 **behind pace**, use all the time on the larger ready items, helpers in
 parallel. **`BOUNDED`** — one bounded task, finished. **`WRAP`** — finish or

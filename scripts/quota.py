@@ -25,9 +25,9 @@ using it outside Claude Code. A reading comes from one of three places:
 - a local session: `statusline.py`'s snapshot when its status line runs, else
   `probe` (the VSCode extension never runs a status line).
 
-**The reserve** (`CLAUDE.md` §2) is 97% of the 5-hour window, always (the
-owner, 2026-11-21: "use it all, always"; the 3% is a margin to hand over), and 90%
-of the weekly one, except in the last 12 hours before the Friday 18:00 UTC
+**The ceilings** (`CLAUDE.md` §2) are 97% of the 5-hour window, always (the
+owner, 2026-11-21: "use it all, always"; the last 3% is for handing over), and
+90% of the weekly one, except in the last 12 hours before the Friday 18:00 UTC
 reset, when the weekly reserve is the shifts' to use too, because it expires
 unused (the owner, 2026-11-20). Late in the week the ceiling is 98, not 100: a
 shift that reaches the hard limit dies without handing over (11-15). A shift
@@ -55,7 +55,8 @@ Known limits (2026-11-21; the quota-pacing read in analysis/experiments.csv
 judges whether they matter): pacing shares the headroom as if shifts alone will
 spend it, so early in the week shifts run ahead of the owner (the 90% reserve
 bounds that); a CI shift cannot take a reading mid-run, so its minutes are set
-at the start; the measured reserve is held by tests/test_quota.py, not by a
+at the start, and until its 5-hour rate is measured it starts with a
+1.75x margin, not 1.25x; the ceilings are held by tests/test_quota.py, not by a
 guardrails.yml grep. A new host (cloud tasks) owes the same two readings:
 a stream with a rate_limit_event for `gate`, and the end stream for
 `shift_budget.py record`.
@@ -85,6 +86,8 @@ RESERVE_7D = 90.0
 LATE_HOURS = 12          # the owner, 2026-11-20: the last ~12h before the reset
 LATE_CEILING_7D = 98.0   # not 100: a shift that hits the hard limit cannot hand over
 SAFETY = 1.25            # a shift starts only if 1.25x its usual use still fits
+SAFETY_5H_PRIOR = 1.75   # while the 5-hour rate is a guess: nothing stops a CI shift
+                         # mid-run short of the hard limit (review, 2026-11-21)
 
 # Until three shifts have been measured. Guesses, replaced by the median of
 # measured shifts as soon as there are MIN_SAMPLES of them.
@@ -312,6 +315,7 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
     ceiling = weekly_ceiling(now, resets)
     cost = shift_cost(list(rows))
     c7, r7, r5 = cost["seven_day"][0], cost["seven_day"][1], cost["five_hour"][1]
+    s5 = SAFETY if cost["five_hour"][2] >= MIN_SAMPLES else SAFETY_5H_PRIOR
     head = f"5h {five:.0f}%, weekly {seven:.0f}%"
 
     def out(verdict, minutes, why, pace=""):
@@ -322,14 +326,14 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
     if seven >= ceiling:
         return out("STOP", 0, f"at the weekly reserve ({ceiling:.0f}%)")
     if five >= RESERVE_5H:
-        return out("STOP", 0, f"at the 5-hour reserve ({RESERVE_5H:.0f}%)")
+        return out("STOP", 0, f"at the 5-hour ceiling ({RESERVE_5H:.0f}%)")
 
     # Minutes that fit under each reserve at SAFETY times a shift's hourly rate.
     fit7 = 60 * (ceiling - seven) / (r7 * SAFETY)
-    fit5 = 60 * (RESERVE_5H - five) / (r5 * SAFETY)
+    fit5 = 60 * (RESERVE_5H - five) / (r5 * s5)
     resets5 = (reading.get("five_hour") or {}).get("resets_at") or 0
     left5 = (resets5 - now) / 60
-    if 0 < left5 < SHIFT_MINUTES and five + r5 * SAFETY * left5 / 60 <= RESERVE_5H:
+    if 0 < left5 < SHIFT_MINUTES and five + r5 * s5 * left5 / 60 <= RESERVE_5H:
         fit5 = SHIFT_MINUTES     # the 5-hour window resets mid-shift, in time
 
     # Pace: the headroom per scheduled shift left before the reset.
@@ -363,12 +367,19 @@ def decide(reading, now=None, rows=(), kind="scheduled"):
 
     fit = min(fit7, fit5)
     if fit < minutes:
+        limit = "weekly reserve" if fit7 <= fit5 else "5-hour ceiling"
         if fit < MIN_MINUTES:
-            limit = "weekly" if fit7 <= fit5 else "5-hour"
-            return out("STOP", 0, f"a shift would cross the {limit} reserve", pace)
+            # Under the 5-hour ceiling only (the owner's 2026-11-21 call; the weekly
+            # reserve is unchanged): a local session reads again after each step,
+            # so a short step still fits. Stopping it left 8-11 points unused.
+            if kind == "dispatch" and fit5 < fit7 and fit >= 5:
+                short = int(fit // 5 * 5)
+                return out("WRAP", short, f"{short} minutes fit under the {limit}: "
+                           "finish one step, then read again", pace)
+            return out("STOP", 0, f"a shift would cross the {limit}", pace)
         minutes = int(fit // 5 * 5)
         verdict = "WRAP" if minutes < SHORT_MINUTES else "BOUNDED"
-        why = f"{minutes} minutes fit under the {'weekly' if fit7 <= fit5 else '5-hour'} reserve"
+        why = f"{minutes} minutes fit under the {limit}"
     return out(verdict, minutes, why, pace)
 
 
