@@ -172,14 +172,14 @@ Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the 
 Accepted 2026-11-18: 11-18 (01:37 shift), implementer from a brief on `e2-t7-lessons` (`dbbc9a3`). Re-run: `epics.py --check` clean on 16 lessons; `pytest tests/test_epics.py` 34 passed (fixture tests for no Evidence, a 31st lesson, five Touches sets); `brief E6 T1` (Touches PRD.md §4) lists L6, L7, L9, L13, L14, L16 and no `src/` lesson. The branch put process/lessons.md 29 words over its budget; trimmed. Fresh review: a Touches item with a note ("src/ (by merge of …)") missed its directory's lessons, and a prefix match let `PLAN.md.bak` match; fixed in `652103f` (an item matches on its first word), with a test. Left: L16's backticked `PRD.md` is a topic, now read as a path filter. Merged `4f18702`, 1,449 pass.
 
 ### T8 · E1's remaining tickets run through this workflow
-Status: todo: 1 of 4 so far (T12); T5 done 11-21, so T13 went out that shift
+Status: todo: 2 of 4 (T12, T13); T14 ready
 Needs: T5
 Touches: epics/E1-the-show-after-reddit.md
 Context: the pilot. E1 does not wait for it: any E1 ticket due before this is ready is done the old way, by a shift directly.
 Accept:
 - [ ] at least four E1 tickets went from `ready` to `done` by dispatch and acceptance, with `Evidence` on each
 - [ ] this file records, per ticket: accepted first time or bounced, and the shift's quota units
-Evidence: 1 of 4 so far. **E1 T12** (11-20, 01:16 shift, run 44652295279): dispatched before T5 was done, its code being inert until 01-05; **accepted first time**; implementer ~6 min, 28 tool calls; the shift's quota units are run 44652295279's row in `shift-usage.csv`. The brief was enough to start cold; the one gap was the worktree having no `venv/` (the orchestrator named the interpreter).
+Evidence: 1 of 4 so far. **E1 T12** (11-20, 01:16 shift, run 44652295279): dispatched before T5 was done, its code being inert until 01-05; **accepted first time**; implementer ~6 min, 28 tool calls; the shift's quota units are run 44652295279's row in `shift-usage.csv`. The brief was enough to start cold; the one gap was the worktree having no `venv/` (the orchestrator named the interpreter). **E1 T13** (11-21, 00:47 shift, run 44846129038): **bounced once, accepted on the second round** by the same agent: round 1 shipped 32 of 40 because rule 4's rewording bar, written for Reddit titles, read every price hook as a rewording of the last; the orchestrator changed that rule, and round 2 shipped 52 (~6 + ~2 min, 27 tool calls). The brief went in as a `$(cat …)` that was not expanded; the implementer read the file itself (F401; `process/epics.md` now says to paste it).
 
 ### T9 · The read
 Status: todo
