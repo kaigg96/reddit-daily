@@ -1,0 +1,6 @@
+#!/bin/sh
+# The pre-push gate: refuses a push that would publish a secret, a private
+# identifier or a personal commit address (scripts/prepush_check.py says what,
+# and how to fix it). Active once core.hooksPath is .githooks, which every
+# Claude session's start sets (.claude/settings.json).
+exec python3 "$(dirname "$0")/../scripts/prepush_check.py" hook "$@"

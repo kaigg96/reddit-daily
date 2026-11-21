@@ -44,7 +44,9 @@ def test_no_tracked_file_holds_a_credential():
         except OSError:   # deleted in the working tree, or a submodule
             continue
         for m in CREDENTIAL.finditer(text):
-            found.append(f"{path}: {m.group()[:8]}…")
+            # Where, never what: CI's output is a public log, and eight
+            # characters of a key are eight fewer to guess.
+            found.append(f"{path}:{text.count(chr(10), 0, m.start()) + 1}")
     assert not found, "credential-shaped values are committed:\n" + "\n".join(found)
 
 

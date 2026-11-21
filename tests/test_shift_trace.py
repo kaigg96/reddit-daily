@@ -89,6 +89,19 @@ def test_more_token_shapes_and_aws_account_ids_are_redacted():
     assert "arn:aws:iam::***:user/claude-readonly" in text
 
 
+def test_personal_addresses_and_named_account_ids_are_redacted():
+    # Built at run time, so this file holds neither (the pre-push gate checks).
+    person = "jo.smith" + "@" + "mail.co"
+    bot = "41898282+claude[bot]" + "@users.noreply.github.com"
+    run = [_assistant(_tool(1, "Bash", command=f"git log --author={person} --committer={bot}"),
+                      _tool(2, "Bash", command="aws sts get-caller-identity")),
+           _result(1, f"fatal: {person} and noreply" + "@github.com are not on this branch", error=True),
+           _result(2, 'denied for {"Account": "' + "4" * 12 + '"}', error=True)]
+    text = shift_trace.render(*shift_trace.trace(run), env={})
+    assert person not in text and "4" * 12 not in text
+    assert bot in text and "noreply" + "@github.com" in text
+
+
 def test_helper_agents_are_counted_not_listed_and_never_speak_last():
     run = [_assistant({"type": "text", "text": "Starting the review."}, _tool(1, "Agent", description="Rank candidates")),
            {**_assistant({"type": "text", "text": "Helper: here are eight candidates."},

@@ -50,6 +50,30 @@ TOKEN_SHAPES = re.compile(
 # An AWS account id in an ARN: money_check.py prints only its last four digits.
 ARN_ACCOUNT = re.compile(r"(arn:aws:[^:\s]*:[^:\s]*:)\d{12}")
 
+# What identifies a person or an account without being a key: an email address
+# that is not a noreply or example one, and an AWS account ID in an ARN or named
+# as one. The trace redacts both, the pre-push gate (prepush_check.py) refuses
+# both, and CI applies the same two rules from .github/workflows/gitleaks.toml
+# (`private-email`, `aws-account-id`); tests/test_prepush_check.py keeps them
+# equal. A shift's tool output can carry either: `git log --format=%ae`, or an
+# AWS error naming the caller's ARN.
+PRIVATE_EMAIL = r"[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}"
+# github.com: a token in a clone URL (`x-access-token:…@github.com`) and the SSH
+# remote `git@github.com` are shaped like addresses and are neither.
+NOT_A_PERSON = (r"@users\.noreply\.github\.com$", r"@github\.com$", r"^no-?reply@",
+                r"@(?:[A-Za-z0-9-]+\.)*example\.[A-Za-z]+$", r"\.(?:example|invalid|test|localhost)$")
+AWS_ACCOUNT_ID = (r"(?i)(?:arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:"
+                  r'''|account[ _-]?(?:id|number|no)?["'`\s:=]{1,5})([0-9]{12})\b''')
+PLACEHOLDER_ACCOUNTS = (r"^123456789012$", r"^000000000000$", r"^111122223333$")
+_EMAIL = re.compile(PRIVATE_EMAIL)
+_NOT_A_PERSON = re.compile("|".join(NOT_A_PERSON))
+_ACCOUNT = re.compile(AWS_ACCOUNT_ID)
+
+
+def private_emails(text):
+    """The addresses in text that could identify someone."""
+    return [m for m in _EMAIL.finditer(text) if not _NOT_A_PERSON.search(m.group())]
+
 
 def redact(text, env=None):
     env = os.environ if env is None else env
@@ -57,7 +81,11 @@ def redact(text, env=None):
         value = (env.get(name) or "").strip()
         if len(value) >= 8:
             text = text.replace(value, "***")
-    return ARN_ACCOUNT.sub(r"\1***", TOKEN_SHAPES.sub("***", text))
+    text = ARN_ACCOUNT.sub(r"\1***", TOKEN_SHAPES.sub("***", text))
+    text = _ACCOUNT.sub(lambda m: m.group()[:m.start(1) - m.start()] + "***", text)
+    for m in reversed(private_emails(text)):
+        text = text[:m.start()] + "***@***" + text[m.end():]
+    return text
 
 
 def load(path):
