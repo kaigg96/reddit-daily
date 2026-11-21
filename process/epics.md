@@ -36,7 +36,8 @@ with `isolation: worktree`, one ticket each, on its own branch named
 `e<n>-t<n>-<slug>`. Background agents are refused in CI and a lone foreground
 agent blocks the shift, so batching is the only way the orchestrator's time
 is not spent waiting. Each brief is generated from the ticket by
-`scripts/epics.py brief E<n> T<n>` (E2 T4), never written by hand: the ticket's
+`scripts/epics.py brief E<n> T<n>` (E2 T4), never written by hand, and pasted
+into the prompt as text (a `$(cat …)` there is not expanded; 11-21): the ticket's
 text, its `Touches`, the gates in `CLAUDE.md` §3 that apply, the lessons
 whose `Applies` matches (`process/lessons.md`), the report format below, and
 its allotment: by default no Gemini calls and no render requests, only free

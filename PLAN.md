@@ -44,7 +44,7 @@ Everything outside the channel product (PRD §0), with the same statuses;
 | C17 | baking: live 10-27 (#84); D15's first read is due 11-24 | GM | **Friction log** (D15) | Done when D15's read says keep, change or stop. |
 | C18 | baking: live 10-27 (#85); read at the next quarterly prep | Data | **Can the experiment process tell it works?** (D15's pattern) | Ledger and `report.py --experiments`. Done when quarterly prep reads it and proposes the process's own rule. |
 | C19 | blocked: `epics/E2` T9 | GM | **Lessons that stick** (owner, 11-14) | From outside evidence only, matched to role and files. Done at E2 T9. |
-| C20 | blocked: E1 T5; pilot 1 of 4 (`epics/E2` T8) | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (README). Done at E2 T9. |
+| C20 | in progress: pilot 1 of 4, E1 T13 dispatched 11-21 (`epics/E2` T8) | Engineering | **Epics, tickets, many implementers** (owner, 11-14) | Roles as modes of a shift; the board is `epics/` (README). Done at E2 T9. |
 
 ## 4. Risks
 
