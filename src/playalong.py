@@ -59,6 +59,65 @@ SERIES = {"APU000074714": {"subject": "Gas", "hook": "a gallon of regular gas",
           "APU0000703112": {"subject": "Ground beef", "hook": "a pound of ground beef",
                             "quantity": "price", "unit": "pound", "category": "food"}}
 GAS_SERIES, BEEF_SERIES = "APU000074714", "APU0000703112"
+
+
+def _price(subject, hook, unit="pound", category="food"):
+    return {"subject": subject, "hook": hook, "quantity": "price", "unit": unit,
+            "category": category}
+
+
+# T13's supply (11-21): BLS average prices with a January 1990 month and a
+# 2026 one, named as BLS names the item. Gas is left out as too well known.
+SUPPLY_SERIES = {
+    "APU0000703112": SERIES[BEEF_SERIES],
+    "APU0000701111": _price("White flour", "a pound of all-purpose white flour"),
+    "APU0000701312": _price("White rice", "a pound of uncooked long-grain white rice"),
+    "APU0000702111": _price("White bread", "a pound of white pan bread"),
+    "APU0000702421": _price("Chocolate chip cookies", "a pound of chocolate chip cookies"),
+    "APU0000703111": _price("Ground chuck", "a pound of ground chuck"),
+    "APU0000703213": _price("Chuck roast", "a pound of boneless chuck roast"),
+    "APU0000703311": _price("Round roast", "a pound of boneless round roast"),
+    "APU0000703511": _price("Round steak", "a pound of boneless round steak"),
+    "APU0000703613": _price("Sirloin steak", "a pound of boneless sirloin steak"),
+    "APU0000704111": _price("Bacon", "a pound of sliced bacon"),
+    "APU0000706111": _price("Whole chicken", "a pound of fresh whole chicken"),
+    "APU0000710411": _price("Ice cream", "a half gallon of ice cream", "half gallon"),
+    "APU0000711311": _price("Navel oranges", "a pound of navel oranges"),
+    "APU0000711412": _price("Grapefruit", "a pound of grapefruit"),
+    "APU0000712112": _price("White potatoes", "a pound of white potatoes"),
+    "APU0000712211": _price("Iceberg lettuce", "a pound of iceberg lettuce"),
+    "APU0000713111": _price("Frozen orange juice", "16 ounces of frozen orange juice concentrate",
+                            "16 ounces"),
+    "APU0000715211": _price("Sugar", "a pound of white sugar"),
+    "APU0000717311": _price("Coffee", "a pound of ground coffee"),
+    "APU0000718311": _price("Potato chips", "16 ounces of potato chips", "16 ounces"),
+    "APU000072610": _price("Electricity", "a kilowatt-hour of electricity", "kilowatt-hour",
+                           "energy"),
+    "APU000072620": _price("Piped gas", "a therm of piped utility gas", "therm", "energy"),
+}
+SERIES.update(SUPPLY_SERIES)
+# Census Vintage 2024 places (SUMLEV 162, name and state as the file has them)
+# and the small states they can beat at x2.
+SUPPLY_CITIES = {("New York city", "New York"): "New York City",
+                 ("Los Angeles city", "California"): "Los Angeles",
+                 ("Chicago city", "Illinois"): "Chicago",
+                 ("Houston city", "Texas"): "Houston",
+                 ("Phoenix city", "Arizona"): "Phoenix",
+                 ("Philadelphia city", "Pennsylvania"): "Philadelphia",
+                 ("San Antonio city", "Texas"): "San Antonio",
+                 ("San Diego city", "California"): "San Diego",
+                 ("Dallas city", "Texas"): "Dallas"}
+SUPPLY_STATES = ("Wyoming", "Vermont", "Alaska", "North Dakota", "South Dakota", "Delaware",
+                 "Rhode Island", "Montana", "Maine", "New Hampshire", "Hawaii")
+# Well-known buildings with a Wikidata floor count (P1101), named by their
+# fetched English label.
+SUPPLY_BUILDINGS = (
+    "Q12495", "Q18547", "Q494895", "Q189476", "Q1077308", "Q29294", "Q317034", "Q83101",
+    "Q80852", "Q546221", "Q94193", "Q83063", "Q80813", "Q4255374", "Q271695", "Q18640924",
+    "Q11274", "Q270407", "Q35525", "Q39054", "Q11208", "Q54109", "Q220728", "Q167566",
+    "Q191161", "Q673223", "Q207870", "Q461371", "Q745964", "Q739612", "Q19104", "Q22041180",
+    "Q836531", "Q189883", "Q188190", "Q478926", "Q91274", "Q677555", "Q750444", "Q656743",
+    "Q336246", "Q542783")
 PLACES = {"District of Columbia": {"subject": "Washington, D.C.", "short": "D.C.",
                                    "kind": "district"}}
 BUILDINGS = {"Q12495": "the Burj Khalifa", "Q9188": "the Empire State Building"}
@@ -125,7 +184,7 @@ def wikidata_records(path=ASSETS / "wikidata_P1101.json"):
         else:
             continue
         value = int(value) if float(value).is_integer() else value
-        name = BUILDINGS.get(qid, qid)
+        name = BUILDINGS.get(qid) or data.get("label") or qid
         out.append({"source": WIKIDATA, "id": f"{qid} P1101", "subject": name,
                     "short": name, "kind": "building", "quantity": "floors", "unit": "floors",
                     "value": value, "period": "", "category": "buildings",
@@ -144,6 +203,96 @@ def candidates(price=GAS_SERIES):
     return [{"template": PRICE_THEN, "records": [gas["2026-10"], gas["1990-01"]]},
             {"template": BIGGER, "records": [people["Wyoming"], people["D.C."]]},
             {"template": HOW_MANY, "records": [floors["Q9188"], floors["Q12495"]]}]
+
+
+def _ambiguous(path):
+    """The items whose floor count Wikidata gives twice over, two normal
+    claims that disagree and none preferred (Willis Tower: 108 and 110)."""
+    out = set()
+    for qid, data in json.loads(path.read_text()).items():
+        claims = data.get("claims", {}).get("P1101", [])
+        if not any(c["rank"] == "preferred" for c in claims) and len(
+                {c["mainsnak"]["datavalue"]["value"]["amount"] for c in claims
+                 if c["rank"] == "normal"}) > 1:
+            out.add(qid)
+    return out
+
+
+def _supply_pool():
+    """{template: [candidate, ...]} from the committed supply files only."""
+    prices = []
+    for r in bls_records(ASSETS / "bls_AP_supply.json"):
+        prices.append(r)
+    by_id = {}
+    for r in prices:
+        by_id.setdefault(r["id"], []).append(r)
+    price = [{"template": PRICE_THEN, "records": sorted(rs, key=lambda r: r["period"], reverse=True)}
+             for rs in by_id.values() if len(rs) == 2]
+    people = census_places()
+    cities = sorted((r for r in people if r["kind"] == "city"), key=lambda r: r["value"])
+    states = sorted((r for r in people if r["kind"] == "state"), key=lambda r: r["value"])
+    picks = []
+    for city in cities:   # the smallest city takes the smallest state it beats x2
+        state = next((s for s in states if city["value"] >= MIN_DISTANCE * s["value"]), None)
+        if state:
+            states.remove(state)
+            picks.append({"template": BIGGER, "records": [state, city]})
+    path = ASSETS / "wikidata_P1101_landmarks.json"
+    floors = [r for r in wikidata_records(path) if r["id"].split()[0] not in _ambiguous(path)]
+    floors.sort(key=lambda r: r["value"], reverse=True)
+    half = len(floors) // 2
+    tall, low = floors[:half], floors[half:]
+    how = []
+    for i, (t, s) in enumerate(zip(tall, low)):
+        how.append({"template": HOW_MANY, "records": [s, t] if i % 2 else [t, s]})
+    return {PRICE_THEN: price, BIGGER: picks, HOW_MANY: how}
+
+
+def supply():
+    """The play-along arm's candidates in shipping order, built only from the
+    committed fetched files (T13). Each passes `select` after the ones before
+    it with nothing shipped: the next always takes another shape (rule 4),
+    the shape with the most left first, so two shapes alternate to the end.
+    A candidate no order can ship (a rule-1, -2 or -5 refusal, a rewording of
+    an earlier hook) is left out."""
+    pool = {k: list(v) for k, v in _supply_pool().items()}
+    out, prev, shipped = [], "", []
+    while True:
+        for template in sorted((t for t in TEMPLATES if t != prev and pool[t]),
+                               key=lambda t: (-len(pool[t]), TEMPLATES.index(t))):
+            pick = next((c for c in pool[template] if select(c, prev, shipped)[0]), None)
+            if pick:
+                break
+        else:
+            return out
+        pool[template].remove(pick)
+        out.append(pick)
+        prev = template
+        shipped.append(select(pick)[0]["hook"])
+
+
+def census_places(path=ASSETS / "census_SUB-EST2024.csv"):
+    """The Vintage 2024 city and town file's rows: a city (SUMLEV 162) under
+    its spoken name, a state (040) under its own."""
+    fetched = _manifest()[path.name]["fetched"]
+    out = []
+    with open(path, newline="", encoding="latin-1") as f:
+        for r in csv.DictReader(f):
+            if r["SUMLEV"] == "162":
+                name, kind = SUPPLY_CITIES.get((r["NAME"], r["STNAME"])), "city"
+                if not name:
+                    continue
+                rid = f"SUB-EST2024 POPESTIMATE2024 {r['NAME']}, {r['STNAME']}"
+            elif r["SUMLEV"] == "040":
+                name, kind, rid = r["NAME"], "state", f"SUB-EST2024 POPESTIMATE2024 {r['NAME']}"
+            else:
+                continue
+            out.append({"source": CENSUS, "id": rid, "subject": name, "short": name,
+                        "kind": kind, "quantity": "population", "unit": "people",
+                        "value": int(r["POPESTIMATE2024"]), "period": "2024",
+                        "category": "population", "fetched": fetched, "provenance": "fetched",
+                        "credit": f"Source: {CENSUS}, Vintage 2024 population estimates."})
+    return out
 
 
 def _half_up(v, decimals):

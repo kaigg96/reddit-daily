@@ -1,0 +1,559 @@
+{
+ "status": "REQUEST_SUCCEEDED",
+ "Results": {
+  "series": [
+   {
+    "seriesID": "APU0000703112",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "6.755",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "1.557",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000701111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "0.536",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.253",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000701312",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "1.101",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.501",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000702111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "1.861",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.689",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000702421",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "5.247",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.506",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000703111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "6.733",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "1.907",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000703213",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "9.083",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.486",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000703311",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "8.367",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.907",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000703511",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "10.113",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "3.303",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000703613",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "13.848",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "3.818",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000704111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "6.686",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "1.966",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000706111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "2.026",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.882",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000710411",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "6.032",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.719",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000711311",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M09",
+      "periodName": "September",
+      "latest": "true",
+      "value": "1.723",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.501",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000711412",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "2.142",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.925",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000712112",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "0.990",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.333",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000712211",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "1.962",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.605",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000713111",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M07",
+      "periodName": "July",
+      "latest": "true",
+      "value": "4.817",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "1.817",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000715211",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "1.001",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.418",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000717311",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "9.249",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.917",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU0000718311",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "6.638",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "2.866",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU000072610",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "0.190",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.081",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   },
+   {
+    "seriesID": "APU000072620",
+    "data": [
+     {
+      "year": "2026",
+      "period": "M10",
+      "periodName": "October",
+      "latest": "true",
+      "value": "1.691",
+      "footnotes": [
+       {}
+      ]
+     },
+     {
+      "year": "1990",
+      "period": "M01",
+      "periodName": "January",
+      "value": "0.599",
+      "footnotes": [
+       {}
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

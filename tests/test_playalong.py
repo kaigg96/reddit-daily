@@ -278,3 +278,28 @@ def test_a_price_rounds_half_up_as_a_reader_does():
     assert playalong._fmt({"value": 6.755, "quantity": "price"}) == "$6.76"
     assert playalong._fmt({"value": 1.557, "quantity": "price"}) == "$1.56"
     assert playalong._fmt({"value": 4.45, "quantity": "number"}) == "4.5"
+
+
+def test_the_supply_ships_in_order_from_fetched_records_alone(capsys):
+    """T13: the arm's supply, from the committed fetched files. Every
+    candidate passes `select` in order, never the same shape twice running,
+    and every record behind it was fetched and has a sources.json entry.
+    32 ship as fetched 11-21, short of the 40 the arm needs: the price hooks
+    ("a pound of ... cost in January 1990? This October") reach the 0.5
+    near-repeat bar against each other, so only 8 of 23 prices ship."""
+    supply = playalong.supply()
+    episodes, rejects = playalong.select_day(supply, shipped=[])
+    assert len(episodes) == len(supply) >= 32 and not rejects
+    shapes = [c["template"] for c in supply]
+    assert all(a != b for a, b in zip(shapes, shapes[1:]))
+    manifest = json.loads((playalong.ASSETS / "sources.json").read_text())
+    for c in supply:
+        for r in c["records"]:
+            assert r["provenance"] == "fetched"
+    for name in ("bls_AP_supply.json", "census_SUB-EST2024.csv", "wikidata_P1101_landmarks.json"):
+        assert manifest[name]["url"] and manifest[name]["fetched"]
+
+
+def test_the_samples_keep_their_three_worked_examples():
+    assert [c["template"] for c in playalong.candidates()] == [
+        playalong.PRICE_THEN, playalong.BIGGER, playalong.HOW_MANY]

@@ -1,0 +1,21 @@
+SUMLEV,STATE,PLACE,NAME,STNAME,POPESTIMATE2024
+040,02,00000,Alaska,Alaska,740133
+162,04,55000,Phoenix city,Arizona,1673164
+162,06,44000,Los Angeles city,California,3878704
+162,06,66000,San Diego city,California,1404452
+040,10,00000,Delaware,Delaware,1051917
+040,15,00000,Hawaii,Hawaii,1446146
+162,17,14000,Chicago city,Illinois,2721308
+040,23,00000,Maine,Maine,1405012
+040,30,00000,Montana,Montana,1137233
+040,33,00000,New Hampshire,New Hampshire,1409032
+162,36,51000,New York city,New York,8478072
+040,38,00000,North Dakota,North Dakota,796568
+162,42,60000,Philadelphia city,Pennsylvania,1573916
+040,44,00000,Rhode Island,Rhode Island,1112308
+040,46,00000,South Dakota,South Dakota,924669
+162,48,19000,Dallas city,Texas,1326087
+162,48,35000,Houston city,Texas,2390125
+162,48,65000,San Antonio city,Texas,1526656
+040,50,00000,Vermont,Vermont,648493
+040,56,00000,Wyoming,Wyoming,587618

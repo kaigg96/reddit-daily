@@ -1,0 +1,926 @@
+{
+ "Q12495": {
+  "label": "Burj Khalifa",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+163",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q12495$5a33216a-42d2-1b18-df70-ab4a0dc64d83"
+    }
+   ]
+  }
+ },
+ "Q18547": {
+  "label": "Shanghai Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+128",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q18547$241b0aaa-4bbe-1e0d-9dca-a89da762d93e"
+    }
+   ]
+  }
+ },
+ "Q494895": {
+  "label": "Lotte World Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+123",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q494895$8f904924-41dc-b035-47f2-27cd4fbf8ed2"
+    }
+   ]
+  }
+ },
+ "Q189476": {
+  "label": "Abraj Al Bait",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+120",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q189476$ca843759-4751-93a5-1fa5-7ea094b3c9fe"
+    }
+   ]
+  }
+ },
+ "Q1077308": {
+  "label": "Ping An Finance Centre",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+115",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q1077308$D15B9F64-D580-4B61-81B1-110CBC1A5C76"
+    }
+   ]
+  }
+ },
+ "Q29294": {
+  "label": "Willis Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+108",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q29294$9fb565b2-48b9-8543-6118-92f82b0f5b4a"
+    },
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+110",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q29294$936084d5-4cbf-6c99-22d9-4ea4b935a252"
+    }
+   ]
+  }
+ },
+ "Q317034": {
+  "label": "International Commerce Centre",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+108",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q317034$cfa29719-4133-7746-5539-369149428600"
+    }
+   ]
+  }
+ },
+ "Q83101": {
+  "label": "Taipei 101",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+101",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q83101$d97f0924-4808-17ee-c8ff-0dc01e27b41a"
+    }
+   ]
+  }
+ },
+ "Q80852": {
+  "label": "Shanghai World Financial Center",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+101",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q80852$6041977b-4f9c-3a25-13c0-3d34a236ba28"
+    }
+   ]
+  }
+ },
+ "Q546221": {
+  "label": "Trump International Hotel and Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+98",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q546221$8d2063ed-412d-ba66-9e0f-4bd5d8eb79db"
+    }
+   ]
+  }
+ },
+ "Q94193": {
+  "label": "Federation Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+95",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q94193$10F4EDBF-9084-469A-AA04-E5388E35FE19"
+    }
+   ]
+  }
+ },
+ "Q83063": {
+  "label": "Petronas Towers",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+88",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q83063$3372d0b6-4f35-9bcc-4d4a-3d46f8bc72de"
+    }
+   ]
+  }
+ },
+ "Q80813": {
+  "label": "Jin Mao Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+88",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q80813$b6c6c966-4a0d-8027-3e29-5695b7666686"
+    }
+   ]
+  }
+ },
+ "Q4255374": {
+  "label": "Lakhta Centre",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+87",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q4255374$3144862D-FC64-4B54-B05A-F6761865F3E6"
+    }
+   ]
+  }
+ },
+ "Q271695": {
+  "label": "Aon Center",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+83",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q271695$010232d8-4af3-b61d-b12e-af3caf77d4bb"
+    }
+   ]
+  }
+ },
+ "Q18640924": {
+  "label": "Landmark 81",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+81",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q18640924$5CFF7AEC-DFF8-4F58-9798-068AD7A37F1D"
+    }
+   ]
+  }
+ },
+ "Q11274": {
+  "label": "Chrysler Building",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+77",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q11274$aff2bae4-45dc-69c4-82f1-2ee05d24c969"
+    }
+   ]
+  }
+ },
+ "Q270407": {
+  "label": "Eureka Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+91",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q270407$0072056a-47d1-9ea2-f8f8-1340a1e4fa83"
+    }
+   ]
+  }
+ },
+ "Q35525": {
+  "label": "White House",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q35525$A8A568F7-8FCA-491E-AFF3-287966EA133B"
+    }
+   ]
+  }
+ },
+ "Q39054": {
+  "label": "Leaning Tower of Pisa",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+9",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "preferred",
+     "id": "Q39054$e6886fdc-4bd9-e84d-01c0-ea39b40e6971"
+    },
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q39054$e7c8d3c0-48fa-7f36-80b4-88df3d98946b"
+    },
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+8",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q39054$4a55a354-46a2-5c29-c7f9-d8e6afb2e722"
+    }
+   ]
+  }
+ },
+ "Q11208": {
+  "label": "The Pentagon",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+5",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q11208$8FA0AB99-11AC-43D8-8462-7C65CF5C806C"
+    }
+   ]
+  }
+ },
+ "Q54109": {
+  "label": "United States Capitol",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+5",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q54109$8B08792C-EA35-404D-9CFD-E6F6CBB32AC1"
+    }
+   ]
+  }
+ },
+ "Q220728": {
+  "label": "Flatiron Building",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+22",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q220728$F59ACD26-5FB9-4DE7-880A-4A38B5CB45A0"
+    }
+   ]
+  }
+ },
+ "Q167566": {
+  "label": "Palace of Culture and Science",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+42",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q167566$2134fb8b-43df-839d-4853-575460dc12cb"
+    }
+   ]
+  }
+ },
+ "Q191161": {
+  "label": "30 St Mary Axe",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+41",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q191161$292B952E-E0AE-4827-92B2-9345D23E7374"
+    }
+   ]
+  }
+ },
+ "Q673223": {
+  "label": "Elbphilharmonie",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+26",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q673223$4E9E2D00-E73C-4331-83DB-310C6F0015E8"
+    }
+   ]
+  }
+ },
+ "Q207870": {
+  "label": "Casa Milà",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+8",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q207870$D390B6AD-1997-45F3-941B-CD61A699D52A"
+    }
+   ]
+  }
+ },
+ "Q461371": {
+  "label": "Casa Batlló",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+6",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q461371$65BAC218-7D26-4B2D-9826-C549C9C13682"
+    }
+   ]
+  }
+ },
+ "Q745964": {
+  "label": "Château Frontenac",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+18",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q745964$3C546D93-9F0C-477F-8726-C72DB4F56804"
+    }
+   ]
+  }
+ },
+ "Q739612": {
+  "label": "Matsumoto Castle",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+5",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q739612$44c6ee7a-4a35-5e61-819a-bc5c71ddb0c7"
+    }
+   ]
+  }
+ },
+ "Q19104": {
+  "label": "Taj Mahal Palace Hotel",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q19104$193a3f9c-4328-7d05-6f46-fed9233e49fe"
+    }
+   ]
+  }
+ },
+ "Q22041180": {
+  "label": "Apple Park",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q22041180$c0bef280-4680-994b-7cd8-defcdaa0ee18"
+    }
+   ]
+  }
+ },
+ "Q836531": {
+  "label": "Hawa Mahal",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+5",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q836531$712657E0-6E2D-4155-9210-61F69F81D620"
+    }
+   ]
+  }
+ },
+ "Q189883": {
+  "label": "Doge's Palace",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q189883$E0EAA361-F0AE-44C0-83F7-9A5C37B3C82B"
+    }
+   ]
+  }
+ },
+ "Q188190": {
+  "label": "Élysée Palace",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+3",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q188190$B120A760-87D9-4429-9E7E-5E87D58577E6"
+    }
+   ]
+  }
+ },
+ "Q478926": {
+  "label": "Casa Rosada",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q478926$66ADCF3C-2F3A-46CD-9495-886D602465FA"
+    }
+   ]
+  }
+ },
+ "Q91274": {
+  "label": "Galata Tower",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+9",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q91274$95dd29a2-49e3-48d8-b7b1-a8b157c0ee44"
+    }
+   ]
+  }
+ },
+ "Q677555": {
+  "label": "Rashtrapati Bhavan",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+4",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q677555$a5b330d7-4b61-4c6a-822f-4ab9edb9acc6"
+    }
+   ]
+  }
+ },
+ "Q750444": {
+  "label": "Stockholm Palace",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+3",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q750444$299DFE61-D6B2-4F95-9CF8-720233B9B8A7"
+    }
+   ]
+  }
+ },
+ "Q656743": {
+  "label": "Kingdom Centre",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+41",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q656743$E6D7680B-0D29-4F7E-ACEA-8259C1FFABEA"
+    }
+   ]
+  }
+ },
+ "Q336246": {
+  "label": "Torre Glòries",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+34",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q336246$343106DF-D2ED-4CF5-832E-82F6099F7EC8"
+    }
+   ]
+  }
+ },
+ "Q542783": {
+  "label": "Chilehaus",
+  "claims": {
+   "P1101": [
+    {
+     "mainsnak": {
+      "property": "P1101",
+      "datavalue": {
+       "value": {
+        "amount": "+10",
+        "unit": "1"
+       },
+       "type": "quantity"
+      }
+     },
+     "rank": "normal",
+     "id": "Q542783$B8F246BF-04BF-4D4E-9212-231188828464"
+    }
+   ]
+  }
+ }
+}
