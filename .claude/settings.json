@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/prepush_check.py\" install"
+            "command": "f=\"$CLAUDE_PROJECT_DIR/scripts/prepush_check.py\"; [ ! -f \"$f\" ] || python3 \"$f\" install"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/prepush_check.py\" guard"
+            "command": "f=\"$CLAUDE_PROJECT_DIR/scripts/prepush_check.py\"; [ ! -f \"$f\" ] || python3 \"$f\" guard"
           }
         ]
       }

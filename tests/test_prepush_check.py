@@ -33,6 +33,9 @@ def _hermetic_git(tmp_path, monkeypatch):
     cfg.write_text("")
     monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(cfg))
     monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    # Nor this machine's ~/.aws: a hook a test runs reads HOME.
+    (tmp_path / "home").mkdir()
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
     for var in ("GIT_AUTHOR_EMAIL", "GIT_COMMITTER_EMAIL", "GIT_DIR", "GIT_WORK_TREE"):
         monkeypatch.delenv(var, raising=False)
 
@@ -42,14 +45,28 @@ def _git(cwd, *args, env=None):
                           text=True, env={**os.environ, **(env or {})}).stdout
 
 
-def _commit(work, path, text, message="change", author=NOREPLY, committer=NOREPLY):
+def _commit(work, path, text, message="change", author=NOREPLY, committer=NOREPLY, name="tester"):
     full = work / path
     full.parent.mkdir(parents=True, exist_ok=True)
-    full.write_text(text)
+    full.write_bytes(text) if isinstance(text, bytes) else full.write_text(text)
     _git(work, "add", path)
     _git(work, "commit", "-q", "-m", message,
-         env={"GIT_AUTHOR_EMAIL": author, "GIT_COMMITTER_EMAIL": committer})
+         env={"GIT_AUTHOR_EMAIL": author, "GIT_COMMITTER_EMAIL": committer, "GIT_AUTHOR_NAME": name})
     return _git(work, "rev-parse", "HEAD").strip()
+
+
+def _push(work, *args):
+    return subprocess.run(["git", "push", "-q", *args], cwd=work, capture_output=True, text=True)
+
+
+def _gate_on(work):
+    # The shim finds the script beside itself, so point git at this checkout's.
+    _git(work, "config", "core.hooksPath", os.path.join(ROOT, ".githooks"))
+
+
+def _public(work, branch):
+    """Push without the gate: history that was public before it existed."""
+    _git(work, "-c", "core.hooksPath=/dev/null", "push", "-q", "origin", branch)
 
 
 @pytest.fixture
@@ -172,7 +189,7 @@ def test_hook_input_becomes_one_range_per_pushed_ref(work):
              f"(delete) {zero} refs/heads/gone {base}",               # a deletion
              "garbage"]
     ranges = gate.ranges_from_hook(lines, "origin", cwd=str(work))
-    assert ranges == [[new, "--not", "--remotes=origin"], [f"{base}..{new}"]]
+    assert ranges == [[new, "--not", "--remotes=origin"], [new, "--not", base, "--remotes=origin"]]
     # A remote given as a URL (no remote name): every remote ref counts as public.
     assert gate.ranges_from_hook(lines[:1], "https://example.invalid/r.git", cwd=str(work)) == [
         [new, "--not", "--remotes"]]
@@ -191,6 +208,8 @@ def test_held_values_come_from_every_place_a_secret_lives(tmp_path):
     (home / ".aws").mkdir(parents=True)
     (home / ".aws" / "credentials").write_text(
         f"[{'9' * 12}_admin]\naws_access_key_id = {'K' * 20}\naws_secret_access_key = {'s' * 40}\n")
+    (home / ".aws" / "config").write_text(
+        f"[profile reader]\nrole_arn = arn:aws:iam::{'7' * 12}:role/r\nsso_account_id = {'8' * 12}\n")
     common = tmp_path / "gitdir"
     (common / "info").mkdir(parents=True)
     (common / "info" / "private-values").write_text("# the owner\nSurname-Here\n\n")
@@ -201,23 +220,135 @@ def test_held_values_come_from_every_place_a_secret_lives(tmp_path):
     labels = set(vals.values())
     assert {".env GEMINI_API_KEY", "client_secret.json client_id", "client_secret.json client_secret",
             "~/.aws/credentials aws_access_key_id", "~/.aws/credentials aws_secret_access_key",
-            "an AWS account ID named in ~/.aws/credentials", "line 2 of .git/info/private-values",
+            "an AWS account ID in ~/.aws/credentials", "an AWS account ID in ~/.aws/config",
+            "line 2 of .git/info/private-values",
             "environment variable GROQ_API_KEY", "environment variable MY_SERVICE_TOKEN",
             "your global git user.email"} == labels
     assert HELD in vals and "abc" not in vals and "/usr/bin:/bin:/x/y/z" not in vals
+    assert "7" * 12 in vals and "8" * 12 in vals
     # A noreply global address is not private; a personal one is (above).
     assert NOREPLY not in gate.held_values(env={}, home=str(tmp_path), global_email=NOREPLY)
+
+
+def test_a_name_carrying_a_held_value_is_refused(work):
+    _commit(work, "a.txt", "fine\n", name="Jo " + HELD)
+    assert [(p.where, p.rule) for p in _problems(work, {HELD: "line 1 of .git/info/private-values"})] == [
+        ("commit metadata", "author name: line 1 of .git/info/private-values")]
+
+
+def test_a_credential_in_a_message_is_refused_even_when_gitleaks_runs(work):
+    # gitleaks reads patches, never messages, so the shapes check them always.
+    _commit(work, "a.txt", "fine\n", message="debug " + "AK" + "IA" + "Q" * 16)
+    assert [(p.where, p.rule) for p in _problems(work, shapes=False)] == [
+        ("commit message", "credential shape")]
+
+
+def test_a_flagged_path_is_refused_and_never_printed(work, capsys):
+    _commit(work, f"notes-{PERSON}.md", f"write to {PERSON}\n")
+    problems = _problems(work)
+    assert [(p.where, p.rule) for p in problems] == [
+        ("a file path", "private-email"), (gate.WITHHELD, "private-email")]
+    gate.report(problems, out=sys.stdout)
+    assert PERSON not in capsys.readouterr().out
+
+
+def test_a_content_line_shaped_like_a_diff_header_is_content(work):
+    # "++ b/x" shows in the patch as "+++ b/x": the hunk's counts say it is content.
+    _commit(work, "a.md", f"++ b/elsewhere\n{PERSON}\n")
+    assert [(p.where, p.rule) for p in _problems(work)] == [("a.md:2", "private-email")]
+
+
+def test_a_binary_file_is_read_whole(work):
+    _commit(work, "blob.bin", b"\x00\x01\x02 " + PERSON.encode() + b" \x00\xff")
+    assert [(p.where, p.rule) for p in _problems(work)] == [("blob.bin (binary)", "private-email")]
+
+
+def test_utf16_text_which_git_calls_binary_is_read(work):
+    _commit(work, "notes.txt", f"key {HELD}\n".encode("utf-16"))
+    assert [(p.where, p.rule) for p in _problems(work, {HELD: ".env X"})] == [("notes.txt (binary)", ".env X")]
+
+
+def test_an_annotated_tag_is_checked(work):
+    zero = "0" * 40
+    _git(work, "tag", "-a", "v1", "-m", f"release, ask {PERSON}", env={"GIT_COMMITTER_EMAIL": PERSON})
+    tag = _git(work, "rev-parse", "v1").strip()
+    lines = [f"refs/tags/v1 {tag} refs/tags/v1 {zero}"]
+    assert gate.pushed_tags(lines, cwd=str(work)) == [tag]
+    assert _rules(gate.check_tags([tag], {}, cwd=str(work))) == [
+        "private-email", "tagger is not a noreply address"]
+    _git(work, "tag", "-a", "v2", "-m", "release", env={"GIT_COMMITTER_EMAIL": NOREPLY})
+    assert gate.check_tags([_git(work, "rev-parse", "v2").strip()], {}, cwd=str(work)) == []
+    # The commit it points at is public already: only the tag object is new.
+    assert [c.sha for r in gate.ranges_from_hook(lines, "origin", cwd=str(work))
+            for c in gate.commits(r, cwd=str(work))] == []
+
+
+def test_a_pushed_ref_name_is_checked():
+    sha, zero = "1" * 40, "0" * 40
+    assert gate.check_refs([f"refs/heads/x {sha} refs/heads/{PERSON} {zero}"], {}) == [
+        gate.Problem("-", "a pushed ref's name", "private-email")]
+    assert gate.check_refs([f"refs/heads/x {sha} refs/heads/topic {zero}"], {}) == []
+
+
+def test_rebasing_or_merging_main_into_a_pushed_branch_rechecks_nothing_public(work):
+    """main carries history from before the gate (personal addresses among it).
+    A branch rebased onto it, or merged with it, publishes only its own commits."""
+    _gate_on(work)
+    _git(work, "checkout", "-q", "-b", "topic")
+    _commit(work, "t.txt", "t\n")
+    assert _push(work, "-u", "origin", "topic").returncode == 0
+    _git(work, "checkout", "-q", "main")
+    _commit(work, "contact.md", f"{PERSON}\n", author=PERSON)
+    _public(work, "main")
+    _git(work, "checkout", "-q", "topic")
+    _git(work, "rebase", "-q", "main")
+    r = _push(work, "--force", "origin", "topic")
+    assert r.returncode == 0, r.stderr
+    _git(work, "checkout", "-q", "main")
+    _commit(work, "contact2.md", f"{PERSON}\n", author=PERSON)
+    _public(work, "main")
+    _git(work, "checkout", "-q", "topic")
+    _git(work, "merge", "-q", "--no-ff", "--no-edit", "main")
+    r = _push(work, "origin", "topic")
+    assert r.returncode == 0, r.stderr
+    # What a merge adds of its own is still its own.
+    _git(work, "checkout", "-q", "main")
+    _commit(work, "c3.md", "three\n")
+    _public(work, "main")
+    _git(work, "checkout", "-q", "topic")
+    _git(work, "merge", "-q", "--no-ff", "--no-commit", "main")
+    (work / "evil.md").write_text(f"{PERSON}\n")
+    _git(work, "add", "evil.md")
+    _git(work, "commit", "-q", "--no-edit")
+    r = _push(work, "origin", "topic")
+    assert r.returncode != 0 and "evil.md:1  private-email" in r.stderr and PERSON not in r.stderr
 
 
 @pytest.mark.parametrize("command", [
     "git push --no-verify",
     "git push origin topic --no-verify",
+    "git push --no-veri",
     "cd x && git -c core.hooksPath=/dev/null push",
+    "git -c 'core.hooksPath=/dev/null' push",
+    'git -c "core.hookspath=" push',
+    "git --config-env=core.hooksPath=HOOKS push",
+    "git -C sub push --no-verify",
+    "env git push --no-verify",
+    "env -u FOO git push --no-verify",
+    "command git push --no-verify",
+    "/usr/bin/git push --no-verify",
+    "sh -c 'git push --no-verify'",
+    "echo start $(git push --no-verify)",
+    "cd x\ngit push --no-verify",
     "git config core.hooksPath /dev/null",
     "git config --global core.hooksPath ~/elsewhere",
     "git config --unset core.hooksPath",
     "git config --local --unset-all core.hooksPath",
+    "git config set core.hooksPath /x",
+    "git config unset core.hooksPath",
     "GIT_CONFIG_PARAMETERS=\"'core.hooksPath=/tmp'\" git push",
+    "export GIT_CONFIG_PARAMETERS=\"'core.hooksPath=/tmp'\"",
+    "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/x git push",
 ])
 def test_the_guard_refuses_switching_the_gate_off(command):
     assert gate.refusal(command)
@@ -226,11 +357,21 @@ def test_the_guard_refuses_switching_the_gate_off(command):
 @pytest.mark.parametrize("command", [
     "git push",
     "git push -u origin security/pre-push-gate",
+    "git push -n",
     "git config core.hooksPath",
     "git config --get core.hooksPath",
+    "git config core.hooksPath .githooks",
     "grep -rn core.hooksPath scripts/",
     "cat .git/config | grep core.hooksPath",
     "git commit -m 'explain why --no-verify is refused'",
+    'git commit -m "Pre-push gate: refuse git push --no-verify"',
+    'git commit --no-verify -m "push it"',
+    'gh pr create --body "never git push --no-verify"',
+    "echo 'git push --no-verify'",
+    "git push  # never with --no-verify",
+    "cat >> WORKLOG.md <<'EOF'\nNever git push --no-verify.\ngit config core.hooksPath /dev/null\nEOF\ngit status",
+    "git commit -q -F - <<EOF\nwhy git push --no-verify is refused\nEOF",
+    "git commit -m \"$(cat <<'EOF'\nGate: git push --no-verify is refused\nEOF\n)\"",
     "python3 scripts/prepush_check.py install --check",
 ])
 def test_the_guard_lets_everything_else_through(command):
@@ -246,36 +387,56 @@ def test_the_guard_speaks_claude_codes_hook_protocol(monkeypatch, capsys):
     assert gate.guard(io.StringIO("not json")) == 0
 
 
-def test_install_points_git_at_the_hooks_and_check_reports_it(work, capsys):
+def test_install_points_git_at_the_hooks_and_check_needs_the_hook_itself(work, capsys):
     assert gate.install(check_only=True, cwd=str(work)) == 1
     assert gate.install(cwd=str(work)) == 0
     assert _git(work, "config", "core.hooksPath").strip() == ".githooks"
+    # The setting is shared by every worktree; one whose branch predates the
+    # gate has no hook to run, so the check must not call it installed.
+    assert gate.install(check_only=True, cwd=str(work)) == 1
+    assert "no executable .githooks/pre-push" in capsys.readouterr().out
+    hook = work / ".githooks" / "pre-push"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\n")
+    hook.chmod(0o755)
     assert gate.install(check_only=True, cwd=str(work)) == 0
     assert "installed" in capsys.readouterr().out
 
 
 def test_a_real_git_push_runs_the_gate(work):
-    # The shim finds the script beside itself, so point git at this checkout's.
-    _git(work, "config", "core.hooksPath", os.path.join(ROOT, ".githooks"))
+    _gate_on(work)
     _commit(work, "ok.txt", "fine\n")
-    _git(work, "push", "-q", "origin", "main")
+    assert _push(work, "origin", "main").returncode == 0
     _commit(work, "bad.txt", f"reach me at {PERSON}\n")
-    r = subprocess.run(["git", "push", "-q", "origin", "main"], cwd=work, capture_output=True, text=True)
+    r = _push(work, "origin", "main")
     assert r.returncode != 0
     assert "private-email" in r.stderr and PERSON not in r.stderr
     remote_head = _git(work, "ls-remote", "origin", "main").split()[0]
     assert remote_head != _git(work, "rev-parse", "HEAD").strip()
 
 
-def test_the_hook_files_are_wired():
+def _hook_commands(event, matcher=None):
+    with open(os.path.join(ROOT, ".claude", "settings.json")) as f:
+        entries = json.load(f)["hooks"][event]
+    return [h["command"] for e in entries if matcher is None or e.get("matcher") == matcher
+            for h in e["hooks"]]
+
+
+def test_the_hook_files_are_wired(tmp_path):
     shim = os.path.join(ROOT, ".githooks", "pre-push")
     assert os.stat(shim).st_mode & stat.S_IXUSR, "git ignores a hook that is not executable"
-    with open(os.path.join(ROOT, ".claude", "settings.json")) as f:
-        hooks = json.load(f)["hooks"]
-    commands = [h["command"] for e in hooks["SessionStart"] for h in e["hooks"]]
-    assert any(c.endswith("prepush_check.py\" install") for c in commands)
-    guards = [h["command"] for e in hooks["PreToolUse"] if e.get("matcher") == "Bash" for h in e["hooks"]]
-    assert any(c.endswith("prepush_check.py\" guard") for c in guards)
+    [install] = [c for c in _hook_commands("SessionStart") if "prepush_check.py" in c]
+    [guard] = [c for c in _hook_commands("PreToolUse", "Bash") if "prepush_check.py" in c]
+    assert install.endswith('"$f" install') and guard.endswith('"$f" guard')
+    refused = json.dumps({"tool_name": "Bash", "tool_input": {"command": "git push --no-verify"}})
+
+    def run(project):
+        return subprocess.run(["sh", "-c", guard], input=refused, text=True, capture_output=True,
+                              env={**os.environ, "CLAUDE_PROJECT_DIR": project}).returncode
+    assert run(ROOT) == 2
+    # A checkout of a branch from before the gate has no script. Exit 2 would
+    # block every Bash call, `git checkout main` included: it must stand aside.
+    assert run(str(tmp_path)) == 0
 
 
 def _toml_rule(rules, rule_id):

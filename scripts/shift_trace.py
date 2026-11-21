@@ -53,11 +53,15 @@ ARN_ACCOUNT = re.compile(r"(arn:aws:[^:\s]*:[^:\s]*:)\d{12}")
 # What identifies a person or an account without being a key: an email address
 # that is not a noreply or example one, and an AWS account ID in an ARN or named
 # as one. The trace redacts both, the pre-push gate (prepush_check.py) refuses
-# both, and CI applies the same two rules from .github/workflows/gitleaks.toml
-# (`private-email`, `aws-account-id`); tests/test_prepush_check.py keeps them
-# equal. A shift's tool output can carry either: `git log --format=%ae`, or an
-# AWS error naming the caller's ARN.
-PRIVATE_EMAIL = r"[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}"
+# both, and the gitleaks config (.github/workflows/gitleaks.toml) carries the
+# same two rules (`private-email`, `aws-account-id`); tests/test_prepush_check.py
+# keeps them equal. A shift's tool output can carry either: `git log
+# --format=%ae`, or an AWS error naming the caller's ARN.
+# Every repeat is bounded (an address part is at most 64 characters, a domain
+# label 63): unbounded, Python's matcher is quadratic on a long run with no `@`,
+# and a push carrying a minified or base64 line would stall on it.
+PRIVATE_EMAIL = (r"[A-Za-z0-9][A-Za-z0-9._%+-]{0,63}@[A-Za-z0-9-]{1,63}"
+                 r"(?:\.[A-Za-z0-9-]{1,63}){0,8}\.[A-Za-z]{2,63}")
 # github.com: a token in a clone URL (`x-access-token:…@github.com`) and the SSH
 # remote `git@github.com` are shaped like addresses and are neither.
 NOT_A_PERSON = (r"@users\.noreply\.github\.com$", r"@github\.com$", r"^no-?reply@",

@@ -323,7 +323,7 @@ nothing published that identifies the owner or was never meant to be public.
 | Responsibility | Cadence | Decides |
 |---|---|---|
 | Money exposure: re-verify provider-side caps, key scope and alarms (`scripts/money_check.py`) | Shift | Act to check; changes are Owner |
-| Secrets and private identifiers (the owner's addresses, account IDs, commit identity): never published, least scope, rotated when exposed. Refused before a push (`scripts/prepush_check.py`), detected after one (CI) | Shift | Act |
+| Secrets and private identifiers (the owner's addresses, account IDs, commit identity): never published, least scope, rotated when exposed. Refused before a push (`scripts/prepush_check.py`): exact values where the machine holds them, shapes elsewhere | Shift | Act |
 | Before anything becomes public (repository visibility, an artifact, a log, a new surface), scan its whole history, not only what it shows today | Trigger | Act |
 | CI and workflow permissions, including what branch code can reach | Monthly | Notice, or the owner's label (`CLAUDE.md` §4) |
 | Account security: the YouTube and Google owner account, OAuth scopes, refresh token, GitHub | Quarterly | Act to recommend; the checks are Owner |
