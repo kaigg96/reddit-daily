@@ -133,6 +133,33 @@ WHAT THE REQUESTS BUILD MUST KEEP
   (f) and RECURRED test it. `mark ... queued` refuses past QUEUED_CAP.
 - The requests rule's thresholds are constants here, checked against D15's
   text like the decision rule's; `evaluate --requests` quotes it first.
+
+BEFORE MERGE (fresh review, 2026-11-21; delete this list as each lands)
+Must fix:
+1. Requests rarely get a group: rows are grouped at the weekly review, so a
+   --new from an ungrouped row opens with none, `mark shipped` fixes no group,
+   and the duplicate guard never fires. Add `mark R… group G…`; `report` lists
+   ungrouped requests for the weekly review; refuse `shipped` with no group.
+2. `mark` truncates friction-groups.csv before writing it: a hand-edited row
+   with an extra field raises mid-write and drops rows. Render both files in
+   memory first, then write each to a temp file and os.replace it.
+Should fix:
+3. _shift_key: count every local vote as one shift ("local"), so one local
+   session cannot pass the bar alone.
+4. `mark open` from shipped: revert the group fixed by that request's item.
+5. Refuse merging a queued request (it frees a cap slot, strands its group).
+6. Store a `queued` date; (r5) reads bar -> queued/resolved, not today's status;
+   a reopen sets `opened`, and (r5)'s clock starts at the later of the two.
+7. A test failing when friction-votes.csv has rows and REQ_START is None.
+8. `friction.py propose "title" --group G…`: the weekly review opens requests
+   for top-leverage groups without a vote, so retros converge on one name.
+9. Rank by shifts, then minutes: "blocked" = 60 lets one row top the list.
+10. `mark merged` to a chain ending at a missing id: ValueError, not KeyError.
+Record in D15's amendment: the 11-24 read lists groups fixed through requests
+apart from the rest (a ship before the read must not quietly rescue (e)).
+Known limits: later voters are anchored by the ranked list; a voter sets its
+row's minutes just before claiming them; renumbering R/F ids on a merge breaks
+votes citing them; --distinct is not stored.
 """
 import argparse
 import csv
