@@ -190,8 +190,8 @@ def print_budget():
         age = int(time.time() - snap["captured_at"])
         print(f"reading age: {age // 60}m ({snap.get('source') or 'status line'}"
               f"{'' if age < FRESH else '; stale — trust resets_at, not the %'})")
-    print("reserves: 5h stops at 80%; weekly at 90%, or 98% in the last 12h before "
-          "the Friday 18:00 UTC reset — the rest is the owner's to use")
+    print("reserves: 5h stops at 97%; weekly at 90%, or 98% in the last 12h before "
+          "the Friday 18:00 UTC reset — the weekly rest is the owner's")
     return 0
 
 

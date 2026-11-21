@@ -47,10 +47,11 @@ so quota runs out rather than costing money. The "quota units" in
 the measured 5h and weekly % beside them is what counts. The one thing that
 does cost money is Polly (§1).
 
-Autonomous work stops at **80% of the 5-hour limit and 90% of the weekly
-limit** — the rest is the owner's. In the **last 12 hours before the Friday
-18:00 UTC reset** the weekly reserve is the shifts' too, to 98%, because it
-expires unused (owner, 2026-11-20); the 5-hour reserve always holds. Quota
+Autonomous work stops at **97% of the 5-hour limit and 90% of the weekly
+limit**. The 5-hour window is the shifts' to use at any time (owner,
+2026-11-21: "use it all, always"); the 3% is a shift's margin to hand over.
+In the **last 12 hours before the Friday 18:00 UTC reset** the weekly reserve
+is the shifts' too, to 98%, because it expires unused (owner, 2026-11-20). Quota
 left at the reset is waste, so shifts are paced to land near the ceiling.
 Check with `venv/bin/python scripts/statusline.py --budget` (`scripts/quota.py`).
 

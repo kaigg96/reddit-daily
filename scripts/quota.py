@@ -25,7 +25,8 @@ using it outside Claude Code. A reading comes from one of three places:
 - a local session: `statusline.py`'s snapshot when its status line runs, else
   `probe` (the VSCode extension never runs a status line).
 
-**The reserve** (`CLAUDE.md` §2) is 80% of the 5-hour window, always, and 90%
+**The reserve** (`CLAUDE.md` §2) is 97% of the 5-hour window, always (the
+owner, 2026-11-21: "use it all, always"; the 3% is a margin to hand over), and 90%
 of the weekly one, except in the last 12 hours before the Friday 18:00 UTC
 reset, when the weekly reserve is the shifts' to use too, because it expires
 unused (the owner, 2026-11-20). Late in the week the ceiling is 98, not 100: a
@@ -79,7 +80,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LEDGER = os.path.join(os.path.dirname(HERE), ".github", "shift-usage.csv")
 SNAPSHOT = os.path.expanduser("~/.claude/usage-snapshot.json")
 
-RESERVE_5H = 80.0        # the owner's live sessions keep the rest, always
+RESERVE_5H = 97.0        # owner 2026-11-21: "use it all, always"; 3% to hand over
 RESERVE_7D = 90.0
 LATE_HOURS = 12          # the owner, 2026-11-20: the last ~12h before the reset
 LATE_CEILING_7D = 98.0   # not 100: a shift that hits the hard limit cannot hand over

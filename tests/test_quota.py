@@ -39,9 +39,10 @@ def measured(n, weekly=4.0, five=20.0, minutes=60):
 
 
 def test_the_owners_reserve_is_as_set():
-    """80% 5h always; 90% weekly; the last 12h before the reset open the weekly
-    reserve (owner, 2026-11-20) up to 98, short of the hard limit."""
-    assert (quota.RESERVE_5H, quota.RESERVE_7D) == (80.0, 90.0)
+    """97% 5h always (owner, 2026-11-21: "use it all, always"); 90% weekly; the
+    last 12h before the reset open the weekly reserve (owner, 2026-11-20) up to
+    98, short of the hard limit."""
+    assert (quota.RESERVE_5H, quota.RESERVE_7D) == (97.0, 90.0)
     assert (quota.LATE_HOURS, quota.LATE_CEILING_7D) == (12, 98.0)
 
 
@@ -92,10 +93,10 @@ def test_a_shift_starts_only_if_it_fits_under_the_ceiling():
 
 def test_five_hour_reserve_always_holds():
     now = RESET - 3 * 86400
-    assert quota.decide(reading(80, 10, now), now=now, rows=measured(5))["verdict"] == "STOP"
+    assert quota.decide(reading(97, 10, now), now=now, rows=measured(5))["verdict"] == "STOP"
     late = RESET - 2 * H
-    assert quota.decide(reading(85, 50, late), now=late, rows=measured(5))["verdict"] == "STOP"
-    d = quota.decide(reading(70, 10, now), now=now, rows=measured(5))
+    assert quota.decide(reading(97, 50, late), now=late, rows=measured(5))["verdict"] == "STOP"
+    d = quota.decide(reading(87, 10, now), now=now, rows=measured(5))
     assert d["verdict"] == "WRAP" and d["minutes"] == 20     # 10 points at 25/h
 
 
@@ -145,11 +146,11 @@ def test_measured_shifts_replace_the_prior():
 
 def test_a_full_hour_is_judged_at_the_hourly_rate_of_shifts_that_ended_early():
     """Review, 2026-11-21: 10 five-hour points in 30-minute shifts is 20 an
-    hour, so from 60% a full hour would reach the 80% reserve."""
+    hour, so from 77% a full hour would reach the 97% ceiling."""
     now = RESET - 5 * 86400
-    d = quota.decide(reading(60, 10, now), now=now, rows=measured(5, 2.0, 10.0, minutes=30))
+    d = quota.decide(reading(77, 10, now), now=now, rows=measured(5, 2.0, 10.0, minutes=30))
     assert d["minutes"] < 60 and d["verdict"] in ("BOUNDED", "WRAP"), d
-    assert 60 + 20 * d["minutes"] / 60 <= quota.RESERVE_5H
+    assert 77 + 20 * d["minutes"] / 60 <= quota.RESERVE_5H
 
 
 def test_a_missing_window_is_unknown_not_empty():
@@ -308,6 +309,6 @@ def test_budget_in_ci_without_a_reading_is_not_capped_twice(monkeypatch):
 
 def test_budget_reads_a_statusline_snapshot():
     now = RESET - 5 * 86400
-    snap = {"five_hour": {"used_percentage": 85.0, "resets_at": now + H},
+    snap = {"five_hour": {"used_percentage": 97.0, "resets_at": now + H},
             "seven_day": {"used_percentage": 20.0, "resets_at": RESET}}
     assert statusline.budget_verdict(snap, now=now, rows=[])[0] == "STOP"
