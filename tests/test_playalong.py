@@ -284,12 +284,10 @@ def test_the_supply_ships_in_order_from_fetched_records_alone(capsys):
     """T13: the arm's supply, from the committed fetched files. Every
     candidate passes `select` in order, never the same shape twice running,
     and every record behind it was fetched and has a sources.json entry.
-    32 ship as fetched 11-21, short of the 40 the arm needs: the price hooks
-    ("a pound of ... cost in January 1990? This October") reach the 0.5
-    near-repeat bar against each other, so only 8 of 23 prices ship."""
+    52 ship as fetched 11-21 (24 prices, 20 floor pairs, 8 picks)."""
     supply = playalong.supply()
     episodes, rejects = playalong.select_day(supply, shipped=[])
-    assert len(episodes) == len(supply) >= 32 and not rejects
+    assert len(episodes) == len(supply) >= 50 and not rejects
     shapes = [c["template"] for c in supply]
     assert all(a != b for a, b in zip(shapes, shapes[1:]))
     manifest = json.loads((playalong.ASSETS / "sources.json").read_text())
@@ -298,6 +296,41 @@ def test_the_supply_ships_in_order_from_fetched_records_alone(capsys):
             assert r["provenance"] == "fetched"
     for name in ("bls_AP_supply.json", "census_SUB-EST2024.csv", "wikidata_P1101_landmarks.json"):
         assert manifest[name]["url"] and manifest[name]["fetched"]
+
+
+def test_a_skipped_day_does_not_strand_the_supply(capsys):
+    """Three episodes already shipped: the rest still ship, in order."""
+    supply = playalong.supply()
+    shipped = [playalong.select(c)[0]["hook"] for c in supply[:3]]
+    episodes, rejects = playalong.select_day(supply, shipped=shipped)
+    assert [e["hook"] for e in episodes] == [playalong.select(c)[0]["hook"] for c in supply[3:]]
+    assert rejects == {"rule4": 3}
+
+
+def _supply_price(subject):
+    return next(c for c in playalong._supply_pool()[playalong.PRICE_THEN]
+                if c["records"][0]["subject"] == subject)
+
+
+def test_two_prices_on_different_items_both_pass():
+    """The frame every price hook shares ("cost", "january", "1990", the month,
+    "pound") is not the question: ground beef then flour is no rewording."""
+    beef, flour = _supply_price("Ground beef"), _supply_price("White flour")
+    hook = playalong.select(beef)[0]["hook"]
+    episode, why = playalong.select(flour, playalong.HOW_MANY, [hook])
+    assert why == "" and "white flour" in episode["hook"]
+
+
+def test_a_shipped_price_subject_is_still_refused():
+    beef = _supply_price("Ground beef")
+    hook = playalong.select(beef)[0]["hook"]
+    assert _reason(beef, shipped=[hook]).startswith("rule4: the subject has shipped")
+
+
+def test_a_reworded_hook_on_the_same_subject_is_still_refused():
+    beef = _supply_price("Ground beef")
+    assert _reason(beef, shipped=["How much was ground beef back in 1990?"]).startswith(
+        "rule4: the subject has shipped")
 
 
 def test_the_samples_keep_their_three_worked_examples():

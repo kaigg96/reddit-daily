@@ -9,6 +9,7 @@ import csv
 import datetime
 import io
 import json
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -89,9 +90,22 @@ def fetch_wikidata():
                  + "&props=labels|claims&languages=en&format=json")
 
 
+def _write_manifest(entries):
+    """Replace or add `entries` in sources.json, leaving every other entry's
+    bytes as they are (one of them is laid out by hand)."""
+    path = playalong.ASSETS / "sources.json"
+    text = path.read_text()
+    for key in entries:
+        text = re.sub(r',?\n "' + re.escape(key) + r'": \{.*?\n \}', "", text, flags=re.S)
+    body = text.rstrip()[:-1].rstrip()
+    for key, value in entries.items():
+        body += ",\n" + json.dumps({key: value}, indent=1)[2:-2]
+    path.write_text(body + "\n}\n")
+
+
 def main():
     today = datetime.date.today().isoformat()
-    manifest = json.loads((playalong.ASSETS / "sources.json").read_text())
+    manifest = {}
     bls, bls_url = fetch_bls()
     (playalong.ASSETS / BLS_FILE).write_text(json.dumps(bls, indent=1) + "\n")
     manifest[BLS_FILE] = {"fetched": today, "url": bls_url,
@@ -105,7 +119,7 @@ def main():
     (playalong.ASSETS / WIKIDATA_FILE).write_text(json.dumps(wd, indent=1, ensure_ascii=False) + "\n")
     manifest[WIKIDATA_FILE] = {"fetched": today, "url": wd_url,
                                "note": "Trimmed to each item's English label and P1101 claims."}
-    (playalong.ASSETS / "sources.json").write_text(json.dumps(manifest, indent=1) + "\n")
+    _write_manifest(manifest)
     print(f"{len(bls['Results']['series'])} series, {census.count(chr(10)) - 1} census rows, "
           f"{len(wd)} buildings")
 

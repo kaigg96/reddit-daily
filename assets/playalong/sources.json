@@ -13,12 +13,7 @@
   "fetched": "2026-11-16",
   "url": "https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=<Q>&property=P1101&format=json",
   "note": "Trimmed to each claim's value. Q9188 returned no P1101 claim on 2026-11-16, so its 102 is entered by hand below and marked so.",
-  "entered": {
-   "Q9188": {
-    "P1101": 102,
-    "by": "hand, 2026-11-15 brief; not on Wikidata as fetched"
-   }
-  }
+  "entered": {"Q9188": {"P1101": 102, "by": "hand, 2026-11-15 brief; not on Wikidata as fetched"}}
  },
  "bls_APU0000703112.json": {
   "fetched": "2026-11-16",
@@ -27,7 +22,7 @@
  },
  "bls_AP_supply.json": {
   "fetched": "2026-11-21",
-  "url": "POST https://api.bls.gov/publicAPI/v1/timeseries/data/ {\"seriesid\": [\"APU0000703112\", \"APU0000701111\", \"APU0000701312\", \"APU0000702111\", \"APU0000702421\", \"APU0000703111\", \"APU0000703213\", \"APU0000703311\", \"APU0000703511\", \"APU0000703613\", \"APU0000704111\", \"APU0000706111\", \"APU0000710411\", \"APU0000711311\", \"APU0000711412\", \"APU0000712112\", \"APU0000712211\", \"APU0000713111\", \"APU0000715211\", \"APU0000717311\", \"APU0000718311\", \"APU000072610\", \"APU000072620\"], \"startyear\": \"1990\", \"endyear\": \"1990\"}; the same for 2026",
+  "url": "POST https://api.bls.gov/publicAPI/v1/timeseries/data/ {\"seriesid\": [\"APU0000703112\", \"APU0000701111\", \"APU0000701312\", \"APU0000702111\", \"APU0000702421\", \"APU0000703111\", \"APU0000703213\", \"APU0000703311\", \"APU0000703511\", \"APU0000703613\", \"APU0000704111\", \"APU0000706111\", \"APU0000710411\", \"APU0000711311\", \"APU0000711412\", \"APU0000712112\", \"APU0000712211\", \"APU0000713111\", \"APU0000715211\", \"APU0000717311\", \"APU0000718311\", \"APU000072610\", \"APU000072620\", \"APU000072511\"], \"startyear\": \"1990\", \"endyear\": \"1990\"}; the same for 2026",
   "note": "Trimmed to each series' January 1990 and latest 2026 month."
  },
  "census_SUB-EST2024.csv": {

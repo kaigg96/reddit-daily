@@ -94,6 +94,7 @@ SUPPLY_SERIES = {
     "APU000072610": _price("Electricity", "a kilowatt-hour of electricity", "kilowatt-hour",
                            "energy"),
     "APU000072620": _price("Piped gas", "a therm of piped utility gas", "therm", "energy"),
+    "APU000072511": _price("Heating oil", "a gallon of No. 2 heating oil", "gallon", "energy"),
 }
 SERIES.update(SUPPLY_SERIES)
 # Census Vintage 2024 places (SUMLEV 162, name and state as the file has them)
@@ -369,7 +370,18 @@ def _repeats_subject(records, hook, shipped):
             subject = insights.question_words(r["subject"])
             if subject and subject <= words:
                 return title
-    return ownquestions.near_repeat(hook, shipped)
+    # The rewording check sees only the question, never the show's frame: the
+    # words a hook keeps whatever its subjects are ("cost", "january", "1990",
+    # the month, the unit "pound") are every price hook's, so two prices on
+    # different items read as rewordings of each other (T13, 11-21). The frame
+    # is derived per hook: its words less its records' subject words, and the
+    # same words are dropped from each shipped title.
+    subjects = frozenset().union(*(insights.question_words(r["subject"]) for r in records))
+    frame = insights.question_words(hook) - subjects
+    core = " ".join(sorted(insights.question_words(hook) - frame))
+    titles = {" ".join(sorted(insights.question_words(t) - frame)): t for t in shipped}
+    near = ownquestions.near_repeat(core, list(titles))
+    return titles.get(near, "")
 
 
 def select(candidate, prev_template="", shipped=()):
