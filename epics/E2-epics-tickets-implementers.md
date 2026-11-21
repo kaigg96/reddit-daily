@@ -172,7 +172,7 @@ Evidence: 11-15 (owner's session): 13 lessons from the friction groups with the 
 Accepted 2026-11-18: 11-18 (01:37 shift), implementer from a brief on `e2-t7-lessons` (`dbbc9a3`). Re-run: `epics.py --check` clean on 16 lessons; `pytest tests/test_epics.py` 34 passed (fixture tests for no Evidence, a 31st lesson, five Touches sets); `brief E6 T1` (Touches PRD.md §4) lists L6, L7, L9, L13, L14, L16 and no `src/` lesson. The branch put process/lessons.md 29 words over its budget; trimmed. Fresh review: a Touches item with a note ("src/ (by merge of …)") missed its directory's lessons, and a prefix match let `PLAN.md.bak` match; fixed in `652103f` (an item matches on its first word), with a test. Left: L16's backticked `PRD.md` is a topic, now read as a path filter. Merged `4f18702`, 1,449 pass.
 
 ### T8 · E1's remaining tickets run through this workflow
-Status: blocked: T5 for the next tickets (started 11-20 with T12, 1 of 4)
+Status: todo: 1 of 4 so far (T12); T5 done 11-21, so T13 went out that shift
 Needs: T5
 Touches: epics/E1-the-show-after-reddit.md
 Context: the pilot. E1 does not wait for it: any E1 ticket due before this is ready is done the old way, by a shift directly.
